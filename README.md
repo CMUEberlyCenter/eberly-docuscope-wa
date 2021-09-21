@@ -1,1 +1,2 @@
-# DocuScopeWA
+# DocuScope Write & Audit
+
