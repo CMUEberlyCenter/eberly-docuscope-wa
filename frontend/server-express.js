@@ -103,16 +103,16 @@ class DocuScopeWALTIService {
   debugRequest (request) {
     console.log ("req.baseUrl: " + request.baseUrl);
     console.log ("req.path: " + request.path);
-    console.log ('oauth_consumer_key:', request.body.oauth_consumer_key);
+    console.log ('oauth_consumer_key:' + request.body.oauth_consumer_key);
   }
 
   /**
    * http://www.passportjs.org/packages/passport-oauth2/
    */
   verifyLTI (request) {
-    console.log ("verifyLTI ()");
+    console.log ("verifyLTI ("+request.body.oauth_consumer_key+")");
 
-    if (!request.body.oauth_consumer_key) {
+    if (request.body.oauth_consumer_key=="") {
       return (false);
     }
 
@@ -126,22 +126,27 @@ class DocuScopeWALTIService {
     console.log ("generateSettingsObject ()");
 
     var token=this.generateAccessToken ("dummy");
-    var settings={};
+    var settingsObject={
+      lti: {}
+    };
 
-    settings.token=token;
+    settingsObject.token=token;
 
-    //console.log (request.body);    
+    //console.log ("Request body:");
+    //console.log (request.body);
 
     for (var key in request.body) {
       if (request.body.hasOwnProperty(key)) {
         //console.log(key + " -> " + request.body[key]);
-        settings [key]=request.body[key];
+
+        var value=request.body[key];
+        settingsObject.lti [key]=value;
       }
     }
 
-    settings ["rules"]=JSON.parse (this.rules);
+    settingsObject ["rules"]=JSON.parse (this.rules);
 
-    return (settings);
+    return (settingsObject);
   }
 
   /**
@@ -150,21 +155,21 @@ class DocuScopeWALTIService {
   processRequest (request, response) {
     console.log ("processRequest ()");
 
-    this.debugRequest (request);
-
-    //service.getUsers (request,response);      
-    //response.json({ info: 'Node.js, Express, and Postgres API' });
-    //response.send('Hello World!')
+    //this.debugRequest (request);
 
     if (this.useLTI==true) {
       if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) { 
         if (this.verifyLTI (request)==true) {
-          var settings=this.generateSettingsObject (request);
+          var settingsObject=this.generateSettingsObject (request);
 
           //response.sendFile(__dirname + this.publicHome + request.path);
 
+          console.log (settingsObject);
+          
+          var stringed=JSON.stringify (settingsObject);
+          
           var raw = fs.readFileSync(__dirname + this.publicHome + '/index.html', 'utf8');
-          var html=raw.replace ("/*SETTINGS*/","var serverContext="+JSON.stringify (settings, null, 2)+";");
+          var html = raw.replace ("/*SETTINGS*/","var serverContext="+stringed+";");
 
           //response.render('main', { html: html });
           response.send(html);
