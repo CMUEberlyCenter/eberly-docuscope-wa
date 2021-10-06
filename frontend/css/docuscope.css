@@ -1,0 +1,97 @@
+
+h1, h2, h3, h4, h5, h6 {
+  color: #222222;
+  font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  margin-top: 0.2rem;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: #1BBC9B;
+  line-height: inherit;
+  text-decoration: none;
+}
+
+.docuscope_scrim {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  padding: 0px;
+  margin: 0px;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255,255,255,0.5);
+  display: none;
+}
+
+.docuscope_button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  border-radius: 0;
+  border-style: solid;
+  border-width: 0;
+  cursor: pointer;
+  font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+  font-weight: normal;
+  line-height: normal;
+  margin: 0 0 1.25rem;
+  position: relative;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  padding: 1rem 2rem 1.0625rem 2rem;
+  font-size: 1rem;
+  background-color: #1BBC9B;
+  border-color: #16967c;
+  color: #FFFFFF;
+  transition: background-color 300ms ease-out;    
+}
+
+.docuscope_button:hover {
+  background-color: #16967c;
+}
+
+.select-option-group {
+  position: relative;
+  display: inline-block;
+  border: 2px solid #bdc3c7;
+  border-radius: 5px;
+  background: #fff;
+  padding: 0;
+  margin: 10px 5px;
+  min-width: 289px;
+}
+
+.selection {
+  display: block;
+  text-align: left;
+  margin-left: 0;
+  overflow: hidden;
+  padding: 7px 10px;
+  padding-right: 30px;
+  font-weight: bold;
+}
+
+.selection:hover {
+  color: black;
+}
+
+.filter-option-expand-indicator {
+  margin-top: 8px;
+  width: 0;
+  height: 0;
+  border-right: 4px solid transparent;
+  border-left: 4px solid transparent;
+  border-top: 4px solid rgba(0,0,0,0.3);
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.col {
+  min-width: 50%;
+}
