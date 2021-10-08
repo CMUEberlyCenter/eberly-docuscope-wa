@@ -7,6 +7,7 @@ import DocuScopeWAInstructor from './DocuScopeWAInstructor';
 import DocuScopeWAStudent from './DocuScopeWAStudent';
 
 import '../css/main.css';
+import '../css/docuscope.css';
 
 /**
  * https://bit.dev/digiaonline/react-foundation
