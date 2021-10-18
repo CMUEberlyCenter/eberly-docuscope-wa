@@ -28,7 +28,9 @@ export default class DocuScopeWAStudent extends Component {
 
     this.state={
       loading: false,
-      activeIndex: 1
+      activeIndex: 1,
+      currentRule: null,
+      currentRuleChild: null
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
@@ -56,6 +58,10 @@ export default class DocuScopeWAStudent extends Component {
     e.stopPropagation ();
 
     let aRule=this.props.ruleManager.getRule (e.target.id);
+
+    if (aRule) {
+      this.setState ({currentRule: aRule, currentRuleChild: null});
+    }
   }
 
   /**
@@ -67,6 +73,10 @@ export default class DocuScopeWAStudent extends Component {
     e.stopPropagation ();
 
     let aRuleChild=this.props.ruleManager.getRuleChild (e.target.id);
+
+    if (aRuleChild) {
+      this.setState ({currentRule: null, currentRuleChild: aRuleChild});
+    }    
   }
 
   /**
@@ -97,6 +107,11 @@ export default class DocuScopeWAStudent extends Component {
    */
   generateExpectationsTab () {
     let ruleElements=this.generateRuleElements ();
+    let ruleDescription;
+
+    if (this.state.currentRule) {
+      ruleDescription=this.state.currentRule.description;
+    }
 
     return (<div className="impressions">
       <div className="impressions-title">
@@ -112,9 +127,14 @@ export default class DocuScopeWAStudent extends Component {
       </div>
       <div className="impressions-content">
         <ol>
-        {ruleElements}      
+        {ruleElements}
         </ol>
+      </div>      
+      <div className="impressions-name">
+      About this Group of Expectations
       </div>
+      <div className="impressions-rule" dangerouslySetInnerHTML={{ __html: ruleDescription }}>
+      </div>      
       <div className="impressions-detail">
       </div>
     </div>);

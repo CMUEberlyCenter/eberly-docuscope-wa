@@ -204,6 +204,7 @@ a {
 
 .impressions-content {
   padding: 6px;
+  border-bottom: 1px solid #d1cfcf;  
 }
 
 .impressions-item {
@@ -219,6 +220,10 @@ a {
 .impressions-child {
   font-weight: normal;
   cursor: pointer;
+}
+
+.impressions-rule {
+  padding: 6px;
 }
 
 .impressions-detail {

@@ -60,6 +60,14 @@ export default class DocuScopeRules {
   getRule (anId) {
     console.log ("getRule ("+anId+")");
 
+    for (let i=0;i<this.rules.length;i++) {
+      let aRule=this.rules [i];
+      if (aRule.id==anId) {
+      	return (aRule);
+      }
+    }
+
+    return (null);
   }
   
   /**
@@ -68,5 +76,17 @@ export default class DocuScopeRules {
   getRuleChild (anId) {
     console.log ("getRule ("+anId+")");
 
+    for (let i=0;i<this.rules.length;i++) {
+      let aRule=this.rules [i];
+      
+      for (let j=0;j<aRule.children.length;j++) {
+      	let aRuleChild=aRule.children [j];
+      	if (aRuleChild.id==anId) {
+      	  return (aRuleChild);
+      	}
+      }
+    }
+
+    return (null);
   }
 }
