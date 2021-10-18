@@ -5,6 +5,7 @@ import 'foundation-sites/dist/css/foundation.min.css';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
 import DocuScopeWAInstructor from './DocuScopeWAInstructor';
 import DocuScopeWAStudent from './DocuScopeWAStudent';
+import DocuScopeRules from './DocuScopeRules';
 
 import '../css/main.css';
 import '../css/docuscope.css';
@@ -22,12 +23,21 @@ export default class DocuScopeWA extends Component {
 
     console.log ("DocuScopeWA ()");
 
+    let ruleManager=new DocuScopeRules ();
+    ruleManager.parse (window.serverContext.rules);
+
+    // Remove the structure from plain sight
+    window.serverContext.rules=[];
+
     this.state = {
       globallyDisabled: false,
-      activeIndex: 1
+      activeIndex: 1,
+      ruleManager: ruleManager
     }
 
     this.onLaunch=this.onLaunch.bind(this);
+
+    //ruleManager.debugRules ();
   }
 
   /**
@@ -46,7 +56,6 @@ export default class DocuScopeWA extends Component {
     if (!serverContext.roles) {
       return (false);
     }
-
 
     var splitter=serverContext.roles.split (",");
 
@@ -161,9 +170,9 @@ export default class DocuScopeWA extends Component {
     }
 
     if (this.isInstructor ()) {
-      mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor></DocuScopeWAInstructor></DocuScopeWAScrim>;
+      mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
     } else {
-      mainPage=<DocuScopeWAScrim><DocuScopeWAStudent></DocuScopeWAStudent></DocuScopeWAScrim>;
+      mainPage=<DocuScopeWAScrim><DocuScopeWAStudent ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
     }
 
     return (mainPage);

@@ -6,6 +6,7 @@ import { Button, Colors } from 'react-foundation';
 import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
 
 import DocuScopeWA from './DocuScopeWAScrim';
+import DocuScopeRules from './DocuScopeRules';
 
 import '../css/main.css';
 import '../css/docuscope.css';
@@ -31,6 +32,8 @@ export default class DocuScopeWAStudent extends Component {
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
+    this.onClickRule=this.onClickRule.bind (this);
+    this.onClickRuleChild=this.onClickRuleChild.bind (this);
   }
 
   /**
@@ -47,14 +50,70 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
+  onClickRule (e) {
+    console.log ("onClickRule ("+e.target.id+")");
+
+    e.stopPropagation ();
+
+    let aRule=this.props.ruleManager.getRule (e.target.id);
+  }
+
+  /**
+   *
+   */
+  onClickRuleChild (e) {
+    console.log ("onClickRuleChild ("+e.target.id+")");
+
+    e.stopPropagation ();
+
+    let aRuleChild=this.props.ruleManager.getRuleChild (e.target.id);
+  }
+
+  /**
+   *
+   */
+  generateRuleElements () {
+    let rulesElements=[];
+
+    for (let i=0;i<this.props.ruleManager.rules.length;i++) {
+      let aRule=this.props.ruleManager.rules [i];
+
+      let childElements=[];
+
+      for (let j=0;j<aRule.children.length;j++) {
+        let aChild=aRule.children [j];
+        let aChildElement=<li id={aChild.id} className="impressions-child" onClick={(e) => { this.onClickRuleChild(e) }}>{aChild.name}</li>;
+        childElements.push (aChildElement);
+      }
+      
+      rulesElements.push (<li id={aRule.id} className="impressions-item" onClick={(e) => { this.onClickRule(e) }}>{aRule.name}<ul className="impressions-children">{childElements}</ul></li>);
+    }
+
+    return (rulesElements);
+  }
+
+  /**
+   *
+   */
   generateExpectationsTab () {
+    let ruleElements=this.generateRuleElements ();
+
     return (<div className="impressions">
       <div className="impressions-title">
         <img src={mainIcon} className="context-icon"></img><h3 className="context-title">Meet Readers' Expectations</h3>
       </div>
-      <div className="impressions-description">        
+      <div className="impressions-description">
+        <div className="impressions-name">
+        {this.props.ruleManager.name}
+        </div>
+        <div className="impressions-statement">
+        Respond to the following questions to meet the readers' expectations. The sentences that you write to respond to each question include a unique topic cluster that consists of a set of words and phrases. DocuScope will automatically highlight sentences in your draft that most likely match these expectations.
+        </div>
       </div>
       <div className="impressions-content">
+        <ol>
+        {ruleElements}      
+        </ol>
       </div>
       <div className="impressions-detail">
       </div>

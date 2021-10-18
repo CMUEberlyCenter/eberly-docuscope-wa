@@ -6,6 +6,7 @@ import { Button, Colors } from 'react-foundation';
 import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
 
 import DocuScopeWA from './DocuScopeWAScrim';
+import DocuScopeRules from './DocuScopeRules';
 
 import '../css/main.css';
 

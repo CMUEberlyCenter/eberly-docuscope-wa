@@ -1,5 +1,6 @@
 clear
 cat ../banner.txt
+cat ../.version
 rm ./public/*
 
 if [ ! -d "node_modules" ]; then
