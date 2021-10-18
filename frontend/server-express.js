@@ -17,8 +17,8 @@ const jwt = require('jsonwebtoken');
 
 const Pool = require('pg').Pool;
 
-//const port = 8888;
-const port = 80;
+const port = 8889;
+//const port = 80;
 
 /**
  *
