@@ -1,0 +1,45 @@
+
+.editor-top-menu {
+  flex: 0;
+  display: flex;
+  flex-direction: row;
+  height: 25px;
+  padding: 2px;
+  background: #f1f1f1;
+}
+
+.editor-top-menu-filler {
+  flex: 1;
+}
+
+.edit-top-menu-label {
+  padding: 2px;
+  margin: 0px;
+  line-height: 1.5;  
+}
+
+.editor-container {
+  flex: 1;
+  overflow: auto;
+  position: relative;
+}
+
+.editor-content {
+  outline: none;
+  white-space: normal;
+  overflow-wrap: break-word;
+  -webkit-user-modify: read-write-plaintext-only;
+  overflow-y: auto;
+  font-size: 12pt;
+  margin-top: 2px;
+  padding: 8px;
+  min-height: 100px;
+  position: absolute;
+  width: 100%;
+  left: 0px;
+  top: 0px;
+}
+
+.editor-bottom-menu {
+  flex: 0;
+}
