@@ -176,3 +176,18 @@ body {
 .selection:hover {
   color: black;
 }
+
+
+/* Foundation Tabs overrides */
+
+.tabs-title>a {
+  display: block;
+  padding: 1.25rem 1.5rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #1779ba;
+}
+
+.tabs .is-active {
+  background: #f9f6f6;
+}
