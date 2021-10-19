@@ -5,7 +5,7 @@ import 'foundation-sites/dist/css/foundation.min.css';
 import { Switch, Button, Colors, Sizes } from 'react-foundation';
 import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
 
-// https://docs.slatejs.org/walkthroughs/installing-slate
+// Via: https://docs.slatejs.org/walkthroughs/installing-slate
 import { Editor } from 'slate-react';
 import { Value } from 'slate';
 import { createEditor } from 'slate';
@@ -18,8 +18,11 @@ import DataTools from './DataTools';
 import '../css/main.css';
 import '../css/docuscope.css';
 import '../css/editor.css';
+import '../css/impressions.css';
+import '../css/coherence.css';
 
 import mainIcon from '../css/icons/audit_icon.png';
+import ontopicLegend from '../css/img/ontopic-legend.png';
 
 let initialValue = Value.fromJSON({
   document: {
@@ -90,7 +93,8 @@ export default class DocuScopeWAStudent extends Component {
       expanded: null,
       loading: false,
       topics: null,
-      topic: null      
+      topic: null,
+      paragraphSelected: 0
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
@@ -99,6 +103,36 @@ export default class DocuScopeWAStudent extends Component {
 
     // Editor event handlers
     this.insertText = this.insertText.bind(this);    
+    this.fillParagraphList = this.fillParagraphList.bind(this);
+    this.handleParagraphSelection = this.handleParagraphSelection.bind(this);
+  }
+
+  /**
+   *
+   */
+  fillParagraphList () {
+    let areasElement=[];
+
+    // get from document analysis
+    let nrParagraphs=10;
+
+    for (let i=0;i<nrParagraphs;i++) {
+      areasElement.push ({value: i, label: ("Paragraph: " + i)});
+    }
+
+    return (areasElement);
+  }
+
+
+  /**
+   *
+   */
+  handleParagraphSelection (e) {
+    console.log ("handleParagraphSelection ("+e.target.value+")");
+
+    this.setState({ 
+      paragraphSelected: e.target.value
+    });     
   }
 
   /**
@@ -182,7 +216,7 @@ export default class DocuScopeWAStudent extends Component {
   }
 
   /**
-   * Render a Slate mark.
+   * Render a Slate mark. Oh, hi Mark!
    *
    * @param {Object} props
    * @return {Element}
@@ -241,7 +275,7 @@ export default class DocuScopeWAStudent extends Component {
   }
 
   /**
-   * On key down, if it's a formatting command toggle a mark.
+   * On key down, if it is a formatting command toggle a mark.
    *
    * @param {Event} event
    * @param {Editor} editor
@@ -384,15 +418,29 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   generateCoherenceTab () {
-    return (<div className="impressions">
-      <div className="impressions-title">
+    return (<div className="coherence">
+      <div className="coherence-title">
         <img src={mainIcon} className="context-icon"></img><h3 className="context-title">Create Flow in Your Writing</h3>
       </div>
-      <div className="impressions-description">
+      <div className="coherence-description">
+        <div style={{marginBottom: "2px"}}>
+          <img src={ontopicLegend}></img>
+        </div>
+        <p>
+          The Coherence Panel charts the flow of your topic clusters across and within paragraphs. Dark circles indicate that a particular topic cluster is prominently discussed in a particular paragraph. White circles and gaps indicate that a particular topic cluster is mentioned but not prominently or not mentioned at all in the paragraph. Study the visualization for dark/white circles and gaps and see if the shifts in topic clusters and their prominence fits a writing plan your readers can easily follow. 
+        </p>
       </div>
-      <div className="impressions-content">
+      <div className="coherence-controls">
+        <div className="editor-top-menu-filler">Coherence across paragraphs</div>
+        <label className="edit-top-menu-label">Show only topic clusters:</label>
+        <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>      
       </div>
-      <div className="impressions-detail">
+      <div className="coherence-content">
+      </div>
+      <div className="coherence-controls">
+      Topic Cluster
+      </div>
+      <div className="coherence-detail">
       </div>
     </div>);
   }  
@@ -488,7 +536,7 @@ export default class DocuScopeWAStudent extends Component {
 
     mainPage=<div className="mainframe">
       <div className="menubar">menubar</div>
-      <div className="content">        
+      <div className="content">
           <div className="leftcol">
             <Tabs>
               <TabItem isActive={this.state.activeIndex === 1} onClick={(e) => { this.onContextSelect(1) }}><a href="#">Expectations</a></TabItem>
@@ -516,9 +564,16 @@ export default class DocuScopeWAStudent extends Component {
           </div>
           <div className="centercol">
             <div className="editor-top-menu">
-              <div className="editor-top-menu-filler"></div>              
+              <div className="editor-top-menu-filler">
+                <select id="paragraphs" name="paragraphs" className="editor-paragraphs" value={this.state.paragraphSelected} onChange={this.handleParagraphSelection}>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </div>
               <label className="edit-top-menu-label">Edit Mode:</label>
-              <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/></div>
+              <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>
+            </div>
             <div className="editor-container">
               {editor}
             </div>  

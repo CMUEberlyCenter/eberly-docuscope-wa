@@ -20,7 +20,7 @@
     "webpack"
   ],
   "author": "Martin van Velsen",
-  "license": "MIT",
+  "license": "CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL 4.0 INTERNATIONAL LICENSE",
   "bugs": {
     "url": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki"
   },
@@ -69,15 +69,11 @@
     "raw-loader": "^3.1.0",
     "react-ace": "^7.0.4",
     "react-bootstrap": "^1.3.0",
-    "react-contenteditable": "^3.3.5",
-    "react-cytoscapejs": "^1.2.0",
-    "react-draggable": "^4.0.3",
     "react-editable-svg-label": "^2.0.3",
     "react-foundation": "^0.9.7",
     "react-portal": "^4.2.0",
     "react-reflex": "^4.0.3",
-    "react-router-dom": "^4.3.1",
-    "react-select": "^4.3.1",
+    "react-router-dom": "^4.3.1",    
     "react-split-pane": "^0.1.92",
     "react-tabs": "^3.1.1",
     "slate-editor": "^5.1.1",

@@ -175,61 +175,6 @@ a {
   padding: 0px !important;
 }
 
-.impressions {
-  display: flex;
-  flex-direction: column;
-}
-  
-.impressions-title {
-  background: #f9f6f6;
-  padding: 10px;
-  flex: 0;
-}
-
-.impressions-description {
-  padding: 4px;
-  border-bottom: 1px solid #d1cfcf;
-  font-family: sans-serif;
-  line-height: 1.5;
-}
-
-.impressions-name {
-  font-weight: bold;
-  font-size: 1.2em;
-}
-
-.impressions-statement {
-
-}
-
-.impressions-content {
-  padding: 6px;
-  border-bottom: 1px solid #d1cfcf;  
-}
-
-.impressions-item {
-  font-weight: bold;
-  font-size: 1.1em;
-  cursor: pointer;
-}
-
-.impressions-children {
-  list-style-type: lower-alpha;
-}
-
-.impressions-child {
-  font-weight: normal;
-  cursor: pointer;
-}
-
-.impressions-rule {
-  padding: 6px;
-}
-
-.impressions-detail {
-
-}
-
 .context-icon {
   float: left;
   width: 38px;
