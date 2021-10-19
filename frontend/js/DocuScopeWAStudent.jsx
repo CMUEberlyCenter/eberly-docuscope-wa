@@ -208,35 +208,34 @@ export default class DocuScopeWAStudent extends Component {
 
     mainPage=<div className="mainframe">
       <div className="menubar">menubar</div>
-      <div className="content">
-       <div className="leftcol">
-        <Tabs>
-          <TabItem isActive={this.state.activeIndex === 1} onClick={(e) => { this.onContextSelect(1) }}><a href="#">Expectations</a></TabItem>
-          <TabItem isActive={this.state.activeIndex === 2} onClick={(e) => { this.onContextSelect(2) }}><a href="#">Coherence</a></TabItem>
-          <TabItem isActive={this.state.activeIndex === 3} onClick={(e) => { this.onContextSelect(3) }}><a href="#">Clarity</a></TabItem>
-          <TabItem isActive={this.state.activeIndex === 3} onClick={(e) => { this.onContextSelect(4) }}><a href="#">Impressions</a></TabItem>
-        </Tabs>
-        <TabsContent className="tabscontent">
+      <div className="content">        
+          <div className="leftcol">
+            <Tabs>
+              <TabItem isActive={this.state.activeIndex === 1} onClick={(e) => { this.onContextSelect(1) }}><a href="#">Expectations</a></TabItem>
+              <TabItem isActive={this.state.activeIndex === 2} onClick={(e) => { this.onContextSelect(2) }}><a href="#">Coherence</a></TabItem>
+              <TabItem isActive={this.state.activeIndex === 3} onClick={(e) => { this.onContextSelect(3) }}><a href="#">Clarity</a></TabItem>
+              <TabItem isActive={this.state.activeIndex === 3} onClick={(e) => { this.onContextSelect(4) }}><a href="#">Impressions</a></TabItem>
+            </Tabs>
+            <TabsContent className="tabscontent">
+              <TabPanel id={'tab1'} className="tabs-panel-override" isActive={this.state.activeIndex === 1}>
+              {expectationsTab}
+              </TabPanel>
 
-          <TabPanel id={'tab1'} className="tabs-panel-override" isActive={this.state.activeIndex === 1}>
-          {expectationsTab}
-          </TabPanel>
+              <TabPanel id={'tab2'} className="tabs-panel-override" isActive={this.state.activeIndex === 2}>
+              {coherenceTab}
+              </TabPanel>
 
-          <TabPanel id={'tab2'} className="tabs-panel-override" isActive={this.state.activeIndex === 2}>
-          {coherenceTab}
-          </TabPanel>
+              <TabPanel id={'tab3'} className="tabs-panel-override" isActive={this.state.activeIndex === 3}>
+              {clarityTab}
+              </TabPanel>
 
-          <TabPanel id={'tab3'} className="tabs-panel-override" isActive={this.state.activeIndex === 3}>
-          {clarityTab}
-          </TabPanel>
-
-          <TabPanel id={'tab4'} className="tabs-panel-override" isActive={this.state.activeIndex === 4}>
-          {impressionsTab}
-          </TabPanel>
-        </TabsContent>
-       </div>
-       <div className="centercol"></div>
-       <div className="rightcol"></div>
+              <TabPanel id={'tab4'} className="tabs-panel-override" isActive={this.state.activeIndex === 4}>
+              {impressionsTab}
+              </TabPanel>
+            </TabsContent>
+          </div>
+          <div className="centercol"></div>
+          <div className="rightcol"></div>
       </div>
       <div className="statusbar">statusbar</div>
     </div>;
