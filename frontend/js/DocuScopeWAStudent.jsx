@@ -14,6 +14,7 @@ import Plain from 'slate-plain-serializer';
 import DocuScopeWA from './DocuScopeWAScrim';
 import DocuScopeRules from './DocuScopeRules';
 import DataTools from './DataTools';
+import DocuScopeOnTopic from './DocuScopeOnTopic';
 
 import '../css/main.css';
 import '../css/docuscope.css';
@@ -436,6 +437,7 @@ export default class DocuScopeWAStudent extends Component {
         <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>      
       </div>
       <div className="coherence-content">
+        <DocuScopeOnTopic />
       </div>
       <div className="coherence-controls">
       Topic Cluster
