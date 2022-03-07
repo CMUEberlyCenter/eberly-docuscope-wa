@@ -2,14 +2,18 @@ import React, { Component } from 'react';
 
 import 'foundation-sites/dist/css/foundation.min.css';
 
-import { Switch, Button, Colors, Sizes } from 'react-foundation';
+import { Button, Colors, Sizes } from 'react-foundation';
 import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
 
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
-import { Editor } from 'slate-react';
-import { Value } from 'slate';
+import { Editor  } from 'slate-react';
+import { Value, Node } from 'slate';
 import { createEditor } from 'slate';
 import Plain from 'slate-plain-serializer';
+
+//import ToggleSwitch from './ToggleSwitch';
+// https://www.npmjs.com/package/react-switch
+import Switch from "react-switch";
 
 import DocuScopeWA from './DocuScopeWAScrim';
 import DocuScopeRules from './DocuScopeRules';
@@ -21,6 +25,7 @@ import '../css/docuscope.css';
 import '../css/editor.css';
 import '../css/impressions.css';
 import '../css/coherence.css';
+import '../css/meter.css';
 
 import mainIcon from '../css/icons/audit_icon.png';
 import ontopicLegend from '../css/img/ontopic-legend.png';
@@ -84,7 +89,6 @@ export default class DocuScopeWAStudent extends Component {
       activeIndex: 1,
       currentRule: null,
       currentRuleChild: null,
-      locked: false,
       fontSize: "12pt",
       value: value,
       invalidated: false,
@@ -95,7 +99,16 @@ export default class DocuScopeWAStudent extends Component {
       loading: false,
       topics: null,
       topic: null,
-      paragraphSelected: 0
+      paragraphSelected: 0,
+      docuscopeConnected: false,
+      docuscope: null,
+      docuscopeOrigin: "",
+      docuscopeVisible: false,
+      editorActive: true,
+      locked: false,
+      showProgress: false,
+      progress: 0,
+      progressTitle: "Docuscope Write and Audit Processing"
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
@@ -106,6 +119,97 @@ export default class DocuScopeWAStudent extends Component {
     this.insertText = this.insertText.bind(this);    
     this.fillParagraphList = this.fillParagraphList.bind(this);
     this.handleParagraphSelection = this.handleParagraphSelection.bind(this);
+
+    this.processMessage = this.processMessage.bind(this);
+
+    this.handleEditorToggle = this.handleEditorToggle.bind(this);
+  }
+
+  /**
+   *
+   */
+  componentDidMount () {
+    console.log ("componentDidMount ()");
+
+    window.addEventListener("message", (event) => {
+      this.processMessage (event.data);
+
+      if (this.state.docuscopeConnected==false) {
+        this.setState ({docuscope: event.source, docuscopeOrigin: event.origin});
+      }
+    }, false);
+  }
+
+  /**
+   *
+   */
+  processMessage (aMessage) {
+    // Just a quick check. You never know
+    if (aMessage.event_id=="docuscope") {
+      let data=aMessage.data;
+
+      if (data.status=="progress") {
+        this.setState ({
+          showProgress: true,
+          progressTitle: data.title,
+          progress: data.content
+        });
+        return;
+      }
+
+      if (data.status=="finished") {
+        this.setState ({
+          showProgress: false
+        });        
+        return;
+      }      
+    }
+  }
+
+  /**
+   *
+   */
+  sendMessage (aMessage) {
+    var payload = {
+      event_id: 'docuscope',
+      data: {      
+        status: "text",
+        content: aMessage
+      }
+    };
+
+    let docuscopeTarget=this.state.docuscope;
+    let docuscopeOrigin=this.state.docuscopeOrigin;
+
+    if (docuscopeTarget!=null) {
+      if (this.state.docuscopeVisible==true) {
+        docuscopeTarget.postMessage(payload,docuscopeOrigin);
+      } else {
+        console.log ("Info: Docuscope Classroom is not visible, not updating");
+      }
+    } else {
+      console.log ("Error: docuscope classroom not connected");
+    }
+  }
+
+  /**
+   *
+   */
+  handleEditorToggle (e) {    
+    let toggled=!this.state.editorActive;
+    let editorLocked=toggled;
+
+    console.log ("handleEditorToggle ("+toggled+","+editorLocked+")");
+    
+    this.setState ({editorActive: toggled, locked: editorLocked}, () => {
+      if (this.state.editorActive==false) {
+        // Send new locked text to backend(s)
+
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+
+        this.sendMessage (plain);
+      }
+    });
   }
 
   /**
@@ -152,6 +256,8 @@ export default class DocuScopeWAStudent extends Component {
    */
   onChange ({ value }) {
     //console.log ("onChange ()");
+
+    //console.log (value.document.nodes.map(n => Node.string(n)).join('\n'));
 
     this.setState({ value }, (e) => {
       let invalidated=this.state.invalidated;
@@ -317,10 +423,23 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   onContextSelect (anIndex) {
-    console.log ("onContextSelect ()");
+    console.log ("onContextSelect ("+anIndex+")");
+
+    let dVisible=false;
+    if (anIndex==4) {
+      dVisible=true;
+    }
 
     this.setState ({
-      activeIndex: anIndex
+      activeIndex: anIndex,
+      docuscopeVisible: dVisible,
+      progress: 0
+    }, () => {
+      if ((this.state.docuscopeVisible==true) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+
+        this.sendMessage (plain);
+      }
     });
   }
 
@@ -475,6 +594,7 @@ export default class DocuScopeWAStudent extends Component {
       <div className="impressions-description">
       </div>
       <div className="impressions-content">
+        <iframe className="docuscopeframe" src="docuscope.html"></iframe>
       </div>
       <div className="impressions-detail">
       </div>
@@ -485,12 +605,24 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   render() {
+    let progresswindow;
     let mainPage;
     let expectationsTab;
     let coherenceTab;
     let clarityTab;
     let impressionsTab;
     let editor;
+
+    if (this.state.showProgress==true) {
+      progresswindow=<div className="progresswindow">
+        <div className="progresstitle">{this.state.progressTitle}</div>
+        <div className="progresscontent">
+          <div className="meter" style={{height: "25px", margin: "15px"}}>
+            <span style={{width: (this.state.progress+"%")}}></span>
+          </div>        
+        </div>
+        </div>;
+    }
 
     expectationsTab=this.generateExpectationsTab ();
     coherenceTab=this.generateCoherenceTab ();
@@ -501,11 +633,11 @@ export default class DocuScopeWAStudent extends Component {
       editor=<Editor 
         tabIndex="0"
         id="editor"
+        ref="editor"
         className="editor-content" 
         spellCheck
         autoFocus
         placeholder="Enter some rich text..."
-        ref="editor"
         value={this.state.value}
         onChange={this.onChange.bind(this)}
         onKeyDown={this.onKeyDown.bind(this)}
@@ -518,13 +650,13 @@ export default class DocuScopeWAStudent extends Component {
     } else {
       editor=<Editor 
         id="editor"
+        ref="editor"
         readOnly
         tabIndex="0"
         className="editor-content" 
         spellCheck
         autoFocus
-        placeholder="Enter some rich text..."
-        ref="editor"
+        placeholder="Enter some rich text..."        
         value={this.state.value}
         onChange={this.onChange.bind(this)}
         onKeyDown={this.onKeyDown.bind(this)}
@@ -574,16 +706,20 @@ export default class DocuScopeWAStudent extends Component {
                 </select>
               </div>
               <label className="edit-top-menu-label">Edit Mode:</label>
-              <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>
+              <Switch width={45} height={20} checked={this.state.editorActive} onChange={this.handleEditorToggle} />
             </div>
             <div className="editor-container">
               {editor}
             </div>  
             <div className="editor-bottom-menu">Editor Bottom Marker</div>
           </div>
-          <div className="rightcol"></div>
+          <div className="rightcol">
+            
+
+          </div>
       </div>
       <div className="statusbar">statusbar</div>
+      {progresswindow}
     </div>
 
     return (mainPage);

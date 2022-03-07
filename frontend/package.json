@@ -54,7 +54,7 @@
     "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.11.0"
   },
-  "dependencies": {    
+  "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
     "@fortawesome/free-solid-svg-icons": "^5.11.2",
     "@fortawesome/react-fontawesome": "^0.1.5",
@@ -76,6 +76,7 @@
     "react-reflex": "^4.0.3",
     "react-router-dom": "^4.3.1",
     "react-split-pane": "^0.1.92",
+    "react-switch": "^6.0.0",
     "react-tabs": "^3.1.1",
     "slate-editor": "^5.1.1",
     "string-replace-webpack-plugin": "^0.1.3",

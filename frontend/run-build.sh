@@ -9,3 +9,4 @@ if [ ! -d "node_modules" ]; then
 fi
 
 npm run build
+cp -v ./views/docuscope.html ./public
