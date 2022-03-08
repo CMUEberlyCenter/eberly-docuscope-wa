@@ -103,9 +103,7 @@ export default class DocuScopeWAStudent extends Component {
       docuscopeConnected: false,
       docuscope: null,
       docuscopeOrigin: "",
-      docuscopeVisible: false,
       editorActive: true,
-      locked: false,
       showProgress: false,
       progress: 0,
       progressTitle: "Docuscope Write and Audit Processing"
@@ -182,7 +180,7 @@ export default class DocuScopeWAStudent extends Component {
     let docuscopeOrigin=this.state.docuscopeOrigin;
 
     if (docuscopeTarget!=null) {
-      if (this.state.docuscopeVisible==true) {
+      if (this.state.activeIndex==4) {
         docuscopeTarget.postMessage(payload,docuscopeOrigin);
       } else {
         console.log ("Info: Docuscope Classroom is not visible, not updating");
@@ -255,7 +253,7 @@ export default class DocuScopeWAStudent extends Component {
    * @param {Editor} editor
    */
   onChange ({ value }) {
-    //console.log ("onChange ()");
+    console.log ("onChange ()");
 
     //console.log (value.document.nodes.map(n => Node.string(n)).join('\n'));
 
@@ -425,21 +423,22 @@ export default class DocuScopeWAStudent extends Component {
   onContextSelect (anIndex) {
     console.log ("onContextSelect ("+anIndex+")");
 
-    let dVisible=false;
-    if (anIndex==4) {
-      dVisible=true;
-    }
-
     this.setState ({
       activeIndex: anIndex,
-      docuscopeVisible: dVisible,
       progress: 0
     }, () => {
-      if ((this.state.docuscopeVisible==true) && (this.state.editorActive==false)) {
-        var plain=Plain.serialize (Value.fromJSON (this.state.value));
 
-        this.sendMessage (plain);
+      // Inform the OnTopic backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        //this.sendMessage (plain);
       }
+
+      // Inform the Docuscope backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        this.sendMessage (plain);
+      }      
     });
   }
 
@@ -605,6 +604,8 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   render() {
+    //console.log ("render ("+this.state.editorActive+")");
+
     let progresswindow;
     let mainPage;
     let expectationsTab;
@@ -612,6 +613,7 @@ export default class DocuScopeWAStudent extends Component {
     let clarityTab;
     let impressionsTab;
     let editor;
+    let editorScrim;
 
     if (this.state.showProgress==true) {
       progresswindow=<div className="progresswindow">
@@ -629,43 +631,25 @@ export default class DocuScopeWAStudent extends Component {
     clarityTab=this.generateClarityTab ();
     impressionsTab=this.generateImpressionsTab ();
 
-    if (this.state.locked==false) {
-      editor=<Editor 
-        tabIndex="0"
-        id="editor"
-        ref="editor"
-        className="editor-content" 
-        spellCheck
-        autoFocus
-        placeholder="Enter some rich text..."
-        value={this.state.value}
-        onChange={this.onChange.bind(this)}
-        onKeyDown={this.onKeyDown.bind(this)}
-        renderBlock={this.renderBlock.bind(this)}
-        renderMark={this.renderMark.bind(this)}
-        renderAnnotation={this.renderAnnotation}
-        style={{overflowY: 'auto', fontSize: this.state.fontSize, marginTop: '2px', padding: '8px'}}
-        schema={this.schema}
-        insertText={this.insertText}></Editor>;
-    } else {
-      editor=<Editor 
-        id="editor"
-        ref="editor"
-        readOnly
-        tabIndex="0"
-        className="editor-content" 
-        spellCheck
-        autoFocus
-        placeholder="Enter some rich text..."        
-        value={this.state.value}
-        onChange={this.onChange.bind(this)}
-        onKeyDown={this.onKeyDown.bind(this)}
-        renderBlock={this.renderBlock.bind(this)}
-        renderMark={this.renderMark.bind(this)}
-        renderAnnotation={this.renderAnnotation}
-        style={{overflowY: 'auto', fontSize: this.state.fontSize, marginTop: '2px', padding: '8px'}}
-        schema={this.schema}
-        insertText={this.insertText}></Editor>
+    editor=<Editor 
+      tabIndex="0"
+      id="editor1"
+      ref="editor1"
+      className="editor-content"
+      readOnly={false}
+      placeholder="Enter some editable text..."
+      value={this.state.value}
+      onChange={this.onChange.bind(this)}
+      onKeyDown={this.onKeyDown.bind(this)}
+      renderBlock={this.renderBlock.bind(this)}
+      renderMark={this.renderMark.bind(this)}
+      renderAnnotation={this.renderAnnotation}
+      style={{overflowY: 'auto', fontSize: this.state.fontSize, marginTop: '2px', padding: '8px'}}
+      schema={this.schema}
+      insertText={this.insertText} />;
+
+    if (this.state.editorActive==false) {
+      editorScrim=<div className="editor-scrim"></div>;
     }
 
     mainPage=<div className="mainframe">
@@ -710,6 +694,7 @@ export default class DocuScopeWAStudent extends Component {
             </div>
             <div className="editor-container">
               {editor}
+              {editorScrim}
             </div>  
             <div className="editor-bottom-menu">Editor Bottom Marker</div>
           </div>
