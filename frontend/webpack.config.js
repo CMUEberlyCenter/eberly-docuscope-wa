@@ -13,9 +13,9 @@ const config = {
   },
   performance: {
     hints: false
-  },  
+  },
   // webpack-dev-server configuration
-  devServer: {    // Can be omitted unless you are using 'docker' 
+  devServer: {    // Can be omitted unless you are using 'docker'
     host: '0.0.0.0',    // This is where webpack-dev-server serves your bundle which is created in memory.
     // To use the in-memory bundle,
     // your <script> 'src' should point to the bundle
@@ -33,50 +33,58 @@ const config = {
     contentBase: path.resolve(__dirname, "./views"),    // 'Live-reloading' happens when you make changes to code
     // dependency pointed to by 'entry' parameter explained earlier.
     // To make live-reloading happen even when changes are made
-    // to the static html pages in 'contentBase', add 
+    // to the static html pages in 'contentBase', add
     // 'watchContentBase'
-    watchContentBase: true,    
+    watchContentBase: true,
     compress: true,
     port: 8082
- },
- plugins: [new HtmlWebpackPlugin({
-  favicon: "./css/favicon.ico", 
-  template: 'views/index.html'
- })],
- resolve: {
-  extensions: ['.js','.jsx','.css'],
-  alias: {
-    fs: 'pdfkit/js/virtual-fs.js'
+  },
+  plugins: [new HtmlWebpackPlugin({
+    favicon: "./css/favicon.ico",
+    template: 'views/index.html'
+  })],
+  resolve: {
+    extensions: ['.js','.jsx','.css'],
+    alias: {
+      fs: 'pdfkit/js/virtual-fs.js'
+    }
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(js|jsx)$/,
+        exclude: /(node_modules|bower_components)/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-react', '@babel/preset-env'],
+          plugins: ['@babel/plugin-proposal-class-properties']
+        }
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|svg|jpe?g|gif)$/i,
+        loader: 'file-loader',
+        options: {
+          publicPath: '.',
+        },
+      },
+      {
+        test: /docuscope\.html$/i,
+        loader: 'file-loader',
+        options: {
+          publicPath: './',
+        },
+      },
+      //{ enforce: 'post', test: /fontkit[/\\]index.js$/, loader: "transform-loader?brfs" },
+      //{ enforce: 'post', test: /unicode-properties[/\\]index.js$/, loader: "transform-loader?brfs" },
+      //{ enforce: 'post', test: /linebreak[/\\]src[/\\]linebreaker.js/, loader: "transform-loader?brfs" },
+      { test: /src[/\\]assets/, loader: 'arraybuffer-loader'},
+      { test: /\.afm$/, loader: 'raw-loader'}
+    ]
   }
- },
- module: {
-  rules: [
-  {
-    test: /\.(js|jsx)$/,
-    exclude: /(node_modules|bower_components)/,
-    loader: 'babel-loader',
-    options: {
-        presets: ['react', 'es2015'],
-        plugins: ['transform-class-properties']
-    }
-  },
-  {
-    test: /\.css$/i,
-    use: ['style-loader', 'css-loader']
-  },
-  {
-    test: /\.(png|svg|jpe?g|gif)$/i,
-    loader: 'file-loader',
-    options: {
-      publicPath: '.',
-    }
-  },
-  { enforce: 'post', test: /fontkit[/\\]index.js$/, loader: "transform-loader?brfs" },
-  { enforce: 'post', test: /unicode-properties[/\\]index.js$/, loader: "transform-loader?brfs" },
-  { enforce: 'post', test: /linebreak[/\\]src[/\\]linebreaker.js/, loader: "transform-loader?brfs" },
-  { test: /src[/\\]assets/, loader: 'arraybuffer-loader'},
-  { test: /\.afm$/, loader: 'raw-loader'}]
- }
 };
 
 module.exports = config;
