@@ -868,10 +868,10 @@
     "@babel/helper-validator-identifier" "^7.14.9"
     "to-fast-properties" "^2.0.0"
 
-"@cmu-eberly-center/eberly-ontopic-visualization@^0.5.10":
-  "integrity" "sha512-yjKQZr3u5MVBqAI7O9GkhrU4JJXmo89VzbodPgAHLmnSWyxE3hnPkYNONmT+t1lqqUrViyXez6a33gHNyGhT/g=="
-  "resolved" "https://registry.npmjs.org/@cmu-eberly-center/eberly-ontopic-visualization/-/eberly-ontopic-visualization-0.5.10.tgz"
-  "version" "0.5.10"
+"@cmu-eberly-center/eberly-ontopic-visualization@^0.5.15":
+  "integrity" "sha512-LkT1Pv2zj+/5PtKedLwHHvmsRS2lK8uAhvzPEd2aVVqdLeyX6xAoJNLMhXAyOCZVnNPv8UEAcnTKNCglZKtnng=="
+  "resolved" "https://registry.npmjs.org/@cmu-eberly-center/eberly-ontopic-visualization/-/eberly-ontopic-visualization-0.5.15.tgz"
+  "version" "0.5.15"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"

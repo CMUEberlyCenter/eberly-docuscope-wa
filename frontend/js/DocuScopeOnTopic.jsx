@@ -7,11 +7,6 @@ import { Topic, OnTopicDataTools, OnTopicConstants, OnTopicVisualization } from 
 
 import HashTable from './HashTable';
 
-import { paragraphData } from './data/paragraphdata.js'
-import { textData } from './data/textdata.js'
-import { sentenceData } from './data/sentencedata.js'
-import { rawData } from './data/rawdata.js'
-
 /**
  * 
  */
@@ -29,69 +24,23 @@ class DocuScopeOnTopic extends Component {
       locked: false,
       invalidated: false,      
       flipped: false,
-      mode: "TEXT",
+      mode: "SENTENCE",
       textdata: this.dataTools.getInitialData(),
       loading: false
     };    
 
-    this.onSelect=this.onSelect.bind(this);
-    this.modeToTab=this.modeToTab.bind(this);
-    this.onFlip=this.onFlip.bind(this);
     this.onHandleTopic=this.onHandleTopic.bind(this);
     this.onHandleSentence = this.onHandleSentence.bind(this);    
-    this.updateVisualization=this.updateVisualization.bind(this);
   }
 
   /**
    *
    */
-  updateVisualization () {
-    console.log ("updateVisualization ()");
-
-    this.getData (this.state.mode);
-  }
-
-  /**
-   *
-   */
-  onSelect (index, lastIndex, event) {
-    console.log ("onSelect ("+index+","+lastIndex+")");
-
-    if (index==0) {
-      this.setState ({mode: "SENTENCE"});
+  componentDidUpdate(prevProps) {
+    if (prevProps.text !== this.props.text) {
+      this.prep (this.props.sentences, this.props.text);
     }
-
-    if (index==1) {
-      this.setState ({mode: "PARAGRAPH"}); 
-    }
-
-    if (index==2) {
-      this.setState ({mode: "TEXT"});
-    }
-
-    if (index==3) {
-      this.setState ({mode: "OUTLINE"});
-    }
-  }
-
-  /**
-   *
-   */
-  getData (aMode) {
-    console.log ("getData ()");
-      
-    if (this.state.mode=="SENTENCE") {
-      this.prep (sentenceData);
-    }
-
-    if (this.state.mode=="PARAGRAPH") {
-      this.prep (paragraphData);
-    }
-
-    if (this.state.mode=="TEXT") {
-      this.prep (textData);
-    }
-  }
+  }  
 
   /**
    *
@@ -99,7 +48,6 @@ class DocuScopeOnTopic extends Component {
   prep (data, plain) {
     console.log ("prep ("+this.state.mode+")");
 
-    //var newData=this.dataTools.deepCopy (this.state.textdata);
     var newData=this.dataTools.copyData (this.state.textdata);
     newData.plain=plain;
 
@@ -198,75 +146,6 @@ class DocuScopeOnTopic extends Component {
   /**
    *
    */
-  modeToTab () {
-    if (this.state.mode=="SENTENCE") {
-      return (0);
-    }
-
-    if (this.state.mode=="PARAGRAPH") {
-      return (1);
-    }
-
-    if (this.state.mode=="TEXT") {
-      return (2);
-    }
-
-    if (this.state.mode=="OUTLINE") {
-      return (3);
-    }        
-
-    return (0);
-  }  
-
-  /**
-   *
-   */
-  onSelect (index, lastIndex, event) {
-    console.log ("onSelect ("+index+","+lastIndex+")");
-
-    //>----------------------------------------------------------
-
-    if (index==0) {
-      this.setState ({mode: "SENTENCE"});
-    }
-
-    //>----------------------------------------------------------
-
-    if (index==1) {
-      this.setState ({mode: "PARAGRAPH"}); 
-    }
-
-    //>----------------------------------------------------------    
-
-    if (index==2) {
-      this.setState ({mode: "TEXT"});
-    }
-
-    //>----------------------------------------------------------    
-
-    if (index==3) {
-      this.setState ({mode: "OUTLINE"});
-    }
-
-    //>----------------------------------------------------------    
-  }  
-
-  /**
-   *
-   */
-  onFlip () {
-    console.log ("onFlip ()");    
-    
-    if (this.state.flipped==true) {
-      this.setState ({flipped: false});
-    } else {
-      this.setState ({flipped: true});
-    }
-  }
-
-  /**
-   *
-   */
   onHandleTopic (topicId,isGlobal,count) {
     console.log ("onHandleTopic ("+topicId+","+isGlobal+","+count+") => Dummy for now");
   }
@@ -283,69 +162,33 @@ class DocuScopeOnTopic extends Component {
   }
 
   /**
-   * On input change, update the annotations.
-   *
-   * @param {Event} event
-   */
-  onSentenceChange () {
-    console.log ("onSentenceChange ()");
-
-    /*
-    const editor = this.getEditorRef ();
-    
-    if (editor==null) {
-      return;
-    }
-
-    const { value } = editor;
-    const { document, annotations } = value;
-
-    // Make the change to annotations without saving it into the undo history,
-    // so that there isn't a confusing behavior when undoing.
-    editor.withoutSaving(() => {
-      if (this.state.sentence!=null) {
-        //let string = this.state.sentence.sentence;
-      
-        // Key is the editor's paragraph id
-        let pIndex=1;
-        for (const [node, path] of document.texts()) {
-          const { key, text } = node;
-          console.log ("Paragraph: " + pIndex + ", text: " + text);
- 
-          let boundaries=this.dataTools.findSentence (text,this.state.sentence);
-
-          console.trace (boundaries);
-
-          pIndex++;
-        }
-      }
-    });
-    */
-  }  
-
-  /**
    *
    */
   render() {
-
-    let ontopic=<OnTopicVisualization 
-      onFlip={this.onFlip}
-      onSelect={this.onSelect}
-      onHandleTopic={this.onHandleTopic}
-      onHandleSentence={this.onHandleSentence}
-      defaultindex={this.modeToTab ()}
-      loading={this.state.loading} 
-      flipped={this.state.flipped}
-      mode={this.state.mode}      
-      invalidated={this.state.invalidated}
-      onNavItemClick={this.onNavItemClick}
-      textdata={this.state.textdata} />;
+    const onTopicHelp='You may lose <bold>clarity</bold> if you try to pack too many ideas into a sentence.<br/> This panel displays each of your sentences as a sequence of noun phrases appearing before and after the main verb. Focus on the sentences with many noun phrases before the main verb but also after.  Click on the sentence line on the left to see your actual sentence. <br/><br/> Read the sentence aloud when feeling. If you stumble or run out of breath, you are most likely stuffing too much information into a single sentence. <br/><br/>  There is nothing wrong with <bold>be verbs</bold> to signal "existence". But an overreliance on the <bold>be verbs</bold> can result in weak writing. If you find you have too many <bold>be verbs</bold>, try to revise some of the sentences with <bold>active verbs</bold>.';
 
     return (
-      <div className="drydock-content">
-        <Button className="btn btn-light" style={{marginRight: "4px"}} onClick={()=> this.updateVisualization()}>Update Visualization</Button>
-        {ontopic}
-      </div>
+      <div className="ontopic-container">
+        <div className="ontopic-content">
+          <OnTopicVisualization 
+            mode="SENTENCE"
+            singlepane={true}
+            onFlip={this.onFlip}
+            onHandleTopic={this.onHandleTopic}
+            onHandleSentence={this.onHandleSentence}
+            loading={this.state.loading}
+            invalidated={this.state.invalidated}        
+            textdata={this.state.textdata} />
+        </div>
+        <div className="ontopic-help" >
+          <div className="ontopic-legend">
+            <span className="topic-legend-item"><div className="box-green"></div>Noun phrase</span>
+            <span className="topic-legend-item"><div className="box-red"></div>Active verb</span>
+            <span className="topic-legend-item"><div className="box-blue"></div>be verb</span>
+          </div>
+          <div dangerouslySetInnerHTML={{__html: onTopicHelp}} />        
+        </div>
+      </div>    
     );
   }
 }

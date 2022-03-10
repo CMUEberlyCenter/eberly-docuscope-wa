@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 
 import 'foundation-sites/dist/css/foundation.min.css';
 
-import { Button, Colors, Sizes } from 'react-foundation';
-import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
+import { Button, Colors, Sizes, Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
+
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
 import { Editor  } from 'slate-react';
@@ -29,6 +30,8 @@ import '../css/meter.css';
 
 import mainIcon from '../css/icons/audit_icon.png';
 import ontopicLegend from '../css/img/ontopic-legend.png';
+
+import { sentenceData } from './data/sentencedata.js'
 
 let initialValue = Value.fromJSON({
   document: {
@@ -105,8 +108,10 @@ export default class DocuScopeWAStudent extends Component {
       docuscopeOrigin: "",
       editorActive: true,
       showProgress: false,
+      showInfoColumn: false,
       progress: 0,
-      progressTitle: "Docuscope Write and Audit Processing"
+      progressTitle: "Docuscope Write and Audit Processing",
+      text: null
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
@@ -121,6 +126,8 @@ export default class DocuScopeWAStudent extends Component {
     this.processMessage = this.processMessage.bind(this);
 
     this.handleEditorToggle = this.handleEditorToggle.bind(this);
+
+    this.selectMenuOption = this.selectMenuOption.bind(this);
   }
 
   /**
@@ -136,6 +143,18 @@ export default class DocuScopeWAStudent extends Component {
         this.setState ({docuscope: event.source, docuscopeOrigin: event.origin});
       }
     }, false);
+  }
+
+  /**
+   *
+   */
+  selectMenuOption (selectedOption) {
+    console.log ("selectMenuOption ("+selectedOption+")")
+
+    if (selectedOption=="#topicclusters") {
+      this.setState ({showInfoColumn: !this.state.showInfoColumn});
+      return;
+    }
   }
 
   /**
@@ -179,14 +198,16 @@ export default class DocuScopeWAStudent extends Component {
     let docuscopeTarget=this.state.docuscope;
     let docuscopeOrigin=this.state.docuscopeOrigin;
 
-    if (docuscopeTarget!=null) {
-      if (this.state.activeIndex==4) {
+    if (this.state.activeIndex==4) {
+      if (docuscopeTarget!=null) {
         docuscopeTarget.postMessage(payload,docuscopeOrigin);
-      } else {
-        console.log ("Info: Docuscope Classroom is not visible, not updating");
       }
-    } else {
-      console.log ("Error: docuscope classroom not connected");
+    }
+
+    if (this.state.activeIndex==3) {
+      this.setState ({
+        sentences: sentenceData,
+        text: aMessage});
     }
   }
 
@@ -207,6 +228,31 @@ export default class DocuScopeWAStudent extends Component {
 
         this.sendMessage (plain);
       }
+    });
+  }
+
+  /**
+   *
+   */
+  onContextSelect (anIndex) {
+    console.log ("onContextSelect ("+anIndex+")");
+
+    this.setState ({
+      activeIndex: anIndex,
+      progress: 0
+    }, () => {
+
+      // Inform the OnTopic backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        //this.sendMessage (plain);
+      }
+
+      // Inform the Docuscope backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        this.sendMessage (plain);
+      }      
     });
   }
 
@@ -420,31 +466,6 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  onContextSelect (anIndex) {
-    console.log ("onContextSelect ("+anIndex+")");
-
-    this.setState ({
-      activeIndex: anIndex,
-      progress: 0
-    }, () => {
-
-      // Inform the OnTopic backend
-      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
-        var plain=Plain.serialize (Value.fromJSON (this.state.value));
-        //this.sendMessage (plain);
-      }
-
-      // Inform the Docuscope backend
-      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
-        var plain=Plain.serialize (Value.fromJSON (this.state.value));
-        this.sendMessage (plain);
-      }      
-    });
-  }
-
-  /**
-   *
-   */
   onClickRule (e) {
     console.log ("onClickRule ("+e.target.id+")");
 
@@ -555,7 +576,6 @@ export default class DocuScopeWAStudent extends Component {
         <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>      
       </div>
       <div className="coherence-content">
-        <DocuScopeOnTopic />
       </div>
       <div className="coherence-controls">
       Topic Cluster
@@ -566,16 +586,15 @@ export default class DocuScopeWAStudent extends Component {
   }  
 
   /**
-   *
+   * e.g OnTopic visualization
    */
   generateClarityTab () {
     return (<div className="impressions">
       <div className="impressions-title">
         <img src={mainIcon} className="context-icon"></img><h3 className="context-title">Polish Your Sentences for Clarity</h3>
       </div>
-      <div className="impressions-description">
-      </div>
       <div className="impressions-content">
+        <DocuScopeOnTopic sentences={this.state.sentences} text={this.state.text}/>      
       </div>
       <div className="impressions-detail">
       </div>
@@ -606,6 +625,9 @@ export default class DocuScopeWAStudent extends Component {
   render() {
     //console.log ("render ("+this.state.editorActive+")");
 
+    let leftWidth="30%";
+    let centerWidth="30%";
+
     let progresswindow;
     let mainPage;
     let expectationsTab;
@@ -614,6 +636,16 @@ export default class DocuScopeWAStudent extends Component {
     let impressionsTab;
     let editor;
     let editorScrim;
+    let infocolumn;
+
+    if (this.state.showInfoColumn==true) {
+      leftWidth="30%";
+      centerWidth="30%";
+      infocolumn=<div className="rightcol"></div>;
+    } else {
+      leftWidth="50%";
+      centerWidth="50%";      
+    }
 
     if (this.state.showProgress==true) {
       progresswindow=<div className="progresswindow">
@@ -653,9 +685,56 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     mainPage=<div className="mainframe">
-      <div className="menubar">menubar</div>
+      <div className="menubar">
+        <Navbar bg="dark" variant="dark">
+          <Container>
+            <Navbar.Brand href="#home">DocuScope Write & Audit</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto" onSelect={(selectedKey) => this.selectMenuOption(selectedKey)}>
+                <NavDropdown title="File" id="dropdown1">
+                  <NavDropdown.Item href="#1">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#2">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#3">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#4">Separated link</NavDropdown.Item>
+                </NavDropdown>
+                <NavDropdown title="Edit" id="dropdown2">
+                  <NavDropdown.Item href="#5">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#6">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#7">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#8">Separated link</NavDropdown.Item>
+                </NavDropdown>
+                <NavDropdown title="View" id="dropdown3">
+                  <NavDropdown.Item href="#topicclusters">Topic Clusters</NavDropdown.Item>
+                  <NavDropdown.Item href="#9">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#10">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#11">Separated link</NavDropdown.Item>
+                </NavDropdown>          
+                <NavDropdown title="Window" id="dropdown4">
+                  <NavDropdown.Item href="#12">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#13">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#14">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#15">Separated link</NavDropdown.Item>
+                </NavDropdown>                      
+                <NavDropdown title="Help" id="dropdown5">
+                  <NavDropdown.Item href="#16">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#17">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#18">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#19">Separated link</NavDropdown.Item>
+                </NavDropdown>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>        
+      </div>
       <div className="content">
-          <div className="leftcol">
+
+          <div className="leftcol" style={{width: leftWidth}}>
             <Tabs>
               <TabItem isActive={this.state.activeIndex === 1} onClick={(e) => { this.onContextSelect(1) }}><a href="#">Expectations</a></TabItem>
               <TabItem isActive={this.state.activeIndex === 2} onClick={(e) => { this.onContextSelect(2) }}><a href="#">Coherence</a></TabItem>
@@ -680,7 +759,8 @@ export default class DocuScopeWAStudent extends Component {
               </TabPanel>
             </TabsContent>
           </div>
-          <div className="centercol">
+
+          <div className="centercol" style={{width: centerWidth}}>
             <div className="editor-top-menu">
               <div className="editor-top-menu-filler">
                 <select id="paragraphs" name="paragraphs" className="editor-paragraphs" value={this.state.paragraphSelected} onChange={this.handleParagraphSelection}>
@@ -698,10 +778,7 @@ export default class DocuScopeWAStudent extends Component {
             </div>  
             <div className="editor-bottom-menu">Editor Bottom Marker</div>
           </div>
-          <div className="rightcol">
-            
-
-          </div>
+          {infocolumn}
       </div>
       <div className="statusbar">statusbar</div>
       {progresswindow}
