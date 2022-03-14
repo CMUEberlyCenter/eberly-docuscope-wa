@@ -1,33 +1,33 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
-import '../css/docuscope.css';
+import "../css/docuscope.css";
 
 /**
  *
  */
 export default class DocuScopeWAScrim extends Component {
-
   /**
    *
    */
   constructor(props) {
     super(props);
 
-    console.log ("DocuScopeWAScrim ()");
+    console.log("DocuScopeWAScrim ()");
 
     this.state = {
-      enabled: false
-    }
+      enabled: false,
+    };
   }
 
   /**
    *
    */
   render() {
-    return (<div>
-      {this.props.children}
-      <div className="docuscope_scrim">        
+    return (
+      <div>
+        {this.props.children}
+        <div className="docuscope_scrim"></div>
       </div>
-    </div>);
+    );
   }
 }

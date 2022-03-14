@@ -1,18 +1,17 @@
 /* eslint-disable react/destructuring-assignment */
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
 
-import ArrowDown from '../css/img/arrowDown.svg';
-import ArrowUp from '../css/img/arrowUp.svg';
-import Check from '../css/img/check.svg';
+import ArrowDown from "../css/img/arrowDown.svg";
+import ArrowUp from "../css/img/arrowUp.svg";
+import Check from "../css/img/check.svg";
 
-import '../css/dropdown.css';
+import "../css/dropdown.css";
 
 /**
- * 
+ *
  */
 class Dropdown extends Component {
-
   constructor(props) {
     super(props);
     const { title, list } = this.props;
@@ -21,7 +20,7 @@ class Dropdown extends Component {
       isListOpen: false,
       title,
       selectedItem: null,
-      keyword: '',
+      keyword: "",
       list,
     };
 
@@ -41,15 +40,15 @@ class Dropdown extends Component {
 
     setTimeout(() => {
       if (isListOpen) {
-        window.addEventListener('click', this.close);
+        window.addEventListener("click", this.close);
       } else {
-        window.removeEventListener('click', this.close);
+        window.removeEventListener("click", this.close);
       }
     }, 0);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('click', this.close);
+    window.removeEventListener("click", this.close);
   }
 
   static getDerivedStateFromProps(nextProps, prevState) {
@@ -66,25 +65,28 @@ class Dropdown extends Component {
     this.setState({
       isListOpen: false,
     });
-  }
+  };
 
   clearSelection = () => {
     const { name, title, onChange } = this.props;
 
-    this.setState({
-      selectedItem: null,
-      title,
-    }, () => {
-      onChange(null, name);
-    });
-  }
+    this.setState(
+      {
+        selectedItem: null,
+        title,
+      },
+      () => {
+        onChange(null, name);
+      }
+    );
+  };
 
   selectSingleItem = (item) => {
     const { list } = this.props;
 
     const selectedItem = list.find((i) => i.value === item.value);
     this.selectItem(selectedItem);
-  }
+  };
 
   selectItem = (item) => {
     const { label, value } = item;
@@ -97,89 +99,78 @@ class Dropdown extends Component {
       foundItem = list.find((i) => i.value === item.value);
     }
 
-    this.setState({
-      title: label || foundItem.label,
-      isListOpen: false,
-      selectedItem: item,
-    }, () => selectedItem.value !== value && onChange(item, name));
-  }
+    this.setState(
+      {
+        title: label || foundItem.label,
+        isListOpen: false,
+        selectedItem: item,
+      },
+      () => selectedItem.value !== value && onChange(item, name)
+    );
+  };
 
   toggleList = () => {
-    this.setState((prevState) => ({
-      isListOpen: !prevState.isListOpen,
-      keyword: '',
-    }), () => {
-      if (this.state.isListOpen && this.searchField.current) {
-        this.searchField.current.focus();
-        this.setState({
-          keyword: '',
-        });
+    this.setState(
+      (prevState) => ({
+        isListOpen: !prevState.isListOpen,
+        keyword: "",
+      }),
+      () => {
+        if (this.state.isListOpen && this.searchField.current) {
+          this.searchField.current.focus();
+          this.setState({
+            keyword: "",
+          });
+        }
       }
-    });
-  }
+    );
+  };
 
   filterList = (e) => {
     this.setState({
       keyword: e.target.value.toLowerCase(),
     });
-  }
+  };
 
   listItems = () => {
-    const {
-      id,
-      searchable,
-      checkIcon,
-      styles,
-    } = this.props;
+    const { id, searchable, checkIcon, styles } = this.props;
     const { listItem, listItemNoResult } = styles;
     const { keyword, list } = this.state;
     let tempList = [...list];
     const selectedItemValue = this.state.selectedItem.value;
 
     if (keyword.length) {
-      tempList = list.filter((item) => item.label.toLowerCase().includes(keyword.toLowerCase()));
-    }
-
-    if (tempList.length) {
-      return (
-        tempList.map((item) => (
-          <button
-            type="button"
-            className={`dd-list-item ${id}`}
-            style={listItem}
-            key={item.value}
-            onClick={() => this.selectItem(item)}
-          >
-            {item.label}
-            {' '}
-            {item.value === selectedItemValue && (
-              <span style={styles.checkIcon}>
-                {checkIcon || <Check />}
-              </span>
-            )}
-          </button>
-        ))
+      tempList = list.filter((item) =>
+        item.label.toLowerCase().includes(keyword.toLowerCase())
       );
     }
 
+    if (tempList.length) {
+      return tempList.map((item) => (
+        <button
+          type="button"
+          className={`dd-list-item ${id}`}
+          style={listItem}
+          key={item.value}
+          onClick={() => this.selectItem(item)}
+        >
+          {item.label}{" "}
+          {item.value === selectedItemValue && (
+            <span style={styles.checkIcon}>{checkIcon || <Check />}</span>
+          )}
+        </button>
+      ));
+    }
+
     return (
-      <div
-        className={`dd-list-item no-result ${id}`}
-        style={listItemNoResult}
-      >
+      <div className={`dd-list-item no-result ${id}`} style={listItemNoResult}>
         {searchable[1]}
       </div>
     );
-  }
+  };
 
   render() {
-    const {
-      id,
-      searchable,
-      arrowUpIcon,
-      arrowDownIcon,
-      styles,
-    } = this.props;
+    const { id, searchable, arrowUpIcon, arrowDownIcon, styles } = this.props;
     const { isListOpen, title } = this.state;
 
     const {
@@ -194,46 +185,40 @@ class Dropdown extends Component {
     } = styles;
 
     return (
-      <div
-        className={`dd-wrapper ${id}`}
-        style={wrapper}
-      >
+      <div className={`dd-wrapper ${id}`} style={wrapper}>
         <button
           type="button"
           className={`dd-header ${id}`}
           style={header}
           onClick={this.toggleList}
         >
-          <div
-            className={`dd-header-title ${id}`}
-            style={headerTitle}
-          >
+          <div className={`dd-header-title ${id}`} style={headerTitle}>
             {title}
           </div>
-          {isListOpen
-            ? <span style={headerArrowUpIcon}>{arrowUpIcon || <ArrowUp />}</span>
-            : <span style={headerArrowDownIcon}>{arrowDownIcon || <ArrowDown />}</span>}
+          {isListOpen ? (
+            <span style={headerArrowUpIcon}>{arrowUpIcon || <ArrowUp />}</span>
+          ) : (
+            <span style={headerArrowDownIcon}>
+              {arrowDownIcon || <ArrowDown />}
+            </span>
+          )}
         </button>
         {isListOpen && (
           <div
-            className={`dd-list${searchable ? ' searchable' : ''} ${id}`}
+            className={`dd-list${searchable ? " searchable" : ""} ${id}`}
             style={list}
           >
-            {searchable
-            && (
-            <input
-              ref={this.searchField}
-              className={`dd-list-search-bar ${id}`}
-              style={listSearchBar}
-              placeholder={searchable[0]}
-              onClick={(e) => e.stopPropagation()}
-              onChange={(e) => this.filterList(e)}
-            />
+            {searchable && (
+              <input
+                ref={this.searchField}
+                className={`dd-list-search-bar ${id}`}
+                style={listSearchBar}
+                placeholder={searchable[0]}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => this.filterList(e)}
+              />
             )}
-            <div
-              className={`dd-scroll-list ${id}`}
-              style={scrollList}
-            >
+            <div className={`dd-scroll-list ${id}`} style={scrollList}>
               {this.listItems()}
             </div>
           </div>
@@ -244,7 +229,7 @@ class Dropdown extends Component {
 }
 
 Dropdown.defaultProps = {
-  id: '',
+  id: "",
   select: undefined,
   searchable: undefined,
   styles: {},
@@ -269,10 +254,12 @@ Dropdown.propTypes = {
     listItemNoResult: PropTypes.string,
   }),
   title: PropTypes.string.isRequired,
-  list: PropTypes.arrayOf(PropTypes.shape({
-    value: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-  })).isRequired,
+  list: PropTypes.arrayOf(
+    PropTypes.shape({
+      value: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   select: PropTypes.shape({ value: PropTypes.string }),

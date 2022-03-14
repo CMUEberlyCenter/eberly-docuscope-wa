@@ -1,6 +1,10 @@
-
 /* Bootstrap override/fix */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   color: #222222;
   font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
   font-style: normal;
@@ -13,7 +17,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Bootstrap override/fix */
 a {
-  color: #1BBC9B;
+  color: #1bbc9b;
   line-height: inherit;
   text-decoration: none;
 }
@@ -24,7 +28,9 @@ table {
 }
 
 /* Bootstrap override/fix */
-tbody, tfoot, thead {
+tbody,
+tfoot,
+thead {
   border: 0px;
   background-color: white;
 }
@@ -43,7 +49,7 @@ tbody tr:nth-child(even) {
   margin: 0px;
   width: 100%;
   height: 100%;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .docuscope_scrim {
@@ -54,7 +60,7 @@ tbody tr:nth-child(even) {
   margin: 0px;
   width: 100%;
   height: 100%;
-  background-color: rgba(255,255,255,0.5);
+  background-color: rgba(255, 255, 255, 0.5);
   display: none;
 }
 
@@ -75,10 +81,10 @@ tbody tr:nth-child(even) {
   display: inline-block;
   padding: 1rem 2rem 1.0625rem 2rem;
   font-size: 1rem;
-  background-color: #1BBC9B;
+  background-color: #1bbc9b;
   border-color: #16967c;
-  color: #FFFFFF;
-  transition: background-color 300ms ease-out;    
+  color: #ffffff;
+  transition: background-color 300ms ease-out;
 }
 
 .docuscope_button:hover {
@@ -116,7 +122,7 @@ tbody tr:nth-child(even) {
   height: 0;
   border-right: 4px solid transparent;
   border-left: 4px solid transparent;
-  border-top: 4px solid rgba(0,0,0,0.3);
+  border-top: 4px solid rgba(0, 0, 0, 0.3);
   position: absolute;
   right: 10px;
   top: 10px;
@@ -139,7 +145,7 @@ tbody tr:nth-child(even) {
   flex: 0;
   /* box-shadow: inset 0px 1px 0px 0px #ffffff; */
   /* background-color: rgba(var(--bs-light-rgb),var(--bs-bg-opacity))!important; */
-  background-color: rgb(33,37,41);
+  background-color: rgb(33, 37, 41);
   /* border: 1px solid #dcdcdc; */
   display: inline-block;
   cursor: pointer;
@@ -163,7 +169,7 @@ tbody tr:nth-child(even) {
 .statusbar {
   flex: 0;
   box-shadow: inset 0px 1px 0px 0px #ffffff;
-  background-color: rgb(33,37,41);
+  background-color: rgb(33, 37, 41);
   /* border: 1px solid #dcdcdc; */
   display: inline-block;
   cursor: pointer;
@@ -188,7 +194,7 @@ tbody tr:nth-child(even) {
 .centercol {
   flex: 1;
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
   border-right: 1px solid grey;
 }
 
@@ -213,7 +219,7 @@ tbody tr:nth-child(even) {
 }
 
 .context-title {
-  color: rgb(242,129,47);
+  color: rgb(242, 129, 47);
 }
 
 .progresswindow {

@@ -1,52 +1,50 @@
-
 /**
  *
  */
 export default class HashTable {
-
   /**
    *
-   */  
-  constructor (obj) {
+   */
+  constructor(obj) {
     this.length = 0;
     this.items = {};
 
     if (obj) {
       for (var p in obj) {
-        if (obj.hasOwnProperty(p)) {
+        if (Object.prototype.hasOwnProperty.call(obj, p)) {
           this.items[p] = obj[p];
           this.length++;
-	    }
-	  }
+        }
+      }
     }
   }
 
   /**
    *
    */
-  getItems () {
-    return (this.items);
+  getItems() {
+    return this.items;
   }
 
   /**
    *
    */
-  getLength () {
-    return (this.length);
+  getLength() {
+    return this.length;
   }
 
   /**
    *
    */
-  setItems (aValue, aLength) {
-    this.items=aValue;
-    this.length=aLength;
+  setItems(aValue, aLength) {
+    this.items = aValue;
+    this.length = aLength;
   }
-  
+
   /**
    *
    */
-  setItem (key, value) {
+  setItem(key, value) {
     var previous = undefined;
 
     if (this.hasItem(key)) {
@@ -56,30 +54,30 @@ export default class HashTable {
     }
 
     this.items[key] = value;
-    
+
     return previous;
   }
 
   /**
    *
    */
-  getItem (key) {
+  getItem(key) {
     return this.hasItem(key) ? this.items[key] : undefined;
   }
 
   /**
    *
    */
-  hasItem (key) {
-    return this.items.hasOwnProperty(key);
+  hasItem(key) {
+    return Object.prototype.hasOwnProperty.call(this.items, key);
   }
-   
+
   /**
    *
-   */   
-  removeItem (key) {
+   */
+  removeItem(key) {
     if (this.hasItem(key)) {
-      previous = this.items[key];
+      const previous = this.items[key];
       this.length--;
       delete this.items[key];
       return previous;
@@ -87,11 +85,11 @@ export default class HashTable {
       return undefined;
     }
   }
- 
+
   /**
    *
    */
-  keys () {
+  keys() {
     var keys = [];
     for (var k in this.items) {
       if (this.hasItem(k)) {
@@ -104,7 +102,7 @@ export default class HashTable {
   /**
    *
    */
-  values () {
+  values() {
     var values = [];
     for (var k in this.items) {
       if (this.hasItem(k)) {
@@ -117,7 +115,7 @@ export default class HashTable {
   /**
    *
    */
-  each (fn) {
+  each(fn) {
     for (var k in this.items) {
       if (this.hasItem(k)) {
         fn(k, this.items[k]);
@@ -128,8 +126,8 @@ export default class HashTable {
   /**
    *
    */
-  clear () {
-    this.items = {}
+  clear() {
+    this.items = {};
     this.length = 0;
   }
 }
