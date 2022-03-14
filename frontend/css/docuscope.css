@@ -1,4 +1,5 @@
 
+/* Bootstrap override/fix */
 h1, h2, h3, h4, h5, h6 {
   color: #222222;
   font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
@@ -10,10 +11,28 @@ h1, h2, h3, h4, h5, h6 {
   text-rendering: optimizeLegibility;
 }
 
+/* Bootstrap override/fix */
 a {
   color: #1BBC9B;
   line-height: inherit;
   text-decoration: none;
+}
+
+/* Bootstrap override/fix */
+table {
+  width: auto;
+}
+
+/* Bootstrap override/fix */
+tbody, tfoot, thead {
+  border: 0px;
+  background-color: white;
+}
+
+/* Bootstrap override/fix */
+tbody tr:nth-child(even) {
+  border-bottom: 0;
+  background-color: white;
 }
 
 .editor-scrim {
@@ -113,23 +132,25 @@ a {
   width: 100%;
   height: 100%;
   margin: 0px;
-  padding: 4px;
+  padding: 0px;
 }
 
 .menubar {
   flex: 0;
-  box-shadow: inset 0px 1px 0px 0px #ffffff;
-  background-color: #ededed;
-  border: 1px solid #dcdcdc;
+  /* box-shadow: inset 0px 1px 0px 0px #ffffff; */
+  /* background-color: rgba(var(--bs-light-rgb),var(--bs-bg-opacity))!important; */
+  background-color: rgb(33,37,41);
+  /* border: 1px solid #dcdcdc; */
   display: inline-block;
   cursor: pointer;
-  color: #777777;
-  font-family: Arial;
+  /* color: #777777; */
+  /* font-family: Arial; */
   font-size: 14px;
   font-weight: bold;
-  padding: 2px 4px;
-  text-decoration: none;
-  text-shadow: 0px 1px 0px #ffffff;
+  /* padding: 2px 4px; */
+  /* text-decoration: none; */
+  /* text-shadow: 0px 1px 0px #ffffff; */
+  display: flex;
 }
 
 .content {
@@ -142,23 +163,22 @@ a {
 .statusbar {
   flex: 0;
   box-shadow: inset 0px 1px 0px 0px #ffffff;
-  background-color: #ededed;
-  border: 1px solid #dcdcdc;
+  background-color: rgb(33,37,41);
+  /* border: 1px solid #dcdcdc; */
   display: inline-block;
   cursor: pointer;
-  color: #777777;
+  color: white;
   font-family: Arial;
   font-size: 14px;
   /* font-weight: bold; */
   line-height: 20px;
   padding: 1px 2px 1px 2px;
   text-decoration: none;
-  text-shadow: 0px 1px 0px #ffffff;
+  /* text-shadow: 0px 1px 0px #ffffff;*/
 }
 
 .leftcol {
   flex: 1;
-  width: 30%;
   border-right: 1px solid #bdbbbb;
   /*background: #fbf5f5;*/
   display: flex;
@@ -167,7 +187,6 @@ a {
 
 .centercol {
   flex: 1;
-  width: 30%;
   display: flex;
   flex-direction: column;  
   border-right: 1px solid grey;
@@ -218,4 +237,66 @@ a {
 
 .progresscontent {
   margin: 2px;
+}
+
+.ontopic-container {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: 100%;
+}
+
+.ontopic-content {
+  width: 50%;
+  flex: 1;
+  padding: 4px;
+}
+
+.ontopic-help {
+  width: 50%;
+  flex: 1;
+  padding: 4px;
+  border-left: 1px solid #ebe7e7;
+  display: flex;
+  flex-direction: column;
+}
+
+.ontopic-legend {
+  flex: 0;
+  border-bottom: 1px solid #ebe7e7;
+}
+
+.topic-legend-item {
+  margin-right: 4px;
+  float: left;
+}
+
+.box-green {
+  background-color: green;
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  margin-top: 7px;
+  padding: 1px;
+  float: left;
+}
+
+.box-red {
+  background-color: red;
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  margin-top: 7px;
+  padding: 1px;
+  float: left;
+}
+
+.box-blue {
+  background-color: blue;
+  width: 10px;
+  height: 10px;
+  margin: 4px;
+  margin-top: 7px;
+  padding: 1px;
+  float: left;
 }

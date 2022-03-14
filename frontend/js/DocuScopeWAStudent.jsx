@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 
 import 'foundation-sites/dist/css/foundation.min.css';
 
-import { Button, Colors, Sizes } from 'react-foundation';
-import { Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
+import { Button, Colors, Sizes, Tabs, TabItem, TabsContent, TabPanel } from 'react-foundation';
+
+import { Navbar, Nav, Container, NavDropdown } from 'react-bootstrap';
 
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
 import { Editor  } from 'slate-react';
@@ -30,7 +31,7 @@ import '../css/meter.css';
 import mainIcon from '../css/icons/audit_icon.png';
 import ontopicLegend from '../css/img/ontopic-legend.png';
 
-import docuscope from '../views/docuscope.html';
+import { sentenceData } from './data/sentencedata.js'
 
 let initialValue = Value.fromJSON({
   document: {
@@ -63,7 +64,7 @@ export default class DocuScopeWAStudent extends Component {
         isAtomic: true,
       }
     },
-  }
+  }  
 
   /**
    *
@@ -107,8 +108,10 @@ export default class DocuScopeWAStudent extends Component {
       docuscopeOrigin: "",
       editorActive: true,
       showProgress: false,
+      showInfoColumn: false,
       progress: 0,
-      progressTitle: "Docuscope Write and Audit Processing"
+      progressTitle: "Docuscope Write and Audit Processing",
+      text: null
     };
 
     this.onContextSelect=this.onContextSelect.bind (this);
@@ -116,13 +119,15 @@ export default class DocuScopeWAStudent extends Component {
     this.onClickRuleChild=this.onClickRuleChild.bind (this);
 
     // Editor event handlers
-    this.insertText = this.insertText.bind(this);
+    this.insertText = this.insertText.bind(this);    
     this.fillParagraphList = this.fillParagraphList.bind(this);
     this.handleParagraphSelection = this.handleParagraphSelection.bind(this);
 
     this.processMessage = this.processMessage.bind(this);
 
     this.handleEditorToggle = this.handleEditorToggle.bind(this);
+
+    this.selectMenuOption = this.selectMenuOption.bind(this);
   }
 
   /**
@@ -138,6 +143,18 @@ export default class DocuScopeWAStudent extends Component {
         this.setState ({docuscope: event.source, docuscopeOrigin: event.origin});
       }
     }, false);
+  }
+
+  /**
+   *
+   */
+  selectMenuOption (selectedOption) {
+    console.log ("selectMenuOption ("+selectedOption+")")
+
+    if (selectedOption=="#topicclusters") {
+      this.setState ({showInfoColumn: !this.state.showInfoColumn});
+      return;
+    }
   }
 
   /**
@@ -160,9 +177,9 @@ export default class DocuScopeWAStudent extends Component {
       if (data.status=="finished") {
         this.setState ({
           showProgress: false
-        });
+        });        
         return;
-      }
+      }      
     }
   }
 
@@ -172,7 +189,7 @@ export default class DocuScopeWAStudent extends Component {
   sendMessage (aMessage) {
     var payload = {
       event_id: 'docuscope',
-      data: {
+      data: {      
         status: "text",
         content: aMessage
       }
@@ -181,26 +198,28 @@ export default class DocuScopeWAStudent extends Component {
     let docuscopeTarget=this.state.docuscope;
     let docuscopeOrigin=this.state.docuscopeOrigin;
 
-    if (docuscopeTarget!=null) {
-      if (this.state.activeIndex==4) {
+    if (this.state.activeIndex==4) {
+      if (docuscopeTarget!=null) {
         docuscopeTarget.postMessage(payload,docuscopeOrigin);
-      } else {
-        console.log ("Info: Docuscope Classroom is not visible, not updating");
       }
-    } else {
-      console.log ("Error: docuscope classroom not connected");
+    }
+
+    if (this.state.activeIndex==3) {
+      this.setState ({
+        sentences: sentenceData,
+        text: aMessage});
     }
   }
 
   /**
    *
    */
-  handleEditorToggle (e) {
+  handleEditorToggle (e) {    
     let toggled=!this.state.editorActive;
     let editorLocked=toggled;
 
     console.log ("handleEditorToggle ("+toggled+","+editorLocked+")");
-
+    
     this.setState ({editorActive: toggled, locked: editorLocked}, () => {
       if (this.state.editorActive==false) {
         // Send new locked text to backend(s)
@@ -209,6 +228,31 @@ export default class DocuScopeWAStudent extends Component {
 
         this.sendMessage (plain);
       }
+    });
+  }
+
+  /**
+   *
+   */
+  onContextSelect (anIndex) {
+    console.log ("onContextSelect ("+anIndex+")");
+
+    this.setState ({
+      activeIndex: anIndex,
+      progress: 0
+    }, () => {
+
+      // Inform the OnTopic backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        //this.sendMessage (plain);
+      }
+
+      // Inform the Docuscope backend
+      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+        var plain=Plain.serialize (Value.fromJSON (this.state.value));
+        this.sendMessage (plain);
+      }      
     });
   }
 
@@ -235,9 +279,9 @@ export default class DocuScopeWAStudent extends Component {
   handleParagraphSelection (e) {
     console.log ("handleParagraphSelection ("+e.target.value+")");
 
-    this.setState({
+    this.setState({ 
       paragraphSelected: e.target.value
-    });
+    });     
   }
 
   /**
@@ -265,7 +309,7 @@ export default class DocuScopeWAStudent extends Component {
       let topic=this.dataTools.deepCopy (this.state.topic);
       let topics=null;
 
-      /*
+      /*  
       if (value.document.text!="") {
         if (this.state.check!=value.document.text) {
           //console.log ("onChange () actual");
@@ -277,7 +321,7 @@ export default class DocuScopeWAStudent extends Component {
             topics=this.copyTopics ();
           }
         } else {
-          topics=this.copyTopics ();
+          topics=this.copyTopics ();       
         }
       } else {
         topics=null;
@@ -287,9 +331,9 @@ export default class DocuScopeWAStudent extends Component {
 
       this.setState ({
                       valueRaw: value.document,
-                      check: value.document.text,
-                      invalidated: invalidated,
-                      topics: topics,
+                      check: value.document.text, 
+                      invalidated: invalidated, 
+                      topics: topics, 
                       topic: topic,
                       expanded: expanded});
     });
@@ -363,19 +407,19 @@ export default class DocuScopeWAStudent extends Component {
           <span {...attributes} style={{ textDecoration: 'underline' }}>
             {children}
           </span>
-        );
+        );       
       case 'italic':
         return (
           <span {...attributes} style={{ fontStyle: 'italic' }}>
             {children}
           </span>
-        );
+        );       
       case 'bold':
         return (
           <span {...attributes} style={{ fontWeight: 'bold' }}>
             {children}
           </span>
-        );
+        );                       
       default:
         return next();
     }
@@ -417,32 +461,7 @@ export default class DocuScopeWAStudent extends Component {
 
     editor.toggleMark(mark)
     */
-  }
-
-  /**
-   *
-   */
-  onContextSelect (anIndex) {
-    console.log ("onContextSelect ("+anIndex+")");
-
-    this.setState ({
-      activeIndex: anIndex,
-      progress: 0
-    }, () => {
-
-      // Inform the OnTopic backend
-      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
-        var plain=Plain.serialize (Value.fromJSON (this.state.value));
-        //this.sendMessage (plain);
-      }
-
-      // Inform the Docuscope backend
-      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
-        var plain=Plain.serialize (Value.fromJSON (this.state.value));
-        this.sendMessage (plain);
-      }
-    });
-  }
+  }  
 
   /**
    *
@@ -471,7 +490,7 @@ export default class DocuScopeWAStudent extends Component {
 
     if (aRuleChild) {
       this.setState ({currentRule: null, currentRuleChild: aRuleChild});
-    }
+    }    
   }
 
   /**
@@ -490,7 +509,7 @@ export default class DocuScopeWAStudent extends Component {
         let aChildElement=<li id={aChild.id} className="impressions-child" onClick={(e) => { this.onClickRuleChild(e) }}>{aChild.name}</li>;
         childElements.push (aChildElement);
       }
-
+      
       rulesElements.push (<li id={aRule.id} className="impressions-item" onClick={(e) => { this.onClickRule(e) }}>{aRule.name}<ul className="impressions-children">{childElements}</ul></li>);
     }
 
@@ -524,16 +543,16 @@ export default class DocuScopeWAStudent extends Component {
         <ol>
         {ruleElements}
         </ol>
-      </div>
+      </div>      
       <div className="impressions-name">
       About this Group of Expectations
       </div>
       <div className="impressions-rule" dangerouslySetInnerHTML={{ __html: ruleDescription }}>
-      </div>
+      </div>      
       <div className="impressions-detail">
       </div>
     </div>);
-  }
+  }  
 
   /**
    *
@@ -548,16 +567,15 @@ export default class DocuScopeWAStudent extends Component {
           <img src={ontopicLegend}></img>
         </div>
         <p>
-          The Coherence Panel charts the flow of your topic clusters across and within paragraphs. Dark circles indicate that a particular topic cluster is prominently discussed in a particular paragraph. White circles and gaps indicate that a particular topic cluster is mentioned but not prominently or not mentioned at all in the paragraph. Study the visualization for dark/white circles and gaps and see if the shifts in topic clusters and their prominence fits a writing plan your readers can easily follow.
+          The Coherence Panel charts the flow of your topic clusters across and within paragraphs. Dark circles indicate that a particular topic cluster is prominently discussed in a particular paragraph. White circles and gaps indicate that a particular topic cluster is mentioned but not prominently or not mentioned at all in the paragraph. Study the visualization for dark/white circles and gaps and see if the shifts in topic clusters and their prominence fits a writing plan your readers can easily follow. 
         </p>
       </div>
       <div className="coherence-controls">
         <div className="editor-top-menu-filler">Coherence across paragraphs</div>
         <label className="edit-top-menu-label">Show only topic clusters:</label>
-        <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>
+        <Switch size={Sizes.TINY} active={{ text: 'On' }} inactive={{ text: 'Off' }}/>      
       </div>
       <div className="coherence-content">
-        <DocuScopeOnTopic />
       </div>
       <div className="coherence-controls">
       Topic Cluster
@@ -565,24 +583,23 @@ export default class DocuScopeWAStudent extends Component {
       <div className="coherence-detail">
       </div>
     </div>);
-  }
+  }  
 
   /**
-   *
+   * e.g OnTopic visualization
    */
   generateClarityTab () {
     return (<div className="impressions">
       <div className="impressions-title">
         <img src={mainIcon} className="context-icon"></img><h3 className="context-title">Polish Your Sentences for Clarity</h3>
       </div>
-      <div className="impressions-description">
-      </div>
       <div className="impressions-content">
+        <DocuScopeOnTopic sentences={this.state.sentences} text={this.state.text}/>      
       </div>
       <div className="impressions-detail">
       </div>
     </div>);
-  }
+  }  
 
   /**
    *
@@ -595,7 +612,7 @@ export default class DocuScopeWAStudent extends Component {
       <div className="impressions-description">
       </div>
       <div className="impressions-content">
-        <iframe className="docuscopeframe" src={docuscope}></iframe>
+        <iframe className="docuscopeframe" src="docuscope.html"></iframe>
       </div>
       <div className="impressions-detail">
       </div>
@@ -608,6 +625,9 @@ export default class DocuScopeWAStudent extends Component {
   render() {
     //console.log ("render ("+this.state.editorActive+")");
 
+    let leftWidth="30%";
+    let centerWidth="30%";
+
     let progresswindow;
     let mainPage;
     let expectationsTab;
@@ -616,6 +636,16 @@ export default class DocuScopeWAStudent extends Component {
     let impressionsTab;
     let editor;
     let editorScrim;
+    let infocolumn;
+
+    if (this.state.showInfoColumn==true) {
+      leftWidth="30%";
+      centerWidth="30%";
+      infocolumn=<div className="rightcol"></div>;
+    } else {
+      leftWidth="50%";
+      centerWidth="50%";      
+    }
 
     if (this.state.showProgress==true) {
       progresswindow=<div className="progresswindow">
@@ -623,7 +653,7 @@ export default class DocuScopeWAStudent extends Component {
         <div className="progresscontent">
           <div className="meter" style={{height: "25px", margin: "15px"}}>
             <span style={{width: (this.state.progress+"%")}}></span>
-          </div>
+          </div>        
         </div>
         </div>;
     }
@@ -633,7 +663,7 @@ export default class DocuScopeWAStudent extends Component {
     clarityTab=this.generateClarityTab ();
     impressionsTab=this.generateImpressionsTab ();
 
-    editor=<Editor
+    editor=<Editor 
       tabIndex="0"
       id="editor1"
       ref="editor1"
@@ -655,9 +685,56 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     mainPage=<div className="mainframe">
-      <div className="menubar">menubar</div>
+      <div className="menubar">
+        <Navbar bg="dark" variant="dark">
+          <Container>
+            <Navbar.Brand href="#home">DocuScope Write & Audit</Navbar.Brand>
+            <Navbar.Toggle aria-controls="basic-navbar-nav" />
+            <Navbar.Collapse id="basic-navbar-nav">
+              <Nav className="me-auto" onSelect={(selectedKey) => this.selectMenuOption(selectedKey)}>
+                <NavDropdown title="File" id="dropdown1">
+                  <NavDropdown.Item href="#1">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#2">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#3">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#4">Separated link</NavDropdown.Item>
+                </NavDropdown>
+                <NavDropdown title="Edit" id="dropdown2">
+                  <NavDropdown.Item href="#5">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#6">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#7">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#8">Separated link</NavDropdown.Item>
+                </NavDropdown>
+                <NavDropdown title="View" id="dropdown3">
+                  <NavDropdown.Item href="#topicclusters">Topic Clusters</NavDropdown.Item>
+                  <NavDropdown.Item href="#9">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#10">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#11">Separated link</NavDropdown.Item>
+                </NavDropdown>          
+                <NavDropdown title="Window" id="dropdown4">
+                  <NavDropdown.Item href="#12">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#13">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#14">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#15">Separated link</NavDropdown.Item>
+                </NavDropdown>                      
+                <NavDropdown title="Help" id="dropdown5">
+                  <NavDropdown.Item href="#16">Action</NavDropdown.Item>
+                  <NavDropdown.Item href="#17">Another action</NavDropdown.Item>
+                  <NavDropdown.Item href="#18">Something</NavDropdown.Item>
+                  <NavDropdown.Divider />
+                  <NavDropdown.Item href="#19">Separated link</NavDropdown.Item>
+                </NavDropdown>
+              </Nav>
+            </Navbar.Collapse>
+          </Container>
+        </Navbar>        
+      </div>
       <div className="content">
-          <div className="leftcol">
+
+          <div className="leftcol" style={{width: leftWidth}}>
             <Tabs>
               <TabItem isActive={this.state.activeIndex === 1} onClick={(e) => { this.onContextSelect(1) }}><a href="#">Expectations</a></TabItem>
               <TabItem isActive={this.state.activeIndex === 2} onClick={(e) => { this.onContextSelect(2) }}><a href="#">Coherence</a></TabItem>
@@ -682,7 +759,8 @@ export default class DocuScopeWAStudent extends Component {
               </TabPanel>
             </TabsContent>
           </div>
-          <div className="centercol">
+
+          <div className="centercol" style={{width: centerWidth}}>
             <div className="editor-top-menu">
               <div className="editor-top-menu-filler">
                 <select id="paragraphs" name="paragraphs" className="editor-paragraphs" value={this.state.paragraphSelected} onChange={this.handleParagraphSelection}>
@@ -697,13 +775,10 @@ export default class DocuScopeWAStudent extends Component {
             <div className="editor-container">
               {editor}
               {editorScrim}
-            </div>
+            </div>  
             <div className="editor-bottom-menu">Editor Bottom Marker</div>
           </div>
-          <div className="rightcol">
-
-
-          </div>
+          {infocolumn}
       </div>
       <div className="statusbar">statusbar</div>
       {progresswindow}
