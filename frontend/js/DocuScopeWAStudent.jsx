@@ -29,6 +29,8 @@ import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
 
+import docuscope from "../views/docuscope.html";
+
 import "../css/main.css";
 import "../css/docuscope.css";
 import "../css/editor.css";
@@ -675,7 +677,7 @@ export default class DocuScopeWAStudent extends Component {
         </div>
         <div className="impressions-description"></div>
         <div className="impressions-content">
-          <iframe className="docuscopeframe" src="docuscope.html"></iframe>
+          <iframe className="docuscopeframe" src={docuscope}></iframe>
         </div>
         <div className="impressions-detail"></div>
       </div>
