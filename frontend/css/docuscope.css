@@ -135,14 +135,14 @@ tbody tr:nth-child(even) {
 .mainframe {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   margin: 0px;
   padding: 0px;
 }
 
 .menubar {
-  flex: 0;
+  flex: 0 1 auto;
   /* box-shadow: inset 0px 1px 0px 0px #ffffff; */
   /* background-color: rgba(var(--bs-light-rgb),var(--bs-bg-opacity))!important; */
   background-color: rgb(33, 37, 41);
@@ -161,9 +161,10 @@ tbody tr:nth-child(even) {
 
 .content {
   background: white;
-  flex: 1;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 }
 
 .statusbar {
@@ -184,17 +185,17 @@ tbody tr:nth-child(even) {
 }
 
 .leftcol {
-  flex: 1;
+  /*flex: 1;*/
   border-right: 1px solid #bdbbbb;
   /*background: #fbf5f5;*/
-  display: flex;
-  flex-direction: column;
+  /*display: flex;
+  flex-direction: column;*/
 }
 
 .centercol {
-  flex: 1;
+  /*flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: column;*/
   border-right: 1px solid grey;
 }
 
@@ -203,9 +204,9 @@ tbody tr:nth-child(even) {
   width: 30%;
 }
 
-.tabscontent {
+/*.tabscontent {
   flex: 1;
-}
+}*/
 
 .tabs-panel-override {
   padding: 0px !important;

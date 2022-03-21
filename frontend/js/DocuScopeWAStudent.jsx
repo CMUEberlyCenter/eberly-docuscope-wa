@@ -3,8 +3,8 @@ import React, { Component } from "react";
 import "foundation-sites/dist/css/foundation.min.css";
 
 import {
-  Button,
-  Colors,
+  //Button,
+  //Colors,
   Sizes,
   Tabs,
   TabItem,
@@ -17,19 +17,19 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
 import { Editor } from "slate-react";
 import { Value, Node } from "slate";
-import { createEditor } from "slate";
+//import { createEditor } from "slate";
 import Plain from "slate-plain-serializer";
 
 //import ToggleSwitch from './ToggleSwitch';
 // https://www.npmjs.com/package/react-switch
 import Switch from "react-switch";
 
-import DocuScopeWA from "./DocuScopeWAScrim";
-import DocuScopeRules from "./DocuScopeRules";
+//import DocuScopeWA from "./DocuScopeWAScrim";
+//import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
 
-import docuscope from "../views/docuscope.html";
+//import docuscope from "../views/docuscope.html";
 
 import "../css/main.css";
 import "../css/docuscope.css";
@@ -42,6 +42,9 @@ import mainIcon from "../css/icons/audit_icon.png";
 import ontopicLegend from "../css/img/ontopic-legend.png";
 
 import { sentenceData } from "./data/sentencedata.js";
+import CategoryTree from "./components/CategoryTree/CategoryTree";
+import Impressions from "./components/Impressions/Impressions";
+import TabTitle from "./components/TabTitle/TabTitle";
 
 let initialValue = Value.fromJSON({
   document: {
@@ -330,7 +333,7 @@ export default class DocuScopeWAStudent extends Component {
       let topic = this.dataTools.deepCopy(this.state.topic);
       let topics = null;
 
-      /*  
+      /*
       if (value.document.text!="") {
         if (this.state.check!=value.document.text) {
           //console.log ("onChange () actual");
@@ -342,7 +345,7 @@ export default class DocuScopeWAStudent extends Component {
             topics=this.copyTopics ();
           }
         } else {
-          topics=this.copyTopics ();       
+          topics=this.copyTopics ();
         }
       } else {
         topics=null;
@@ -572,10 +575,7 @@ export default class DocuScopeWAStudent extends Component {
 
     return (
       <div className="impressions">
-        <div className="impressions-title">
-          <img src={mainIcon} className="context-icon"></img>
-          <h3 className="context-title">Meet Readers' Expectations</h3>
-        </div>
+        <TabTitle title="Meet Readers' Expectations"/>
         <div className="impressions-description">
           <div className="impressions-name">{this.props.ruleManager.name}</div>
           <div className="impressions-statement">
@@ -605,10 +605,7 @@ export default class DocuScopeWAStudent extends Component {
   generateCoherenceTab() {
     return (
       <div className="coherence">
-        <div className="coherence-title">
-          <img src={mainIcon} className="context-icon"></img>
-          <h3 className="context-title">Create Flow in Your Writing</h3>
-        </div>
+        <TabTitle title="Create Flow in Your Writing"/>
         <div className="coherence-description">
           <div style={{ marginBottom: "2px" }}>
             <img src={ontopicLegend}></img>
@@ -632,6 +629,8 @@ export default class DocuScopeWAStudent extends Component {
             Show only topic clusters:
           </label>
           <Switch
+            onChange={() => null}
+            checked={false}
             size={Sizes.TINY}
             active={{ text: "On" }}
             inactive={{ text: "Off" }}
@@ -650,10 +649,7 @@ export default class DocuScopeWAStudent extends Component {
   generateClarityTab() {
     return (
       <div className="impressions">
-        <div className="impressions-title">
-          <img src={mainIcon} className="context-icon"></img>
-          <h3 className="context-title">Polish Your Sentences for Clarity</h3>
-        </div>
+        <TabTitle title="Polish Your Sentences for Clarity"/>
         <div className="impressions-content">
           <DocuScopeOnTopic
             sentences={this.state.sentences}
@@ -670,16 +666,17 @@ export default class DocuScopeWAStudent extends Component {
    */
   generateImpressionsTab() {
     return (
-      <div className="impressions">
-        <div className="impressions-title">
+      <div className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
+        <div className="impressions-title flex-shrink-0">
           <img src={mainIcon} className="context-icon"></img>
           <h3 className="context-title">Manage Readers' Impressions</h3>
         </div>
-        <div className="impressions-description"></div>
-        <div className="impressions-content">
-          <iframe className="docuscopeframe" src={docuscope}></iframe>
+        {/*<div className="impressions-description"></div>*/}
+        <div className="impressions-content overflow-auto h-100 flex-grow-1">
+          <CategoryTree/>
+          {/*<iframe className="docuscopeframe" src={docuscope}></iframe>*/}
         </div>
-        <div className="impressions-detail"></div>
+        {/*<div className="impressions-detail"></div>*/}
       </div>
     );
   }
@@ -698,7 +695,6 @@ export default class DocuScopeWAStudent extends Component {
     let expectationsTab;
     let coherenceTab;
     let clarityTab;
-    let impressionsTab;
     let editor;
     let editorScrim;
     let infocolumn;
@@ -728,11 +724,10 @@ export default class DocuScopeWAStudent extends Component {
     expectationsTab = this.generateExpectationsTab();
     coherenceTab = this.generateCoherenceTab();
     clarityTab = this.generateClarityTab();
-    impressionsTab = this.generateImpressionsTab();
 
     editor = (
       <Editor
-        tabIndex="0"
+        tabIndex={0}
         id="editor1"
         ref="editor1"
         className="editor-content"
@@ -834,7 +829,7 @@ export default class DocuScopeWAStudent extends Component {
           </Navbar>
         </div>
         <div className="content">
-          <div className="leftcol" style={{ width: leftWidth }}>
+          <div className="leftcol d-flex flex-grow-1 flex-column overflow-hidden" style={{ width: leftWidth }}>
             <Tabs>
               <TabItem
                 isActive={this.state.activeIndex === 1}
@@ -861,7 +856,7 @@ export default class DocuScopeWAStudent extends Component {
                 <a href="#">Clarity</a>
               </TabItem>
               <TabItem
-                isActive={this.state.activeIndex === 3}
+                isActive={this.state.activeIndex === 4}
                 onClick={(e) => {
                   this.onContextSelect(4);
                 }}
@@ -869,9 +864,9 @@ export default class DocuScopeWAStudent extends Component {
                 <a href="#">Impressions</a>
               </TabItem>
             </Tabs>
-            <TabsContent className="tabscontent">
+            <TabsContent className="tabscontent flex-grow-1 overflow-hidden">
               <TabPanel
-                id={"tab1"}
+                id={"ExpectationsTab"}
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 1}
               >
@@ -879,7 +874,7 @@ export default class DocuScopeWAStudent extends Component {
               </TabPanel>
 
               <TabPanel
-                id={"tab2"}
+                id={"CoherenceTab"}
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 2}
               >
@@ -887,7 +882,7 @@ export default class DocuScopeWAStudent extends Component {
               </TabPanel>
 
               <TabPanel
-                id={"tab3"}
+                id={"ClarityTab"}
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 3}
               >
@@ -895,16 +890,16 @@ export default class DocuScopeWAStudent extends Component {
               </TabPanel>
 
               <TabPanel
-                id={"tab4"}
-                className="tabs-panel-override"
+                id={"Impressions"}
+                className="tabs-panel-override h-100 w-100"
                 isActive={this.state.activeIndex === 4}
               >
-                {impressionsTab}
+                <Impressions/>
               </TabPanel>
             </TabsContent>
           </div>
 
-          <div className="centercol" style={{ width: centerWidth }}>
+          <div className="centercol d-flex flex-grow-1 flex-column" style={{ width: centerWidth }}>
             <div className="editor-top-menu">
               <div className="editor-top-menu-filler">
                 <select

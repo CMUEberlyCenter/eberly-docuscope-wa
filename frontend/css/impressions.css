@@ -1,15 +1,15 @@
-.impressions {
+/*.impressions {
   display: flex;
   flex-direction: column;
   height: 100%;
   flex: 1;
-}
+}*/
 
-.impressions-title {
+/*.impressions-title {
   background: #f9f6f6;
   padding: 10px;
   flex: 0;
-}
+}*/
 
 .impressions-description {
   padding: 4px;
@@ -29,7 +29,7 @@
 .impressions-content {
   padding: 6px;
   border-bottom: 1px solid #d1cfcf;
-  flex: 1;
+  /*flex: 1;*/
 }
 
 .impressions-item {

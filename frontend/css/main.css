@@ -190,5 +190,5 @@ body {
 }
 
 .tabs .is-active {
-  background: #f9f6f6;
+  background: #e9ecef; /* var(--bs-gray-200) */
 }

@@ -44,13 +44,18 @@ const config = {
     template: 'views/index.html'
   })],
   resolve: {
-    extensions: ['.js','.jsx','.css'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.css'],
     alias: {
       fs: 'pdfkit/js/virtual-fs.js'
     }
   },
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
       {
         test: /\.(js|jsx)$/,
         exclude: /(node_modules|bower_components)/,
