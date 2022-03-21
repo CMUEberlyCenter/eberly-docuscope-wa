@@ -47,15 +47,15 @@ export default class DocuScopeWA extends Component {
       return false;
     }
 
-    if (!serverContext) {
+    if (!window.serverContext) {
       return false;
     }
 
-    if (!serverContext.roles) {
+    if (!window.serverContext.roles) {
       return false;
     }
 
-    var splitter = serverContext.roles.split(",");
+    var splitter = window.serverContext.roles.split(",");
 
     for (var i = 0; i < splitter.length; i++) {
       if (splitter[i] == "urn:lti:instrole:ims/lis/Student") {
@@ -74,15 +74,15 @@ export default class DocuScopeWA extends Component {
       return false;
     }
 
-    if (!serverContext) {
+    if (!window.serverContext) {
       return false;
     }
 
-    if (!serverContext.roles) {
+    if (!window.serverContext.roles) {
       return false;
     }
 
-    var splitter = serverContext.roles.split(",");
+    var splitter = window.serverContext.roles.split(",");
 
     for (var i = 0; i < splitter.length; i++) {
       if (splitter[i] == "urn:lti:instrole:ims/lis/Instructor") {
@@ -126,14 +126,14 @@ export default class DocuScopeWA extends Component {
   onLaunch() {
     console.log("onLaunch (" + window.location.href + ")");
 
-    var ltiFields = serverContext.lti;
+    var ltiFields = window.serverContext.lti;
 
     console.log(ltiFields);
 
     var relayform = document.getElementById("ltirelayform");
 
     for (let key in ltiFields) {
-      if (ltiFields.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
         console.log("Appending: " + key + " -> " + ltiFields[key]);
 
         var ltiField = document.createElement("input");
