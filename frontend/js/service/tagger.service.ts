@@ -17,4 +17,9 @@ export interface TaggerResults {
   tagging_time: number;
   patterns: PatternCategoryData[];
 }
+export function gen_patterns_map(res: TaggerResults): Map<string, PatternData[]> {
+  return new Map<string, PatternData[]>(
+    res.patterns.map((d) => [d.category, d.patterns ?? []])
+  );
+}
 export const [useTaggerResults, taggerResults$] = bind(of(tagged as TaggerResults), null);

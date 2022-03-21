@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Suspense } from 'react';
 import { Spinner } from 'react-bootstrap';
 import { CommonDictionary, CommonDictionaryTreeNode, useCommonDictionary } from '../../service/common-dictionary.service';
-import { TaggerResults, useTaggerResults } from '../../service/tagger.service';
+import { gen_patterns_map, TaggerResults, useTaggerResults } from '../../service/tagger.service';
 import './CategoryTree.css';
 
 interface PatternData {
@@ -47,9 +47,7 @@ const CategoryTreeTop = () => {
   const common: CommonDictionary | null = useCommonDictionary();
   const tagged: TaggerResults | null = useTaggerResults();
   if (common && tagged) {
-    const cat_pat_map = new Map<string, PatternData[]>(
-      tagged.patterns.map((d) => [d.category, d.patterns ?? []])
-    );
+    const cat_pat_map = gen_patterns_map(tagged);
     const dfsmap = (node: CommonDictionaryTreeNode): TreeNode => ({
       id: node.id,
       label: node.label,
@@ -67,4 +65,5 @@ const CategoryTreeTop = () => {
   return (<Spinner animation={'border'} />)
 }
 
-export default () => (<Suspense fallback={<Spinner animation={'border'} />}><CategoryTreeTop /></Suspense>);
+const CategoryTree = () => (<Suspense fallback={<Spinner animation={'border'} />}><CategoryTreeTop /></Suspense>);
+export default CategoryTree;

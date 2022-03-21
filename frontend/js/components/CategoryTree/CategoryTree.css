@@ -3,4 +3,5 @@
 }
 .impressions-category-tree .patterns {
   font-size: small;
+  max-width: 16em;
 }

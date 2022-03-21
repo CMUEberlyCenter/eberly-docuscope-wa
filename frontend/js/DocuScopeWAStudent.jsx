@@ -16,7 +16,7 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
 import { Editor } from "slate-react";
-import { Value, Node } from "slate";
+import { Value } from "slate";
 //import { createEditor } from "slate";
 import Plain from "slate-plain-serializer";
 
@@ -114,7 +114,6 @@ export default class DocuScopeWAStudent extends Component {
       sentence: null,
       collapsed: null,
       expanded: null,
-      loading: false,
       topics: null,
       topic: null,
       paragraphSelected: 0,
@@ -237,7 +236,7 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  handleEditorToggle(e) {
+  handleEditorToggle(_e) {
     let toggled = !this.state.editorActive;
     let editorLocked = toggled;
 
@@ -268,14 +267,14 @@ export default class DocuScopeWAStudent extends Component {
       () => {
         // Inform the OnTopic backend
         if (this.state.activeIndex == 4 && this.state.editorActive == false) {
-          var plain = Plain.serialize(Value.fromJSON(this.state.value));
+          //var plain = Plain.serialize(Value.fromJSON(this.state.value));
           //this.sendMessage (plain);
         }
 
         // Inform the Docuscope backend
         if (this.state.activeIndex == 4 && this.state.editorActive == false) {
-          var plain = Plain.serialize(Value.fromJSON(this.state.value));
-          this.sendMessage(plain);
+          const plain_text = Plain.serialize(Value.fromJSON(this.state.value));
+          this.sendMessage(plain_text);
         }
       }
     );
@@ -327,7 +326,7 @@ export default class DocuScopeWAStudent extends Component {
 
     //console.log (value.document.nodes.map(n => Node.string(n)).join('\n'));
 
-    this.setState({ value }, (e) => {
+    this.setState({ value }, (_e) => {
       let invalidated = this.state.invalidated;
       let expanded = this.dataTools.deepCopy(this.state.expanded);
       let topic = this.dataTools.deepCopy(this.state.topic);
@@ -579,7 +578,7 @@ export default class DocuScopeWAStudent extends Component {
         <div className="impressions-description">
           <div className="impressions-name">{this.props.ruleManager.name}</div>
           <div className="impressions-statement">
-            Respond to the following questions to meet the readers'
+            Respond to the following questions to meet the readers&apos;
             expectations. The sentences that you write to respond to each
             question include a unique topic cluster that consists of a set of
             words and phrases. DocuScope will automatically highlight sentences
@@ -657,26 +656,6 @@ export default class DocuScopeWAStudent extends Component {
           />
         </div>
         <div className="impressions-detail"></div>
-      </div>
-    );
-  }
-
-  /**
-   *
-   */
-  generateImpressionsTab() {
-    return (
-      <div className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
-        <div className="impressions-title flex-shrink-0">
-          <img src={mainIcon} className="context-icon"></img>
-          <h3 className="context-title">Manage Readers' Impressions</h3>
-        </div>
-        {/*<div className="impressions-description"></div>*/}
-        <div className="impressions-content overflow-auto h-100 flex-grow-1">
-          <CategoryTree/>
-          {/*<iframe className="docuscopeframe" src={docuscope}></iframe>*/}
-        </div>
-        {/*<div className="impressions-detail"></div>*/}
       </div>
     );
   }
@@ -833,7 +812,7 @@ export default class DocuScopeWAStudent extends Component {
             <Tabs>
               <TabItem
                 isActive={this.state.activeIndex === 1}
-                onClick={(e) => {
+                onClick={(_e) => {
                   this.onContextSelect(1);
                 }}
               >
@@ -841,7 +820,7 @@ export default class DocuScopeWAStudent extends Component {
               </TabItem>
               <TabItem
                 isActive={this.state.activeIndex === 2}
-                onClick={(e) => {
+                onClick={(_e) => {
                   this.onContextSelect(2);
                 }}
               >
@@ -849,7 +828,7 @@ export default class DocuScopeWAStudent extends Component {
               </TabItem>
               <TabItem
                 isActive={this.state.activeIndex === 3}
-                onClick={(e) => {
+                onClick={(_e) => {
                   this.onContextSelect(3);
                 }}
               >
@@ -857,7 +836,7 @@ export default class DocuScopeWAStudent extends Component {
               </TabItem>
               <TabItem
                 isActive={this.state.activeIndex === 4}
-                onClick={(e) => {
+                onClick={(_e) => {
                   this.onContextSelect(4);
                 }}
               >
