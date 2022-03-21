@@ -27,7 +27,7 @@
   "homepage": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki",
   "devDependencies": {
     "@babel/preset-env": "^7.6.3",
-    "@cmu-eberly-center/eberly-ontopic-visualization": "^0.5.16",
+    "@cmu-eberly-center/eberly-ontopic-visualization": "^0.5.17",
     "babel-core": "^6.26.3",
     "babel-loader": "^7.1.5",
     "babel-plugin-transform-class-properties": "^6.24.1",

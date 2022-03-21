@@ -88,6 +88,7 @@ export default class DocuScopeWAStudent extends Component {
     let value=initialValue;
 
     this.state = {
+      status: "",
       loading: false,
       activeIndex: 1,
       currentRule: null,
@@ -128,6 +129,8 @@ export default class DocuScopeWAStudent extends Component {
     this.handleEditorToggle = this.handleEditorToggle.bind(this);
 
     this.selectMenuOption = this.selectMenuOption.bind(this);
+
+    this.setStatus = this.setStatus.bind(this);
   }
 
   /**
@@ -143,6 +146,17 @@ export default class DocuScopeWAStudent extends Component {
         this.setState ({docuscope: event.source, docuscopeOrigin: event.origin});
       }
     }, false);
+  }
+
+  /**
+   *
+   */
+  setStatus (aMessage) {
+    console.log ("setStatus ()");
+
+    this.setState ({
+      status: aMessage
+    });
   }
 
   /**
@@ -594,7 +608,7 @@ export default class DocuScopeWAStudent extends Component {
         <img src={mainIcon} className="context-icon"></img><h3 className="context-title">Polish Your Sentences for Clarity</h3>
       </div>
       <div className="impressions-content">
-        <DocuScopeOnTopic sentences={this.state.sentences} text={this.state.text}/>      
+        <DocuScopeOnTopic setStatus={this.setStatus} sentences={this.state.sentences} text={this.state.text}/>      
       </div>
       <div className="impressions-detail">
       </div>
@@ -625,6 +639,8 @@ export default class DocuScopeWAStudent extends Component {
   render() {
     //console.log ("render ("+this.state.editorActive+")");
 
+    let status="Idle";
+
     let leftWidth="30%";
     let centerWidth="30%";
 
@@ -637,6 +653,10 @@ export default class DocuScopeWAStudent extends Component {
     let editor;
     let editorScrim;
     let infocolumn;
+
+    if (this.state.status!="") {
+      status=this.state.status;
+    }
 
     if (this.state.showInfoColumn==true) {
       leftWidth="30%";
@@ -780,7 +800,7 @@ export default class DocuScopeWAStudent extends Component {
           </div>
           {infocolumn}
       </div>
-      <div className="statusbar">statusbar</div>
+      <div className="statusbar">{status}</div>
       {progresswindow}
     </div>
 

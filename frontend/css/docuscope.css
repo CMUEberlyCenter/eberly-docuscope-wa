@@ -271,6 +271,18 @@ tbody tr:nth-child(even) {
   float: left;
 }
 
+.ontopic-details {
+  /* flex: 1; */
+  border-bottom: 1px solid #ebe7e7;
+  padding-bottom: 10px;
+}
+
+.ontopic-explanation {
+  flex: 1;
+  margin-top: 10px;
+  font-size: 12pt;
+}
+
 .box-green {
   background-color: green;
   width: 10px;
