@@ -1,16 +1,3 @@
-/*.impressions {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  flex: 1;
-}*/
-
-/*.impressions-title {
-  background: #f9f6f6;
-  padding: 10px;
-  flex: 0;
-}*/
-
 .impressions-description {
   padding: 4px;
   border-bottom: 1px solid #d1cfcf;
@@ -23,13 +10,9 @@
   font-size: 1.2em;
 }
 
-.impressions-statement {
-}
-
 .impressions-content {
   padding: 6px;
   border-bottom: 1px solid #d1cfcf;
-  /*flex: 1;*/
 }
 
 .impressions-item {
@@ -49,15 +32,4 @@
 
 .impressions-rule {
   padding: 6px;
-}
-
-.impressions-detail {
-}
-
-.docuscopeframe {
-  border: 1px solid red;
-  margin: 0px;
-  padding: 0px;
-  width: 100%;
-  height: 100%;
 }

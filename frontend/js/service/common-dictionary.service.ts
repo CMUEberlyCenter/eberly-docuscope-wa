@@ -96,4 +96,12 @@ export class CommonDictionary implements ICommonDictionary {
   }
 }
 
-export const [useCommonDictionary, commonDictionary$] = bind(ajax.getJSON<ICommonDictionary>('/common_dict.json').pipe(map(data => new CommonDictionary(data)), catchError(err => { console.error(err); /* TODO: add interface report here */return of(err); })), null)
+export const [useCommonDictionary, commonDictionary$] = bind(
+  ajax.getJSON<ICommonDictionary>('http://docuscope.eberly.cmu.edu/common_dictionary')
+    .pipe(map(data => new CommonDictionary(data)),
+      catchError(err => {
+        console.error(err);
+        /* TODO: add interface report here */
+        return of(err);
+      })),
+  null);
