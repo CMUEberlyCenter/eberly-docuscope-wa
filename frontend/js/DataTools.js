@@ -38,9 +38,9 @@ export default class DataTools {
     //console.log ("parameterJSONtoArray ()");
     //console.log ("Parameter object: " + JSON.stringify (anObjectMap));
 
-    var newArray = new Array();
+    var newArray = [];
 
-    for (var key in anObjectMap) {
+    for (const key in anObjectMap) {
       if (Object.prototype.hasOwnProperty.call(anObjectMap, key)) {
         if (key != "dummy") {
           //console.log(key + " -> " + JSON.stringify (anObjectMap[key]));

@@ -185,17 +185,10 @@ tbody tr:nth-child(even) {
 }
 
 .leftcol {
-  /*flex: 1;*/
   border-right: 1px solid #bdbbbb;
-  /*background: #fbf5f5;*/
-  /*display: flex;
-  flex-direction: column;*/
 }
 
 .centercol {
-  /*flex: 1;
-  display: flex;
-  flex-direction: column;*/
   border-right: 1px solid grey;
 }
 
@@ -204,23 +197,8 @@ tbody tr:nth-child(even) {
   width: 30%;
 }
 
-/*.tabscontent {
-  flex: 1;
-}*/
-
 .tabs-panel-override {
   padding: 0px !important;
-}
-
-.context-icon {
-  float: left;
-  width: 38px;
-  padding-right: 10px;
-  padding-top: 7px;
-}
-
-.context-title {
-  color: rgb(242, 129, 47);
 }
 
 .progresswindow {

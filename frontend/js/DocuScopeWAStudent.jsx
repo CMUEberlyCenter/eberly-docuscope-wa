@@ -34,15 +34,13 @@ import DocuScopeOnTopic from "./DocuScopeOnTopic";
 import "../css/main.css";
 import "../css/docuscope.css";
 import "../css/editor.css";
-import "../css/impressions.css";
+import '../css/expectations.scss';
 import "../css/coherence.css";
 import "../css/meter.css";
 
-import mainIcon from "../css/icons/audit_icon.png";
 import ontopicLegend from "../css/img/ontopic-legend.png";
 
 import { sentenceData } from "./data/sentencedata.js";
-import CategoryTree from "./components/CategoryTree/CategoryTree";
 import Impressions from "./components/Impressions/Impressions";
 import TabTitle from "./components/TabTitle/TabTitle";
 
@@ -573,7 +571,7 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     return (
-      <div className="impressions">
+      <div className="expectations">
         <TabTitle title="Meet Readers' Expectations"/>
         <div className="impressions-description">
           <div className="impressions-name">{this.props.ruleManager.name}</div>

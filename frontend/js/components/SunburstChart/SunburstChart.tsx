@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Spinner } from 'react-bootstrap';
 import { CommonDictionary, CommonDictionaryTreeNode, useCommonDictionary } from '../../service/common-dictionary.service';
 import { gen_patterns_map, TaggerResults, useTaggerResults } from '../../service/tagger.service';
-import './SunburstChart.css';
+import './SunburstChart.scss';
 
 interface Segment {
   x0: number;
@@ -79,7 +79,7 @@ const SunburstChart = (props: SunburstChartProps) => {
       .attr('d', (d) => arc(d.data.current ?? { x0: 0, x1: 0, y0: 0, y1: 0 }));
     path.filter((d) => d.children ? d.children.length > 0 : false)
       .style('cursor', 'pointer');
-    const label = d3.select(labelRef.current).selectAll('text').data(root.descendants().slice(1))
+    /*const label = */d3.select(labelRef.current).selectAll('text').data(root.descendants().slice(1))
       .join('text')
       .attr('dy', '0.35em')
       .attr('fill-opacity', (d) => +labelVisible(d.data.current))
@@ -89,9 +89,9 @@ const SunburstChart = (props: SunburstChartProps) => {
     //}, [props]);
 
     return (
-      <figure>
+      <figure className='sunburst-chart'>
         <figcaption>{props.current_path ?? ''}</figcaption>
-        <svg viewBox={`0 0 ${width} ${width}`} className='sunburst-chart'>
+        <svg viewBox={`0 0 ${width} ${width}`}>
           <g transform={`translate(${width / 2},${width / 2})`}>
             <g ref={wedgeRef}></g>
             <g ref={labelRef} pointerEvents="none" textAnchor="middle" className='sunburst-chart-label'></g>
