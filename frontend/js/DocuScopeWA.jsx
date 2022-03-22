@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 
 import 'foundation-sites/dist/css/foundation.min.css';
 
+import DataTools from './DataTools';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
 import DocuScopeWAInstructor from './DocuScopeWAInstructor';
 import DocuScopeWAStudent from './DocuScopeWAStudent';
@@ -30,10 +31,12 @@ export default class DocuScopeWA extends Component {
 
     console.log ("DocuScopeWA ()");
 
+    this.dataTools=new DataTools ();
+
     this.ruleManager=new DocuScopeRules ();
     this.pingTimer=-1;
-    this.token="AAA";
-    this.session="BBB";
+    this.token=this.dataTools.uuidv4 ();
+    this.session=this.dataTools.uuidv4 ();
     this.standardHeader={
       method: "GET",       
       cache: 'no-cache'
@@ -45,12 +48,14 @@ export default class DocuScopeWA extends Component {
       progressState: "Loading ...",
       globallyDisabled: false,
       activeIndex: 1,
-      ruleManager: this.ruleManager
+      ruleManager: this.ruleManager,
+      server: {
+        uptime: "retrieving ...",
+        version: "retrieving ..."
+      }
     }
 
     this.onLaunch=this.onLaunch.bind(this);
-
-    //ruleManager.debugRules ();
   }
 
   /**
@@ -67,7 +72,7 @@ export default class DocuScopeWA extends Component {
       });
 
       this.apiCall ("rules").then ((result) => {
-        this.ruleManager.parse (result.data);
+        this.ruleManager.parse (result);
 
         if (this.ruleManager.getReady ()==true) {
           this.setState ({
@@ -78,9 +83,19 @@ export default class DocuScopeWA extends Component {
 
           console.log ("Starting ping service timer ...");
 
+          this.apiCall ("ping").then ((result) => {
+            this.setState ({
+              state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+              server: result
+            });
+          });          
+
           this.pingTimer=setInterval ((e) => {
             this.apiCall ("ping").then ((result) => {
-              console.log (result);
+              this.setState ({
+                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+                server: result
+              });
             });
           },30000);
 
@@ -147,12 +162,18 @@ export default class DocuScopeWA extends Component {
         if (evaluation!=null) {
           reject(evaluation);
         } else {
-          resolve (raw);
+          resolve (raw.data);
         }
+      }).catch((error) => {
+        //console.log (error);
+
+        this.setState ({
+          state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
+          progress: 100,
+          progressState: "Error: unable to connect to server, retrying ..."
+        });      
+        reject(error);
       });
-    }) .catch((error) => {
-      console.log (error);
-      reject(error);
     });
   }  
 
@@ -291,9 +312,9 @@ export default class DocuScopeWA extends Component {
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;      
     } else {
       if (this.isInstructor ()) {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
       } else {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAStudent ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><DocuScopeWAStudent server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
       }
     }
 

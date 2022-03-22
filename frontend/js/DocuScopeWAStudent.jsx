@@ -800,7 +800,7 @@ export default class DocuScopeWAStudent extends Component {
           </div>
           {infocolumn}
       </div>
-      <div className="statusbar">{status}</div>
+      <div className="statusbar"><div className="statusflex">{status}</div><div className="statusfixed">{"Uptime: " + this.props.server.uptime}</div><div className="statusfixed">{"Version: " + this.props.server.version}</div></div>
       {progresswindow}
     </div>
 
