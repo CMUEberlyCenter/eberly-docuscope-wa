@@ -1,0 +1,20 @@
+.impressions-category-tree {
+  label {
+    font-size: medium !important;
+  }
+  .comment {
+    font-size: small;
+  }
+  .patterns-container {
+    max-height: 10rem;
+    max-width: 16em;
+    .header {
+      position: sticky;
+      top: 0;
+    }
+    .patterns {
+      font-size: small;
+      //max-width: 16em;
+    }
+  }
+}
