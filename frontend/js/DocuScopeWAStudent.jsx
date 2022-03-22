@@ -76,7 +76,7 @@ export default class DocuScopeWAStudent extends Component {
 
 
     this.bURLServer='';
-    this.bURLPath='/api/activity/ontopic/';
+    this.bURLPath='/api/ontopic/';
 
     if (typeof backendServer !== 'undefined') {
       this.bURLServer=backendServer;
@@ -675,7 +675,7 @@ export default class DocuScopeWAStudent extends Component {
             <span style={{width: (this.state.progress+"%")}}></span>
           </div>        
         </div>
-        </div>;
+      </div>;
     }
 
     expectationsTab=this.generateExpectationsTab ();

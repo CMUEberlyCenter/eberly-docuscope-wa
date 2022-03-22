@@ -33,11 +33,14 @@ class DocuScopeWALTIService {
 
     dotenv.config();
 
+    this.pjson = require('./package.json');
+    console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
+
     this.useLTI=true;
     this.publicHome="/public";
     this.staticHome="/static";
 
-    this.rules=fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8');
+    this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
     this.secret=process.env.TOKEN_SECRET;
@@ -91,6 +94,24 @@ class DocuScopeWALTIService {
   }
 
   /**
+   * 
+   */
+  pad(s) {
+    return (s < 10 ? '0' : '') + s;
+  }
+
+  /**
+   * 
+   */
+  format(seconds){
+    var hours = Math.floor(seconds / (60*60));
+    var minutes = Math.floor(seconds % (60*60) / 60);
+    var seconds = Math.floor(seconds % 60);
+
+    return this.pad(hours) + ':' + this.pad(minutes) + ':' + this.pad(seconds);
+  }
+
+  /**
    * Here’s an example of a function for signing tokens:
    */ 
   generateAccessToken(aString) {
@@ -104,6 +125,31 @@ class DocuScopeWALTIService {
     console.log ("req.baseUrl: " + request.baseUrl);
     console.log ("req.path: " + request.path);
     console.log ('oauth_consumer_key:' + request.body.oauth_consumer_key);
+  }
+
+  /**
+   * 
+   */
+  generateErrorMessage (aMessage) {
+    var error = {
+      status: "error",
+      message: aMessage
+    };
+
+    return (error);
+  }
+
+
+  /**
+   * 
+   */
+  generateDataMessage (aDataset) {
+    var error = {
+      status: "success",
+      data: aDataset
+    };
+
+    return (error);
   }
 
   /**
@@ -144,7 +190,7 @@ class DocuScopeWALTIService {
       }
     }
 
-    settingsObject ["rules"]=JSON.parse (this.rules);
+    //settingsObject ["rules"]=JSON.parse (this.rules);
 
     return (settingsObject);
   }
@@ -187,8 +233,45 @@ class DocuScopeWALTIService {
   /**
    *
    */
+  processAPIRequest (type,request, response) {
+    console.log ("processAPIRequest ("+type+") => " + request.path);
+
+    if (request.path=="/api/v1/rules") {
+      response.json (this.generateDataMessage (this.rules));
+      return;
+    }
+
+    if (request.path=="/api/v1/ping") {
+      let uptime = process.uptime();
+
+      console.log(this.format(uptime));
+
+      response.json (this.generateDataMessage ({
+        uptime: this.format(uptime),
+        version: this.pjson.version,
+      }));
+
+      return;
+    }    
+
+    response.json(this.generateErrorMessage ("Unknown API call made"));
+  }  
+
+  /**
+   *
+   */
   run () {
     console.log ("run ()");
+
+    this.app.get('/api/v1/*', (request, response) => {
+      console.log ("get(api)");
+      this.processAPIRequest ("GET",request,response);
+    });
+
+    this.app.post('/api/v1/*', (request, response) => {
+      console.log ("post(api)");
+      this.processAPIRequest ("POST",request,response);
+    });    
 
     this.app.get('/*', (request, response) => {
       console.log ("get()");
@@ -199,6 +282,8 @@ class DocuScopeWALTIService {
       console.log ("post()");
       this.processRequest (request,response);
     });
+
+
 
     this.app.listen(port, () => {
       console.log(`App running on port ${port}.`);
