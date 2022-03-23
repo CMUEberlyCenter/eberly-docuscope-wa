@@ -15,8 +15,6 @@ const fs = require('fs');
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 
-const Pool = require('pg').Pool;
-
 const port = 8888;
 //const port = 80;
 
@@ -36,6 +34,13 @@ class DocuScopeWALTIService {
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
 
+    this.token="AAA";
+    this.session="BBB";
+    this.standardHeader={
+      method: "GET",       
+      cache: 'no-cache'
+    };
+
     this.useLTI=true;
     this.publicHome="/public";
     this.staticHome="/static";
@@ -43,24 +48,11 @@ class DocuScopeWALTIService {
     this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
-    this.secret=process.env.TOKEN_SECRET;
+    this.backend=process.env.DWA_BACKEND;
     this.mode=process.env.MODE;
     if (!this.mode) {
       this.mode="production";
     }
-
-    this.pool = new Pool({
-      user: process.env.POSTGRES_USER, // get from .env
-      host: 'localhost',
-      database: 'ideate',
-      password: process.env.POSTGRES_PASSWORD, // get from .env
-      port: 5432,
-    }); 
-
-    this.pool.on('error', (err, client) => {
-      console.error('Unexpected error on idle client', err)
-      process.exit(-1)
-    })
 
     console.log ("Configured secret through .env: " + this.secret);
 
@@ -68,30 +60,26 @@ class DocuScopeWALTIService {
 
     // Turn off caching for now (detect developer mode!)
     this.app.set('etag', false);
+    this.app.use(express.json());
     this.app.use((req, res, next) => {
       res.set('Cache-Control', 'no-store')
       next()
     })
  
-    /*
-    this.app.use(bodyParser.json());
-    this.app.use(
-      bodyParser.urlencoded({
-        extended: false,
-      })
-    );
-    */
-
-    /*
-    this.app.use(formidable()); // to get the LTI header fields
-    */
-
     this.app.use(express.urlencoded({
       extended: true
     }));
-
-    //this.showServerInfo ();
   }
+
+  /**
+   *
+   */
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }  
 
   /**
    * 
@@ -115,7 +103,14 @@ class DocuScopeWALTIService {
    * Here’s an example of a function for signing tokens:
    */ 
   generateAccessToken(aString) {
-    return jwt.sign({payload: aString}, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+    let tSecret="";
+
+    if ((process.env.TOKEN_SECRET=="dummy") || (process.env.TOKEN_SECRET=="")) {
+      tSecret=this.uuidv4();
+    } else {
+      tSecret=process.env.TOKEN_SECRET;
+    }
+    return jwt.sign({payload: aString}, tSecret, { expiresIn: '1800s' });
   }
 
   /**
@@ -178,22 +173,60 @@ class DocuScopeWALTIService {
 
     settingsObject.token=token;
 
-    //console.log ("Request body:");
-    //console.log (request.body);
-
     for (var key in request.body) {
       if (request.body.hasOwnProperty(key)) {
-        //console.log(key + " -> " + request.body[key]);
-
         var value=request.body[key];
         settingsObject.lti [key]=value;
       }
     }
 
-    //settingsObject ["rules"]=JSON.parse (this.rules);
-
     return (settingsObject);
   }
+
+  /**
+   * 
+   */
+  evaluateResult (aMessage) {
+
+    return (null);
+  }
+
+  /**
+     https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+
+     {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, *cors, same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+       'Content-Type': 'application/json'       
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+    }
+   */
+  apiCall (aCall,anArgumentSet) {
+    console.log ("apiCall ("+aCall+")");
+
+    let aURL=this.backend+"/api/v1/"+aCall+"?token="+this.token+"&session="+this.session+"&"+anArgumentSet;
+
+    return new Promise((resolve, reject) => {  
+      fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
+        let raw=JSON.parse(result);
+        let evaluation=this.evaluateResult (raw);
+        if (evaluation!=null) {
+          reject(evaluation);
+        } else {
+          resolve (raw.data);
+        }
+      }).catch((error) => {
+        //console.log (error);
+        reject(error);
+      });
+    });
+  }    
 
   /**
    *
@@ -253,6 +286,26 @@ class DocuScopeWALTIService {
 
       return;
     }    
+
+    if (request.path=="/api/v1/ontopic") {
+      console.log ("Processing ontopic request ...");
+      
+      let msg=request.body;
+
+      if (msg.status=="request") {
+        let raw=msg.data.base;
+
+        let decoded=Buffer.from(raw, 'base64');
+
+        let unescaped=unescape (decoded);
+      }
+
+      response.json (this.generateDataMessage ({
+        sentences: {},
+      }));
+
+      return;      
+    }
 
     response.json(this.generateErrorMessage ("Unknown API call made"));
   }  

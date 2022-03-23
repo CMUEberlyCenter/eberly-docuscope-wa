@@ -56,6 +56,7 @@ export default class DocuScopeWA extends Component {
     }
 
     this.onLaunch=this.onLaunch.bind(this);
+    this.apiCall=this.apiCall.bind(this);
   }
 
   /**
@@ -71,7 +72,7 @@ export default class DocuScopeWA extends Component {
         progressState: "Backend connected, loading data ..."
       });
 
-      this.apiCall ("rules").then ((result) => {
+      this.apiCall ("rules",null,"GET").then ((result) => {
         this.ruleManager.parse (result);
 
         if (this.ruleManager.getReady ()==true) {
@@ -83,7 +84,7 @@ export default class DocuScopeWA extends Component {
 
           console.log ("Starting ping service timer ...");
 
-          this.apiCall ("ping").then ((result) => {
+          this.apiCall ("ping",null,"GET").then ((result) => {
             this.setState ({
               state: DocuScopeWA.DOCUSCOPE_STATE_READY,
               server: result
@@ -91,7 +92,7 @@ export default class DocuScopeWA extends Component {
           });          
 
           this.pingTimer=setInterval ((e) => {
-            this.apiCall ("ping").then ((result) => {
+            this.apiCall ("ping",null,"GET").then ((result) => {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_READY,
                 server: result
@@ -135,26 +136,57 @@ export default class DocuScopeWA extends Component {
   }
 
   /**
-     https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-
-     {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-       'Content-Type': 'application/json'       
-      },
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-    }
+   * 
    */
-  apiCall (aCall,anArgumentSet) {
-    console.log ("apiCall ("+aCall+")");
+  createDataMessage (aData) {
+    let message={
+      status: "request",
+      data: aData
+    }
+    return (JSON.stringify(message));
+  }
 
-    let aURL="/api/v1/"+aCall+"?token="+this.token+"&session="+this.session+"&"+anArgumentSet;
+  /**
+   * 
+   */
+  apiPOSTCall (aURL,aData) {
+    let payload=this.createDataMessage (aData);
 
+    console.log (payload);
+
+    return new Promise((resolve, reject) => {          
+      fetch(aURL,{
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: payload
+      }).then(resp => resp.text()).then((result) => {
+        let raw=JSON.parse(result);
+        let evaluation=this.evaluateResult (raw);
+        if (evaluation!=null) {
+          reject(evaluation);
+        } else {
+          resolve (raw.data);
+        }
+      }).catch((error) => {
+        //console.log (error);
+
+        this.setState ({
+          state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
+          progress: 100,
+          progressState: "Error: unable to connect to server, retrying ..."
+        });      
+        reject(error);
+      });
+    });    
+  }
+
+  /**
+   * 
+   */
+  apiGETCall (aURL,aData) {
     return new Promise((resolve, reject) => {  
       fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
         let raw=JSON.parse(result);
@@ -174,7 +206,37 @@ export default class DocuScopeWA extends Component {
         });      
         reject(error);
       });
-    });
+    });    
+  }
+
+  /**
+     https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+
+     {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, *cors, same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: 'same-origin', // include, *same-origin, omit
+      headers: {
+       'Content-Type': 'application/json'       
+      },
+      redirect: 'follow', // manual, *follow, error
+      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+      body: JSON.stringify(data) // body data type must match "Content-Type" header
+    }
+   */
+  apiCall (aCall,aData,aType) {
+    console.log ("apiCall ("+aCall+")");
+
+    let aURL="/api/v1/"+aCall+"?token="+this.token+"&session="+this.session;
+
+    if (aType=="POST") {
+      return (this.apiPOSTCall (aURL,aData));
+    }
+
+    if (aType=="GET") {
+      return (this.apiGETCall (aURL,aData));
+    }
   }  
 
   /**
@@ -312,9 +374,9 @@ export default class DocuScopeWA extends Component {
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;      
     } else {
       if (this.isInstructor ()) {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
       } else {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAStudent server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><DocuScopeWAStudent api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
       }
     }
 

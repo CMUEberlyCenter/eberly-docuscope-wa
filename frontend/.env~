@@ -1,3 +1,2 @@
 MODE=development
 DWA_BACKEND=localhost:5000
-TOKEN_SECRET=dummy

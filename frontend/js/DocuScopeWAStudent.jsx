@@ -219,9 +219,20 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.activeIndex==3) {
+      let escaped=escape (aMessage);
+
+      let encoded=btoa(escaped);
+
+      if (this.props.api) {
+        this.props.api ("ontopic", {
+          base: encoded
+        },"POST");
+      }
+ 
       this.setState ({
         sentences: sentenceData,
-        text: aMessage});
+        text: aMessage
+      });
     }
   }
 
@@ -255,11 +266,10 @@ export default class DocuScopeWAStudent extends Component {
       activeIndex: anIndex,
       progress: 0
     }, () => {
-
       // Inform the OnTopic backend
-      if ((this.state.activeIndex==4) && (this.state.editorActive==false)) {
+      if ((this.state.activeIndex==3) && (this.state.editorActive==false)) {
         var plain=Plain.serialize (Value.fromJSON (this.state.value));
-        //this.sendMessage (plain);
+        this.sendMessage (plain);
       }
 
       // Inform the Docuscope backend
