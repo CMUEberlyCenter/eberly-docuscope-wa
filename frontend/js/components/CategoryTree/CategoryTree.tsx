@@ -4,8 +4,8 @@ import { Suspense, useState } from 'react';
 import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
 import { ErrorBoundary } from 'react-error-boundary';
 import { combineLatest, map } from 'rxjs';
-import { commonDictionary$, CommonDictionaryTreeNode } from '../../service/common-dictionary.service';
-import { gen_patterns_map, taggerResults$ } from '../../service/tagger.service';
+import { CommonDictionary, commonDictionary$, CommonDictionaryTreeNode } from '../../service/common-dictionary.service';
+import { gen_patterns_map, TaggerResults, taggerResults$ } from '../../service/tagger.service';
 import './CategoryTree.scss';
 
 interface PatternData {
@@ -14,33 +14,50 @@ interface PatternData {
 }
 
 interface TreeNode {
+  parent: string;
   id: string;
   label: string;
   help: string;
   children: TreeNode[];
   patterns: PatternData[];
+  checked: CheckboxState;
 }
 
 function has_child_data(node: TreeNode): boolean {
   return (node.children.length + node.patterns.length) > 0;
 }
+function* descendants(node: TreeNode): Generator<TreeNode> {
+  yield node;
+  for (const child of node.children) {
+    yield* descendants(child);
+  }
+}
+function count_patterns(node: TreeNode): number {
+  if (node.patterns && node.patterns.length > 0) {
+    return node.patterns.reduce((total: number, current: PatternData) => total + current.count, 0);
+  } else if (node.children && node.children.length > 0) {
+    return node.children.reduce((total: number, child: TreeNode) => total + count_patterns(child), 0);
+  }
+  return 0;
+}
 
 const [useCategoryData] = bind(
   combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
     map((data) => {
-      const tagged = data.tagged;
-      const common = data.common;
+      const tagged: TaggerResults | null = data.tagged;
+      const common: CommonDictionary | null = data.common;
       if (common) {
         const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
-        const dfsmap = (node: CommonDictionaryTreeNode): TreeNode => ({
+        const dfsmap = (parent: string, node: CommonDictionaryTreeNode): TreeNode => ({
+          parent: parent,
           id: node.id,
           label: node.label,
           help: node.help,
-          children: node.children?.map(dfsmap) ?? [],
+          children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
           patterns: cat_pat_map.get(node.id) ?? [],
+          checked: CheckboxState.Empty,
         });
-        //category_checked$.next(new Set());
-        return common.tree.map(dfsmap);
+        return common.tree.map(dfsmap.bind(null, ''));
       }
       return null;
     })
@@ -52,8 +69,6 @@ enum CheckboxState {
   Indeterminate,
   Checked,
 }
-//const category_checked$ = new BehaviorSubject<Set<string>>(new Set());
-//const [useChecked] = bind(category_checked$);
 
 const Patterns = (props: { category: string, data: PatternData[] }) => (
   <div className='table-responsive patterns-container ms-5'>
@@ -66,39 +81,31 @@ const Patterns = (props: { category: string, data: PatternData[] }) => (
   </div>
 )
 
-function count_patterns(node: TreeNode): number {
-  if (node.patterns && node.patterns.length > 0) {
-    return node.patterns.reduce((total: number, current: PatternData) => total + current.count, 0);
-  } else if (node.children && node.children.length > 0) {
-    return node.children.reduce((total: number, child: TreeNode) => total + count_patterns(child), 0);
-  }
-  return 0;
-}
 
-const CategoryNode = (props: { data: TreeNode, parent_checked?: CheckboxState, onChange?: (target: TreeNode) => void }) => {
+const CategoryNode = (props: { data: TreeNode, onChange: (target: TreeNode, state: CheckboxState) => void }) => {
   const checkRef = React.useRef(null);
-  const [checked, setChecked] = useState(props.parent_checked ?? CheckboxState.Empty);
-  //const checked = useChecked();
   const [expanded, setExpanded] = useState(false);
   const checkId = `pattern-check-${props.data.id}`;
 
   React.useEffect(() => {
+    const state = props.data.checked;
     if (checkRef.current) {
       const cb = checkRef.current as HTMLInputElement;
-      if (checked === CheckboxState.Checked) {
+      if (state === CheckboxState.Checked) {
         cb.checked = true;
         cb.indeterminate = false;
-      } else if (checked === CheckboxState.Empty) {
+      } else if (state === CheckboxState.Empty) {
         cb.checked = false;
         cb.indeterminate = false;
-      } else if (checked === CheckboxState.Indeterminate) {
+      } else if (state === CheckboxState.Indeterminate) {
         cb.checked = false;
         cb.indeterminate = true;
       }
     }
-  }, [checked]);
+  });
   const change = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setChecked(e.currentTarget.checked ? CheckboxState.Checked : CheckboxState.Empty);
+      const state = e.currentTarget.checked ? CheckboxState.Checked : CheckboxState.Empty;
+      props.onChange(props.data, state);
   }
 
   const pattern_count = count_patterns(props.data);
@@ -116,18 +123,45 @@ const CategoryNode = (props: { data: TreeNode, parent_checked?: CheckboxState, o
         {props.data.patterns.length > 0 || !expanded ? (<span className={`badge bg-${pattern_count > 0 ? 'primary' : 'secondary'} rounded-pill fs-6`}>{pattern_count}</span>) : ''}
       </div>
       <div className={expanded ? '' : 'd-none'}>
-        {props.data.children.length > 0 ? (<ul className='list-group'>{props.data.children.map(sub => (<CategoryNode key={sub.id} data={sub} parent_checked={checked}/>))}</ul>) : ''}
+        {props.data.children.length > 0 ? (<ul className='list-group'>{props.data.children.map(sub => (<CategoryNode key={sub.id} data={sub} onChange={props.onChange} />))}</ul>) : ''}
         {props.data.children.length === 0 && props.data.patterns.length > 0 ? (<Patterns category={props.data.id} data={props.data.patterns} />) : ''}
       </div>
     </li>
   )
 };
 
+function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
+  if (node.parent !== '') {
+    const nodes = data.map(c=>[...descendants(c)]).flat();
+    return nodes.find((n) => n.id === node.parent);
+  }
+  return undefined;
+}
 const CategoryTreeTop = () => {
+  const [refresh, setRefresh] = useState(false); // Hack to force refresh.
   const data: TreeNode[] | null = useCategoryData();
+
+  const onChange = (node: TreeNode, state: CheckboxState) => {
+    // all children
+    [...descendants(node)].forEach(c=>{ if(count_patterns(c) > 0) {c.checked = state;}});
+    // update parents
+    let ancestor = parent(node, data??[]);
+    while (ancestor) {
+      const desc = [...descendants(ancestor)].slice(1);
+      if (desc.every((d)=>d.checked === CheckboxState.Checked || count_patterns(d)===0)) {
+        ancestor.checked = CheckboxState.Checked;
+      } else if (desc.every((d)=>d.checked === CheckboxState.Empty)) {
+        ancestor.checked = CheckboxState.Empty;
+      } else {
+        ancestor.checked = CheckboxState.Indeterminate;
+      }
+      ancestor = parent(ancestor, data??[]);
+    }
+    setRefresh(!refresh);
+  }
   return (
     <ul className='impressions-category-tree list-group'>
-      {data && data.map((cat) => (<CategoryNode key={cat.id} data={cat} />))}
+      {data && data.map((cat) => (<CategoryNode key={cat.id} data={cat} onChange={onChange} />))}
     </ul>
   );
 }
