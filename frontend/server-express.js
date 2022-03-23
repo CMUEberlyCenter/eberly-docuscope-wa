@@ -11,6 +11,8 @@
 
 const express = require('express')
 const fs = require('fs');
+const http = require('http');
+//const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
@@ -34,9 +36,17 @@ class DocuScopeWALTIService {
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
 
-    this.token="AAA";
-    this.session="BBB";
-    this.standardHeader={
+    this.backendHost=dotenv.DWA_BACKEND_HOST;
+    if (this.backendHost=="") {
+      this.backendHost="localhost";
+    }
+    this.backendPort=dotenv.DWA_BACKEND_PORT;
+    if (this.backendPort=="") {
+      this.backendPort=5000;
+    }    
+    this.token=this.uuidv4();
+    this.session=this.uuidv4();
+    this.standardHeader = {
       method: "GET",       
       cache: 'no-cache'
     };
@@ -192,28 +202,37 @@ class DocuScopeWALTIService {
   }
 
   /**
-     https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-
-     {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-       'Content-Type': 'application/json'       
-      },
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-    }
+   * 
    */
-  apiCall (aCall,anArgumentSet) {
-    console.log ("apiCall ("+aCall+")");
+  createDataMessage (aData) {
+    let message={
+      status: "request",
+      data: aData
+    }
+    return (JSON.stringify(message));
+  }
 
-    let aURL=this.backend+"/api/v1/"+aCall+"?token="+this.token+"&session="+this.session+"&"+anArgumentSet;
+  /**
+   * 
+   */
+  apiPOSTCall (aURL,aData) {
+    console.log ("apiPOSTCall ()");
 
-    return new Promise((resolve, reject) => {  
-      fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
+    let url="/api/v1/"+aURL;
+    //let payload=this.createDataMessage (aData);
+    
+    //console.log (payload);
+
+    /*
+    return new Promise((resolve, reject) => {          
+      fetch(url,{
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "POST",
+        body: payload
+      }).then(resp => resp.text()).then((result) => {
         let raw=JSON.parse(result);
         let evaluation=this.evaluateResult (raw);
         if (evaluation!=null) {
@@ -222,19 +241,61 @@ class DocuScopeWALTIService {
           resolve (raw.data);
         }
       }).catch((error) => {
-        //console.log (error);
         reject(error);
       });
     });
-  }    
+    */
+
+    /* We use the one below if we're not passing through data */
+    //const data = JSON.stringify(payload);
+    const data = JSON.stringify(aData);
+
+    const options = {
+      hostname: this.backendHost,
+      path: url,
+      port: 5000,      
+      /*port: this.backendPost,*/      
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    }
+
+    const req = http.request(options, (res) => {
+      if (res.statusCode==200) { 
+        let body = "";
+
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            let json = JSON.parse(body);
+            console.log ("Retrieved valid data from backend, forwarding to frontend ...");
+          } catch (error) {
+            console.error(error.message);
+          };
+        });
+      } else {
+        console.log ("Server responded with " + res.statusCode);
+      }
+    })
+
+    req.on('error', error => {
+      console.error(error);
+    })
+
+    req.write(data);
+    req.end();
+  }  
 
   /**
    *
    */
   processRequest (request, response) {
     console.log ("processRequest ()");
-
-    //this.debugRequest (request);
 
     if (this.useLTI==true) {
       if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) { 
@@ -264,7 +325,7 @@ class DocuScopeWALTIService {
   }
 
   /**
-   *
+   * https://nodejs.dev/learn/making-http-requests-with-nodejs
    */
   processAPIRequest (type,request, response) {
     console.log ("processAPIRequest ("+type+") => " + request.path);
@@ -299,6 +360,8 @@ class DocuScopeWALTIService {
 
         let unescaped=unescape (decoded);
       }
+
+      this.apiPOSTCall ("ontopic", msg);
 
       response.json (this.generateDataMessage ({
         sentences: {},

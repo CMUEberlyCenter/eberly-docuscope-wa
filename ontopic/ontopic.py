@@ -1,6 +1,9 @@
-from flask import make_response
+from flask import make_response, jsonify
+from urllib.parse import unquote
 import os, threading, psutil, platform
 import prometheus
+import base64
+import html
 
 driver=prometheus.PythonPrometheus ()
 
@@ -31,7 +34,25 @@ class OnTopic:
     response.mimetype = "text/plain"
     return response
 
-  def getRules (self):
+  def rules (self):
     response = make_response(self.rules, 200)
     response.mimetype = "application/json"
     return response
+
+  def ontopic (self,request):
+    
+    #json=request.get_json()
+    #data=json ["data"]
+    #raw=data["base"];
+    #decoded=base64.b64decode(raw)
+    #unescaped=unquote(decoded)
+
+    #print (unescaped)
+
+    f = open("resources/sentencedata.json", "r")
+    sentences=f.read();
+
+    response = make_response(sentences, 200)
+    response.mimetype = "application/json"
+    response.headers["Content-Type"] = "application/json"
+    return response    

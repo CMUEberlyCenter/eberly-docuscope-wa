@@ -152,8 +152,6 @@ export default class DocuScopeWA extends Component {
   apiPOSTCall (aURL,aData) {
     let payload=this.createDataMessage (aData);
 
-    console.log (payload);
-
     return new Promise((resolve, reject) => {          
       fetch(aURL,{
         headers: {
@@ -171,8 +169,6 @@ export default class DocuScopeWA extends Component {
           resolve (raw.data);
         }
       }).catch((error) => {
-        //console.log (error);
-
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
