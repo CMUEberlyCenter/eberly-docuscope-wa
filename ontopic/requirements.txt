@@ -20,7 +20,6 @@ preshed==3.0.2
 python-docx==0.8.10
 requests==2.23.0
 six==1.14.0
-spacy==2.2.4
 srsly==1.0.2
 thinc==7.4.0
 tqdm==4.43.0
@@ -29,3 +28,11 @@ wasabi==0.6.0
 Werkzeug==1.0.0
 zipp==3.1.0
 psutil=5.9.0
+ftfy==5.8
+python_docx==0.8.10
+spacy==2.3.5
+reportlab==3.5.60
+regex==2020.11.13
+beautifulsoup4==4.10.0
+controller==0.1.0
+docx==0.2.4

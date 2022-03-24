@@ -5,6 +5,10 @@ pip install flask
 pip install pathlib
 pip install python-docx
 pip install nltk
+pip install beautifulsoup4
+pip install ftfy
+pip install PyQt5
+pip install reportlab
 # On Linux:
 pip install numpy
 # On Mac:

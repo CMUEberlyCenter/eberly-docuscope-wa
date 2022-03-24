@@ -5,6 +5,8 @@ import prometheus
 import base64
 import html
 
+from dslib.models.document import DSDocument
+
 driver=prometheus.PythonPrometheus ()
 
 ##
@@ -16,6 +18,7 @@ class OnTopic:
     print ("OnTopic()");
     f = open("resources/rules.json", "r")
     self.rules=f.read();
+    self.document=DSDocument ()
 
   def ping (self):
     memInString = "<tr><td>" + str(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2) + " Mb</td></tr>";
