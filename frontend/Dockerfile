@@ -4,6 +4,7 @@ FROM node:latest
 
 WORKDIR /app
 
+# Setup some minimal files we'll need to get going
 COPY ["package.json", "package-lock.json*", "./"]
 
 # With the --production flag (or when the NODE_ENV environment variable is set to production), 
@@ -21,8 +22,9 @@ RUN ping -c 5 registry.npmjs.org
 
 RUN npm install --loglevel info --color=false
 
-COPY ./dist ./dist
-COPY ./server.js ./
+COPY ./public ./public
+COPY ./server-express.js ./
+COPY ./.env ./
 
 EXPOSE 8888
 

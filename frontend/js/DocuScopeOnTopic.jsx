@@ -39,10 +39,13 @@ class DocuScopeOnTopic extends Component {
       mode: "SENTENCE",
       textdata: this.dataTools.getInitialData(),
       loading: false,
-    };
+      sentence: null
+    };    
 
-    this.onHandleTopic = this.onHandleTopic.bind(this);
-    this.onHandleSentence = this.onHandleSentence.bind(this);
+    this.onHandleTopic=this.onHandleTopic.bind(this);
+    this.onHandleSentence = this.onHandleSentence.bind(this);    
+
+    this.onSentenceChange = this.onSentenceChange.bind(this);    
   }
 
   /**
@@ -69,6 +72,7 @@ class DocuScopeOnTopic extends Component {
       newData.sentences = data;
 
       this.setState({
+        sentence: null,
         loading: false,
         textdata: newData,
         invalidated: false,
@@ -77,23 +81,27 @@ class DocuScopeOnTopic extends Component {
 
     //>--------------------------------------------------------------------
 
-    if (this.state.mode == "PARAGRAPH") {
-      newData.paragraphs = data;
+    /*
+    if (this.state.mode=="PARAGRAPH") {
+      newData.paragraphs=data;
 
       this.setState({
-        loading: false,
+        sentence: null,
+        loading: false, 
         textdata: newData,
         invalidated: false,
       });
     }
+    */
 
     //>--------------------------------------------------------------------
 
-    if (this.state.mode == "TEXT") {
-      let collapsed = data.collapsed;
-      let expanded = data.expanded;
-      let topics = new HashTable();
-      let sentence = 0;
+    /*
+    if (this.state.mode=="TEXT") {
+      let collapsed=data.collapsed;
+      let expanded=data.expanded;
+      let topics=new HashTable ();
+      let sentence=0;
 
       if (expanded != null) {
         for (let i = 0; i < expanded.length; i++) {
@@ -146,11 +154,13 @@ class DocuScopeOnTopic extends Component {
       newData.topics = topics;
 
       this.setState({
-        loading: false,
+        sentence: null,
+        loading: false, 
         textdata: newData,
         invalidated: false,
       });
     }
+    */
 
     //>--------------------------------------------------------------------
   }
@@ -158,23 +168,24 @@ class DocuScopeOnTopic extends Component {
   /**
    *
    */
-  onHandleTopic(topicId, isGlobal, count) {
-    console.log(
-      "onHandleTopic (" +
-        topicId +
-        "," +
-        isGlobal +
-        "," +
-        count +
-        ") => Dummy for now"
-    );
+  onHandleTopic (topicId,isGlobal,count) {
+    console.log ("onHandleTopic ("+topicId+","+isGlobal+","+count+") => Dummy for now");
+
   }
 
   /**
    *
    */
-  onHandleSentence(aSentenceObject) {
-    console.log("onHandleSentence ()");
+  onHandleSentence (aSentenceObject) {
+    console.log ("onHandleSentence ()");
+    console.log (aSentenceObject);
+
+    if (aSentenceObject==null) {
+      if (this.props.setStatus) {
+        this.props.setStatus ("");
+      }      
+      return;
+    }
 
     this.setState({ sentence: aSentenceObject }, (e) => {
       this.onSentenceChange();
@@ -184,9 +195,26 @@ class DocuScopeOnTopic extends Component {
   /**
    *
    */
+  onSentenceChange () {
+    console.log ("onSentenceChange ()");
+
+    if (this.props.setStatus) {
+      this.props.setStatus ("Selected sentence, at paragraph " + this.state.sentence.paragraphIndex + ", and sentence " + this.state.sentence.sentenceIndex + ", with main verb: " + this.state.sentence.verb);
+    } else {
+      console.log ("No status update method available");
+    }
+  }
+
+  /**
+   *
+   */
   render() {
-    const onTopicHelp =
-      'You may lose <bold>clarity</bold> if you try to pack too many ideas into a sentence.<br/> This panel displays each of your sentences as a sequence of noun phrases appearing before and after the main verb. Focus on the sentences with many noun phrases before the main verb but also after.  Click on the sentence line on the left to see your actual sentence. <br/><br/> Read the sentence aloud when feeling. If you stumble or run out of breath, you are most likely stuffing too much information into a single sentence. <br/><br/>  There is nothing wrong with <bold>be verbs</bold> to signal "existence". But an overreliance on the <bold>be verbs</bold> can result in weak writing. If you find you have too many <bold>be verbs</bold>, try to revise some of the sentences with <bold>active verbs</bold>.';
+    const onTopicHelp='You may lose <b>clarity</b> if you try to pack too many ideas into a sentence.<br/> This panel displays each of your sentences as a sequence of noun phrases appearing before and after the main verb. Focus on the sentences with many noun phrases before the main verb but also after.  Click on the sentence line on the left to see your actual sentence. <br/><br/> Read the sentence aloud when feeling. If you stumble or run out of breath, you are most likely stuffing too much information into a single sentence. <br/><br/>  There is nothing wrong with <b>be verbs</b> to signal "existence". But an overreliance on the <b>be verbs</b> can result in weak writing. If you find you have too many <b>be verbs</b>, try to revise some of the sentences with <b>active verbs</b>.';
+    let sentencedetails;
+
+    if (this.state.sentence!=null) {
+      sentencedetails=this.state.sentence.full;
+    }
 
     return (
       <div className="ontopic-container">
@@ -214,7 +242,10 @@ class DocuScopeOnTopic extends Component {
               <div className="box-blue"></div>be verb
             </span>
           </div>
-          <div dangerouslySetInnerHTML={{ __html: onTopicHelp }} />
+          <div className="ontopic-details" dangerouslySetInnerHTML={{__html: onTopicHelp}} />
+          <div className="ontopic-explanation">
+          {sentencedetails}  
+          </div>
         </div>
       </div>
     );

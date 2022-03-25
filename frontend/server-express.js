@@ -11,11 +11,11 @@
 
 const express = require('express')
 const fs = require('fs');
+const http = require('http');
+//const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
-
-const Pool = require('pg').Pool;
 
 const port = 8888;
 //const port = 80;
@@ -33,31 +33,36 @@ class DocuScopeWALTIService {
 
     dotenv.config();
 
+    this.pjson = require('./package.json');
+    console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
+
+    this.backendHost=dotenv.DWA_BACKEND_HOST;
+    if (this.backendHost=="") {
+      this.backendHost="localhost";
+    }
+    this.backendPort=dotenv.DWA_BACKEND_PORT;
+    if (this.backendPort=="") {
+      this.backendPort=5000;
+    }    
+    this.token=this.uuidv4();
+    this.session=this.uuidv4();
+    this.standardHeader = {
+      method: "GET",       
+      cache: 'no-cache'
+    };
+
     this.useLTI=true;
     this.publicHome="/public";
     this.staticHome="/static";
 
-    this.rules=fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8');
+    this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
-    this.secret=process.env.TOKEN_SECRET;
+    this.backend=process.env.DWA_BACKEND;
     this.mode=process.env.MODE;
     if (!this.mode) {
       this.mode="production";
     }
-
-    this.pool = new Pool({
-      user: process.env.POSTGRES_USER, // get from .env
-      host: 'localhost',
-      database: 'ideate',
-      password: process.env.POSTGRES_PASSWORD, // get from .env
-      port: 5432,
-    }); 
-
-    this.pool.on('error', (err, client) => {
-      console.error('Unexpected error on idle client', err)
-      process.exit(-1)
-    })
 
     console.log ("Configured secret through .env: " + this.secret);
 
@@ -65,36 +70,59 @@ class DocuScopeWALTIService {
 
     // Turn off caching for now (detect developer mode!)
     this.app.set('etag', false);
+    this.app.use(express.json());
     this.app.use((req, res, next) => {
       res.set('Cache-Control', 'no-store')
       next()
     })
  
-    /*
-    this.app.use(bodyParser.json());
-    this.app.use(
-      bodyParser.urlencoded({
-        extended: false,
-      })
-    );
-    */
-
-    /*
-    this.app.use(formidable()); // to get the LTI header fields
-    */
-
     this.app.use(express.urlencoded({
       extended: true
     }));
 
-    //this.showServerInfo ();
+    this.processBackendReply=this.processBackendReply.bind(this);
+  }
+
+  /**
+   *
+   */
+  uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }  
+
+  /**
+   * 
+   */
+  pad(s) {
+    return (s < 10 ? '0' : '') + s;
+  }
+
+  /**
+   * 
+   */
+  format(seconds){
+    var hours = Math.floor(seconds / (60*60));
+    var minutes = Math.floor(seconds % (60*60) / 60);
+    var seconds = Math.floor(seconds % 60);
+
+    return this.pad(hours) + ':' + this.pad(minutes) + ':' + this.pad(seconds);
   }
 
   /**
    * Here’s an example of a function for signing tokens:
    */ 
   generateAccessToken(aString) {
-    return jwt.sign({payload: aString}, process.env.TOKEN_SECRET, { expiresIn: '1800s' });
+    let tSecret="";
+
+    if ((process.env.TOKEN_SECRET=="dummy") || (process.env.TOKEN_SECRET=="")) {
+      tSecret=this.uuidv4();
+    } else {
+      tSecret=process.env.TOKEN_SECRET;
+    }
+    return jwt.sign({payload: aString}, tSecret, { expiresIn: '1800s' });
   }
 
   /**
@@ -104,6 +132,31 @@ class DocuScopeWALTIService {
     console.log ("req.baseUrl: " + request.baseUrl);
     console.log ("req.path: " + request.path);
     console.log ('oauth_consumer_key:' + request.body.oauth_consumer_key);
+  }
+
+  /**
+   * 
+   */
+  generateErrorMessage (aMessage) {
+    var error = {
+      status: "error",
+      message: aMessage
+    };
+
+    return (error);
+  }
+
+
+  /**
+   * 
+   */
+  generateDataMessage (aDataset) {
+    var error = {
+      status: "success",
+      data: aDataset
+    };
+
+    return (error);
   }
 
   /**
@@ -132,21 +185,92 @@ class DocuScopeWALTIService {
 
     settingsObject.token=token;
 
-    //console.log ("Request body:");
-    //console.log (request.body);
-
     for (var key in request.body) {
       if (request.body.hasOwnProperty(key)) {
-        //console.log(key + " -> " + request.body[key]);
-
         var value=request.body[key];
         settingsObject.lti [key]=value;
       }
     }
 
-    settingsObject ["rules"]=JSON.parse (this.rules);
-
     return (settingsObject);
+  }
+
+  /**
+   * 
+   */
+  evaluateResult (aMessage) {
+
+    return (null);
+  }
+
+  /**
+   * 
+   */
+  createDataMessage (aData) {
+    let message={
+      status: "request",
+      data: aData
+    }
+    return (JSON.stringify(message));
+  }
+
+  /**
+   * 
+   */
+  apiPOSTCall (aURL,aData) {
+    console.log ("apiPOSTCall ()");
+
+    let url="/api/v1/"+aURL;
+
+    const data = JSON.stringify(aData);
+
+    const options = {
+      hostname: this.backendHost,
+      path: url,
+      port: 5000,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': data.length
+      }
+    }
+
+    const req = http.request(options, (res) => {
+      if (res.statusCode==200) { 
+        let body = "";
+
+        res.on("data", (chunk) => {
+          body += chunk;
+        });
+
+        res.on("end", () => {
+          try {
+            let json = JSON.parse(body);
+            console.log ("Retrieved valid data from backend, forwarding to frontend ...");
+            this.processBackendReply (json);
+          } catch (error) {
+            console.error(error.message);
+          };
+        });
+      } else {
+        console.log ("Server responded with " + res.statusCode);
+      }
+    })
+
+    req.on('error', error => {
+      console.error(error);
+    })
+
+    req.write(data);
+    req.end();
+  }  
+
+  /**
+   *
+   */
+  processBackendReply (json) {
+    console.log ("processBackendReply ()");
+
   }
 
   /**
@@ -154,8 +278,6 @@ class DocuScopeWALTIService {
    */
   processRequest (request, response) {
     console.log ("processRequest ()");
-
-    //this.debugRequest (request);
 
     if (this.useLTI==true) {
       if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) { 
@@ -185,10 +307,71 @@ class DocuScopeWALTIService {
   }
 
   /**
+   * https://nodejs.dev/learn/making-http-requests-with-nodejs
+   */
+  processAPIRequest (type,request, response) {
+    console.log ("processAPIRequest ("+type+") => " + request.path);
+
+    if (request.path=="/api/v1/rules") {
+      response.json (this.generateDataMessage (this.rules));
+      return;
+    }
+
+    if (request.path=="/api/v1/ping") {
+      let uptime = process.uptime();
+
+      console.log(this.format(uptime));
+
+      response.json (this.generateDataMessage ({
+        uptime: this.format(uptime),
+        version: this.pjson.version,
+      }));
+
+      return;
+    }    
+
+    if (request.path=="/api/v1/ontopic") {
+      console.log ("Processing ontopic request ...");
+      
+      let msg=request.body;
+
+      if (msg.status=="request") {
+        let raw=msg.data.base;
+
+        let decoded=Buffer.from(raw, 'base64');
+
+        let unescaped=unescape (decoded);
+      }
+
+      console.log ("Forwarding request ...");
+
+      this.apiPOSTCall ("ontopic", msg);
+
+      response.json (this.generateDataMessage ({
+        sentences: {},
+      }));
+
+      return;      
+    }
+
+    response.json(this.generateErrorMessage ("Unknown API call made"));
+  }  
+
+  /**
    *
    */
   run () {
     console.log ("run ()");
+
+    this.app.get('/api/v1/*', (request, response) => {
+      console.log ("get(api)");
+      this.processAPIRequest ("GET",request,response);
+    });
+
+    this.app.post('/api/v1/*', (request, response) => {
+      console.log ("post(api)");
+      this.processAPIRequest ("POST",request,response);
+    });    
 
     this.app.get('/*', (request, response) => {
       console.log ("get()");
@@ -199,6 +382,8 @@ class DocuScopeWALTIService {
       console.log ("post()");
       this.processRequest (request,response);
     });
+
+
 
     this.app.listen(port, () => {
       console.log(`App running on port ${port}.`);

@@ -7,9 +7,17 @@ export default class DocuScopeRules {
   /**
    *
    */
-  constructor() {
-    this.name = "unassigned";
-    this.rules = [];
+  constructor () {
+  	this.name="unassigned";
+    this.rules=[];
+    this.ready=false;
+  }
+
+  /**
+   *
+   */
+  getReady () {
+    return (this.ready);
   }
 
   /**
@@ -33,6 +41,8 @@ export default class DocuScopeRules {
       newRule.parse(ruleObject);
       this.rules.push(newRule);
     }
+
+    this.ready=true;
   }
 
   /**

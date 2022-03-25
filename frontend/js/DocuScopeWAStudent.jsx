@@ -28,7 +28,8 @@ import Switch from "react-switch";
 //import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
-
+import DocuScopeProgressWindow from './DocuScopeProgressWindow';
+        
 //import docuscope from "../views/docuscope.html";
 
 import "../css/main.css";
@@ -85,7 +86,7 @@ export default class DocuScopeWAStudent extends Component {
     super(props);
 
     this.bURLServer = "";
-    this.bURLPath = "/api/activity/ontopic/";
+    this.bURLPath = "/api/ontopic/";
 
     if (typeof backendServer !== "undefined") {
       this.bURLServer = backendServer;
@@ -101,6 +102,7 @@ export default class DocuScopeWAStudent extends Component {
     let value = initialValue;
 
     this.state = {
+      status: "",
       loading: false,
       activeIndex: 1,
       currentRule: null,
@@ -134,12 +136,10 @@ export default class DocuScopeWAStudent extends Component {
     this.insertText = this.insertText.bind(this);
     this.fillParagraphList = this.fillParagraphList.bind(this);
     this.handleParagraphSelection = this.handleParagraphSelection.bind(this);
-
     this.processMessage = this.processMessage.bind(this);
-
     this.handleEditorToggle = this.handleEditorToggle.bind(this);
-
     this.selectMenuOption = this.selectMenuOption.bind(this);
+    this.setStatus = this.setStatus.bind(this);
   }
 
   /**
@@ -162,6 +162,16 @@ export default class DocuScopeWAStudent extends Component {
       },
       false
     );
+  }
+  /**
+   *
+   */
+  setStatus (aMessage) {
+    console.log ("setStatus ()");
+
+    this.setState ({
+      status: aMessage
+    });
   }
 
   /**
@@ -205,12 +215,13 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  sendMessage(aMessage) {
+  sendMessage(aRawText) {
+    console.log ("sendMessage ()");
     var payload = {
       event_id: "docuscope",
       data: {
         status: "text",
-        content: aMessage,
+        content: aRawText,
       },
     };
 
@@ -224,9 +235,28 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.activeIndex == 3) {
-      this.setState({
-        sentences: sentenceData,
-        text: aMessage,
+      let escaped=escape (payload);
+
+      let encoded=btoa(escaped);
+
+      if (this.props.api) {
+        this.props.api ("ontopic", {
+          base: encoded
+        },"POST");
+      }
+      this.setState ({
+        showProgress: true,
+        progressTitle: "Retrieving results ...",
+        progress: 25
+      }, (e) => {
+        setTimeout ((e) => {
+          this.setState ({
+            showProgress: false,
+            sentences: sentenceData,
+            text: aRawText,
+            progress: 100
+          });
+        },3000);
       });
     }
   }
@@ -264,13 +294,13 @@ export default class DocuScopeWAStudent extends Component {
       },
       () => {
         // Inform the OnTopic backend
-        if (this.state.activeIndex == 4 && this.state.editorActive == false) {
-          //var plain = Plain.serialize(Value.fromJSON(this.state.value));
-          //this.sendMessage (plain);
+        if ((this.state.activeIndex == 3) && (this.state.editorActive == false)) {
+          var plain = Plain.serialize(Value.fromJSON(this.state.value));
+          this.sendMessage (plain);
         }
 
         // Inform the Docuscope backend
-        if (this.state.activeIndex == 4 && this.state.editorActive == false) {
+        if ((this.state.activeIndex == 4) && (this.state.editorActive == false)) {
           const plain_text = Plain.serialize(Value.fromJSON(this.state.value));
           this.sendMessage(plain_text);
         }
@@ -626,8 +656,6 @@ export default class DocuScopeWAStudent extends Component {
             Show only topic clusters:
           </label>
           <Switch
-            onChange={() => null}
-            checked={false}
             size={Sizes.TINY}
             active={{ text: "On" }}
             inactive={{ text: "Off" }}
@@ -649,6 +677,7 @@ export default class DocuScopeWAStudent extends Component {
         <TabTitle title="Polish Your Sentences for Clarity"/>
         <div className="impressions-content">
           <DocuScopeOnTopic
+            setStatus={this.setStatus}
             sentences={this.state.sentences}
             text={this.state.text}
           />
@@ -664,6 +693,8 @@ export default class DocuScopeWAStudent extends Component {
   render() {
     //console.log ("render ("+this.state.editorActive+")");
 
+    let status="Idle";
+
     let leftWidth = "30%";
     let centerWidth = "30%";
 
@@ -676,6 +707,10 @@ export default class DocuScopeWAStudent extends Component {
     let editorScrim;
     let infocolumn;
 
+    if (this.state.status!="") {
+      status=this.state.status;
+    }
+
     if (this.state.showInfoColumn == true) {
       leftWidth = "30%";
       centerWidth = "30%";
@@ -686,16 +721,7 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.showProgress == true) {
-      progresswindow = (
-        <div className="progresswindow">
-          <div className="progresstitle">{this.state.progressTitle}</div>
-          <div className="progresscontent">
-            <div className="meter" style={{ height: "25px", margin: "15px" }}>
-              <span style={{ width: this.state.progress + "%" }}></span>
-            </div>
-          </div>
-        </div>
-      );
+      progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
     }
 
     expectationsTab = this.generateExpectationsTab();

@@ -1,4 +1,5 @@
 .DS_Store
+node_modules
 db
 *.rbc
 *.sassc
@@ -24,3 +25,4 @@ config/database.yml
 deps.txt
 /dbentry
 *~
+*.pyc
