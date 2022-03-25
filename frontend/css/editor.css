@@ -1,4 +1,3 @@
-
 .editor-top-menu {
   flex: 0;
   display: flex;
@@ -15,7 +14,7 @@
 .edit-top-menu-label {
   padding: 2px;
   margin: 0px;
-  line-height: 1.5;  
+  line-height: 1.5;
 }
 
 .editor-container {

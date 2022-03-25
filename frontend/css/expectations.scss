@@ -1,0 +1,35 @@
+.expectations {
+  .impressions-description {
+    border-bottom: 1px solid #d1cfcf;
+    font-family: 'Open Sans';
+  }
+  .impressions-name {
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .impressions-content {
+    padding: 6px;
+    border-bottom: 1px solid #d1cfcf;
+  }
+
+  .impressions-item {
+    font-weight: bold;
+    font-size: 1.1em;
+    cursor: pointer;
+  }
+
+  .impressions-children {
+    list-style-type: lower-alpha;
+  }
+
+  .impressions-child {
+    font-weight: normal;
+    cursor: pointer;
+  }
+
+  .impressions-rule {
+    padding: 6px;
+  }
+}
+

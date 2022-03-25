@@ -24,4 +24,5 @@ config/database.yml
 *.rdb
 deps.txt
 /dbentry
+*~
 *.pyc

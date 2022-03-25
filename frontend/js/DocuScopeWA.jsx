@@ -38,7 +38,7 @@ export default class DocuScopeWA extends Component {
     this.token=this.dataTools.uuidv4 ();
     this.session=this.dataTools.uuidv4 ();
     this.standardHeader={
-      method: "GET",       
+      method: "GET",
       cache: 'no-cache'
     };
 
@@ -65,7 +65,7 @@ export default class DocuScopeWA extends Component {
   componentDidMount () {
     console.log ("componentDidMount ()");
 
-    setTimeout ((e) => {
+    setTimeout ((_e) => {
       this.setState ({
         state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTED,
         progress: 50,
@@ -89,9 +89,9 @@ export default class DocuScopeWA extends Component {
               state: DocuScopeWA.DOCUSCOPE_STATE_READY,
               server: result
             });
-          });          
+          });
 
-          this.pingTimer=setInterval ((e) => {
+          this.pingTimer=setInterval ((_e) => {
             this.apiCall ("ping",null,"GET").then ((result) => {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_READY,
@@ -104,7 +104,7 @@ export default class DocuScopeWA extends Component {
             state: DocuScopeWA.DOCUSCOPE_STATE_READY,
             progress: 100,
             progressTitle: "Application ready"
-          });          
+          });
         } else {
          this.setState ({
             state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
@@ -125,7 +125,7 @@ export default class DocuScopeWA extends Component {
   }
 
   /**
-   * 
+   *
    */
   evaluateResult (aMessage) {
     if (aMessage.status!="success") {
@@ -136,7 +136,7 @@ export default class DocuScopeWA extends Component {
   }
 
   /**
-   * 
+   *
    */
   createDataMessage (aData) {
     let message={
@@ -147,12 +147,12 @@ export default class DocuScopeWA extends Component {
   }
 
   /**
-   * 
+   *
    */
   apiPOSTCall (aURL,aData) {
     let payload=this.createDataMessage (aData);
 
-    return new Promise((resolve, reject) => {          
+    return new Promise((resolve, reject) => {
       fetch(aURL,{
         headers: {
           'Accept': 'application/json',
@@ -173,17 +173,17 @@ export default class DocuScopeWA extends Component {
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
           progressTitle: "Error: unable to connect to server, retrying ..."
-        });      
+        });
         reject(error);
       });
-    });    
+    });
   }
 
   /**
-   * 
+   *
    */
-  apiGETCall (aURL,aData) {
-    return new Promise((resolve, reject) => {  
+  apiGETCall (aURL, _aData) {
+    return new Promise((resolve, reject) => {
       fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
         let raw=JSON.parse(result);
         let evaluation=this.evaluateResult (raw);
@@ -199,10 +199,10 @@ export default class DocuScopeWA extends Component {
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
           progressTitle: "Error: unable to connect to server, retrying ..."
-        });      
+        });
         reject(error);
       });
-    });    
+    });
   }
 
   /**
@@ -214,7 +214,7 @@ export default class DocuScopeWA extends Component {
       cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
       credentials: 'same-origin', // include, *same-origin, omit
       headers: {
-       'Content-Type': 'application/json'       
+       'Content-Type': 'application/json'
       },
       redirect: 'follow', // manual, *follow, error
       referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
@@ -233,7 +233,7 @@ export default class DocuScopeWA extends Component {
     if (aType=="GET") {
       return (this.apiGETCall (aURL,aData));
     }
-  }  
+  }
 
   /**
    *
@@ -243,16 +243,16 @@ export default class DocuScopeWA extends Component {
       return (false);
     }
 
-    if (!serverContext) {
+    if (!window.serverContext) {
       return (false);
     }
 
 
-    if (!serverContext.roles) {
+    if (!window.serverContext.roles) {
       return (false);
     }
 
-    var splitter=serverContext.roles.split (",");
+    var splitter=window.serverContext.roles.split (",");
 
     for (var i=0;i<splitter.length;i++) {
       if (splitter [i]=="urn:lti:instrole:ims/lis/Student") {
@@ -271,17 +271,17 @@ export default class DocuScopeWA extends Component {
       return (false);
     }
 
-    if (!serverContext) {
+    if (!window.serverContext) {
       return (false);
     }
 
 
-    if (!serverContext.roles) {
+    if (!window.serverContext.roles) {
       return (false);
     }
 
 
-    var splitter=serverContext.roles.split (",");
+    var splitter=window.serverContext.roles.split (",");
 
     for (var i=0;i<splitter.length;i++) {
       if (splitter [i]=="urn:lti:instrole:ims/lis/Instructor") {
@@ -290,7 +290,7 @@ export default class DocuScopeWA extends Component {
     }
 
     return (false);
-  }  
+  }
 
   /**
    *
@@ -311,9 +311,9 @@ export default class DocuScopeWA extends Component {
         <button id="launcher" className="center_button" onClick={this.onLaunch}>Open in new Window</button>
         <div className="iframe">
           <form id="ltirelayform" target="docuscopewa" method="post"></form>
-        </div>        
-      </div>);progress
-  }   
+        </div>
+      </div>);//progress
+  }
 
   /**
    *
@@ -321,14 +321,14 @@ export default class DocuScopeWA extends Component {
   onLaunch () {
     console.log ("onLaunch ("+window.location.href+")");
 
-    var ltiFields = serverContext.lti;
+    var ltiFields = window.serverContext.lti;
 
     console.log (ltiFields);
 
     var relayform = document.getElementById ("ltirelayform");
 
     for (let key in ltiFields) {
-      if (ltiFields.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
         console.log("Appending: " + key + " -> " + ltiFields[key]);
 
         var ltiField=document.createElement ("input");
@@ -352,7 +352,7 @@ export default class DocuScopeWA extends Component {
     relayform.setAttribute ("action",window.location.href);
     relayform.submit();
     relayform.style.visibility="hidden";
-  }   
+  }
 
   /**
    *
@@ -367,7 +367,7 @@ export default class DocuScopeWA extends Component {
 
     if (this.state.state != DocuScopeWA.DOCUSCOPE_STATE_READY) {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
-      mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;      
+      mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
       if (this.isInstructor ()) {
         mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;

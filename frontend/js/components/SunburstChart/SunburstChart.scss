@@ -1,0 +1,13 @@
+.sunburst-chart {
+  max-width: 300px;
+  svg {
+    font-size: 12px;
+    font-family: "Open Sans";
+    .sunburst-chart-label {
+      user-select: none;
+    }
+    .sunburst-clickable {
+      cursor: pointer;
+    }
+  }
+}

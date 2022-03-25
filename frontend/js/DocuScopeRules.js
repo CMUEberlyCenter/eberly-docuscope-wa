@@ -1,11 +1,9 @@
-
-import DocuScopeRule from './DocuScopeRule';
+import DocuScopeRule from "./DocuScopeRule";
 
 /**
  *
  */
 export default class DocuScopeRules {
-
   /**
    *
    */
@@ -25,23 +23,23 @@ export default class DocuScopeRules {
   /**
    *
    */
-  parseString (aString) {
-    parse (JSON.parse (aString));
+  parseString(aString) {
+    this.parse(JSON.parse(aString));
   }
-  
+
   /**
    *
    */
-  parse (anObject) {
+  parse(anObject) {
     //console.log ("parse ()");
 
-    this.name=anObject.name;
+    this.name = anObject.name;
 
-    for (let i=0;i<anObject.rules.length;i++) {
-      let ruleObject=anObject.rules [i];
-      let newRule=new DocuScopeRule ();
-      newRule.parse (ruleObject);
-      this.rules.push (newRule);
+    for (let i = 0; i < anObject.rules.length; i++) {
+      let ruleObject = anObject.rules[i];
+      let newRule = new DocuScopeRule();
+      newRule.parse(ruleObject);
+      this.rules.push(newRule);
     }
 
     this.ready=true;
@@ -50,53 +48,53 @@ export default class DocuScopeRules {
   /**
    *
    */
-  debugRules () {
-    console.log ("debugRules ()");
+  debugRules() {
+    console.log("debugRules ()");
 
-    console.log ("+ Name: " + this.name);
-    console.log ("+ Rules ");
+    console.log("+ Name: " + this.name);
+    console.log("+ Rules ");
 
-    for (let i=0;i<this.rules.length;i++) {
-       let aRule=this.rules [i];
-       console.log ("+-- " + aRule.name);
-       console.log ("  +-- " + aRule.description);
-       console.log ("  +-- " + aRule.type);
+    for (let i = 0; i < this.rules.length; i++) {
+      let aRule = this.rules[i];
+      console.log("+-- " + aRule.name);
+      console.log("  +-- " + aRule.description);
+      console.log("  +-- " + aRule.type);
     }
   }
 
   /**
    *
    */
-  getRule (anId) {
-    console.log ("getRule ("+anId+")");
+  getRule(anId) {
+    console.log("getRule (" + anId + ")");
 
-    for (let i=0;i<this.rules.length;i++) {
-      let aRule=this.rules [i];
-      if (aRule.id==anId) {
-      	return (aRule);
+    for (let i = 0; i < this.rules.length; i++) {
+      let aRule = this.rules[i];
+      if (aRule.id == anId) {
+        return aRule;
       }
     }
 
-    return (null);
+    return null;
   }
-  
+
   /**
    *
-   */  
-  getRuleChild (anId) {
-    console.log ("getRule ("+anId+")");
+   */
+  getRuleChild(anId) {
+    console.log("getRule (" + anId + ")");
 
-    for (let i=0;i<this.rules.length;i++) {
-      let aRule=this.rules [i];
-      
-      for (let j=0;j<aRule.children.length;j++) {
-      	let aRuleChild=aRule.children [j];
-      	if (aRuleChild.id==anId) {
-      	  return (aRuleChild);
-      	}
+    for (let i = 0; i < this.rules.length; i++) {
+      let aRule = this.rules[i];
+
+      for (let j = 0; j < aRule.children.length; j++) {
+        let aRuleChild = aRule.children[j];
+        if (aRuleChild.id == anId) {
+          return aRuleChild;
+        }
       }
     }
 
-    return (null);
+    return null;
   }
 }

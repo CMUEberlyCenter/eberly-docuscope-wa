@@ -1,28 +1,40 @@
-import React, { Component } from 'react';
+import React, { Component } from "react";
 
 // https://react-bootstrap.github.io/components/navbar/#navbars-mobile-friendly
-import { Form, FormControl, Button, Navbar, Nav, NavItem, NavDropdown } from 'react-bootstrap';
+import {
+  Form,
+  FormControl,
+  Button,
+  Navbar,
+  Nav,
+  NavItem,
+  NavDropdown,
+} from "react-bootstrap";
 
-import { Topic, OnTopicDataTools, OnTopicConstants, OnTopicVisualization } from '@cmu-eberly-center/eberly-ontopic-visualization';
+import {
+  Topic,
+  OnTopicDataTools,
+  OnTopicConstants,
+  OnTopicVisualization,
+} from "@cmu-eberly-center/eberly-ontopic-visualization";
 
-import HashTable from './HashTable';
+import HashTable from "./HashTable";
 
 /**
- * 
+ *
  */
 class DocuScopeOnTopic extends Component {
-
   /**
    *
    */
   constructor(props) {
     super(props);
 
-    this.dataTools=new OnTopicDataTools ();
+    this.dataTools = new OnTopicDataTools();
 
-    this.state = { 
+    this.state = {
       locked: false,
-      invalidated: false,      
+      invalidated: false,
       flipped: false,
       mode: "SENTENCE",
       textdata: this.dataTools.getInitialData(),
@@ -41,29 +53,29 @@ class DocuScopeOnTopic extends Component {
    */
   componentDidUpdate(prevProps) {
     if (prevProps.text !== this.props.text) {
-      this.prep (this.props.sentences, this.props.text);
+      this.prep(this.props.sentences, this.props.text);
     }
-  }  
+  }
 
   /**
    *
    */
-  prep (data, plain) {
-    console.log ("prep ("+this.state.mode+")");
+  prep(data, plain) {
+    console.log("prep (" + this.state.mode + ")");
 
-    var newData=this.dataTools.copyData (this.state.textdata);
-    newData.plain=plain;
+    var newData = this.dataTools.copyData(this.state.textdata);
+    newData.plain = plain;
 
     //>--------------------------------------------------------------------
 
-    if (this.state.mode=="SENTENCE") {
-      newData.sentences=data;
+    if (this.state.mode == "SENTENCE") {
+      newData.sentences = data;
 
       this.setState({
         sentence: null,
         loading: false,
         textdata: newData,
-        invalidated: false
+        invalidated: false,
       });
     }
 
@@ -77,12 +89,12 @@ class DocuScopeOnTopic extends Component {
         sentence: null,
         loading: false, 
         textdata: newData,
-        invalidated: false
-      });    
+        invalidated: false,
+      });
     }
     */
 
-    //>--------------------------------------------------------------------    
+    //>--------------------------------------------------------------------
 
     /*
     if (this.state.mode=="TEXT") {
@@ -91,48 +103,48 @@ class DocuScopeOnTopic extends Component {
       let topics=new HashTable ();
       let sentence=0;
 
-      if (expanded!=null) {
-        for (let i=0;i<expanded.length;i++) {
-          let row=expanded [i];
+      if (expanded != null) {
+        for (let i = 0; i < expanded.length; i++) {
+          let row = expanded[i];
 
-          if (i==0) {
-            for (let j=0;j<row.length;j++) {
-              row [j][2]=this.dataTools.uuidv4();
+          if (i == 0) {
+            for (let j = 0; j < row.length; j++) {
+              row[j][2] = this.dataTools.uuidv4();
 
-              let topic=new Topic ();
-              topic.uuid=row [j][2];
-              topic.name=row [j][1];
-              topics.setItem (topic.uuid,topic);
+              let topic = new Topic();
+              topic.uuid = row[j][2];
+              topic.name = row[j][1];
+              topics.setItem(topic.uuid, topic);
             }
           } else {
-            let isParaBoundary=0;
+            let isParaBoundary = 0;
 
-            for (let j=0;j<row.length;j++) {
-              let cell=row [j];
-              let isCellBoundary=false;
+            for (let j = 0; j < row.length; j++) {
+              let cell = row[j];
+              let isCellBoundary = false;
 
-              if (this.dataTools.isNumber (cell)==true) {
-                isCellBoundary=true;
+              if (this.dataTools.isNumber(cell) == true) {
+                isCellBoundary = true;
                 isParaBoundary++;
               }
 
               // We have a valid row
-              if (isCellBoundary==false) {
-                if (cell [1]!=false) {
-                  cell [13]=this.dataTools.uuidv4();
+              if (isCellBoundary == false) {
+                if (cell[1] != false) {
+                  cell[13] = this.dataTools.uuidv4();
 
-                  let topic=new Topic ();
-                  topic.uuid=cell [13];
-                  topic.name=cell [2];
-                  topic.sentence=sentence;
-                  topics.setItem (topic.uuid,topic);
+                  let topic = new Topic();
+                  topic.uuid = cell[13];
+                  topic.name = cell[2];
+                  topic.sentence = sentence;
+                  topics.setItem(topic.uuid, topic);
                 }
               }
             }
 
-            if (isParaBoundary!=row.length) {
+            if (isParaBoundary != row.length) {
               sentence++;
-            }          
+            }
           }
         }
       }
@@ -145,12 +157,12 @@ class DocuScopeOnTopic extends Component {
         sentence: null,
         loading: false, 
         textdata: newData,
-        invalidated: false
+        invalidated: false,
       });
     }
     */
 
-    //>--------------------------------------------------------------------    
+    //>--------------------------------------------------------------------
   }
 
   /**
@@ -175,8 +187,8 @@ class DocuScopeOnTopic extends Component {
       return;
     }
 
-    this.setState ({sentence: aSentenceObject},(e) => {
-      this.onSentenceChange ();
+    this.setState({ sentence: aSentenceObject }, (e) => {
+      this.onSentenceChange();
     });
   }
 
@@ -207,28 +219,35 @@ class DocuScopeOnTopic extends Component {
     return (
       <div className="ontopic-container">
         <div className="ontopic-content">
-          <OnTopicVisualization 
+          <OnTopicVisualization
             mode="SENTENCE"
             singlepane={true}
             onFlip={this.onFlip}
             onHandleTopic={this.onHandleTopic}
             onHandleSentence={this.onHandleSentence}
             loading={this.state.loading}
-            invalidated={this.state.invalidated}        
-            textdata={this.state.textdata} />
+            invalidated={this.state.invalidated}
+            textdata={this.state.textdata}
+          />
         </div>
-        <div className="ontopic-help" >
+        <div className="ontopic-help">
           <div className="ontopic-legend">
-            <span className="topic-legend-item"><div className="box-green"></div>Noun phrase</span>
-            <span className="topic-legend-item"><div className="box-red"></div>Active verb</span>
-            <span className="topic-legend-item"><div className="box-blue"></div>be verb</span>
+            <span className="topic-legend-item">
+              <div className="box-green"></div>Noun phrase
+            </span>
+            <span className="topic-legend-item">
+              <div className="box-red"></div>Active verb
+            </span>
+            <span className="topic-legend-item">
+              <div className="box-blue"></div>be verb
+            </span>
           </div>
           <div className="ontopic-details" dangerouslySetInnerHTML={{__html: onTopicHelp}} />
           <div className="ontopic-explanation">
           {sentencedetails}  
           </div>
         </div>
-      </div>    
+      </div>
     );
   }
 }
