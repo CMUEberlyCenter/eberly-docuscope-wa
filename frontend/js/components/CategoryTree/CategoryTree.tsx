@@ -1,12 +1,20 @@
-import { bind, Subscribe } from '@react-rxjs/core';
-import * as React from 'react';
-import { Suspense, useState } from 'react';
-import { OverlayTrigger, Spinner, Tooltip } from 'react-bootstrap';
-import { ErrorBoundary } from 'react-error-boundary';
-import { combineLatest, map } from 'rxjs';
-import { CommonDictionary, commonDictionary$, CommonDictionaryTreeNode } from '../../service/common-dictionary.service';
-import { gen_patterns_map, TaggerResults, taggerResults$ } from '../../service/tagger.service';
-import './CategoryTree.scss';
+import { bind, Subscribe } from "@react-rxjs/core";
+import * as React from "react";
+import { Suspense, useState } from "react";
+import { OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
+import { combineLatest, map } from "rxjs";
+import {
+  CommonDictionary,
+  commonDictionary$,
+  CommonDictionaryTreeNode,
+} from "../../service/common-dictionary.service";
+import {
+  gen_patterns_map,
+  TaggerResults,
+  taggerResults$,
+} from "../../service/tagger.service";
+import "./CategoryTree.scss";
 
 interface PatternData {
   pattern: string;
@@ -24,7 +32,7 @@ interface TreeNode {
 }
 
 function has_child_data(node: TreeNode): boolean {
-  return (node.children.length + node.patterns.length) > 0;
+  return node.children.length + node.patterns.length > 0;
 }
 function* descendants(node: TreeNode): Generator<TreeNode> {
   yield node;
@@ -34,9 +42,15 @@ function* descendants(node: TreeNode): Generator<TreeNode> {
 }
 function count_patterns(node: TreeNode): number {
   if (node.patterns && node.patterns.length > 0) {
-    return node.patterns.reduce((total: number, current: PatternData) => total + current.count, 0);
+    return node.patterns.reduce(
+      (total: number, current: PatternData) => total + current.count,
+      0
+    );
   } else if (node.children && node.children.length > 0) {
-    return node.children.reduce((total: number, child: TreeNode) => total + count_patterns(child), 0);
+    return node.children.reduce(
+      (total: number, child: TreeNode) => total + count_patterns(child),
+      0
+    );
   }
   return 0;
 }
@@ -48,7 +62,10 @@ const [useCategoryData] = bind(
       const common: CommonDictionary | null = data.common;
       if (common) {
         const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
-        const dfsmap = (parent: string, node: CommonDictionaryTreeNode): TreeNode => ({
+        const dfsmap = (
+          parent: string,
+          node: CommonDictionaryTreeNode
+        ): TreeNode => ({
           parent: parent,
           id: node.id,
           label: node.label,
@@ -57,12 +74,12 @@ const [useCategoryData] = bind(
           patterns: cat_pat_map.get(node.id) ?? [],
           checked: CheckboxState.Empty,
         });
-        return common.tree.map(dfsmap.bind(null, ''));
+        return common.tree.map(dfsmap.bind(null, ""));
       }
       return null;
     })
   )
-)
+);
 
 enum CheckboxState {
   Empty,
@@ -70,19 +87,34 @@ enum CheckboxState {
   Checked,
 }
 
-const Patterns = (props: { category: string, data: PatternData[] }) => (
-  <div className='table-responsive patterns-container ms-5'>
-    <table className='table table-sm patterns overflow-auto'>
-      <thead className='header'><tr><th scope='col'>Pattern</th><th scope='col' className='text-end'>Count</th></tr></thead>
+const Patterns = (props: { category: string; data: PatternData[] }) => (
+  <div className="table-responsive patterns-container ms-5">
+    <table className="table table-sm patterns overflow-auto">
+      <thead className="header">
+        <tr>
+          <th scope="col">Pattern</th>
+          <th scope="col" className="text-end">
+            Count
+          </th>
+        </tr>
+      </thead>
       <tbody>
-        {props.data && props.data.map((pat, i) => (<tr key={`${props.category}-row-${i}`}><td>{pat.pattern}</td><td className='text-end pe-3'>{pat.count}</td></tr>))}
+        {props.data &&
+          props.data.map((pat, i) => (
+            <tr key={`${props.category}-row-${i}`}>
+              <td>{pat.pattern}</td>
+              <td className="text-end pe-3">{pat.count}</td>
+            </tr>
+          ))}
       </tbody>
     </table>
   </div>
-)
+);
 
-
-const CategoryNode = (props: { data: TreeNode, onChange: (target: TreeNode, state: CheckboxState) => void }) => {
+const CategoryNode = (props: {
+  data: TreeNode;
+  onChange: (target: TreeNode, state: CheckboxState) => void;
+}) => {
   const checkRef = React.useRef(null);
   const [expanded, setExpanded] = useState(false);
   const checkId = `pattern-check-${props.data.id}`;
@@ -104,35 +136,74 @@ const CategoryNode = (props: { data: TreeNode, onChange: (target: TreeNode, stat
     }
   });
   const change = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const state = e.currentTarget.checked ? CheckboxState.Checked : CheckboxState.Empty;
-      props.onChange(props.data, state);
-  }
+    const state = e.currentTarget.checked
+      ? CheckboxState.Checked
+      : CheckboxState.Empty;
+    props.onChange(props.data, state);
+  };
 
   const pattern_count = count_patterns(props.data);
   return (
-    <li data-docuscope-category={props.data.id} className='list-group-item'>
-      <span className={`material-icons ${has_child_data(props.data) ? '' : 'invisible'}`} onClick={() => setExpanded(!expanded)}>{expanded ? 'expand_more' : 'chevron_right'}</span>
-      <div className='form-check d-inline-flex align-items-baseline'>
-        <input ref={checkRef} className='form-check-input' id={checkId} type='checkbox' value={props.data.id} onChange={change} disabled={pattern_count === 0} />
-        <label className='form-check-label' htmlFor={checkId}>
+    <li data-docuscope-category={props.data.id} className="list-group-item">
+      <span
+        className={`material-icons ${
+          has_child_data(props.data) ? "" : "invisible"
+        }`}
+        onClick={() => setExpanded(!expanded)}
+      >
+        {expanded ? "expand_more" : "chevron_right"}
+      </span>
+      <div className="form-check d-inline-flex align-items-baseline">
+        <input
+          ref={checkRef}
+          className="form-check-input"
+          id={checkId}
+          type="checkbox"
+          value={props.data.id}
+          onChange={change}
+          disabled={pattern_count === 0}
+        />
+        <label className="form-check-label" htmlFor={checkId}>
           {props.data.label}
           <OverlayTrigger overlay={<Tooltip>{props.data.help}</Tooltip>}>
-            <span className='material-icons comment mx-1'>comment</span>
+            <span className="material-icons comment mx-1">comment</span>
           </OverlayTrigger>
         </label>
-        {props.data.patterns.length > 0 || !expanded ? (<span className={`badge bg-${pattern_count > 0 ? 'primary' : 'secondary'} rounded-pill fs-6`}>{pattern_count}</span>) : ''}
+        {props.data.patterns.length > 0 || !expanded ? (
+          <span
+            className={`badge bg-${
+              pattern_count > 0 ? "primary" : "secondary"
+            } rounded-pill fs-6`}
+          >
+            {pattern_count}
+          </span>
+        ) : (
+          ""
+        )}
       </div>
-      <div className={expanded ? '' : 'd-none'}>
-        {props.data.children.length > 0 ? (<ul className='list-group'>{props.data.children.map(sub => (<CategoryNode key={sub.id} data={sub} onChange={props.onChange} />))}</ul>) : ''}
-        {props.data.children.length === 0 && props.data.patterns.length > 0 ? (<Patterns category={props.data.id} data={props.data.patterns} />) : ''}
+      <div className={expanded ? "" : "d-none"}>
+        {props.data.children.length > 0 ? (
+          <ul className="list-group">
+            {props.data.children.map((sub) => (
+              <CategoryNode key={sub.id} data={sub} onChange={props.onChange} />
+            ))}
+          </ul>
+        ) : (
+          ""
+        )}
+        {props.data.children.length === 0 && props.data.patterns.length > 0 ? (
+          <Patterns category={props.data.id} data={props.data.patterns} />
+        ) : (
+          ""
+        )}
       </div>
     </li>
-  )
+  );
 };
 
 function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
-  if (node.parent !== '') {
-    const nodes = data.map(c=>[...descendants(c)]).flat();
+  if (node.parent !== "") {
+    const nodes = data.map((c) => [...descendants(c)]).flat();
     return nodes.find((n) => n.id === node.parent);
   }
   return undefined;
@@ -143,42 +214,53 @@ const CategoryTreeTop = () => {
 
   const onChange = (node: TreeNode, state: CheckboxState) => {
     // all children
-    [...descendants(node)].forEach(c=>{ if(count_patterns(c) > 0) {c.checked = state;}});
+    [...descendants(node)].forEach((c) => {
+      if (count_patterns(c) > 0) {
+        c.checked = state;
+      }
+    });
     // update parents
-    let ancestor = parent(node, data??[]);
+    let ancestor = parent(node, data ?? []);
     while (ancestor) {
       const desc = [...descendants(ancestor)].slice(1);
-      if (desc.every((d)=>d.checked === CheckboxState.Checked || count_patterns(d)===0)) {
+      if (
+        desc.every(
+          (d) => d.checked === CheckboxState.Checked || count_patterns(d) === 0
+        )
+      ) {
         ancestor.checked = CheckboxState.Checked;
-      } else if (desc.every((d)=>d.checked === CheckboxState.Empty)) {
+      } else if (desc.every((d) => d.checked === CheckboxState.Empty)) {
         ancestor.checked = CheckboxState.Empty;
       } else {
         ancestor.checked = CheckboxState.Indeterminate;
       }
-      ancestor = parent(ancestor, data??[]);
+      ancestor = parent(ancestor, data ?? []);
     }
     setRefresh(!refresh);
-  }
+  };
   return (
-    <ul className='impressions-category-tree list-group'>
-      {data && data.map((cat) => (<CategoryNode key={cat.id} data={cat} onChange={onChange} />))}
+    <ul className="impressions-category-tree list-group">
+      {data &&
+        data.map((cat) => (
+          <CategoryNode key={cat.id} data={cat} onChange={onChange} />
+        ))}
     </ul>
   );
-}
+};
 
 const ErrorFallback = (props: { error?: Error }) => (
-  <div role='alert' className='alert alert-danger'>
+  <div role="alert" className="alert alert-danger">
     <p>Error loading category information:</p>
     <pre>{props.error?.message}</pre>
   </div>
-)
+);
 const CategoryTree = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
-    <Suspense fallback={<Spinner animation={'border'} />}>
+    <Suspense fallback={<Spinner animation={"border"} />}>
       <Subscribe>
         <CategoryTreeTop />
       </Subscribe>
     </Suspense>
   </ErrorBoundary>
-)
+);
 export default CategoryTree;
