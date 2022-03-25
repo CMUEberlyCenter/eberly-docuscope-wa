@@ -52,7 +52,7 @@
     "slate-react": "^0.22.9",
     "webpack": "^4.40.2",
     "webpack-cli": "^3.3.9",
-    "webpack-dev-server": "^3.11.0"
+    "webpack-dev-server": "^3.11.3"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^1.2.25",

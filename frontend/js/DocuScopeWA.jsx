@@ -45,7 +45,7 @@ export default class DocuScopeWA extends Component {
     this.state = {
       state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTING,
       progress: 0,
-      progressState: "Loading ...",
+      progressTitle: "Loading ...",
       globallyDisabled: false,
       activeIndex: 1,
       ruleManager: this.ruleManager,
@@ -69,7 +69,7 @@ export default class DocuScopeWA extends Component {
       this.setState ({
         state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTED,
         progress: 50,
-        progressState: "Backend connected, loading data ..."
+        progressTitle: "Backend connected, loading data ..."
       });
 
       this.apiCall ("rules",null,"GET").then ((result) => {
@@ -79,7 +79,7 @@ export default class DocuScopeWA extends Component {
           this.setState ({
             state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
             progress: 75,
-            progressState: "Ruleset loaded, Initializing ..."
+            progressTitle: "Ruleset loaded, Initializing ..."
           });
 
           console.log ("Starting ping service timer ...");
@@ -103,13 +103,13 @@ export default class DocuScopeWA extends Component {
           this.setState ({
             state: DocuScopeWA.DOCUSCOPE_STATE_READY,
             progress: 100,
-            progressState: "Application ready"
+            progressTitle: "Application ready"
           });          
         } else {
          this.setState ({
             state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
             progress: 100,
-            progressState: "Error: unable to process ruleset"
+            progressTitle: "Error: unable to process ruleset"
           });
         }
       });
@@ -172,7 +172,7 @@ export default class DocuScopeWA extends Component {
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
-          progressState: "Error: unable to connect to server, retrying ..."
+          progressTitle: "Error: unable to connect to server, retrying ..."
         });      
         reject(error);
       });
@@ -198,7 +198,7 @@ export default class DocuScopeWA extends Component {
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
-          progressState: "Error: unable to connect to server, retrying ..."
+          progressTitle: "Error: unable to connect to server, retrying ..."
         });      
         reject(error);
       });
@@ -366,7 +366,7 @@ export default class DocuScopeWA extends Component {
     }
 
     if (this.state.state != DocuScopeWA.DOCUSCOPE_STATE_READY) {
-      progresswindow=<DocuScopeProgressWindow state={this.state.progressState} progress={this.state.progress} />;
+      progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;      
     } else {
       if (this.isInstructor ()) {

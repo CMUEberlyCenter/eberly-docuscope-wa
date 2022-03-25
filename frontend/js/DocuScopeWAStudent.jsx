@@ -20,6 +20,7 @@ import DocuScopeWA from './DocuScopeWAScrim';
 import DocuScopeRules from './DocuScopeRules';
 import DataTools from './DataTools';
 import DocuScopeOnTopic from './DocuScopeOnTopic';
+import DocuScopeProgressWindow from './DocuScopeProgressWindow';
 
 import '../css/main.css';
 import '../css/docuscope.css';
@@ -200,12 +201,14 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  sendMessage (aMessage) {
+  sendMessage (aRawText) {
+    console.log ("sendMessage ()");
+
     var payload = {
       event_id: 'docuscope',
       data: {      
         status: "text",
-        content: aMessage
+        content: aRawText
       }
     };
 
@@ -219,7 +222,7 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.activeIndex==3) {
-      let escaped=escape (aMessage);
+      let escaped=escape (payload);
 
       let encoded=btoa(escaped);
 
@@ -228,11 +231,21 @@ export default class DocuScopeWAStudent extends Component {
           base: encoded
         },"POST");
       }
- 
+
       this.setState ({
-        sentences: sentenceData,
-        text: aMessage
-      });
+        showProgress: true,
+        progressTitle: "Retrieving results ...",
+        progress: 25
+      }, (e) => {
+        setTimeout ((e) => {
+          this.setState ({
+            showProgress: false,
+            sentences: sentenceData,
+            text: aRawText,
+            progress: 100
+          });
+        },3000);
+      });      
     }
   }
 
@@ -678,14 +691,7 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.showProgress==true) {
-      progresswindow=<div className="progresswindow">
-        <div className="progresstitle">{this.state.progressTitle}</div>
-        <div className="progresscontent">
-          <div className="meter" style={{height: "25px", margin: "15px"}}>
-            <span style={{width: (this.state.progress+"%")}}></span>
-          </div>        
-        </div>
-      </div>;
+      progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
     }
 
     expectationsTab=this.generateExpectationsTab ();

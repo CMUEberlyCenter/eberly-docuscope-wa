@@ -79,6 +79,8 @@ class DocuScopeWALTIService {
     this.app.use(express.urlencoded({
       extended: true
     }));
+
+    this.processBackendReply=this.processBackendReply.bind(this);
   }
 
   /**
@@ -219,42 +221,13 @@ class DocuScopeWALTIService {
     console.log ("apiPOSTCall ()");
 
     let url="/api/v1/"+aURL;
-    //let payload=this.createDataMessage (aData);
-    
-    //console.log (payload);
 
-    /*
-    return new Promise((resolve, reject) => {          
-      fetch(url,{
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-        },
-        method: "POST",
-        body: payload
-      }).then(resp => resp.text()).then((result) => {
-        let raw=JSON.parse(result);
-        let evaluation=this.evaluateResult (raw);
-        if (evaluation!=null) {
-          reject(evaluation);
-        } else {
-          resolve (raw.data);
-        }
-      }).catch((error) => {
-        reject(error);
-      });
-    });
-    */
-
-    /* We use the one below if we're not passing through data */
-    //const data = JSON.stringify(payload);
     const data = JSON.stringify(aData);
 
     const options = {
       hostname: this.backendHost,
       path: url,
-      port: 5000,      
-      /*port: this.backendPost,*/      
+      port: 5000,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -274,6 +247,7 @@ class DocuScopeWALTIService {
           try {
             let json = JSON.parse(body);
             console.log ("Retrieved valid data from backend, forwarding to frontend ...");
+            this.processBackendReply (json);
           } catch (error) {
             console.error(error.message);
           };
@@ -290,6 +264,14 @@ class DocuScopeWALTIService {
     req.write(data);
     req.end();
   }  
+
+  /**
+   *
+   */
+  processBackendReply (json) {
+    console.log ("processBackendReply ()");
+
+  }
 
   /**
    *
@@ -360,6 +342,8 @@ class DocuScopeWALTIService {
 
         let unescaped=unescape (decoded);
       }
+
+      console.log ("Forwarding request ...");
 
       this.apiPOSTCall ("ontopic", msg);
 

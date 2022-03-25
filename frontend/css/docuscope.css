@@ -227,7 +227,7 @@ tbody tr:nth-child(even) {
 .progresswindow {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: calc(50% - 200px);
   width: 400px;
   height: 100px;
   background-color: #e5e1e1;
