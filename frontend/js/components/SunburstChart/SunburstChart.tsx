@@ -8,7 +8,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
 import {
   commonDictionary$,
-  CommonDictionaryTreeNode,
+  CommonDictionaryTreeNode
 } from "../../service/common-dictionary.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";
 import "./SunburstChart.scss";
@@ -27,10 +27,11 @@ interface SunburstNode {
   children?: SunburstNode[];
   value?: number;
 }
+type HierarchyNode = HierarchyRectangularNode<SunburstNode>;
 
 const partition = (
   pdata: SunburstNode
-): HierarchyRectangularNode<SunburstNode> => {
+): HierarchyNode => {
   const r = d3.hierarchy(pdata).sum((d) => d.value ?? 0);
   return d3.partition<SunburstNode>().size([2 * Math.PI, r.height + 1])(r);
 };
@@ -80,6 +81,18 @@ const [useSunbrustData, sunburstData$] = bind(
   )
 );
 
+function relativeArc(d: HierarchyNode, p: HierarchyNode | null): Segment {
+  if (p) {
+    const p2 = 2 * Math.PI;
+    return {
+      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * p2,
+      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * p2,
+      y0: Math.max(0, d.y0 - p.depth),
+      y1: Math.max(0, d.y1 - p.depth),
+    }
+  }
+  return d as Segment;
+}
 const arcVisible = (d: Segment | undefined): boolean =>
   Boolean(d && d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0);
 const labelVisible = (d: Segment | undefined): number =>
@@ -93,7 +106,7 @@ const labelTransform = (d: Segment | undefined, radius: number): string => {
 };
 const format = d3.format(",d");
 const color = d3.scaleOrdinal(d3.schemeCategory10);
-const fill = (d: d3.HierarchyRectangularNode<SunburstNode>) => {
+const fill = (d: HierarchyNode) => {
   while (d.depth > 1 && d.parent) {
     d = d.parent;
   }
@@ -105,19 +118,14 @@ interface SunburstChartProps extends React.HTMLProps<HTMLDivElement> {
 }
 
 const SunburstFigure = (props: SunburstChartProps) => {
-  const [current_path, setCurrentPath] = React.useState("");
   const root = useSunbrustData();
-  const [parent, setParent] = React.useState(root); //useCurrent();
-  //console.log('SunburstFigure', parent);
-  //const [parent, setParent] = React.useState(root);
-  //sunburstData$.subscribe((r) => setParent(r)); // recurse fail
-  //const [root, setRoot] = React.useState(base_root);
+  const [parent, setParent] = React.useState(root);
   const wedgeRef = React.useRef(null);
   const labelRef = React.useRef(null);
   const width = props.width ?? 300;
   const radius = width / 6;
   const arc = d3
-    .arc<HierarchyRectangularNode<SunburstNode>>()
+    .arc<Segment>()
     .startAngle((d) => d.x0)
     .endAngle((d) => d.x1)
     .padAngle((d) => Math.min((d.x1 - d.x0) / 2, 0.005))
@@ -125,102 +133,41 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .innerRadius((d) => d.y0 * radius)
     .outerRadius((d) => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-  React.useEffect(() => { sunburstData$.subscribe((data) => setParent(data)) });
-  //React.useEffect(() => {
-  /*const path = d3.select(wedgeRef.current).selectAll('path').data(root.descendants().slice(1))
-    .join('path').attr('fill', (d) => {
-      while (d.depth > 1 && d.parent) {
-        d = d.parent;
+  React.useEffect(() => {
+    sunburstData$.subscribe((data) => {
+      if (data !== root) {
+        setParent(data);
       }
-      return color(d.data.name);
-    })
-    .attr('fill-opacity', (d) => arcVisible(d.data.current) ? (d.children ? 0.8 : 0.4) : 0)
-    .attr('d', (d) => arc(d));*/
-  /*path.filter((d) => d.children ? d.children.length > 0 : false)
-    .style('cursor', 'pointer');*/
-  /*const label = d3.select(labelRef.current).selectAll('text').data(root.descendants().slice(1))
-    .join('text')
-    .attr('dy', '0.35em')
-    .attr('fill-opacity', (d) => +labelVisible(d.data.current))
-    .attr('transform', (d) => labelTransform(d.data.current, radius))
-    .text((d) => d.data.name);*/
-  /*path.on('click', (_event: MouseEvent, p: HierarchyRectangularNode<SunburstNode>): void => {
-    //setCurrentPath(p ? p.ancestors().reverse().slice(1).map((d) => d.data.name).join(' > ') : '');
-    root.each((d) => (d.data.target = {
-      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * 2 * Math.PI,
-      y0: Math.max(0, d.y0 - p.depth),
-      y1: Math.max(0, d.y1 - p.depth),
-    }));
-    //const trans = d3.transition('sunburst').duration(750);
-    path.transition('sunburst').duration(750)
-      .tween('data', (d) => {
-        const i = d3.interpolate(d.data.current, d.data.target ?? {x0: 0, x1: 0, y0: 0, y1: 0});
-        return (t) => (d.data.current = i(t));
-      })
-      .filter(function (d) {
-        return (Boolean(+((this as Element).getAttribute('fill-opacity') ?? 0) || arcVisible(d.data.target)));
-      })
-      .attr('fill-opacity', (d) => arcVisible(d.data.target) ? (d.children ? 0.8 : 0.4) : 0)
-      .attrTween('d', (d) => () => arc(d.data.current)??'');
-    label.filter(function (d): boolean {
-      return (Boolean(+((this as Element).getAttribute('fill-opacity') ?? 0)) || labelVisible(d.data.target));
-    }).transition('sunburst').duration(750).attr('fill-opacity', (d) => +labelVisible(d.data.target))
-      .attrTween('transform', (d) => () => labelTransform(d.data.current, radius));
-  });*/
-  //path.append('title').text((d) => `${d.ancestors().map((dn) => dn.data.name).reverse().slice(1).join(' > ')}\n${format(d.value ?? 0)}`);
-  //}, [props]);
-  const click = (p: HierarchyRectangularNode<SunburstNode> | null) => {
+    });
+  });
+  const click = (p: HierarchyNode | null) => {
     if (!p) {
-      setCurrentPath("");
-      root?.each((d) => (d.data.current = d));
       setParent(root);
       return;
     }
-    if (p.children) {
-      root?.each((d) => {
-        if (d.data.current) {
-          // target
-          d.data.current.x0 =
-            Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) *
-            2 *
-            Math.PI;
-          d.data.current.x1 =
-            Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) *
-            2 *
-            Math.PI;
-          d.data.current.y0 = Math.max(0, d.y0 - p.depth);
-          d.data.current.y1 = Math.max(0, d.y1 - p.depth);
-        }
-      });
+    if (p.children) { // gurantee no leaves
+      setParent(p);
     }
-      //setRoot(root);
-      setCurrentPath(
-        p
-          .ancestors()
-          .reverse()
-          .slice(1)
-          .map((d) => d.data.name)
-          .join(" > ")
-      );
-      setParent(p.parent || root);
-
   };
+  const current_path = parent?.ancestors()
+    .reverse()
+    .slice(1)
+    .map((d) => d.data.name)
+    .join(" > ");
+
   return (
     <figure className="sunburst-chart">
       <figcaption>{current_path}</figcaption>
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
-            {parent?.descendants().map((d) => (
+            {parent?.descendants().filter((d) => arcVisible(relativeArc(d, parent))).map((d) => (
               <path
                 key={d.data.id}
                 onClick={() => click(d)}
                 fill={fill(d)}
-                fillOpacity={
-                  arcVisible(d.data.current) ? (d.children ? 0.8 : 0.4) : 0
-                }
-                d={d.data.current ? arc(d) ?? "" : ""}
+                fillOpacity={d.children ? 0.8 : 0.4}
+                d={arc(relativeArc(d, parent)) ?? ""}
                 className={
                   d.children && d.children.length > 0
                     ? "sunburst-clickable"
@@ -244,12 +191,11 @@ const SunburstFigure = (props: SunburstChartProps) => {
             textAnchor="middle"
             className="sunburst-chart-label"
           >
-            {parent?.descendants().map((d) => (
+            {parent?.descendants().filter((d) => labelVisible(relativeArc(d, parent))).map((d) => (
               <text
                 key={`label-${d.data.id}`}
                 dy="0.35em"
-                fillOpacity={labelVisible(d.data.current)}
-                transform={labelTransform(d.data.current, radius)}
+                transform={labelTransform(relativeArc(d, parent), radius)}
               >
                 {d.data.name}
               </text>
@@ -259,15 +205,13 @@ const SunburstFigure = (props: SunburstChartProps) => {
             r={radius}
             fill="none"
             pointerEvents="all"
-            onClick={() => click(parent)}
+            onClick={() => click(parent?.parent??null)}
           />
         </g>
       </svg>
     </figure>
   );
 };
-//return (<Spinner animation={'border'} />)
-//}
 
 const ErrorFallback = (props: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">

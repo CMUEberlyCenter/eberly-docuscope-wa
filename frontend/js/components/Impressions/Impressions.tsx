@@ -8,7 +8,7 @@ const Impressions = () => (
     <TabTitle title="Manage Readers' Impressions" />
     {/*<div className="p-2 lh-lg"></div>*/}
     <div className="impressions-content overflow-auto flex-grow-1 p-3">
-      <SunburstChart width={300} />
+      <SunburstChart width={400} />
       <h3 className="mt-2">Dictionary Categories</h3>
       <CategoryTree />
       {/*<iframe className="docuscopeframe" src={docuscope}></iframe>*/}
