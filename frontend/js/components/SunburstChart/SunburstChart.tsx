@@ -23,7 +23,7 @@ interface SunburstNode {
   id: string;
   name: string;
   target?: Segment;
-  current?: HierarchyRectangularNode<SunburstNode>;
+  current?: Segment;
   children?: SunburstNode[];
   value?: number;
 }
@@ -34,7 +34,7 @@ const partition = (
   const r = d3.hierarchy(pdata).sum((d) => d.value ?? 0);
   return d3.partition<SunburstNode>().size([2 * Math.PI, r.height + 1])(r);
 };
-const [useSunbrustData] = bind(
+const [useSunbrustData, sunburstData$] = bind(
   combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
     map((data) => {
       const tagged = data.tagged;
@@ -57,7 +57,22 @@ const [useSunbrustData] = bind(
           children: common.tree.map(sunmap),
         };
         const root = partition(tree);
-        root.each((d) => (d.data.current = d));
+        root.each((d) => (d.data.current = d as Segment));
+        root.each(
+          (d) =>
+          (d.data.target = {
+            x0:
+              Math.max(0, Math.min(1, (d.x0 - root.x0) / (root.x1 - root.x0))) *
+              2 *
+              Math.PI,
+            x1:
+              Math.max(0, Math.min(1, (d.x1 - root.x0) / (root.x1 - root.x0))) *
+              2 *
+              Math.PI,
+            y0: Math.max(0, d.y0 - root.depth),
+            y1: Math.max(0, d.y1 - root.depth),
+          })
+        );
         return root;
       }
       return null;
@@ -92,7 +107,10 @@ interface SunburstChartProps extends React.HTMLProps<HTMLDivElement> {
 const SunburstFigure = (props: SunburstChartProps) => {
   const [current_path, setCurrentPath] = React.useState("");
   const root = useSunbrustData();
-  const [parent, setParent] = React.useState(root);
+  const [parent, setParent] = React.useState(root); //useCurrent();
+  //console.log('SunburstFigure', parent);
+  //const [parent, setParent] = React.useState(root);
+  //sunburstData$.subscribe((r) => setParent(r)); // recurse fail
   //const [root, setRoot] = React.useState(base_root);
   const wedgeRef = React.useRef(null);
   const labelRef = React.useRef(null);
@@ -107,6 +125,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .innerRadius((d) => d.y0 * radius)
     .outerRadius((d) => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
+  React.useEffect(() => { sunburstData$.subscribe((data) => setParent(data)) });
   //React.useEffect(() => {
   /*const path = d3.select(wedgeRef.current).selectAll('path').data(root.descendants().slice(1))
     .join('path').attr('fill', (d) => {
@@ -174,6 +193,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
           d.data.current.y1 = Math.max(0, d.y1 - p.depth);
         }
       });
+    }
       //setRoot(root);
       setCurrentPath(
         p
@@ -184,7 +204,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
           .join(" > ")
       );
       setParent(p.parent || root);
-    }
+
   };
   return (
     <figure className="sunburst-chart">
@@ -192,7 +212,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
-            {root?.descendants().map((d) => (
+            {parent?.descendants().map((d) => (
               <path
                 key={d.data.id}
                 onClick={() => click(d)}
@@ -200,7 +220,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
                 fillOpacity={
                   arcVisible(d.data.current) ? (d.children ? 0.8 : 0.4) : 0
                 }
-                d={d.data.current ? arc(d.data.current) ?? "" : ""}
+                d={d.data.current ? arc(d) ?? "" : ""}
                 className={
                   d.children && d.children.length > 0
                     ? "sunburst-clickable"
@@ -224,7 +244,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
             textAnchor="middle"
             className="sunburst-chart-label"
           >
-            {root?.descendants().map((d) => (
+            {parent?.descendants().map((d) => (
               <text
                 key={`label-${d.data.id}`}
                 dy="0.35em"

@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React, { Component } from "react";
 
 import "foundation-sites/dist/css/foundation.min.css";
@@ -29,7 +30,7 @@ import Switch from "react-switch";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
 import DocuScopeProgressWindow from './DocuScopeProgressWindow';
-        
+
 //import docuscope from "../views/docuscope.html";
 
 import "../css/main.css";
@@ -89,7 +90,7 @@ export default class DocuScopeWAStudent extends Component {
     this.bURLPath = "/api/ontopic/";
 
     if (typeof backendServer !== "undefined") {
-      this.bURLServer = backendServer;
+      this.bURLServer = window.backendServer;
       console.log(
         "Switching back-end url to one defined in the html page: " +
           this.bURLServer +
@@ -235,9 +236,9 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.activeIndex == 3) {
-      let escaped=escape (payload);
+      let escaped=encodeURIComponent(payload);
 
-      let encoded=btoa(escaped);
+      let encoded=window.btoa(escaped);
 
       if (this.props.api) {
         this.props.api ("ontopic", {
@@ -248,8 +249,8 @@ export default class DocuScopeWAStudent extends Component {
         showProgress: true,
         progressTitle: "Retrieving results ...",
         progress: 25
-      }, (e) => {
-        setTimeout ((e) => {
+      }, () => {
+        setTimeout (() => {
           this.setState ({
             showProgress: false,
             sentences: sentenceData,
@@ -656,9 +657,12 @@ export default class DocuScopeWAStudent extends Component {
             Show only topic clusters:
           </label>
           <Switch
+            checked={false}
+            onChange={()=>({})}
             size={Sizes.TINY}
             active={{ text: "On" }}
             inactive={{ text: "Off" }}
+            disabled
           />
         </div>
         <div className="coherence-content"></div>
@@ -693,23 +697,14 @@ export default class DocuScopeWAStudent extends Component {
   render() {
     //console.log ("render ("+this.state.editorActive+")");
 
-    let status="Idle";
+    //const status = this.state.status || "Idle"; // unused
 
     let leftWidth = "30%";
     let centerWidth = "30%";
 
     let progresswindow;
-    let mainPage;
-    let expectationsTab;
-    let coherenceTab;
-    let clarityTab;
-    let editor;
     let editorScrim;
     let infocolumn;
-
-    if (this.state.status!="") {
-      status=this.state.status;
-    }
 
     if (this.state.showInfoColumn == true) {
       leftWidth = "30%";
@@ -724,15 +719,15 @@ export default class DocuScopeWAStudent extends Component {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
     }
 
-    expectationsTab = this.generateExpectationsTab();
-    coherenceTab = this.generateCoherenceTab();
-    clarityTab = this.generateClarityTab();
+    const expectationsTab = this.generateExpectationsTab();
+    const coherenceTab = this.generateCoherenceTab();
+    const clarityTab = this.generateClarityTab();
 
-    editor = (
+    const editor = (
       <Editor
         tabIndex={0}
         id="editor1"
-        ref="editor1"
+        //ref="editor1"
         className="editor-content"
         readOnly={false}
         placeholder="Enter some editable text..."
@@ -757,7 +752,7 @@ export default class DocuScopeWAStudent extends Component {
       editorScrim = <div className="editor-scrim"></div>;
     }
 
-    mainPage = (
+    const mainPage = (
       <div className="mainframe">
         <div className="menubar">
           <Navbar bg="dark" variant="dark">

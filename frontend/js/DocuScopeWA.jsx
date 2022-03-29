@@ -119,10 +119,9 @@ export default class DocuScopeWA extends Component {
   /**
    *
    */
-  componentDidUnmount () {
-    console.log ("componentDidUnmount ()");
-
-  }
+  /*componentWillUnmount () {
+    console.log ("componentWillUnmount ()");
+  }*/
 
   /**
    *
