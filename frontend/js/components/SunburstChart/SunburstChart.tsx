@@ -1,8 +1,8 @@
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
-import * as React from "react";
-import { Suspense } from "react";
+import React from "react";
+import { Suspense, useState, useEffect, useRef, SVGProps, HTMLProps } from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
@@ -22,8 +22,6 @@ interface Segment {
 interface SunburstNode {
   id: string;
   name: string;
-  target?: Segment;
-  current?: Segment;
   children?: SunburstNode[];
   value?: number;
 }
@@ -58,22 +56,6 @@ const [useSunbrustData, sunburstData$] = bind(
           children: common.tree.map(sunmap),
         };
         const root = partition(tree);
-        root.each((d) => (d.data.current = d as Segment));
-        root.each(
-          (d) =>
-          (d.data.target = {
-            x0:
-              Math.max(0, Math.min(1, (d.x0 - root.x0) / (root.x1 - root.x0))) *
-              2 *
-              Math.PI,
-            x1:
-              Math.max(0, Math.min(1, (d.x1 - root.x0) / (root.x1 - root.x0))) *
-              2 *
-              Math.PI,
-            y0: Math.max(0, d.y0 - root.depth),
-            y1: Math.max(0, d.y1 - root.depth),
-          })
-        );
         return root;
       }
       return null;
@@ -113,15 +95,77 @@ const fill = (d: HierarchyNode) => {
   return color(d.data.name);
 };
 
-interface SunburstChartProps extends React.HTMLProps<HTMLDivElement> {
+interface ArcProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  arc: d3.Arc<any, Segment>,
+  root: HierarchyNode | null,
+  node: HierarchyNode,
+  onClick: (d: HierarchyNode) => void
+}
+const Arc = (props: ArcProps) => {
+  const { arc, root, node, onClick } = props;
+  const ref = useRef(null);
+  const [current, setCurrent] = useState(relativeArc(node, root));
+
+  useEffect(() => {
+    setCurrent(relativeArc(node, root));
+  }, [props.root]);
+
+  return (
+    <path
+      ref={ref}
+      onClick={() => onClick(node)}
+      d={arc(current) ?? ''}
+      fill={fill(node)}
+      fillOpacity={arcVisible(current) ? (node.children ? 0.8 : 0.4) : 0}
+      className={
+        node.children && node.children.length > 0
+          ? "sunburst-clickable"
+          : ""
+      }
+    >
+      <title>
+        {`${props.node
+          .ancestors()
+          .map((datum) => datum.data.name)
+          .reverse()
+          .slice(1)
+          .join(" > ")}\n${format(props.node.value ?? 0)}`}
+      </title>
+    </path>
+  )
+}
+interface ArcLabelProps extends SVGProps<SVGTextElement> {
+  root: HierarchyNode | null,
+  node: HierarchyNode,
+  radius: number,
+}
+const ArcLabel = (props: ArcLabelProps) => {
+  const { root, node, radius } = props;
+  const [current, setCurrent] = useState(relativeArc(node, root));
+
+  useEffect(() => {
+    setCurrent(relativeArc(node, root));
+  }, [props.root]);
+
+  return (<text {...props}
+    dy="0.35em"
+    opacity={arcVisible(current) ? labelVisible(current) : 0}
+    transform={labelTransform(current, radius)}
+  >
+    {node.data.name}
+  </text>)
+}
+
+interface SunburstChartProps extends HTMLProps<HTMLDivElement> {
   width?: number;
 }
 
 const SunburstFigure = (props: SunburstChartProps) => {
   const root = useSunbrustData();
-  const [parent, setParent] = React.useState(root);
-  const wedgeRef = React.useRef(null);
-  const labelRef = React.useRef(null);
+  const [parent, setParent] = useState(root);
+  const wedgeRef = useRef(null);
+  const labelRef = useRef(null);
   const width = props.width ?? 300;
   const radius = width / 6;
   const arc = d3
@@ -133,7 +177,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .innerRadius((d) => d.y0 * radius)
     .outerRadius((d) => Math.max(d.y0 * radius, d.y1 * radius - 1));
 
-  React.useEffect(() => {
+  useEffect(() => {
     sunburstData$.subscribe((data) => {
       if (data !== root) {
         setParent(data);
@@ -156,33 +200,12 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .join(" > ");
 
   return (
-    <figure className="sunburst-chart">
-      <figcaption>{current_path}</figcaption>
+    <figure {...props} className="sunburst-chart">
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
-            {parent?.descendants().filter((d) => arcVisible(relativeArc(d, parent))).map((d) => (
-              <path
-                key={d.data.id}
-                onClick={() => click(d)}
-                fill={fill(d)}
-                fillOpacity={d.children ? 0.8 : 0.4}
-                d={arc(relativeArc(d, parent)) ?? ""}
-                className={
-                  d.children && d.children.length > 0
-                    ? "sunburst-clickable"
-                    : ""
-                }
-              >
-                <title>
-                  {`${d
-                    .ancestors()
-                    .map((datum) => datum.data.name)
-                    .reverse()
-                    .slice(1)
-                    .join(" > ")}\n${format(d.value ?? 0)}`}
-                </title>
-              </path>
+            {root?.descendants().map((d) => (
+              <Arc key={d.data.id} node={d} root={parent} onClick={click} arc={arc} />
             ))}
           </g>
           <g
@@ -191,24 +214,19 @@ const SunburstFigure = (props: SunburstChartProps) => {
             textAnchor="middle"
             className="sunburst-chart-label"
           >
-            {parent?.descendants().filter((d) => labelVisible(relativeArc(d, parent))).map((d) => (
-              <text
-                key={`label-${d.data.id}`}
-                dy="0.35em"
-                transform={labelTransform(relativeArc(d, parent), radius)}
-              >
-                {d.data.name}
-              </text>
+            {root?.descendants().map((d) => (
+              <ArcLabel key={`label-${d.data.id}`} radius={radius} node={d} root={parent} />
             ))}
           </g>
           <circle
             r={radius}
             fill="none"
             pointerEvents="all"
-            onClick={() => click(parent?.parent??null)}
+            onClick={() => click(parent?.parent ?? null)}
           />
         </g>
       </svg>
+      <figcaption>&nbsp;{current_path}</figcaption>
     </figure>
   );
 };

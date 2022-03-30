@@ -1,6 +1,6 @@
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as React from "react";
-import { Suspense, useState } from "react";
+import { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
 import { OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
@@ -115,11 +115,11 @@ const CategoryNode = (props: {
   data: TreeNode;
   onChange: (target: TreeNode, state: CheckboxState) => void;
 }) => {
-  const checkRef = React.useRef(null);
+  const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const checkId = `pattern-check-${props.data.id}`;
 
-  React.useEffect(() => {
+  useEffect(() => {
     const state = props.data.checked;
     if (checkRef.current) {
       const cb = checkRef.current as HTMLInputElement;
@@ -135,7 +135,7 @@ const CategoryNode = (props: {
       }
     }
   });
-  const change = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const change = (e: ChangeEvent<HTMLInputElement>) => {
     const state = e.currentTarget.checked
       ? CheckboxState.Checked
       : CheckboxState.Empty;
