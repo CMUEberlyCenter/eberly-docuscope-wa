@@ -6,4 +6,4 @@ import DocuScopeWA from "./DocuScopeWA";
 
 const root = createRoot(document.getElementById("content"));
 root.render(<DocuScopeWA />);
-//ReactDOM.render(<DocuScopeSandbox />, document.getElementById("content"));
+//root.render(<DocuScopeSandbox />);

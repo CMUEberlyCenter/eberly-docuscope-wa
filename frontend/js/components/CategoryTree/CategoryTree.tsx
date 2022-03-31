@@ -117,7 +117,7 @@ const CategoryNode = (props: {
 }) => {
   const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
-  const checkId = `pattern-check-${props.data.id}`;
+  const checkId = `pattern-check-${props.data.id}`; // TODO: replace with useId()
 
   useEffect(() => {
     const state = props.data.checked;
