@@ -38,7 +38,6 @@ import "../css/docuscope.css";
 import "../css/editor.css";
 import "../css/expectations.scss";
 import "../css/coherence.css";
-import "../css/meter.css";
 
 import ontopicLegend from "../css/img/ontopic-legend.png";
 
