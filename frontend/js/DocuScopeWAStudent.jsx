@@ -29,14 +29,14 @@ import Switch from "react-switch";
 //import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
-import DocuScopeProgressWindow from './DocuScopeProgressWindow';
+import DocuScopeProgressWindow from "./DocuScopeProgressWindow";
 
 //import docuscope from "../views/docuscope.html";
 
 import "../css/main.css";
 import "../css/docuscope.css";
 import "../css/editor.css";
-import '../css/expectations.scss';
+import "../css/expectations.scss";
 import "../css/coherence.css";
 import "../css/meter.css";
 
@@ -167,11 +167,11 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  setStatus (aMessage) {
-    console.log ("setStatus ()");
+  setStatus(aMessage) {
+    console.log("setStatus ()");
 
-    this.setState ({
-      status: aMessage
+    this.setState({
+      status: aMessage,
     });
   }
 
@@ -217,7 +217,7 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   sendMessage(aRawText) {
-    console.log ("sendMessage ()");
+    console.log("sendMessage ()");
     var payload = {
       event_id: "docuscope",
       data: {
@@ -236,29 +236,36 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.activeIndex == 3) {
-      let escaped=encodeURIComponent(payload);
+      let escaped = encodeURIComponent(payload);
 
-      let encoded=window.btoa(escaped);
+      let encoded = window.btoa(escaped);
 
       if (this.props.api) {
-        this.props.api ("ontopic", {
-          base: encoded
-        },"POST");
+        this.props.api(
+          "ontopic",
+          {
+            base: encoded,
+          },
+          "POST"
+        );
       }
-      this.setState ({
-        showProgress: true,
-        progressTitle: "Retrieving results ...",
-        progress: 25
-      }, () => {
-        setTimeout (() => {
-          this.setState ({
-            showProgress: false,
-            sentences: sentenceData,
-            text: aRawText,
-            progress: 100
-          });
-        },3000);
-      });
+      this.setState(
+        {
+          showProgress: true,
+          progressTitle: "Retrieving results ...",
+          progress: 25,
+        },
+        () => {
+          setTimeout(() => {
+            this.setState({
+              showProgress: false,
+              sentences: sentenceData,
+              text: aRawText,
+              progress: 100,
+            });
+          }, 3000);
+        }
+      );
     }
   }
 
@@ -295,13 +302,13 @@ export default class DocuScopeWAStudent extends Component {
       },
       () => {
         // Inform the OnTopic backend
-        if ((this.state.activeIndex == 3) && (this.state.editorActive == false)) {
+        if (this.state.activeIndex == 3 && this.state.editorActive == false) {
           var plain = Plain.serialize(Value.fromJSON(this.state.value));
-          this.sendMessage (plain);
+          this.sendMessage(plain);
         }
 
         // Inform the Docuscope backend
-        if ((this.state.activeIndex == 4) && (this.state.editorActive == false)) {
+        if (this.state.activeIndex == 4 && this.state.editorActive == false) {
           const plain_text = Plain.serialize(Value.fromJSON(this.state.value));
           this.sendMessage(plain_text);
         }
@@ -603,7 +610,7 @@ export default class DocuScopeWAStudent extends Component {
 
     return (
       <div className="expectations">
-        <TabTitle title="Meet Readers' Expectations"/>
+        <TabTitle title="Meet Readers' Expectations" />
         <div className="impressions-description">
           <div className="impressions-name">{this.props.ruleManager.name}</div>
           <div className="impressions-statement">
@@ -633,7 +640,7 @@ export default class DocuScopeWAStudent extends Component {
   generateCoherenceTab() {
     return (
       <div className="coherence">
-        <TabTitle title="Create Flow in Your Writing"/>
+        <TabTitle title="Create Flow in Your Writing" />
         <div className="coherence-description">
           <div style={{ marginBottom: "2px" }}>
             <img src={ontopicLegend}></img>
@@ -658,7 +665,7 @@ export default class DocuScopeWAStudent extends Component {
           </label>
           <Switch
             checked={false}
-            onChange={()=>({})}
+            onChange={() => ({})}
             size={Sizes.TINY}
             active={{ text: "On" }}
             inactive={{ text: "Off" }}
@@ -678,7 +685,7 @@ export default class DocuScopeWAStudent extends Component {
   generateClarityTab() {
     return (
       <div className="impressions">
-        <TabTitle title="Polish Your Sentences for Clarity"/>
+        <TabTitle title="Polish Your Sentences for Clarity" />
         <div className="impressions-content">
           <DocuScopeOnTopic
             setStatus={this.setStatus}
@@ -716,7 +723,12 @@ export default class DocuScopeWAStudent extends Component {
     }
 
     if (this.state.showProgress == true) {
-      progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
+      progresswindow = (
+        <DocuScopeProgressWindow
+          title={this.state.progressTitle}
+          progress={this.state.progress}
+        />
+      );
     }
 
     const expectationsTab = this.generateExpectationsTab();
@@ -827,7 +839,10 @@ export default class DocuScopeWAStudent extends Component {
           </Navbar>
         </div>
         <div className="content">
-          <div className="leftcol d-flex flex-grow-1 flex-column overflow-hidden" style={{ width: leftWidth }}>
+          <div
+            className="leftcol d-flex flex-grow-1 flex-column overflow-hidden"
+            style={{ width: leftWidth }}
+          >
             <Tabs>
               <TabItem
                 isActive={this.state.activeIndex === 1}
@@ -892,12 +907,15 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override h-100 w-100"
                 isActive={this.state.activeIndex === 4}
               >
-                <Impressions/>
+                <Impressions />
               </TabPanel>
             </TabsContent>
           </div>
 
-          <div className="centercol d-flex flex-grow-1 flex-column" style={{ width: centerWidth }}>
+          <div
+            className="centercol d-flex flex-grow-1 flex-column"
+            style={{ width: centerWidth }}
+          >
             <div className="editor-top-menu">
               <div className="editor-top-menu-filler">
                 <select

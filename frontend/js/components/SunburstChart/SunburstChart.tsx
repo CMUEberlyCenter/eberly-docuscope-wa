@@ -2,13 +2,20 @@ import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
 import React from "react";
-import { Suspense, useState, useEffect, useRef, SVGProps, HTMLProps } from "react";
+import {
+  Suspense,
+  useState,
+  useEffect,
+  useRef,
+  SVGProps,
+  HTMLProps,
+} from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
 import {
   commonDictionary$,
-  CommonDictionaryTreeNode
+  CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";
 import "./SunburstChart.scss";
@@ -19,6 +26,9 @@ interface Segment {
   y0: number;
   y1: number;
 }
+function equalSegment(a: Segment, b: Segment) {
+  return a.x0 === b.x0 && a.x1 === b.x1 && a.y0 === b.y0 && a.y1 === b.y1;
+}
 interface SunburstNode {
   id: string;
   name: string;
@@ -27,9 +37,7 @@ interface SunburstNode {
 }
 type HierarchyNode = HierarchyRectangularNode<SunburstNode>;
 
-const partition = (
-  pdata: SunburstNode
-): HierarchyNode => {
+const partition = (pdata: SunburstNode): HierarchyNode => {
   const r = d3.hierarchy(pdata).sum((d) => d.value ?? 0);
   return d3.partition<SunburstNode>().size([2 * Math.PI, r.height + 1])(r);
 };
@@ -71,7 +79,7 @@ function relativeArc(d: HierarchyNode, p: HierarchyNode | null): Segment {
       x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * p2,
       y0: Math.max(0, d.y0 - p.depth),
       y1: Math.max(0, d.y1 - p.depth),
-    }
+    };
   }
   return d as Segment;
 }
@@ -94,34 +102,53 @@ const fill = (d: HierarchyNode) => {
   }
   return color(d.data.name);
 };
+const opacity = (visible: boolean, hasChildren: boolean) =>
+  visible ? (hasChildren ? 0.8 : 0.4) : 0;
 
 interface ArcProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  arc: d3.Arc<any, Segment>,
-  root: HierarchyNode | null,
-  node: HierarchyNode,
-  onClick: (d: HierarchyNode) => void
+  arc: d3.Arc<any, Segment>;
+  root: HierarchyNode | null;
+  node: HierarchyNode;
+  onClick: (d: HierarchyNode) => void;
 }
 const Arc = (props: ArcProps) => {
   const { arc, root, node, onClick } = props;
   const ref = useRef(null);
   const [current, setCurrent] = useState(relativeArc(node, root));
-
   useEffect(() => {
-    setCurrent(relativeArc(node, root));
-  }, [props.root]);
+    const target = relativeArc(node, root);
+    if (!equalSegment(current, target)) {
+      const current_visible = arcVisible(current);
+      const target_visible = arcVisible(target);
+      if (ref.current && (current_visible || target_visible)) {
+        //const visInterp = d3.interpolate(opacity(current_visible, !!node.children), opacity(target_visible, !!node.children));
+        d3.select(ref.current)
+          .transition("sunburst")
+          .duration(750)
+          .attr("fill-opacity", () =>
+            opacity(arcVisible(target), !!node.children)
+          )
+          .attrTween("d", () => {
+            const interp = d3.interpolate(current, target);
+            return (t: number) => arc(interp(t)) ?? "";
+          })
+          .on("end", () => setCurrent(target));
+      } else {
+        setCurrent(target);
+      }
+    }
+  }, [node, root, arc, current]);
 
   return (
     <path
       ref={ref}
       onClick={() => onClick(node)}
-      d={arc(current) ?? ''}
+      d={arc(current) ?? ""}
       fill={fill(node)}
-      fillOpacity={arcVisible(current) ? (node.children ? 0.8 : 0.4) : 0}
+      fillOpacity={opacity(arcVisible(current), !!node.children)}
       className={
-        node.children && node.children.length > 0
-          ? "sunburst-clickable"
-          : ""
+        node.children && node.children.length > 0 ? "sunburst-clickable" : ""
       }
     >
       <title>
@@ -133,29 +160,53 @@ const Arc = (props: ArcProps) => {
           .join(" > ")}\n${format(props.node.value ?? 0)}`}
       </title>
     </path>
-  )
-}
+  );
+};
 interface ArcLabelProps extends SVGProps<SVGTextElement> {
-  root: HierarchyNode | null,
-  node: HierarchyNode,
-  radius: number,
+  root: HierarchyNode | null;
+  node: HierarchyNode;
+  radius: number;
 }
 const ArcLabel = (props: ArcLabelProps) => {
   const { root, node, radius } = props;
   const [current, setCurrent] = useState(relativeArc(node, root));
+  const ref = useRef(null);
 
   useEffect(() => {
-    setCurrent(relativeArc(node, root));
-  }, [props.root]);
+    const target = relativeArc(node, root);
+    if (!equalSegment(current, target)) {
+      const current_visible = arcVisible(current);
+      const target_visible = arcVisible(target);
+      if (ref.current && (current_visible || target_visible)) {
+        d3.select(ref.current)
+          .transition("sunburst")
+          .duration(750)
+          .attr("fill-opacity", () =>
+            target_visible ? labelVisible(target) : 0
+          )
+          .attrTween("transform", () => {
+            const interp = d3.interpolate(current, target);
+            return (t: number) => labelTransform(interp(t), radius);
+          })
+          .on("end", () => setCurrent(target));
+      } else {
+        setCurrent(target);
+      }
+    }
+  }, [node, root, current, radius]);
 
-  return (<text {...props}
-    dy="0.35em"
-    opacity={arcVisible(current) ? labelVisible(current) : 0}
-    transform={labelTransform(current, radius)}
-  >
-    {node.data.name}
-  </text>)
-}
+  return (
+    <text
+      {...props}
+      ref={ref}
+      dy="0.35em"
+      opacity={arcVisible(current) ? labelVisible(current) : 0}
+      transform={labelTransform(current, radius)}
+    >
+      {node.data.name}
+    </text>
+  );
+};
 
 interface SunburstChartProps extends HTMLProps<HTMLDivElement> {
   width?: number;
@@ -189,11 +240,13 @@ const SunburstFigure = (props: SunburstChartProps) => {
       setParent(root);
       return;
     }
-    if (p.children) { // gurantee no leaves
+    if (p.children) {
+      // gurantee no leaves
       setParent(p);
     }
   };
-  const current_path = parent?.ancestors()
+  const current_path = parent
+    ?.ancestors()
     .reverse()
     .slice(1)
     .map((d) => d.data.name)
@@ -205,7 +258,13 @@ const SunburstFigure = (props: SunburstChartProps) => {
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
             {root?.descendants().map((d) => (
-              <Arc key={d.data.id} node={d} root={parent} onClick={click} arc={arc} />
+              <Arc
+                key={d.data.id}
+                node={d}
+                root={parent}
+                onClick={click}
+                arc={arc}
+              />
             ))}
           </g>
           <g
@@ -215,7 +274,12 @@ const SunburstFigure = (props: SunburstChartProps) => {
             className="sunburst-chart-label"
           >
             {root?.descendants().map((d) => (
-              <ArcLabel key={`label-${d.data.id}`} radius={radius} node={d} root={parent} />
+              <ArcLabel
+                key={`label-${d.data.id}`}
+                radius={radius}
+                node={d}
+                root={parent}
+              />
             ))}
           </g>
           <circle
