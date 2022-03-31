@@ -210,29 +210,6 @@ tbody tr:nth-child(even) {
   padding: 0px !important;
 }
 
-.progresswindow {
-  position: absolute;
-  top: 50%;
-  left: calc(50% - 200px);
-  width: 400px;
-  height: 100px;
-  background-color: #e5e1e1;
-  border: 2px outset #d1cfcf;
-  -webkit-box-shadow: 2px 2px 9px 5px rgb(0 0 0 / 60%);
-  box-shadow: 2px 2px 9px 5px rgb(0 0 0 / 60%);
-}
-
-.progresstitle {
-  /* border: 1px solid grey; */
-  background: #c7c7c7;
-  padding: 3px;
-  margin: 2px;
-}
-
-.progresscontent {
-  margin: 2px;
-}
-
 .ontopic-container {
   display: flex;
   flex-direction: row;

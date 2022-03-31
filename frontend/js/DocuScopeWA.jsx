@@ -7,7 +7,7 @@ import DocuScopeWAScrim from './DocuScopeWAScrim';
 import DocuScopeWAInstructor from './DocuScopeWAInstructor';
 import DocuScopeWAStudent from './DocuScopeWAStudent';
 import DocuScopeRules from './DocuScopeRules';
-import DocuScopeProgressWindow from './DocuScopeProgressWindow';
+import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
 
 import '../css/main.css';
 import '../css/docuscope.css';

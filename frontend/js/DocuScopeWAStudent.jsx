@@ -29,7 +29,7 @@ import Switch from "react-switch";
 //import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
-import DocuScopeProgressWindow from "./DocuScopeProgressWindow";
+import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 
 //import docuscope from "../views/docuscope.html";
 
