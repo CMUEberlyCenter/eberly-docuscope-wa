@@ -7,6 +7,9 @@ const Impressions = () => (
   <div className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
     <TabTitle title="Manage Readers' Impressions" />
     {/*<div className="p-2 lh-lg"></div>*/}
+    <div className="alert alert-warning">
+      These tools is not available when editing is enabled.
+    </div>
     <div className="impressions-content overflow-auto flex-grow-1 p-3">
       <SunburstChart width={400} />
       <h3 className="mt-2">Dictionary Categories</h3>

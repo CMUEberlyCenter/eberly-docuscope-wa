@@ -103,8 +103,10 @@ export function tag(text: string) {
             subscriber.next(payload);
             break;
           }
-          case 'submitted':
           case 'error':
+            subscriber.error(evData);
+            break;
+          case 'submitted': // Unused in this context.
           case 'pending':
           default:
             console.warn(`Unhandled event: ${evEvent}`);
@@ -120,6 +122,7 @@ export function tag(text: string) {
     xhr.addEventListener('load', () => subscriber.complete());
     xhr.addEventListener('abort', () => subscriber.complete());
     xhr.send(JSON.stringify({ text: text }));
+    return () => xhr.abort();
   });
 }
 export const [useTaggerResults, taggerResults$] = bind(

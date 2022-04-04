@@ -17,6 +17,7 @@ import {
   commonDictionary$,
   CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
+import { useEditorState } from "../../service/editor-state.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";
 import "./SunburstChart.scss";
 
@@ -214,6 +215,7 @@ interface SunburstChartProps extends HTMLProps<HTMLDivElement> {
 
 const SunburstFigure = (props: SunburstChartProps) => {
   const root = useSunbrustData();
+  const editing = useEditorState();
   const [parent, setParent] = useState(root);
   const wedgeRef = useRef(null);
   const labelRef = useRef(null);
@@ -253,7 +255,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .join(" > ");
 
   return (
-    <figure {...props} className="sunburst-chart">
+    <figure {...props} className={`sunburst-chart ${editing || parent === null ? 'placeholder w-100' : ''}`} aria-hidden={editing}>
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>

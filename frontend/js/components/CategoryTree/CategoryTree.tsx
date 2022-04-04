@@ -9,6 +9,7 @@ import {
   commonDictionary$,
   CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
+import { useEditorState } from "../../service/editor-state.service";
 import {
   gen_patterns_map,
   TaggerResults,
@@ -117,6 +118,7 @@ const CategoryNode = (props: {
 }) => {
   const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
+  const editing = useEditorState();
   const checkId = `pattern-check-${props.data.id}`; // TODO: replace with useId()
 
   useEffect(() => {
@@ -172,10 +174,10 @@ const CategoryNode = (props: {
         {props.data.patterns.length > 0 || !expanded ? (
           <span
             className={`badge bg-${
-              pattern_count > 0 ? "primary" : "secondary"
+              pattern_count > 0 && !editing ? "primary" : "secondary"
             } rounded-pill fs-6`}
           >
-            {pattern_count}
+            {editing ? '-' : pattern_count}
           </span>
         ) : (
           ""
