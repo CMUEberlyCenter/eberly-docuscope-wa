@@ -57,29 +57,32 @@ function count_patterns(node: TreeNode): number {
 }
 
 const [useCategoryData] = bind(
-  combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
-    map((data) => {
-      const tagged: TaggerResults | null = data.tagged;
-      const common: CommonDictionary | null = data.common;
-      if (common) {
-        const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
-        const dfsmap = (
-          parent: string,
-          node: CommonDictionaryTreeNode
-        ): TreeNode => ({
-          parent: parent,
-          id: node.id,
-          label: node.label,
-          help: node.help,
-          children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
-          patterns: cat_pat_map.get(node.id) ?? [],
-          checked: CheckboxState.Empty,
-        });
-        return common.tree.map(dfsmap.bind(null, ""));
-      }
-      return null;
-    })
-  )
+  //editorState.pipe(
+  //  filter(o => !o),
+  //  switchMap(() => combineLatest({ common: commonDictionary$, tagged: taggerResults$}))).pipe(
+      combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
+      map((data) => {
+        const tagged: TaggerResults | number | null = data.tagged;
+        const common: CommonDictionary | null = data.common;
+        if (common && typeof tagged !== 'number') {
+          const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
+          const dfsmap = (
+            parent: string,
+            node: CommonDictionaryTreeNode
+          ): TreeNode => ({
+            parent: parent,
+            id: node.id,
+            label: node.label,
+            help: node.help,
+            children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
+            patterns: cat_pat_map.get(node.id) ?? [],
+            checked: CheckboxState.Empty,
+          });
+          return common.tree.map(dfsmap.bind(null, ""));
+        }
+        return null;
+      })
+    )
 );
 
 enum CheckboxState {
@@ -148,9 +151,8 @@ const CategoryNode = (props: {
   return (
     <li data-docuscope-category={props.data.id} className="list-group-item">
       <span
-        className={`material-icons ${
-          has_child_data(props.data) ? "" : "invisible"
-        }`}
+        className={`material-icons ${has_child_data(props.data) ? "" : "invisible"
+          }`}
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? "expand_more" : "chevron_right"}
@@ -173,9 +175,8 @@ const CategoryNode = (props: {
         </label>
         {props.data.patterns.length > 0 || !expanded ? (
           <span
-            className={`badge bg-${
-              pattern_count > 0 && !editing ? "primary" : "secondary"
-            } rounded-pill fs-6`}
+            className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
+              } rounded-pill fs-6`}
           >
             {editing ? '-' : pattern_count}
           </span>

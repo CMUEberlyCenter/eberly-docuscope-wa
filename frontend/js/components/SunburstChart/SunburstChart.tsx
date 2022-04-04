@@ -47,7 +47,7 @@ const [useSunbrustData, sunburstData$] = bind(
     map((data) => {
       const tagged = data.tagged;
       const common = data.common;
-      if (common && tagged) {
+      if (common && tagged && typeof(tagged) !== 'number') {
         const cat_pat_map = gen_patterns_map(tagged);
         const sunmap = (node: CommonDictionaryTreeNode): SunburstNode => ({
           id: node.id,

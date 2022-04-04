@@ -44,7 +44,7 @@ import ontopicLegend from "../css/img/ontopic-legend.png";
 import { sentenceData } from "./data/sentencedata.js";
 import Impressions from "./components/Impressions/Impressions";
 import TabTitle from "./components/TabTitle/TabTitle";
-import { editorState } from "./service/editor-state.service";
+import { editorState, editorText } from "./service/editor-state.service";
 
 let initialValue = Value.fromJSON({
   document: {
@@ -278,6 +278,7 @@ export default class DocuScopeWAStudent extends Component {
 
     console.log("handleEditorToggle (" + toggled + "," + editorLocked + ")");
 
+    editorText.next(checked ? '' : Plain.serialize(Value.fromJSON(this.state.value)));
     editorState.next(checked);
     this.setState({ editorActive: toggled, locked: editorLocked }, () => {
       if (this.state.editorActive == false) {

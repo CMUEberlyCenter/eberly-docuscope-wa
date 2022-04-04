@@ -1,6 +1,6 @@
 import { bind } from '@react-rxjs/core';
-import { Observable, of } from 'rxjs';
-//import tagged from '../data/tagger.json';
+import { filter, Observable, switchMap } from 'rxjs';
+import { editorState$, editorText } from './editor-state.service';
 
 interface PatternData {
   pattern: string;
@@ -17,13 +17,13 @@ export interface TaggerResults {
   tagging_time: number;
   patterns: PatternCategoryData[];
 }
-const EmptyResults: TaggerResults = {
+/*const EmptyResults: TaggerResults = {
   doc_id: '',
   word_count: 0,
   html_content: '',
   tagging_time: 0,
   patterns: [],
-}
+}*/
 export function gen_patterns_map(
   res: TaggerResults
 ): Map<string, PatternData[]> {
@@ -38,9 +38,9 @@ interface Message {
 }
 
 export function tag(text: string) {
-  return new Observable(subscriber => {
+  return new Observable<TaggerResults | number>(subscriber => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', '/tag', true);
+    xhr.open('POST', 'http://localhost:8000/tag', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     let position = 0;
     xhr.addEventListener('progress', (ev) => {
@@ -50,7 +50,9 @@ export function tag(text: string) {
         subscriber.error(xhr.responseText);
         return;
       }
+      //console.log(xhr.responseText);
       const data = xhr.responseText.substring(position);
+      //console.log(data);
       position += data.length;
       let chunk = '';
       //let evId: string | null = null;
@@ -64,8 +66,8 @@ export function tag(text: string) {
             chunk.split(/\n|\r\n|\r/).forEach((line) => {
               line = line.trimEnd();
               const index = line.indexOf(':');
-              if (index <= 0) {
-                // ignore non-fields;
+              if (index <= 0 || index > 8) {
+                // ignore non-fields or garbage
                 return;
               }
               const field = line.substring(0, index);
@@ -81,7 +83,7 @@ export function tag(text: string) {
                   evEvent = value;
                   break;
                 default:
-                  console.warn(`Unhandled field: ${field}`);
+                  console.warn(`Unhandled field for ${evEvent}: ${field}`);
                   return;
               }
             });
@@ -99,12 +101,16 @@ export function tag(text: string) {
             break;
           }
           case 'done': {
-            const payload: TaggerResults = JSON.parse(evData);
-            subscriber.next(payload);
+            if (evData) { // Needed to prevent weird parsing errors.
+              const payload: TaggerResults = JSON.parse(evData);
+              subscriber.next(payload);
+            }
             break;
           }
           case 'error':
             subscriber.error(evData);
+            break;
+          case 'message':
             break;
           case 'submitted': // Unused in this context.
           case 'pending':
@@ -125,7 +131,16 @@ export function tag(text: string) {
     return () => xhr.abort();
   });
 }
+
+const tagEditorText = editorState$.pipe(
+  filter(o => !o),
+  switchMap(() => editorText.pipe(
+    filter(txt => !!txt),
+    switchMap((text: string) => tag(text))
+  ))
+);
+
 export const [useTaggerResults, taggerResults$] = bind(
-  of(EmptyResults),
+  tagEditorText,
   null
 );
