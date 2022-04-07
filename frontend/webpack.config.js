@@ -1,15 +1,13 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
 const path = require('path');
-const resolve = require('path').resolve;
 
 const config = {
   devtool: 'eval-source-map',
   entry: __dirname + '/js/index.jsx',
   output:{
-    path: resolve('./public/'),
+    path: path.resolve('./public/'),
     filename: 'bundle.js',
-    publicPath: '.'
+    publicPath: 'auto'
   },
   performance: {
     hints: false
@@ -57,7 +55,7 @@ const config = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(js|jsx)$/i,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         options: {
@@ -79,23 +77,23 @@ const config = {
       },
       {
         test: /\.(png|svg|jpe?g|gif)$/i,
-        loader: 'file-loader',
-        options: {
-          publicPath: '.',
-        },
+        type: 'asset/resource',
+        generator: {
+          filename: 'images/[name][ext][query]'
+        }
       },
       {
-        test: /docuscope\.html$/i,
-        loader: 'file-loader',
-        options: {
-          publicPath: './',
-        },
+        test: /\/assets\//,
+        type: 'asset/resource',
+        generator: {
+          filename: 'assets/[name][ext][query]'
+        }
       },
       //{ enforce: 'post', test: /fontkit[/\\]index.js$/, loader: "transform-loader?brfs" },
       //{ enforce: 'post', test: /unicode-properties[/\\]index.js$/, loader: "transform-loader?brfs" },
       //{ enforce: 'post', test: /linebreak[/\\]src[/\\]linebreaker.js/, loader: "transform-loader?brfs" },
       { test: /src[/\\]assets/, loader: 'arraybuffer-loader'},
-      { test: /\.afm$/, loader: 'raw-loader'}
+      { test: /\.afm$/, type: 'asset/source'}
     ]
   }
 };

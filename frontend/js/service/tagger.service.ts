@@ -1,6 +1,7 @@
 import { bind } from '@react-rxjs/core';
-import { catchError, filter, Observable, of, switchMap } from 'rxjs';
+import { catchError, combineLatest, filter, Observable, of, switchMap } from 'rxjs';
 import { editorState$, editorText } from './editor-state.service';
+import { settings$ } from './settings.service';
 
 interface PatternData {
   pattern: string;
@@ -38,10 +39,10 @@ interface Message {
   status: string;
 }
 
-export function tag(text: string) {
+export function tag(tagger_url: string, text: string) {
   return new Observable<TaggerResults | number>(subscriber => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8088/tag', true);
+    xhr.open('POST', tagger_url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     let position = 0;
     xhr.addEventListener('progress', (ev) => {
@@ -135,9 +136,9 @@ export function tag(text: string) {
 
 const tagEditorText = editorState$.pipe(
   filter(o => !o),
-  switchMap(() => editorText.pipe(
-    filter(txt => txt.trim().length > 0),
-    switchMap((text: string) => tag(text))
+  switchMap(() => combineLatest({ settings: settings$, text: editorText }).pipe(
+    filter(({text}) => text.trim().length > 0),
+    switchMap(({settings, text}) => tag(settings.tagger, text))
   )),
   catchError((err: Error) =>
     of({...EmptyResults, ...{isError: true, html_content: err.message}}))
