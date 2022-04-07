@@ -1,5 +1,5 @@
 import { bind } from '@react-rxjs/core';
-import { filter, Observable, switchMap } from 'rxjs';
+import { catchError, filter, Observable, of, switchMap } from 'rxjs';
 import { editorState$, editorText } from './editor-state.service';
 
 interface PatternData {
@@ -16,14 +16,15 @@ export interface TaggerResults {
   html_content: string;
   tagging_time: number;
   patterns: PatternCategoryData[];
+  isError?: boolean;
 }
-/*const EmptyResults: TaggerResults = {
+const EmptyResults: TaggerResults = {
   doc_id: '',
   word_count: 0,
   html_content: '',
   tagging_time: 0,
   patterns: [],
-}*/
+}
 export function gen_patterns_map(
   res: TaggerResults
 ): Map<string, PatternData[]> {
@@ -40,7 +41,7 @@ interface Message {
 export function tag(text: string) {
   return new Observable<TaggerResults | number>(subscriber => {
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:8000/tag', true);
+    xhr.open('POST', 'http://localhost:8088/tag', true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     let position = 0;
     xhr.addEventListener('progress', (ev) => {
@@ -121,9 +122,8 @@ export function tag(text: string) {
         subscriber.error(err);
       }
     });
-    xhr.addEventListener('error', (err) => {
-      console.error(err);
-      subscriber.error(err);
+    xhr.addEventListener('error', () => {
+      subscriber.error(new Error('Tagger is unavailable.'));
     });
     xhr.addEventListener('load', () => subscriber.complete());
     xhr.addEventListener('abort', () => subscriber.complete());
@@ -135,9 +135,11 @@ export function tag(text: string) {
 const tagEditorText = editorState$.pipe(
   filter(o => !o),
   switchMap(() => editorText.pipe(
-    filter(txt => !!txt),
+    filter(txt => txt.trim().length > 0),
     switchMap((text: string) => tag(text))
-  ))
+  )),
+  catchError((err: Error) =>
+    of({...EmptyResults, ...{isError: true, html_content: err.message}}))
 );
 
 export const [useTaggerResults, taggerResults$] = bind(
