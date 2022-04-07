@@ -127,6 +127,7 @@ export function tag(text: string) {
     });
     xhr.addEventListener('load', () => subscriber.complete());
     xhr.addEventListener('abort', () => subscriber.complete());
+    subscriber.next(0);
     xhr.send(JSON.stringify({ text: text }));
     return () => xhr.abort();
   });
