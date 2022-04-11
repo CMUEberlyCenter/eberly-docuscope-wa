@@ -2,15 +2,19 @@ import { bind } from '@react-rxjs/core';
 import { catchError, combineLatest, filter, Observable, of, switchMap } from 'rxjs';
 import { editorState$, editorText } from './editor-state.service';
 import { settings$ } from './settings.service';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
+/** JSON structure of patterns. */
 interface PatternData {
   pattern: string;
   count: number;
 }
+/** JSON structure of patterns for a category */
 interface PatternCategoryData {
   category: string;
   patterns: PatternData[];
 }
+/** JSON structure of tagger results data */
 export interface TaggerResults {
   doc_id: string;
   word_count: number;
@@ -26,6 +30,12 @@ const EmptyResults: TaggerResults = {
   tagging_time: 0,
   patterns: [],
 }
+/**
+ * Generate the mapping of category ids to their list of patterns.
+ * Useful for fast lookup of of patterns.
+ * @param res the results of tagging.
+ * @returns a Map of category id to its list of patterns.
+ */
 export function gen_patterns_map(
   res: TaggerResults
 ): Map<string, PatternData[]> {
@@ -34,114 +44,78 @@ export function gen_patterns_map(
   );
 }
 
+/** JSON structure for non-TaggerResult messages from the tagger. */
 interface Message {
   doc_id?: string;
   status: string;
 }
 
+/**
+ * Tag the given text using the specified DocuScope tagger.
+ * @param tagger_url URL of the tagging service.
+ * @param text the string to be tagged.
+ * @returns TaggerResults which is the data returned by the tagger or
+ * a number which is the percent complete of the tagging process.
+ */
 export function tag(tagger_url: string, text: string) {
   return new Observable<TaggerResults | number>(subscriber => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', tagger_url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    let position = 0;
-    xhr.addEventListener('progress', (ev) => {
-      if (!xhr) return;
-      if (xhr.status !== 200) {
-        console.error(ev);
-        subscriber.error(xhr.responseText);
-        return;
-      }
-      //console.log(xhr.responseText);
-      const data = xhr.responseText.substring(position);
-      //console.log(data);
-      position += data.length;
-      let chunk = '';
-      //let evId: string | null = null;
-      //let evRetry: string | null = null;
-      let evData = '';
-      let evEvent = 'message';
-      data.split(/(\r\n|\r|\n){2}/g).forEach((part) => {
-        if (part.trim().length === 0) {
-          // process chunk
-          if (chunk && chunk.length > 0) {
-            chunk.split(/\n|\r\n|\r/).forEach((line) => {
-              line = line.trimEnd();
-              const index = line.indexOf(':');
-              if (index <= 0 || index > 8) {
-                // ignore non-fields or garbage
-                return;
-              }
-              const field = line.substring(0, index);
-              const value = line.substring(index + 1).trimStart();
-              switch (field) {
-                case 'data':
-                  evData += value;
-                  break;
-                case 'id':
-                case 'retry':
-                  break;
-                case 'event':
-                  evEvent = value;
-                  break;
-                default:
-                  console.warn(`Unhandled field for ${evEvent}: ${field}`);
-                  return;
-              }
-            });
-          }
-          chunk = '';
+    subscriber.next(0);
+    const ctrl = new AbortController();
+    fetchEventSource(tagger_url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ text: text }),
+      signal: ctrl.signal,
+      // TODO: possibly add better error handling.
+      /*async onopen(response) {
+        console.log(response.ok, response.status, response.statusText);
+        if (response.ok) {
+          return; // everything's good
+        } else if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+          // client-side errors are usually non-retriable:
+          throw new Error(response.statusText);
         } else {
-          chunk += part;
+          throw new Error(response.statusText);
         }
-      });
-      try {
-        switch (evEvent) {
+      },*/
+      onerror(err) {
+        subscriber.error(new Error('Tagger service is down.'));
+        throw err;
+      },
+      onmessage(msg) {
+        switch (msg.event) {
+          case 'error':
+            subscriber.error(new Error(msg.data));
+            break;
           case 'processing': {
-            const proc: Message = JSON.parse(evData);
+            const proc: Message = JSON.parse(msg.data);
             subscriber.next(parseFloat(proc.status));
             break;
           }
           case 'done': {
-            if (evData) { // Needed to prevent weird parsing errors.
-              const payload: TaggerResults = JSON.parse(evData);
-              subscriber.next(payload);
-            }
+            const payload: TaggerResults = JSON.parse(msg.data);
+            subscriber.next(payload);
             break;
           }
-          case 'error':
-            subscriber.error(evData);
-            break;
-          case 'message':
-            break;
-          case 'submitted': // Unused in this context.
-          case 'pending':
           default:
-            console.warn(`Unhandled event: ${evEvent}`);
+            console.warn(`Unhandled message ${msg}`);
         }
-      } catch (err) {
-        subscriber.error(err);
       }
     });
-    xhr.addEventListener('error', () => {
-      subscriber.error(new Error('Tagger is unavailable.'));
-    });
-    xhr.addEventListener('load', () => subscriber.complete());
-    xhr.addEventListener('abort', () => subscriber.complete());
-    subscriber.next(0);
-    xhr.send(JSON.stringify({ text: text }));
-    return () => xhr.abort();
+    return () => ctrl.abort();
   });
 }
 
 const tagEditorText = editorState$.pipe(
   filter(o => !o),
   switchMap(() => combineLatest({ settings: settings$, text: editorText }).pipe(
-    filter(({text}) => text.trim().length > 0),
-    switchMap(({settings, text}) => tag(settings.tagger, text))
+    filter(({ text }) => text.trim().length > 0),
+    switchMap(({ settings, text }) => tag(settings.tagger, text))
   )),
   catchError((err: Error) =>
-    of({...EmptyResults, ...{isError: true, html_content: err.message}}))
+    of({ ...EmptyResults, ...{ isError: true, html_content: err.message } }))
 );
 
 export const [useTaggerResults, taggerResults$] = bind(

@@ -56,7 +56,7 @@ function count_patterns(node: TreeNode): number {
   return 0;
 }
 
-const [useCategoryData] = bind(
+const [useCategoryData, categoryData$] = bind(
   //editorState.pipe(
   //  filter(o => !o),
   //  switchMap(() => combineLatest({ common: commonDictionary$, tagged: taggerResults$}))).pipe(
@@ -260,7 +260,7 @@ const ErrorFallback = (props: { error?: Error }) => (
 const CategoryTree = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Suspense fallback={<Spinner animation={"border"} />}>
-      <Subscribe>
+      <Subscribe source$={categoryData$}>
         <CategoryTreeTop />
       </Subscribe>
     </Suspense>
