@@ -6,9 +6,9 @@ various environments.
 If new runtime settings are added, do not forget to modify the
 Settings interface and DEFAULT settings object.
 */
-import { bind } from "@react-rxjs/core";
-import { catchError, map, of, shareReplay } from "rxjs";
-import { ajax } from "rxjs/ajax";
+import { bind } from '@react-rxjs/core';
+import { catchError, map, of, shareReplay } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
 
 // URL for settings.json, 'base' gets it to work with webpack.
 const SETTINGS_URL = new URL('../assets/settings.json', import.meta.url);
@@ -20,8 +20,8 @@ interface Settings {
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
-  tagger: 'http://docuscope.eberly.cmu.edu:8088/tag'
-}
+  tagger: 'http://docuscope.eberly.cmu.edu:8088/tag',
+};
 
 // useSettings: for use in a component, settings$: the rxjs observable
 export const [useSettings, settings$] = bind(
@@ -29,7 +29,8 @@ export const [useSettings, settings$] = bind(
     map((data) => ({ ...DEFAULT, ...data })),
     shareReplay(1),
     catchError((err) => {
-    console.warn(`Failed to load settings: ${err}`);
-    return of(DEFAULT);
-  }))
+      console.warn(`Failed to load settings: ${err}`);
+      return of(DEFAULT);
+    })
+  )
 );

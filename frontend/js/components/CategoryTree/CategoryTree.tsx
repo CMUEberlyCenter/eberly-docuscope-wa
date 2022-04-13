@@ -1,8 +1,16 @@
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as React from "react";
-import { ChangeEvent, Suspense, useEffect, useRef, useState } from "react";
-import { OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
+import {
+  ChangeEvent,
+  Suspense,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import { Collapse, OverlayTrigger, Spinner, Tooltip } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
+import { Transition } from "react-transition-group";
 import { combineLatest, map } from "rxjs";
 import {
   CommonDictionary,
@@ -60,29 +68,29 @@ const [useCategoryData, categoryData$] = bind(
   //editorState.pipe(
   //  filter(o => !o),
   //  switchMap(() => combineLatest({ common: commonDictionary$, tagged: taggerResults$}))).pipe(
-      combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
-      map((data) => {
-        const tagged: TaggerResults | number | null = data.tagged;
-        const common: CommonDictionary | null = data.common;
-        if (common && typeof tagged !== 'number') {
-          const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
-          const dfsmap = (
-            parent: string,
-            node: CommonDictionaryTreeNode
-          ): TreeNode => ({
-            parent: parent,
-            id: node.id,
-            label: node.label,
-            help: node.help,
-            children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
-            patterns: cat_pat_map.get(node.id) ?? [],
-            checked: CheckboxState.Empty,
-          });
-          return common.tree.map(dfsmap.bind(null, ""));
-        }
-        return null;
-      })
-    )
+  combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
+    map((data) => {
+      const tagged: TaggerResults | number | null = data.tagged;
+      const common: CommonDictionary | null = data.common;
+      if (common && typeof tagged !== "number") {
+        const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
+        const dfsmap = (
+          parent: string,
+          node: CommonDictionaryTreeNode
+        ): TreeNode => ({
+          parent: parent,
+          id: node.id,
+          label: node.label,
+          help: node.help,
+          children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
+          patterns: cat_pat_map.get(node.id) ?? [],
+          checked: CheckboxState.Empty,
+        });
+        return common.tree.map(dfsmap.bind(null, ""));
+      }
+      return null;
+    })
+  )
 );
 
 enum CheckboxState {
@@ -115,6 +123,19 @@ const Patterns = (props: { category: string; data: PatternData[] }) => (
   </div>
 );
 
+const DURATION = 250;
+function chevron_rotate(state: string) {
+  const rotation = state === "entering" || state === "entered" ? 0.25 : 0;
+  return {
+    transition: `transform ${DURATION}ms linear`,
+    transform: `rotate(${rotation}turn)`,
+  };
+}
+function fade(state: string) {
+  const opacity = state === "entering" || state === "entered" ? 1 : 0;
+  return { transition: `opacity ${DURATION}ms ease-in-out`, opacity: opacity };
+}
+
 const CategoryNode = (props: {
   data: TreeNode;
   onChange: (target: TreeNode, state: CheckboxState) => void;
@@ -122,7 +143,8 @@ const CategoryNode = (props: {
   const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
   const editing = useEditorState();
-  const checkId = `pattern-check-${props.data.id}`; // TODO: replace with useId()
+  const checkId = useId();
+  const childrenId = useId();
 
   useEffect(() => {
     const state = props.data.checked;
@@ -150,60 +172,86 @@ const CategoryNode = (props: {
   const pattern_count = count_patterns(props.data);
   return (
     <li data-docuscope-category={props.data.id} className="list-group-item">
-      <span
-        className={`material-icons ${has_child_data(props.data) ? "" : "invisible"
-          }`}
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? "expand_more" : "chevron_right"}
-      </span>
-      <div className="form-check d-inline-flex align-items-baseline">
-        <input
-          ref={checkRef}
-          className="form-check-input"
-          id={checkId}
-          type="checkbox"
-          value={props.data.id}
-          onChange={change}
-          disabled={pattern_count === 0}
-        />
-        <label className="form-check-label" htmlFor={checkId}>
-          {props.data.label}
-          <OverlayTrigger overlay={<Tooltip>{props.data.help}</Tooltip>}>
-            <span className="material-icons comment mx-1">comment</span>
-          </OverlayTrigger>
-        </label>
-        {props.data.patterns.length > 0 || !expanded ? (
-          <span
-            className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
-              } rounded-pill fs-6`}
-          >
-            {editing ? '-' : pattern_count}
+      <div className="d-flex align-items-baseline">
+        <button
+          type="button"
+          className="btn btn-light me-1"
+          disabled={!has_child_data(props.data)}
+          onClick={() => setExpanded(!expanded)}
+          aria-controls={childrenId}
+        >
+          <Transition in={expanded} timeout={DURATION}>
+            {(state) => (
+              <i
+                className="fa-solid fa-chevron-right category-tree-chevron"
+                style={chevron_rotate(state)}
+              />
+            )}
+          </Transition>
+        </button>
+        <div className="form-check d-inline-flex align-items-baseline align-self-end">
+          <input
+            ref={checkRef}
+            className="form-check-input"
+            id={checkId}
+            type="checkbox"
+            value={props.data.id}
+            onChange={change}
+            disabled={editing || pattern_count === 0}
+          />
+          <label className="form-check-label me-0" htmlFor={checkId}>
+            {props.data.label}
+          </label>
+        </div>
+        <OverlayTrigger overlay={<Tooltip>{props.data.help}</Tooltip>}>
+          <span className="material-icons comment mx-1 align-self-start">
+            comment
           </span>
-        ) : (
-          ""
-        )}
+        </OverlayTrigger>
+        <Transition
+          in={props.data.patterns.length > 0 || !expanded}
+          timeout={DURATION}
+        >
+          {(state) => (
+            <span
+              style={fade(state)}
+              className={`badge bg-${
+                pattern_count > 0 && !editing ? "primary" : "secondary"
+              } rounded-pill fs-6 ms-4`}
+            >
+              {editing ? "-" : pattern_count}
+            </span>
+          )}
+        </Transition>
       </div>
-      <div className={expanded ? "" : "d-none"}>
-        {props.data.children.length > 0 ? (
-          <ul className="list-group">
-            {props.data.children.map((sub) => (
-              <CategoryNode key={sub.id} data={sub} onChange={props.onChange} />
-            ))}
-          </ul>
-        ) : (
-          ""
-        )}
-        {props.data.children.length === 0 && props.data.patterns.length > 0 ? (
-          <Patterns category={props.data.id} data={props.data.patterns} />
-        ) : (
-          ""
-        )}
-      </div>
+      <Collapse in={expanded} timeout={DURATION}>
+        <div id={childrenId}>
+          {props.data.children.length > 0 ? (
+            <ul className="list-group">
+              {props.data.children.map((sub) => (
+                <CategoryNode
+                  key={sub.id}
+                  data={sub}
+                  onChange={props.onChange}
+                />
+              ))}
+            </ul>
+          ) : (
+            ""
+          )}
+          {props.data.children.length === 0 &&
+          props.data.patterns.length > 0 ? (
+            <Patterns category={props.data.id} data={props.data.patterns} />
+          ) : (
+            ""
+          )}
+        </div>
+      </Collapse>
     </li>
   );
 };
 
+/** Find the parent of a given node in the given tree. */
 function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
   if (node.parent !== "") {
     const nodes = data.map((c) => [...descendants(c)]).flat();
@@ -211,6 +259,7 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
   }
   return undefined;
 }
+
 const CategoryTreeTop = () => {
   const [refresh, setRefresh] = useState(false); // Hack to force refresh.
   const data: TreeNode[] | null = useCategoryData();
@@ -241,13 +290,18 @@ const CategoryTreeTop = () => {
     }
     setRefresh(!refresh);
   };
-  return (
-    <ul className="impressions-category-tree list-group">
-      {data &&
-        data.map((cat) => (
-          <CategoryNode key={cat.id} data={cat} onChange={onChange} />
-        ))}
-    </ul>
+  return data ? (
+    <React.Fragment>
+      <h3 className="mt-2">Dictionary Categories</h3>
+      <ul className="impressions-category-tree list-group">
+        {data &&
+          data.map((cat) => (
+            <CategoryNode key={cat.id} data={cat} onChange={onChange} />
+          ))}
+      </ul>
+    </React.Fragment>
+  ) : (
+    <div />
   );
 };
 
@@ -257,10 +311,17 @@ const ErrorFallback = (props: { error?: Error }) => (
     <pre>{props.error?.message}</pre>
   </div>
 );
+
+const MySpinner = () => (
+  <Spinner animation={"border"} role={"status"} variant={"primary"}>
+    <span className="visually-hidden">Loading...</span>
+  </Spinner>
+);
+
 const CategoryTree = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
-    <Suspense fallback={<Spinner animation={"border"} />}>
-      <Subscribe source$={categoryData$}>
+    <Suspense fallback={<MySpinner />}>
+      <Subscribe source$={categoryData$} fallback={<MySpinner />}>
         <CategoryTreeTop />
       </Subscribe>
     </Suspense>

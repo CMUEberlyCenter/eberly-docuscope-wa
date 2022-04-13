@@ -1,7 +1,7 @@
 /* Service for retrieving the common dictionary data. */
-import { ajax } from 'rxjs/ajax';
 import { bind } from '@react-rxjs/core';
 import { catchError, map, of } from 'rxjs';
+import { ajax } from 'rxjs/ajax';
 
 export interface Entry {
   name?: string;

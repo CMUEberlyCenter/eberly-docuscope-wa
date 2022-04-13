@@ -1,14 +1,13 @@
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
-import React from "react";
-import {
+import React, {
+  HTMLProps,
   Suspense,
-  useState,
+  SVGProps,
   useEffect,
   useRef,
-  SVGProps,
-  HTMLProps,
+  useState,
 } from "react";
 import { Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
@@ -47,7 +46,7 @@ const [useSunbrustData, sunburstData$] = bind(
     map((data) => {
       const tagged = data.tagged;
       const common = data.common;
-      if (common && tagged && typeof(tagged) !== 'number') {
+      if (common && tagged && typeof tagged !== "number") {
         const cat_pat_map = gen_patterns_map(tagged);
         const sunmap = (node: CommonDictionaryTreeNode): SunburstNode => ({
           id: node.id,
@@ -255,7 +254,13 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .join(" > ");
 
   return (
-    <figure {...props} className={`sunburst-chart ${editing || parent === null ? 'placeholder w-100' : ''}`} aria-hidden={editing}>
+    <figure
+      {...props}
+      className={`sunburst-chart ${
+        editing || parent === null ? "placeholder w-100" : ""
+      }`}
+      aria-hidden={editing}
+    >
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>

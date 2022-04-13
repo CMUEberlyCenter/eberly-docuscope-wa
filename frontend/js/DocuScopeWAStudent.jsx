@@ -1,49 +1,30 @@
 /* eslint-disable react/prop-types */
-import React, { Component } from "react";
-
 import "foundation-sites/dist/css/foundation.min.css";
-
-import {
-  //Button,
-  //Colors,
-  Sizes,
-  Tabs,
-  TabItem,
-  TabsContent,
-  TabPanel,
-} from "react-foundation";
-
-import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
-
-// Via: https://docs.slatejs.org/walkthroughs/installing-slate
-import { Editor } from "slate-react";
+import React, { Component } from "react";
+import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
+import { Sizes, TabItem, TabPanel, Tabs, TabsContent } from "react-foundation";
+// https://www.npmjs.com/package/react-switch
+import ReactSwitch from "react-switch";
 import { Value } from "slate";
 //import { createEditor } from "slate";
 import Plain from "slate-plain-serializer";
-
-//import ToggleSwitch from './ToggleSwitch';
-// https://www.npmjs.com/package/react-switch
-import Switch from "react-switch";
-
+// Via: https://docs.slatejs.org/walkthroughs/installing-slate
+import { Editor } from "slate-react";
+import "../css/coherence.css";
+import "../css/docuscope.css";
+import "../css/editor.css";
+import "../css/expectations.scss";
+import ontopicLegend from "../css/img/ontopic-legend.png";
+import "../css/main.css";
+import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
+import Impressions from "./components/Impressions/Impressions";
+import LockSwitch from "./components/LockSwitch/LockSwitch";
+import TabTitle from "./components/TabTitle/TabTitle";
+import { sentenceData } from "./data/sentencedata.js";
 //import DocuScopeWA from "./DocuScopeWAScrim";
 //import DocuScopeRules from "./DocuScopeRules";
 import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
-import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
-
-//import docuscope from "../views/docuscope.html";
-
-import "../css/main.css";
-import "../css/docuscope.css";
-import "../css/editor.css";
-import "../css/expectations.scss";
-import "../css/coherence.css";
-
-import ontopicLegend from "../css/img/ontopic-legend.png";
-
-import { sentenceData } from "./data/sentencedata.js";
-import Impressions from "./components/Impressions/Impressions";
-import TabTitle from "./components/TabTitle/TabTitle";
 import { editorState, editorText } from "./service/editor-state.service";
 
 let initialValue = Value.fromJSON({
@@ -82,7 +63,7 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   constructor(props) {
-    console.log("DocuScopeWAStudent ()");
+    //console.log("DocuScopeWAStudent ()");
 
     super(props);
 
@@ -147,7 +128,7 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   componentDidMount() {
-    console.log("componentDidMount ()");
+    //console.log("componentDidMount ()");
 
     window.addEventListener(
       "message",
@@ -168,7 +149,7 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   setStatus(aMessage) {
-    console.log("setStatus ()");
+    //console.log("setStatus ()");
 
     this.setState({
       status: aMessage,
@@ -217,7 +198,7 @@ export default class DocuScopeWAStudent extends Component {
    *
    */
   sendMessage(aRawText) {
-    console.log("sendMessage ()");
+    //console.log("sendMessage ()");
     var payload = {
       event_id: "docuscope",
       data: {
@@ -272,13 +253,19 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  handleEditorToggle(checked/*: boolean*/, _evt/*: InputEvent*/, _id/*:string*/) {
+  handleEditorToggle(
+    checked /*: boolean*/,
+    _evt /*: InputEvent*/,
+    _id /*:string*/
+  ) {
     let toggled = !this.state.editorActive;
     let editorLocked = toggled;
 
-    console.log("handleEditorToggle (" + toggled + "," + editorLocked + ")");
+    //console.log("handleEditorToggle (" + toggled + "," + editorLocked + ")");
 
-    editorText.next(checked ? '' : Plain.serialize(Value.fromJSON(this.state.value)));
+    editorText.next(
+      checked ? "" : Plain.serialize(Value.fromJSON(this.state.value))
+    );
     editorState.next(checked);
     this.setState({ editorActive: toggled, locked: editorLocked }, () => {
       if (this.state.editorActive == false) {
@@ -360,7 +347,7 @@ export default class DocuScopeWAStudent extends Component {
    * @param {Editor} editor
    */
   onChange({ value }) {
-    console.log("onChange ()");
+    //console.log("onChange ()");
 
     //console.log (value.document.nodes.map(n => Node.string(n)).join('\n'));
 
@@ -496,7 +483,7 @@ export default class DocuScopeWAStudent extends Component {
    */
   onKeyDown(event, editor, next) {
     //console.log (event);
-    console.log(event.keyCode);
+    //console.log(event.keyCode);
 
     if (event.keyCode == 32) {
       //this.clearAnnotations ();
@@ -665,7 +652,7 @@ export default class DocuScopeWAStudent extends Component {
           <label className="edit-top-menu-label">
             Show only topic clusters:
           </label>
-          <Switch
+          <ReactSwitch
             checked={false}
             onChange={() => ({})}
             size={Sizes.TINY}
@@ -932,8 +919,8 @@ export default class DocuScopeWAStudent extends Component {
                   <option value="3">3</option>
                 </select>
               </div>
-              <label className="edit-top-menu-label">Edit Mode:</label>
-              <Switch
+              <LockSwitch
+                label="Edit Mode:"
                 width={45}
                 height={20}
                 checked={this.state.editorActive}

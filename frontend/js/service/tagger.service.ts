@@ -1,8 +1,15 @@
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind } from '@react-rxjs/core';
-import { catchError, combineLatest, filter, Observable, of, switchMap } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  filter,
+  Observable,
+  of,
+  switchMap,
+} from 'rxjs';
 import { editorState$, editorText } from './editor-state.service';
 import { settings$ } from './settings.service';
-import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 /** JSON structure of patterns. */
 interface PatternData {
@@ -29,7 +36,7 @@ const EmptyResults: TaggerResults = {
   html_content: '',
   tagging_time: 0,
   patterns: [],
-}
+};
 /**
  * Generate the mapping of category ids to their list of patterns.
  * Useful for fast lookup of of patterns.
@@ -58,7 +65,7 @@ interface Message {
  * a number which is the percent complete of the tagging process.
  */
 export function tag(tagger_url: string, text: string) {
-  return new Observable<TaggerResults | number>(subscriber => {
+  return new Observable<TaggerResults | number>((subscriber) => {
     subscriber.next(0);
     const ctrl = new AbortController();
     fetchEventSource(tagger_url, {
@@ -102,23 +109,23 @@ export function tag(tagger_url: string, text: string) {
           default:
             console.warn(`Unhandled message ${msg}`);
         }
-      }
+      },
     });
     return () => ctrl.abort();
   });
 }
 
 const tagEditorText = editorState$.pipe(
-  filter(o => !o),
-  switchMap(() => combineLatest({ settings: settings$, text: editorText }).pipe(
-    filter(({ text }) => text.trim().length > 0),
-    switchMap(({ settings, text }) => tag(settings.tagger, text))
-  )),
+  filter((o) => !o),
+  switchMap(() =>
+    combineLatest({ settings: settings$, text: editorText }).pipe(
+      filter(({ text }) => text.trim().length > 0),
+      switchMap(({ settings, text }) => tag(settings.tagger, text))
+    )
+  ),
   catchError((err: Error) =>
-    of({ ...EmptyResults, ...{ isError: true, html_content: err.message } }))
+    of({ ...EmptyResults, ...{ isError: true, html_content: err.message } })
+  )
 );
 
-export const [useTaggerResults, taggerResults$] = bind(
-  tagEditorText,
-  null
-);
+export const [useTaggerResults, taggerResults$] = bind(tagEditorText, null);
