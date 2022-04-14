@@ -4,7 +4,7 @@ import 'foundation-sites/dist/css/foundation.min.css';
 
 import DataTools from './DataTools';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
-import DocuScopeWAInstructor from './DocuScopeWAInstructor';
+import InstructorView from './views/Instructor/InstructorView';
 import DocuScopeWAStudent from './DocuScopeWAStudent';
 import DocuScopeRules from './DocuScopeRules';
 import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
@@ -369,7 +369,7 @@ export default class DocuScopeWA extends Component {
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
       if (this.isInstructor ()) {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAInstructor api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAInstructor></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>;
       } else {
         mainPage=<DocuScopeWAScrim><DocuScopeWAStudent api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
       }

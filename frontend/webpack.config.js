@@ -3,7 +3,7 @@ const path = require('path');
 
 const config = {
   devtool: 'eval-source-map',
-  entry: __dirname + '/js/index.jsx',
+  entry: __dirname + '/js/index.tsx',
   output:{
     path: path.resolve('./public/'),
     filename: 'bundle.js',

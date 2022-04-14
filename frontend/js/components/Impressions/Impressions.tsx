@@ -56,7 +56,7 @@ const Impressions = () => {
     );
   }
   return (
-    <div className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
+    <section className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
       <TabTitle title="Manage Readers' Impressions" />
       {/*<div className="p-2 lh-lg"></div>*/}
       <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -71,7 +71,7 @@ const Impressions = () => {
           </Subscribe>
         </React.Suspense>
       </ErrorBoundary>
-    </div>
+    </section>
   );
 };
 export default Impressions;

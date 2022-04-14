@@ -17,6 +17,7 @@ import "../css/expectations.scss";
 import ontopicLegend from "../css/img/ontopic-legend.png";
 import "../css/main.css";
 import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
+import Expectations from "./components/Expectations/Expectations";
 import Impressions from "./components/Impressions/Impressions";
 import LockSwitch from "./components/LockSwitch/LockSwitch";
 import TabTitle from "./components/TabTitle/TabTitle";
@@ -111,8 +112,6 @@ export default class DocuScopeWAStudent extends Component {
     };
 
     this.onContextSelect = this.onContextSelect.bind(this);
-    this.onClickRule = this.onClickRule.bind(this);
-    this.onClickRuleChild = this.onClickRuleChild.bind(this);
 
     // Editor event handlers
     this.insertText = this.insertText.bind(this);
@@ -515,117 +514,6 @@ export default class DocuScopeWAStudent extends Component {
   /**
    *
    */
-  onClickRule(e) {
-    console.log("onClickRule (" + e.target.id + ")");
-
-    e.stopPropagation();
-
-    let aRule = this.props.ruleManager.getRule(e.target.id);
-
-    if (aRule) {
-      this.setState({ currentRule: aRule, currentRuleChild: null });
-    }
-  }
-
-  /**
-   *
-   */
-  onClickRuleChild(e) {
-    console.log("onClickRuleChild (" + e.target.id + ")");
-
-    e.stopPropagation();
-
-    let aRuleChild = this.props.ruleManager.getRuleChild(e.target.id);
-
-    if (aRuleChild) {
-      this.setState({ currentRule: null, currentRuleChild: aRuleChild });
-    }
-  }
-
-  /**
-   *
-   */
-  generateRuleElements() {
-    let rulesElements = [];
-
-    for (let i = 0; i < this.props.ruleManager.rules.length; i++) {
-      let aRule = this.props.ruleManager.rules[i];
-
-      let childElements = [];
-
-      for (let j = 0; j < aRule.children.length; j++) {
-        let aChild = aRule.children[j];
-        let aChildElement = (
-          <li
-            id={aChild.id}
-            className="impressions-child"
-            onClick={(e) => {
-              this.onClickRuleChild(e);
-            }}
-          >
-            {aChild.name}
-          </li>
-        );
-        childElements.push(aChildElement);
-      }
-
-      rulesElements.push(
-        <li
-          id={aRule.id}
-          className="impressions-item"
-          onClick={(e) => {
-            this.onClickRule(e);
-          }}
-        >
-          {aRule.name}
-          <ul className="impressions-children">{childElements}</ul>
-        </li>
-      );
-    }
-
-    return rulesElements;
-  }
-
-  /**
-   *
-   */
-  generateExpectationsTab() {
-    let ruleElements = this.generateRuleElements();
-    let ruleDescription;
-
-    if (this.state.currentRule) {
-      ruleDescription = this.state.currentRule.description;
-    }
-
-    return (
-      <div className="expectations">
-        <TabTitle title="Meet Readers' Expectations" />
-        <div className="impressions-description">
-          <div className="impressions-name">{this.props.ruleManager.name}</div>
-          <div className="impressions-statement">
-            Respond to the following questions to meet the readers&apos;
-            expectations. The sentences that you write to respond to each
-            question include a unique topic cluster that consists of a set of
-            words and phrases. DocuScope will automatically highlight sentences
-            in your draft that most likely match these expectations.
-          </div>
-        </div>
-        <div className="impressions-content">
-          <ol>{ruleElements}</ol>
-        </div>
-        <div className="impressions-name">About this Group of Expectations</div>
-        <div
-          className="impressions-rule"
-          dangerouslySetInnerHTML={{ __html: ruleDescription }}
-        ></div>
-        <div className="impressions-detail"></div>
-      </div>
-    );
-  }
-
-  /**
-   *
-   */
   generateCoherenceTab() {
     return (
       <div className="coherence">
@@ -720,7 +608,6 @@ export default class DocuScopeWAStudent extends Component {
       );
     }
 
-    const expectationsTab = this.generateExpectationsTab();
     const coherenceTab = this.generateCoherenceTab();
     const clarityTab = this.generateClarityTab();
 
@@ -872,7 +759,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 1}
               >
-                {expectationsTab}
+                <Expectations/>
               </TabPanel>
 
               <TabPanel

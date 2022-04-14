@@ -1,0 +1,26 @@
+.expectations {
+  .expectations-rule:hover {
+    color: var(--bs-dark);
+    background-color: var(--bs-info);
+  }
+  ol.expectations-list {
+    list-style-type: decimal;
+    > li {
+      font-weight: bold;
+      font-size: 1.1em;
+      > div {
+        font-weight: initial;
+        font-size: 1em;
+      }
+      ol {
+        list-style-type: lower-alpha;
+        > li {
+          font-weight: normal;
+          ol {
+            list-style-type: lower-roman;
+          }
+        }
+      }
+    }
+  }
+}
