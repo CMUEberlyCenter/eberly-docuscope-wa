@@ -16,6 +16,8 @@ import "../css/editor.css";
 import "../css/expectations.scss";
 import ontopicLegend from "../css/img/ontopic-legend.png";
 import "../css/main.css";
+import Clarity from "./components/Clarity/Clarity";
+import Coherence from "./components/Coherence/Coherence";
 import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import Expectations from "./components/Expectations/Expectations";
 import Impressions from "./components/Impressions/Impressions";
@@ -608,8 +610,8 @@ export default class DocuScopeWAStudent extends Component {
       );
     }
 
-    const coherenceTab = this.generateCoherenceTab();
-    const clarityTab = this.generateClarityTab();
+    //const coherenceTab = this.generateCoherenceTab();
+    //const clarityTab = this.generateClarityTab();
 
     const editor = (
       <Editor
@@ -767,7 +769,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 2}
               >
-                {coherenceTab}
+                <Coherence/>
               </TabPanel>
 
               <TabPanel
@@ -775,7 +777,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 3}
               >
-                {clarityTab}
+                <Clarity/>
               </TabPanel>
 
               <TabPanel

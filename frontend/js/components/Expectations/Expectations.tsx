@@ -18,7 +18,7 @@ const Rule = (props: RuleProps) => {
       <Collapse in={expanded}>
         <Card onClick={() => setExpanded(false)}>
           <Card.Body>
-          <Card.Text dangerouslySetInnerHTML={{ __html: props.rule.description }} />
+            <Card.Text dangerouslySetInnerHTML={{ __html: props.rule.description }} />
           </Card.Body>
         </Card>
       </Collapse>
@@ -40,38 +40,26 @@ const Expectations = () => {
   const expectations = useExpectations();
   const ref = useId();
   return (
-    <section className="d-flex flex-column overflow-hidden expectations h-100 w-100 justify-content-start align-items-stretch">
-      <TabTitle title="Meet Readers' Expectations" />
-      <Card className="overflow-auto flex-grow-1">
-        <Card.Body>
-          <Subscribe>
-            <Card.Title>{expectations?.name ?? 'Loading...'}</Card.Title>
-            <Card.Subtitle>
-              Respond to the following questions to meet the readers&apos;
-              expectations. The sentences that you write to respond to each
-              question include a unique topic cluster that consists of a set of
-              words and phrases. DocuScope will automatically highlight sentences
-              in your draft that most likely match these expectations.
-            </Card.Subtitle>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <ol className="expectations-list mt-3">
-                {expectations?.rules.map((rule, i) => (<Rule key={`${ref}-${i}`} rule={rule} />)) ?? ''}
-              </ol>
-            </ErrorBoundary>
-          </Subscribe>
-        </Card.Body>
-      </Card>
-      {/*<Card>
-        <Card.Body>
-          <Card.Title>About this Group of Expectations</Card.Title>
-          <div className="overflow-auto">
-            {selectedRule
-              ? (<p dangerouslySetInnerHTML={{ __html: selectedRule.description }} />)
-              : (<Alert variant="info">No Selected Group.</Alert>)}
-          </div>
-        </Card.Body>
-            </Card>*/}
-    </section>
+    <Card as="section">
+      <Card.Header><TabTitle>Meet Readers&apos; Expectations</TabTitle></Card.Header>
+      <Card.Body className="overflow-auto flex-grow-1">
+        <Subscribe>
+          <Card.Title>{expectations?.name ?? 'Loading...'}</Card.Title>
+          <Card.Subtitle>
+            Respond to the following questions to meet the readers&apos;
+            expectations. The sentences that you write to respond to each
+            question include a unique topic cluster that consists of a set of
+            words and phrases. DocuScope will automatically highlight sentences
+            in your draft that most likely match these expectations.
+          </Card.Subtitle>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <ol className="expectations-list mt-3">
+              {expectations?.rules.map((rule, i) => (<Rule key={`${ref}-${i}`} rule={rule} />)) ?? ''}
+            </ol>
+          </ErrorBoundary>
+        </Subscribe>
+      </Card.Body>
+    </Card>
   )
 }
 export default Expectations;

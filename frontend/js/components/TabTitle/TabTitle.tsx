@@ -1,11 +1,15 @@
 import * as React from "react";
-import mainIcon from "../../../css/icons/audit_icon.png";
+import { Image } from "react-bootstrap";
+import audit_icon from "../../../css/icons/audit_icon.png";
 import "./TabTitle.scss";
 
-const TabTitle = (props: { title: string }) => (
-  <div className="bg-light flex-shrink-0 p-3 d-flex align-items-center tab-title">
-    <img src={`${mainIcon}`} className="pe-3 icon"></img>
-    <h3 className="context-title">{props.title}</h3>
-  </div>
+interface Props {
+  children?: React.ReactNode;
+}
+const TabTitle: React.FC<Props> = ({children}) => (
+  <h3 className="text-warning ds-tab-title">
+    <Image fluid={true} thumbnail={true} src={audit_icon} className="icon me-2" />
+    {children}
+  </h3>
 );
 export default TabTitle;

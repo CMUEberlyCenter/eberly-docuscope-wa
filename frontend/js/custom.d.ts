@@ -1,6 +1,6 @@
-declare module '*.png' {
-  const content: unknown;
-  export default content;
+declare module "*.png" {
+  const value: any;
+  export = value;
 }
 
 declare module '*.txt' {

@@ -1,6 +1,6 @@
 import { Subscribe } from "@react-rxjs/core";
 import * as React from "react";
-import { Alert, ProgressBar, Spinner } from "react-bootstrap";
+import { Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   useEditorState,
@@ -56,22 +56,21 @@ const Impressions = () => {
     );
   }
   return (
-    <section className="impressions d-flex h-100 w-100 flex-column justify-content-start align-items-stretch">
-      <TabTitle title="Manage Readers' Impressions" />
-      {/*<div className="p-2 lh-lg"></div>*/}
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <React.Suspense fallback={<Spinner animation={"border"} />}>
-          <Subscribe>
-            <div className="impressions-content overflow-auto flex-grow-1 p-3">
-              {content ?? <SunburstChart width={400} />}
-              <CategoryTree />
-              {/*<iframe className="docuscopeframe" src={docuscope}></iframe>*/}
-            </div>
-            {/*<div className="impressions-detail"></div>*/}
-          </Subscribe>
-        </React.Suspense>
-      </ErrorBoundary>
-    </section>
+    <Card as="section">
+      <Card.Header><TabTitle>Manage Readers&apos; Impressions</TabTitle></Card.Header>
+      <Card.Body>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <React.Suspense fallback={<Spinner animation={"border"} />}>
+            <Subscribe>
+              <div className="impressions-content overflow-auto flex-grow-1 p-3">
+                {content ?? <SunburstChart width={400} />}
+                <CategoryTree />
+              </div>
+            </Subscribe>
+          </React.Suspense>
+        </ErrorBoundary>
+      </Card.Body>
+    </Card>
   );
 };
 export default Impressions;
