@@ -9,9 +9,9 @@ const Clarity = () => {
   const [status, setStatus] = useState('');
   const text = useEditorText();
   return (
-    <Card as="section">
+    <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header><TabTitle>Polish Your Sentences for Clarity</TabTitle></Card.Header>
-      <Card.Body>
+      <Card.Body className="overflow-auto">
         <DocuScopeOnTopic
           setStatus={setStatus}
           sentences={ sentenceData }

@@ -1,19 +1,15 @@
 import React, { Component } from 'react';
-
-import 'foundation-sites/dist/css/foundation.min.css';
-
+import '../css/docuscope.css';
+import '../css/main.css';
+import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
 import DataTools from './DataTools';
+import DocuScopeRules from './DocuScopeRules';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
-import DocuScopeWAStudent from './DocuScopeWAStudent';
-import DocuScopeRules from './DocuScopeRules';
-import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
+import StudentView from './views/Student/StudentView';
 
-import '../css/main.css';
-import '../css/docuscope.css';
 
 /**
- * https://bit.dev/digiaonline/react-foundation
  */
 export default class DocuScopeWA extends Component {
 
@@ -371,7 +367,7 @@ export default class DocuScopeWA extends Component {
       if (this.isInstructor ()) {
         mainPage=<DocuScopeWAScrim><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>;
       } else {
-        mainPage=<DocuScopeWAScrim><DocuScopeWAStudent api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></DocuScopeWAStudent></DocuScopeWAScrim>;
+        mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></StudentView></DocuScopeWAScrim>;
       }
     }
 

@@ -7,10 +7,10 @@ import './Coherence.scss';
 const Legend = () => (
   <Container className="border p-2">
     <Row xs={'auto'} md={'auto'} lg={2}>
-      <Col className="text-nowrap"><i className="fa-solid fa-circle text-legend"></i> Topic before the main verb</Col>
-      <Col className="text-nowrap"><i className="fa-solid fa-circle text-legend" style={{ fontSize: '0.3em', transform: 'translateY(-0.75rem)' }}></i><i className="fa-solid fa-circle text-legend"></i> Topic before the main verb of a topic sentence</Col>
-      <Col className="text-nowrap"><i className="fa-regular fa-circle text-legend"></i> Topic after the main verb</Col>
-      <Col className="text-nowrap"><span className="border rounded px-1 border-2">1</span> Paragraph/Sentence number</Col>
+      <Col className="text-nowrap"><i className="fa-solid fa-circle text-legend" title="A filled circle."></i> Topic before the main verb</Col>
+      <Col className="text-nowrap"><span className="text-nowrap" title="A solid circle with a small circle in the upper left corner."><i className="fa-solid fa-circle text-legend" style={{ fontSize: '0.3em', transform: 'translateY(-0.75rem)' }}></i><i className="fa-solid fa-circle text-legend"></i></span> Topic before the main verb of a topic sentence</Col>
+      <Col className="text-nowrap"><i className="fa-regular fa-circle text-legend" title="An empty circle."></i> Topic after the main verb</Col>
+      <Col className="text-nowrap"><span className="border rounded px-1 border-2" title="A boxed number.">1</span> Paragraph/Sentence number</Col>
     </Row>
   </Container>
 )
@@ -19,9 +19,9 @@ const Coherence = () => {
   const [showToggle, setShowToggle] = useState(false);
 
   return (
-    <Card as="section">
+    <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header><TabTitle>CreateFlow in Your Writing</TabTitle></Card.Header>
-      <Card.Body>
+      <Card.Body className="overflow-auto">
         <Legend />
         <Card.Text>
           The Coherence Panel charts the flow of your topic clusters across
@@ -33,7 +33,7 @@ const Coherence = () => {
           and see if the shifts in topic clusters and their prominence fits a
           writing plan your readers can easily follow.
         </Card.Text>
-        <Card>
+        <Card className="mb-1">
           <Card.Header className="d-flex justify-content-between">
             <span>Coherence across paragraphs</span>
             <div className="d-flex align-items-start" onChange={() => setShowToggle(!showToggle)}>

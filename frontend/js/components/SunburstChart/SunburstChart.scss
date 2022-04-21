@@ -1,5 +1,6 @@
 .sunburst-chart {
-  max-width: 300px;
+  max-width: 250px;
+  // TODO: add @media-breakpoint-up(sm)
   svg {
     font-size: 12px;
     font-family: "Open Sans";

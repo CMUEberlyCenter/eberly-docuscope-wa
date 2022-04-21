@@ -40,18 +40,18 @@ const Expectations = () => {
   const expectations = useExpectations();
   const ref = useId();
   return (
-    <Card as="section">
+    <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header><TabTitle>Meet Readers&apos; Expectations</TabTitle></Card.Header>
-      <Card.Body className="overflow-auto flex-grow-1">
+      <Card.Body className="overflow-auto">
         <Subscribe>
           <Card.Title>{expectations?.name ?? 'Loading...'}</Card.Title>
-          <Card.Subtitle>
+          <Card.Text>
             Respond to the following questions to meet the readers&apos;
             expectations. The sentences that you write to respond to each
             question include a unique topic cluster that consists of a set of
             words and phrases. DocuScope will automatically highlight sentences
             in your draft that most likely match these expectations.
-          </Card.Subtitle>
+          </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <ol className="expectations-list mt-3">
               {expectations?.rules.map((rule, i) => (<Rule key={`${ref}-${i}`} rule={rule} />)) ?? ''}

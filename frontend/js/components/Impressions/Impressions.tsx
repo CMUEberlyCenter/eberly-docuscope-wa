@@ -56,13 +56,13 @@ const Impressions = () => {
     );
   }
   return (
-    <Card as="section">
+    <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header><TabTitle>Manage Readers&apos; Impressions</TabTitle></Card.Header>
-      <Card.Body>
+      <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <React.Suspense fallback={<Spinner animation={"border"} />}>
             <Subscribe>
-              <div className="impressions-content overflow-auto flex-grow-1 p-3">
+              <div className="impressions-content flex-grow-1 p-3">
                 {content ?? <SunburstChart width={400} />}
                 <CategoryTree />
               </div>

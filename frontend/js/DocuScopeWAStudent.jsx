@@ -1,15 +1,15 @@
 /* eslint-disable react/prop-types */
-import "foundation-sites/dist/css/foundation.min.css";
+//import "foundation-sites/dist/css/foundation.min.css";
 import React, { Component } from "react";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { Sizes, TabItem, TabPanel, Tabs, TabsContent } from "react-foundation";
 // https://www.npmjs.com/package/react-switch
 import ReactSwitch from "react-switch";
-import { Value } from "slate";
+import { Node } from "slate";
 //import { createEditor } from "slate";
-import Plain from "slate-plain-serializer";
+//import Plain from "slate-plain-serializer";
 // Via: https://docs.slatejs.org/walkthroughs/installing-slate
-import { Editor } from "slate-react";
+import { ReactEditor } from "slate-react";
 import "../css/coherence.css";
 import "../css/docuscope.css";
 import "../css/editor.css";
@@ -30,7 +30,11 @@ import DataTools from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
 import { editorState, editorText } from "./service/editor-state.service";
 
-let initialValue = Value.fromJSON({
+const serialize = (nodes) => {
+  return nodes.map((n) => Node.string(n)).join('\n')
+}
+
+let initialValue = {
   document: {
     nodes: [
       {
@@ -45,7 +49,7 @@ let initialValue = Value.fromJSON({
       },
     ],
   },
-});
+};
 
 /**
  * https://bit.dev/digiaonline/react-foundation
@@ -265,14 +269,14 @@ export default class DocuScopeWAStudent extends Component {
     //console.log("handleEditorToggle (" + toggled + "," + editorLocked + ")");
 
     editorText.next(
-      checked ? "" : Plain.serialize(Value.fromJSON(this.state.value))
+      checked ? "" : serialize(this.state.value)
     );
     editorState.next(checked);
     this.setState({ editorActive: toggled, locked: editorLocked }, () => {
       if (this.state.editorActive == false) {
         // Send new locked text to backend(s)
 
-        var plain = Plain.serialize(Value.fromJSON(this.state.value));
+        var plain = serialize(this.state.value);
 
         this.sendMessage(plain);
       }
@@ -293,13 +297,13 @@ export default class DocuScopeWAStudent extends Component {
       () => {
         // Inform the OnTopic backend
         if (this.state.activeIndex == 3 && this.state.editorActive == false) {
-          var plain = Plain.serialize(Value.fromJSON(this.state.value));
+          var plain = serialize(this.state.value);
           this.sendMessage(plain);
         }
 
         // Inform the Docuscope backend
         if (this.state.activeIndex == 4 && this.state.editorActive == false) {
-          const plain_text = Plain.serialize(Value.fromJSON(this.state.value));
+          const plain_text = serialize(this.state.value);
           this.sendMessage(plain_text);
         }
       }
@@ -614,7 +618,7 @@ export default class DocuScopeWAStudent extends Component {
     //const clarityTab = this.generateClarityTab();
 
     const editor = (
-      <Editor
+      <ReactEditor
         tabIndex={0}
         id="editor1"
         //ref="editor1"
