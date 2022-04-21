@@ -1,3 +1,11 @@
+/**********************************************
+ * THIS IS DEPRICATED!!!!
+ * Using js/views/StudentView instead.
+ * Not deleting this yet as there might be some
+ * functionality that has not been ported yet.
+ * - mringenb
+ */
+
 /* eslint-disable react/prop-types */
 //import "foundation-sites/dist/css/foundation.min.css";
 import React, { Component } from "react";
