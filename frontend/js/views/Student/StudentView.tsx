@@ -67,7 +67,7 @@ const StudentView = () => {
             </Tab>
           </Tabs>
         </aside>
-        <Card as="article" className="w-50">
+        <Card as="article" className="w-50 overflow-hidden">
           <Card.Header className="d-flex justify-content-between">
             <Form.Group>
               {/*<Form.Label>Paragraph</Form.Label>*/}
@@ -78,7 +78,7 @@ const StudentView = () => {
             <LockSwitch checked={editable} label="Edit Mode:"
               onChange={(checked) => editorState.next(checked)} />
           </Card.Header>
-          <Card.Body>
+          <Card.Body className="overflow-auto">
             <Slate
               editor={editor}
               value={editorValue}
@@ -89,7 +89,6 @@ const StudentView = () => {
             >
               <Editable readOnly={!editable}
                 placeholder="Enter some editable text..."
-                className="mh-100 mw-100 border"
               />
             </Slate>
 
