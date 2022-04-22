@@ -1,3 +1,4 @@
+
 *:focus {
   outline: none;
 }
@@ -16,7 +17,7 @@
 }
 
 html {
-  box-sizing: border-box;
+  /*box-sizing: border-box;*/
   -ms-text-size-adjust: 100%;
   -webkit-text-size-adjust: 100%;
 
@@ -25,37 +26,37 @@ html {
 
   overflow: hidden;
 
-  font-family: Verdana;
+  font-family: 'Open Sans';
   font-size: 10pt;
 }
-
+/*
 *,
 *:before,
 *:after {
   box-sizing: inherit;
-}
+}*/
 
 body {
-  margin: 0px;
+  /*margin: 0px;*/
   padding: 0px;
 
-  font-family: sans-serif;
+  /*font-family: sans-serif;*/
   overflow: hidden;
 
-  line-height: 2;
+  /*line-height: 2;*/
   height: 100%;
 }
 
-.main {
+/*.main {
   margin: 0px;
   padding: 0px;
   border: 0px;
   width: 100%;
   height: 100%;
   overflow: hidden;
-}
+}*/
 
-.maincontainer {
+/*.maincontainer {
   margin: 0px;
   padding: 10px;
   width: 100%;
@@ -63,44 +64,44 @@ body {
 
   border: 2px solid red;
   overflow: hidden;
-
+*/
   /* https://css-tricks.com/stripes-css/ */
-  background: repeating-linear-gradient(
+  /*background: repeating-linear-gradient(
     45deg,
     #606dbc,
     #606dbc 10px,
     #465298 10px,
     #465298 20px
   );
-}
+}*/
 
-.termscontainer {
+/*.termscontainer {
   margin: 0px;
   padding: 10px;
   height: 100%;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
+}*/
 
-.termscontent {
+/*.termscontent {
   overflow-x: hidden;
   overflow-y: scroll;
   flex: 1;
   padding: 0px;
   margin: 6px;
-}
+}*/
 
-.termsconfirm {
+/*.termsconfirm {
   flex: 0;
 }
 
 .section-title {
   color: #999;
   font-size: 1em;
-}
+}*/
 
-.count {
+/*.count {
   background: #bbb;
   display: inline-block;
   color: #fff;
@@ -113,7 +114,7 @@ body {
 
 .foundation-container {
   margin: 10px;
-}
+}*/
 
 .loader {
   position: absolute;
@@ -155,7 +156,7 @@ body {
 
 /* To override the react-select sizes, which are too big by default */
 
-.select-option-group {
+/*.select-option-group {
   position: relative;
   display: inline-block;
   border: 2px solid #bdc3c7;
@@ -169,19 +170,19 @@ body {
   display: block;
   text-align: left;
   margin-left: 0;
-  overflow: hidden;
+  overflow: hidden; */
   /*padding: 7px 10px;*/
-  padding-right: 30px;
+/*  padding-right: 30px;
   font-weight: bold;
-}
+}*/
 
-.selection:hover {
+/*.selection:hover {
   color: black;
-}
+}*/
 
 /* Foundation Tabs overrides */
 
-.tabs-title > a {
+/*.tabs-title > a {
   display: block;
   padding: 1.25rem 1.5rem;
   font-size: 1.2rem;
@@ -190,5 +191,6 @@ body {
 }
 
 .tabs .is-active {
-  background: #e9ecef; /* var(--bs-gray-200) */
-}
+  background: #e9ecef; *//* var(--bs-gray-200) */
+/*}
+*/
