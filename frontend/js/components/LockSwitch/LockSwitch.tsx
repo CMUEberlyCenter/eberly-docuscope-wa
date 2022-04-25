@@ -30,6 +30,7 @@ const LockSwitch = (props: LockSwitchProps) => {
         } lock-button rounded-pill me-2`}
         role="switch"
         aria-checked={toggle}
+        aria-labelledby={labelId}
       >
         <i className={`fa-solid fa-lock${toggle ? "-open" : ""}`}></i>
       </button>

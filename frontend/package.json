@@ -34,6 +34,9 @@
     "url": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki"
   },
   "homepage": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki",
+  "browserslist": [
+    "defaults"
+  ],
   "devDependencies": {
     "@babel/core": "^7.17.9",
     "@babel/plugin-proposal-class-properties": "^7.16.7",
@@ -46,14 +49,15 @@
     "@testing-library/react": "^13.1.1",
     "@types/d3": "^7.1.0",
     "@types/jest": "^27.4.1",
-    "@types/react-dom": "^18.0.1",
+    "@types/react-dom": "^18.0.2",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",
     "arraybuffer-loader": "^1.0.8",
+    "autoprefixer": "^10.4.5",
     "babel-loader": "^8.2.5",
     "css-loader": "^6.7.1",
     "dotenv": "^16.0.0",
-    "eslint": "^8.13.0",
+    "eslint": "^8.14.0",
     "eslint-plugin-react": "^7.29.4",
     "eslint-plugin-react-hooks": "^4.4.0",
     "file-loader": "^6.2.0",
@@ -62,6 +66,7 @@
     "jest": "^27.5.1",
     "jsonwebtoken": "^8.5.1",
     "pdfkit": "^0.13.0",
+    "postcss-loader": "^6.2.1",
     "prettier": "^2.6.2",
     "raw-loader": "^4.0.2",
     "sass": "^1.50.1",

@@ -69,11 +69,34 @@ const config = {
       },
       {
         test: /\.s[ac]ss$/i,
-        use: ['style-loader', 'css-loader', 'sass-loader',],
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [['autoprefixer', {}]]
+              }
+            }
+          },
+          'sass-loader',
+        ],
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader']
+        use: [
+          'style-loader',
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: [['autoprefixer', {}]]
+              }
+            }
+          },
+        ]
       },
       {
         test: /\.(png|svg|jpe?g|gif)$/i,
