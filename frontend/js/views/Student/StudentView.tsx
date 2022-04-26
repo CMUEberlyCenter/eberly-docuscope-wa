@@ -23,6 +23,7 @@ import {
 import { Node } from "slate";
 import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
+import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 
 const serialize = (nodes: Node[]) => {
   return nodes.map((n: Node) => Node.string(n)).join("\n");
@@ -32,6 +33,7 @@ const StudentView = () => {
   const selectId = useId();
   const [showInfoColumn, setShowInfoColumn] = useState(false);
   //const [status, setStatus] = useState('');
+  const [currentTab, setCurrentTab] = useState<string | null>(null);
   const status = "";
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
@@ -46,6 +48,14 @@ const StudentView = () => {
       setShowInfoColumn(!showInfoColumn);
     }
   };
+  const tagging = useTaggerResults();
+  const showTaggedText = currentTab === 'impressions' && !editable && isTaggerResult(tagging);
+  const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : '';
+  const taggedText = (
+    <React.Fragment>
+      <h4>Tagged Text:</h4>
+      <div dangerouslySetInnerHTML={{ __html: taggedTextContent }}></div>
+    </React.Fragment>);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       <header className="d-flex bg-dark">
@@ -67,7 +77,7 @@ const StudentView = () => {
       </header>
       <main className="d-flex flex-grow-1 bg-white justify-content-stretch overflow-hidden">
         <aside className="d-flex flex-column w-50">
-          <Tabs className="mt-1 px-2">
+          <Tabs className="mt-1 px-2" onSelect={(key) => setCurrentTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
               <Expectations />
             </Tab>
@@ -101,6 +111,7 @@ const StudentView = () => {
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
+            {showTaggedText ? taggedText : ''}
             <Slate
               editor={editor}
               value={editorValue}
@@ -109,9 +120,9 @@ const StudentView = () => {
                 setEditorValue(content);
               }}
             >
-              <Editable
+              <Editable className={showTaggedText ? 'd-none' : ''}
                 readOnly={!editable}
-                placeholder="Enter some editable text..."
+                placeholder={editable ? "Enter some text..." : "Unlock and enter some text..."}
               />
             </Slate>
           </Card.Body>

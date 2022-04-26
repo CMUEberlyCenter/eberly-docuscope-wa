@@ -37,6 +37,14 @@ const EmptyResults: TaggerResults = {
   tagging_time: 0,
   patterns: [],
 };
+
+/** Predicate for testing if a value is a TaggerResult */
+export function isTaggerResult(res: TaggerResults | number | null): res is TaggerResults {
+  if (typeof(res) === 'number') return false;
+  if (res === null) return false;
+  return (res as TaggerResults).isError !== true;
+}
+
 /**
  * Generate the mapping of category ids to their list of patterns.
  * Useful for fast lookup of of patterns.
