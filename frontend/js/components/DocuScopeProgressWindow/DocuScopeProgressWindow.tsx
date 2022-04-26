@@ -1,3 +1,4 @@
+/* Progress tracker in a modal like dialog. */
 import React from "react";
 import "./DocuScopeProgressWindow.scss";
 

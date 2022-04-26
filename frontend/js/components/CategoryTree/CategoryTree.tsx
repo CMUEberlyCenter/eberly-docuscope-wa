@@ -1,3 +1,8 @@
+/* Component for displaying the common dictionary tree and pattern counts.
+
+This is part of the visualization (Impressions) of DocuScope tagged data.
+The tree view sums the number of instances for all subcategories when collapsed.
+*/
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as React from "react";
 import {
@@ -73,6 +78,7 @@ const [useCategoryData, categoryData$] = bind(
       const tagged: TaggerResults | number | null = data.tagged;
       const common: CommonDictionary | null = data.common;
       if (common && typeof tagged !== "number") {
+        // non-number tagged should mean that it is data.
         const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
         const dfsmap = (
           parent: string,
@@ -99,30 +105,37 @@ enum CheckboxState {
   Checked,
 }
 
-const Patterns = (props: { category: string; data: PatternData[] }) => (
-  <div className="table-responsive patterns-container ms-5">
-    <table className="table table-sm patterns overflow-auto">
-      <thead className="header">
-        <tr>
-          <th scope="col">Pattern</th>
-          <th scope="col" className="text-end">
-            Count
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {props.data &&
-          props.data.map((pat, i) => (
-            <tr key={`${props.category}-row-${i}`}>
-              <td>{pat.pattern}</td>
-              <td className="text-end pe-3">{pat.count}</td>
-            </tr>
-          ))}
-      </tbody>
-    </table>
-  </div>
-);
+/**
+ * Displays the pattern count table.
+ */
+const Patterns = (props: { data: PatternData[] }) => {
+  const key = useId();
+  return (
+    <div className="table-responsive patterns-container ms-5">
+      <table className="table table-sm patterns overflow-auto">
+        <thead className="header">
+          <tr>
+            <th scope="col">Pattern</th>
+            <th scope="col" className="text-end">
+              Count
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {props.data &&
+            props.data.map((pat, i) => (
+              <tr key={`${key}-row-${i}`}>
+                <td>{pat.pattern}</td>
+                <td className="text-end pe-3">{pat.count}</td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
+/* Transitions */
 const DURATION = 250;
 function chevron_rotate(state: string) {
   const rotation = state === "entering" || state === "entered" ? 0.25 : 0;
@@ -136,6 +149,11 @@ function fade(state: string) {
   return { transition: `opacity ${DURATION}ms ease-in-out`, opacity: opacity };
 }
 
+/**
+ * A node in the CategoryTree
+ * @param props
+ * @returns
+ */
 const CategoryNode = (props: {
   data: TreeNode;
   onChange: (target: TreeNode, state: CheckboxState) => void;
@@ -241,7 +259,7 @@ const CategoryNode = (props: {
           )}
           {props.data.children.length === 0 &&
           props.data.patterns.length > 0 ? (
-            <Patterns category={props.data.id} data={props.data.patterns} />
+            <Patterns data={props.data.patterns} />
           ) : (
             ""
           )}
@@ -260,6 +278,7 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
   return undefined;
 }
 
+/** Top level node in the CategoryTree */
 const CategoryTreeTop = () => {
   const [refresh, setRefresh] = useState(false); // Hack to force refresh.
   const data: TreeNode[] | null = useCategoryData();
@@ -318,6 +337,7 @@ const MySpinner = () => (
   </Spinner>
 );
 
+/** Category Tree for displaying the category hierarchy data. */
 const CategoryTree = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Suspense fallback={<MySpinner />}>

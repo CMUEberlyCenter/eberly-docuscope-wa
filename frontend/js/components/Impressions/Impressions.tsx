@@ -57,7 +57,9 @@ const Impressions = () => {
   }
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
-      <Card.Header><TabTitle>Manage Readers&apos; Impressions</TabTitle></Card.Header>
+      <Card.Header>
+        <TabTitle>Manage Readers&apos; Impressions</TabTitle>
+      </Card.Header>
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <React.Suspense fallback={<Spinner animation={"border"} />}>

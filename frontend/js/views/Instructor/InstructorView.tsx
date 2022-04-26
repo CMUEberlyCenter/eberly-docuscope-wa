@@ -5,5 +5,5 @@ const InstuctorView = () => (
   <Alert variant="warning">
     <p>Instructor interface is unavailable.</p>
   </Alert>
-)
+);
 export default InstuctorView;

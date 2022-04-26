@@ -1,12 +1,21 @@
+/*
+A simple two state button for showing (un)locked state.
+*/
 import React, { useId, useState } from "react";
 import "./LockSwitch.scss";
 
 interface LockSwitchProps {
-  label: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  label: string; // Label text content, prepended to button
+  checked: boolean; // true if locked
+  onChange?: (checked: boolean) => void; // function to handle new state
 }
 
+/**
+ * A two state button for displaying and controlling
+ * locked status.
+ * @param props
+ * @returns
+ */
 const LockSwitch = (props: LockSwitchProps) => {
   const labelId = useId();
   const [toggle, setToggle] = useState(props.checked);
@@ -23,7 +32,6 @@ const LockSwitch = (props: LockSwitchProps) => {
       <label className="text-nowrap px-2" id={labelId}>
         {props.label}
       </label>
-      {/*<input type="checkbox" aria-labelledby={labelId} className="d-none" aria-roledescription="switch" />*/}
       <button
         className={`btn btn-outline-${
           toggle ? "success" : "secondary"

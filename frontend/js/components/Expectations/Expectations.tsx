@@ -1,34 +1,52 @@
+/* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
 import React, { useId, useState } from "react";
 import { Alert, Card, Collapse } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { ExpectationRule, useExpectations } from "../../service/expectations.service";
+import {
+  ExpectationRule,
+  useExpectations,
+} from "../../service/expectations.service";
 import TabTitle from "../TabTitle/TabTitle";
-import './Expectations.scss';
+import "./Expectations.scss";
 
 interface RuleProps {
   rule: ExpectationRule;
 }
+/** A Rule instance. */
 const Rule = (props: RuleProps) => {
   const ref = useId();
   const [expanded, setExpanded] = useState(false);
   return (
     <li>
-      <span className="cursor-pointer expectations-rule" onClick={() => setExpanded(!expanded)}>{props.rule.name}</span>
+      <span
+        className="cursor-pointer expectations-rule"
+        onClick={() => setExpanded(!expanded)}
+      >
+        {props.rule.name}
+      </span>
       <Collapse in={expanded}>
         <Card onClick={() => setExpanded(false)}>
           <Card.Body>
-            <Card.Text dangerouslySetInnerHTML={{ __html: props.rule.description }} />
+            <Card.Text
+              dangerouslySetInnerHTML={{ __html: props.rule.description }}
+            />
           </Card.Body>
         </Card>
       </Collapse>
       {props.rule.children.length > 0 ? (
         <ol>
-          {props.rule.children.map((child: ExpectationRule, i) => (<Rule key={`${ref}-${i}`} rule={child} />))}
+          {props.rule.children.map((child: ExpectationRule, i) => (
+            <Rule key={`${ref}-${i}`} rule={child} />
+          ))}
         </ol>
-      ) : ''}
-    </li>)
-}
+      ) : (
+        ""
+      )}
+    </li>
+  );
+};
+/** Component specific error message. */
 const ErrorFallback = (props: { error?: Error }) => (
   <Alert variant="danger">
     <p>Error loading expectations:</p>
@@ -41,10 +59,12 @@ const Expectations = () => {
   const ref = useId();
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
-      <Card.Header><TabTitle>Meet Readers&apos; Expectations</TabTitle></Card.Header>
+      <Card.Header>
+        <TabTitle>Meet Readers&apos; Expectations</TabTitle>
+      </Card.Header>
       <Card.Body className="overflow-auto">
         <Subscribe>
-          <Card.Title>{expectations?.name ?? 'Loading...'}</Card.Title>
+          <Card.Title>{expectations?.name ?? "Loading..."}</Card.Title>
           <Card.Text>
             Respond to the following questions to meet the readers&apos;
             expectations. The sentences that you write to respond to each
@@ -54,12 +74,14 @@ const Expectations = () => {
           </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             <ol className="expectations-list mt-3">
-              {expectations?.rules.map((rule, i) => (<Rule key={`${ref}-${i}`} rule={rule} />)) ?? ''}
+              {expectations?.rules.map((rule, i) => (
+                <Rule key={`${ref}-${i}`} rule={rule} />
+              )) ?? ""}
             </ol>
           </ErrorBoundary>
         </Subscribe>
       </Card.Body>
     </Card>
-  )
-}
+  );
+};
 export default Expectations;

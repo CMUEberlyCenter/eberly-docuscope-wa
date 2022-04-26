@@ -1,5 +1,5 @@
 /**
- Via: 
+ Via:
   https://blog.logrocket.com/nodejs-expressjs-postgresql-crud-rest-api-example/
   https://node-postgres.com/features/pooling
   https://expressjs.com/en/guide/routing.html
@@ -43,11 +43,11 @@ class DocuScopeWALTIService {
     this.backendPort=dotenv.DWA_BACKEND_PORT;
     if (this.backendPort=="") {
       this.backendPort=5000;
-    }    
+    }
     this.token=this.uuidv4();
     this.session=this.uuidv4();
     this.standardHeader = {
-      method: "GET",       
+      method: "GET",
       cache: 'no-cache'
     };
 
@@ -75,7 +75,7 @@ class DocuScopeWALTIService {
       res.set('Cache-Control', 'no-store')
       next()
     })
- 
+
     this.app.use(express.urlencoded({
       extended: true
     }));
@@ -91,17 +91,17 @@ class DocuScopeWALTIService {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
       return v.toString(16);
     });
-  }  
+  }
 
   /**
-   * 
+   *
    */
   pad(s) {
     return (s < 10 ? '0' : '') + s;
   }
 
   /**
-   * 
+   *
    */
   format(seconds){
     var hours = Math.floor(seconds / (60*60));
@@ -113,7 +113,7 @@ class DocuScopeWALTIService {
 
   /**
    * Here’s an example of a function for signing tokens:
-   */ 
+   */
   generateAccessToken(aString) {
     let tSecret="";
 
@@ -135,7 +135,7 @@ class DocuScopeWALTIService {
   }
 
   /**
-   * 
+   *
    */
   generateErrorMessage (aMessage) {
     var error = {
@@ -148,7 +148,7 @@ class DocuScopeWALTIService {
 
 
   /**
-   * 
+   *
    */
   generateDataMessage (aDataset) {
     var error = {
@@ -196,7 +196,7 @@ class DocuScopeWALTIService {
   }
 
   /**
-   * 
+   *
    */
   evaluateResult (aMessage) {
 
@@ -204,7 +204,7 @@ class DocuScopeWALTIService {
   }
 
   /**
-   * 
+   *
    */
   createDataMessage (aData) {
     let message={
@@ -215,7 +215,7 @@ class DocuScopeWALTIService {
   }
 
   /**
-   * 
+   *
    */
   apiPOSTCall (aURL,aData) {
     console.log ("apiPOSTCall ()");
@@ -236,7 +236,7 @@ class DocuScopeWALTIService {
     }
 
     const req = http.request(options, (res) => {
-      if (res.statusCode==200) { 
+      if (res.statusCode==200) {
         let body = "";
 
         res.on("data", (chunk) => {
@@ -263,7 +263,7 @@ class DocuScopeWALTIService {
 
     req.write(data);
     req.end();
-  }  
+  }
 
   /**
    *
@@ -280,16 +280,16 @@ class DocuScopeWALTIService {
     console.log ("processRequest ()");
 
     if (this.useLTI==true) {
-      if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) { 
+      if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) {
         if (this.verifyLTI (request)==true) {
           var settingsObject=this.generateSettingsObject (request);
 
           //response.sendFile(__dirname + this.publicHome + request.path);
 
           console.log (settingsObject);
-          
+
           var stringed=JSON.stringify (settingsObject);
-          
+
           var raw = fs.readFileSync(__dirname + this.publicHome + '/index.html', 'utf8');
           var html = raw.replace ("/*SETTINGS*/","var serverContext="+stringed+";");
 
@@ -328,11 +328,11 @@ class DocuScopeWALTIService {
       }));
 
       return;
-    }    
+    }
 
     if (request.path=="/api/v1/ontopic") {
       console.log ("Processing ontopic request ...");
-      
+
       let msg=request.body;
 
       if (msg.status=="request") {
@@ -351,11 +351,11 @@ class DocuScopeWALTIService {
         sentences: {},
       }));
 
-      return;      
+      return;
     }
 
     response.json(this.generateErrorMessage ("Unknown API call made"));
-  }  
+  }
 
   /**
    *
@@ -364,22 +364,22 @@ class DocuScopeWALTIService {
     console.log ("run ()");
 
     this.app.get('/api/v1/*', (request, response) => {
-      console.log ("get(api)");
+      //console.log ("get(api)");
       this.processAPIRequest ("GET",request,response);
     });
 
     this.app.post('/api/v1/*', (request, response) => {
-      console.log ("post(api)");
+      //console.log ("post(api)");
       this.processAPIRequest ("POST",request,response);
-    });    
+    });
 
     this.app.get('/*', (request, response) => {
-      console.log ("get()");
+      //console.log ("get()");
       this.processRequest (request,response);
     });
 
     this.app.post('/*', (request, response) => {
-      console.log ("post()");
+      //console.log ("post()");
       this.processRequest (request,response);
     });
 

@@ -1,3 +1,4 @@
+/* Sunburst chart for visualizing DocuScope tagger data */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
@@ -302,6 +303,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
   );
 };
 
+/** Custom error feedback. */
 const ErrorFallback = (props: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading chart data:</p>
@@ -310,6 +312,11 @@ const ErrorFallback = (props: { error?: Error }) => (
     {/*<button onClick={resetErrorBoundary}>Try again</button>*/}
   </div>
 );
+/**
+ * Sunburst Chart for visualizing proportions in hierarchical data.
+ * @param props
+ * @returns
+ */
 const SunburstChart = (props: SunburstChartProps) => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Suspense fallback={<Spinner animation={"border"} />}>

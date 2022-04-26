@@ -32,7 +32,7 @@ export interface ExpectationRule {
 }
 export interface ExpectationRules {
   name: string;
-  rules: ExpectationRule[]
+  rules: ExpectationRule[];
 }
 
 // useExpectations: for use in a component, expectations$: the rxjs observable
@@ -42,7 +42,11 @@ export const [useExpectations, expectations$] = bind(
     shareReplay(1),
     catchError((err) => {
       console.warn(`Failed to load Expectations rules: ${err}`);
-      return of({name: 'Error loading Expectation rules.', rules: []} as ExpectationRules);
+      return of({
+        name: 'Error loading Expectation rules.',
+        rules: [],
+      } as ExpectationRules);
     })
-  ), {name: 'Loading Expectation rules.', rules: []} as ExpectationRules
+  ),
+  { name: 'Loading Expectation rules.', rules: [] } as ExpectationRules
 );
