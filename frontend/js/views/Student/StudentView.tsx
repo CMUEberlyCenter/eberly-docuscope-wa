@@ -82,7 +82,7 @@ const StudentView = () => {
             </Tab>
           </Tabs>
         </aside>
-        <Card as="article" className="w-50 overflow-hidden">
+        <Card as="article" className="editor-pane overflow-hidden w-50">
           <Card.Header className="d-flex justify-content-between">
             <Form.Group>
               {/*<Form.Label>Paragraph</Form.Label>*/}
