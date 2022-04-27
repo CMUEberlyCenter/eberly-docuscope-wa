@@ -20,15 +20,10 @@ import {
   editorText,
   useEditorState,
 } from "../../service/editor-state.service";
-import { Node } from "slate";
 import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
-
-const serialize = (nodes: Node[]): string => {
-  return nodes.map((n: Node) => Node.string(n)).join("\n");
-};
 
 function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   let target: HTMLElement | null = evt.target as HTMLElement;
@@ -135,7 +130,7 @@ const StudentView = () => {
               editor={editor}
               value={editorValue}
               onChange={(content: Descendant[]) => {
-                editorText.next(serialize(content));
+                editorText.next(content);
                 setEditorValue(content);
               }}
             >

@@ -280,18 +280,6 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
   }
   return undefined;
 }
-/*function ancestors(node: TreeNode, data: TreeNode[]): TreeNode[] {
-  const ret: TreeNode[] = [];
-  let par = parent(node, data);
-  while (par) {
-    ret.push(par);
-    par = parent(par, data);
-  }
-  return ret;
-}
-function getCategories(node: TreeNode, data: TreeNode[]): string[] {
-  return ['category_node', node.id, ...ancestors(node, data).map((d) => d.id)];
-}*/
 
 function findChecked(data: TreeNode[]): string[] {
   const ret: string[] = [];
@@ -307,6 +295,7 @@ function findChecked(data: TreeNode[]): string[] {
 function highlighSelection(data: TreeNode[]): void {
   const categoryColors = d3.scaleOrdinal(d3.schemeCategory10);
   categoryColors.range(d3.schemeCategory10);
+  // TODO: scope to CategoryTree and tagged text.
   d3.selectAll('.cluster').classed('cluster', false);
   findChecked(data).forEach((id) => d3.selectAll(`.${id}`).classed('cluster', true).style('border-bottom-color', categoryColors(id)));
 }
@@ -342,7 +331,6 @@ const CategoryTreeTop = () => {
     }
     // walk data, if node is checked then add category, if empty then skip, else check children
     if (data) {
-      console.log(findChecked(data));
       highlighSelection(data);
     }
     setRefresh(!refresh);

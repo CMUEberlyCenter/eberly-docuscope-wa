@@ -23,7 +23,7 @@ const Impressions = () => {
   const text = useEditorText();
   const tagging = useTaggerResults();
   let content;
-  if (editing || text.trim().length === 0 || tagging === null) {
+  if (editing || text.length === 0 || tagging === null) {
     content = (
       <div className="alert alert-warning m-5 shadow d-flex align-items-center">
         <span className="material-icons">warning</span>

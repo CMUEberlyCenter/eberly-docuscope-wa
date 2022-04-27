@@ -8,7 +8,7 @@ import {
   of,
   switchMap,
 } from 'rxjs';
-import { editorState$, editorText } from './editor-state.service';
+import { editorState$, editorText$ } from './editor-state.service';
 import { settings$ } from './settings.service';
 
 /** JSON structure of patterns. */
@@ -126,7 +126,7 @@ export function tag(tagger_url: string, text: string) {
 const tagEditorText = editorState$.pipe(
   filter((o) => !o),
   switchMap(() =>
-    combineLatest({ settings: settings$, text: editorText }).pipe(
+    combineLatest({ settings: settings$, text: editorText$ }).pipe(
       filter(({ text }) => text.trim().length > 0),
       switchMap(({ settings, text }) => tag(settings.tagger, text))
     )
