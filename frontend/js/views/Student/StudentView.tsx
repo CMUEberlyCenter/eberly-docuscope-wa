@@ -74,6 +74,11 @@ const StudentView = () => {
         Please note that this is how DocuScope sees your text and it might
         appear slightly different than your text, toggle the &quot;Edit
         Mode&quot; to see your original text.
+        <br/>
+        In the tagged text, you can click on words and phrases to see
+        its category tag. Not all words or phrases have tags. Selecting
+        a category from the Dictionary Categories tree will highlight
+        all of the instances of the selected categories in the tagged text.
       </Alert>
       <div
         className="tagged-text"
