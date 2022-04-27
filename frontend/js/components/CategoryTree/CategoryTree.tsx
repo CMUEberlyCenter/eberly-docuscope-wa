@@ -4,6 +4,7 @@ This is part of the visualization (Impressions) of DocuScope tagged data.
 The tree view sums the number of instances for all subcategories when collapsed.
 */
 import { bind, Subscribe } from "@react-rxjs/core";
+import * as d3 from "d3";
 import * as React from "react";
 import {
   ChangeEvent,
@@ -156,6 +157,7 @@ function fade(state: string) {
  */
 const CategoryNode = (props: {
   data: TreeNode;
+  ancestors: string[];
   onChange: (target: TreeNode, state: CheckboxState) => void;
 }) => {
   const checkRef = useRef(null);
@@ -188,6 +190,7 @@ const CategoryNode = (props: {
   };
 
   const pattern_count = count_patterns(props.data);
+  const myCategoryClasses = [...props.ancestors, props.data.id];
   return (
     <li data-docuscope-category={props.data.id} className="list-group-item">
       <div className="d-flex align-items-baseline">
@@ -217,7 +220,7 @@ const CategoryNode = (props: {
             onChange={change}
             disabled={editing || pattern_count === 0}
           />
-          <label className="form-check-label me-0" htmlFor={checkId}>
+          <label className={`form-check-label me-0 ms-1 ${myCategoryClasses.join(' ')}`} htmlFor={checkId}>
             {props.data.label}
           </label>
         </div>
@@ -233,9 +236,8 @@ const CategoryNode = (props: {
           {(state) => (
             <span
               style={fade(state)}
-              className={`badge bg-${
-                pattern_count > 0 && !editing ? "primary" : "secondary"
-              } rounded-pill fs-6 ms-4`}
+              className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
+                } rounded-pill fs-6 ms-4`}
             >
               {editing ? "-" : pattern_count}
             </span>
@@ -250,6 +252,7 @@ const CategoryNode = (props: {
                 <CategoryNode
                   key={sub.id}
                   data={sub}
+                  ancestors={myCategoryClasses}
                   onChange={props.onChange}
                 />
               ))}
@@ -258,7 +261,7 @@ const CategoryNode = (props: {
             ""
           )}
           {props.data.children.length === 0 &&
-          props.data.patterns.length > 0 ? (
+            props.data.patterns.length > 0 ? (
             <Patterns data={props.data.patterns} />
           ) : (
             ""
@@ -276,6 +279,36 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
     return nodes.find((n) => n.id === node.parent);
   }
   return undefined;
+}
+/*function ancestors(node: TreeNode, data: TreeNode[]): TreeNode[] {
+  const ret: TreeNode[] = [];
+  let par = parent(node, data);
+  while (par) {
+    ret.push(par);
+    par = parent(par, data);
+  }
+  return ret;
+}
+function getCategories(node: TreeNode, data: TreeNode[]): string[] {
+  return ['category_node', node.id, ...ancestors(node, data).map((d) => d.id)];
+}*/
+
+function findChecked(data: TreeNode[]): string[] {
+  const ret: string[] = [];
+  data.forEach((d) => {
+    if (d.checked === CheckboxState.Indeterminate) {
+      ret.push(...findChecked(d.children));
+    } else if (d.checked === CheckboxState.Checked) {
+      ret.push(d.id)
+    }
+  })
+  return ret;
+}
+function highlighSelection(data: TreeNode[]): void {
+  const categoryColors = d3.scaleOrdinal(d3.schemeCategory10);
+  categoryColors.range(d3.schemeCategory10);
+  d3.selectAll('.cluster').classed('cluster', false);
+  findChecked(data).forEach((id) => d3.selectAll(`.${id}`).classed('cluster', true).style('border-bottom-color', categoryColors(id)));
 }
 
 /** Top level node in the CategoryTree */
@@ -307,6 +340,11 @@ const CategoryTreeTop = () => {
       }
       ancestor = parent(ancestor, data ?? []);
     }
+    // walk data, if node is checked then add category, if empty then skip, else check children
+    if (data) {
+      console.log(findChecked(data));
+      highlighSelection(data);
+    }
     setRefresh(!refresh);
   };
   return data ? (
@@ -315,7 +353,7 @@ const CategoryTreeTop = () => {
       <ul className="impressions-category-tree list-group">
         {data &&
           data.map((cat) => (
-            <CategoryNode key={cat.id} data={cat} onChange={onChange} />
+            <CategoryNode key={cat.id} data={cat} ancestors={[]} onChange={onChange} />
           ))}
       </ul>
     </React.Fragment>

@@ -24,10 +24,29 @@ import { Node } from "slate";
 import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
+import * as d3 from "d3";
 
-const serialize = (nodes: Node[]) => {
+const serialize = (nodes: Node[]): string => {
   return nodes.map((n: Node) => Node.string(n)).join("\n");
 };
+
+function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
+  let target: HTMLElement | null = evt.target as HTMLElement;
+  while (target && !target.getAttribute('data-key')) {
+    target = target.parentElement;
+  }
+  const key = target?.getAttribute('data-key');
+  if (target && key && key.trim()) {
+    const isSelected = d3.select(target).classed('selected_text');
+    d3.selectAll('.selected_text').classed('selected_text', false);
+    d3.selectAll('.cluster_id').classed('d_none', true);
+    if (!isSelected) {
+      d3.select(target).classed('selected_text', true);
+      d3.select(target).select('sup.cluster_id').classed('d_none', false);
+    }
+  }
+}
+
 const StudentView = () => {
   const navId = useId();
   const selectId = useId();
@@ -54,7 +73,7 @@ const StudentView = () => {
   const taggedText = (
     <React.Fragment>
       <h4>Tagged Text:</h4>
-      <div dangerouslySetInnerHTML={{ __html: taggedTextContent }}></div>
+      <div className="tagged-text" onClick={(evt) => click_select(evt)} dangerouslySetInnerHTML={{ __html: taggedTextContent }}></div>
     </React.Fragment>);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
