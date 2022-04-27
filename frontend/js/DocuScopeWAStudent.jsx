@@ -1,5 +1,5 @@
 /**********************************************
- * THIS IS DEPRICATED!!!!
+ * THIS IS DEPRECATED!!!!
  * Using js/views/StudentView instead.
  * Not deleting this yet as there might be some
  * functionality that has not been ported yet.
