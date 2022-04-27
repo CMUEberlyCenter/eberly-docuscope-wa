@@ -1,5 +1,6 @@
 import React, { useId, useState } from "react";
 import {
+  Alert,
   Card,
   Container,
   Form,
@@ -27,17 +28,17 @@ import * as d3 from "d3";
 
 function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   let target: HTMLElement | null = evt.target as HTMLElement;
-  while (target && !target.getAttribute('data-key')) {
+  while (target && !target.getAttribute("data-key")) {
     target = target.parentElement;
   }
-  const key = target?.getAttribute('data-key');
+  const key = target?.getAttribute("data-key");
   if (target && key && key.trim()) {
-    const isSelected = d3.select(target).classed('selected_text');
-    d3.selectAll('.selected_text').classed('selected_text', false);
-    d3.selectAll('.cluster_id').classed('d_none', true);
+    const isSelected = d3.select(target).classed("selected_text");
+    d3.selectAll(".selected_text").classed("selected_text", false);
+    d3.selectAll(".cluster_id").classed("d_none", true);
     if (!isSelected) {
-      d3.select(target).classed('selected_text', true);
-      d3.select(target).select('sup.cluster_id').classed('d_none', false);
+      d3.select(target).classed("selected_text", true);
+      d3.select(target).select("sup.cluster_id").classed("d_none", false);
     }
   }
 }
@@ -63,13 +64,24 @@ const StudentView = () => {
     }
   };
   const tagging = useTaggerResults();
-  const showTaggedText = currentTab === 'impressions' && !editable && isTaggerResult(tagging);
-  const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : '';
+  const showTaggedText =
+    currentTab === "impressions" && !editable && isTaggerResult(tagging);
+  const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
   const taggedText = (
     <React.Fragment>
       <h4>Tagged Text:</h4>
-      <div className="tagged-text" onClick={(evt) => click_select(evt)} dangerouslySetInnerHTML={{ __html: taggedTextContent }}></div>
-    </React.Fragment>);
+      <Alert variant="info">
+        Please note that this is how DocuScope sees your text and it might
+        appear slightly different than your text, toggle the &quot;Edit
+        Mode&quot; to see your original text.
+      </Alert>
+      <div
+        className="tagged-text"
+        onClick={(evt) => click_select(evt)}
+        dangerouslySetInnerHTML={{ __html: taggedTextContent }}
+      ></div>
+    </React.Fragment>
+  );
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       <header className="d-flex bg-dark">
@@ -125,7 +137,7 @@ const StudentView = () => {
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
-            {showTaggedText ? taggedText : ''}
+            {showTaggedText ? taggedText : ""}
             <Slate
               editor={editor}
               value={editorValue}
@@ -134,9 +146,14 @@ const StudentView = () => {
                 setEditorValue(content);
               }}
             >
-              <Editable className={showTaggedText ? 'd-none' : ''}
+              <Editable
+                className={showTaggedText ? "d-none" : ""}
                 readOnly={!editable}
-                placeholder={editable ? "Enter some text..." : "Unlock and enter some text..."}
+                placeholder={
+                  editable
+                    ? "Enter some text..."
+                    : "Unlock and enter some text..."
+                }
               />
             </Slate>
           </Card.Body>

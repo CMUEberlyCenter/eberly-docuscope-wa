@@ -220,7 +220,12 @@ const CategoryNode = (props: {
             onChange={change}
             disabled={editing || pattern_count === 0}
           />
-          <label className={`form-check-label me-0 ms-1 ${myCategoryClasses.join(' ')}`} htmlFor={checkId}>
+          <label
+            className={`form-check-label me-0 ms-1 ${myCategoryClasses.join(
+              " "
+            )}`}
+            htmlFor={checkId}
+          >
             {props.data.label}
           </label>
         </div>
@@ -236,8 +241,9 @@ const CategoryNode = (props: {
           {(state) => (
             <span
               style={fade(state)}
-              className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
-                } rounded-pill fs-6 ms-4`}
+              className={`badge bg-${
+                pattern_count > 0 && !editing ? "primary" : "secondary"
+              } rounded-pill fs-6 ms-4`}
             >
               {editing ? "-" : pattern_count}
             </span>
@@ -261,7 +267,7 @@ const CategoryNode = (props: {
             ""
           )}
           {props.data.children.length === 0 &&
-            props.data.patterns.length > 0 ? (
+          props.data.patterns.length > 0 ? (
             <Patterns data={props.data.patterns} />
           ) : (
             ""
@@ -287,17 +293,22 @@ function findChecked(data: TreeNode[]): string[] {
     if (d.checked === CheckboxState.Indeterminate) {
       ret.push(...findChecked(d.children));
     } else if (d.checked === CheckboxState.Checked) {
-      ret.push(d.id)
+      ret.push(d.id);
     }
-  })
+  });
   return ret;
 }
 function highlighSelection(data: TreeNode[]): void {
   const categoryColors = d3.scaleOrdinal(d3.schemeCategory10);
   categoryColors.range(d3.schemeCategory10);
   // TODO: scope to CategoryTree and tagged text.
-  d3.selectAll('.cluster').classed('cluster', false);
-  findChecked(data).forEach((id) => d3.selectAll(`.${id}`).classed('cluster', true).style('border-bottom-color', categoryColors(id)));
+  d3.selectAll(".cluster").classed("cluster", false);
+  findChecked(data).forEach((id) =>
+    d3
+      .selectAll(`.${id}`)
+      .classed("cluster", true)
+      .style("border-bottom-color", categoryColors(id))
+  );
 }
 
 /** Top level node in the CategoryTree */
@@ -341,7 +352,12 @@ const CategoryTreeTop = () => {
       <ul className="impressions-category-tree list-group">
         {data &&
           data.map((cat) => (
-            <CategoryNode key={cat.id} data={cat} ancestors={[]} onChange={onChange} />
+            <CategoryNode
+              key={cat.id}
+              data={cat}
+              ancestors={[]}
+              onChange={onChange}
+            />
           ))}
       </ul>
     </React.Fragment>
