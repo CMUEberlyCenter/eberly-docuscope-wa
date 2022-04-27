@@ -1,8 +1,8 @@
 import { BaseEditor } from 'slate';
 import { ReactEditor } from 'slate-react';
 
-type CustomElement = { type: 'paragraph'; children: CustomText[] };
-type CustomText = { text: string };
+type CustomElement = { type: string; children: CustomText[] };
+type CustomText = { text: string, type?: string };
 
 declare module 'slate' {
   interface CustomTypes {

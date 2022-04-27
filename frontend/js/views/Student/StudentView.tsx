@@ -1,4 +1,4 @@
-import React, { useId, useState } from "react";
+import React, { useCallback, useId, useState } from "react";
 import {
   Alert,
   Card,
@@ -11,7 +11,7 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { createEditor, Descendant } from "slate";
-import { Editable, Slate, withReact } from "slate-react";
+import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
 import Clarity from "../../components/Clarity/Clarity";
 import Coherence from "../../components/Coherence/Coherence";
 import Expectations from "../../components/Expectations/Expectations";
@@ -58,6 +58,40 @@ const StudentView = () => {
       children: [{ text: "" }],
     },
   ]);
+  const renderElement = useCallback(({ attributes, children, element }: RenderElementProps) => {
+    switch (element.type) {
+      case 'block-quote':
+        return <blockquote {...attributes}>{children}</blockquote>;
+      case 'bulleted-list':
+        return <ul {...attributes}>{children}</ul>;
+      case "heading-one":
+        return <h1 {...attributes}>{children}</h1>;
+      case "heading-two":
+        return <h2 {...attributes}>{children}</h2>;
+      case "list-item":
+        return <li {...attributes}>{children}</li>;
+      case "numbered-list":
+        return <ol {...attributes}>{children}</ol>;
+      default:
+        return <p {...attributes}>{children}</p>
+    }
+  }, []);
+  const renderLeaf = useCallback(({ attributes, children, leaf }: RenderLeafProps) => {
+    switch (leaf.type) {
+      case "bold":
+        return <strong {...attributes}>{children}</strong>;
+      case "code":
+        return <code {...attributes}>{children}</code>;
+      case "italic":
+        return <em {...attributes}>{children}</em>;
+      case "underlined":
+        return <u {...attributes}>{children}</u>;
+      case "highlight":
+        return <span {...attributes} style={{ backgroundColor: "#ffeeba" }}>{children}</span>
+      default:
+        return <span {...attributes}>{children}</span>;
+    }
+  }, [])
   const onNavSelect = (eventKey: string | null) => {
     if (eventKey === "showTopicClusters") {
       setShowInfoColumn(!showInfoColumn);
@@ -74,7 +108,7 @@ const StudentView = () => {
         Please note that this is how DocuScope sees your text and it might
         appear slightly different than your text, toggle the &quot;Edit
         Mode&quot; to see your original text.
-        <br/>
+        <br />
         In the tagged text, you can click on words and phrases to see
         its category tag. Not all words or phrases have tags. Selecting
         a category from the Dictionary Categories tree will highlight
@@ -154,6 +188,8 @@ const StudentView = () => {
               <Editable
                 className={showTaggedText ? "d-none" : ""}
                 readOnly={!editable}
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
                 placeholder={
                   editable
                     ? "Enter some text..."
