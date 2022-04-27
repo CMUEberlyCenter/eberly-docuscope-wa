@@ -102,7 +102,7 @@ const StudentView = () => {
         </Navbar>
       </header>
       <main className="d-flex flex-grow-1 bg-white justify-content-stretch overflow-hidden">
-        <aside className="d-flex flex-column w-50">
+        <aside className="d-flex flex-column w-50 tools-pane">
           <Tabs className="mt-1 px-2" onSelect={(key) => setCurrentTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
               <Expectations />

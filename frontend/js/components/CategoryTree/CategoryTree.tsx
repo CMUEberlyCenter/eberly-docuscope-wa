@@ -181,7 +181,15 @@ const CategoryNode = (props: {
         cb.indeterminate = true;
       }
     }
-  });
+  }, [props.data.checked]);
+
+  useEffect(() => {
+    if (editing) {
+      d3.select('.cluster').classed('cluster', false);
+    }
+    return () => { d3.select('.cluster').classed('cluster', false); };
+  }, [editing])
+
   const change = (e: ChangeEvent<HTMLInputElement>) => {
     const state = e.currentTarget.checked
       ? CheckboxState.Checked
