@@ -130,8 +130,8 @@ const StudentView = () => {
             <Navbar.Toggle aria-controls={navId}></Navbar.Toggle>
             <Navbar.Collapse id={navId}>
               <Nav className="me-auto" onSelect={onNavSelect}>
-                <NavDropdown title="View">
-                  <NavDropdown.Item eventKey={"showTopicClusters"}>
+                <NavDropdown title="View" menuVariant="dark">
+                  <NavDropdown.Item eventKey={"showTopicClusters"} active={showInfoColumn} aria-current={showInfoColumn}>
                     Topic Clusters
                   </NavDropdown.Item>
                 </NavDropdown>
@@ -199,7 +199,16 @@ const StudentView = () => {
             </Slate>
           </Card.Body>
         </Card>
-        <aside></aside>
+        <aside className={showInfoColumn ? '' : 'd-none'}>
+          <Card className="m-1">
+            <Card.Header>
+              <h5>Topic Clusters</h5>
+            </Card.Header>
+            <Card.Body>
+              <Alert variant="warning">Topic Cluster information is unavailable.</Alert>
+            </Card.Body>
+          </Card>
+        </aside>
       </main>
       <footer className="bg-dark">Status: {status}</footer>
     </div>
