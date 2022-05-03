@@ -4,9 +4,9 @@ import {
   catchError,
   combineLatest,
   filter,
+  mergeMap,
   Observable,
   of,
-  switchMap,
 } from 'rxjs';
 import { editorState$, editorText$ } from './editor-state.service';
 import { settings$ } from './settings.service';
@@ -39,8 +39,10 @@ const EmptyResults: TaggerResults = {
 };
 
 /** Predicate for testing if a value is a TaggerResult */
-export function isTaggerResult(res: TaggerResults | number | null): res is TaggerResults {
-  if (typeof(res) === 'number') return false;
+export function isTaggerResult(
+  res: TaggerResults | number | null
+): res is TaggerResults {
+  if (typeof res === 'number') return false;
   if (res === null) return false;
   return (res as TaggerResults).isError !== true;
 }
@@ -123,17 +125,18 @@ export function tag(tagger_url: string, text: string) {
   });
 }
 
-const tagEditorText = editorState$.pipe(
-  filter((o) => !o),
-  switchMap(() =>
-    combineLatest({ settings: settings$, text: editorText$ }).pipe(
-      filter(({ text }) => text.trim().length > 0),
-      switchMap(({ settings, text }) => tag(settings.tagger, text))
-    )
-  ),
+const tagText = combineLatest({
+  state: editorState$,
+  text: editorText$,
+  settings: settings$,
+}).pipe(
+  filter((c) => !!c.settings),
+  filter((c) => !c.state),
+  filter((c) => c.text.trim().length > 0),
+  mergeMap((c) => tag(c.settings.tagger, c.text)),
   catchError((err: Error) =>
     of({ ...EmptyResults, ...{ isError: true, html_content: err.message } })
   )
 );
 
-export const [useTaggerResults, taggerResults$] = bind(tagEditorText, null);
+export const [useTaggerResults, taggerResults$] = bind(tagText, null);

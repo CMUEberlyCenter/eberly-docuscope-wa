@@ -32,8 +32,8 @@ import {
 import "./CategoryTree.scss";
 
 interface PatternData {
-  pattern: string;
-  count: number;
+  pattern: string; // text string pattern (eg) "I like"
+  count: number; // number of instances of that pattern in the text.
 }
 
 interface TreeNode {
@@ -185,10 +185,12 @@ const CategoryNode = (props: {
 
   useEffect(() => {
     if (editing) {
-      d3.select('.cluster').classed('cluster', false);
+      d3.select(".cluster").classed("cluster", false);
     }
-    return () => { d3.select('.cluster').classed('cluster', false); };
-  }, [editing])
+    return () => {
+      d3.select(".cluster").classed("cluster", false);
+    };
+  }, [editing]);
 
   const change = (e: ChangeEvent<HTMLInputElement>) => {
     const state = e.currentTarget.checked

@@ -11,7 +11,13 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { createEditor, Descendant } from "slate";
-import { Editable, RenderElementProps, RenderLeafProps, Slate, withReact } from "slate-react";
+import {
+  Editable,
+  RenderElementProps,
+  RenderLeafProps,
+  Slate,
+  withReact,
+} from "slate-react";
 import Clarity from "../../components/Clarity/Clarity";
 import Coherence from "../../components/Coherence/Coherence";
 import Expectations from "../../components/Expectations/Expectations";
@@ -43,7 +49,7 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   }
 }
 
-const StudentView = () => {
+const StudentView = (props: { api: apiCall }) => {
   const navId = useId();
   const selectId = useId();
   const [showInfoColumn, setShowInfoColumn] = useState(false);
@@ -58,40 +64,50 @@ const StudentView = () => {
       children: [{ text: "" }],
     },
   ]);
-  const renderElement = useCallback(({ attributes, children, element }: RenderElementProps) => {
-    switch (element.type) {
-      case 'block-quote':
-        return <blockquote {...attributes}>{children}</blockquote>;
-      case 'bulleted-list':
-        return <ul {...attributes}>{children}</ul>;
-      case "heading-one":
-        return <h1 {...attributes}>{children}</h1>;
-      case "heading-two":
-        return <h2 {...attributes}>{children}</h2>;
-      case "list-item":
-        return <li {...attributes}>{children}</li>;
-      case "numbered-list":
-        return <ol {...attributes}>{children}</ol>;
-      default:
-        return <p {...attributes}>{children}</p>
-    }
-  }, []);
-  const renderLeaf = useCallback(({ attributes, children, leaf }: RenderLeafProps) => {
-    switch (leaf.type) {
-      case "bold":
-        return <strong {...attributes}>{children}</strong>;
-      case "code":
-        return <code {...attributes}>{children}</code>;
-      case "italic":
-        return <em {...attributes}>{children}</em>;
-      case "underlined":
-        return <u {...attributes}>{children}</u>;
-      case "highlight":
-        return <span {...attributes} style={{ backgroundColor: "#ffeeba" }}>{children}</span>
-      default:
-        return <span {...attributes}>{children}</span>;
-    }
-  }, [])
+  const renderElement = useCallback(
+    ({ attributes, children, element }: RenderElementProps) => {
+      switch (element.type) {
+        case "block-quote":
+          return <blockquote {...attributes}>{children}</blockquote>;
+        case "bulleted-list":
+          return <ul {...attributes}>{children}</ul>;
+        case "heading-one":
+          return <h1 {...attributes}>{children}</h1>;
+        case "heading-two":
+          return <h2 {...attributes}>{children}</h2>;
+        case "list-item":
+          return <li {...attributes}>{children}</li>;
+        case "numbered-list":
+          return <ol {...attributes}>{children}</ol>;
+        default:
+          return <p {...attributes}>{children}</p>;
+      }
+    },
+    []
+  );
+  const renderLeaf = useCallback(
+    ({ attributes, children, leaf }: RenderLeafProps) => {
+      switch (leaf.type) {
+        case "bold":
+          return <strong {...attributes}>{children}</strong>;
+        case "code":
+          return <code {...attributes}>{children}</code>;
+        case "italic":
+          return <em {...attributes}>{children}</em>;
+        case "underlined":
+          return <u {...attributes}>{children}</u>;
+        case "highlight":
+          return (
+            <span {...attributes} style={{ backgroundColor: "#ffeeba" }}>
+              {children}
+            </span>
+          );
+        default:
+          return <span {...attributes}>{children}</span>;
+      }
+    },
+    []
+  );
   const onNavSelect = (eventKey: string | null) => {
     if (eventKey === "showTopicClusters") {
       setShowInfoColumn(!showInfoColumn);
@@ -109,10 +125,10 @@ const StudentView = () => {
         appear slightly different than your text, toggle the &quot;Edit
         Mode&quot; to see your original text.
         <br />
-        In the tagged text, you can click on words and phrases to see
-        its category tag. Not all words or phrases have tags. Selecting
-        a category from the Dictionary Categories tree will highlight
-        all of the instances of the selected categories in the tagged text.
+        In the tagged text, you can click on words and phrases to see its
+        category tag. Not all words or phrases have tags. Selecting a category
+        from the Dictionary Categories tree will highlight all of the instances
+        of the selected categories in the tagged text.
       </Alert>
       <div
         className="tagged-text"
@@ -131,7 +147,11 @@ const StudentView = () => {
             <Navbar.Collapse id={navId}>
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <NavDropdown title="View" menuVariant="dark">
-                  <NavDropdown.Item eventKey={"showTopicClusters"} active={showInfoColumn} aria-current={showInfoColumn}>
+                  <NavDropdown.Item
+                    eventKey={"showTopicClusters"}
+                    active={showInfoColumn}
+                    aria-current={showInfoColumn}
+                  >
                     Topic Clusters
                   </NavDropdown.Item>
                 </NavDropdown>
@@ -150,7 +170,7 @@ const StudentView = () => {
               <Coherence />
             </Tab>
             <Tab eventKey={"clarity"} title="Clarity">
-              <Clarity />
+              <Clarity api={props.api} />
             </Tab>
             <Tab eventKey={"impressions"} title="Impressions">
               <Impressions />
@@ -199,13 +219,15 @@ const StudentView = () => {
             </Slate>
           </Card.Body>
         </Card>
-        <aside className={showInfoColumn ? '' : 'd-none'}>
+        <aside className={showInfoColumn ? "" : "d-none"}>
           <Card className="m-1">
             <Card.Header>
               <h5>Topic Clusters</h5>
             </Card.Header>
             <Card.Body>
-              <Alert variant="warning">Topic Cluster information is unavailable.</Alert>
+              <Alert variant="warning">
+                Topic Cluster information is unavailable.
+              </Alert>
             </Card.Body>
           </Card>
         </aside>
