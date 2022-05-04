@@ -1,3 +1,12 @@
+/*
+Student view has a tool bar header and a status bar footer,
+both of which should always be visible.
+The main area is composed of two major regions: the tools and the text.
+The text is the user's text either in an editor or in an interactive
+area showing the results of tagging.
+The tools are arranged in tabs.
+There is also a optional third area for displaying additional information.
+*/
 import React, { useCallback, useId, useState } from "react";
 import {
   Alert,
@@ -32,6 +41,12 @@ import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
 
+/**
+ * For handling clicks on the tagged text.
+ * It will reveal the tag for the clicked on pattern while hiding
+ * all other tags.
+ * @param evt mouse event that triggers this handler
+ */
 function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   let target: HTMLElement | null = evt.target as HTMLElement;
   while (target && !target.getAttribute("data-key")) {
@@ -49,6 +64,11 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   }
 }
 
+/**
+ * The student facing application interface.
+ * @param props `api` is for passing down the function that makes "api" calls.
+ * @returns
+ */
 const StudentView = (props: { api: apiCall }) => {
   const navId = useId();
   const selectId = useId();
@@ -64,6 +84,7 @@ const StudentView = (props: { api: apiCall }) => {
       children: [{ text: "" }],
     },
   ]);
+  // Rendering elements in the editor.
   const renderElement = useCallback(
     ({ attributes, children, element }: RenderElementProps) => {
       switch (element.type) {
@@ -85,6 +106,7 @@ const StudentView = (props: { api: apiCall }) => {
     },
     []
   );
+  // Rendering leaf items in the editor.
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }: RenderLeafProps) => {
       switch (leaf.type) {
@@ -108,15 +130,20 @@ const StudentView = (props: { api: apiCall }) => {
     },
     []
   );
+  // Note: Newer versions of the slate editor did away with markings renderer.
+
+  // Tool bar menu handler.
   const onNavSelect = (eventKey: string | null) => {
     if (eventKey === "showTopicClusters") {
       setShowInfoColumn(!showInfoColumn);
     }
   };
   const tagging = useTaggerResults();
+  // should the special tagged text rendering be used?
   const showTaggedText =
     currentTab === "impressions" && !editable && isTaggerResult(tagging);
   const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
+  // Special rendering of tagger results.
   const taggedText = (
     <React.Fragment>
       <h4>Tagged Text:</h4>
@@ -139,6 +166,7 @@ const StudentView = (props: { api: apiCall }) => {
   );
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
+      {/* Whole page application */}
       <header className="d-flex bg-dark">
         <Navbar variant="dark">
           <Container>
@@ -220,6 +248,7 @@ const StudentView = (props: { api: apiCall }) => {
           </Card.Body>
         </Card>
         <aside className={showInfoColumn ? "" : "d-none"}>
+          {/* Optional third panel controlled by header menu button. */}
           <Card className="m-1">
             <Card.Header>
               <h5>Topic Clusters</h5>

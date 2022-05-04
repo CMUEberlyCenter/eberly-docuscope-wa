@@ -1,3 +1,11 @@
+/*
+The Impressions tools is the used to display and interact with the
+results of the DocuScope tagger for the given text.
+
+Users can click on the sunburst chart wedges to zoom in and out.
+The category tree is expandable and selecting a category with the
+checkbox will initiate highlighting in the tagged text view.
+*/
 import { Subscribe } from "@react-rxjs/core";
 import * as React from "react";
 import { Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
@@ -18,6 +26,14 @@ const ErrorFallback = (props: { error?: Error }) => (
   </div>
 );
 
+/**
+ * Impressions tab content.
+ *
+ * Renders the card title.
+ * Contextually warning about only valid on non-editable, non-empty text.
+ * Shows the interactive Sunburst chart and category tree for the
+ * results returned by the tagger.
+ */
 const Impressions = () => {
   const editing = useEditorState();
   const text = useEditorText();
