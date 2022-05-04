@@ -32,7 +32,11 @@ const LockSwitch = (props: LockSwitchProps) => {
   };
 
   return (
-    <div className={`d-flex align-items-center`} onClick={handleClick} role="button">
+    <div
+      className={`d-flex align-items-center`}
+      onClick={handleClick}
+      role="button"
+    >
       <label className="text-nowrap px-2" id={labelId}>
         {props.label}
       </label>
@@ -44,7 +48,11 @@ const LockSwitch = (props: LockSwitchProps) => {
         aria-checked={toggle}
         aria-labelledby={labelId}
       >
-        <i className={`fa-solid fa-lock${toggle ? "-open" : ""}`} role="img" aria-label={toggle ? 'unlocked' : 'locked'}></i>
+        <i
+          className={`fa-solid fa-lock${toggle ? "-open" : ""}`}
+          role="img"
+          aria-label={toggle ? "unlocked" : "locked"}
+        ></i>
       </button>
     </div>
   );

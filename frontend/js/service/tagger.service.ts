@@ -8,6 +8,7 @@ import {
   Observable,
   of,
 } from 'rxjs';
+import { currentTool$ } from './current-tool.service';
 import { editorState$, editorText$ } from './editor-state.service';
 import { settings$ } from './settings.service';
 
@@ -129,7 +130,9 @@ const tagText = combineLatest({
   state: editorState$,
   text: editorText$,
   settings: settings$,
+  tool: currentTool$,
 }).pipe(
+  filter((c) => c.tool === 'impressions'),
   filter((c) => !!c.settings),
   filter((c) => !c.state),
   filter((c) => c.text.trim().length > 0),

@@ -40,6 +40,7 @@ import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
+import { currentTool } from "../../service/current-tool.service";
 
 /**
  * For handling clicks on the tagged text.
@@ -75,6 +76,11 @@ const StudentView = (props: { api: apiCall }) => {
   const [showInfoColumn, setShowInfoColumn] = useState(false);
   //const [status, setStatus] = useState('');
   const [currentTab, setCurrentTab] = useState<string | null>(null);
+  // on tab switch update current and broadcast.
+  const switchTab = (key: string | null) => {
+    setCurrentTab(key);
+    currentTool.next(key);
+  };
   const status = "";
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
@@ -190,7 +196,7 @@ const StudentView = (props: { api: apiCall }) => {
       </header>
       <main className="d-flex flex-grow-1 bg-white justify-content-stretch overflow-hidden">
         <aside className="d-flex flex-column w-50 tools-pane">
-          <Tabs className="mt-1 px-2" onSelect={(key) => setCurrentTab(key)}>
+          <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
               <Expectations />
             </Tab>

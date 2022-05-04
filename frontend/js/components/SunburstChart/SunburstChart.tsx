@@ -90,8 +90,12 @@ function relativeArc(node: HierarchyNode, root: HierarchyNode | null): Segment {
   if (root) {
     const p2 = 2 * Math.PI;
     return {
-      x0: Math.max(0, Math.min(1, (node.x0 - root.x0) / (root.x1 - root.x0))) * p2,
-      x1: Math.max(0, Math.min(1, (node.x1 - root.x0) / (root.x1 - root.x0))) * p2,
+      x0:
+        Math.max(0, Math.min(1, (node.x0 - root.x0) / (root.x1 - root.x0))) *
+        p2,
+      x1:
+        Math.max(0, Math.min(1, (node.x1 - root.x0) / (root.x1 - root.x0))) *
+        p2,
       y0: Math.max(0, node.y0 - root.depth),
       y1: Math.max(0, node.y1 - root.depth),
     };
@@ -284,8 +288,9 @@ const SunburstFigure = (props: SunburstChartProps) => {
   return (
     <figure
       {...props}
-      className={`sunburst-chart ${editing || parent === null ? "placeholder w-100" : ""
-        }`}
+      className={`sunburst-chart ${
+        editing || parent === null ? "placeholder w-100" : ""
+      }`}
       aria-hidden={editing}
     >
       <svg viewBox={`0 0 ${width} ${width}`}>
