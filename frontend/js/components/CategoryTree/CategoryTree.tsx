@@ -1,12 +1,13 @@
-/* Component for displaying the common dictionary tree and pattern counts.
-
-This is part of the visualization (Impressions) of DocuScope tagged data.
-The tree view sums the number of instances for all subcategories when collapsed.
-Each node is also selectable, which does affect the seleted states of its
-ancestors and descendants.
-Selected nodes should also trigger colored underlining of of itself and its
-children as well as all instances in the tagged text.
-*/
+/**
+ * @fileoverview Component for displaying the common dictionary tree and pattern counts.
+ *
+ * This is part of the visualization (Impressions) of DocuScope tagged data.
+ * The tree view sums the number of instances for all subcategories when collapsed.
+ * Each node is also selectable, which does affect the seleted states of its
+ * ancestors and descendants.
+ * Selected nodes should also trigger colored underlining of of itself and its
+ * children as well as all instances in the tagged text.
+ */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import * as React from "react";
@@ -118,6 +119,10 @@ enum CheckboxState {
 
 /**
  * Displays the pattern count table.
+ * Two columns: the pattern and a count of instances of that pattern.
+ * Each row is a different pattern.
+ *
+ * TODO: add sorting by pattern or count.
  */
 const Patterns = (props: { data: PatternData[] }) => {
   const key = useId();
@@ -147,7 +152,8 @@ const Patterns = (props: { data: PatternData[] }) => {
 };
 
 /* Transitions */
-const DURATION = 250;
+const DURATION = 250; // in milliseconds.
+// pi/2 rotation for use with expansion chevron.
 function chevron_rotate(state: string) {
   const rotation = state === "entering" || state === "entered" ? 0.25 : 0;
   return {
@@ -155,6 +161,7 @@ function chevron_rotate(state: string) {
     transform: `rotate(${rotation}turn)`,
   };
 }
+// Fad in/out effect, used for fading category count.
 function fade(state: string) {
   const opacity = state === "entering" || state === "entered" ? 1 : 0;
   return { transition: `opacity ${DURATION}ms ease-in-out`, opacity: opacity };
@@ -162,6 +169,13 @@ function fade(state: string) {
 
 /**
  * A node in the CategoryTree
+ * Has a subnode expansion button if required.
+ * A checkbox for selecting the category for highlighting.
+ * A label displaying the human readable category name.
+ * A button to hover over to get a popup further describing the category.
+ * The agrigate count of pattern instances for all subcategories
+ * shown if this node is not expanded.
+ * A collapsable component with child nodes or the patterns table.
  * @param props
  *    data - the current TreeNode,
  *    ancestors - all ancestor ids,
@@ -179,6 +193,7 @@ const CategoryNode = (props: {
   const checkId = useId();
   const childrenId = useId();
 
+  // when checked status changes, update checkbox.
   useEffect(() => {
     const state = props.data.checked;
     if (checkRef.current) {
@@ -243,11 +258,13 @@ const CategoryNode = (props: {
           </Transition>
         </button>
         <div className="form-check d-inline-flex align-items-baseline align-self-end">
+          {/* Highlight category checkbox. */}
           <input
             ref={checkRef}
             className="form-check-input"
             id={checkId}
             type="checkbox"
+            role="checkbox"
             value={props.data.id}
             onChange={change}
             disabled={editing || pattern_count === 0}
@@ -275,9 +292,8 @@ const CategoryNode = (props: {
           {(state) => (
             <span
               style={fade(state)}
-              className={`badge bg-${
-                pattern_count > 0 && !editing ? "primary" : "secondary"
-              } rounded-pill fs-6 ms-4`}
+              className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
+                } rounded-pill fs-6 ms-4`}
             >
               {/* Indicate invalid count while editing. */}
               {editing ? "-" : pattern_count}
@@ -288,6 +304,7 @@ const CategoryNode = (props: {
       <Collapse in={expanded} timeout={DURATION}>
         {/* Animate expansion */}
         <div id={childrenId}>
+          {/* if there are child nodes, generate those, else show patterns */}
           {props.data.children.length > 0 ? (
             <ul className="list-group">
               {props.data.children.map((sub) => (
@@ -303,7 +320,7 @@ const CategoryNode = (props: {
             ""
           )}
           {props.data.children.length === 0 &&
-          props.data.patterns.length > 0 ? (
+            props.data.patterns.length > 0 ? (
             <Patterns data={props.data.patterns} />
           ) : (
             ""
