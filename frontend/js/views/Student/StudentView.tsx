@@ -201,7 +201,7 @@ const StudentView = (props: { api: apiCall }) => {
               <Expectations />
             </Tab>
             <Tab eventKey={"coherence"} title="Coherence">
-              <Coherence />
+              <Coherence api={props.api} />
             </Tab>
             <Tab eventKey={"clarity"} title="Clarity">
               <Clarity api={props.api} />
