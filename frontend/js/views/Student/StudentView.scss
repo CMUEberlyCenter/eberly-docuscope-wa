@@ -1,3 +1,5 @@
+$cmu-secondary-gold: #a60;
+
 .editor-content {
   outline: none;
   white-space: normal;
@@ -33,5 +35,8 @@
 .tagged-text {
   .d_none {
     display: none;
+  }
+  .selected_text {
+    background-color: rgba($cmu-secondary-gold, 0.3);
   }
 }

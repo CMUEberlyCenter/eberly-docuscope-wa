@@ -363,7 +363,7 @@ function highlighSelection(data: TreeNode[]): void {
   d3.selectAll(".cluster").classed("cluster", false);
   findChecked(data).forEach((id) =>
     d3
-      .selectAll(`.${id}`)
+      .selectAll(`span.${id}`)
       .classed("cluster", true)
       .style("border-bottom-color", categoryColors(id))
   );
