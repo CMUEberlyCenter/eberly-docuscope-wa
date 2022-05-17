@@ -1,7 +1,8 @@
 /* Service for retrieving the common dictionary data. */
 import { bind } from '@react-rxjs/core';
-import { catchError, map, of } from 'rxjs';
+import { catchError, map, of, switchMap } from 'rxjs';
 import { ajax } from 'rxjs/ajax';
+import { settings$ } from './settings.service';
 
 export interface Entry {
   name?: string;
@@ -98,9 +99,10 @@ export class CommonDictionary implements ICommonDictionary {
 }
 
 export const [useCommonDictionary, commonDictionary$] = bind(
+  settings$.pipe(switchMap((settings) =>
   ajax
     .getJSON<ICommonDictionary>(
-      'http://docuscope.eberly.cmu.edu/common_dictionary'
+      settings.common_dictionary
     )
     .pipe(
       map((data) => new CommonDictionary(data)),
@@ -109,6 +111,6 @@ export const [useCommonDictionary, commonDictionary$] = bind(
         /* TODO: add interface report here */
         return of(err);
       })
-    ),
+    ))),
   null
 );
