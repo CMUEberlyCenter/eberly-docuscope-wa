@@ -1,3 +1,6 @@
+/**
+ * @fileoverview Hooks and observables for signaling the current tool.
+ */
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject } from 'rxjs';
 

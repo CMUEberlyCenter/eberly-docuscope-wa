@@ -1,4 +1,6 @@
-/* Observables for editor state changes */
+/**
+ * @fileoverview Hooks and observables for editor state changes.
+ */
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, combineLatest, filter, map } from 'rxjs';
 import { Descendant, Node } from 'slate';

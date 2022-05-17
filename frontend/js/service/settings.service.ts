@@ -1,11 +1,12 @@
-/* Runtime settings loader
-
-Reads the "assets/settings.json" file which can be easily replaced in
-various environments.
-
-If new runtime settings are added, do not forget to modify the
-Settings interface and DEFAULT settings object.
-*/
+/**
+ * @fileoverview Runtime settings service.
+ *
+ * Reads the "assets/settings.json" file which can be easily replaced in
+ * various environments.
+ *
+ * If new runtime settings are added, do not forget to modify the
+ * Settings interface and DEFAULT settings object.
+  */
 import { bind } from '@react-rxjs/core';
 import { catchError, map, of, shareReplay } from 'rxjs';
 import { ajax } from 'rxjs/ajax';

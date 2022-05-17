@@ -1,32 +1,39 @@
-/* Service for retrieving the common dictionary data. */
+/**
+ * @fileoverview Service for retrieving the common dictionary data.
+ */
 import { bind } from '@react-rxjs/core';
 import { catchError, map, of, switchMap } from 'rxjs';
 import { ajax } from 'rxjs/ajax';
 import { settings$ } from './settings.service';
 
-export interface Entry {
+/**** Common Dictionary schema ****/
+/** Shared category entry information. */
+interface Entry {
   name?: string;
   label: string;
   help: string;
   path?: string;
   depth?: number;
 }
-export interface ICluster {
+/** Form of third level of common dictionary categories. */
+interface ICluster {
   name: string;
   label: string;
   help: string;
   path?: string;
   depth?: number;
 }
-export interface Category extends Entry {
-  clusters: ICluster[];
-}
+/** Form of second level of common dictionary categories. */
 interface ISubcategory extends Entry {
   clusters: ICluster[];
 }
+/** Form of first level of common dictionary categories. */
 interface ICategory extends Entry {
   subcategories: ISubcategory[];
 }
+/**
+ * Top level form of the common dictionary json.
+ */
 export interface ICommonDictionary {
   default_dict: string;
   custom_dict: string;
@@ -35,6 +42,7 @@ export interface ICommonDictionary {
   categories: ICategory[];
 }
 
+/** Interface for tree walkable nodes. */
 export interface CommonDictionaryTreeNode {
   id: string;
   label: string;
@@ -42,6 +50,11 @@ export interface CommonDictionaryTreeNode {
   children?: CommonDictionaryTreeNode[];
 }
 
+/**
+ * Common dictionary representation.
+ * The common dictionary is the higher order category structure
+ * of DocuScope categories.
+ */
 export class CommonDictionary implements ICommonDictionary {
   default_dict!: string;
   custom_dict!: string;
@@ -65,6 +78,7 @@ export class CommonDictionary implements ICommonDictionary {
     }
   }
 
+  /** Get the tree representation of the categories in this common dictionary. */
   get tree(): CommonDictionaryTreeNode[] {
     return this.categories.map((category: ICategory) => ({
       id: category.name ?? category.label,
@@ -83,6 +97,7 @@ export class CommonDictionary implements ICommonDictionary {
     }));
   }
 
+  /** Get the flat list of all categories in this common dictionary. */
   get nodes(): Entry[] {
     return this.categories.reduce(
       (acc, cat) => [
@@ -98,19 +113,20 @@ export class CommonDictionary implements ICommonDictionary {
   }
 }
 
+/** react-rxjs hook for supplying the instance of the common dictionary. */
 export const [useCommonDictionary, commonDictionary$] = bind(
-  settings$.pipe(switchMap((settings) =>
-  ajax
-    .getJSON<ICommonDictionary>(
-      settings.common_dictionary
+  // get url from settings.
+  settings$.pipe(
+    switchMap((settings) =>
+      ajax.getJSON<ICommonDictionary>(settings.common_dictionary).pipe(
+        map((data) => new CommonDictionary(data)),
+        catchError((err) => {
+          console.error(err);
+          /* TODO: add interface report here */
+          return of(err);
+        })
+      )
     )
-    .pipe(
-      map((data) => new CommonDictionary(data)),
-      catchError((err) => {
-        console.error(err);
-        /* TODO: add interface report here */
-        return of(err);
-      })
-    ))),
+  ),
   null
 );
