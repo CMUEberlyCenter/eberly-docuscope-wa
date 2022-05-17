@@ -1,12 +1,14 @@
-/*
-Student view has a tool bar header and a status bar footer,
-both of which should always be visible.
-The main area is composed of two major regions: the tools and the text.
-The text is the user's text either in an editor or in an interactive
-area showing the results of tagging.
-The tools are arranged in tabs.
-There is also a optional third area for displaying additional information.
-*/
+/**
+ * @fileoverview Student facing interface.
+ *
+ * Student view has a tool bar header and a status bar footer,
+ * both of which should always be visible.
+ * The main area is composed of two major regions: the tools and the text.
+ * The text is the user's text either in an editor or in an interactive
+ * area showing the results of tagging.
+ * The tools are arranged in tabs.
+ * There is also a optional third area for displaying additional information.
+ */
 import React, { useCallback, useId, useState } from "react";
 import {
   Alert,
@@ -43,7 +45,7 @@ import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 
 /**
- * For handling clicks on the tagged text.
+ * For handling clicks on the tagged text for the impressions tool.
  * It will reveal the tag for the clicked on pattern while hiding
  * all other tags.
  * @param evt mouse event that triggers this handler
@@ -51,13 +53,18 @@ import { currentTool } from "../../service/current-tool.service";
 function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   let target: HTMLElement | null = evt.target as HTMLElement;
   while (target && !target.getAttribute("data-key")) {
+    // check ancestors until one with a data-key is found.
     target = target.parentElement;
   }
   const key = target?.getAttribute("data-key");
   if (target && key && key.trim()) {
+    // see if it is already selected.
     const isSelected = d3.select(target).classed("selected_text");
+    // clear all selected text.
     d3.selectAll(".selected_text").classed("selected_text", false);
     d3.selectAll(".cluster_id").classed("d_none", true);
+    // if it was not previously selected, select it.
+    // otherwise leave it as unselected.
     if (!isSelected) {
       d3.select(target).classed("selected_text", true);
       d3.select(target).select("sup.cluster_id").classed("d_none", false);
@@ -81,7 +88,7 @@ const StudentView = (props: { api: apiCall }) => {
     setCurrentTab(key);
     currentTool.next(key);
   };
-  const status = "";
+  const status = ""; // TODO: nothing currently sets the status.
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
   const [editorValue, setEditorValue] = useState<Descendant[]>([
