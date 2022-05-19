@@ -13,11 +13,12 @@ import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
 
 // On locking with text and tool is clarity, then emit text.
-const [useClarityText, /*clarityText$*/] = bind(
+const [useClarityText /*clarityText$*/] = bind(
   combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
-    filter((data) => data.tool === 'clarity'),
+    filter((data) => data.tool === "clarity"),
     map((data) => data.text)
-  ), ''
+  ),
+  ""
 );
 
 /** Error feedback component for clarity tool. */
@@ -26,14 +27,14 @@ const ClarityErrorFallback = (props: { error?: Error }) => (
     <p>Error loading Clarity data:</p>
     <pre>{props.error?.message}</pre>
   </Alert>
-)
-const Clarity = ({api}: { api: apiCall }) => {
+);
+const Clarity = ({ api }: { api: apiCall }) => {
   const [status, setStatus] = useState("");
   const [data, setSentenceData] = useState<unknown>(null);
   const text = useClarityText();
 
   useEffect(() => {
-    if (text !== '') {
+    if (text !== "") {
       // TODO: add progress spinner.
       setStatus("Retrieving results...");
 
@@ -64,7 +65,11 @@ const Clarity = ({api}: { api: apiCall }) => {
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
           <Suspense>
-            <DocuScopeOnTopic setStatus={setStatus} sentences={data} text={text} />
+            <DocuScopeOnTopic
+              setStatus={setStatus}
+              sentences={data}
+              text={text}
+            />
           </Suspense>
         </ErrorBoundary>
       </Card.Body>

@@ -292,8 +292,9 @@ const CategoryNode = (props: {
           {(state) => (
             <span
               style={fade(state)}
-              className={`badge bg-${pattern_count > 0 && !editing ? "primary" : "secondary"
-                } rounded-pill fs-6 ms-4`}
+              className={`badge bg-${
+                pattern_count > 0 && !editing ? "primary" : "secondary"
+              } rounded-pill fs-6 ms-4`}
             >
               {/* Indicate invalid count while editing. */}
               {editing ? "-" : pattern_count}
@@ -320,7 +321,7 @@ const CategoryNode = (props: {
             ""
           )}
           {props.data.children.length === 0 &&
-            props.data.patterns.length > 0 ? (
+          props.data.patterns.length > 0 ? (
             <Patterns data={props.data.patterns} />
           ) : (
             ""

@@ -57,14 +57,15 @@ const Legend = () => (
 // Using react-rxjs to get observable to act like hooks.
 // On locking text with some text present and the tool is clarity
 // emit the text.
-const [useCoherenceText, /*coherenceText$*/] = bind(
-  combineLatest({ text: lockedEditorText$, tool: currentTool$}).pipe(
-    filter((data) => data.tool === 'clarity'),
+const [useCoherenceText /*coherenceText$*/] = bind(
+  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
+    filter((data) => data.tool === "clarity"),
     map((data) => data.text)
-  ), ''
-)
+  ),
+  ""
+);
 
-const Coherence = ({api}: { api: apiCall }) => {
+const Coherence = ({ api }: { api: apiCall }) => {
   // api passed through on assumption that it will be used in submission.
   const toggleId = useId();
   const [showToggle, setShowToggle] = useState(false);
@@ -72,14 +73,14 @@ const Coherence = ({api}: { api: apiCall }) => {
 
   //const api = props.api;
   useEffect(() => {
-    if (text !== '') {
-      console.log('Coherence text update!'); // TODO replace with real call
+    if (text !== "") {
+      console.log("Coherence text update!"); // TODO replace with real call
       // submit to backend here.
       /* api('service', { text: text }, 'POST').then((results) => {
         console.log(`Coherence backend results: ${results}`)
       }) */
     }
-  }, [text, api])
+  }, [text, api]);
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
