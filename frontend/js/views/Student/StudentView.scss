@@ -19,9 +19,12 @@ $cmu-secondary-gold: #a60;
 
 .editor-pane {
   max-width: 6.5in; // preference expressed during DocuScope classroom development.
+  min-width: 4in;
 }
 .tools-pane {
   max-width: 52rem; // based on legend size
+  min-width: 390px;
+  width: 390px;
 }
 
 .tab-content {
@@ -39,4 +42,10 @@ $cmu-secondary-gold: #a60;
   .selected_text {
     background-color: rgba($cmu-secondary-gold, 0.3);
   }
+}
+
+.cluster-pane {
+  max-width: 33hmax;
+  min-width: 16rem;
+  width: calc(100hmax - 6.5in - 390px);
 }

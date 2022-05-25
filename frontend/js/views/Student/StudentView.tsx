@@ -9,7 +9,13 @@
  * The tools are arranged in tabs.
  * There is also a optional third area for displaying additional information.
  */
-import React, { useCallback, useId, useState } from "react";
+import React, {
+  createRef,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Alert,
   Card,
@@ -43,6 +49,7 @@ import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
+import Divider from "../../components/Divider/Divider";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -97,6 +104,129 @@ const StudentView = (props: { api: apiCall }) => {
       children: [{ text: "" }],
     },
   ]);
+  // Resize panels
+  const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
+  const [rightWidth, setRightWidth] = useState<undefined | number>(undefined);
+  const [toolSeparatorXPosition, setToolSeparatorXPosition] = useState<
+    undefined | number
+  >(undefined);
+  const [toolSeparatorDragging, setToolSeparatorDragging] = useState(false);
+  const [rightSeparatorXPosition, setRightSeparatorXPosition] = useState<
+    undefined | number
+  >(undefined);
+  const [rightSeparatorDragging, setRightSeparatorDragging] = useState(false);
+  const toolRef = createRef<HTMLDivElement>();
+  const rightRef = createRef<HTMLDivElement>();
+  const onMouseDownTool = (
+    event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    setToolSeparatorXPosition(event.clientX);
+    setToolSeparatorDragging(true);
+  };
+  const onTouchStartTool = (event: React.TouchEvent<HTMLDivElement>) => {
+    setToolSeparatorXPosition(event.touches[0].clientX);
+    setToolSeparatorDragging(true);
+  };
+  const onMouseDownRight = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    setRightSeparatorXPosition(e.clientX);
+    setRightSeparatorDragging(true);
+  };
+  const onTouchStartRight = (event: React.TouchEvent<HTMLDivElement>) => {
+    setRightSeparatorXPosition(event.touches[0].clientX);
+    setRightSeparatorDragging(true);
+  };
+  const onMove = useCallback(
+    (clientX: number) => {
+      if (toolSeparatorDragging && toolWidth && toolSeparatorXPosition) {
+        const width = toolWidth + clientX - toolSeparatorXPosition;
+        setToolSeparatorXPosition(clientX);
+        setToolWidth(width);
+      } else if (
+        rightSeparatorDragging &&
+        rightWidth &&
+        rightSeparatorXPosition
+      ) {
+        const width = rightWidth - clientX + rightSeparatorXPosition;
+        setRightSeparatorXPosition(clientX);
+        setRightWidth(width);
+      }
+    },
+    [
+      rightSeparatorDragging,
+      rightSeparatorXPosition,
+      rightWidth,
+      toolSeparatorDragging,
+      toolSeparatorXPosition,
+      toolWidth,
+    ]
+  );
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (toolSeparatorDragging || rightSeparatorDragging) {
+        e.preventDefault;
+      }
+      onMove(e.clientX);
+    },
+    [toolSeparatorDragging, rightSeparatorDragging, onMove]
+  );
+  const onTouchMove = useCallback(
+    (e: TouchEvent) => onMove(e.touches[0].clientX),
+    [onMove]
+  );
+  const onMouseUp = useCallback(() => {
+    if (toolSeparatorDragging) {
+      setToolSeparatorDragging(false);
+      if (toolRef.current) {
+        setToolWidth(toolRef.current.clientWidth);
+        toolRef.current.style.width = `${toolWidth}px`;
+      }
+    }
+    if (rightSeparatorDragging) {
+      setRightSeparatorDragging(false);
+      if (rightRef.current) {
+        setRightWidth(rightRef.current.clientWidth);
+        rightRef.current.style.width = `${rightWidth}px`;
+      }
+    }
+  }, [
+    rightRef,
+    rightSeparatorDragging,
+    rightWidth,
+    toolRef,
+    toolSeparatorDragging,
+    toolWidth,
+  ]);
+  useEffect(() => {
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("touchmove", onTouchMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("touchmove", onTouchMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+  }, [onMouseMove, onMouseUp, onTouchMove]);
+  useEffect(() => {
+    if (toolRef.current) {
+      if (!toolWidth) {
+        setToolWidth(toolRef.current.clientWidth);
+        //return;
+      }
+      toolRef.current.style.width = `${toolWidth}px`;
+    }
+  }, [toolRef, toolWidth]);
+  useEffect(() => {
+    if (rightRef.current) {
+      if (!rightWidth) {
+        setRightWidth(rightRef.current.clientWidth);
+        return;
+      }
+      rightRef.current.style.width = `${rightWidth}px`;
+    }
+  }, [rightRef, rightWidth]);
+
   // Rendering elements in the editor.
   const renderElement = useCallback(
     ({ attributes, children, element }: RenderElementProps) => {
@@ -149,6 +279,15 @@ const StudentView = (props: { api: apiCall }) => {
   const onNavSelect = (eventKey: string | null) => {
     if (eventKey === "showTopicClusters") {
       setShowInfoColumn(!showInfoColumn);
+    } else if (eventKey === "resetView") {
+      if (toolRef.current) {
+        toolRef.current.style.width = "";
+        setToolWidth(toolRef.current.clientWidth);
+      }
+      if (rightRef.current) {
+        rightRef.current.style.width = "";
+        setRightWidth(rightRef.current.clientWidth);
+      }
     }
   };
   const tagging = useTaggerResults();
@@ -195,14 +334,17 @@ const StudentView = (props: { api: apiCall }) => {
                   >
                     Topic Clusters
                   </NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"resetView"} active={false}>
+                    Reset View
+                  </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
             </Navbar.Collapse>
           </Container>
         </Navbar>
       </header>
-      <main className="d-flex flex-grow-1 bg-white justify-content-stretch overflow-hidden">
-        <aside className="d-flex flex-column w-50 tools-pane">
+      <main className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden">
+        <aside ref={toolRef} className="d-flex flex-column tools-pane">
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
               <Expectations />
@@ -218,7 +360,12 @@ const StudentView = (props: { api: apiCall }) => {
             </Tab>
           </Tabs>
         </aside>
-        <Card as="article" className="editor-pane overflow-hidden w-50">
+        <Divider
+          onMouseDown={onMouseDownTool}
+          onTouchEnd={onMouseUp}
+          onTouchStart={onTouchStartTool}
+        />
+        <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             <Form.Group>
               {/*<Form.Label>Paragraph</Form.Label>*/}
@@ -260,19 +407,33 @@ const StudentView = (props: { api: apiCall }) => {
             </Slate>
           </Card.Body>
         </Card>
-        <aside className={showInfoColumn ? "" : "d-none"}>
-          {/* Optional third panel controlled by header menu button. */}
-          <Card className="m-1">
-            <Card.Header>
-              <h5>Topic Clusters</h5>
-            </Card.Header>
-            <Card.Body>
-              <Alert variant="warning">
-                Topic Cluster information is unavailable.
-              </Alert>
-            </Card.Body>
-          </Card>
-        </aside>
+        {showInfoColumn ? (
+          <>
+            <Divider
+              onMouseDown={onMouseDownRight}
+              onTouchEnd={onMouseUp}
+              onTouchStart={onTouchStartRight}
+            />
+            <aside
+              ref={rightRef}
+              className={`cluster-pane ${showInfoColumn ? "" : "d-none"}`}
+            >
+              {/* Optional third panel controlled by header menu button. */}
+              <Card className="m-1">
+                <Card.Header>
+                  <h5>Topic Clusters</h5>
+                </Card.Header>
+                <Card.Body>
+                  <Alert variant="warning">
+                    Topic Cluster information is unavailable.
+                  </Alert>
+                </Card.Body>
+              </Card>
+            </aside>
+          </>
+        ) : (
+          <></>
+        )}
       </main>
       <footer className="bg-dark">Status: {status}</footer>
     </div>

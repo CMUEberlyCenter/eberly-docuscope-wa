@@ -19,7 +19,7 @@ export default class DocuScopeRuleChild {
    *
    */
   parse(anObject) {
-    console.log("parse ()");
+    //console.log("parse ()");
 
     this.name = anObject.name;
     this.description = anObject.description;
