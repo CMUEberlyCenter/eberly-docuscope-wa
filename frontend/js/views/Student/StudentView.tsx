@@ -435,7 +435,7 @@ const StudentView = (props: { api: apiCall }) => {
           <></>
         )}
       </main>
-      <footer className="bg-dark">Status: {status}</footer>
+      <footer className="bg-dark text-info">Status: {status}</footer>
     </div>
   );
 };
