@@ -1,11 +1,20 @@
-/* Contents of the Coherence tab of the tools widget. */
-import React, { useId, useState } from "react";
+/**
+ * @fileoverview Contents of the Coherence tool.
+ *
+ * The top has a legend for interpreting this tool's symbols.
+ */
+import { bind } from "@react-rxjs/core";
+import React, { useEffect, useId, useState } from "react";
 import { Card, Col, Container, Row } from "react-bootstrap";
+import { combineLatest, filter, map } from "rxjs";
+import { currentTool$ } from "../../service/current-tool.service";
+import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
 import "./Coherence.scss";
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
+  // Use this to get better accessability and scaling than an image.
   <Container className="border p-2">
     <Row xs={"auto"} md={"auto"} lg={2}>
       <Col className="text-nowrap">
@@ -45,14 +54,38 @@ const Legend = () => (
   </Container>
 );
 
-const Coherence = () => {
+// Using react-rxjs to get observable to act like hooks.
+// On locking text with some text present and the tool is clarity
+// emit the text.
+const [useCoherenceText /*coherenceText$*/] = bind(
+  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
+    filter((data) => data.tool === "clarity"),
+    map((data) => data.text)
+  ),
+  ""
+);
+
+const Coherence = ({ api }: { api: apiCall }) => {
+  // api passed through on assumption that it will be used in submission.
   const toggleId = useId();
   const [showToggle, setShowToggle] = useState(false);
+  const text = useCoherenceText();
+
+  //const api = props.api;
+  useEffect(() => {
+    if (text !== "") {
+      console.log("Coherence text update!"); // TODO replace with real call
+      // submit to backend here.
+      /* api('service', { text: text }, 'POST').then((results) => {
+        console.log(`Coherence backend results: ${results}`)
+      }) */
+    }
+  }, [text, api]);
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header>
-        <TabTitle>CreateFlow in Your Writing</TabTitle>
+        <TabTitle>Create Flow in Your Writing</TabTitle>
       </Card.Header>
       <Card.Body className="overflow-auto">
         <Legend />

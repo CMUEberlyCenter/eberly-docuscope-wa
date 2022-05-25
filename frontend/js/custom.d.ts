@@ -8,4 +8,8 @@ declare module '*.txt' {
   export default content;
 }
 
-type apiCall = (call: string, data: unknown, method: 'POST'|'GET') => Promise<unknown>;
+type apiCall = (
+  call: string,
+  data: unknown,
+  method: 'POST' | 'GET'
+) => Promise<unknown>;

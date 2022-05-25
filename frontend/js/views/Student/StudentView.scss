@@ -1,3 +1,5 @@
+$cmu-secondary-gold: #a60;
+
 .editor-content {
   outline: none;
   white-space: normal;
@@ -16,7 +18,7 @@
 }
 
 .editor-pane {
-  max-width: 6.5in;
+  max-width: 6.5in; // preference expressed during DocuScope classroom development.
 }
 .tools-pane {
   max-width: 52rem; // based on legend size
@@ -33,5 +35,8 @@
 .tagged-text {
   .d_none {
     display: none;
+  }
+  .selected_text {
+    background-color: rgba($cmu-secondary-gold, 0.3);
   }
 }

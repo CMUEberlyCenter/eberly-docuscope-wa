@@ -1,8 +1,9 @@
-/* Runtime rules loader
-
-Reads the "assets/rules.json" file which can be easily replaced in
-various environments.
-*/
+/**
+ * @fileoverview Runtime rules loader.
+ *
+ * Reads the "assets/rules.json" file which can be easily replaced in
+ * various environments.
+ */
 import { bind } from '@react-rxjs/core';
 import { catchError, of, shareReplay } from 'rxjs';
 import { ajax } from 'rxjs/ajax';

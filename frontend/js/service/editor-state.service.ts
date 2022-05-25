@@ -1,4 +1,6 @@
-/* Observables for editor state changes */
+/**
+ * @fileoverview Hooks and observables for editor state changes.
+ */
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, combineLatest, filter, map } from 'rxjs';
 import { Descendant, Node } from 'slate';
@@ -12,22 +14,21 @@ const serialize = (nodes: Descendant[]): string => {
 };
 
 // For tracking the Editor text content.
-// Currently updated only when Editor editable toggle changes.
 export const editorText = new BehaviorSubject<Descendant[]>([]);
 export const [useEditorText, editorText$] = bind(
   editorText.pipe(map(serialize)),
   ''
 );
-//editorText$.subscribe(() => console.log('editor text update'));
 
 // Emit text on locking.
 const lockedText = combineLatest({
   state: editorState$,
   text: editorText$,
 }).pipe(
-  filter((c) => !c.state),
-  filter((c) => c.text.trim().length > 0),
+  filter((c) => !c.state), // only when not editable
+  filter((c) => c.text.trim().length > 0), // not just whitespace
   map((c) => c.text)
 );
 
+// For use in components, pushes only when text is locked.
 export const [useLockedEditorText, lockedEditorText$] = bind(lockedText, '');

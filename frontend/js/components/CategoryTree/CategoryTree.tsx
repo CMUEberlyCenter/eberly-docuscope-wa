@@ -1,8 +1,13 @@
-/* Component for displaying the common dictionary tree and pattern counts.
-
-This is part of the visualization (Impressions) of DocuScope tagged data.
-The tree view sums the number of instances for all subcategories when collapsed.
-*/
+/**
+ * @fileoverview Component for displaying the common dictionary tree and pattern counts.
+ *
+ * This is part of the visualization (Impressions) of DocuScope tagged data.
+ * The tree view sums the number of instances for all subcategories when collapsed.
+ * Each node is also selectable, which does affect the seleted states of its
+ * ancestors and descendants.
+ * Selected nodes should also trigger colored underlining of of itself and its
+ * children as well as all instances in the tagged text.
+ */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import * as React from "react";
@@ -38,23 +43,29 @@ interface PatternData {
 
 interface TreeNode {
   parent: string;
-  id: string;
-  label: string;
-  help: string;
+  id: string; // machine readable identifier.
+  label: string; // human readable identifier.
+  help: string; // additional information about category
   children: TreeNode[];
   patterns: PatternData[];
   checked: CheckboxState;
 }
 
+/**
+ * Predicate to check if a given node has any children.
+ * Children defined as child TreeNodes or patterns.
+ */
 function has_child_data(node: TreeNode): boolean {
   return node.children.length + node.patterns.length > 0;
 }
+/** Generates all TreeNode descendants of the given node. */
 function* descendants(node: TreeNode): Generator<TreeNode> {
   yield node;
   for (const child of node.children) {
     yield* descendants(child);
   }
 }
+/** Collects the total pattern counts among all descendants. */
 function count_patterns(node: TreeNode): number {
   if (node.patterns && node.patterns.length > 0) {
     return node.patterns.reduce(
@@ -70,16 +81,15 @@ function count_patterns(node: TreeNode): number {
   return 0;
 }
 
+// Observer that combines common dictionary and tagger results to emit
+// the TreeNodes.
 const [useCategoryData, categoryData$] = bind(
-  //editorState.pipe(
-  //  filter(o => !o),
-  //  switchMap(() => combineLatest({ common: commonDictionary$, tagged: taggerResults$}))).pipe(
   combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
     map((data) => {
       const tagged: TaggerResults | number | null = data.tagged;
       const common: CommonDictionary | null = data.common;
       if (common && typeof tagged !== "number") {
-        // non-number tagged should mean that it is data.
+        // non-number `tagged` should mean that it is data.
         const cat_pat_map = tagged ? gen_patterns_map(tagged) : new Map();
         const dfsmap = (
           parent: string,
@@ -100,6 +110,7 @@ const [useCategoryData, categoryData$] = bind(
   )
 );
 
+// Tri-state checkbox states.
 enum CheckboxState {
   Empty,
   Indeterminate,
@@ -108,6 +119,10 @@ enum CheckboxState {
 
 /**
  * Displays the pattern count table.
+ * Two columns: the pattern and a count of instances of that pattern.
+ * Each row is a different pattern.
+ *
+ * TODO: add sorting by pattern or count.
  */
 const Patterns = (props: { data: PatternData[] }) => {
   const key = useId();
@@ -137,7 +152,8 @@ const Patterns = (props: { data: PatternData[] }) => {
 };
 
 /* Transitions */
-const DURATION = 250;
+const DURATION = 250; // in milliseconds.
+// pi/2 rotation for use with expansion chevron.
 function chevron_rotate(state: string) {
   const rotation = state === "entering" || state === "entered" ? 0.25 : 0;
   return {
@@ -145,6 +161,7 @@ function chevron_rotate(state: string) {
     transform: `rotate(${rotation}turn)`,
   };
 }
+// Fad in/out effect, used for fading category count.
 function fade(state: string) {
   const opacity = state === "entering" || state === "entered" ? 1 : 0;
   return { transition: `opacity ${DURATION}ms ease-in-out`, opacity: opacity };
@@ -152,8 +169,18 @@ function fade(state: string) {
 
 /**
  * A node in the CategoryTree
+ * Has a subnode expansion button if required.
+ * A checkbox for selecting the category for highlighting.
+ * A label displaying the human readable category name.
+ * A button to hover over to get a popup further describing the category.
+ * The agrigate count of pattern instances for all subcategories
+ * shown if this node is not expanded.
+ * A collapsable component with child nodes or the patterns table.
  * @param props
- * @returns
+ *    data - the current TreeNode,
+ *    ancestors - all ancestor ids,
+ *    onChange - callback for when checkbox is toggled.
+ * @returns a component representing a single node in the tree
  */
 const CategoryNode = (props: {
   data: TreeNode;
@@ -166,6 +193,7 @@ const CategoryNode = (props: {
   const checkId = useId();
   const childrenId = useId();
 
+  // when checked status changes, update checkbox.
   useEffect(() => {
     const state = props.data.checked;
     if (checkRef.current) {
@@ -183,15 +211,21 @@ const CategoryNode = (props: {
     }
   }, [props.data.checked]);
 
+  // When editing state changes.
   useEffect(() => {
+    // cluster class shows colored underlining to indicate
+    // tag highlighting.
     if (editing) {
+      // if editing, remove cluster class.
       d3.select(".cluster").classed("cluster", false);
     }
+    // cleanup cluster class on destruction.
     return () => {
       d3.select(".cluster").classed("cluster", false);
     };
   }, [editing]);
 
+  // handler of checkbox state change.
   const change = (e: ChangeEvent<HTMLInputElement>) => {
     const state = e.currentTarget.checked
       ? CheckboxState.Checked
@@ -200,6 +234,8 @@ const CategoryNode = (props: {
   };
 
   const pattern_count = count_patterns(props.data);
+  // To get cluster highlighting to work properly, the ancestor class
+  // ids need to be added.
   const myCategoryClasses = [...props.ancestors, props.data.id];
   return (
     <li data-docuscope-category={props.data.id} className="list-group-item">
@@ -212,6 +248,7 @@ const CategoryNode = (props: {
           aria-controls={childrenId}
         >
           <Transition in={expanded} timeout={DURATION}>
+            {/* rotate collapse chevron */}
             {(state) => (
               <i
                 className="fa-solid fa-chevron-right category-tree-chevron"
@@ -221,11 +258,13 @@ const CategoryNode = (props: {
           </Transition>
         </button>
         <div className="form-check d-inline-flex align-items-baseline align-self-end">
+          {/* Highlight category checkbox. */}
           <input
             ref={checkRef}
             className="form-check-input"
             id={checkId}
             type="checkbox"
+            role="checkbox"
             value={props.data.id}
             onChange={change}
             disabled={editing || pattern_count === 0}
@@ -239,6 +278,7 @@ const CategoryNode = (props: {
             {props.data.label}
           </label>
         </div>
+        {/* Additional category information tooltip. */}
         <OverlayTrigger overlay={<Tooltip>{props.data.help}</Tooltip>}>
           <span className="material-icons comment mx-1 align-self-start">
             comment
@@ -248,6 +288,7 @@ const CategoryNode = (props: {
           in={props.data.patterns.length > 0 || !expanded}
           timeout={DURATION}
         >
+          {/* Animate count fading on expansion. */}
           {(state) => (
             <span
               style={fade(state)}
@@ -255,13 +296,16 @@ const CategoryNode = (props: {
                 pattern_count > 0 && !editing ? "primary" : "secondary"
               } rounded-pill fs-6 ms-4`}
             >
+              {/* Indicate invalid count while editing. */}
               {editing ? "-" : pattern_count}
             </span>
           )}
         </Transition>
       </div>
       <Collapse in={expanded} timeout={DURATION}>
+        {/* Animate expansion */}
         <div id={childrenId}>
+          {/* if there are child nodes, generate those, else show patterns */}
           {props.data.children.length > 0 ? (
             <ul className="list-group">
               {props.data.children.map((sub) => (
@@ -297,25 +341,30 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
   return undefined;
 }
 
+// Find the highest checked nodes.
 function findChecked(data: TreeNode[]): string[] {
   const ret: string[] = [];
   data.forEach((d) => {
     if (d.checked === CheckboxState.Indeterminate) {
+      // indeterminate indicates that some descendants are checked
       ret.push(...findChecked(d.children));
     } else if (d.checked === CheckboxState.Checked) {
+      // if current is checked, no need to recurse.
       ret.push(d.id);
     }
   });
   return ret;
 }
+// Set the colors to be used for category highlighting.
 function highlighSelection(data: TreeNode[]): void {
+  // reset color indices
   const categoryColors = d3.scaleOrdinal(d3.schemeCategory10);
   categoryColors.range(d3.schemeCategory10);
   // TODO: scope to CategoryTree and tagged text.
   d3.selectAll(".cluster").classed("cluster", false);
   findChecked(data).forEach((id) =>
     d3
-      .selectAll(`.${id}`)
+      .selectAll(`span.${id}`)
       .classed("cluster", true)
       .style("border-bottom-color", categoryColors(id))
   );
@@ -326,6 +375,8 @@ const CategoryTreeTop = () => {
   const [refresh, setRefresh] = useState(false); // Hack to force refresh.
   const data: TreeNode[] | null = useCategoryData();
 
+  // Callback to handle propigating checkbox state through the tree and
+  // triggers highlighting.
   const onChange = (node: TreeNode, state: CheckboxState) => {
     // all children
     [...descendants(node)].forEach((c) => {
@@ -376,6 +427,7 @@ const CategoryTreeTop = () => {
   );
 };
 
+// What to display if there is an error in this component.
 const ErrorFallback = (props: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading category information:</p>
@@ -383,6 +435,9 @@ const ErrorFallback = (props: { error?: Error }) => (
   </div>
 );
 
+// Spinner to display on loading.
+// Not often seen as there should be some data available by the
+// time a user sees this component.
 const MySpinner = () => (
   <Spinner animation={"border"} role={"status"} variant={"primary"}>
     <span className="visually-hidden">Loading...</span>

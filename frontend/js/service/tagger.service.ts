@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Service for submitting text for tagging.
+ *
+ * Initiates tagging when appropriate and handles the SSE's streamed
+ * by the tagging service.
+ */
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind } from '@react-rxjs/core';
 import {
@@ -8,6 +14,7 @@ import {
   Observable,
   of,
 } from 'rxjs';
+import { currentTool$ } from './current-tool.service';
 import { editorState$, editorText$ } from './editor-state.service';
 import { settings$ } from './settings.service';
 
@@ -42,9 +49,9 @@ const EmptyResults: TaggerResults = {
 export function isTaggerResult(
   res: TaggerResults | number | null
 ): res is TaggerResults {
-  if (typeof res === 'number') return false;
-  if (res === null) return false;
-  return (res as TaggerResults).isError !== true;
+  if (typeof res === 'number') return false; // number is a percent update
+  if (res === null) return false; // non-null
+  return (res as TaggerResults).isError !== true; // not an error.
 }
 
 /**
@@ -63,12 +70,14 @@ export function gen_patterns_map(
 
 /** JSON structure for non-TaggerResult messages from the tagger. */
 interface Message {
-  doc_id?: string;
-  status: string;
+  doc_id?: string; // optional id for tracking. Unused in this context.
+  status: string; // status content.
 }
 
 /**
  * Tag the given text using the specified DocuScope tagger.
+ * This is a potentially long processing call.  The service
+ * does emit Server Sent Events to update progress.
  * @param tagger_url URL of the tagging service.
  * @param text the string to be tagged.
  * @returns TaggerResults which is the data returned by the tagger or
@@ -77,6 +86,7 @@ interface Message {
 export function tag(tagger_url: string, text: string) {
   return new Observable<TaggerResults | number>((subscriber) => {
     subscriber.next(0);
+    // abort controller in case tool is destroyed.
     const ctrl = new AbortController();
     fetchEventSource(tagger_url, {
       method: 'POST',
@@ -104,19 +114,23 @@ export function tag(tagger_url: string, text: string) {
       onmessage(msg) {
         switch (msg.event) {
           case 'error':
+            // Service error event.
             subscriber.error(new Error(msg.data));
             break;
           case 'processing': {
+            // Service progress update event.
             const proc: Message = JSON.parse(msg.data);
             subscriber.next(parseFloat(proc.status));
             break;
           }
           case 'done': {
+            // Final results event.
             const payload: TaggerResults = JSON.parse(msg.data);
             subscriber.next(payload);
             break;
           }
           default:
+            // Unknown event, should not be reached.
             console.warn(`Unhandled message ${msg}`);
         }
       },
@@ -125,18 +139,24 @@ export function tag(tagger_url: string, text: string) {
   });
 }
 
+// Observable that tags text when the impressions tool is open,
+// settings are loaded, the editor is locked, and there is text.
 const tagText = combineLatest({
   state: editorState$,
   text: editorText$,
   settings: settings$,
+  tool: currentTool$,
 }).pipe(
+  filter((c) => c.tool === 'impressions'),
   filter((c) => !!c.settings),
   filter((c) => !c.state),
   filter((c) => c.text.trim().length > 0),
   mergeMap((c) => tag(c.settings.tagger, c.text)),
   catchError((err: Error) =>
+    // signal error and put error message in html_content.
     of({ ...EmptyResults, ...{ isError: true, html_content: err.message } })
   )
 );
 
+// React hook and observable to be used in impressions tool.
 export const [useTaggerResults, taggerResults$] = bind(tagText, null);

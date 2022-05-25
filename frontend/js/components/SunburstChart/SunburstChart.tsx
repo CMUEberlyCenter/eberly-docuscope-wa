@@ -1,4 +1,10 @@
-/* Sunburst chart for visualizing DocuScope tagger data */
+/* Sunburst chart for visualizing DocuScope tagger data
+
+The sunburst colors wedges based on the top level category.
+Wedges are clickable and will make that entry the new first ring.
+Clicking on the center zooms back out one level until the top level is reached.
+It is not possible to zoom beyond the patterns level or the top level categories.
+*/
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
@@ -21,27 +27,34 @@ import { useEditorState } from "../../service/editor-state.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";
 import "./SunburstChart.scss";
 
+// Line segment
 interface Segment {
   x0: number;
   x1: number;
   y0: number;
   y1: number;
 }
+// Equality predicate for Segments
 function equalSegment(a: Segment, b: Segment) {
   return a.x0 === b.x0 && a.x1 === b.x1 && a.y0 === b.y0 && a.y1 === b.y1;
 }
+// A node in the chart (modelled like a tree)
 interface SunburstNode {
-  id: string;
-  name: string;
-  children?: SunburstNode[];
-  value?: number;
+  id: string; // machine readable identifier.
+  name: string; // human readable identifier.
+  children?: SunburstNode[]; // child nodes
+  value?: number; // count of patterns.
 }
+// d3's HierarchyRectangularNode specialized for SunburstNodes.
 type HierarchyNode = HierarchyRectangularNode<SunburstNode>;
 
+// Partition the nodes with the parameter being the current root.
 const partition = (pdata: SunburstNode): HierarchyNode => {
   const r = d3.hierarchy(pdata).sum((d) => d.value ?? 0);
   return d3.partition<SunburstNode>().size([2 * Math.PI, r.height + 1])(r);
 };
+// Observable that combines the common dictionary data and the tagging
+// results to generate the SunburstNode root.
 const [useSunbrustData, sunburstData$] = bind(
   combineLatest({ common: commonDictionary$, tagged: taggerResults$ }).pipe(
     map((data) => {
@@ -72,51 +85,65 @@ const [useSunbrustData, sunburstData$] = bind(
   )
 );
 
-function relativeArc(d: HierarchyNode, p: HierarchyNode | null): Segment {
-  if (p) {
+// Convert rectangular to polar given a node and the current root node.
+function relativeArc(node: HierarchyNode, root: HierarchyNode | null): Segment {
+  if (root) {
     const p2 = 2 * Math.PI;
     return {
-      x0: Math.max(0, Math.min(1, (d.x0 - p.x0) / (p.x1 - p.x0))) * p2,
-      x1: Math.max(0, Math.min(1, (d.x1 - p.x0) / (p.x1 - p.x0))) * p2,
-      y0: Math.max(0, d.y0 - p.depth),
-      y1: Math.max(0, d.y1 - p.depth),
+      x0:
+        Math.max(0, Math.min(1, (node.x0 - root.x0) / (root.x1 - root.x0))) *
+        p2,
+      x1:
+        Math.max(0, Math.min(1, (node.x1 - root.x0) / (root.x1 - root.x0))) *
+        p2,
+      y0: Math.max(0, node.y0 - root.depth),
+      y1: Math.max(0, node.y1 - root.depth),
     };
   }
-  return d as Segment;
+  return node as Segment; // no adjustment if at top level.
 }
+// Predicate for if the given arc is visible based on size.
 const arcVisible = (d: Segment | undefined): boolean =>
   Boolean(d && d.y1 <= 3 && d.y0 >= 1 && d.x1 > d.x0);
+// Is the segment big enough to justify having a label?
 const labelVisible = (d: Segment | undefined): number =>
   +Boolean(
     !!d && d.y1 <= 3 && d.y0 >= 1 && (d.y1 - d.y0) * (d.x1 - d.x0) > 0.03
   );
+// Generate "transform" string to position label.
 const labelTransform = (d: Segment | undefined, radius: number): string => {
   const x = d ? (((d.x0 + d.x1) / 2) * 180) / Math.PI : 0;
   const y = d ? ((d.y0 + d.y1) / 2) * radius : 0;
   return `rotate(${x - 90}) translate(${y},0) rotate(${x < 180 ? 0 : 180})`;
 };
+// How to display numbers
 const format = d3.format(",d");
+// Color mapping.
 const color = d3.scaleOrdinal(d3.schemeCategory10);
+// Base color on top level category.
 const fill = (d: HierarchyNode) => {
   while (d.depth > 1 && d.parent) {
     d = d.parent;
   }
   return color(d.data.name);
 };
+// Opacity based on visibility and leaf status.
 const opacity = (visible: boolean, hasChildren: boolean) =>
   visible ? (hasChildren ? 0.8 : 0.4) : 0;
 
 interface ArcProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  arc: d3.Arc<any, Segment>;
-  root: HierarchyNode | null;
-  node: HierarchyNode;
-  onClick: (d: HierarchyNode) => void;
+  arc: d3.Arc<any, Segment>; // d3's arc component.
+  root: HierarchyNode | null; // current root node.
+  node: HierarchyNode; // this arc's node data.
+  onClick: (d: HierarchyNode) => void; // callback for clicks
 }
 const Arc = (props: ArcProps) => {
   const { arc, root, node, onClick } = props;
   const ref = useRef(null);
   const [current, setCurrent] = useState(relativeArc(node, root));
+
+  // transitioning to new state.
   useEffect(() => {
     const target = relativeArc(node, root);
     if (!equalSegment(current, target)) {
@@ -153,6 +180,7 @@ const Arc = (props: ArcProps) => {
       }
     >
       <title>
+        {/* title for tooltip, shows ancestors path */}
         {`${props.node
           .ancestors()
           .map((datum) => datum.data.name)
@@ -163,16 +191,19 @@ const Arc = (props: ArcProps) => {
     </path>
   );
 };
+
 interface ArcLabelProps extends SVGProps<SVGTextElement> {
   root: HierarchyNode | null;
   node: HierarchyNode;
   radius: number;
 }
+// Component for rendering arc labels.
 const ArcLabel = (props: ArcLabelProps) => {
   const { root, node, radius } = props;
   const [current, setCurrent] = useState(relativeArc(node, root));
   const ref = useRef(null);
 
+  // transition to new state.
   useEffect(() => {
     const target = relativeArc(node, root);
     if (!equalSegment(current, target)) {
@@ -210,12 +241,12 @@ const ArcLabel = (props: ArcLabelProps) => {
 };
 
 interface SunburstChartProps extends HTMLProps<HTMLDivElement> {
-  width?: number;
+  width?: number; // default 300, optional width attribute.
 }
-
+// Component for rendering figure and svg used in chart.
 const SunburstFigure = (props: SunburstChartProps) => {
-  const root = useSunbrustData();
-  const editing = useEditorState();
+  const root = useSunbrustData(); // changes on new tagging data
+  const editing = useEditorState(); // changes on editor state
   const [parent, setParent] = useState(root);
   const wedgeRef = useRef(null);
   const labelRef = useRef(null);
@@ -265,6 +296,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
       <svg viewBox={`0 0 ${width} ${width}`}>
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
+            {/* all the wedges */}
             {root?.descendants().map((d) => (
               <Arc
                 key={d.data.id}
@@ -281,6 +313,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
             textAnchor="middle"
             className="sunburst-chart-label"
           >
+            {/* all of the wedge labels */}
             {root?.descendants().map((d) => (
               <ArcLabel
                 key={`label-${d.data.id}`}
@@ -290,6 +323,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
               />
             ))}
           </g>
+          {/* center hole */}
           <circle
             r={radius}
             fill="none"
@@ -298,6 +332,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
           />
         </g>
       </svg>
+      {/* caption shows path to current root */}
       <figcaption>&nbsp;{current_path}</figcaption>
     </figure>
   );
@@ -319,6 +354,7 @@ const ErrorFallback = (props: { error?: Error }) => (
  */
 const SunburstChart = (props: SunburstChartProps) => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
+    {/* contain component errors to component! */}
     <Suspense fallback={<Spinner animation={"border"} />}>
       <Subscribe>
         <SunburstFigure {...props} />

@@ -40,19 +40,19 @@ class DocuScopeOnTopic extends Component {
       textdata: this.dataTools.getInitialData(),
       loading: false,
       sentence: null
-    };    
+    };
 
     this.onHandleTopic=this.onHandleTopic.bind(this);
-    this.onHandleSentence = this.onHandleSentence.bind(this);    
+    this.onHandleSentence = this.onHandleSentence.bind(this);
 
-    this.onSentenceChange = this.onSentenceChange.bind(this);    
+    this.onSentenceChange = this.onSentenceChange.bind(this);
   }
 
   /**
    *
    */
   componentDidUpdate(prevProps) {
-    if (prevProps.text !== this.props.text) {
+    if (prevProps.text !== this.props.text || prevProps.sentences !== this.props.sentences) {
       this.prep(this.props.sentences, this.props.text);
     }
   }
@@ -87,7 +87,7 @@ class DocuScopeOnTopic extends Component {
 
       this.setState({
         sentence: null,
-        loading: false, 
+        loading: false,
         textdata: newData,
         invalidated: false,
       });
@@ -155,7 +155,7 @@ class DocuScopeOnTopic extends Component {
 
       this.setState({
         sentence: null,
-        loading: false, 
+        loading: false,
         textdata: newData,
         invalidated: false,
       });
@@ -183,7 +183,7 @@ class DocuScopeOnTopic extends Component {
     if (aSentenceObject==null) {
       if (this.props.setStatus) {
         this.props.setStatus ("");
-      }      
+      }
       return;
     }
 
@@ -244,7 +244,7 @@ class DocuScopeOnTopic extends Component {
           </div>
           <div className="ontopic-details" dangerouslySetInnerHTML={{__html: onTopicHelp}} />
           <div className="ontopic-explanation">
-          {sentencedetails}  
+          {sentencedetails}
           </div>
         </div>
       </div>
