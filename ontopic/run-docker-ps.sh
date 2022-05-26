@@ -1,2 +1,2 @@
 clear
-sudo docker ps | grep ontopic
+docker ps | grep ontopic

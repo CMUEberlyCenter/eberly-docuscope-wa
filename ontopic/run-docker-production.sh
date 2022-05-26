@@ -1,3 +1,3 @@
 clear
-cat ./logo.txt
-sudo docker run -d -p 8089:8081 -ti ontopic
+cat ../banner.txt
+docker run -d -p 8089:8081 -ti ontopic

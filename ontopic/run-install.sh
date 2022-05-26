@@ -14,5 +14,6 @@ pip install numpy
 # On Mac:
 #pip install numpy --upgrade --ignore-installed
 pip install spacy
+#pip install spacy==2.3.5
 npm i react react-dom --save-dev
-python -m spacy download en_core_web_sm
+#python -m spacy download en_core_web_sm

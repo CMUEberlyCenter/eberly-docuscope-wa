@@ -1,3 +1,4 @@
+__pycache__
 .DS_Store
 node_modules
 db
@@ -26,3 +27,5 @@ deps.txt
 /dbentry
 *~
 *.pyc
+/ontopic/data/default_model
+/ontopic/data/large_model

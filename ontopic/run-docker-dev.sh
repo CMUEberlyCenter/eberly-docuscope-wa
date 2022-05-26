@@ -1,3 +1,3 @@
 clear
-cat ./banner.txt
-sudo docker run -p 8089:8081 -it ontopic
+cat ../banner.txt
+docker run -p 5000:5000 -it docuscope-wa-ontopic

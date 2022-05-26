@@ -74,22 +74,15 @@ import spacy                                   # SpaCy NLP library
 NLP_MODEL_DEFAULT = 0
 NLP_MODEL_LARGE   = 1
 
+TOPIC_FILTER_LEFT       = 0     # LEFT
+TOPIC_FILTER_LEFT_RIGHT = 1     # LEFT + RIGHT
+TOPIC_FILTER_ALL        = 2     # ALL
+
+TOPIC_SORT_APPEARANCE   = 0
+TOPIC_SORT_LEFT_COUNT   = 1
+
 import pprint                                  # pretty prnting for debugging
 pp = pprint.PrettyPrinter(indent=4)            # create a pretty printing object used for debugging.
-
-nlp = None
-
-def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
-    global nlp
-
-    try:
-        if lang == 'en':      # English module
-            if model == NLP_MODEL_DEFAULT:
-                nlp = spacy.load(resource_path('data/default_model'))
-            else:
-                nlp = spacy.load(resource_path('data/large_model'))
-    except:
-        pass
 
 TEXT_COLOR      = RGBColor( 64,  64,  64)
 TEXT_VERB_COLOR = RGBColor(  0, 188, 242)
@@ -128,12 +121,44 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
 
 import dslib.models.stat as ds_stat
 
+nlp = None
+
+##
+# https://spacy.io/api/top-level#spacy.info
+##
+def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
+    print("setLanguageModel ()")
+
+    global nlp
+
+    try:
+        if lang == 'en':
+            if model == NLP_MODEL_DEFAULT:
+                print("Loading Spacy default model ...")
+                nlp = spacy.load(resource_path('data/default_model'))
+                #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
+                #print("\n\n")
+                #print(result)
+            else:
+                print("Loading Spacy large model ...")
+                nlp = spacy.load(resource_path('data/large_model'))
+    except Exception as e:
+        print(e)
+    else:
+        print("Spacy language model loaded successfully")
+        print (spacy.info())
+##
+#
+##
 def isModelLoaded():
     if nlp is not None:
         return True
     else:
         return False
 
+##
+#
+##
 def removeQuotedSlashes(s):
     if s.find('“') > 0 and s.find('”') > 0:
         pattern = r'\s\/\s'
@@ -146,6 +171,9 @@ def removeQuotedSlashes(s):
     else:
         return s
 
+##
+#
+##
 def adjustSpaces(text):
     """
     This function takes a string, often directly read from a file, and cleans up the string for parsing.
@@ -201,6 +229,25 @@ def adjustSpaces(text):
     text = text.replace(u'  ', u' ').replace(u'  ', u' ').replace(u'  ', u' ') # remove extra spaces
 
     return text
+
+def is_skip(elem, left_count, topic_filter):
+
+    # if theme_only == True:                 
+    if topic_filter == TOPIC_FILTER_LEFT:
+
+        # if the left only mode is on
+        if elem[IS_TOPIC] == False:
+            # skip, if it is not a topic word
+            return True # skip  
+
+        elif left_count < 1 and elem[ISLEFT] == False:
+            # skip if it's a right-side word and left_count < 1 (==0)
+            return True # skip
+
+        else:
+            return False            # otherwise, it's not a skip word.
+    else:
+        return False
 
 class DSWord():
     def __init__(self, w, lw, end, lat, pos):
@@ -601,6 +648,13 @@ class DSDocument():
         self.bQuote = False        # temp variable
 
         self.progress_callback = None
+
+        # variables used by the methods for the online version of write & audit
+        self.local_topics_dict = None
+        self.global_header           = []
+        self.local_header            = []
+        self.global_topics           = []
+        self.local_topics            = []        
 
     def setController(self, c):
         self.controller = c
@@ -1055,8 +1109,8 @@ class DSDocument():
 
             return lemma
 
-
-        incl_nsubj = self.controller.postMainVerbTopics() # true or false
+        #incl_nsubj = self.controller.postMainVerbTopics() # true or false
+        incl_nsubj = None
 
         res = list()
         is_left = True
@@ -1285,7 +1339,10 @@ class DSDocument():
             res['NPS'].append(np.text)
         res['NUM_NPS'] = len(res['NPS'])
 
-        res['NOUN_CHUNKS'] = list(doc.noun_chunks)
+        # res['NOUN_CHUNKS'] = list(doc.noun_chunks) 
+        # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert 
+        # the 'sent_analysis' property to JSON easily later.
+        res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]        
 
         advcl_root = None
         for token in doc:
@@ -1336,6 +1393,18 @@ class DSDocument():
         return res
 
     def processDoc(self, section_data):
+        print ("processDoc ()")
+
+        if (isModelLoaded () == False):
+           print ("Warning: language model not loaded yet, loading ...")
+           setLanguageModel ("en",NLP_MODEL_DEFAULT)
+
+        if (isModelLoaded () == False):
+           print ("Error: unable to load language model!")
+           return (list())
+
+        print("Language model appears to be loaded, processing text ...")   
+
         """
         This function iterates through all the paragraphs in the given docx document.
         and find all the unique lemmas in each sentence, and in each paragraph.
@@ -1343,10 +1412,8 @@ class DSDocument():
 
         doc = section_data['doc']
 
-        if self.progress_callback:
-            self.progress_callback(max_val=20, msg="Preprocessing...")
-
         self.num_quoted_words = 0 
+
         word_pos = section_data['start']
 
         def listLemmas(sent):
@@ -1665,7 +1732,37 @@ class DSDocument():
     # Loading Methods
     #
     ########################################
-                
+    def loadFromTxt(self, aText):
+        print ("loadFromTxt ()")
+        #print (aText)
+
+        self.current_section = 0
+
+        text = aText
+        paragraphs = text.splitlines()
+
+        doc = Document()
+
+        for para in paragraphs:
+            if para:
+                para = adjustSpaces(para)
+                doc.add_paragraph(para)
+
+        section_data = dict()
+        section_data['doc']     = doc
+        section_data['data']    = dict()
+        section_data['heading'] = "n/a"
+        section_data['start']   = 0
+        section_data['pos']     = 0
+
+        self.sections = [section_data]
+
+        self.processDoc(section_data)
+
+        section_data['start'] = 0
+
+        self.processDoc(section_data)
+
     def loadFromTxtFile(self, src_dir, file):
         """
         Load a text from a plain text file. If the file contains headings using
@@ -1882,6 +1979,7 @@ class DSDocument():
     ########################################
     #
     # Methods for creating HTML/XML strings from the text data
+    # Doesn't rely on DocuScope tagging, does rely on PythonDocX
     #
     ########################################
 
@@ -2391,7 +2489,12 @@ class DSDocument():
 
         return res_docx
 
-    def getLocalTopicalProgData(self, selected_paragraphs):  
+    ##
+    # Mainly the content for the coherence panel, bottom (per sentence) portion
+    ##
+    def getLocalTopicalProgData(self, selected_paragraphs):
+        print ("getLocalTopicalProgData ()")
+        #print (selected_paragraphs)
 
         selected_paragraphs.sort()
 
@@ -2562,16 +2665,25 @@ class DSDocument():
         res = res[:-1]
         return res
 
+    ##
+    # Mainly the content for the coherence panel, top portion
+    ##
     def getGlobalTopicalProgData(self, sort_by=views.TOPIC_SORT_APPEARANCE):
+        print ("getGlobalTopicalProgData ()")
+
         # first we should make a list of given lemmas as they appear in the text
         all_lemmas = list()
+
         temp = list()
 
         if self.sections is None:
             return
 
+        #print (self.current_section)
+        #print (self.sections)        
+
         data      = self.sections[self.current_section]['data']
-        para_data = self.sections[self.current_section]['para_data']
+        #para_data = self.sections[self.current_section]['para_data']
 
         if data is None:
             return
@@ -2732,8 +2844,13 @@ class DSDocument():
         # for pd in para_data:
             # pd.printData()
 
-        return {'data': res, 'para_data': para_data}
+        #return {'data': res, 'para_data': para_data}
 
+        return {'data': res, 'para_data': []}
+
+    ##
+    # Main OnTopic style data
+    ##
     def getSentStructureData(self):
         p_count = 1
         res = list()
@@ -3869,6 +3986,991 @@ class DSDocument():
 
         self.sections[section_id]['para_data'] = lats_by_para
 
+    ###############################################################################
+    #
+    # The Methods below here are used only by the online version of DocuScope Write & Audit
+    # 
+    # The following are the top level functions that should be used to retrieve the data.
+    #     DSDocument.generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2)
+    #     DSDocument.generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE)
+    #
+    # You can use the following methods to test the data genereated by the above methods.
+    # These functions print the visualization using ASCII characters.
+    #
+    #    testPrintLocalVisData(data)
+    #    testPrintGlobalVisdata(data)
+    #
+    ###############################################################################
+
+    def generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2):
+        """
+        This method returns a python dictionary that contains the data that are needed for
+        the visualization of coherence across sentences within 1 or more pragraphs.
+        selected_paragraphs:    A list of paragraph IDs.
+        max_topic_sents:        The total number of sentences at the beginning of paragraphs that
+                                should be considered a topic sentence.
+        min_topics:             The minimum number of lexical overlaps between sentences.
+        """
+
+        self.local_topics = list()
+
+        data = self.getLocalTopicalProgData(selected_paragraphs)
+        if data is None:
+            return ValueError('data is None.')
+
+        topic_filter = TOPIC_FILTER_LEFT_RIGHT
+        key_para_topics = self.getKeyParaTopics()
+        key_sent_topics = []
+
+        header = data[0]   # list of tuples (POS, LEMMA)
+        self.local_header = header
+        nrows  = len(data)
+        ncols  = len(header)
+
+        sent_buttons_data = [None] * (nrows-1)
+
+        if ncols == 0:
+            return ValueError('ncols is 0.')
+
+        vis_data = dict()
+        vis_data['num_topics'] = ncols
+        vis_data['data'] = list()
+
+        if selected_paragraphs:
+            sent_filter     = self.filterLocalTopics(data, nrows, ncols)
+            selected_paragraphs.sort()
+            b_para_break = False
+            true_left_count = 0
+            l_count = 0
+            for ci in range(ncols):
+
+                topic = header[ci][1]
+                topic_data = [None] * (nrows-1)
+                b_skip     = False
+                sent_pos   = 0
+                sent_id    = 0
+
+                if topic is not None:
+                    true_left_count = sent_filter[topic]['left_count']
+
+                    if topic_filter == TOPIC_FILTER_ALL:
+                        count = sent_filter[topic]['count']
+                        l_count = sent_filter[topic]['left_count']                  
+                    else:
+                        l_count = sent_filter[topic]['left_count']
+                        if l_count == 1:
+                            count = 2
+                        else:
+                            count = l_count
+
+                if count < min_topics:
+                    continue
+
+                is_global = False
+                if topic in self.global_topics:
+                    is_global = True
+
+                if DSDocument.isUserDefinedSynonym(topic):
+                    is_tc = True
+                else:
+                    is_tc = False
+
+                self.local_topics.append((topic, is_global))
+
+                topic_info = None
+                para_count = 0
+                para_id = selected_paragraphs[para_count]
+
+                for ri in range(1,nrows):     # for each row
+                    elem= data[ri][ci]      # get the elem 
+
+                    if type(elem) == int and elem < 0:
+                        b_para_break = True
+                    elif type(elem) == tuple and elem[0] is not None and \
+                                is_skip(elem, true_left_count, topic_filter) == False:
+                        if elem[IS_SKIP] == False:
+                            d = dict()
+                            # d['topic'] = elem
+                            d['sent_pos'] = sent_id
+                            d['para_pos'] = para_id
+                            d['is_left'] = elem[ISLEFT]
+
+                            if sent_id < max_topic_sents:
+                                d['is_topic_sent'] = True
+                            else:
+                                d['is_topic_sent'] = False
+
+                            topic_data[sent_pos] = d
+                            topic_info = elem
+
+                    elif type(elem) == tuple and elem[0] is not None \
+                                and is_skip(elem, true_left_count, topic_filter) == True:
+                        b_skip = True
+
+                    elif type(elem) == tuple and elem[0] is None:
+                        b_skip = True
+
+                    if b_para_break:
+                        para_count += 1
+                        para_id = selected_paragraphs[para_count]
+                        sent_id = 0
+                        b_para_break = False
+                    else:
+                        sent_pos += 1
+                        sent_id  += 1
+
+                vis_data['num_sents'] = sent_id
+                vis_data['data'].append({'sentences':        topic_data, 
+                                         'is_topic_cluster': is_tc,
+                                         'is_global':        is_global,
+                                         'topic':            list(topic_info[0:3])})
+
+            # debug
+            # with open("sample_local_coherence_data.json", 'w') as fout:
+                # json.dump(vis_data, fout, indent=4)
+
+            return vis_data
+
+    def generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE):
+        """
+        This method returns a python dictionary that contains the data that are needed for
+        the visualization of coherence across paragraphs.
+        min_topics:             The minimum number of lexical overlaps between sentences.
+        max_topic_sents:        The total number of sentences at the beginning of paragraphs that
+                                should be considered a topic sentence.
+        sort_by:                The sorting method option.
+        """
+
+        global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
+        self.updateLocalTopics()
+        self.updateGlobalTopics(global_data)
+
+        if global_data is None:
+            return ValueError('global_data is None.')
+
+        data = global_data['data']
+        para_data = global_data['para_data']
+
+        if data is None:
+            return ValueError('data is None.')
+
+        header = data[0]   # list of tuples (POS, LEMMA, POS, COUNT)
+
+        nrows  = len(data)              # Initialize the number of rows and the number of columns.
+        ncols  = len(header)
+
+        self.global_topics = list()
+
+        if ncols == 0:
+            return ValueError('ncols is 0.')
+
+        vis_data = dict()
+        vis_data['num_topics'] = ncols
+        vis_data['data'] = list()
+
+        # Filters
+        para_filter     = self.filterParaTopics(data, nrows, ncols)      #
+        sent_filter     = self.filterTopics(data, nrows, ncols)          # 
+        topic_filter    = TOPIC_FILTER_LEFT_RIGHT                   # 
+
+        sent_count = 0
+        b_break = False
+        true_left_count = 0
+        l_count = 0
+        count = 0
+
+        for ci in range(ncols):                             # for each topic entry,
+
+            topic = header[ci][1]                           # find a topic from the header list.
+            topic_data = [None] * (nrows-1)                 # initialize the topic data
+            p_ri = 0                                        # initialize the row index w/in paragraph
+
+            if topic is not None:                           # topic exists 
+                if  self.isLocalTopic(topic) == False and \
+                    DSDocument.isUserDefinedSynonym(topic) == False:         # topic cluster = user defined synonym
+                    # if the topic is NOT a local topic AND it is NOT a topic cluster, 
+                    # we should skip this topic.
+                    continue
+
+                # Count how manu times the topic appears on the left side of the main verb.
+                if DSDocument.isUserDefinedSynonym(topic):                # topic is a topic cluster.
+                    true_left_count = sent_filter[topic]['left_count']
+                    count   = sent_filter[topic]['count']                    
+                    l_count = sent_filter[topic]['left_count']
+                    if count < 2:
+                            count = 2
+                else:                                                            # topic is not a topic sluster
+                    true_left_count = sent_filter[topic]['left_count']
+                    if topic_filter == TOPIC_FILTER_ALL:                  # rarely used.
+                        count   = sent_filter[topic]['count']
+                        l_count = sent_filter[topic]['left_count']                  
+                    else:                                                        # default
+                        l_count = sent_filter[topic]['left_count']
+                        if l_count == 1:                                         # one left + one right case.
+                            count = 2
+                        else:
+                            count = l_count
+
+            if count < min_topics:                    # min_topics == 2 by default. Skip topics that do not apper in more than 2 paragraphs.
+                continue
+
+            self.global_topics.append(topic)                    # if we get here, the topic is a global topic.
+
+            if DSDocument.isUserDefinedSynonym(topic):     # check if topic is a topic cluster.
+                is_tc = True
+            else:
+                is_tc = False
+
+            topic_info = None
+            sent_count = 0
+
+            # we will start with the index == 2 because the first index is the header row, 
+            # and the second index is the pragraph break indicator.
+
+            for ri in range(2,nrows):     # for each column (r & c are flipped!)
+
+                elem= data[ri][ci]        # get the elem 
+
+                if type(elem) == int and elem < 0:       # paragraph brek
+                    b_break = True
+
+                # Not the first column (not the paragraph ID/Number)
+                elif type(elem) == tuple and elem[0] is not None and \
+                            is_skip(elem, true_left_count, topic_filter) == False:
+
+                    curr_elem = topic_data[p_ri]
+
+                    # d['sent_id'] captures the sent id of the first occurence of the topic on the left side.
+                    if curr_elem is not None and \
+                       elem[ISLEFT] == True and \
+                       curr_elem['topic'][ISLEFT] == False:
+                        # 'elem' not the first instance for this paragraph
+                        # the existing element 'curr_elem' is on the right side.
+                        d = dict()
+                        d['topic']   = list(elem)
+                        d['first_left_sent_id'] = sent_count   
+                        d['para_pos'] = p_ri
+                        d['is_left'] = True
+                        # d['is_topic_cluster'] = is_tc
+
+                        if sent_count < max_topic_sents:
+                            d['is_topic_sent'] = True
+                        else:
+                            d['is_topic_sent'] = False
+
+                        topic_data[p_ri] = d
+
+                    elif curr_elem is None:
+                        d = dict()
+                        d['topic'] = list(elem)
+                        d['para_pos'] = p_ri
+
+                        if elem[ISLEFT] == True:
+                            d['first_left_sent_id'] = sent_count
+                            d['is_left'] = True
+                        else:
+                            d['first_left_sent_id'] = -1
+                            d['is_left'] = False
+
+                        if sent_count < max_topic_sents:
+                            d['is_topic_sent'] = True
+                        else:
+                            d['is_topic_sent'] = False
+
+                        topic_data[p_ri] = d
+                        topic_info = elem
+
+                elif type(elem) == tuple and elem[0] is not None \
+                            and is_skip(elem, true_left_count, topic_filter) == True:
+                    pass
+
+                elif type(elem) == tuple and elem[0] is None:                     # if empty slot 
+                    pass
+
+                if b_break:
+                    p_ri += 1 
+                    b_break = False
+                    sent_count = 0
+                else:
+                    sent_count += 1
+
+            topic_data = topic_data[0:p_ri+1]
+
+            for i in range(len(topic_data)):          # delete the topic data.
+                d = topic_data[i]
+                if d is not None:
+                    del d['topic']
+            
+            if self.isLocalTopic(topic) == False:               
+                is_non_local = True
+            else:
+                is_non_local = False
+
+            vis_data['data'].append({'paragraphs':       topic_data,
+                                     'is_topic_cluster': is_tc,
+                                     'is_non_local':     is_non_local,
+                                     'topic':            list(topic_info[0:3])})
+
+            vis_data['num_paras']  = (p_ri)
+
+        # Add missing topic clusters, if any
+        tcs = DSDocument.getUserDefinedSynonyms()        
+        if tcs is not None:
+            missing_tcs = list(set(tcs) - set(self.global_topics))
+            for tc  in missing_tcs:
+                topic_info = ['NOUN', '', tc]
+
+                vis_data['data'].append({'paragraphs': [], 
+                                         'is_topic_cluster': True,
+                                         'is_non_local':     False,
+                                         'topic': topic_info})
+
+        # debug
+        # with open("sample_global_coherence_data.json", 'w') as fout:
+        #     json.dump(vis_data, fout, indent=4)
+
+        return vis_data
+
+    def filterTopics(self, data, nrows, ncols):
+        res = dict()
+        for c in range(1, ncols+1):  # for each topic
+
+            l_start = -1 # left only
+            l_end   = -1
+            start = -1  # left or right
+            end   = -1
+            given_count = 0
+            given_left_count  = 0
+            given_right_count = 0
+            para_count  = 0
+            num_paras   = 0
+            header = data[0][c-1][1]
+            given_left_paras  = list()
+            given_right_paras = list()
+            first_new_paras   = list()
+
+            for r in range(1, nrows):
+                elem= data[r][c-1]
+
+                if type(elem) == tuple and elem[0] is not None:
+                    if start < 0:
+                       start = r
+                    elif start >= 0:
+                       end = r
+
+                    if elem[ISLEFT]:
+                        if l_start < 0:
+                           l_start = r
+                        elif l_start >= 0:
+                           l_end = r
+
+                        given_left_count += 1
+                        given_left_paras.append(para_count)
+                    else:
+                        given_right_count += 1
+                        given_right_paras.append(para_count)
+
+                    given_count += 1
+
+                elif type(elem) == int and elem < 0:
+                    para_count += 1
+
+            l_skip_lines = 0
+            skip_lines = 0
+            sent_count = 0
+            for r in range(1, nrows):
+                elem= data[r][c-1]
+
+                if r > l_start and r < l_end:               
+                    if type(elem) == str and elem == 'heading':
+                        l_skip_lines += 1
+                    elif type(elem) == str and elem == 'title':
+                        l_skip_lines += 1                  
+                    elif type(elem) == int and elem < 0:
+                        l_skip_lines += 1
+
+                if r > start and r < end:
+                    if type(elem) == str and elem == 'heading':
+                        skip_lines += 1
+                    elif type(elem) == str and elem == 'title':
+                        skip_lines += 1                  
+                    elif type(elem) == int and elem < 0:
+                        skip_lines += 1
+                        
+                if type(elem) != str and type(elem) != int:
+                    sent_count += 1
+
+            given_left_paras  = list(set(given_left_paras))
+            given_right_paras = list(set(given_right_paras))
+
+            is_topic = False
+            if len(given_left_paras) > 1:
+                is_topic = True
+            elif len(given_left_paras) == 1:  
+                # this topic only appears in one paragraph. Let's see if it appears in 
+                # another pragraph on the right side...
+                if len(set(given_right_paras)-set(given_left_paras)) > 0:
+                    # This topic satisfies the min requirement to be a topic.
+                    is_topic = True
+
+            # left only
+            l_span = (l_end - l_start + 1) - l_skip_lines
+            if l_span < 0:
+                l_span = 0
+            norm_l_span = (l_span / sent_count) * 100
+            norm_l_coverage = (given_left_count / sent_count) * 100
+
+            # left or right
+            span = (end - start + 1) - skip_lines
+            if span < 0:
+                span = 0
+            norm_span = (span / sent_count) * 100
+            norm_coverage = (given_count / sent_count) * 100
+                        
+            res[header] = {'type':            0,
+                           'is_topic':        is_topic,
+                           'left_span':       norm_l_span, 
+                           'left_coverage':   norm_l_coverage,
+                           'span':            norm_span,         # left+right
+                           'coverage':        norm_coverage,     # left+right
+                           'count':           given_count,
+                           'left_count':      given_left_count,
+                           'right_count':     given_right_count,
+                           'sent_count':      sent_count,
+                           'para_count':      None}
+
+        return res
+
+    def filterParaTopics(self, data, nrows, ncols):
+        res = dict()
+        for c in range(1, ncols+1):  # for each topic
+
+            p_l_start = -1
+            p_l_end   = -1
+            p_start = -1
+            p_end   = -1
+            given_count = 0
+            given_left_count = 0
+            given_right_count = 0
+
+            para_count = 0
+            given_paras = list()
+            given_left_paras  = list()
+            given_right_paras = list()
+
+            header = data[0][c-1][1]
+
+            for r in range(1, nrows):
+
+                elem= data[r][c-1]
+
+                if type(elem) == tuple and elem[0] is not None:
+                    if p_start < 0:
+                        p_start = para_count
+                    elif p_start >= 0:
+                        p_end = para_count
+
+                    if elem[ISLEFT]:
+                        if p_l_start < 0:
+                            p_l_start = para_count
+                        elif p_l_start >= 0:
+                            p_l_end = para_count
+
+                        given_left_paras.append(para_count)
+                        given_left_count += 1
+                    else:
+                        given_right_paras.append(para_count)
+                        given_right_count += 1
+
+                    given_paras.append(para_count)
+                    given_count += 1
+
+                elif type(elem) == int and elem < 0:
+                    para_count += 1
+
+            para_count -= 1
+
+            p_l_span = (p_l_end - p_l_start + 1)
+            norm_l_span = (p_l_span / para_count) * 100
+
+            p_span = (p_end - p_start + 1)
+            norm_span = (p_span / para_count) * 100
+
+            given_paras       = list(set(given_paras))
+            given_left_paras  = list(set(given_left_paras))
+            given_right_paras = list(set(given_right_paras))
+
+            norm_l_coverage   = (len(given_left_paras) / para_count) * 100
+            norm_coverage     = (len(given_paras) / para_count) * 100
+
+            is_topic = False
+            if len(given_left_paras) > 1:
+                is_topic = True
+            elif len(given_left_paras) == 1:  
+                # this topic only appears in one paragraph. Let's see if it appears in 
+                # another pragraph on the right side...
+                if len(set(given_right_paras)-set(given_left_paras)) > 0:
+                    # This topic satisfies the min requirement to be a topic.
+                    is_topic = True
+
+            res[header] = {'type':           4,
+                           'is_topic':       is_topic,
+                           'left_span':      norm_l_span,
+                           'left_coverage':  norm_l_coverage, 
+                           'span':           norm_span,
+                           'coverage':       norm_coverage, 
+                           'count':          len(given_paras),
+                           'left_count':     len(given_left_paras),
+                           'right_count':    len(given_right_paras),
+                           'sent_count':     None,
+                           'para_count':     para_count}
+
+        return res
+
+    def filterLocalTopics(self, data, nrows, ncols):
+
+        res = dict()
+        for c in range(1, ncols+1):  # for each topic
+
+            start = -1
+            end   = -1
+            given_count = 0
+            given_left_count = 0
+            # para_count = 0
+            first_new_count = 0
+            header = data[0][c-1][1]
+
+            for r in range(1, nrows):
+                elem= data[r][c-1]
+
+                if type(elem) == tuple and elem[0] is not None:
+                    # if para_count == para_pos:
+                    bSkip = False
+
+                    if elem[IS_TOPIC] == False: # it's not a topic word
+                        bSkip = True
+
+                    if bSkip == False: # it's a topic word
+                        if start < 0:
+                            start = r
+                        elif start >= 0:
+                            end = r
+
+                        given_left_count += 1
+
+                        if elem[ISLEFT] == False:
+                            first_new_count += 1
+
+                    given_count += 1
+
+            if (given_left_count - first_new_count) == 0:
+                start = -1
+                end = -1
+
+            skip_lines = 0
+            sent_count = 0
+            # para_count = 0
+            for r in range(1, nrows):
+                elem= data[r][c-1]
+
+                if r > start and r < end:               
+                    if type(elem) == str and elem == 'heading':
+                        skip_lines += 1
+                    elif type(elem) == int and elem < 0:
+                        skip_lines += 1
+                        
+                if type(elem) != str and type(elem) != int:
+                        sent_count += 1
+
+            if start >= 0 and end >= 0:
+                span = (end - start + 1) - skip_lines
+                norm_span = (span / sent_count) * 100
+            else:
+                span = 0
+                norm_span = 0.0
+
+            if sent_count > 0:
+                norm_coverage = (given_left_count / sent_count) * 100
+            else:
+                norm_coverage = 0
+
+            res[header] = {'type':            1,
+                           'span':            norm_span, 
+                           'coverage':        norm_coverage, 
+                           'count':           given_count, 
+                           'left_count':      given_left_count,
+                           'first_new_count': first_new_count,
+                           'sent_count':      sent_count,
+                           'para_count':      None,
+                           'top':             False}
+
+        top_left_count = 0
+        for stats in res.values():  # find the top left count
+            if stats['left_count'] > top_left_count:
+                top_left_count = stats['left_count']
+
+        for stats in res.values():  # update the 'top' status of each topic.
+            if stats['left_count'] == top_left_count and \
+                stats['left_count'] - stats['first_new_count'] != 0:
+                stats['top'] = True
+                    
+        return res        
+
+    def updateGlobalTopics(self, global_data, min_topics=2):
+
+        data = global_data['data']
+
+        header = data[0]   # list of tuples (POS, LEMMA, POS, SENT_COUNT, PARA_COUNT)
+        self.global_header = header.copy()   # Let's make a copy so that we don't actually change the global data.
+
+        nrows  = len(data)
+        ncols  = len(header)
+
+        self.global_topics = list()
+
+        if ncols == 0:
+            return []
+
+        topic_filter    = TOPIC_FILTER_ALL
+        sent_filter     = self.filterTopics(data, nrows, ncols)     
+
+        true_left_count = 0
+        l_count = 0
+
+        for ci in range(ncols):    # for each colum (word) in a row
+
+            topic = header[ci][1]
+            p_ri = 0
+
+            if topic is not None:
+                if self.isLocalTopic(topic) == False and \
+                   DSDocument.isUserDefinedSynonym(topic) == False:
+                    continue
+
+                if DSDocument.isUserDefinedSynonym(topic):
+                    true_left_count = sent_filter[topic]['left_count']
+                    count = sent_filter[topic]['count']                    
+                    l_count = sent_filter[topic]['left_count']
+                    if count < 2:
+                        count = 2
+                else:
+                    true_left_count = sent_filter[topic]['left_count']
+
+                    if topic_filter == TOPIC_FILTER_ALL:
+                        count = sent_filter[topic]['count']
+                        l_count = sent_filter[topic]['left_count']                  
+                    else:
+                        l_count = sent_filter[topic]['left_count']
+                        if l_count == 1:
+                            count = 2
+                        else:
+                            count = l_count
+
+            if count < min_topics:
+                continue
+
+            self.global_topics.append(topic)
+
+        # find the topic clusters that are not included in self.global_topics.
+        # or simply add all the topic clusters and call list(set(...)) so that there
+        # no duplicates!!
+
+        tcs = DSDocument.getUserDefinedSynonyms()
+        if tcs is not None:
+            missing_tcs = list(set(tcs) - set(self.global_topics))
+            self.global_topics = self.global_topics + missing_tcs
+            count = 0
+            for tc in missing_tcs:
+                 # list of tuples (POS, LEMMA, POS, SENT_COUNT, PARA_COUNT)
+                if tc not in [h[1] for h in self.global_header]:
+                    self.global_header.append(('NOUN', tc, 10000000+count, -1, -1))
+                    count += 1
+
+        return self.global_topics
+
+    def updateLocalTopics(self):
+
+        def filter_local_topics(data, nrows, ncols):
+
+            res = dict()
+            for c in range(1, ncols+1):  # for each topic
+
+                start = -1
+                end   = -1
+                given_count = 0
+                given_left_count = 0
+                # para_count = 0
+                first_new_count = 0
+                header = data[0][c-1][1]
+
+                for r in range(1, nrows):
+                    elem= data[r][c-1]
+
+                    if type(elem) == tuple and elem[0] is not None:
+                        # if para_count == para_pos:
+                        bSkip = False
+
+                        if elem[IS_TOPIC] == False: # it's not a topic word
+                            bSkip = True
+
+                        if bSkip == False: # it's a topic word
+                            if start < 0:
+                                start = r
+                            elif start >= 0:
+                                end = r
+
+                            given_left_count += 1
+
+                            if elem[ISLEFT] == False:
+                                first_new_count += 1
+
+                        given_count += 1
+
+                if (given_left_count - first_new_count) == 0:
+                    start = -1
+                    end = -1
+
+                skip_lines = 0
+                sent_count = 0
+                # para_count = 0
+                for r in range(1, nrows):
+                    elem= data[r][c-1]
+
+                    # if type(elem) == int and elem < 0:
+                        # para_count += 1
+                    # elif para_count == para_pos:
+
+                    if r > start and r < end:               
+                        if type(elem) == str and elem == 'heading':
+                            skip_lines += 1
+                        elif type(elem) == int and elem < 0:
+                            skip_lines += 1
+                            
+                    if type(elem) != str and type(elem) != int:
+                            sent_count += 1
+
+                if start >= 0 and end >= 0:
+                    span = (end - start + 1) - skip_lines
+                    norm_span = (span / sent_count) * 100
+                else:
+                    span = 0
+                    norm_span = 0.0
+
+                if sent_count > 0:
+                    norm_coverage = (given_left_count / sent_count) * 100
+                else:
+                    norm_coverage = 0
+
+                res[header] = {'type':            1,
+                               'span':            norm_span, 
+                               'coverage':        norm_coverage, 
+                               'count':           given_count, 
+                               'left_count':      given_left_count,
+                               'first_new_count': first_new_count,
+                               'sent_count':      sent_count,
+                               'para_count':      None,
+                               'top':             False}
+
+            top_left_count = 0
+            for stats in res.values():  # find the top left count
+                if stats['left_count'] > top_left_count:
+                    top_left_count = stats['left_count']
+
+            for stats in res.values():  # update the 'top' status of each topic.
+                if stats['left_count'] == top_left_count and \
+                    stats['left_count'] - stats['first_new_count'] != 0:
+                    stats['top'] = True
+                        
+            return res
+
+        def get_local_topics(local_data, min_topics=2):
+            data = local_data
+
+            topic_filter = TOPIC_FILTER_LEFT_RIGHT
+            header = data[0]
+            nrows  = len(data)
+            ncols  = len(header)
+
+            if ncols == 0:
+                return []
+
+            sent_filter = filter_local_topics(data, nrows, ncols)
+
+            true_left_count = 0
+            l_count = 0
+            self.local_topics = list()
+
+            for ci in range(ncols):
+
+                topic = header[ci][1]
+                sent_count = 0
+
+                if topic is not None:
+                    true_left_count = sent_filter[topic]['left_count']
+
+                    if topic_filter == TOPIC_FILTER_ALL:
+                        count = sent_filter[topic]['count']
+                        l_count = sent_filter[topic]['left_count']                  
+                    else:
+                        l_count = sent_filter[topic]['left_count']
+                        if l_count == 1:
+                            count = 2
+                        else:
+                            count = l_count
+
+                if count < min_topics:
+                    continue
+
+                is_global = False
+                if topic in self.global_topics:
+                    is_global = True
+
+                self.local_topics.append((topic, is_global))
+
+            return self.local_topics
+
+        num_paragraphs = self.getNumParagraphs()
+        all_local_topics = list()
+        self.local_topics_dict = dict()
+
+        for i in range(num_paragraphs):
+            local_data = self.getLocalTopicalProgData([i])
+            local_topics = get_local_topics(local_data)
+            all_local_topics += local_topics
+
+            self.local_topics_dict[i] = local_topics
+
+        return list(set(all_local_topics))
+
+    def isLocalTopic(self, topic):
+        """
+        Returns True if <topic> is a local topic.
+        """
+        if self.local_topics_dict is not None:            
+            for key, value in self.local_topics_dict.items():    # for each paragraph
+                local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
+                if topic in local_topics:                        # if <topic> is in it, return True
+                    return True
+        return False     
 
 
+    def testPrintGlobalVisData(self, vis_data):
 
+        data       = vis_data['data']
+        num_paras  = vis_data['num_paras']
+        num_topics = vis_data['num_topics']
+
+        # Print paragraph IDs
+        line = " " * 30
+        for i in range(num_paras):
+            line += "{} ".format(i+1)
+
+        print(line)
+
+        # For each data for a specific topic,
+        for topic_data in data:                                    
+            topic = topic_data['topic']
+            lemma = topic[LEMMA]
+            is_topic_cluster = topic_data['is_topic_cluster']
+            is_non_local = topic_data['is_non_local']
+
+            # if the paragraph data is not empty OR if the topic is a topic cluster
+            if topic_data['paragraphs'] != [] or is_topic_cluster:
+
+                # header section
+                line = lemma
+                line += " " * (30 - len(lemma))
+
+                # Write a symbol for each paragraph.
+                # L = 'topic' appears on the left side of the main verb at least once.
+                # l = a topic cluster that is not a global topic.
+                # R = 'topic' appears on the right side of the main verb.
+                # r = a topic cluster that is not a global topic.
+                # * = topic sentence.
+                for para_data in topic_data['paragraphs']:
+                    if para_data is not None:
+                        para_pos = para_data['para_pos']
+                        is_left  = para_data['is_left']
+                        is_topic_sent = para_data['is_topic_sent']
+
+                        if is_left:                     # is 'topic' on the left side?
+                            if is_non_local:            # is it a non-local global topic?
+                                c = 'l'
+                            else: 
+                                c = 'L'
+
+                            if is_topic_sent:           # is 'topic' appear in a topic sentence?
+                                line += (c + "*")
+                            else:                      
+                                line += (c + " ")
+                        else:
+                            if is_non_local:
+                                c = 'r'
+                            else: 
+                                c = 'R'
+
+                            if is_topic_sent:
+                                line += (c + "*")
+                            else:
+                                line += (c + " ")
+                    else:
+                        line += "  "
+
+                print(line)
+
+    def testPrintLocalVisData(self, vis_data):
+
+        data       = vis_data['data']
+        num_sents  = vis_data['num_sents']
+        num_topics = vis_data['num_topics']
+
+        # Print paragraph IDs
+        line = " " * 30
+        for i in range(num_sents):
+            line += "{} ".format(i+1)
+
+        print(line)
+
+        # For each topic data,
+        for topic_data in data:
+            topic = topic_data['topic']
+            is_topic_cluster = topic_data['is_topic_cluster']
+            lemma = topic[LEMMA]
+            is_global = topic_data['is_global']
+
+            # If 'topic' appears in one or more sentences OR it is a topic cluster
+            if topic_data['sentences'] != [] or is_topic_cluster:
+                line = lemma
+                line += " " * (30 - len(lemma))
+
+                # Write a symbol for each sentence sentence.
+                for sent_data in topic_data['sentences']:
+                    if sent_data is not None:
+                        sent_pos = sent_data['para_pos']
+                        is_left = sent_data['is_left']
+                        is_topic_sent = sent_data['is_topic_sent']
+
+                        if is_left:
+                            if is_global:
+                                c = 'L'
+                            else:
+                                c = 'l'
+
+                            if is_topic_sent:
+                                line += (c + '*')
+                            else:           
+                                line += (c + ' ')
+                        else:
+                            if is_global:
+                                c = 'R'
+                            else:
+                                c = 'r'
+
+                            if is_topic_sent:
+                                line += (c + '*')
+                            else:
+                                line += (c + ' ')
+                    else:
+                        line += "  "
+
+                print(line)

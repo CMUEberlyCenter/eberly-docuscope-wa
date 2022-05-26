@@ -1,2 +1,2 @@
 clear
-sudo docker images | grep ontopic
+docker images | grep ontopic

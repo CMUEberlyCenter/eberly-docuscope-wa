@@ -1,9 +1,14 @@
 from flask import make_response, jsonify
 from urllib.parse import unquote
+from urllib.parse import quote_from_bytes
 import os, threading, psutil, platform
 import prometheus
 import base64
 import html
+import json
+
+import dslib.utils as utils
+import dslib.views as views
 
 from dslib.models.document import DSDocument
 
@@ -16,9 +21,24 @@ class OnTopic:
 
   def __init__(self):
     print ("OnTopic()");
-    f = open("resources/rules.json", "r")
-    self.rules=f.read();
-    self.document=DSDocument ()
+
+    self.systemErrorMessage=""
+    self.systemReady=True
+
+    if (os.path.isfile("resources/rules.json")==False):
+      self.systemReady=False
+      self.systemErrorMessage="Unable to load data model"
+    else:  
+      f = open("resources/rules.json", "r")
+      self.rules=f.read();
+
+    if (os.path.exists("data/default_model") == False):
+      self.systemErrorMessage="Unable to locate default language model"
+      self.systemReady=False
+
+    if (os.path.exists("data/large_model") == False):
+      self.systemErrorMessage="Unable to locate large language model"
+      self.systemReady=False
 
   def ping (self):
     memInString = "<tr><td>" + str(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2) + " Mb</td></tr>";
@@ -42,20 +62,62 @@ class OnTopic:
     response.mimetype = "application/json"
     return response
 
-  def ontopic (self,request):
-    
-    #json=request.get_json()
-    #data=json ["data"]
-    #raw=data["base"];
-    #decoded=base64.b64decode(raw)
-    #unescaped=unquote(decoded)
+  def ontopic (self,request):    
+    print ('ontopic()')
 
+    envelope=request.get_json()
+
+    #print (envelope)
+
+    data=envelope ["data"]
+    raw=data["base"];
+
+    decoded=base64.b64decode(raw).decode('utf-8')
+
+    unescaped=unquote(decoded)
+
+    #print ("decoded and unqoted:")
     #print (unescaped)
 
-    f = open("resources/sentencedata.json", "r")
-    sentences=f.read();
+    document=DSDocument ()
+    document.loadFromTxt (unescaped)
 
-    response = make_response(sentences, 200)
+    coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
+    clarity=document.getSentStructureData()
+    html=document.toHtml_OTOnly(coherence,-1)
+
+    #topics=self.document.getLocalTopicalProgData (views.TOPIC_SORT_APPEARANCE)
+
+    # https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
+    html_bytes = html.encode('utf-8')
+    html_base64 = base64.b64encode(html_bytes)
+
+    #print ("Found coherence data: ")
+    #print(type(coherence))
+    #print (coherence)
+    #print (json.dumps(coherence))
+
+    #print ("Found clarity data (ontopic): ")
+    #print(type(clarity))
+    #print (clarity)
+    #print (json.dumps(clarity))
+
+    #print ("Found html data: ")
+    #print (html)
+
+    #print (json.dumps(topics))
+    #print (json.loads(json.dumps(topics)))
+
+    data = {}
+    data['coherence'] = json.loads(json.dumps(coherence))
+    data['clarity'] = json.loads(json.dumps(clarity))
+    data['html'] = html_base64.decode("utf-8")
+
+    #print ("data: ")
+    #print (data)
+
+    response = make_response(data, 200)
     response.mimetype = "application/json"
     response.headers["Content-Type"] = "application/json"
+
     return response    

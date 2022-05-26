@@ -1,0 +1,44 @@
+# Regular image
+FROM python:3.7
+# Small footprint image
+#FROM python:3.7-alpine
+
+COPY ./ontopic-web /app
+WORKDIR /app
+
+#RUN apt-get -yq update && apt-get -yqq install ssh
+#RUN ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+#RUN ls -als ./templates/static/js/components/
+#RUN cat ./templates/static/js/components/OnTopic.jsx
+
+RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
+RUN apt-get install npm -y
+RUN npm --version
+
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt install -y nodejs -y
+RUN node --version
+
+# Temporarily change the working directory to esnure npm runs from the current working directory
+WORKDIR /app/templates/static
+
+# Make sure we have a clean context
+RUN rm -rf ./node_modules
+
+# Now we can install and build as usual
+RUN npm install
+
+RUN npm run build
+
+# Switch the context back to the overall application so that we can install and boot the Python Flask app
+WORKDIR /app
+
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+RUN python -m spacy download en
+RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
+
+ENTRYPOINT ["python"]
+CMD ["app.py"]
