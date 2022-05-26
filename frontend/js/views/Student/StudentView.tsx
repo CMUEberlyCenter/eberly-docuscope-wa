@@ -8,6 +8,8 @@
  * area showing the results of tagging.
  * The tools are arranged in tabs.
  * There is also a optional third area for displaying additional information.
+ * The three main areas can be resized by the user.
+ * Editor text is also cached in sessionStorage.
  */
 import React, {
   createRef,
@@ -98,12 +100,25 @@ const StudentView = (props: { api: apiCall }) => {
   const status = ""; // TODO: nothing currently sets the status.
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
-  const [editorValue, setEditorValue] = useState<Descendant[]>([
-    {
-      type: "paragraph",
-      children: [{ text: "" }],
-    },
-  ]);
+  // Set initial value to stored session data or empty.
+  const [editorValue, setEditorValue] = useState<Descendant[]>(
+    JSON.parse(sessionStorage.getItem('content') ?? 'null') ||
+    [
+      {
+        type: "paragraph",
+        children: [{ text: "" }],
+      },
+    ]);
+  useEffect(() => {
+    // Set editor text if initializing from session storage.
+    // Necessary for analysis tool to receive the initial
+    // text value.
+    const content = sessionStorage.getItem('content');
+    if (content) {
+      editorText.next(JSON.parse(content));
+    }
+  }, []); // [] dependency means this runs only once.
+
   // Resize panels
   const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
   const [rightWidth, setRightWidth] = useState<undefined | number>(undefined);
@@ -389,8 +404,12 @@ const StudentView = (props: { api: apiCall }) => {
               editor={editor}
               value={editorValue}
               onChange={(content: Descendant[]) => {
-                editorText.next(content);
-                setEditorValue(content);
+                // only if change is not selection change.
+                if (editor.operations.some(op => 'set_selection' !== op.type)) {
+                  editorText.next(content);
+                  setEditorValue(content);
+                  sessionStorage.setItem('content', JSON.stringify(content));
+                }
               }}
             >
               <Editable
