@@ -151,6 +151,8 @@ class DocuScopeWALTIService {
    *
    */
   generateDataMessage (aDataset) {
+    console.log ("generateDataMessage ()");
+
     var error = {
       status: "success",
       data: aDataset
@@ -217,10 +219,10 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  apiPOSTCall (aURL,aData) {
-    console.log ("apiPOSTCall ()");
-
+  apiPOSTCall (aURL, aData, aResponse) {  
     let url="/api/v1/"+aURL;
+
+    console.log ("apiPOSTCall ("+url+")");
 
     const data = JSON.stringify(aData);
 
@@ -247,7 +249,9 @@ class DocuScopeWALTIService {
           try {
             let json = JSON.parse(body);
             console.log ("Retrieved valid data from backend, forwarding to frontend ...");
-            this.processBackendReply (json);
+            console.log (json);
+            //this.processBackendReply (json);
+            aResponse.json (this.generateDataMessage (json));
           } catch (error) {
             console.error(error.message);
           };
@@ -270,7 +274,6 @@ class DocuScopeWALTIService {
    */
   processBackendReply (json) {
     console.log ("processBackendReply ()");
-
   }
 
   /**
@@ -345,11 +348,13 @@ class DocuScopeWALTIService {
 
       console.log ("Forwarding request ...");
 
-      this.apiPOSTCall ("ontopic", msg);
+      this.apiPOSTCall ("ontopic", msg, response);
 
+      /* 
       response.json (this.generateDataMessage ({
         sentences: {},
       }));
+      */
 
       return;
     }

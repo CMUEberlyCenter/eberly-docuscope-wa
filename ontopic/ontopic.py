@@ -86,8 +86,6 @@ class OnTopic:
     clarity=document.getSentStructureData()
     html=document.toHtml_OTOnly(coherence,-1)
 
-    #topics=self.document.getLocalTopicalProgData (views.TOPIC_SORT_APPEARANCE)
-
     # https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
     html_bytes = html.encode('utf-8')
     html_base64 = base64.b64encode(html_bytes)

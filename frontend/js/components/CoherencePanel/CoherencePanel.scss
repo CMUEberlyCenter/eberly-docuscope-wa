@@ -1,0 +1,70 @@
+
+.coherence-table {
+  padding: 0px;
+  margin: 0px;
+}
+
+.coherence-table tr {
+  padding: 0px;
+  margin: 0px;
+}
+
+.coherence-table tr td {
+  padding: 0px;
+  margin: 0px;
+}
+
+.coherence-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.coherence-item {
+  flex: 1;
+  border: 1px outset #e9e4e4;
+  padding: 0px 5px 0px 5px;
+  margin: 1px;
+  cursor: pointer;
+}
+
+.paragraph-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.paragraph-toggle {
+  border: 1px solid gray;
+  border-radius: 2px;
+  width: 24px;
+  height: 24px;
+  /* flex: 0; */
+  margin: 2px;
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.paragraph-toggle:hover {
+  background-color: #f7f794;
+}
+
+.paragraph-toggled {
+  background-color: #f7f794;
+  border: 1px solid gray;
+  border-radius: 2px;
+  width: 24px;
+  height: 24px;
+  /* flex: 0; */
+  margin: 2px;
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.paragraph-toggled:hover {
+  background-color: #f7f794;
+}
+
+.paragraph-padding {
+  flex: 1;
+}

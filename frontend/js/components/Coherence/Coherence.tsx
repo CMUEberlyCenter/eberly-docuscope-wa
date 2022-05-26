@@ -3,18 +3,27 @@
  *
  * The top has a legend for interpreting this tool's symbols.
  */
-import { bind } from "@react-rxjs/core";
 import React, { useEffect, useId, useState } from "react";
+
 import { Card, Col, Container, Row } from "react-bootstrap";
+
 import { combineLatest, filter, map } from "rxjs";
+import { bind } from "@react-rxjs/core";
+
 import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
+
+import { useLockedEditorText } from "../../service/editor-state.service";
+
 import "./Coherence.scss";
+import CoherencePanel from '../CoherencePanel/CoherencePanel';
+
+// Dummy data so that we can keep working on our visualization widget set
+//import { coherenceData } from "../../data/coherence";
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
-  // Use this to get better accessability and scaling than an image.
   <Container className="border p-2">
     <Row xs={"auto"} md={"auto"} lg={2}>
       <Col className="text-nowrap">
@@ -27,21 +36,17 @@ const Legend = () => (
       <Col className="text-nowrap">
         <span
           className="text-nowrap"
-          title="A solid circle with a small circle in the upper left corner."
-        >
+          title="A solid circle with a small circle in the upper left corner.">
           <i
             className="fa-solid fa-circle text-legend"
-            style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}
-          ></i>
+            style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}></i>
           <i className="fa-solid fa-circle text-legend"></i>
         </span>{" "}
         Topic before the main verb of a topic sentence
       </Col>
       <Col className="text-nowrap">
-        <i
-          className="fa-regular fa-circle text-legend"
-          title="An empty circle."
-        ></i>{" "}
+        <i className="fa-regular fa-circle text-legend"
+          title="An empty circle."></i>
         Topic after the main verb
       </Col>
       <Col className="text-nowrap">
@@ -57,28 +62,62 @@ const Legend = () => (
 // Using react-rxjs to get observable to act like hooks.
 // On locking text with some text present and the tool is clarity
 // emit the text.
-const [useCoherenceText /*coherenceText$*/] = bind(
-  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
-    filter((data) => data.tool === "clarity"),
-    map((data) => data.text)
-  ),
-  ""
-);
+const [useCoherenceText /*coherenceText$*/] = bind(combineLatest ({ text: lockedEditorText$, tool: currentTool$ }).pipe (filter((data) => data.tool === "coherence"), map((data) => data.text)),"");
 
+/**
+ * 
+ */
 const Coherence = ({ api }: { api: apiCall }) => {
   // api passed through on assumption that it will be used in submission.
   const toggleId = useId();
+
+  const [status, setStatus] = useState("");
   const [showToggle, setShowToggle] = useState(false);
+  const [data, setCoherenceData] = useState<unknown>(null);
+  //const text = useLockedEditorText();
+  
   const text = useCoherenceText();
 
-  //const api = props.api;
+  let visualization;
+
+  visualization=<CoherencePanel setStatus={setStatus} data={data} text={text} showglobal={showToggle}/>;  
+
   useEffect(() => {
+    console.log ("useEffect ()");
+
     if (text !== "") {
-      console.log("Coherence text update!"); // TODO replace with real call
-      // submit to backend here.
-      /* api('service', { text: text }, 'POST').then((results) => {
-        console.log(`Coherence backend results: ${results}`)
-      }) */
+      setStatus("Retrieving results...");
+      
+      const escaped = encodeURIComponent(text);
+
+      const encoded = window.btoa(escaped);
+
+      api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
+        console.log ("Processing incoming coherence data ...");
+
+        //console.log (incoming);
+        
+        let coherenceData=incoming.coherence.data;
+
+        // This is an artifact of the Python code not being completely aligned with Suguru's DSLib
+        // Will be fixed as soon as we have a stable visualizatioon
+        if (incoming.coherence.data.constructor == Array) {
+          coherenceData=incoming.coherence.data[0];
+        }
+
+        console.log (coherenceData);
+
+        //const decoded = window.atob(incoming.html);
+
+        /*
+        console.log (incoming.clarity);
+        console.log (sentenceData);
+        */
+
+        setCoherenceData(coherenceData);
+
+        setStatus("Data retrieved");
+      });
     }
   }, [text, api]);
 
@@ -104,24 +143,21 @@ const Coherence = ({ api }: { api: apiCall }) => {
             <span>Coherence across paragraphs</span>
             <div
               className="d-flex align-items-start"
-              onChange={() => setShowToggle(!showToggle)}
-            >
-              <label className="form-check-label me-1" htmlFor={toggleId}>
-                Show only topic clusters:
-              </label>
+              onChange={() => setShowToggle(!showToggle)}>
+              <label className="form-check-label me-1" htmlFor={toggleId}>Show only topic clusters:</label>
               <div className="form-check form-switch">
                 <input
                   className="form-check-input"
                   type="checkbox"
                   role="switch"
                   id={toggleId}
-                  disabled
                   checked={showToggle}
                 />
               </div>
             </div>
           </Card.Header>
-          <Card.Body>{/* coherence-content */}</Card.Body>
+
+          <Card.Body>{visualization}</Card.Body>
         </Card>
         <Card>
           <Card.Header>Topic Cluster</Card.Header>
@@ -131,4 +167,5 @@ const Coherence = ({ api }: { api: apiCall }) => {
     </Card>
   );
 };
+
 export default Coherence;

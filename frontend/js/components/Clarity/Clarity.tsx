@@ -28,34 +28,51 @@ const ClarityErrorFallback = (props: { error?: Error }) => (
     <pre>{props.error?.message}</pre>
   </Alert>
 );
+
 const Clarity = ({ api }: { api: apiCall }) => {
   const [status, setStatus] = useState("");
-  const [data, setSentenceData] = useState<unknown>(null);
+  const [data, setClarityData] = useState<unknown>(null);
   const text = useClarityText();
 
+  /**
+   * 
+   */
   useEffect(() => {
-    if (text !== "") {
-      // TODO: add progress spinner.
-      setStatus("Retrieving results...");
+    console.log ("useEffect ()");
 
-      // FIXME: encoding of data sent.
-      const escaped = encodeURIComponent(`{
-      event_id: "docuscope",
-      data: {
-        status: "text",
-        content: ${text},
-      }
-    }`);
+    if (text !== "") {    
+      setStatus("Retrieving results...");
+      
+      const escaped = encodeURIComponent(text);
+
       const encoded = window.btoa(escaped);
-      // HERE IS THE CALL TO ONTOPIC API
-      api("ontopic", { base: encoded }, "POST").then((results) => {
-        console.log(results);
-        setSentenceData(sentenceData);
-        // replace with setSentenceData(results) once real data is provided.
-        setStatus("");
+
+      api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
+        console.log ("Processing incoming clarity data ...");
+
+        console.log (incoming);
+
+        const clarityData=incoming.clarity;
+
+        console.log (clarityData);
+
+        //const decoded = window.atob(incoming.html);
+
+        /*
+        console.log (incoming.clarity);
+        console.log (sentenceData);
+        */
+
+        setClarityData(clarityData);
+
+        setStatus("Data retrieved");
       });
-    }
+    }    
   }, [text, api]);
+
+  let visualization;
+
+  visualization=<DocuScopeOnTopic setStatus={setStatus} sentences={data} text={text} />;
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -65,11 +82,7 @@ const Clarity = ({ api }: { api: apiCall }) => {
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
           <Suspense>
-            <DocuScopeOnTopic
-              setStatus={setStatus}
-              sentences={data}
-              text={text}
-            />
+          {visualization}
           </Suspense>
         </ErrorBoundary>
       </Card.Body>
@@ -77,4 +90,5 @@ const Clarity = ({ api }: { api: apiCall }) => {
     </Card>
   );
 };
+
 export default Clarity;
