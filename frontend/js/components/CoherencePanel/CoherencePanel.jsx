@@ -44,6 +44,7 @@ class CoherencePanel extends Component {
     this.dataTools=new OnTopicDataTools ();
 
     this.onTopicClick=this.onTopicClick.bind(this);
+    this.onTopicParagraphClick=this.onTopicParagraphClick.bind(this);
     this.onGlobalTopicClick=this.onGlobalTopicClick.bind(this);
   }
 
@@ -61,6 +62,19 @@ class CoherencePanel extends Component {
       
     }
   }
+
+  /**
+   * 
+   */
+  getTopicObject (anIndex) {
+    if (!this.props.data) {
+      return (-1);
+    }
+
+    let topics=this.props.data.data;
+
+    return (topics [anIndex]);
+  }
  
   /**
    * 
@@ -72,6 +86,17 @@ class CoherencePanel extends Component {
 
     console.log (topic);
   }
+
+  /**
+   * 
+   */
+  onTopicParagraphClick (e,anIndex,aParagraph) {
+    console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
+
+    let topic=this.getTopicObject (anIndex);
+
+    console.log (topic);
+  }  
 
   /**
    * 
@@ -95,21 +120,20 @@ class CoherencePanel extends Component {
   }
 
   /**
-   * Utility function, also need one that gets the topic by the
-   * actual string or occurrence in the text (maybe?)
+   * 
    */
-  getTopicObject (anIndex) {
-  	if (!this.props.data) {
-  	  return (null);
-  	}
+  countParagraphs () {
+    if (!this.props.data) {
+      return (0);
+    }
 
-  	let topicRow=this.props.data [0];
+    //this.dataTools.countParagraphs (this.props.data);
 
-  	if (topicRow) {
-  	  return (topicRow [anIndex]);
-  	}
+    let copy=this.props.data;
 
-  	return (null);
+    let nrParagraphs = parseInt (copy.num_paras);    
+
+    return (nrParagraphs);
   }
 
   /**
@@ -129,30 +153,88 @@ class CoherencePanel extends Component {
   /**
    * Currently commented out the old data processing code to make sure we have something in
    * the repository that is stable. From this point on we will be working with the new
-   * data format
+   * data format. Below is the original Python code that tests the visualization mapping code:
+   * 
+   * 
+      para_pos = para_data['para_pos']
+      is_left  = para_data['is_left']
+      is_topic_sent = para_data['is_topic_sent']
+
+      if is_left:                     # is 'topic' on the left side?
+          if is_non_local:            # is it a non-local global topic?
+              c = 'l'
+          else: 
+              c = 'L'
+
+          if is_topic_sent:           # is 'topic' appear in a topic sentence?
+              line += (c + "*")
+          else:                      
+              line += (c + " ")
+      else:
+          if is_non_local:
+              c = 'r'
+          else: 
+              c = 'R'
+
+          if is_topic_sent:
+              line += (c + "*")
+          else:
+              line += (c + " ")
+   *
    */
   generateCoherencePanel (paraCount) {
   	let topicElements=[];
 
-    /*
   	if (!this.props.data) {
   	  return (topicElements);
   	}
 
     let copy=this.props.data;
 
-    let topics=copy [0];
+    let topics=copy.data;
 
     for (let i=0;i<topics.length;i++) {
-      let topic=this.getTopicObject (i);
-      topicElements.push (<tr key={"topic-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic[1]}</div></td><td>&nbsp;</td></tr>)
+      let topicObject=this.getTopicObject (i);      
+      let topic=topicObject.topic [2];
+      let is_topic_cluster = topicObject.is_topic_cluster;
+      let is_non_local = topicObject.is_non_local;
+      let paragraphs=topicObject.paragraphs;
+      let paraElements=[];
+
+      //for (let j=0;j<paragraphs.length;j++) {
+      // Temporary fix. Already resolved in the Python code
+      for (let j=0;j<paraCount;j++) {
+        let paraType=paragraphs[j];
+        let paraContent=" ";
+        if (paraType!=null) {
+          if (paraType.is_left==true) {
+            if (is_non_local==true) {
+              paraContent = "l";
+            } else {
+              paraContent = "L";
+            }
+            if (paraType.is_topic_sent==true) {
+              paraContent += "*";
+            }
+          } else {
+            if (is_non_local==true) {
+              paraContent = "r";
+            } else {
+              paraContent = "R";
+            }
+
+            if (paraType.is_topic_sent==true) {
+              paraContent += "*";
+            }
+          }
+        }
+        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{paraContent}</div>);
+      }
+
+      topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
     }
 
-    // Skip the header
-    for (let i=1;i<copy.length;i++) {
-
-    }
-    */
+    let nrParagraphs = parseInt (copy.num_paras);
 
     return (topicElements);
   }
@@ -168,7 +250,7 @@ class CoherencePanel extends Component {
       if (i==this.state.selectedParagraph) {
         paraClass="paragraph-toggled";
       }
-      paraElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onParagraphClick (e,i)}>{""+i}</div>);
+      paraElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onParagraphClick (e,i)}>{""+(i+1)}</div>);
     }
 
     paraElements.push (<div className="paragraph-padding"></div>);
@@ -180,7 +262,7 @@ class CoherencePanel extends Component {
    * 
    */
   render () {
-    let paraCount=this.dataTools.countParagraphs (this.props.data);    
+    let paraCount=this.countParagraphs ();
   	let visualization;
     let paragraphcontrols=this.generatePagraphControls (paraCount);
 

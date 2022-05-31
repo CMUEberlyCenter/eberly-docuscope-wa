@@ -4294,7 +4294,7 @@ class DSDocument():
                 else:
                     sent_count += 1
 
-            topic_data = topic_data[0:p_ri+1]
+            topic_data = topic_data[0:p_ri]
 
             for i in range(len(topic_data)):          # delete the topic data.
                 d = topic_data[i]

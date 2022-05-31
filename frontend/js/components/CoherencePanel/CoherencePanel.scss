@@ -68,3 +68,20 @@
 .paragraph-padding {
   flex: 1;
 }
+
+.topic-container {
+  display: flex;
+  flex-direction: row;  
+}
+
+.topic-type-default {
+  /*background-color: #f7f794;*/
+  /*border: 1px solid gray;*/
+  border-radius: 2px;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}

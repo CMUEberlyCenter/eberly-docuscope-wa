@@ -20,7 +20,8 @@ import "./Coherence.scss";
 import CoherencePanel from '../CoherencePanel/CoherencePanel';
 
 // Dummy data so that we can keep working on our visualization widget set
-//import { coherenceData } from "../../data/coherence";
+import { coherenceData } from "../../data/coherencedata";
+
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
@@ -97,23 +98,19 @@ const Coherence = ({ api }: { api: apiCall }) => {
 
         //console.log (incoming);
         
-        let coherenceData=incoming.coherence.data;
+        let coherence=incoming.coherence.data;
 
         // This is an artifact of the Python code not being completely aligned with Suguru's DSLib
         // Will be fixed as soon as we have a stable visualizatioon
         if (incoming.coherence.data.constructor == Array) {
-          coherenceData=incoming.coherence.data[0];
+          coherence=incoming.coherence.data[0];
         }
 
-        console.log (coherenceData);
+        console.log (coherence);
 
         //const decoded = window.atob(incoming.html);
 
-        /*
-        console.log (incoming.clarity);
-        console.log (sentenceData);
-        */
-
+        // Use dummy data for now
         setCoherenceData(coherenceData);
 
         setStatus("Data retrieved");
