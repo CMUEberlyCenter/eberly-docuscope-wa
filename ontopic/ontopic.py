@@ -19,6 +19,9 @@ driver=prometheus.PythonPrometheus ()
 ##
 class OnTopic:
 
+  ##
+  #
+  ##
   def __init__(self):
     print ("OnTopic()");
 
@@ -40,6 +43,28 @@ class OnTopic:
       self.systemErrorMessage="Unable to locate large language model"
       self.systemReady=False
 
+  ##
+  #
+  ##
+  def createList(self, r1, r2):
+    # Testing if range r1 and r2 are equal
+    if (r1 == r2):
+      return r1
+    else:
+      # Create empty list
+      res = []
+  
+      # loop to append successors to 
+      # list until r2 is reached.
+      while(r1 < r2+1 ):              
+        res.append(r1)
+        r1 += 1
+
+      return res
+
+  ##
+  #
+  ##
   def ping (self):
     memInString = "<tr><td>" + str(psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2) + " Mb</td></tr>";
     # https://docs.python.org/3/library/threading.html
@@ -52,16 +77,25 @@ class OnTopic:
     cpuString = "<tr><td>" + platform.processor() + "</td></tr>"
     return ("<html><body><table>" + memInString+threadString+machineString+versionString+platformString+nameString+systemString+cpuString + "<table></body></html>");    
 
+  ##
+  #
+  ##
   def metrics (self):
     response = make_response(driver.metrics(), 200)
     response.mimetype = "text/plain"
     return response
 
+  ##
+  #
+  ##
   def rules (self):
     response = make_response(self.rules, 200)
     response.mimetype = "application/json"
     return response
 
+  ##
+  #
+  ##
   def ontopic (self,request):    
     print ('ontopic()')
 
@@ -90,6 +124,15 @@ class OnTopic:
     html_bytes = html.encode('utf-8')
     html_base64 = base64.b64encode(html_bytes)
 
+    print ("Number of paragraphs processed: ");
+    print (coherence ['num_paras']);
+
+    paraList=self.createList (0,coherence ['num_paras']-1);
+
+    print (paraList);
+
+    local=document.generateLocalVisData (paraList,1,2);
+
     #print ("Found coherence data: ")
     #print(type(coherence))
     #print (coherence)
@@ -108,6 +151,7 @@ class OnTopic:
 
     data = {}
     data['coherence'] = json.loads(json.dumps(coherence))
+    data['local'] = json.loads(json.dumps(local))
     data['clarity'] = json.loads(json.dumps(clarity))
     data['html'] = html_base64.decode("utf-8")
 

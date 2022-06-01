@@ -27,14 +27,14 @@ import { coherenceData } from "../../data/coherencedata";
 const Legend = () => (
   <Container className="border p-2">
     <Row xs={"auto"} md={"auto"} lg={2}>
-      <Col className="text-nowrap">
+      <Col>
         <i
           className="fa-solid fa-circle text-legend"
           title="A filled circle."
         ></i>{" "}
         Topic before the main verb
       </Col>
-      <Col className="text-nowrap">
+      <Col>
         <span
           className="text-nowrap"
           title="A solid circle with a small circle in the upper left corner.">
@@ -45,15 +45,13 @@ const Legend = () => (
         </span>{" "}
         Topic before the main verb of a topic sentence
       </Col>
-      <Col className="text-nowrap">
+      <Col>
         <i className="fa-regular fa-circle text-legend"
           title="An empty circle."></i>
         Topic after the main verb
       </Col>
-      <Col className="text-nowrap">
-        <span className="border rounded px-1 border-2" title="A boxed number.">
-          1
-        </span>{" "}
+      <Col>
+        <span className="border rounded px-1 border-2" title="A boxed number.">1</span>{" "}
         Paragraph/Sentence number
       </Col>
     </Row>
@@ -95,8 +93,7 @@ const Coherence = ({ api }: { api: apiCall }) => {
 
       api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
         console.log ("Processing incoming coherence data ...");
-
-        //console.log (incoming);
+        console.log (incoming);
         
         let coherence=incoming.coherence.data;
 

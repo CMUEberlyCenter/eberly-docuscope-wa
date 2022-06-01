@@ -4,6 +4,13 @@ import './CoherencePanel.scss';
 
 import OnTopicDataTools from "../../lang/OnTopicDataTools";
 
+import topic_left_dark_icon from '../../../css/icons/topic_left_dark_icon.png';
+import topic_left_icon from '../../../css/icons/topic_left_icon.png';
+import topic_right_dark_icon from '../../../css/icons/topic_right_dark_icon.png';
+import topic_right_icon from '../../../css/icons/topic_right_icon.png';
+import topic_sent_dark_icon from '../../../css/icons/topic_sent_dark_icon.png';
+import topic_sent_icon from '../../../css/icons/topic_sent_icon.png';
+
 /**
   Here is a brief summary of what the icons mean.
 
@@ -204,31 +211,47 @@ class CoherencePanel extends Component {
       //for (let j=0;j<paragraphs.length;j++) {
       // Temporary fix. Already resolved in the Python code
       for (let j=0;j<paraCount;j++) {
+        let icon;
+
         let paraType=paragraphs[j];
         let paraContent=" ";
+        let paraIcon=null;
+        let paraIconClass="topic-icon-large";
+
         if (paraType!=null) {
           if (paraType.is_left==true) {
             if (is_non_local==true) {
               paraContent = "l";
+              paraIconClass="topic-icon-small";            
             } else {
               paraContent = "L";
             }
+
             if (paraType.is_topic_sent==true) {
               paraContent += "*";
+              paraIcon=topic_sent_icon;
+            } else {
+              paraIcon=topic_left_icon;
             }
           } else {
             if (is_non_local==true) {
               paraContent = "r";
+              paraIconClass="topic-icon-small";            
             } else {
               paraContent = "R";
             }
 
             if (paraType.is_topic_sent==true) {
               paraContent += "*";
+              paraIcon=topic_right_icon;
+            } else {
+              paraIcon=topic_right_icon;
             }
           }
+
+          icon=<img alt={paraContent} title={paraContent} className={paraIconClass} src={paraIcon}/>;
         }
-        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{paraContent}</div>);
+        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{icon}</div>);
       }
 
       topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
