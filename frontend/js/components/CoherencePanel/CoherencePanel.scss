@@ -21,7 +21,8 @@
 
 .coherence-item {
   flex: 1;
-  border: 1px outset #e9e4e4;
+  border: 1px solid #e9e4e4;
+  border-radius: 5px;
   padding: 0px 5px 0px 5px;
   margin: 1px;
   cursor: pointer;
@@ -67,6 +68,12 @@
 
 .paragraph-padding {
   flex: 1;
+}
+
+.topic-separator {
+  /* height: 10px; */
+  background-color: rgba(0,0,0,.03);
+  padding: 3px;
 }
 
 .topic-container {

@@ -4016,7 +4016,8 @@ class DSDocument():
 
         data = self.getLocalTopicalProgData(selected_paragraphs)
         if data is None:
-            return ValueError('data is None.')
+            #return ValueError('data is None.')
+            return ({'error': 'data is None'});
 
         topic_filter = TOPIC_FILTER_LEFT_RIGHT
         key_para_topics = self.getKeyParaTopics()
@@ -4030,7 +4031,8 @@ class DSDocument():
         sent_buttons_data = [None] * (nrows-1)
 
         if ncols == 0:
-            return ValueError('ncols is 0.')
+            #return ValueError('ncols is 0.')
+            return ({'error': 'ncols is 0'});
 
         vis_data = dict()
         vis_data['num_topics'] = ncols

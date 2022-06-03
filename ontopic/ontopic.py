@@ -124,14 +124,20 @@ class OnTopic:
     html_bytes = html.encode('utf-8')
     html_base64 = base64.b64encode(html_bytes)
 
-    print ("Number of paragraphs processed: ");
-    print (coherence ['num_paras']);
+    nrParagraphs=coherence ['num_paras'];
 
-    paraList=self.createList (0,coherence ['num_paras']-1);
+    print ("Number of paragraphs processed: " + str(nrParagraphs));
 
-    print (paraList);
+    local=[]
 
-    local=document.generateLocalVisData (paraList,1,2);
+    for i in range(nrParagraphs):
+      localSelected=[];
+      localSelected.append(i);
+      print ("Processing paragraph " + str(i) + ", with selected paragraph: " + str (localSelected));
+      localDict=document.generateLocalVisData (localSelected,1,2);
+      print (localDict);
+      #local.append (json.dumps(localDict));
+      local.append (localDict);
 
     #print ("Found coherence data: ")
     #print(type(coherence))
@@ -151,7 +157,7 @@ class OnTopic:
 
     data = {}
     data['coherence'] = json.loads(json.dumps(coherence))
-    data['local'] = json.loads(json.dumps(local))
+    data['local'] = local
     data['clarity'] = json.loads(json.dumps(clarity))
     data['html'] = html_base64.decode("utf-8")
 

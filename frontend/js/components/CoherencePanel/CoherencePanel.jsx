@@ -6,10 +6,12 @@ import OnTopicDataTools from "../../lang/OnTopicDataTools";
 
 import topic_left_dark_icon from '../../../css/icons/topic_left_dark_icon.png';
 import topic_left_icon from '../../../css/icons/topic_left_icon.png';
-import topic_right_dark_icon from '../../../css/icons/topic_right_dark_icon.png';
 import topic_right_icon from '../../../css/icons/topic_right_icon.png';
-import topic_sent_dark_icon from '../../../css/icons/topic_sent_dark_icon.png';
-import topic_sent_icon from '../../../css/icons/topic_sent_icon.png';
+import topic_sent_icon_left from '../../../css/icons/topic_sent_icon_left.png';
+import topic_sent_icon_right from '../../../css/icons/topic_sent_icon_right.png';
+
+// Dummy data so that we can keep working on our visualization widget set
+import { coherenceDataLocal } from "../../data/coherencedatalocal";
 
 /**
   Here is a brief summary of what the icons mean.
@@ -44,8 +46,10 @@ class CoherencePanel extends Component {
   constructor (props) {
     super (props);
 
-    this.state = {
-      selectedParagraph: -1
+    this.state = {      
+      selectedParagraph: -1,
+      selectedLocal: {},
+      selectedSentence: -1
     };
 
     this.dataTools=new OnTopicDataTools ();
@@ -53,6 +57,8 @@ class CoherencePanel extends Component {
     this.onTopicClick=this.onTopicClick.bind(this);
     this.onTopicParagraphClick=this.onTopicParagraphClick.bind(this);
     this.onGlobalTopicClick=this.onGlobalTopicClick.bind(this);
+    this.onParagraphClick=this.onParagraphClick.bind(this);
+    this.onSentenceClick=this.onSentenceClick.bind(this);
   }
 
   /**
@@ -75,13 +81,26 @@ class CoherencePanel extends Component {
    */
   getTopicObject (anIndex) {
     if (!this.props.data) {
-      return (-1);
+      return (null);
     }
 
     let topics=this.props.data.data;
 
     return (topics [anIndex]);
   }
+
+  /**
+   * 
+   */
+  getLocalTopicObject (anIndex) {
+    if (!this.state.selectedLocal) {
+      return (null);
+    }
+
+    let topics=this.state.selectedLocal.data;
+
+    return (topics [anIndex]);
+  }  
  
   /**
    * 
@@ -122,9 +141,19 @@ class CoherencePanel extends Component {
     if (this.state.selectedParagraph==anIndex) {
       this.setState ({selectedParagraph: -1});
     } else {
-      this.setState ({selectedParagraph: anIndex});
+      this.setState ({
+        selectedParagraph: anIndex,
+        selectedLocal: coherenceDataLocal});
     }
   }
+
+  /**
+   * 
+   */
+  onSentenceClick (e,anIndex) {
+    console.log ("onSentenceClick ("+anIndex+")");
+
+  }  
 
   /**
    * 
@@ -146,7 +175,7 @@ class CoherencePanel extends Component {
   /**
    * 
    */
-  generateGlobalTopics (paraCount) {
+  generateGlobalClusters (paraCount) {
     let topicElements=[];
 
     topicElements.push (<tr key={"topic-key-0"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,0)}>Current Conditions</div></td><td>&nbsp;</td></tr>)
@@ -189,7 +218,7 @@ class CoherencePanel extends Component {
               line += (c + " ")
    *
    */
-  generateCoherencePanel (paraCount) {
+  generateGlobalTopics (paraCount) {
   	let topicElements=[];
 
   	if (!this.props.data) {
@@ -229,7 +258,7 @@ class CoherencePanel extends Component {
 
             if (paraType.is_topic_sent==true) {
               paraContent += "*";
-              paraIcon=topic_sent_icon;
+              paraIcon=topic_sent_icon_left;
             } else {
               paraIcon=topic_left_icon;
             }
@@ -243,7 +272,7 @@ class CoherencePanel extends Component {
 
             if (paraType.is_topic_sent==true) {
               paraContent += "*";
-              paraIcon=topic_right_icon;
+              paraIcon=topic_sent_icon_right;
             } else {
               paraIcon=topic_right_icon;
             }
@@ -257,7 +286,85 @@ class CoherencePanel extends Component {
       topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
     }
 
-    let nrParagraphs = parseInt (copy.num_paras);
+    //let nrParagraphs = parseInt (copy.num_paras);
+
+    return (topicElements);
+  }
+
+  /**
+   * 
+   */
+  generateLocalTopics () {
+    let topicElements=[];
+
+    if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+      return (topicElements);
+    }
+
+    let topics=this.state.selectedLocal.data;
+
+    console.log (topics);
+
+    let num_sents=this.state.selectedLocal.num_sents;
+  
+    for (let i=0;i<topics.length;i++) {
+      let topicObject=this.getLocalTopicObject (i);
+      if (topicObject==null) {
+        return (topicElements);
+      }
+      let topic=topicObject.topic [2];
+      let is_topic_cluster = topicObject.is_topic_cluster;
+      let is_non_local = topicObject.is_non_local;
+      let sentences=topicObject.sentences;
+      let sentenceElements=[];
+
+      for (let j=0;j<num_sents;j++) {
+        let icon;
+
+        let paraType=sentences[j];
+        let paraContent=" ";
+        let paraIcon=null;
+        let paraIconClass="topic-icon-large";
+
+        if (paraType!=null) {
+          if (paraType.is_left==true) {
+            if (is_non_local==true) {
+              paraContent = "l";
+              paraIconClass="topic-icon-small";            
+            } else {
+              paraContent = "L";
+            }
+
+            if (paraType.is_topic_sent==true) {
+              paraContent += "*";
+              paraIcon=topic_sent_icon_left;
+            } else {
+              paraIcon=topic_left_icon;
+            }
+          } else {
+            if (is_non_local==true) {
+              paraContent = "r";
+              paraIconClass="topic-icon-small";            
+            } else {
+              paraContent = "R";
+            }
+
+            if (paraType.is_topic_sent==true) {
+              paraContent += "*";
+              paraIcon=topic_sent_icon_right;
+            } else {
+              paraIcon=topic_right_icon;
+            }
+          }
+
+          icon=<img alt={paraContent} title={paraContent} className={paraIconClass} src={paraIcon}/>;
+        }
+
+        sentenceElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{icon}</div>);
+      }
+
+      topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{sentenceElements}</div></td></tr>)
+    }
 
     return (topicElements);
   }
@@ -284,24 +391,72 @@ class CoherencePanel extends Component {
   /**
    * 
    */
+  generateSentenceControls (paraCount) {
+    let sentenceElements=[];
+
+    if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+      return (sentenceElements);
+    }
+
+    for (let i=0;i<this.state.selectedLocal.num_sents;i++) {
+      let paraClass="paragraph-toggle";
+      if (i==this.state.selectedSentence) {
+        paraClass="paragraph-toggled";
+      }
+      sentenceElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onSentenceClick (e,i)}>{""+(i+1)}</div>);
+    }
+
+    sentenceElements.push (<div className="paragraph-padding"></div>);
+
+    return (<div className="paragraph-row">{sentenceElements}</div>);
+  }
+
+  /**
+   * 
+   */
   render () {
     let paraCount=this.countParagraphs ();
-  	let visualization;
+  	let visualizationGlobal;
+    let visualizationLocal;
     let paragraphcontrols=this.generatePagraphControls (paraCount);
+    let sentencecontrols=this.generateSentenceControls ();
 
     if (this.props.showglobal==true) {
-      visualization=this.generateGlobalTopics (paraCount);
+      visualizationGlobal=this.generateGlobalClusters (paraCount);
     } else {
-      visualization=this.generateCoherencePanel (paraCount);
+      visualizationGlobal=this.generateGlobalTopics (paraCount);
+      if (this.state.selectedParagraph!=-1) {
+        visualizationLocal=this.generateLocalTopics ();
+      }
+    }
+
+    if (this.state.selectedParagraph!=-1) {
+      return (<div className="coherence-list"><table>
+        <tbody>
+          <tr>
+            <td>Paragraphs:</td>
+            <td>{paragraphcontrols}</td>
+          </tr>
+          {visualizationGlobal}
+          <tr>
+            <td colspan="2" className="topic-separator">{"Coherence across sentences in paragraph: " + (this.state.selectedParagraph+1)}</td>
+          </tr>
+          <tr>
+            <td>Sentences:</td>
+            <td>{sentencecontrols}</td>
+          </tr>      
+          {visualizationLocal}      
+        </tbody>
+      </table></div>);
     }
 
     return (<div className="coherence-list"><table>
       <tbody>
-      <tr>
-        <td>Controls</td>
-        <td>{paragraphcontrols}</td>
-      </tr>
-      {visualization}
+        <tr>
+          <td>Paragraphs:</td>
+          <td>{paragraphcontrols}</td>
+        </tr>
+        {visualizationGlobal}
       </tbody>
     </table></div>);
   }

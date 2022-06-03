@@ -22,7 +22,6 @@ import CoherencePanel from '../CoherencePanel/CoherencePanel';
 // Dummy data so that we can keep working on our visualization widget set
 import { coherenceData } from "../../data/coherencedata";
 
-
 /** Legend for data representation for these tools. */
 const Legend = () => (
   <Container className="border p-2">
