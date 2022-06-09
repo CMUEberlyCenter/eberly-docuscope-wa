@@ -36,14 +36,28 @@ class DocuScopeWALTIService {
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
 
-    this.backendHost=dotenv.DWA_BACKEND_HOST;
-    if (this.backendHost=="") {
-      this.backendHost="localhost";
+    this.backendHost="localhost";
+    if (process.env.DSWA_ONTOPIC_HOST) {
+      this.backendHost=process.env.DSWA_ONTOPIC_HOST;
+    } else {
+      this.backendHost=dotenv.DSWA_ONTOPIC_HOST;
+      if (this.backendHost=="") {
+        this.backendHost="localhost";
+      }
     }
-    this.backendPort=dotenv.DWA_BACKEND_PORT;
-    if (this.backendPort=="") {
-      this.backendPort=5000;
+
+    this.backendPort=5000;
+    if (process.env.DSWA_ONTOPIC_PORT) {
+      this.backendPort=process.env.DSWA_ONTOPIC_PORT;  
+    } else {
+      this.backendPort=dotenv.DSWA_ONTOPIC_PORT;
+      if (this.backendPort=="") {
+        this.backendPort=5000;
+      }
     }
+
+    console.log ("Configured the OnTopic backend url to be:" + this.backendHost + ": " + this.backendPort);
+
     this.token=this.uuidv4();
     this.session=this.uuidv4();
     this.standardHeader = {

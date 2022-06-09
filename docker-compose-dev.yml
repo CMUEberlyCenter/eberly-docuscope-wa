@@ -1,0 +1,32 @@
+###################################################################################
+#
+#
+#
+###################################################################################
+
+version: '3'
+services:
+
+  dswa-ontopic:
+    build:    
+      context: ./ontopic
+      dockerfile: ./Dockerfile    
+    ports:
+     - 5000:5000
+    tty: true
+    stdin_open: true
+
+  dswa-frontend:
+    build:    
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+     - 8888:8888
+    environment:
+      DSWA_ONTOPIC_HOST: "dswa-ontopic"
+      DSWA_ONTOPIC_PORT: 5000
+    tty: true
+    stdin_open: true
+    depends_on:
+      - "dswa-ontopic"    
+    
