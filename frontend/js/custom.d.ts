@@ -1,6 +1,6 @@
 declare module '*.png' {
-  const value: any;
-  export = value;
+  const value: string;
+  export default value;
 }
 
 declare module '*.txt' {

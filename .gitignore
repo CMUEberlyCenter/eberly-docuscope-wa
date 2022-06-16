@@ -26,6 +26,7 @@ config/database.yml
 deps.txt
 /dbentry
 *~
+.vscode
 *.pyc
 /ontopic/data/default_model
 /ontopic/data/large_model

@@ -2,7 +2,7 @@
  * @fileoverview Hooks and observables for editor state changes.
  */
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, combineLatest, filter, map } from 'rxjs';
+import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
 import { Descendant, Node } from 'slate';
 
 // For tracking Editor editable toggle.
@@ -16,7 +16,7 @@ const serialize = (nodes: Descendant[]): string => {
 // For tracking the Editor text content.
 export const editorText = new BehaviorSubject<Descendant[]>([]);
 export const [useEditorText, editorText$] = bind(
-  editorText.pipe(map(serialize)),
+  editorText.pipe(distinctUntilChanged(), map(serialize)),
   ''
 );
 
