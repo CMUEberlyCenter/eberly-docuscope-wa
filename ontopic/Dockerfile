@@ -23,6 +23,9 @@ RUN pip install ftfy
 RUN pip install PyQt5
 RUN pip install reportlab
 RUN pip install numpy
+RUN pip install pydocx
+RUN pip install unidecode
+
 # For now we have to use an older version of Spacy because the language
 # model was compiled for this one and won't work with 3>
 RUN pip install spacy==2.3.5

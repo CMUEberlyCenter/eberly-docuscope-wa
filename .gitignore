@@ -29,3 +29,4 @@ deps.txt
 *.pyc
 /ontopic/data/default_model
 /ontopic/data/large_model
+/env

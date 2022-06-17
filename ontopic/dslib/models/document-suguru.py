@@ -23,6 +23,7 @@ from io import BytesIO
 
 from bs4 import BeautifulSoup as bs
 from pydocx import PyDocX
+import unidecode
 
 import dslib.utils as utils
 from dslib.utils import resource_path
@@ -33,7 +34,12 @@ from docx.enum.text import WD_COLOR_INDEX
 from docx.enum.text import WD_UNDERLINE
 from docx.shared import Pt, Inches
 
+
+##################################################
+# English ONLY
+##################################################
 from spacy.lang.en.stop_words import STOP_WORDS
+
 stop_words = list(STOP_WORDS)
 stop_words += ['therefore', 'however', 'thus', 'hence', '\'s', 'mr.', 'mrs.', 'ms.', 'dr.', 'prof.']
 pronouns = ['it',  'i',    'we',   'you',   'he',  'she',  'they',
@@ -45,18 +51,15 @@ for p in pronouns:
     if p in stop_words:
         stop_words.remove(p)
 
-
-# used by toDocxText() and toDocxPara()
 no_space_patterns = ["\u2019ve", "n\u2019t", ".\u201D", ".\u2019",
                      "\u2019s", "\u2019t", "\u2019m", "\u2019ll", "\u2019re", "\u2019d", 
                      "\'ve" ,"n\'t", ".\"", ".\'",
                      "\'s", "\'t", "\'m", "\'ll", "\'re", "\'d",
-                     "%"] # , ":", ";", "?", "!", ".", ","]
-
+                     "%"]
                     # note: use a single quote for apostorophes
 
-left_quotes  = ['\u201C', '\u2018', '(', '[', '$', '\"', '\''] 
-right_quotes = ['\u201D', '\u2019', ')', ']']
+left_quotes  = ['\u201C', '\u2018', '(', '[', '$', '\"', '\'', '\u00BF']  # todo: should be 'left_punct'
+right_quotes = ['\u201D', '\u2019', ')', ']']                             # todo: should be 'right_punct'
 
 dashes       = ['\u2014', '\u2013', '\u2015']  # em dash, en dash, horizontal bar
 hyphen_slash = ['-', '/',]  # hyphen, slash,
@@ -67,9 +70,10 @@ end_puncts   = ['.', ',', ';', ':', '?', '!']
 
 be_verbs = ['be', 'been', 'am', 'is', 'are', 'was', 'were', '\'m', '\'re', '\'s', "\u2019s", "\u2019m", "\u2019re"]
 
+##################################################
+
 import spacy                                   # SpaCy NLP library
 # from spacy.attrs import ORTH, LEMMA, POS
-
 # POS dependency labels (see: https://spacy.io/api/annotation)
 
 NLP_MODEL_DEFAULT = 0
@@ -89,20 +93,6 @@ default_font_info = {'Title': 24, 'Heading 1': 20, 'Heading 2': 18, 'Normal': 16
 import pprint                                  # pretty prnting for debugging
 pp = pprint.PrettyPrinter(indent=4)            # create a pretty printing object used for debugging.
 
-nlp = None
-
-def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
-    global nlp
-
-    try:
-        if lang == 'en':      # English module
-            if model == NLP_MODEL_DEFAULT:
-                nlp = spacy.load(resource_path('data/default_model'))
-            else:
-                nlp = spacy.load(resource_path('data/large_model'))
-    except:
-        pass
-
 TEXT_COLOR      = RGBColor( 64,  64,  64)
 TEXT_VERB_COLOR = RGBColor(  0, 188, 242)
 TEXT_NP_VCOLOR  = RGBColor(125,   0, 125)
@@ -110,7 +100,7 @@ TEXT_NP_VCOLOR  = RGBColor(125,   0, 125)
 #
 # Constants for sentence['text_w_info']. Each word is represented using a tuple with
 # the following elements. 
-# TODO: Create a class to represent this. The indexes have grown too long.
+# TODO: Create a enumeration class to represent this. The indexes have grown too long.
 #
 POS      = 0          # Part of Speech
 WORD     = 1          # Original Word
@@ -140,6 +130,42 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
 
 import dslib.models.stat as ds_stat
 
+nlp = None
+
+##
+# https://spacy.io/api/top-level#spacy.info
+##
+def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
+    print("setLanguageModel ()")
+
+    global nlp
+
+    try:
+        if lang == 'en':
+            if model == NLP_MODEL_DEFAULT:
+                print("Loading Spacy default model ...")
+                nlp = spacy.load(resource_path('data/default_model'))
+                #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
+                #print("\n\n")
+                #print(result)
+            else:
+                print("Loading Spacy large model ...")
+                nlp = spacy.load(resource_path('data/large_model'))
+
+        elif lang == 'es':
+            # It is an experimental feature for now.
+            # We assume that es_core_news_lg is downloaded already.
+            nlp = spacy.load("es_core_news_lg")
+
+    except Exception as e:
+        print(e)
+    else:
+        print("Spacy language model loaded successfully")
+        print (spacy.info())
+
+##
+#
+##
 def isModelLoaded():
     if nlp is not None:
         return True
@@ -158,11 +184,17 @@ def removeQuotedSlashes(s):
     else:
         return s
 
+##
+#
+##
 def adjustSpaces(text):
     """
     This function takes a string, often directly read from a file, and cleans up the string for parsing.
+    It's only been tested with English texts.
     """
+
     text = text.strip()                         # trim
+
     text = utils.remove_hrefs(text)
 
     # Just in case a period is found in front of a word (e.g, ".And")  This handles
@@ -176,7 +208,7 @@ def adjustSpaces(text):
     # Remove the image HTLM elements.
     text = re.sub('\<img.+>', '', text)
 
-    # replace the space character(s) in multiword patterns with underscor character "_"
+    # Replace the space character(s) in multiword patterns with underscor character "_"
     for mw_topic in DSDocument.multiword_topics: 
         connected_mw_topic = mw_topic.replace(' ', '_')
         text = text.replace(mw_topic, connected_mw_topic)
@@ -184,25 +216,25 @@ def adjustSpaces(text):
         text = text.replace(mw_topic.title(), connected_mw_topic.title())
         text = text.replace(mw_topic.capitalize(), connected_mw_topic.capitalize())
 
-    text = text.replace(u'\u200b', '')             # remove the zero width space
-    text = text.replace(u'\t', u' ')               # sorry. we don't do tabs. replace it with a space.
-    text = text.replace(u'\xa0', u' ')             # replace non-breaking spaces with a regular space.
-    text = text.replace(u'\u2013', u' \u2014 ')    # replace en-dashes with em-dashes.
-                                                   # not the best way to deal with en-dashes, though.
+    text = text.replace(u'\u200b', '')               # remove the zero width space
+    text = text.replace(u'\t', u' ')                 # sorry. we don't do tabs. replace it with a space.
+    text = text.replace(u'\xa0', u' ')               # replace non-breaking spaces with a regular space.
+    text = text.replace(u'\u2013', u' \u2014 ')      # replace en-dashes with em-dashes.
+                                                     # not the best way to deal with en-dashes, though.
 
     text = text.replace(u' cannot ', u' can not ')   # replace cannot with can not.
     text = text.replace(u' cannot, ', u' can not, ') # replace cannot with can not.
     
-    text = text.replace(u'\u2014', u' \u2014 ')    # always add a space before/after an em-dash
-    text = text.replace(u'--', u' \u2014 ')        # replace double dashes with an em-dash.
+    text = text.replace(u'\u2014', u' \u2014 ')      # always add a space before/after an em-dash
+    text = text.replace(u'--', u' \u2014 ')          # replace double dashes with an em-dash.
 
-    text = text.replace(u'/ ', u' ')               # a slash followed by a space is replaced by a space
+    text = text.replace(u'/ ', u' ')                 # a slash followed by a space is replaced by a space
 
-    text = text.replace(u' )', u')')               # remove a space followed by a close parentesis
-    text = text.replace(u'( ', u'(')               # remove a space followed by a close parentesis
+    text = text.replace(u' )', u')')                 # remove a space followed by a close parentesis
+    text = text.replace(u'( ', u'(')                 # remove a space followed by a close parentesis
 
-    text = text.replace(u'. . .', u' \u2026')      # convert the MLA style ellipsis to an ellipsis character
-    text = text.replace(u'...', u' \u2026')        # convert 3 dots to an ellipsis character
+    text = text.replace(u'. . .', u' \u2026')        # convert the MLA style ellipsis to an ellipsis character
+    text = text.replace(u'...', u' \u2026')          # convert 3 dots to an ellipsis character
 
     text = text.replace(u'??', u'?').replace(u'??', u'?')    # double/triple punctuations are not allowed
     text = text.replace(u'!!', u'!').replace(u'!!', u'!')    # double/triple punctuations are not allowed
@@ -477,7 +509,7 @@ class DSDocument():
     multiword_topics         = []
     deleted_multiword_topics = []
 
-    user_defined_synonyms      = None   # it's a dictionary
+    user_defined_synonyms      = None 
     user_defined_synonym_names = []
     user_defined_topics        = []
 
@@ -514,9 +546,6 @@ class DSDocument():
                 undefined_count+=1
 
             DSDocument.user_defined_synonym_names.append(lemma)
-
-        # print("setUserDefinedSynonyms()")
-        # pp.pprint(DSDocument.user_defined_synonyms)
 
     @classmethod
     def isUserDefinedSynonym(cls, lemma):
@@ -583,6 +612,9 @@ class DSDocument():
     def getUserDefinedSynonyms(cls):
         return DSDocument.user_defined_synonym_names
 
+    @classmethod
+    def clearUserDefinedSynonyms(cls):
+        DSDocument.user_defined_synonym_names = []
 
     ##########################################
     # Instance methods
@@ -667,16 +699,12 @@ class DSDocument():
         self.noun             = True
         self.adj              = False     
         self.adv              = False
-        # self.prp              = False # pronouns
-
-        # self.vis_mode         = vis_mode
 
         self.para_accum_mode  = True
         self.sent_accum_mode  = True
 
         self.max_paras        = max_paras
         self.skip_paras       = skip_paras
-
 
     ########################################
     #
@@ -734,6 +762,9 @@ class DSDocument():
     def setSelectedWord(self, selected_word):
         self.selectedWord = selected_word    # word is a tuple = elem
         
+    # def setSynonymThreshold(self, val):
+        # self.synonym_threshold = val
+
     def setShowKeyTopics(self, val):
         self.showKeyTopics = val
 
@@ -742,6 +773,7 @@ class DSDocument():
 
     def setCollapsed(self, val):
         self.is_collapsed = val
+
 
     ########################################
     #
@@ -892,6 +924,9 @@ class DSDocument():
 
     def getKeyTopics(self):
         return self.keyTopics
+
+    # def getKeyTopicsFirstSent(self):
+    #     return self.keyTopicsFirstSent
 
     def getKeyParaTopics(self):
         return self.keyParaTopics
@@ -1369,14 +1404,29 @@ class DSDocument():
         This function iterates through all the paragraphs in the given docx document.
         and find all the unique lemmas in each sentence, and in each paragraph.
         """
+
+        print ("processDoc ()")
+
+        if (isModelLoaded () == False):
+           print ("Warning: language model not loaded yet, loading ...")
+           setLanguageModel ("en",NLP_MODEL_DEFAULT)
+
+        if (isModelLoaded () == False):
+           print ("Error: unable to load language model!")
+           return (list())
+
+        print("Language model appears to be loaded, processing text ...")   
+
+
+
         self.global_topical_prog_data = None # clear the cache
 
         doc = section_data['doc']
 
         if self.progress_callback:
             self.progress_callback(max_val=20, msg="Preprocessing...")
-
         self.num_quoted_words = 0 
+
         word_pos = section_data['start']
 
        # def listLemmas(sent):
@@ -1436,6 +1486,7 @@ class DSDocument():
                             temp.append(l[LEMMA])
                             accum.append(l)
             return accum
+
 
         self.bQuote = False
         num_paras = len(doc.paragraphs)
@@ -1570,7 +1621,7 @@ class DSDocument():
 
                 sent_dict['accum_lemmas'] = list(para_dict['lemmas'])
                 # sent_dict['accum_stems']  = list(para_dict['stems'])
-            
+
             data['paragraphs'].append(para_dict)                # add para_dict to doc_dict
             
             # here, we need to create para_dict['accmum_lemmas'] by going through all the previous
@@ -1704,7 +1755,7 @@ class DSDocument():
 
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para/num_paras))
-            
+
             para['given_accum_lemmas'] = list()
             para['new_accum_lemmas']   = list()
             foo = list()
@@ -1753,11 +1804,43 @@ class DSDocument():
     # Loading Methods
     #
     ########################################
-                
+    def loadFromTxt(self, aText):
+        print ("loadFromTxt ()")
+        #print (aText)
+
+        self.current_section = 0
+
+        text = aText
+        paragraphs = text.splitlines()
+
+        doc = Document()
+
+        for para in paragraphs:
+            if para:
+                para = adjustSpaces(para)
+                doc.add_paragraph(para)
+
+        section_data = dict()
+        section_data['doc']     = doc
+        section_data['data']    = dict()
+        section_data['heading'] = "n/a"
+        section_data['start']   = 0
+        section_data['pos']     = 0
+        section_data['para_data'] = []
+
+        self.sections = [section_data]
+
+        self.processDoc(section_data)
+
+        section_data['start'] = 0
+
+        self.processDoc(section_data)
+
     def loadFromTxtFile(self, src_dir, file):
         """
         Load a text from a plain text file. 
         It then process the document by calling the processDoc method.
+        It calls back the application object to update the headings.
         """
 
         if self.progress_callback:
@@ -1812,9 +1895,12 @@ class DSDocument():
         if self.progress_callback:
             self.progress_callback(max_val=10, msg="Opening file...")         
 
+
         self.sections = list()
         fpath = os.path.join(src_dir,file)
         doc = Document(fpath)     # create a Document object from a file.
+
+
         if self.progress_callback:
             self.progress_callback(new_val=12)
 
@@ -1828,6 +1914,10 @@ class DSDocument():
         for para in doc.paragraphs:
 
             ptext = para.text.strip()
+
+            if para_count-skip_count >= len(html_paras):
+                skip_count += 1
+                continue
 
             tag = html_paras[para_count-skip_count]
 
@@ -2027,6 +2117,7 @@ class DSDocument():
     ########################################
     #
     # Methods for creating HTML/XML strings from the text data
+    # Doesn't rely on DocuScope tagging, does rely on PythonDocX
     #
     ########################################
 
@@ -2055,7 +2146,7 @@ class DSDocument():
             total_sents = len(para['sentences'])
 
             para_style = para['style']
-            font_size = font_info[para_style]
+            font_size = font_info[para_style]            
             html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
 
             scount = 1
@@ -2076,7 +2167,8 @@ class DSDocument():
                     # if w[LEMMA] in topics:
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
                         # we need to remove periods.
-                        html_word = "<t class=\'{} p{} s{}\'>{}</t>".format(w[LEMMA].replace('.',''), pcount, scount, word)
+                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                        html_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, pcount, scount, word)
                     else:
                         html_word = word
 
@@ -2165,9 +2257,10 @@ class DSDocument():
                                     # get the next pair
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
-                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(temp_w[LEMMA].replace('.',''), 
-                                                                                  pcount, scount, 
-                                                                                  temp_w[WORD])
+                                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, 
+                                                                                                 pcount, scount, 
+                                                                                                 temp_w[WORD])
                                     else:
                                         html_temp_word = temp_w[WORD]
 
@@ -2201,6 +2294,7 @@ class DSDocument():
                                     is_space = True
 
                                 word_count = temp_word_count # skip all the words in the hyphenated word
+                                is_space = True
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
@@ -2347,7 +2441,8 @@ class DSDocument():
                     lemma = w[LEMMA]        # lemma/topic
 
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
-                        html_word = '<t class=\'{} p{} s{}\'>{}</t>'.format(lemma.replace('.',''), pcount, scount, word)
+                        topic = unidecode.unidecode(lemma.replace('.',''))
+                        html_word = '<t class=\'{} p{} s{}\'>{}</t>'.format(topic, pcount, scount, word)
                     else:
                         html_word = word
 
@@ -2502,7 +2597,8 @@ class DSDocument():
                                     # get the next pair
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
-                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(temp_w[LEMMA].replace('.',''), 
+                                        topic = unidecode.unidecode(temp_w[LEMMA].replace('.',''))
+                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, 
                                                                                   pcount, scount, 
                                                                                   temp_w[WORD])
                                     else:
@@ -2840,8 +2936,11 @@ class DSDocument():
         if self.sections is None:
             return
 
+        #print (self.current_section)
+        #print (self.sections)        
+
         data      = self.sections[self.current_section]['data']
-        para_data = self.sections[self.current_section]['para_data']
+        #para_data = self.sections[self.current_section]['para_data']
 
         if data is None:
             return
@@ -3002,11 +3101,11 @@ class DSDocument():
         # for pd in para_data:
             # pd.printData()
 
-        self.global_topical_prog_data = {'data': res, 'para_data': para_data}
+        #self.global_topical_prog_data = {'data': res, 'para_data': para_data}
+
+        self.global_topical_prog_data = {'data': res, 'para_data': []}
 
         return self.global_topical_prog_data
-
-        # return {'data': res, 'para_data': para_data}
 
     def getSentStructureData(self):
         p_count = 1
@@ -3902,7 +4001,6 @@ class DSDocument():
         pat_end   = 0
         pattern_t = None
 
-
         lines = token_data.split('\n')
 
         for i in range(len(lines)):
@@ -4194,7 +4292,7 @@ class DSDocument():
 
         data = self.getLocalTopicalProgData(selected_paragraphs)
         if data is None:
-            return ValueError('data is None.')
+            return ({'error': 'data is None'});
 
         topic_filter = TOPIC_FILTER_LEFT_RIGHT
         key_para_topics = self.getKeyParaTopics()
@@ -4205,10 +4303,8 @@ class DSDocument():
         nrows  = len(data)
         ncols  = len(header)
 
-        sent_buttons_data = [None] * (nrows-1)
-
         if ncols == 0:
-            return
+            return ({'error': 'ncols is 0'});
 
         vis_data = dict()
         vis_data['num_topics'] = ncols
@@ -4330,13 +4426,13 @@ class DSDocument():
         self.updateGlobalTopics(global_data)
 
         if global_data is None:
-            return ValueError('global_data is None.')
+            return ({'error': 'ncols is 0'});
 
         data = global_data['data']
         para_data = global_data['para_data']
 
         if data is None:
-            return ValueError('data is None.')
+            return ({'error': 'ncols is 0'});
 
         header = data[0]   # list of tuples (POS, LEMMA, POS, COUNT)
 
@@ -4346,7 +4442,7 @@ class DSDocument():
         self.global_topics = list()
 
         if ncols == 0:
-            return
+            return ({'error': 'ncols is 0'});
 
         vis_data = dict()
         vis_data['num_topics'] = ncols
@@ -5040,6 +5136,10 @@ class DSDocument():
 
     def testPrintGlobalVisData(self, vis_data):
 
+        if vis_data['data'] == []:
+            print("No global topics")
+            return
+
         data       = vis_data['data']
         num_paras  = vis_data['num_paras']
         num_topics = vis_data['num_topics']
@@ -5104,8 +5204,9 @@ class DSDocument():
 
     def testPrintLocalVisData(self, vis_data):
 
-        print("testPrintLocalVisData()")
-        print("vis_data: ", vis_data)
+        if vis_data['data'] == []:
+            print("No local topics")
+            return
 
         data       = vis_data['data']
         num_topics = vis_data['num_topics']
@@ -5161,7 +5262,3 @@ class DSDocument():
                         line += "  "
 
                 print(line)
-
-
-
-
