@@ -22,8 +22,8 @@ interface Settings {
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
-  common_dictionary: 'http://docuscope.eberly.cmu.edu/common_dictionary',
-  tagger: 'http://docuscope.eberly.cmu.edu:8088/tag',
+  common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
+  tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable
