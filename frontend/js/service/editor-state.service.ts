@@ -2,7 +2,13 @@
  * @fileoverview Hooks and observables for editor state changes.
  */
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, combineLatest, distinctUntilChanged, filter, map } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+} from 'rxjs';
 import { Descendant, Node } from 'slate';
 
 // For tracking Editor editable toggle.

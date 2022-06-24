@@ -6,12 +6,16 @@ import React from "react";
 import { afterEach, describe, test, vi } from "vitest";
 import LockSwitch from "./LockSwitch";
 
-describe('LockSwitch', () => {
-  afterEach(() => { vi.resetAllMocks(); });
+describe("LockSwitch", () => {
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
   test("render with label", () => {
     render(<LockSwitch label="foo" checked={false} />);
     expect(screen.getByText("foo").textContent).toBe("foo");
-    expect(screen.getByRole("switch").classList.contains("btn-outline-secondary")).toBeTruthy();
+    expect(
+      screen.getByRole("switch").classList.contains("btn-outline-secondary")
+    ).toBeTruthy();
     expect(screen.getByRole("img").classList.contains("fa-lock")).toBeTruthy();
   });
 
@@ -24,10 +28,16 @@ describe('LockSwitch', () => {
 
   test("change state", () => {
     render(<LockSwitch label="change" checked={true} />);
-    expect(screen.getByRole("switch").classList.contains("btn-outline-success")).toBeTruthy();
-    expect(screen.getByRole("img").classList.contains('fa-lock-open')).toBeTruthy();
+    expect(
+      screen.getByRole("switch").classList.contains("btn-outline-success")
+    ).toBeTruthy();
+    expect(
+      screen.getByRole("img").classList.contains("fa-lock-open")
+    ).toBeTruthy();
     fireEvent.click(screen.getByRole("button"));
-    expect(screen.getByRole("switch").classList.contains("btn-outline-secondary")).toBeTruthy();
+    expect(
+      screen.getByRole("switch").classList.contains("btn-outline-secondary")
+    ).toBeTruthy();
     expect(screen.getByRole("img").classList.contains("fa-lock")).toBeTruthy();
   });
 });

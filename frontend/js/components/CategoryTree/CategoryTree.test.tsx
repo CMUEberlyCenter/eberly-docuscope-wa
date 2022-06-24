@@ -7,9 +7,9 @@ import React from "react";
 import { describe, test } from "vitest";
 import CategoryTree from "./CategoryTree";
 
-describe('CategoryTree', () => {
+describe("CategoryTree", () => {
   test("creation", async () => {
     render(<CategoryTree />);
-    await waitFor(() => screen.queryByText('Dictionary Categories'))
+    await waitFor(() => screen.queryByText("Dictionary Categories"));
   });
 });

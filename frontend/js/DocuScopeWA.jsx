@@ -30,7 +30,10 @@ export default class DocuScopeWA extends Component {
     this.dataTools=new DataTools ();
 
     this.ruleManager=new DocuScopeRules ();
+    
+    this.pingEnabled=true;
     this.pingTimer=-1;
+
     this.token=this.dataTools.uuidv4 ();
     this.session=this.dataTools.uuidv4 ();
     this.standardHeader={
@@ -72,35 +75,53 @@ export default class DocuScopeWA extends Component {
         this.ruleManager.parse (result);
 
         if (this.ruleManager.getReady ()==true) {
-          this.setState ({
-            state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
-            progress: 75,
-            progressTitle: "Ruleset loaded, Initializing ..."
-          });
-
-          console.log ("Starting ping service timer ...");
-
-          this.apiCall ("ping",null,"GET").then ((result) => {
+          if (this.pingEnabled==false) {
             this.setState ({
               state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-              server: result
+              progress: 100,
+              progressTitle: "Application ready"
             });
-          });
+          } else {
+            this.setState ({
+              state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
+              progress: 75,
+              progressTitle: "Ruleset loaded, Initializing ..."
+            });
 
-          this.pingTimer=setInterval ((_e) => {
-            this.apiCall ("ping",null,"GET").then ((result) => {
+            console.log ("Starting ping service timer ...");
+              
+            /*
+             Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+             problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+             to 'ding'
+            */
+            this.apiCall ("ding",null,"GET").then ((result) => {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_READY,
                 server: result
               });
             });
-          },30000);
 
-          this.setState ({
-            state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-            progress: 100,
-            progressTitle: "Application ready"
-          });
+            /*
+             Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+             problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+             to 'ding'
+            */
+            this.pingTimer=setInterval ((_e) => {
+              this.apiCall ("ding",null,"GET").then ((result) => {
+                this.setState ({
+                  state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+                  server: result
+                });
+              });
+            },30000);
+
+            this.setState ({
+              state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+              progress: 100,
+              progressTitle: "Application ready"
+            });
+          }
         } else {
          this.setState ({
             state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
