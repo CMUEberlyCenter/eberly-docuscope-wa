@@ -4,13 +4,17 @@
 import { bind } from "@react-rxjs/core";
 import React, { Suspense, useEffect, useState } from "react";
 import { Alert, Card } from "react-bootstrap";
+
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, filter, map } from "rxjs";
 import { sentenceData } from "../../data/sentencedata";
+
 import DocuScopeOnTopic from "../../DocuScopeOnTopic";
 import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
+
+import "./Clarity.scss";
 
 // On locking with text and tool is clarity, then emit text.
 const [useClarityText /*clarityText$*/] = bind(
@@ -29,7 +33,10 @@ const ClarityErrorFallback = (props: { error?: Error }) => (
   </Alert>
 );
 
-const Clarity = ({ api }: { api: apiCall }) => {
+const Clarity = (props: { 
+    api: apiCall,
+    ruleManager: any
+  }) => {
   const [status, setStatus] = useState("");
   const [data, setClarityData] = useState<unknown>(null);
   const text = useClarityText();
@@ -47,7 +54,7 @@ const Clarity = ({ api }: { api: apiCall }) => {
 
       const encoded = window.btoa(escaped);
 
-      api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
+      props.api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
         console.log ("Processing incoming clarity data ...");
 
         console.log (incoming);
@@ -68,7 +75,7 @@ const Clarity = ({ api }: { api: apiCall }) => {
         setStatus("Data retrieved");
       });
     }    
-  }, [text, api]);
+  }, [text, props.api]);
 
   let visualization;
 

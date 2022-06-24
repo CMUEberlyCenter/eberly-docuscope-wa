@@ -21,6 +21,7 @@ import CoherencePanel from '../CoherencePanel/CoherencePanel';
 
 // Dummy data so that we can keep working on our visualization widget set
 import { coherenceData } from "../../data/coherencedata";
+import { coherenceDataLocal } from "../../data/coherencedatalocal";
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
@@ -65,7 +66,10 @@ const [useCoherenceText /*coherenceText$*/] = bind(combineLatest ({ text: locked
 /**
  * 
  */
-const Coherence = ({ api }: { api: apiCall }) => {
+const Coherence = (props: { 
+    api: apiCall,
+    ruleManager: any
+  }) => {
   // api passed through on assumption that it will be used in submission.
   const toggleId = useId();
 
@@ -90,7 +94,7 @@ const Coherence = ({ api }: { api: apiCall }) => {
 
       const encoded = window.btoa(escaped);
 
-      api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
+      props.api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
         console.log ("Processing incoming coherence data ...");
         console.log (incoming);
         
@@ -104,15 +108,17 @@ const Coherence = ({ api }: { api: apiCall }) => {
 
         console.log (coherence);
 
+        setCoherenceData(coherence);
+
         //const decoded = window.atob(incoming.html);
 
         // Use dummy data for now
-        setCoherenceData(coherenceData);
+        //setCoherenceData(coherenceData);
 
         setStatus("Data retrieved");
       });
     }
-  }, [text, api]);
+  }, [text, props.api]);
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">

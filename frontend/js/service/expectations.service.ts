@@ -3,6 +3,11 @@
  *
  * Reads the "assets/rules.json" file which can be easily replaced in
  * various environments.
+ * 
+ * MvV: We should load this from disk through the node service since this will
+ * be both authorable and different per course/context. So we shouldn't hardcode it.
+ * This code is no longer used but left in for historical use and completeness
+ * 
  */
 import { bind } from '@react-rxjs/core';
 import { catchError, of, shareReplay } from 'rxjs';

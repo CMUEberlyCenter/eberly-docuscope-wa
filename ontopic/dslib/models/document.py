@@ -7,9 +7,6 @@
 __author__    = "Suguru Ishizaki"
 __copyright__ = "2017-21 Suguru Ishizaki, Carnegie Mellon University"
 
-# import logging
-# logger = logging.getLogger(__name__)
-
 from time import time
 import json
 import re
@@ -19,22 +16,28 @@ import os
 import sys
 from collections import Counter 
 
-import bs4
-from bs4 import BeautifulSoup as bs  
+from urllib.parse import urlparse
+import base64
+from PIL import Image
+from io import BytesIO
+
+from bs4 import BeautifulSoup as bs
+from pydocx import PyDocX
+import unidecode
 
 import dslib.utils as utils
-import dslib.views as views
 from dslib.utils import resource_path
 
 from docx import Document
 from docx.shared import RGBColor
 from docx.enum.text import WD_COLOR_INDEX
 from docx.enum.text import WD_UNDERLINE
-from docx.shared import Pt
+from docx.shared import Pt, Inches
 
-# SpaCy NLP library
-import spacy
-# from spacy.attrs import ORTH, LEMMA, POS
+
+##################################################
+# English ONLY
+##################################################
 from spacy.lang.en.stop_words import STOP_WORDS
 
 stop_words = list(STOP_WORDS)
@@ -48,18 +51,15 @@ for p in pronouns:
     if p in stop_words:
         stop_words.remove(p)
 
-
-# used by toDocxText() and toDocxPara()
 no_space_patterns = ["\u2019ve", "n\u2019t", ".\u201D", ".\u2019",
                      "\u2019s", "\u2019t", "\u2019m", "\u2019ll", "\u2019re", "\u2019d", 
                      "\'ve" ,"n\'t", ".\"", ".\'",
                      "\'s", "\'t", "\'m", "\'ll", "\'re", "\'d",
-                     "%"] # , ":", ";", "?", "!", ".", ","]
-
+                     "%"]
                     # note: use a single quote for apostorophes
 
-left_quotes  = ['\u201C', '\u2018', '(', '[', '$', '\"', '\''] 
-right_quotes = ['\u201D', '\u2019', ')', ']']
+left_quotes  = ['\u201C', '\u2018', '(', '[', '$', '\"', '\'', '\u00BF']  # todo: should be 'left_punct'
+right_quotes = ['\u201D', '\u2019', ')', ']']                             # todo: should be 'right_punct'
 
 dashes       = ['\u2014', '\u2013', '\u2015']  # em dash, en dash, horizontal bar
 hyphen_slash = ['-', '/',]  # hyphen, slash,
@@ -70,6 +70,10 @@ end_puncts   = ['.', ',', ';', ':', '?', '!']
 
 be_verbs = ['be', 'been', 'am', 'is', 'are', 'was', 'were', '\'m', '\'re', '\'s', "\u2019s", "\u2019m", "\u2019re"]
 
+##################################################
+
+import spacy                                   # SpaCy NLP library
+# from spacy.attrs import ORTH, LEMMA, POS
 # POS dependency labels (see: https://spacy.io/api/annotation)
 
 NLP_MODEL_DEFAULT = 0
@@ -81,6 +85,7 @@ TOPIC_FILTER_ALL        = 2     # ALL
 
 TOPIC_SORT_APPEARANCE   = 0
 TOPIC_SORT_LEFT_COUNT   = 1
+
 
 # Default font info used to create HTML strings.
 default_font_info = {'Title': 24, 'Heading 1': 20, 'Heading 2': 18, 'Normal': 16}
@@ -95,7 +100,7 @@ TEXT_NP_VCOLOR  = RGBColor(125,   0, 125)
 #
 # Constants for sentence['text_w_info']. Each word is represented using a tuple with
 # the following elements. 
-# TODO: Create a class to represent this. The indexes have grown too long.
+# TODO: Create a enumeration class to represent this. The indexes have grown too long.
 #
 POS      = 0          # Part of Speech
 WORD     = 1          # Original Word
@@ -146,11 +151,18 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
             else:
                 print("Loading Spacy large model ...")
                 nlp = spacy.load(resource_path('data/large_model'))
+
+        elif lang == 'es':
+            # It is an experimental feature for now.
+            # We assume that es_core_news_lg is downloaded already.
+            nlp = spacy.load("es_core_news_lg")
+
     except Exception as e:
         print(e)
     else:
         print("Spacy language model loaded successfully")
         print (spacy.info())
+
 ##
 #
 ##
@@ -160,9 +172,6 @@ def isModelLoaded():
     else:
         return False
 
-##
-#
-##
 def removeQuotedSlashes(s):
     if s.find('“') > 0 and s.find('”') > 0:
         pattern = r'\s\/\s'
@@ -181,6 +190,7 @@ def removeQuotedSlashes(s):
 def adjustSpaces(text):
     """
     This function takes a string, often directly read from a file, and cleans up the string for parsing.
+    It's only been tested with English texts.
     """
 
     text = text.strip()                         # trim
@@ -195,7 +205,10 @@ def adjustSpaces(text):
     # If there is a comma followed by a character (i.e., missing a sapce), add a space.
     text = re.sub(',(=?[a-zA-Z])',  r', \1', text)
 
-    # replace the space character(s) in multiword patterns with underscor character "_"
+    # Remove the image HTLM elements.
+    text = re.sub('\<img.+>', '', text)
+
+    # Replace the space character(s) in multiword patterns with underscor character "_"
     for mw_topic in DSDocument.multiword_topics: 
         connected_mw_topic = mw_topic.replace(' ', '_')
         text = text.replace(mw_topic, connected_mw_topic)
@@ -203,25 +216,25 @@ def adjustSpaces(text):
         text = text.replace(mw_topic.title(), connected_mw_topic.title())
         text = text.replace(mw_topic.capitalize(), connected_mw_topic.capitalize())
 
-    text = text.replace(u'\u200b', '')             # remove the zero width space
-    text = text.replace(u'\t', u' ')               # sorry. we don't do tabs. replace it with a space.
-    text = text.replace(u'\xa0', u' ')             # replace non-breaking spaces with a regular space.
-    text = text.replace(u'\u2013', u' \u2014 ')    # replace en-dashes with em-dashes.
-                                                   # not the best way to deal with en-dashes, though.
+    text = text.replace(u'\u200b', '')               # remove the zero width space
+    text = text.replace(u'\t', u' ')                 # sorry. we don't do tabs. replace it with a space.
+    text = text.replace(u'\xa0', u' ')               # replace non-breaking spaces with a regular space.
+    text = text.replace(u'\u2013', u' \u2014 ')      # replace en-dashes with em-dashes.
+                                                     # not the best way to deal with en-dashes, though.
 
     text = text.replace(u' cannot ', u' can not ')   # replace cannot with can not.
     text = text.replace(u' cannot, ', u' can not, ') # replace cannot with can not.
     
-    text = text.replace(u'\u2014', u' \u2014 ')    # always add a space before/after an em-dash
-    text = text.replace(u'--', u' \u2014 ')        # replace double dashes with an em-dash.
+    text = text.replace(u'\u2014', u' \u2014 ')      # always add a space before/after an em-dash
+    text = text.replace(u'--', u' \u2014 ')          # replace double dashes with an em-dash.
 
-    text = text.replace(u'/ ', u' ')               # a slash followed by a space is replaced by a space
+    text = text.replace(u'/ ', u' ')                 # a slash followed by a space is replaced by a space
 
-    text = text.replace(u' )', u')')               # remove a space followed by a close parentesis
-    text = text.replace(u'( ', u'(')               # remove a space followed by a close parentesis
+    text = text.replace(u' )', u')')                 # remove a space followed by a close parentesis
+    text = text.replace(u'( ', u'(')                 # remove a space followed by a close parentesis
 
-    text = text.replace(u'. . .', u' \u2026')      # convert the MLA style ellipsis to an ellipsis character
-    text = text.replace(u'...', u' \u2026')        # convert 3 dots to an ellipsis character
+    text = text.replace(u'. . .', u' \u2026')        # convert the MLA style ellipsis to an ellipsis character
+    text = text.replace(u'...', u' \u2026')          # convert 3 dots to an ellipsis character
 
     text = text.replace(u'??', u'?').replace(u'??', u'?')    # double/triple punctuations are not allowed
     text = text.replace(u'!!', u'!').replace(u'!!', u'!')    # double/triple punctuations are not allowed
@@ -496,9 +509,9 @@ class DSDocument():
     multiword_topics         = []
     deleted_multiword_topics = []
 
-    user_defined_synonyms    = None   # it's a dictionary
-
-    user_defined_topics      = []
+    user_defined_synonyms      = None 
+    user_defined_synonym_names = []
+    user_defined_topics        = []
 
     @classmethod
     def setNounSubjectOptions(cls, options):
@@ -597,8 +610,11 @@ class DSDocument():
 
     @classmethod
     def getUserDefinedSynonyms(cls):
-        return DSDocument.user_defined_synonyms
+        return DSDocument.user_defined_synonym_names
 
+    @classmethod
+    def clearUserDefinedSynonyms(cls):
+        DSDocument.user_defined_synonym_names = []
 
     ##########################################
     # Instance methods
@@ -631,7 +647,6 @@ class DSDocument():
 
         self.total_words          = 0
 
-        self.vis_mode             = views.VISMODE_ORGANIZATION    # for now, this is the only vis mode.
         self.para_accum_mode      = True
         self.sent_accum_mode      = True
 
@@ -653,12 +668,16 @@ class DSDocument():
 
         self.progress_callback = None
 
+        self.img_count = 0
+
+        self.global_topical_prog_data = None
+
         # variables used by the methods for the online version of write & audit
         self.local_topics_dict = None
         self.global_header           = []
         self.local_header            = []
         self.global_topics           = []
-        self.local_topics            = []        
+        self.local_topics            = []
 
     def setController(self, c):
         self.controller = c
@@ -680,16 +699,12 @@ class DSDocument():
         self.noun             = True
         self.adj              = False     
         self.adv              = False
-        # self.prp              = False # pronouns
-
-        self.vis_mode         = vis_mode
 
         self.para_accum_mode  = True
         self.sent_accum_mode  = True
 
         self.max_paras        = max_paras
         self.skip_paras       = skip_paras
-
 
     ########################################
     #
@@ -706,27 +721,8 @@ class DSDocument():
     def setSection(self, val):
         self.current_section = val
 
-    # def setTopicFilter(self, option):
-    #     self.topic_filter = option
-
-    # def getTopicFilter(self):
-    #     return self.topic_filter
-
-    # def setThemeOnly(self, val):
-    #     self.theme_only = val
-
-    # def getThemeOnly(self):
-    #     return self.theme_only
-
-    # def setVerbHighlight(self, val):
-        # self.show_root = val
-
     def setPronounsVisible(self, val):
         self.prp = val
-
-    # def setSentViewFilters(self, nps, emphasis):
-    #     self.sent_show_nps = nps
-    #     self.sent_show_emphasis = emphasis
 
     def setUserTopics(self, user_topics):
         res = []
@@ -737,9 +733,6 @@ class DSDocument():
 
     def setKeySentTopics(self, keytopics):
         self.keySentTopics = keytopics
-
-    # def setKeyTopicsFirstSent(self, keytopics):
-        # self.keyTopicsFirstSent = keytopics
 
     def setKeyParaTopics(self, keytopics):
         self.keyParaTopics = keytopics
@@ -787,6 +780,7 @@ class DSDocument():
     # Query Mthods
     #
     ########################################
+
     def userTopicsDefined(self):
         if len(self.userTopics) > 0:
             return True
@@ -853,6 +847,9 @@ class DSDocument():
         else:
             return []
 
+    def getSectionCount(self):
+        return len(self.sections)
+
     def getSectionAt(self, i):
         if self.sections is not None and i < len(self.sections):
             return self.sections[i]
@@ -915,7 +912,6 @@ class DSDocument():
             pcount += 1
         return res
 
-
     def getNumParagraphs(self):
         data = self.sections[self.current_section]['data']
         return len(data['paragraphs'])
@@ -956,7 +952,7 @@ class DSDocument():
     def findSentences(self, ruleset):
 
         if self.sections is None:
-            return "Error in toHtml()"
+            return "Error in findSentences()"
         else:
             try:
                 data = self.sections[self.current_section]['data']
@@ -1003,7 +999,7 @@ class DSDocument():
             pcount += 1
 
         """
-        Note. We are returning a dictionary, where keys are rules, and the values are sentences.
+        Note. We are returning a python dictionary, where keys are rules, and the values are sentences.
         """
         return res
 
@@ -1019,6 +1015,7 @@ class DSDocument():
         Each entry in the list is a tuple (POS, Word, Lemma, bLeft_of_the_Main_Verb).
         e.g., ('NOUN', 'dogs', 'dog', False)
         """
+
         word_pos = start
 
         def processHeading(heading):
@@ -1113,8 +1110,11 @@ class DSDocument():
 
             return lemma
 
-        #incl_nsubj = self.controller.postMainVerbTopics() # true or false
-        incl_nsubj = None
+        # TODO: We should not do this here... This shold be passed to this method as an argument...
+        if self.controller:
+            incl_nsubj = self.controller.postMainVerbTopics() # true or false
+        else:
+            incl_nsubj = True # default
 
         res = list()
         is_left = True
@@ -1346,7 +1346,7 @@ class DSDocument():
         # res['NOUN_CHUNKS'] = list(doc.noun_chunks) 
         # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert 
         # the 'sent_analysis' property to JSON easily later.
-        res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]        
+        res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
 
         advcl_root = None
         for token in doc:
@@ -1396,7 +1396,15 @@ class DSDocument():
 
         return res
 
+    def clearGlobalTopicalProgDataCache(self):
+        self.global_topical_prog_data = None # clear the cache
+
     def processDoc(self, section_data):
+        """
+        This function iterates through all the paragraphs in the given docx document.
+        and find all the unique lemmas in each sentence, and in each paragraph.
+        """
+
         print ("processDoc ()")
 
         if (isModelLoaded () == False):
@@ -1409,17 +1417,32 @@ class DSDocument():
 
         print("Language model appears to be loaded, processing text ...")   
 
-        """
-        This function iterates through all the paragraphs in the given docx document.
-        and find all the unique lemmas in each sentence, and in each paragraph.
-        """
+
+
+        self.global_topical_prog_data = None # clear the cache
 
         doc = section_data['doc']
 
+        if self.progress_callback:
+            self.progress_callback(max_val=20, msg="Preprocessing...")
         self.num_quoted_words = 0 
 
         word_pos = section_data['start']
 
+       # def listLemmas(sent):
+       #      global stop_words
+
+       #      lemmas = list()
+       #      temp = list()
+
+       #      for w in sent:
+       #          if w[POS] is not None and w[LEMMA] not in stop_words:
+       #              if (w[POS], w[LEMMA]) not in temp:
+       #                  temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
+       #                  lemmas.append(w)
+       #      return lemmas
+
+        # Optimized by only adding NOUNs. We ignore all the other POSs.
         def listLemmas(sent):
             global stop_words
 
@@ -1427,9 +1450,10 @@ class DSDocument():
             temp = list()
 
             for w in sent:
-                if w[POS] is not None and w[LEMMA] not in stop_words:
+                if w[POS] is not None and \
+                   w[POS] == 'NOUN' and \
+                   w[LEMMA] not in stop_words:
                     if (w[POS], w[LEMMA]) not in temp:
-                        # temp.append( (w[POS], w[LEMMA]) )   # 'NOUN' + 'man'
                         temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
                         lemmas.append(w)
             return lemmas
@@ -1444,11 +1468,25 @@ class DSDocument():
                         stems.append(w)
             return stems
         
+        # def accumulateParaLemmas(paragraphs):
+        #     accum = list()
+        #     for para in paragraphs:
+        #         accum += para['lemmas']
+        #     return accum
+
+        # Optimization. We are only interested in nouns now.
         def accumulateParaLemmas(paragraphs):
+            temp = list()
             accum = list()
             for para in paragraphs:
-                accum += para['lemmas']
+                lemmas = para['lemmas']
+                for l in lemmas:
+                    if l[POS] == 'NOUN':
+                        if l[LEMMA] not in temp:
+                            temp.append(l[LEMMA])
+                            accum.append(l)
             return accum
+
 
         self.bQuote = False
         num_paras = len(doc.paragraphs)
@@ -1474,6 +1512,30 @@ class DSDocument():
 
             p = para.text
 
+            if p.startswith("<img "): # skip if p is an image element.
+                para_dict = dict()
+                para_dict['text'] = p
+                para_dict['sentences']          = list() 
+                
+                para_dict['lemmas']             = list()
+                para_dict['accum_lemmas']       = list()
+                para_dict['given_lemmas']       = list()
+                para_dict['new_lemmas']         = list()
+                para_dict['given_accum_lemmas'] = list()
+                para_dict['new_accum_lemmas']   = list()
+
+                # stems are not used for now.
+                # para_dict['stems']              = list()
+                # para_dict['accum_stems']        = list()
+                # para_dict['given_stems']        = list()
+                # para_dict['new_stems']          = list()
+                # para_dict['given_accum_stems']  = list()
+                # para_dict['new_accum_stems']    = list()
+                
+                para_dict['style']              = 'Normal'
+                data['paragraphs'].append(para_dict)                  
+                continue                      
+
             if p == "":                       # skip if it is an empty line.
                 continue
 
@@ -1493,12 +1555,12 @@ class DSDocument():
             para_dict['given_accum_lemmas'] = list()
             para_dict['new_accum_lemmas']   = list()
             
-            para_dict['stems']              = list()
-            para_dict['accum_stems']        = list()
-            para_dict['given_stems']        = list()
-            para_dict['new_stems']          = list()
-            para_dict['given_accum_stems']  = list()
-            para_dict['new_accum_stems']    = list()
+            # para_dict['stems']              = list()
+            # para_dict['accum_stems']        = list()
+            # para_dict['given_stems']        = list()
+            # para_dict['new_stems']          = list()
+            # para_dict['given_accum_stems']  = list()
+            # para_dict['new_accum_stems']    = list()
             
             para_dict['style']              = style                 # set the paragraph style (from the docx file).
 
@@ -1528,12 +1590,12 @@ class DSDocument():
                 sent_dict['given_accum_lemmas'] = []            # initializes the 'given_lemmas' field.
                 sent_dict['new_accum_lemmas'] = []              # initializes the 'new_lemmas' field.
 
-                sent_dict['stems']  = listStems(sent_dict['text_w_info'])   # list stems in the paragraph
-                sent_dict['accum_stems'] = []
-                sent_dict['given_stems'] = []                  # initializes the 'given_lemmas' field.
-                sent_dict['new_stems'] = []                    # initializes the 'new_lemmas' field.
-                sent_dict['given_accum_stems'] = []            # initializes the 'given_lemmas' field.
-                sent_dict['new_accum_stems'] = []              # initializes the 'new_lemmas' field.
+                # sent_dict['stems']  = listStems(sent_dict['text_w_info'])   # list stems in the paragraph
+                # sent_dict['accum_stems'] = []
+                # sent_dict['given_stems'] = []                  # initializes the 'given_lemmas' field.
+                # sent_dict['new_stems'] = []                    # initializes the 'new_lemmas' field.
+                # sent_dict['given_accum_stems'] = []            # initializes the 'given_lemmas' field.
+                # sent_dict['new_accum_stems'] = []              # initializes the 'new_lemmas' field.
                 
                 para_dict['sentences'].append(sent_dict)        # add sent_dict to para_dict.
 
@@ -1548,18 +1610,18 @@ class DSDocument():
                         para_dict['lemmas'].append(sl)
 
                 # update the paragraph's 'stems' field by adding new stems from the new sentence 'ss'
-                for ss in sent_dict['stems']:                  # for each lemma in the new sentence,
-                    match = False
-                    for ps in para_dict['stems']:              # check against each stem in its paragraph.
-                        if ps[STEM] == ss[STEM]:               # if there is a match
-                            match = True                       # mark 'match' as True, and beak
-                            break
-                    if match != True:
-                        para_dict['stems'].append(ss)
+                # for ss in sent_dict['stems']:                  # for each lemma in the new sentence,
+                    # match = False
+                    # for ps in para_dict['stems']:              # check against each stem in its paragraph.
+                        # if ps[STEM] == ss[STEM]:               # if there is a match
+                            # match = True                       # mark 'match' as True, and beak
+                            # break
+                    # if match != True:
+                        # para_dict['stems'].append(ss)
 
                 sent_dict['accum_lemmas'] = list(para_dict['lemmas'])
-                sent_dict['accum_stems']  = list(para_dict['stems'])
-            
+                # sent_dict['accum_stems']  = list(para_dict['stems'])
+
             data['paragraphs'].append(para_dict)                # add para_dict to doc_dict
             
             # here, we need to create para_dict['accmum_lemmas'] by going through all the previous
@@ -1586,19 +1648,17 @@ class DSDocument():
                 data = self.sections[section]['data']
 
         if self.progress_callback:
-            self.progress_callback(max_val=55, msg="Finding lexical overlaps between paragraphs...")
+            self.progress_callback(max_val=50, msg="Finding lexical overlaps between paragraphs...")
 
         self.findGivenWordsPara(data)               # find given words between paragraphs
 
         if self.progress_callback:
-            self.progress_callback(max_val=90, msg="Finding lexical overlaps between sentences...")
+            self.progress_callback(max_val=80, msg="Finding lexical overlaps between sentences...")
 
         self.findGivenWordsSent(data)               # find given words between sentences in each paragraph
 
-
     def isGiven(self, l1, l2, pos1, pos2, pronoun=False):  
               
-
         if pos1 == pos2:                                 
             # these 2 lemmas share the same POS tag.
             if pronoun == False and pos1.startswith('PRON'):
@@ -1645,7 +1705,11 @@ class DSDocument():
                         for cl in prev_s['accum_lemmas']:        
                             # for each given accum_lemmas in the prev sentence
                             # if a lemma ('gl') is in the previous paragraph AND their POSs maatch
-                            if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+
+                            # Note: POS is no longer checked for optmization.
+                            # if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+
                                 # and if 'gl' is not already in the sentence's given lemma's list
                                 if gl[LEMMA] not in [x[LEMMA] for x in sent['given_accum_lemmas']]:
                                     sent['given_accum_lemmas'].append(gl)            # add 'gl' to the list
@@ -1657,7 +1721,8 @@ class DSDocument():
                                 break
                             for cl in temp_sent['accum_lemmas']:  # for each accum_lemma in the sentence
                                 # if a lemma ('gl') is in the sentence AND their POSs maatch
-                                if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+                                # Note: POS is no longer checked for optmization.
+                                if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
                                     # if 'cl' is not already in the sentence's new lemmas list
                                     if gl[POS] != 'PRON' and cl[LEMMA] not in [x[LEMMA] for x in temp_sent['new_accum_lemmas']]:
                                         temp_sent['new_accum_lemmas'].append(cl)     # add 'cl' to the list 
@@ -1690,23 +1755,27 @@ class DSDocument():
 
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para/num_paras))
-            
+
             para['given_accum_lemmas'] = list()
             para['new_accum_lemmas']   = list()
             foo = list()
-            if prev_p is not None:                             # start with the 2nd paragraph.
-                for gl in para['lemmas']:                      # for each lemma in the paragraph
-                    for cl in prev_p['accum_lemmas']:          # for each given lemmas in the prev. paragraph
+            if prev_p is not None:                      # start with the 2nd paragraph.
+                for gl in para['lemmas']:               # for each lemma in the paragraph
+                    
+                    for cl in prev_p['accum_lemmas']:   # for each given lemmas in the prev. paragraph
                         # if a lemma ('gl') is in the previous paragraphs AND their POSs maatch
-                        if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                        #if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                        if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
                             para['given_accum_lemmas'].append(gl)         # add 'gl' to the list
 
                     for temp_para in data['paragraphs']: 
                         if temp_para == para:
-                            break                   
+                            break        
+
                         for cl in temp_para['accum_lemmas']:     # for each paragraph's accum_lemmas 
                             # if a lemma ('gl') is in the previous paragraph AND their POSs maatch
-                            if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                            # if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
                                 # if 'cl' is not already in the previous paragraph's new lemmas list
                                 if cl[LEMMA] not in [x[LEMMA] for x in temp_para['new_accum_lemmas']]:
                                     temp_para['new_accum_lemmas'].append(cl)         # add 'cl' to the list
@@ -1729,7 +1798,6 @@ class DSDocument():
                        DSDocument.isUserDefinedSynonym(gl[LEMMA]):
                         if gl[LEMMA].lower() not in para['given_accum_lemmas']:
                             para['given_accum_lemmas'].append(gl)
-
 
     ########################################
     #
@@ -1758,6 +1826,7 @@ class DSDocument():
         section_data['heading'] = "n/a"
         section_data['start']   = 0
         section_data['pos']     = 0
+        section_data['para_data'] = []
 
         self.sections = [section_data]
 
@@ -1769,8 +1838,7 @@ class DSDocument():
 
     def loadFromTxtFile(self, src_dir, file):
         """
-        Load a text from a plain text file. If the file contains headings using
-        the "Heading 1" style, the document is split into multiple sections.
+        Load a text from a plain text file. 
         It then process the document by calling the processDoc method.
         It calls back the application object to update the headings.
         """
@@ -1799,6 +1867,7 @@ class DSDocument():
         section_data['heading'] = "n/a"
         section_data['start']   = 0
         section_data['pos']     = 0
+        section_data['para_data'] = []
         self.sections = [section_data]
 
         self.filename = file
@@ -1807,34 +1876,90 @@ class DSDocument():
         section_data['start'] = 0
         self.processDoc(section_data)
  
-        # self.controller.setSections(["(No Sections)"])
 
     def loadFromMSWordFile(self, src_dir, file):
         """
         Load a text from a MS Word file. If the file contains headings using
-        the "Heading 1" style, the document is split into multiple sections.
+        the "Title" or th "Heading 1" style, the document is split into multiple sections.
         It then process the document by calling the processDoc method.
-        It calls back the application object to update the headings.
         """
+        def docx_to_paras(path):                          # use pydocx here because python-docx does not allow
+            html = PyDocX.to_html(path)                   # us to find if any runs contains an image!
+            soup = bs(html, "html.parser")                           
+            body = soup.find("body")
+            elements = body.find_all(recursive=False)
+            return elements
+
         self.current_section = 0
 
         if self.progress_callback:
             self.progress_callback(max_val=10, msg="Opening file...")         
 
+
         self.sections = list()
-        doc = Document(os.path.join(src_dir,file))     # create a Document object from a file.
+        fpath = os.path.join(src_dir,file)
+        doc = Document(fpath)     # create a Document object from a file.
+
+
         if self.progress_callback:
             self.progress_callback(new_val=12)
-            
+
+        html_paras = docx_to_paras(fpath)
+
         para_count = 0
         sect_count = 0
+        skip_count = 0
         headings = list()
         p = None
         for para in doc.paragraphs:
 
             ptext = para.text.strip()
 
+            if para_count-skip_count >= len(html_paras):
+                skip_count += 1
+                continue
+
+            tag = html_paras[para_count-skip_count]
+
+            if tag.name == "img":
+                img_tag = tag
+            else:
+                img_tag = tag.find("img")
+
+            if img_tag is not None:
+
+                if para_count == 0 and sect_count == 0:
+                    section_data = dict()
+                    section_data['doc'] = Document()
+                    section_data['heading'] = ptext
+                    section_data['pos'] = sect_count
+                    section_data['para_data'] = []
+                    self.sections.append(section_data)
+                    headings.append("")                
+                    sect_count += 1
+                    p = None
+
+                src = img_tag.get("src")       # get the src value
+                w = img_tag.get("width")       # get the width and the height
+                h = img_tag.get("height")
+                w = w.replace("px", "")        # remove the "px" suffix
+                h = h.replace("px", "")      
+
+                # Extract the data and save it as a file in a cache. 
+                data = src[src.find(",")+1:]   
+                im = Image.open(BytesIO(base64.b64decode(data)))
+                fpath = utils.cache_path("img_{:03d}.png".format(self.img_count))
+                im.save(fpath, 'PNG')
+                im.close()
+
+                html_img_tag = "<img src=\"file:///{}\" width=\"{}\" height=\"{}\"/>".format(fpath, w, h)
+                section_data['doc'].add_paragraph(html_img_tag)
+                para_count += 1
+                self.img_count+=1
+                continue
+
             if ptext == '':
+                skip_count += 1
                 continue
 
             ptext = adjustSpaces(ptext)
@@ -1862,6 +1987,7 @@ class DSDocument():
                 section_data['doc'] = Document()
                 section_data['heading'] = ptext
                 section_data['pos'] = sect_count
+                section_data['para_data'] = []        
                 self.sections.append(section_data)
                 headings.append(ptext)
                 sect_count += 1
@@ -1873,11 +1999,11 @@ class DSDocument():
                 section_data['doc'] = Document()
                 section_data['heading'] = ptext
                 section_data['pos'] = sect_count
+                section_data['para_data'] = []                        
                 self.sections.append(section_data)
                 headings.append("")                
                 sect_count += 1
                 p = None
-
 
             p = section_data['doc'].add_paragraph(ptext, style=style)
 
@@ -1894,9 +2020,10 @@ class DSDocument():
         if sect_count > 1 and headings[0] == "":
             headings[0] = "(No Sections Header/Title)"
             text = self.sections[0]['heading']
-            self.controller.showWarningDialog("Warning", "The first section does not include a title or heading. " +
-                                                           "Consider assigning the Title or Heading style to the following line " +
-                                                           "in Microsoft Word. \n\n\"{}\"".format(text))
+            if self.controller:
+                self.controller.showWarningDialog("Warning", "The first section does not include a title or heading. " +
+                                                             "Consider assigning the Title or Heading style to the following line " +
+                                                             "in Microsoft Word. \n\n\"{}\"".format(text))
         self.filename = file
         return headings
 
@@ -1911,14 +2038,21 @@ class DSDocument():
             self.sections = list()
 
         if self.progress_callback:
-            self.progress_callback(new_val=10)
+            self.progress_callback(new_val=25)
 
         para_count = 0
         # sect_count = 0
         headings = list()
         new_sections = list()
+
         for para in doc.paragraphs:
+            
             ptext = para.text
+
+            if ptext.startswith("<img "):
+                section_data['doc'].add_paragraph(ptext)
+                para_count += 1
+                continue
 
             for mw_topic in DSDocument.multiword_topics + DSDocument.deleted_multiword_topics: 
                             
@@ -1937,6 +2071,7 @@ class DSDocument():
                     section_data['doc'] = Document()
                     section_data['heading'] = ptext
                     section_data['pos'] = section
+                    section_data['para_data'] = []
                     new_sections.append(section_data)
                     headings.append(ptext)
 
@@ -1945,6 +2080,7 @@ class DSDocument():
                     section_data['doc'] = Document()
                     section_data['heading'] = ptext
                     section_data['pos'] = section
+                    section_data['para_data'] = []
                     headings.append("(No Heading)")
                     new_sections.append(section_data)
 
@@ -1977,8 +2113,6 @@ class DSDocument():
                 offset = section_data['end_pos'] + 1
 
         return headings
-        # self.controller.updateSections(self.current_section, headings)  # 2021.12.19
-
 
     ########################################
     #
@@ -1987,7 +2121,12 @@ class DSDocument():
     #
     ########################################
 
-    def toHtml_OTOnly(self, topics=[], para_pos=-1):
+    def toHtml_OTOnly(self, topics=[], para_pos=-1, font_info=default_font_info):
+        """
+        This method is used if there is no docusope dictionary. In Write & Audit, this means
+        that it is either used without the Impressions panel, or it is used from the Online version
+        where docuscope is not integrated into the Coherence visualization.
+        """
 
         data = self.sections[self.current_section]['data']
 
@@ -2007,15 +2146,8 @@ class DSDocument():
             total_sents = len(para['sentences'])
 
             para_style = para['style']
-            if para_style == 'Title':
-                font_size = views.editor_title_font_size
-            elif para_style == 'Heading 1':
-                font_size = views.editor_h1_font_size
-            else:
-                font_size = views.editor_normal_font_size
-
+            font_size = font_info[para_style]            
             html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
-            # html_str += '<p class=\'p{}\'>'.format(pcount)
 
             scount = 1
 
@@ -2029,110 +2161,218 @@ class DSDocument():
                 while word_count < total_words:
 
                     w = sent['text_w_info'][word_count]
+                    word  = w[WORD]         # ontopic word
+                    lemma = w[LEMMA]        # lemma/topic
 
-                    if w[LEMMA] in topics:
+                    # if w[LEMMA] in topics:
+                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
                         # we need to remove periods.
-                        html_word = "<t class=\'{} p{} s{}\'>{}</t>".format(w[LEMMA].replace('.',''), pcount, scount, w[WORD])
+                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                        html_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, pcount, scount, word)
                     else:
-                        html_word = w[WORD] 
+                        html_word = word
 
                     is_space = True
                     is_combo = False
                     temp_word_count = 0
 
                     if word_count < total_words-1:
-                        next_w = sent['text_w_info'][word_count+1]
 
-                        if w[WORD] in right_quotes and html_str[-1] == ' ':
-                            # if w[WORD] is a right side quotes, and the current html_word string ends
+                        # Let's deal with hyphenations and words followed by a no-space units.
+                        next_w = sent['text_w_info'][word_count+1]
+                        next_next_w = None
+                        
+                        if word_count+1 < total_words-1:
+                            next_next_w = sent['text_w_info'][word_count+2]
+
+                        if word in right_quotes and html_str[-1] == ' ':
+                            # if w[WORD] is a right side quotes, and the current html_str string ends
                             # with a space, remove the space.
                             html_str = html_str[:-1]
 
-                        # if next_w[WORD] == '\u2026' or w[WORD] == '\u2026':   
-                        #     # an ellipsis character is treated like a word.                        
-                        #     pass
-
-                        if w[WORD] in left_quotes or w[WORD] in hyphen_slash:
-                            # if w[WORD] in left_quotes or w[WORD] in dashes:
+                        if word in left_quotes or word in hyphen_slash:
                             # w is a left side punct or a dash (not em-dash or en-dash)
                             is_space = False
 
+                        elif word == '.' and next_w[WORD].isdigit():
+                            # if word is a period and the next word is a digit + %, it's a decimal point.
+                            is_space = False
+
+                        elif word == '.' and len(next_w[WORD]) == 1 and next_w[WORD].isalpha():
+                            # if word is a period and the next word is single alphabet, it's a decimal point
+                            # or multi-level figure numbers.
+                            is_space = False
+
+                        elif word == 'can' and next_w[WORD] == 'not' and next_next_w is not None and next_next_w[WORD] != 'only':
+                            # we always spell 'can not' without a space, except when it is followd by 'only'.
+                            is_space = False
+
                         elif next_w[WORD] not in left_quotes:
-                            # next_w a punct, which is not on one of the left quotes
+
+                            # next_w is a punct, which is not on one of the left quotes
                             temp_word_count = 0
                             if next_w[WORD] in no_space_patterns:
-                                combo_word = html_word + next_w[WORD]
-                                is_space = True
-                                is_combo = True
-                                word_count += 1  # skip the next word
 
-                            elif next_w[WORD] in hyphen_slash: # hyphenation
                                 combo_word = html_word + next_w[WORD]
                                 temp_word_count = word_count + 2
 
-                                while True:
-                                    # get the next pair
-
+                                if temp_word_count < total_words:    # is the folloiwng word punct?
                                     temp_w = sent['text_w_info'][temp_word_count]
-                                    if temp_w[LEMMA] in topics:
-                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(temp_w[LEMMA].replace('.',''), 
-                                                                                                 pcount, scount, temp_w[WORD])
+
+                                    if temp_w[WORD] in no_space_patterns or temp_w[WORD] in right_quotes:
+                                        combo_word = combo_word + temp_w[WORD]
+                                        word_count = temp_word_count
+                                        is_space = True
+                                        is_combo = True
+
+                                    elif temp_w[POS] == 'PUNCT' and temp_w[WORD] not in dashes and temp_w[WORD] != ellipsis:
+                                        combo_word = combo_word + temp_w[WORD]
+                                        word_count = temp_word_count
+                                        is_space = True
+                                        is_combo = True
+
                                     else:
-                                        html_temp_word = temp_w[WORD]  
+                                        word_count += 1
+                                        is_space = True
+                                        is_combo = True
 
-                                    temp_next_w = sent['text_w_info'][temp_word_count+1]
+                                else:
+                                    word_count += 1  # skip the next word
+                                    is_space = True
+                                    is_combo = True
 
-                                    if temp_next_w[WORD] in hyphen_slash:
-                                        combo_word += html_temp_word
-                                        combo_word += temp_next_w[WORD]
-                                        temp_word_count += 2
+                            elif next_w[WORD] in hyphen_slash:
+                                combo_word = html_word + next_w[WORD] # word + '-' or '/'
+                                temp_word_count = word_count + 2
+
+                                if temp_word_count >= total_words:
+                                    pass
+
+                                temp_next_w = None
+                                while True:
+
+                                    if temp_word_count >= (total_words):
+                                        break
+
+                                    # get the next pair
+                                    temp_w = sent['text_w_info'][temp_word_count]
+                                    if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
+                                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, 
+                                                                                                 pcount, scount, 
+                                                                                                 temp_w[WORD])
+                                    else:
+                                        html_temp_word = temp_w[WORD]
+
+                                    if temp_word_count+1 < (total_words):
+                                        temp_next_w = sent['text_w_info'][temp_word_count+1]
+
+                                        if temp_next_w[WORD] in hyphen_slash:
+                                            combo_word += html_temp_word
+                                            combo_word += temp_next_w[WORD]  # word + '-' or '/'
+                                            temp_word_count += 2
+                                        else:
+                                            combo_word += html_temp_word
+                                            break
                                     else:
                                         combo_word += html_temp_word
                                         break
+
+                                if temp_next_w is not None:
+
+                                    if temp_next_w[WORD] in no_space_patterns or \
+                                       temp_next_w[WORD] in right_quotes:
+                                        is_space = False
+
+                                    elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
+                                                                         and temp_next_w[WORD] != ellipsis:
+                                        is_space = False                                        
+
+                                    else:
+                                        is_space = True
+                                else:
+                                    is_space = True
 
                                 word_count = temp_word_count # skip all the words in the hyphenated word
                                 is_space = True
                                 is_combo = True
 
-                            elif next_w[POS] == 'PUNCT':
+                            elif next_w[WORD] in right_quotes:
+                                is_space = False 
+             
+                            elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
-                        if is_space:       # followed by a space
+                            else:
+                                is_space = True
+
+                        if is_space:        
                             next_char = ' '          
-                        else:              # followed by a punctuation
+                        else:    
                             next_char = ''   
-                    else:                  # last word/char in 'sent'
-                        next_char = ' '       # end of 'sent'                           
+
+                    else:  # last word/char in 'sent'
+                        if word in ['\u201C', '\u2018']:
+                            # If the last word is an opening/left single/double quote, no space should be added.
+                            # This case should only happen if the NLP parser's result is incorrect.
+                            next_char = ''
+
+                        elif word in right_quotes:
+                            if html_str[-1] == ' ':
+                                html_str = html_str.rstrip()
+                            next_char = ' '
+                        else:
+                            next_char = ' '       # end of 'sent' 
+
 
                     if is_combo:
                         html_str += combo_word
                     else:
                         html_str += html_word
-
+                        
                     html_str += next_char
                     word_count += 1
-                # 
+
+                # if bTagOpen == True:
+                    # html_str += '</ds>'
+                    # bTagOpen = False
+
+                #  word
+                html_str += '</sent>'
+                html_str += next_char
                 scount += 1
-                html_str += '</sent>\n'
 
             # sent
             pcount += 1
-            html_str += '</p>\n\n'
+            html_str += '</p>'   # Close the paragraph tag
+
+        html_str = "<html><body>\n" + html_str + "\n</body></html>"
 
         return html_str
 
-    def toHtml(self, topics=[], para_pos=-1):
+    def toHtml(self, topics=[], para_pos=-1, font_info=default_font_info):
+        """
+        This method is used only by the desktop version of Write & Audit. It genreates an HTML string
+        for the edtiror from the parsed data.
+        """
+
+        if self.controller is None:
+            return "DSDocument.toHtml(). No controller is available."
 
         if self.controller.isDocTagged() == False:
-            # We don't suppor the OnTopic only option now.
-            # return self.toHtml_OTOnly(para_pos, topics)  
-            return "Error in toHtml()"            
+            return self.toHtml_OTOnly(topics=topics, para_pos=para_pos, font_info=font_info)            
 
         if self.sections is None:
             return "Error in toHtml()"
         else:
             try:
                 data = self.sections[self.current_section]['data']
+                doc  = self.sections[self.current_section]['doc']
+                if doc is None:
+                    raise valueError;                    
+                else:
+                    docx_paras = doc.paragraphs
+
                 if data is None:
                     raise valueError;
             except:
@@ -2155,16 +2395,6 @@ class DSDocument():
 
         for para in data['paragraphs']:    # for each paragraph
 
-            para_style = para['style']
-            if para_style == 'Title':
-                font_size = views.editor_title_font_size
-            elif para_style == 'Heading 1':
-                font_size = views.editor_h1_font_size
-            else:
-                font_size = views.editor_normal_font_size
-
-            html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
-
             scount = 1
 
             if para_pos != -1 and (para_pos+1) != pcount:
@@ -2172,6 +2402,17 @@ class DSDocument():
                 bParaCrossingPattern = False
                 bTagOpen = False
                 continue
+
+            # If the paragraph is an URL, we assume that that's an image.
+            docx_p = docx_paras[pcount-1]
+            if docx_p.text.startswith("<img "):
+                html_str += ("<p>" + docx_p.text + "</p>\n")
+                pcount += 1
+                continue
+
+            para_style = para['style']
+            font_size = font_info[para_style]
+            html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)            
 
             for sent in para['sentences']: # for each sentence
                 total_words = len(sent['text_w_info'])
@@ -2200,7 +2441,8 @@ class DSDocument():
                     lemma = w[LEMMA]        # lemma/topic
 
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
-                        html_word = '<t class=\'{} p{} s{}\'>{}</t>'.format(lemma.replace('.',''), pcount, scount, word)
+                        topic = unidecode.unidecode(lemma.replace('.',''))
+                        html_word = '<t class=\'{} p{} s{}\'>{}</t>'.format(topic, pcount, scount, word)
                     else:
                         html_word = word
 
@@ -2355,7 +2597,8 @@ class DSDocument():
                                     # get the next pair
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
-                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(temp_w[LEMMA].replace('.',''), 
+                                        topic = unidecode.unidecode(temp_w[LEMMA].replace('.',''))
+                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, 
                                                                                   pcount, scount, 
                                                                                   temp_w[WORD])
                                     else:
@@ -2420,7 +2663,6 @@ class DSDocument():
                         else:
                             next_char = ' '       # end of 'sent' 
 
-
                     if is_combo:
                         html_str += combo_word
                     else:
@@ -2439,7 +2681,9 @@ class DSDocument():
 
             # sent
             pcount += 1
-            html_str += '</p>\n\n'   # Close the paragraph tag
+            html_str += '</p>'   # Close the paragraph tag
+
+        html_str = "<html><body>\n" + html_str + "\n</body></html>"
 
         return html_str
 
@@ -2461,9 +2705,6 @@ class DSDocument():
             num_paragraphs = len(paragraphs)             # count the total # of paragraphs
 
             for i in range(num_paragraphs):              # for each paragraph in the current document.
-                p = res_docx.add_paragraph('')           # add a paragraph object
-                #run_list = list()                       # it's a temporary list to hold a run that won't be highlighted.
-                #sent_count = 0                          # reset the sentence counter for each paragraph 'p'.
 
                 style = paragraphs[i]['style']         
                 if style not in ['Normal', 'Heading 1', 'Heading 2', 'Heasing 3', 'Title']:
@@ -2471,6 +2712,24 @@ class DSDocument():
 
                 text = paragraphs[i]['text']
 
+                if text.startswith("<img"):
+                    soup = bs(text, "html.parser")
+                    tag = soup.find("img")
+                    src = tag.get('src', None)
+                    src = src.replace("file:///", "")
+                    w   = tag.get('width', None)
+                    h   = tag.get('height', None)
+                    w = int(float(w)/96.0)
+                    h = int(float(h)/96.0)
+                    if src is not None:
+                        p = res_docx.add_paragraph()           # add a paragraph object                        
+                        r = p.add_run()
+                        r.add_picture(src, width=Inches(w), height=Inches(h))
+                    continue
+
+                p = res_docx.add_paragraph('')           # add a paragraph object
+                p.style = style
+                
                 # replace underscores with spaces if there are multi-word topics
                 for mw_topic in DSDocument.multiword_topics: 
                     connected_mw_topic = mw_topic.replace(' ', '_')
@@ -2479,26 +2738,23 @@ class DSDocument():
                     text = text.replace(connected_mw_topic.title(), mw_topic.title())
                     text = text.replace(connected_mw_topic.capitalize(), mw_topic.capitalize())
 
-                if style.startswith('Heading') or style == 'Title':
-                    r = p.add_run(text)
-                    r.font.color.rgb = RGBColor(0,0,0)
-                    if style == 'Title':
-                        r.font.size = Pt(24)
-                    else:
-                        r.font.size = Pt(18)             
-                    r.underline = False
-                    r.bold = False
-                else:
-                    r = p.add_run(text)
+                # if style.startswith('Heading') or style == 'Title':
+                #     r = p.add_run(text)
+                #     r.font.color.rgb = RGBColor(0,0,0)
+                #     if style == 'Title':
+                #         r.font.size = Pt(24)
+                #     else:
+                #         r.font.size = Pt(18)             
+                #     r.underline = False
+                #     r.bold = False
+                # else:
+                #     r = p.add_run(text)
+                    
+                r = p.add_run(text)
 
         return res_docx
 
-    ##
-    # Mainly the content for the coherence panel, bottom (per sentence) portion
-    ##
-    def getLocalTopicalProgData(self, selected_paragraphs):
-        print ("getLocalTopicalProgData ()")
-        #print (selected_paragraphs)
+    def getLocalTopicalProgData(self, selected_paragraphs):  
 
         selected_paragraphs.sort()
 
@@ -2669,15 +2925,12 @@ class DSDocument():
         res = res[:-1]
         return res
 
-    ##
-    # Mainly the content for the coherence panel, top portion
-    ##
-    def getGlobalTopicalProgData(self, sort_by=views.TOPIC_SORT_APPEARANCE):
-        print ("getGlobalTopicalProgData ()")
+    def getGlobalTopicalProgData(self, sort_by=TOPIC_SORT_APPEARANCE):
+        if self.global_topical_prog_data is not None:
+            return self.global_topical_prog_data
 
         # first we should make a list of given lemmas as they appear in the text
         all_lemmas = list()
-
         temp = list()
 
         if self.sections is None:
@@ -2752,7 +3005,7 @@ class DSDocument():
 
         ###### 
         all_lemmas.sort(key=lambda tup: tup[2])      # sort by the order of appearance.
-        if sort_by == views.TOPIC_SORT_LEFT_COUNT:
+        if sort_by == TOPIC_SORT_LEFT_COUNT:
             all_lemmas.sort(key=lambda tup: tup[3], reverse=True)      # sort by the total left count
 
         res = list()
@@ -2848,13 +3101,12 @@ class DSDocument():
         # for pd in para_data:
             # pd.printData()
 
-        #return {'data': res, 'para_data': para_data}
+        #self.global_topical_prog_data = {'data': res, 'para_data': para_data}
 
-        return {'data': res, 'para_data': []}
+        self.global_topical_prog_data = {'data': res, 'para_data': []}
 
-    ##
-    # Main OnTopic style data
-    ##
+        return self.global_topical_prog_data
+
     def getSentStructureData(self):
         p_count = 1
         res = list()
@@ -2865,7 +3117,7 @@ class DSDocument():
             return res
 
         if len(self.sections) <= self.current_section:
-            return
+            return res
             
         data = self.sections[self.current_section]['data']
         for p in data['paragraphs']:        # for each paragraph
@@ -2881,7 +3133,6 @@ class DSDocument():
                 else:
                     bSkipPunct = False
 
-                # res.append(tuple([p_count, s_count, s['sent_analysis'], s['text'], bSkipPunct]))
                 res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
                 s_count += 1
 
@@ -3080,8 +3331,14 @@ class DSDocument():
 
     def calculateAdjacencyStats(self, topic=None, para_pos=-1):
         """
-        para_pos starts with 0, but pcount starts with 1. :-) FIXIT.
+        This method is used for calculating collocations between Topics and DocuScope categories.
+
+        TODO: para_pos starts with 0, but pcount starts with 1. :-) FIXIT.
         """
+
+        if self.controller is None:
+            return
+
         if self.sections is None:
             return "Error in calculateAdjacencyStats()"
         else:
@@ -3111,7 +3368,7 @@ class DSDocument():
                 for w in sent['text_w_info']: 
 
                     if w[LEMMA] == topic and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
-                        if topic_filter == views.TOPIC_FILTER_LEFT and w[ISLEFT] == False:  ## NEW 3/2/21
+                        if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  ## NEW 3/2/21
                             pass
                         else:
                             adj_stats.addParagraphID(pcount)
@@ -3203,8 +3460,13 @@ class DSDocument():
 
     def calculateAggregatedAdjacencyStats(self, topics=None, para_pos=-1):
         """
+        This method is used for calculating collocations between Topics and DocuScope categories.
+
         para_pos starts with 0, but pcount starts with 1. :-) FIXIT.
         """
+
+        if self.controller is None:
+            return
 
         if self.sections is None:
             return "Error in calculateAggregatedAdjacencyStats()"
@@ -3231,7 +3493,7 @@ class DSDocument():
             for sent in para['sentences']:
                 for w in sent['text_w_info']: 
                     if w[LEMMA] in topics:
-                        if topic_filter == views.TOPIC_FILTER_LEFT and w[ISLEFT] == False:  # NEW 3/2/21
+                        if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  # NEW 3/2/21
                             pass
                         adj_stats.addParagraphID(pcount)
                         adj_stats.addSentenceID(pcount, scount)
@@ -3327,6 +3589,9 @@ class DSDocument():
         This function is used to get the stats spefific to the given paragraph.
         It is used by the controller to update the dictionary tree.        
         """
+
+        if self.controller is None:
+            return
 
         if self.sections is None:
             return "Error in calculateAdjacencyStats()"
@@ -3589,6 +3854,11 @@ class DSDocument():
 
         output = list()
         word_count = 0
+        
+        # b_in_html_element = False
+        word = ''
+        prev_word = ''
+
         for line in token_data.split('\n'):   # each line is a word
             if line:
                 # replace commas with '\u0000'
@@ -3607,7 +3877,7 @@ class DSDocument():
                 continue
 
             word_count += 1
-
+            prev_word = word
             word  = token_info[0]    # original word
             lword = token_info[1]    # lowercase word
             end   = token_info[2]    # end reason
@@ -3686,16 +3956,19 @@ class DSDocument():
                         for w in s['text_w_info']:
                              ot_words.append(w[WORD])
 
-            csv_file = "debugging_{}.csv".format(section_id)
+
             for i in range(len(output)):
                 line = output[i]
                 if i >= len(ot_words):
                     break
                 w = ot_words[i]
                 error_table += "{},{},{},{},{},{}\n".format(line[0], line[1], line[2], line[3], line[4], w)
+                
+            # csv_file = "debugging_{}.csv".format(section_id)                
             # with open(csv_file, 'w') as fout:
                 # fout.write(error_table)
             return error_table
+            # return res
         else:
             return res
 
@@ -3754,10 +4027,6 @@ class DSDocument():
             lat  = token_info[3]    # category
             pos  = token_info[4]
 
-            # print("token_info =", token_info)
-            # print("word =", word)
-            # print("pos  =", pos)
-
             quoted_num = re.search('\"[0-9,.]+\"', word)
             if quoted_num is not None:
                 word = word[1:-1]
@@ -3788,6 +4057,7 @@ class DSDocument():
 
             elif word == "%" and end_str and end_str[-1] == ' ':
                 end_str = end_str[:-1]
+
 
             dim, clust = self.dictionary.getDimensionAndCluster(lat)
 
@@ -3990,37 +4260,38 @@ class DSDocument():
 
         self.sections[section_id]['para_data'] = lats_by_para
 
-    ###############################################################################
-    #
-    # The Methods below here are used only by the online version of DocuScope Write & Audit
-    # 
-    # The following are the top level functions that should be used to retrieve the data.
-    #     DSDocument.generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2)
-    #     DSDocument.generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE)
-    #
-    # You can use the following methods to test the data genereated by the above methods.
-    # These functions print the visualization using ASCII characters.
-    #
-    #    testPrintLocalVisData(data)
-    #    testPrintGlobalVisdata(data)
-    #
-    ###############################################################################
+###############################################################################
+#
+# The Methods below here are used only by the online version of DocuScope Write & Audit
+# 
+# The following are the top level functions that should be used to retrieve the data.
+#     DSDocument.generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2)
+#     DSDocument.generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE)
+#
+# You can use the following methods to test the data genereated by the above methods.
+# These functions print the visualization using ASCII characters.
+#
+#    testPrintLocalVisData(data)
+#    testPrintGlobalVisdata(data)
+#
+###############################################################################
 
     def generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2):
         """
         This method returns a python dictionary that contains the data that are needed for
         the visualization of coherence across sentences within 1 or more pragraphs.
+
         selected_paragraphs:    A list of paragraph IDs.
         max_topic_sents:        The total number of sentences at the beginning of paragraphs that
                                 should be considered a topic sentence.
         min_topics:             The minimum number of lexical overlaps between sentences.
+
         """
 
         self.local_topics = list()
 
         data = self.getLocalTopicalProgData(selected_paragraphs)
         if data is None:
-            #return ValueError('data is None.')
             return ({'error': 'data is None'});
 
         topic_filter = TOPIC_FILTER_LEFT_RIGHT
@@ -4032,10 +4303,7 @@ class DSDocument():
         nrows  = len(data)
         ncols  = len(header)
 
-        sent_buttons_data = [None] * (nrows-1)
-
         if ncols == 0:
-            #return ValueError('ncols is 0.')
             return ({'error': 'ncols is 0'});
 
         vis_data = dict()
@@ -4048,6 +4316,8 @@ class DSDocument():
             b_para_break = False
             true_left_count = 0
             l_count = 0
+            num_topics = 0
+            num_sents  = 0
             for ci in range(ncols):
 
                 topic = header[ci][1]
@@ -4125,11 +4395,13 @@ class DSDocument():
                         sent_pos += 1
                         sent_id  += 1
 
-                vis_data['num_sents'] = sent_id
                 vis_data['data'].append({'sentences':        topic_data, 
                                          'is_topic_cluster': is_tc,
                                          'is_global':        is_global,
                                          'topic':            list(topic_info[0:3])})
+                num_topics += 1
+
+            vis_data['num_topics'] = num_topics
 
             # debug
             # with open("sample_local_coherence_data.json", 'w') as fout:
@@ -4141,10 +4413,12 @@ class DSDocument():
         """
         This method returns a python dictionary that contains the data that are needed for
         the visualization of coherence across paragraphs.
+
         min_topics:             The minimum number of lexical overlaps between sentences.
         max_topic_sents:        The total number of sentences at the beginning of paragraphs that
                                 should be considered a topic sentence.
         sort_by:                The sorting method option.
+
         """
 
         global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
@@ -4152,13 +4426,13 @@ class DSDocument():
         self.updateGlobalTopics(global_data)
 
         if global_data is None:
-            return ValueError('global_data is None.')
+            return ({'error': 'ncols is 0'});
 
         data = global_data['data']
         para_data = global_data['para_data']
 
         if data is None:
-            return ValueError('data is None.')
+            return ({'error': 'ncols is 0'});
 
         header = data[0]   # list of tuples (POS, LEMMA, POS, COUNT)
 
@@ -4168,7 +4442,7 @@ class DSDocument():
         self.global_topics = list()
 
         if ncols == 0:
-            return ValueError('ncols is 0.')
+            return ({'error': 'ncols is 0'});
 
         vis_data = dict()
         vis_data['num_topics'] = ncols
@@ -4862,6 +5136,10 @@ class DSDocument():
 
     def testPrintGlobalVisData(self, vis_data):
 
+        if vis_data['data'] == []:
+            print("No global topics")
+            return
+
         data       = vis_data['data']
         num_paras  = vis_data['num_paras']
         num_topics = vis_data['num_topics']
@@ -4926,9 +5204,13 @@ class DSDocument():
 
     def testPrintLocalVisData(self, vis_data):
 
+        if vis_data['data'] == []:
+            print("No local topics")
+            return
+
         data       = vis_data['data']
-        num_sents  = vis_data['num_sents']
         num_topics = vis_data['num_topics']
+        num_sents  = len(data[0]['sentences'])
 
         # Print paragraph IDs
         line = " " * 30

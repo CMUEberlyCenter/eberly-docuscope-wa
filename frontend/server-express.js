@@ -12,6 +12,7 @@
 const express = require('express')
 const fs = require('fs');
 const http = require('http');
+const cors = require('cors');
 //const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
@@ -69,7 +70,8 @@ class DocuScopeWALTIService {
     this.publicHome="/public";
     this.staticHome="/static";
 
-    this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
+    // See rule retrieval code for more detail
+    //this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
     this.backend=process.env.DWA_BACKEND;
@@ -320,7 +322,24 @@ class DocuScopeWALTIService {
       }
     }
 
-    response.sendFile(__dirname + this.publicHome + request.path);
+    // Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
+    // exist on the server with other add-ons. Instead we should just configure the url to 
+    // point to the root of the host
+
+    let path=request.path;
+
+    if (request.path.indexOf ("/lti/activity/docuscope")!=-1) {
+      console.log ("We've got an LTI path, stripping ...");
+      path=request.path.replace("/lti/activity/docuscope", "/");
+    }
+
+    if (path=="/") {
+      path="/index.html";
+    }
+
+    console.log (path);
+
+    response.sendFile(__dirname + this.publicHome + path);
   }
 
   /**
@@ -330,11 +349,20 @@ class DocuScopeWALTIService {
     console.log ("processAPIRequest ("+type+") => " + request.path);
 
     if (request.path=="/api/v1/rules") {
-      response.json (this.generateDataMessage (this.rules));
+      // MvV: This file is course/assignment specific, we should therefore be able to load it
+      // dynamically. I already received 2 new files from Suguru that are each used by different
+      // courses. See the README file in the asset directory for more info.
+      let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
+      response.json (this.generateDataMessage (ruleData));
       return;
     }
 
-    if (request.path=="/api/v1/ping") {
+    /*
+     Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+     problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+     to 'ding'
+    */
+    if (request.path=="/api/v1/ding") {
       let uptime = process.uptime();
 
       console.log(this.format(uptime));
@@ -382,6 +410,14 @@ class DocuScopeWALTIService {
   run () {
     console.log ("run ()");
 
+    console.log ("Configuring CORS ...");
+
+    this.app.use(cors({
+      origin: '*'
+    }));    
+
+    console.log ("Configuring endpoints ...");
+
     this.app.get('/api/v1/*', (request, response) => {
       //console.log ("get(api)");
       this.processAPIRequest ("GET",request,response);
@@ -401,8 +437,6 @@ class DocuScopeWALTIService {
       //console.log ("post()");
       this.processRequest (request,response);
     });
-
-
 
     this.app.listen(port, () => {
       console.log(`App running on port ${port}.`);

@@ -1,0 +1,26 @@
+
+.cluster-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0px;
+  padding: 4px;
+}
+
+.cluster-title {
+  flex: 0;
+}
+
+.cluster-icon {
+  float: left;
+  width: 28px;
+  margin-right: 5px;
+}
+
+.cluster-content {
+  flex: 1;
+  min-height: 100px;
+}
+
+.cluster-text-padder {
+  padding: 10px;
+}

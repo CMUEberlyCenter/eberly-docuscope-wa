@@ -16,7 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useState,
+  useState
 } from "react";
 import {
   Alert,
@@ -27,7 +27,7 @@ import {
   Navbar,
   NavDropdown,
   Tab,
-  Tabs,
+  Tabs
 } from "react-bootstrap";
 import { createEditor, Descendant } from "slate";
 import {
@@ -35,7 +35,7 @@ import {
   RenderElementProps,
   RenderLeafProps,
   Slate,
-  withReact,
+  withReact
 } from "slate-react";
 import Clarity from "../../components/Clarity/Clarity";
 import Coherence from "../../components/Coherence/Coherence";
@@ -44,7 +44,7 @@ import Impressions from "../../components/Impressions/Impressions";
 import {
   editorState,
   editorText,
-  useEditorState,
+  useEditorState
 } from "../../service/editor-state.service";
 import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
@@ -86,7 +86,10 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = (props: { api: apiCall }) => {
+const StudentView = (props: { 
+    api: apiCall,
+    ruleManager: any
+  }) => {
   const navId = useId();
   const selectId = useId();
   const [showInfoColumn, setShowInfoColumn] = useState(false);
@@ -109,6 +112,7 @@ const StudentView = (props: { api: apiCall }) => {
         children: [{ text: "" }],
       },
     ]);
+
   useEffect(() => {
     // Set editor text if initializing from session storage.
     // Necessary for analysis tool to receive the initial
@@ -125,33 +129,40 @@ const StudentView = (props: { api: apiCall }) => {
   const [toolSeparatorXPosition, setToolSeparatorXPosition] = useState<
     undefined | number
   >(undefined);
+
   const [toolSeparatorDragging, setToolSeparatorDragging] = useState(false);
   const [rightSeparatorXPosition, setRightSeparatorXPosition] = useState<
     undefined | number
   >(undefined);
+
   const [rightSeparatorDragging, setRightSeparatorDragging] = useState(false);
   const toolRef = createRef<HTMLDivElement>();
   const rightRef = createRef<HTMLDivElement>();
+
   const onMouseDownTool = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     setToolSeparatorXPosition(event.clientX);
     setToolSeparatorDragging(true);
   };
+
   const onTouchStartTool = (event: React.TouchEvent<HTMLDivElement>) => {
     setToolSeparatorXPosition(event.touches[0].clientX);
     setToolSeparatorDragging(true);
   };
+
   const onMouseDownRight = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
     setRightSeparatorXPosition(e.clientX);
     setRightSeparatorDragging(true);
   };
+
   const onTouchStartRight = (event: React.TouchEvent<HTMLDivElement>) => {
     setRightSeparatorXPosition(event.touches[0].clientX);
     setRightSeparatorDragging(true);
   };
+
   const onMove = useCallback(
     (clientX: number) => {
       if (toolSeparatorDragging && toolWidth && toolSeparatorXPosition) {
@@ -213,6 +224,7 @@ const StudentView = (props: { api: apiCall }) => {
     toolSeparatorDragging,
     toolWidth,
   ]);
+
   useEffect(() => {
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("touchmove", onTouchMove);
@@ -223,6 +235,7 @@ const StudentView = (props: { api: apiCall }) => {
       document.removeEventListener("mouseup", onMouseUp);
     };
   }, [onMouseMove, onMouseUp, onTouchMove]);
+
   useEffect(() => {
     if (toolRef.current) {
       if (!toolWidth) {
@@ -232,6 +245,7 @@ const StudentView = (props: { api: apiCall }) => {
       toolRef.current.style.width = `${toolWidth}px`;
     }
   }, [toolRef, toolWidth]);
+
   useEffect(() => {
     if (rightRef.current) {
       if (!rightWidth) {
@@ -362,13 +376,13 @@ const StudentView = (props: { api: apiCall }) => {
         <aside ref={toolRef} className="d-flex flex-column tools-pane">
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
-              <Expectations />
+              <Expectations api={props.api} ruleManager={props.ruleManager}/>
             </Tab>
             <Tab eventKey={"coherence"} title="Coherence">
-              <Coherence api={props.api} />
+              <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
             <Tab eventKey={"clarity"} title="Clarity">
-              <Clarity api={props.api} />
+              <Clarity api={props.api} ruleManager={props.ruleManager} />
             </Tab>
             <Tab eventKey={"impressions"} title="Impressions">
               <Impressions />

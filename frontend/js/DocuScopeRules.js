@@ -11,6 +11,7 @@ export default class DocuScopeRules {
     this.name = "unassigned";
     this.rules = [];
     this.ready = false;
+    this.original = null;
   }
 
   /**
@@ -31,8 +32,9 @@ export default class DocuScopeRules {
    *
    */
   parse(anObject) {
-    //console.log ("parse ()");
-
+    console.log ("parse ()");
+    
+    this.original = anObject;
     this.name = anObject.name;
 
     for (let i = 0; i < anObject.rules.length; i++) {
@@ -43,6 +45,8 @@ export default class DocuScopeRules {
     }
 
     this.ready = true;
+
+    this.debugRules();
   }
 
   /**
@@ -51,6 +55,9 @@ export default class DocuScopeRules {
   debugRules() {
     console.log("debugRules ()");
 
+    console.log (this.original);
+
+    /*
     console.log("+ Name: " + this.name);
     console.log("+ Rules ");
 
@@ -60,6 +67,7 @@ export default class DocuScopeRules {
       console.log("  +-- " + aRule.description);
       console.log("  +-- " + aRule.type);
     }
+    */
   }
 
   /**

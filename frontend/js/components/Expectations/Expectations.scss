@@ -1,26 +1,60 @@
-.expectations {
-  .expectations-rule:hover {
-    color: var(--bs-dark);
-    background-color: var(--bs-info);
-  }
-  ol.expectations-list {
-    list-style-type: decimal;
-    > li {
-      font-weight: bold;
-      font-size: 1.1em;
-      > div {
-        font-weight: initial;
-        font-size: 1em;
-      }
-      ol {
-        list-style-type: lower-alpha;
-        > li {
-          font-weight: normal;
-          ol {
-            list-style-type: lower-roman;
-          }
-        }
-      }
-    }
-  }
+/* 
+  MvV: We will go full-on SCSS but for now the top priority is to match everything with the DSWA desktop
+  version and that's styled internally in a more linear way
+*/
+
+.expectations-list {
+  font-weight: bold;
+  font-size: 12pt;
+}
+
+.expectations-rule {
+  font-size: 12pt;
+  cursor: pointer;
+}
+
+.expectations-rule:hover {
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+}
+
+.expectations-clusters {
+  font-size: 11pt;
+  font-weight: normal;
+}
+
+.expectations-cluster {
+  font-size: 12pt;
+  cursor: pointer;
+}
+
+.expectations-cluster:hover {
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+}
+
+.cluster-line {
+  display: flex;
+  flex-direction: row;
+}
+
+.cluster-line-label {
+  flex: 1;
+}
+
+.cluster-line-icon {
+  flex: 0;
+  width: 18px;
+}
+
+.cluster-mini-icon {
+  flex: 0;
+  width: 18px;
+  padding-top: 3px;
+  padding-right: 3px;
+  margin-right: 2px;
+}
+
+.cluster-mini-label {
+  flex: 0;
+  font-size: 10pt;
+  padding-top: 2px;
 }
