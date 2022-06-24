@@ -34,5 +34,8 @@ jobs:
       working-directory: ./frontend
     - run: npm run build --if-present
     - run: npm test
+      continue-on-error: true
     - run: npm run eslint
+      continue-on-error: true
     - run: npm run prettier
+      continue-on-error: true
