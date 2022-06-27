@@ -1216,10 +1216,10 @@
   dependencies:
     "@babel/runtime" "^7.6.2"
 
-"@react-rxjs/core@^0.9.7", "@react-rxjs/core@>=0.1.0":
-  "integrity" "sha512-79wFDjIpFUQRXnHOd3a9WPOHXLgGIjijTzy1Rjszwt1zcx69ZNfTcu/vdzKJs52VCfl68ZbF2e0j6MutQKvrUQ=="
-  "resolved" "https://registry.npmjs.org/@react-rxjs/core/-/core-0.9.7.tgz"
-  "version" "0.9.7"
+"@react-rxjs/core@^0.9.8", "@react-rxjs/core@>=0.1.0":
+  "integrity" "sha512-H629Fqjm+fIItTnsffbYPXbDRIfTy7Iq1UItoqADwDj31MUVX94F0+OlZFQ3A5wxI86xGq0BNHzzKoDw2eri9g=="
+  "resolved" "https://registry.npmjs.org/@react-rxjs/core/-/core-0.9.8.tgz"
+  "version" "0.9.8"
   dependencies:
     "@rxstate/core" "^0.0.1"
     "use-sync-external-store" "^1.0.0"
@@ -3383,10 +3383,10 @@
     "d3-selection" "2 - 3"
     "d3-transition" "2 - 3"
 
-"d3@^7.4.5":
-  "integrity" "sha512-Jl349p+A0oTrTeoSFSD6oIlKVDi2B4eJDOhn2kFSE+Fq7wRABBTWLwbG8IZKKdUFI3/fBgMxjUYwTjyoAB0EJg=="
-  "resolved" "https://registry.npmjs.org/d3/-/d3-7.4.5.tgz"
-  "version" "7.4.5"
+"d3@^7.5.0":
+  "integrity" "sha512-b0hUpzWOI99VOek1VpmARF67izlrvd6C83wAAP+Wm7c3Prx7080W26ETt51XTiUn5HDdgVytjrz1UX/0P48VdQ=="
+  "resolved" "https://registry.npmjs.org/d3/-/d3-7.5.0.tgz"
+  "version" "7.5.0"
   dependencies:
     "d3-array" "3"
     "d3-axis" "3"
@@ -6958,10 +6958,10 @@
   "resolved" "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   "version" "2.1.2"
 
-"sass-loader@^13.0.1":
-  "integrity" "sha512-IeCdtvhwMY6GvgMtWJKLcehMeETvVZZjgZLJbQbwrLVHhL7zmj+7YsEPe5yhi04TaqzSZANz4CMu1QSh0/G9ew=="
-  "resolved" "https://registry.npmjs.org/sass-loader/-/sass-loader-13.0.1.tgz"
-  "version" "13.0.1"
+"sass-loader@^13.0.2":
+  "integrity" "sha512-BbiqbVmbfJaWVeOOAu2o7DhYWtcNmTfvroVgFXa6k2hHheMxNAeDHLNoDy/Q5aoaVlz0LH+MbMktKwm9vN/j8Q=="
+  "resolved" "https://registry.npmjs.org/sass-loader/-/sass-loader-13.0.2.tgz"
+  "version" "13.0.2"
   dependencies:
     "klona" "^2.0.4"
     "neo-async" "^2.6.2"
