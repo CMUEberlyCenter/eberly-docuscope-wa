@@ -13,9 +13,15 @@
   cursor: pointer;
 }
 
-.expectations-rule:hover {
-  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+.expectations-rule-selected:hover {
+  color: grey;
 }
+
+/*
+.expectations-rule:hover {
+  color: grey;
+}
+*/
 
 .expectations-clusters {
   font-size: 11pt;
@@ -27,10 +33,6 @@
   cursor: pointer;
 }
 
-.expectations-cluster:hover {
-  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
-}
-
 .cluster-line {
   display: flex;
   flex-direction: row;
@@ -38,6 +40,14 @@
 
 .cluster-line-label {
   flex: 1;
+}
+
+.cluster-line-label:hover {
+  color: grey;
+}
+
+.cluster-selected {
+  background: #87bbff;
 }
 
 .cluster-line-icon {

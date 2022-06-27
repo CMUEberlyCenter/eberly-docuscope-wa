@@ -111,7 +111,7 @@ const Expectations = (props: {
   /**
    * 
    */
-  const createRuleTree = (ruleManager: any) => {
+  const createRuleTree = (ruleManager: any, currentRule: number, currentCluster: number) => {
     let listElements=[];
 
     for (let i=0;i<ruleManager.rules.length;i++) {
@@ -121,8 +121,15 @@ const Expectations = (props: {
       for (let j=0;j<aRule.children.length;j++) {
         let aCluster=aRule.children [j];
         let id="rule-"+i+"-"+j;
+
+        let clusterClass="cluster-line";
+
+        if ((i==currentRule) && (j==currentCluster)) {
+          clusterClass="cluster-line cluster-selected";
+        }
+
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
-          <div className="cluster-line">
+          <div className={clusterClass}>
             <div className="cluster-line-label">{aCluster.name}</div>
             <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterWarningIcon}/></div>
             <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
@@ -134,13 +141,14 @@ const Expectations = (props: {
       }
 
       let subRules=<ol type="a" className="expectations-clusters">{clusterList}</ol>
-      listElements.push (<li className="expectations-rule" key={"rule"+i} id={"rule-"+i} onClick={(e) => onRuleClick (e,i)}>{aRule.name}{subRules}</li>)    
+
+      listElements.push (<li className="expectations-rule" key={"rule"+i} id={"rule-"+i} onClick={(e) => onRuleClick (e,i)}><div className="expectations-rule-selected">{aRule.name}</div>{subRules}</li>)    
     }
 
     return (<ol type="1" className="expectations-list">{listElements}</ol>);
   }
 
-  const ruleTree = createRuleTree (props.ruleManager);
+  const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -166,4 +174,5 @@ const Expectations = (props: {
     </Card>
   );
 };
+
 export default Expectations;
