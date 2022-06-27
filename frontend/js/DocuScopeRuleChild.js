@@ -11,8 +11,9 @@ export default class DocuScopeRuleChild {
     let dTools = new DataTools();
 
     this.id = dTools.uuidv4();
-    this.name = "unassigned";
-    this.description = "unassigned";
+    this.name = "";
+    this.description = "";
+    this.examples = "";
   }
 
   /**
@@ -23,5 +24,6 @@ export default class DocuScopeRuleChild {
 
     this.name = anObject.name;
     this.description = anObject.description;
+    this.examples = anObject.examples;
   }
 }

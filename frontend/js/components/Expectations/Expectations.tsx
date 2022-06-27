@@ -82,25 +82,30 @@ const Expectations = (props: {
 
   const ref = useId();
 
-  const [ruleDescription, setRuleDescroption] = useState("");
+  const [ruleState, setCurrentRuleState] = useState({currentRule: -1, currentCluster: -1});
 
   /**
    * 
    */
-  const onClusterClick = (e:any, rule: number, cluster: number) => {
-    console.log ("onClusterClick ("+rule+","+cluster+")");    
+  const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
+    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+
     e.preventDefault ();
+    e.stopPropagation ();
+
+    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
   }
 
   /**
    * 
    */
   const onRuleClick = (e:any, ruleIndex: number) => {
-    //console.log ("onRuleClick ("+ruleIndex+")");
-    e.preventDefault ();
-    let aRule:any=props.ruleManager.rules [ruleIndex];
+    console.log ("onRuleClick ("+ruleIndex+")");
 
-    setRuleDescroption (aRule.description);
+    e.preventDefault ();
+    e.stopPropagation ();
+   
+    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: -1});
   }
 
   /**
@@ -156,7 +161,7 @@ const Expectations = (props: {
           {ruleTree}
           </ErrorBoundary>
         </Subscribe>
-        <ClusterPanel ruleDescription={ruleDescription}/>
+        <ClusterPanel ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />
       </Card.Body>
     </Card>
   );
