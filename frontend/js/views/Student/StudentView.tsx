@@ -53,6 +53,9 @@ import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
+
 /**
  * For handling clicks on the tagged text for the impressions tool.
  * It will reveal the tag for the clicked on pattern while hiding
@@ -92,7 +95,7 @@ const StudentView = (props: {
   }) => {
 
   // Status handlers
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Application ready, rules loaded");
   const [language, setLanguage] = useState("ENG");
 
   const navId = useId();
@@ -474,8 +477,8 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
-        <div className="statusbar-ruleversion">{props.ruleManager.getVersion ()}</div>
-        <div className="statusbar-language">{language}</div>
+        <div className="statusbar-ruleversion"><FontAwesomeIcon icon={faBook} style={{marginLeft: "2px", marginRight: "2px"}} />{props.ruleManager.getVersion ()}</div>
+        <div className="statusbar-language"><FontAwesomeIcon icon={faGlobe} style={{marginLeft: "2px", marginRight: "2px"}} />{language}</div>
       </footer>
     </div>
   );
