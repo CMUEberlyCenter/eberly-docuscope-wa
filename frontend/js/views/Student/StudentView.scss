@@ -49,3 +49,26 @@ $cmu-secondary-gold: #a60;
   min-width: 16rem;
   width: calc(100hmax - 6.5in - 390px);
 }
+
+.statusbar {
+  display: flex;
+  flex-direction: row;
+  color: white;
+}
+
+.statusbar-status {
+  flex: 1;
+}
+
+.statusbar-ruleversion {
+  flex: 0;
+  min-width: 175px;
+  padding: 0px 2px 0px 2px;
+}
+
+.statusbar-language {
+  flex: 0;
+  min-width: 75px;
+  padding: 0px 2px 0px 2px;
+  text-align: right;
+}

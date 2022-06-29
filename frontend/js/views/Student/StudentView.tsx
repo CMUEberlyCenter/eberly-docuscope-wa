@@ -90,6 +90,11 @@ const StudentView = (props: {
     api: apiCall,
     ruleManager: any
   }) => {
+
+  // Status handlers
+  const [status, setStatus] = useState("");
+  const [language, setLanguage] = useState("ENG");
+
   const navId = useId();
   const selectId = useId();
   const [showInfoColumn, setShowInfoColumn] = useState(false);
@@ -100,7 +105,6 @@ const StudentView = (props: {
     setCurrentTab(key);
     currentTool.next(key);
   };
-  const status = ""; // TODO: nothing currently sets the status.
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
   // Set initial value to stored session data or empty.
@@ -468,8 +472,13 @@ const StudentView = (props: {
           <></>
         )}
       </main>
-      <footer className="bg-dark text-info">Status: {status}</footer>
+      <footer className="bg-dark statusbar">
+        <div className="statusbar-status">{status}</div>
+        <div className="statusbar-ruleversion">{props.ruleManager.getVersion ()}</div>
+        <div className="statusbar-language">{language}</div>
+      </footer>
     </div>
   );
 };
+
 export default StudentView;

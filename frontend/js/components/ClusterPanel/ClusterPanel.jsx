@@ -80,25 +80,33 @@ class ClusterPanel extends Component {
    * 
    */
   createRuleDescription () {
+  	console.log ("createRuleDescription ("+this.props.currentRule+","+this.props.currentCluster+")");
+
   	let rules=this.props.ruleManager.rules;
 
   	if (!rules) {
       return ("Internal error: no rule definitions available");
   	}
   	
+  	// Nothing selected yet
   	if (this.props.currentRule==-1) {
-      return ("Internal error: invalid rule or cluster index provided");
-  	}
-
-  	if (this.props.currentRule==-1) {
-  	  return ("");
+      return ("");
   	}
 
   	let rule=rules [this.props.currentRule];
 
   	if (!rule) {
-      return ("Internal error: invalid ruleprovided");
+      return ("Internal error: invalid rule provided");
   	}
+
+    if (this.props.currentCluster!=-1) {
+      let description=rule.children [this.props.currentCluster].description;
+  	  if (description=="") {
+  	    description=" ";
+  	  }
+  	  console.log ("Description: " + description);
+  	  return (description);
+    }
 
     return (rule.description);
   }
@@ -148,7 +156,7 @@ class ClusterPanel extends Component {
       return (<div className="cluster-examples">Internal error: invalid cluster provided</div>);
   	}
 
-  	console.log ("Example data: " + cluster.examples);
+  	//console.log ("Example data: " + cluster.examples);
 
     return (<div className="cluster-examples" dangerouslySetInnerHTML={{ __html: cluster.examples }}></div>);
   }

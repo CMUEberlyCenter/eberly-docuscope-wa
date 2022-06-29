@@ -12,6 +12,7 @@ export default class DocuScopeRules {
     this.rules = [];
     this.ready = false;
     this.original = null;
+    this.version = "1.0.0?";
   }
 
   /**
@@ -19,6 +20,17 @@ export default class DocuScopeRules {
    */
   getReady() {
     return this.ready;
+  }
+
+  /**
+   * 
+   */
+  getVersion () {
+    if (this.ready==false) {
+      return ("No rules loaded yet")
+    }
+
+    return (this.name + ": (" + this.version + ")");
   }
 
   /**
@@ -33,7 +45,7 @@ export default class DocuScopeRules {
    */
   parse(anObject) {
     console.log ("parse ()");
-    
+
     this.original = anObject;
     this.name = anObject.name;
 
