@@ -8,31 +8,6 @@ import './ClusterTopics.scss';
 
 import clusterIcon from '../../../css/icons/topic_cluster_icon.png';
 
-// https://javascript.plainenglish.io/editable-html-in-react-6dd67dd7e302
-const EditableElement = (props) => {
-  const { onChange } = props;
-  const element = useRef();
-  let elements = React.Children.toArray(props.children);
-  if (elements.length > 1) {
-    throw Error("Can't have more than one child");
-  }
-  const onMouseUp = () => {
-    const value = element.current?.value || element.current?.innerText;
-    onChange(value);
-  };
-  useEffect(() => {
-    const value = element.current?.value || element.current?.innerText;
-    onChange(value);
-  }, []);
-  elements = React.cloneElement(elements[0], {
-    contentEditable: true,
-    suppressContentEditableWarning: true,
-    ref: element,
-    onKeyUp: onMouseUp
-  });
-  return elements;
-};
-
 /**
  *
  */
@@ -46,11 +21,13 @@ class ClusterPanel extends Component {
 
     this.state = {      
       currentTab: "expectationabout",
-      topics: "Enter custom topics here"
+      topics: "",
+      topicList: []
     };
 
     this.switchTab=this.switchTab.bind(this);
     this.onTopicsChange=this.onTopicsChange.bind(this);
+    this.onCustomTopicUpdate=this.onCustomTopicUpdate.bind(this);
   }
 
   /**
@@ -67,13 +44,36 @@ class ClusterPanel extends Component {
   /**
    * 
    */
-  onTopicsChange (value) {
+  onTopicsChange (e) {
   	console.log ("onTopicsChange ()");
-  	console.log (value);
+  	
+  	let newList=[];
+
+  	let rawText=e.target.value;
+
+    if (rawText) {
+      let lines=rawText.split ("\n");
+      for (let i=0;i<lines.length;i++) {
+      	if (lines [i]!="") {
+      	  newList.push (lines [i]);
+      	}
+      }
+    }
+
+    console.log (newList);
 
   	this.setState ({
-      topics: value
+      topics: e.target.value,
+      topicList: newList
   	});
+  }
+
+  /**
+   * 
+   */
+  onCustomTopicUpdate (e) {
+    console.log ("onCustomTopicUpdate ()");
+
   }
 
   /**
@@ -108,13 +108,12 @@ class ClusterPanel extends Component {
    */
   createTopicEditor () {
     return (<div className="cluster-topic-editor">
-    	<div className="cluster-topic-input">   
-	      <EditableElement onChange={this.onTopicsChange}>
-	        <p>{this.state.topics}</p>
-	      </EditableElement>    	  
-    	</div>
+        <textarea
+          className="cluster-topic-input"
+	      value={this.state.topics}
+	      onChange={this.onTopicsChange} />
     	<div className="cluster-topic-controls">
-    	  <Button>Update</Button>
+    	  <Button onClick={(e) => this.onCustomTopicUpdate (e)}>Update</Button>
     	</div>
     </div>);
   }

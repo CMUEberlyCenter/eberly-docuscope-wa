@@ -169,7 +169,7 @@ const Expectations = (props: {
           {ruleTree}
           </ErrorBoundary>
         </Subscribe>
-        <ClusterPanel ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />
+        <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />
       </Card.Body>
     </Card>
   );
