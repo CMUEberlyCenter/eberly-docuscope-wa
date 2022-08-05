@@ -150,6 +150,8 @@ const Expectations = (props: {
 
   const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
 
+  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />;
+
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header>
@@ -169,7 +171,7 @@ const Expectations = (props: {
           {ruleTree}
           </ErrorBoundary>
         </Subscribe>
-        <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />
+        {clusterpanel}
       </Card.Body>
     </Card>
   );

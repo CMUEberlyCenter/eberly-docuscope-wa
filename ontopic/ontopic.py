@@ -104,7 +104,15 @@ class OnTopic:
     #print (envelope)
 
     data=envelope ["data"]
-    raw=data["base"];
+    raw=data["base"]
+    customString=data["custom"]
+    custom="";
+
+    if (isinstance(customString, str)):
+      custom = customString.split(";")
+
+    #print ("Custom: ");
+    #print (custom);
 
     decoded=base64.b64decode(raw).decode('utf-8')
 
@@ -115,6 +123,10 @@ class OnTopic:
 
     document=DSDocument ()
     document.loadFromTxt (unescaped)
+
+    # What's the difference between the two methods below?
+    #document.setUserTopics (custom);
+    document.setUserDefinedTopics (custom);
 
     coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()

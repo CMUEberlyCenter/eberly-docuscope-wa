@@ -83,7 +83,7 @@
     "webpack-dev-server": "^4.9.2"
   },
   "dependencies": {
-    "@cmu-eberly-center/eberly-ontopic-visualization": "^0.5.21",
+    "@cmu-eberly-center/eberly-ontopic-visualization": "^0.5.22",
     "@fortawesome/fontawesome-free": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/react-fontawesome": "^0.1.18",

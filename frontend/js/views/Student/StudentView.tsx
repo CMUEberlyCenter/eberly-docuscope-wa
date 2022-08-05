@@ -352,6 +352,13 @@ const StudentView = (props: {
       ></div>
     </React.Fragment>
   );
+
+  let infocolumn;
+
+  if (showInfoColumn==true) {
+    infocolumn=<div className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden ds-info"></div>;
+  }
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -396,11 +403,13 @@ const StudentView = (props: {
             </Tab>
           </Tabs>
         </aside>
+
         <Divider
           onMouseDown={onMouseDownTool}
           onTouchEnd={onMouseUp}
           onTouchStart={onTouchStartTool}
         />
+        
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             <Form.Group>
@@ -447,33 +456,7 @@ const StudentView = (props: {
             </Slate>
           </Card.Body>
         </Card>
-        {showInfoColumn ? (
-          <>
-            <Divider
-              onMouseDown={onMouseDownRight}
-              onTouchEnd={onMouseUp}
-              onTouchStart={onTouchStartRight}
-            />
-            <aside
-              ref={rightRef}
-              className={`cluster-pane ${showInfoColumn ? "" : "d-none"}`}
-            >
-              {/* Optional third panel controlled by header menu button. */}
-              <Card className="m-1">
-                <Card.Header>
-                  <h5>Topic Clusters</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Alert variant="warning">
-                    Topic Cluster information is unavailable.
-                  </Alert>
-                </Card.Body>
-              </Card>
-            </aside>
-          </>
-        ) : (
-          <></>
-        )}
+        {infocolumn}
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>

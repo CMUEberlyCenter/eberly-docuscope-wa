@@ -1,216 +1,270 @@
 {
-    "name": "Change Proposal",
+    "name": "P1 Exploratory Data Analysis",
     "rules": [
         {
-            "name": "Establish the Current Conditions",
-            "description": "<body>\n<p>In a change proposal, you first want to establish the <span style=\"font-weight:600;\">current conditions</span>. These are the present conditions in need of change. Another common name for the current conditions is the <span style=\"font-weight:600;\">status quo</span>. </p>\n<p></p></body>",
+            "name": "Describing Real-World Importance",
+            "description": "<body>\n<p>TBD</p></body>",
             "topics": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "What is the thing you propose to change?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by describing the thing you propose to change neutrally.</p>\n<p>Consider a writer who is a member of their college's rowing club. The writer can think of various neutral things to say about club. Neutrally, the rowing club has been in existence for decades, has at any time about twenty members, and recruits students from across campus. </p>\n<p></p></body>",
+                    "name": "What is motivating this research? What is the real-world importance?",
+                    "description": "<body>\n<p>Motivate the analysis of the data, with relation to the potential importance or impact in the world.\u00a0 Summarize the research questions that will be addressed, with connection to the motivation. </p>\n<p>The introduction should not have detailed methodological discussion, it should just be the place to catch the reader\u2019s interest. </p></body>",
                     "topics": [
                         {
-                            "lemma": "Thing You Want To Change",
+                            "lemma": "Real-World Connections",
                             "user_defined": true,
                             "pre_defined_topics": [],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>The <span class=\"topic\">rowing club</span> at our university was founded in 1985 and takes in studentss from many majors across campus.</p>\n<p>The <span class=\"topic\">technical interview process</span> is something almost all computer science majors go through when they graduate.</p>\n<p>This generation of college students is well-known to be actively involved in community service but the<span class=\"topic\"> university</span> can be slow to acknowleddge this.</p>\n<p>Most campus eateries provide allergen sheets that list the allergens in their foods but <span class=\"topic\">some</span> don't.</p>\n<p></p></body>",
+                    "examples": "<body>\n<p>TBD3</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>By meeting this expectation, you make your writing more considerate. Your reader needs a neutral picture of what's going on now as a baseline for helping the reader understand why you are invested in the status quo and why you want to change it. By supporting the reader's need for this neutral picture before you complicate it, your text is <span style=\"font-style:italic;\">considerate.</span></p></body>",
-                    "values": [
-                        "considerate"
-                    ],
-                    "parent": "Establish the Current Conditions"
-                },
-                {
-                    "name": "What's good happening now that makes this change worth investing in?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by describing the positive aspects of the current state (what's working?) to establish the fact that this change is a worthwhile investment.</p>\n<p>Let's return to our rower who wants their college to upgrade rowing from a club sport to a varsity sport. You want to show what makes investment in that upgrade worthwhile. </p>\n<p>What record of success has the rowing club shown that makes this upgrade both important and timely? Words and phrases that help answer this question might be \u201crecruits committed individuals\u201d, \u201chas won many trophies in community competition\u201d, and \u201crespresents some of the university's best scholar-athletes\u201d.</p>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Positive Aspects of the Current State",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>The rowing club has <span class=\"topic\">boasted many top student athletes over the years</span>.</p>\n<p>Today's students are<span class=\"topic\"> greatly interested in learning everything they can</span> about personal finance.</p>\n<p>Vegan students have <span class=\"topic\">waiting patiently </span>for the uiversity to create an all-vegan eatery. </p>\n<p>Even students who <span class=\"topic\">pride themsevles on making it to class consistently and on-time</span> are having more trouble doing so with the lack of crossing lanes. </p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By meeting this expectation, you show your reader that the status quo contains positive features only worth preserving but worth investing in further. Your ability to argue for why the time is right for change enhances your <span style=\"font-style:italic;\">crediblity</span> to steward the status quo into the future and that in turn makes your writing more <span style=\"font-style:italic;\">compelliing. </span>In addition, to comprehend your proposal, your reader needs a clear picture of what's right about the current conditions to understand why the status quo deserves additional investment. Your support of the reader's comprehension and informed judgment makes you a <span style=\"font-style:italic;\">considerate</span> writer.</p></body>",
-                    "values": [
-                        "credible",
-                        "considerate",
-                        "compelling"
-                    ],
-                    "parent": "Establish the Current Conditions"
-                },
-                {
-                    "name": "What's bad happening now that makes this change necessary? (gaps)",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by describing the problems associated with the thing you want to change, and why these problems make the proposed change ncessary.</p>\n<p>Let's return to our rower who wants their college to upgrade rowing from a club sport to a varsity sport. You will want to list negative information about the status of the rowing club that makes change seem necessary. </p>\n<p>Negative words and phrases associated with the current conditions might be that, because rowing remains only a club and not a varsity sport, the college \u201closes top recruits to other schools while the rowers are left to rely on \u201doutdated rowing equipment\u201c, and \u201dinadequate\u201c medical coverage compared to the coverage extended to the members of the varsity sports.</p>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Current Problems",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>The rowing club on this campus is<span class=\"topic\"> imperiled</span> because it has not been granted status as a variety sport.</p>\n<p>The current tests that many technology companies give to evalulate student applicant programming skills are <span class=\"topic\">unfair and invalid</span> meausres of what professional programmers need to do on the job.</p>\n<p>A street that hundreds of students cross per hour to get to their classes<span class=\"topic\"> lacks crosswalks, stop signs, and traffic lights, and is a prsent danger </span>to students.</p>\n<p>Our campus currently <span class=\"topic\">has no eatery</span> that satisfies the nutritional requirements of vegans.</p>\n<p>There is a <span class=\"topic\">dearth of reporters on the campus newspaper</span> primarily due to apathy.</p>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By creating easily identifiable and troubling gap sentences, you show your <span style=\"font-style:italic;\">crediblity </span>to motivate change and you show your considerateness to readers to prepare them to comprehend the change you propose. </p></body>",
-                    "values": [
-                        "credible",
-                        "considerate"
-                    ],
-                    "parent": "Establish the Current Conditions"
-                }
-            ],
-            "cv_description": "<body>\n<p></p></body>",
-            "values": [],
-            "parent": null
-        },
-        {
-            "name": "Present Your Change Proposal",
-            "description": "<body>\n<p>After you have established the current conditions, you are ready to present your proposal for change. </p></body>",
-            "topics": [],
-            "examples": "<body>\n<p></p></body>",
-            "type": "bounded_optional",
-            "is_group": true,
-            "children": [
-                {
-                    "name": "What concrete change(s) do you propose?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by describing the specific changes you propose.</p>\n<p>Let's return to our rower who wants to make rowing a varsity sport on campus. The change proposed is the topic cluster \u201cmake rowing a varsity sport\u201d or simply \u201cvarsity sport\u201d. Sentences containing that topic, and variations, should recur consistently throughout the change proposal, and with each recurrence, the reader will take it for the proposed solution.</p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Proposed Changes",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>Rowing needs to be turned into a <span class=\"topic\">varsity sport</span>.</p>\n<p>Companies need <span class=\"topic\">fairer ways to test the ability of programmers</span>.</p>\n<p>The university needs to place a <span class=\"topic\">stop sign and crosswalk</span> at this dangerous intersection.</p>\n<p>Dining services on campus should <span class=\"topic\">label all foods</span> sold <span class=\"topic\">with nutritional and allergenic information</span>.</p>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By meeting this expectation, you make it easy for your reader to pick out your proposed change and this makes your text a considerate text.</p></body>",
-                    "values": [
-                        "considerate"
-                    ],
-                    "parent": "Present Your Change Proposal"
-                },
-                {
-                    "name": "How does your proposal fill the gaps?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by including words and phrases that spell out the improvements that will result from putting your proposed change into effect.</p>\n<p>Consider our rowing example where the proposed change is to upgrade rowing from a club sport to a varsity sport. Here the phrase \u201cvarsity sport\u201d would often be close to the proposed changes.</p>\n<p>Phrases associated with improvements include positive languages.</p>\n<ul><li>\u201cMaking rowing a varsity sport will <span style=\"font-weight:600;\">help recruit the best</span> rowers graduating from high school\u201d</li>\n<li>\u201cAs a varsity sport, rowing will <span style=\"font-weight:600;\">put our rowing team on the map</span>\u201d</li>\n<li>\u201cUpgrading rowing to a varsity sport will <span style=\"font-weight:600;\">grow our population</span> of student athletes\u201d </li></ul>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Improvements",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>Making rowing a varsity sport will <span class=\"topic\">double our population of student athletes</span>.</p>\n<p>By making company tests for hiring programmers open book and focused on practical problems, companies <span class=\"topic\">will make better hiriing decisions</span> and students coming out of school <span class=\"topic\">will be treated more fairly</span>.</p>\n<p>Placing a stop sign and crosswalk on Elm and Fifth will <span class=\"topic\">improve the safety of students who rely on that intersection to get to classes</span>. It will also send the message that the <span class=\"topic\">university makes student safety a top priority</span>.</p>\n<p>Creating an eatery on campus that is entirely vegan will <span class=\"topic\">accommodate the increasing number of students who are vegan or who want to explore a vegan lifestyle</span>. It will also <span class=\"topic\">help recruit students from high school </span>who are vegan or want to try it in their college years.</p>\n<p>By developing a policy on campus free speech that respects free speech as a constitutional right while upholding the university's values of respect and dignity for all is important for <span class=\"topic\">maintaining a healthy campus climate, encouraging open inquiry, and better coping with hate speech</span>. </p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By crafting sentences that meet this expectation, you show you can credibly (from a problem-solving point of view) and compellingly (from a reader point of view) link your proposed change to tangible advantages.</p></body>",
-                    "values": [
-                        "credible",
-                        "compelling"
-                    ],
-                    "parent": "Present Your Change Proposal"
-                },
-                {
-                    "name": "How does your proposal affirm the values of your target audience?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How Is this expectation met in English sentences?</span></p>\n<p>You meet it by identifying the values you and your target audience share, and showing how putting your proposal into effect advances those values.</p>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Shared Values",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>The university has an <span class=\"topic\">overriding interest to recruit the best student-athletes graduating from high schoo</span>l. It happens that, across all sports, rowing attracts some of the best student athletes.</p>\n<p>The university has <span class=\"topic\">a significant interest in the safety of students</span>. And this is why making campus intersections safe is such a compelling interest.</p>\n<p>Campus leaders undertand that while students are here to acquire knowledge, their <span class=\"topic\">health and nutritional well-being are also very important</span>.</p>\n<p>Tech companies hiring programmers out of college <span class=\"topic\">need students who can solve practical programming problems</span>. If they are to meet this need, they need to make sure<span class=\"topic\"> they screen for applicants with this practical programming sense</span>.</p>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By linking the values of your change proposal to the deepest values of your target audience, you make your text compelling.</p></body>",
-                    "values": [
-                        "compelling"
-                    ],
-                    "parent": "Present Your Change Proposal"
-                }
-            ],
-            "cv_description": "<body>\n<p></p></body>",
-            "values": [],
-            "parent": null
-        },
-        {
-            "name": "Address The Limitations In Your Proposal",
-            "description": "<body>\n<p>In a change proposal, your proposal is bound to have some limitations and you need to acknowledge them. </p></body>",
-            "topics": [],
-            "examples": "<body>\n<p></p></body>",
-            "type": "bounded_optional",
-            "is_group": true,
-            "children": [
-                {
-                    "name": "What are the limitations of your proposal?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by being upfront and transparent about the limitations in your proposal, the aspects of your proposal that might make your target audience reject it despite its merits. </p>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Limitations In Your Proposal",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>I acknowlege that my proposal<span class=\"topic\"> comes with an expensive price tag. </span></p>\n<p>After talking to unversity officials, I learned that we can get a vegan eatery, <span class=\"topic\">but only if we eliminate an existing eatery, </span>and that may be a hard pill to swallow.</p>\n<p>I recognize that my proposal to expand greek life on campus is <span class=\"topic\">a low priority for the administration</span>.</p>\n<p>A bike-sharing program for campus, which I propose, <span class=\"topic\">was tried a few years ago and it failed</span>. So you are right to be skeptical about it. </p>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>Let's return to our rower who wants their college to upgrade rowing to a varsity sport. This is an appealing solution for the rowing club. But it is also an expensive solution. And the university has many sports to support! Proposal writers lose credibility when they fail to address the limitations in their proposal. They also show lapses of ethical balance if they come across as thinking that the strengths of their proposal should count more than the weaknesses. They also show a lapse of ethical and considerate thinking if they leave it to their target audience to find the weak links. Their need to assist their audience in seeing them. </p></body>",
-                    "values": [
-                        "credible",
-                        "considerate",
-                        "ethical"
-                    ],
-                    "parent": "Address The Limitations In Your Proposal"
-                },
-                {
-                    "name": "How do you plan to address (mitigate) these limitations?",
-                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences? </span></p>\n<p>You meet this expectation by including the adjustments or refinements you would be willing to make if you believe the limitations in your proposal might be deadbreakers. Even as you indicate what you would be willing to pull back on, make sure to continue to emphasize the positive benefits that can still result from these adjustments.</p>\n<p>Words and phrases associated with such accommodating language are the following:</p>\n<ul><li>\u201cShould my full proposal be too big for immediate implementation, we can <span style=\"font-weight:600;\">proceed incrementally</span>.\u201d</li>\n<li>\u201cIf need be, we can <span style=\"font-weight:600;\">reduce the scope of</span>...\u201c</li></ul>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Mitigation",
-                            "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>Making rowing a varsity sport has a range of upfront and hidden costs that we may not be able to afford. If that is the case, we might think of a <span class=\"topic\">one-time investment</span> to bring the equipment up to well-recognized standards of performance and safety.</p>\n<p>If a traffic light and cross-walk are too expensive for this intersection, we should consider a <span class=\"topic\">stop sign</span> or even a <span class=\"topic\">\"yield to pedestrian\" sign</span>. That could still turn out to be very effective.</p>\n<p>An eatery dedicated to vegan food may be logistically and financially challenging for the university. If that is the case, I have checked and it would be less challenging to make sure a few <span class=\"topic\">existing eateries increase their stock of vegan products</span>. </p>\n<p>Completely changing the corporate tests for student programmers may be impossible for many computer companies. However, even if that were the case, there would be no great effort or cost in <span class=\"topic\">allowing the tests to be open-book</span> to cut down on meaningless memorization. </p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>By addressing the limitations of your proposal, you show you are interested in presenting a balanced account (ethical) that is respectful of the reader's potential objections and concerns (considerate). And these impressions in turn contribute to the reader's perception of your credibility as a writer and your willingness to co-construct the proposal with the audience/potential funder to make it compelling.</p></body>",
+                    "cv_description": "<body>\n<p>TBD4</p></body>",
                     "values": [
                         "credible",
                         "considerate",
                         "compelling",
                         "ethical"
                     ],
-                    "parent": "Address The Limitations In Your Proposal"
+                    "parent": "Describing Real-World Importance"
+                },
+                {
+                    "name": "Can you interpret the results for a real-world audience?",
+                    "description": "<body>\n<p>Appropriately interpret and discuss your summaries/tables/figures in relation to the research question:\u00a0 Indicate whether and how they provide evidence to refute or confirm each of the three research questions, and what conclusion (if any) you can come to regarding each research question from the available EDA evidence.</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Meaning of Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Describing Real-World Importance"
+                },
+                {
+                    "name": "What are some suggestions for future research/action?",
+                    "description": "<body>\n<p>TBD</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Future Research",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Describing Real-World Importance"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Describing concerns of the data & methods",
+            "description": "<body>\n<p></p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "Can you summarize the data?",
+                    "description": "<body>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Data Descriptors",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "IQR",
+                                "bimodal",
+                                "inter-quartile range",
+                                "max",
+                                "maximum",
+                                "meadian ",
+                                "mean",
+                                "min ",
+                                "minimum",
+                                "mode ",
+                                "quartile",
+                                "sample",
+                                "sample size",
+                                "small sample",
+                                "spread",
+                                "standard deviation",
+                                "unimodal ",
+                                "variability",
+                                "variation ",
+                                "varied ",
+                                "vary"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Describing concerns of the data & methods"
+                },
+                {
+                    "name": "Are there any concerns that you have with the data?",
+                    "description": "<body>\n<p>Do you have any concerns with the methods used to collect this data? Consider the background sources and potential issues with the data that your reader might be concerned about. </p>\n<p>How relatively well is this assumption satisfied by the study described? Does the relative representativeness of the sample (or lack thereof) give you much cause for concern about the relative validity of the final results of the hypothesis test? Why or why not?</p>\n<p>Background sources and issues</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Quality of Data",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "concerning",
+                                "outlier",
+                                "outliers",
+                                "problematic",
+                                "sample sizes",
+                                "sampling method",
+                                "selection method",
+                                "skew",
+                                "skewed",
+                                "skewness",
+                                "skews",
+                                "sparse"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [
+                        "considerate",
+                        "ethical"
+                    ],
+                    "parent": "Describing concerns of the data & methods"
+                },
+                {
+                    "name": "How might you justify your techniques for your readers?",
+                    "description": "<body>\n<p>Consider a reader with experience in data analysis. How would you address their potential concerns? </p>\n<p>Do you have any concerns with the methodologies used to analyze this data?</p>\n<p>appears in conclusion as well (limitations) </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Quality of Methods",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "bin",
+                                "binned",
+                                "binning",
+                                "combine",
+                                "combined",
+                                "combining",
+                                "grouping",
+                                "linearity",
+                                "normality",
+                                "transformation",
+                                "transformations"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
+                    ],
+                    "parent": "Describing concerns of the data & methods"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Statistical Analysis & Interpretation",
+            "description": "<body>\n<p></p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "What can the reader learn from your figures?",
+                    "description": "<body>\n<p>make sure you reference each figure </p>\n<p>concept maps for each figure </p>\n<p>(200?) do you refer to each plot in the text? </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Visual Descriptors",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                },
+                {
+                    "name": "What can the reader learn from your statistical results?",
+                    "description": "<body>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Statistical Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                },
+                {
+                    "name": "What interpretations can you draw from these results?",
+                    "description": "<body>\n<p>What is motivating these questions? Why does the reader care?</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Real-World Interpretations of Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",

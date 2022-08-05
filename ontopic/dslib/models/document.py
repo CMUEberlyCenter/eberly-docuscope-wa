@@ -4398,9 +4398,11 @@ class DSDocument():
                 vis_data['data'].append({'sentences':        topic_data, 
                                          'is_topic_cluster': is_tc,
                                          'is_global':        is_global,
+                                         'num_sents':        len(topic_data),
                                          'topic':            list(topic_info[0:3])})
                 num_topics += 1
 
+            #vis_data['num_sents'] = num_sents
             vis_data['num_topics'] = num_topics
 
             # debug

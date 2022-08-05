@@ -1,22 +1,9 @@
 import React, { Component } from "react";
 
 // https://react-bootstrap.github.io/components/navbar/#navbars-mobile-friendly
-import {
-  Form,
-  FormControl,
-  Button,
-  Navbar,
-  Nav,
-  NavItem,
-  NavDropdown,
-} from "react-bootstrap";
+import { Form, FormControl, Button, Navbar, Nav, NavItem, NavDropdown } from "react-bootstrap";
 
-import {
-  Topic,
-  OnTopicDataTools,
-  OnTopicConstants,
-  OnTopicVisualization,
-} from "@cmu-eberly-center/eberly-ontopic-visualization";
+import {Topic, OnTopicDataTools, OnTopicConstants, OnTopicVisualization, } from "@cmu-eberly-center/eberly-ontopic-visualization";
 
 import HashTable from "./HashTable";
 
@@ -178,8 +165,9 @@ class DocuScopeOnTopic extends Component {
    */
   onHandleSentence (aSentenceObject) {
     console.log ("onHandleSentence ()");
-    console.log (aSentenceObject);
+    //console.log (aSentenceObject);
 
+    /*
     if (aSentenceObject==null) {
       if (this.props.setStatus) {
         this.props.setStatus ("");
@@ -190,6 +178,7 @@ class DocuScopeOnTopic extends Component {
     this.setState({ sentence: aSentenceObject }, (e) => {
       this.onSentenceChange();
     });
+    */
   }
 
   /**

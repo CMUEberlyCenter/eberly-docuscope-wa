@@ -107,6 +107,7 @@ export default class DocuScopeWA extends Component {
              problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
              to 'ding'
             */
+            /*
             this.pingTimer=setInterval ((_e) => {
               this.apiCall ("ding",null,"GET").then ((result) => {
                 this.setState ({
@@ -115,6 +116,7 @@ export default class DocuScopeWA extends Component {
                 });
               });
             },30000);
+            */
 
             this.setState ({
               state: DocuScopeWA.DOCUSCOPE_STATE_READY,

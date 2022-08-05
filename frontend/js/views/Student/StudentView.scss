@@ -50,10 +50,14 @@ $cmu-secondary-gold: #a60;
   width: calc(100hmax - 6.5in - 390px);
 }
 
+/* MvV: we'll probably split this up into a separate component at some point */
+
 .statusbar {
   display: flex;
   flex-direction: row;
-  color: white;
+  color: #fff;
+  padding: 2px;
+  margin: 0px;
 }
 
 .statusbar-status {
@@ -62,7 +66,7 @@ $cmu-secondary-gold: #a60;
 
 .statusbar-ruleversion {
   flex: 0;
-  min-width: 200px;
+  min-width: 250px;
   padding: 0px 2px 0px 2px;
 }
 
@@ -71,4 +75,9 @@ $cmu-secondary-gold: #a60;
   min-width: 75px;
   padding: 0px 2px 0px 2px;
   text-align: right;
+}
+
+.ds-info {
+  width: 150px;
+  border: 1px solid red;
 }

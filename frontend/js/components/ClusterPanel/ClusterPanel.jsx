@@ -9,7 +9,36 @@ import './ClusterTopics.scss';
 import clusterIcon from '../../../css/icons/topic_cluster_icon.png';
 
 /**
- *
+	"topics": [
+		{
+		    "lemma": "Data Descriptors",
+		    "user_defined": true,
+		    "pre_defined_topics": [
+		        "IQR",
+		        "bimodal",
+		        "inter-quartile range",
+		        "max",
+		        "maximum",
+		        "meadian ",
+		        "mean",
+		        "min ",
+		        "minimum",
+		        "mode ",
+		        "quartile",
+		        "sample",
+		        "sample size",
+		        "small sample",
+		        "spread",
+		        "standard deviation",
+		        "unimodal ",
+		        "variability",
+		        "variation ",
+		        "varied ",
+		        "vary"
+		    ],
+		    "no_lexical_overlap": false
+		}
+	]
  */
 class ClusterPanel extends Component {
 
@@ -21,13 +50,54 @@ class ClusterPanel extends Component {
 
     this.state = {      
       currentTab: "expectationabout",
-      topics: "",
-      topicList: []
+      topictext: ""
     };
 
     this.switchTab=this.switchTab.bind(this);
     this.onTopicsChange=this.onTopicsChange.bind(this);
     this.onCustomTopicUpdate=this.onCustomTopicUpdate.bind(this);
+  }
+
+  /**
+   * Update with the latest from the actual data
+   */
+  componentDidUpdate(prevProps) {
+    console.log ("componentDidUpdate ()");
+
+    if ((prevProps.currentRule!=this.props.currentRule) || (prevProps.currentCluster!=this.props.currentCluster)) {
+      /*
+      this.setState ({
+        topicText: "bingo, boingo"
+      });      
+      */
+
+      let aText=this.getTopicText ();
+
+      console.log ("Topic text: " + aText + ", type: "  + typeof aText);
+
+      this.setState ({
+        topicText: aText
+      });      
+    }
+  }
+
+  /**
+   * 
+   */
+  getTopicText () {
+    console.log ("getTopicText ("+this.props.currentRule + "," + this.props.currentCluster+")");
+
+  	let topictext="";
+  	let cluster=this.props.ruleManager.getClusterByIndex (this.props.currentRule,this.props.currentCluster);
+  	if (cluster!=null) {
+      topictext=this.props.ruleManager.getClusterTopicText (cluster);
+  	} else {
+      console.log ("Warning cluster not found");
+    }
+
+    //console.log ("Topic text: " + topictext);
+
+  	return (topictext);
   }
 
   /**
@@ -47,25 +117,9 @@ class ClusterPanel extends Component {
   onTopicsChange (e) {
   	console.log ("onTopicsChange ()");
   	
-  	let newList=[];
-
-  	let rawText=e.target.value;
-
-    if (rawText) {
-      let lines=rawText.split ("\n");
-      for (let i=0;i<lines.length;i++) {
-      	if (lines [i]!="") {
-      	  newList.push (lines [i]);
-      	}
-      }
-    }
-
-    console.log (newList);
-
   	this.setState ({
-      topics: e.target.value,
-      topicList: newList
-  	});
+      topictext: e.target.value
+  	});  	
   }
 
   /**
@@ -74,13 +128,14 @@ class ClusterPanel extends Component {
   onCustomTopicUpdate (e) {
     console.log ("onCustomTopicUpdate ()");
 
+    this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster,e.target.value);
   }
 
   /**
    * 
    */
   createRuleDescription () {
-  	console.log ("createRuleDescription ("+this.props.currentRule+","+this.props.currentCluster+")");
+  	//console.log ("createRuleDescription ("+this.props.currentRule+","+this.props.currentCluster+")");
 
   	let rules=this.props.ruleManager.rules;
 
@@ -104,7 +159,7 @@ class ClusterPanel extends Component {
   	  if (description=="") {
   	    description=" ";
   	  }
-  	  console.log ("Description: " + description);
+  	  //console.log ("Description: " + description);
   	  return (description);
     }
 
@@ -115,10 +170,12 @@ class ClusterPanel extends Component {
    * 
    */
   createTopicEditor () {
+    console.log ("createTopicEditor ()");
+
     return (<div className="cluster-topic-editor">
-        <textarea
-          className="cluster-topic-input"
-	      value={this.state.topics}
+      <textarea
+        className="cluster-topic-input"
+	      value={this.state.topicText}
 	      onChange={this.onTopicsChange} />
     	<div className="cluster-topic-controls">
     	  <Button onClick={(e) => this.onCustomTopicUpdate (e)}>Update</Button>
@@ -162,12 +219,48 @@ class ClusterPanel extends Component {
   }
 
   /**
+   * Via Suguru in email:
+   * 
+   * I don’t think we talked about this… There is a hard coded HTML string defined the UI code, which I have not externalized yet :-(
+   * 
+   * CP_DESCRIPTION_TOPIC_ONLY_TEMPLATE = "<p>Enter words and phrases associated with <b style=\"color: \'{}\'\">{}</b> in the text field.</p>"
+   * 
+   * The variable “{}” is replaced by the name of the topic cluster associated with the currently selected rule.
+   * 
+   * It is followed by the following HTML string in the instructions_en.yml file. 
+   * 
+   * topic_cluster_edu: >
+   *  <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>
+ 
+   */
+  createClusterDefinition () {
+    if (this.props.currentCluster!=-1) {
+      let cluster=this.props.ruleManager.getClusterByIndex (this.props.currentRule,this.props.currentCluster);
+
+      let defined="<p>Enter words and phrases associated with <b style=\"color: black;\">\"[replacer]\"</b> in the text field.</p> <br> <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>";
+      let clean=defined;
+      if (cluster!=null) {
+        clean=defined.replace ("[replacer]", cluster.name);
+      }
+      return (clean);
+    }
+
+    return ("&nbsp;");
+  }
+
+  /**
    * 
    */
   render () {
-  	let ruledescription=this.createRuleDescription ();
-  	let topiceditor=this.createTopicEditor ();
-  	let examples=this.createExamplePanel();
+  	let ruledescription="<div></div>";
+  	let topiceditor;
+  	let examples;
+    let clusterdefinition;
+
+    ruledescription=this.createRuleDescription ();
+    topiceditor=this.createTopicEditor ();
+    examples=this.createExamplePanel();    
+    clusterdefinition=this.createClusterDefinition ();
 
   	return (<div className="cluster-container">
   		<div className="cluster-title">
@@ -175,8 +268,7 @@ class ClusterPanel extends Component {
   		  <div className="card-title h5">Topic Cluster</div>
   		</div>
   		<div className="cluster-content">
-  		  <div className="cluster-content-left">
-  		  Left
+  		  <div className="cluster-content-left" dangerouslySetInnerHTML={{ __html: clusterdefinition }} >
   		  </div>  		  
   		  {topiceditor}
   		</div>

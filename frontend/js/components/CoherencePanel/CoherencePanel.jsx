@@ -46,9 +46,8 @@ class CoherencePanel extends Component {
   constructor (props) {
     super (props);
 
-    this.state = {      
+    this.state = {
       selectedParagraph: -1,
-      selectedLocal: {},
       selectedSentence: -1
     };
 
@@ -64,17 +63,17 @@ class CoherencePanel extends Component {
   /**
    *
    */
+  /* 
   componentDidUpdate(prevProps) {
   	console.log ("componentDidUpdate ()");
 
-  	if (prevProps.data !== this.props.data) {
+    //console.log (this.props.data);
+
+  	if (prevProps.data !== this.props.data) {      
       this.setState ({data: this.props.data});
     }
-
-    if (prevProps.text !== this.props.text) {
-      
-    }
   }
+  */
 
   /**
    * 
@@ -92,14 +91,105 @@ class CoherencePanel extends Component {
   /**
    * 
    */
-  getLocalTopicObject (anIndex) {
-    if (!this.state.selectedLocal) {
+  countParagraphs () {
+    if (!this.props.data) {
+      return (0);
+    }
+
+    let copy=this.props.data;
+
+    let nrParagraphs = parseInt (copy.num_paras);    
+
+    return (nrParagraphs);
+  }
+
+  /**
+   * 
+   */
+  countSentences (aParagraphIndex) {
+    if (!this.props.local) {
+      return (0);
+    }
+
+    let copy=this.props.local;
+    let envelope=copy [aParagraphIndex]; // Get the first paragraph
+
+    if (envelope.error) {
+      console.log ("No topics found in this sentence");
+      return (0);
+    }    
+
+    let data=envelope.data; // Get the data block from the first paragraph
+    let actual=data [0]; // For some reason there is another nested array in here
+
+    console.log ("Nr sentences: " + actual.sentences.length);
+
+    return (actual.sentences.length);
+  }  
+
+  /**
+   * You might get this: {error: 'ncols is 0'}
+   */
+  getLocalTopic (anIndex) {
+    console.log ("getLocalTopic ("+anIndex+")");
+
+    if (!this.props.local) {
       return (null);
     }
 
-    let topics=this.state.selectedLocal.data;
+    let localTopics=this.props.local;
+
+    let envelope=localTopics [anIndex]; // Get the first paragraph
+
+    if (envelope.error) {
+      console.log ("No topics found in this sentence");
+      return (null);
+    }
+
+    console.log ("local topic root: ");
+    console.log (envelope);
+
+    return (envelope);
+  }  
+
+  /**
+   * You might get this: {error: 'ncols is 0'}
+   */
+  getLocalTopicObject (anIndex) {
+    console.log ("getLocalTopicObject ("+anIndex+")");
+
+    if (!this.props.local) {
+      return (null);
+    }
+
+    let localTopics=this.props.local;
+
+    //console.log (localTopics);
+
+    /*
+    let localTopics=topics [anIndex];
+
+    if (localTopics.error) {
+      console.log ("No topics found in this sentence");
+      return (null);
+    }
 
     return (topics [anIndex]);
+    */
+
+    let envelope=localTopics [anIndex]; // Get the first paragraph
+
+    if (envelope.error) {
+      console.log ("No topics found in this sentence");
+      return (null);
+    }
+
+    let data=envelope.data; // Get the data block from the first paragraph
+    let actual=data [0]; // For some reason there is another nested array in here    
+
+    console.log (actual);
+
+    return (actual);
   }  
  
   /**
@@ -141,9 +231,16 @@ class CoherencePanel extends Component {
     if (this.state.selectedParagraph==anIndex) {
       this.setState ({selectedParagraph: -1});
     } else {
+      /*
+      console.log ("Hardcoded: ");
+      console.log (coherenceDataLocal);
+
+      console.log ("Incoming:");
+      console.log (this.props.data);
+      */
+
       this.setState ({
-        selectedParagraph: anIndex,
-        selectedLocal: coherenceDataLocal});
+        selectedParagraph: anIndex});
     }
   }
 
@@ -154,23 +251,6 @@ class CoherencePanel extends Component {
     console.log ("onSentenceClick ("+anIndex+")");
 
   }  
-
-  /**
-   * 
-   */
-  countParagraphs () {
-    if (!this.props.data) {
-      return (0);
-    }
-
-    //this.dataTools.countParagraphs (this.props.data);
-
-    let copy=this.props.data;
-
-    let nrParagraphs = parseInt (copy.num_paras);    
-
-    return (nrParagraphs);
-  }
 
   /**
    * 
@@ -226,6 +306,12 @@ class CoherencePanel extends Component {
   	}
 
     let copy=this.props.data;
+
+    //console.log (copy);
+
+    if (!copy.data) {
+      return (topicElements);
+    }
 
     let topics=copy.data;
 
@@ -295,20 +381,26 @@ class CoherencePanel extends Component {
    * 
    */
   generateLocalTopics () {
+    console.log ("generateLocalTopics ()");
+
     let topicElements=[];
 
-    if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+    //if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+    if ((this.state.selectedParagraph==-1) || (this.props.local==null)) {
       return (topicElements);
     }
 
-    let topics=this.state.selectedLocal.data;
+    let topics=this.props.local [this.state.selectedParagraph].data;
+    let num_sents=this.countSentences (this.state.selectedParagraph);
 
-    console.log (topics);
+    if (num_sents==0) {
+      return (topicElements);
+    }
 
-    let num_sents=this.state.selectedLocal.num_sents;
+    //let num_sents=this.props.local.num_sents; // Not valid yet, needs to be fixed in the Python code
   
     for (let i=0;i<topics.length;i++) {
-      let topicObject=this.getLocalTopicObject (i);
+      let topicObject=topics [i];
       if (topicObject==null) {
         return (topicElements);
       }
@@ -394,11 +486,13 @@ class CoherencePanel extends Component {
   generateSentenceControls (paraCount) {
     let sentenceElements=[];
 
-    if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+    //if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
+    if ((this.state.selectedParagraph==-1) || (this.props.data==null)) {
       return (sentenceElements);
     }
 
-    for (let i=0;i<this.state.selectedLocal.num_sents;i++) {
+    //for (let i=0;i<this.state.selectedLocal.num_sents;i++) {
+    for (let i=0;i<this.props.data.num_sents;i++) {      
       let paraClass="paragraph-toggle";
       if (i==this.state.selectedSentence) {
         paraClass="paragraph-toggled";

@@ -59,8 +59,9 @@
   border-radius: 3px;
   margin: 2px;
   padding: 2px;
-  max-height: 159px;
+  /*max-height: 159px;*/
   overflow-y: auto;
+  resize: none;
 }
 
 .cluster-topic-controls {

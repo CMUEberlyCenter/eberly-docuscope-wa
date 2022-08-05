@@ -61,7 +61,16 @@ const Legend = () => (
 // Using react-rxjs to get observable to act like hooks.
 // On locking text with some text present and the tool is clarity
 // emit the text.
-const [useCoherenceText /*coherenceText$*/] = bind(combineLatest ({ text: lockedEditorText$, tool: currentTool$ }).pipe (filter((data) => data.tool === "coherence"), map((data) => data.text)),"");
+//const [useCoherenceText /*coherenceText$*/] = bind(combineLatest ({ text: lockedEditorText$, tool: currentTool$ }).pipe (filter((data) => data.tool === "coherence"), map((data) => data.text)),"");
+
+// On locking with text and tool is clarity, then emit text.
+const [useCoherenceText /*coherenceText$*/] = bind(
+  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
+    filter((data) => data.tool === "coherence"),
+    map((data) => data.text)
+  ),
+  ""
+);
 
 /**
  * 
@@ -76,39 +85,39 @@ const Coherence = (props: {
   const [status, setStatus] = useState("");
   const [showToggle, setShowToggle] = useState(false);
   const [data, setCoherenceData] = useState<unknown>(null);
-  //const text = useLockedEditorText();
+  const [local, setLocalCoherenceData] = useState<unknown>(null);
   
   const text = useCoherenceText();
-
-  let visualization;
-
-  visualization=<CoherencePanel setStatus={setStatus} data={data} text={text} showglobal={showToggle}/>;  
 
   useEffect(() => {
     console.log ("useEffect ()");
 
     if (text !== "") {
       setStatus("Retrieving results...");
+
+      let customTopics=props.ruleManager.getAllCustomTopics ();
+
+      console.log ("Adding custom topics: " + customTopics);
       
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      props.api("ontopic", { base: encoded }, "POST").then((incoming : any) => {
+      props.api("ontopic", { custom: customTopics, base: encoded }, "POST").then((incoming : any) => {
         console.log ("Processing incoming coherence data ...");
-        console.log (incoming);
         
-        let coherence=incoming.coherence.data;
+        let coherence=incoming.coherence;
+        let local=incoming.local;
 
-        // This is an artifact of the Python code not being completely aligned with Suguru's DSLib
-        // Will be fixed as soon as we have a stable visualizatioon
-        if (incoming.coherence.data.constructor == Array) {
-          coherence=incoming.coherence.data[0];
-        }
-
+        /*
+        console.log ("coherence:");
         console.log (coherence);
+        console.log ("local:");
+        console.log (local);
+        */
 
         setCoherenceData(coherence);
+        setLocalCoherenceData(local);
 
         //const decoded = window.atob(incoming.html);
 
@@ -119,6 +128,10 @@ const Coherence = (props: {
       });
     }
   }, [text, props.api]);
+
+  let visualization;
+
+  visualization=<CoherencePanel setStatus={setStatus} data={data} local={local} text={text} showglobal={showToggle} />;  
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">

@@ -204,4 +204,21 @@ export default class DataTools {
       console.log("'" + anArray[i] + "'");
     }
   }
+
+  /**
+   * Convert a list containing terms separated by newlines into a string with semicolons representing the newlines
+   * This is used to transmit custom topics and pre-defined topics to the OnTopic backend. It is very important that
+   * this method returns a valid string, this might be empty but it needs to be valid. That ensures a lot less
+   * issues on the server side.
+   */
+  textToOnTopicList (aTextBlock) {
+    if (aTextBlock==null) {
+      return ("");
+    }
+
+    if (aTextBlock=="") {
+      return ("");
+    }
+    return (aTextBlock.replace (/(?:\r\n|\r|\n)/g,";"));
+  }
 }
