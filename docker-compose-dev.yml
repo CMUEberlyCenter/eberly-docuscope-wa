@@ -7,6 +7,12 @@
 version: '3'
 services:
 
+  mongo:
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: 458243507dsdf9245824
+
   dswa-ontopic:
     build:    
       context: ./ontopic

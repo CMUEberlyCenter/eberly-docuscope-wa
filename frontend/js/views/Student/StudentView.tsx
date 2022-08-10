@@ -53,6 +53,7 @@ import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
 import DocuScopeHelp from '../../DocuScopeHelp';
+import DocuScopeAbout from '../../DocuScopeAbout';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
@@ -340,7 +341,7 @@ const StudentView = (props: {
     }
 
     if (eventKey === "showAbout") {
-
+      setShowAbout (true);
       return;
     }
   };
@@ -377,6 +378,8 @@ const StudentView = (props: {
     infocolumn=<div className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden ds-info"></div>;
   }
 
+  //>--------------------------------------------------------
+
   const [showHelp, setShowHelp] = useState(false);
 
   let help;
@@ -390,9 +393,22 @@ const StudentView = (props: {
     help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} />;
   }
 
+  //>--------------------------------------------------------
+
   const [showAbout, setShowAbout] = useState(false);
 
   let about;
+
+  const onCloseAboutPage = () => {
+    console.log ("onCloseAboutPage ()");
+    setShowAbout (false);
+  };
+
+  if (showAbout==true) {
+    about=<DocuScopeAbout onCloseAboutPage={onCloseAboutPage} ruleManager={props.ruleManager}/>;
+  }
+
+  //>--------------------------------------------------------
 
   const [showParagraphSelector, setShowParagraphSelector] = useState(false);
 
@@ -409,6 +425,8 @@ const StudentView = (props: {
   } else {
     paragraphselector=<div className="spacer"></div>;
   }
+
+  //>--------------------------------------------------------  
 
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
