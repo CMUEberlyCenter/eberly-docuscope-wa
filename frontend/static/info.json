@@ -1,10 +1,7 @@
 {
-    "path": "C:/Users/kaufer/Desktop/Latest_Builder_WA/Projects - Write & Audit/Parent_7_29_2021_ProjectFolder/DavesCustomizedDictionaryProjectFolder\\src\\Change Proposal",
-    "name": "Change Proposal",
-    "author": "David Kaufer & Suguru Ishizaki, Carnegie Mellon",
-    "version": "2021.08.11",
-    "copyright": "2021 David Kaufer & Suguru Ishizaki, Carnegie Mellon",
-    "customized": true,
-    "base_dict": "ds_dict (v.2021.08.11)",
-    "pronouns": false
+    "name": "Writing User-Facing Statistics Reports",
+    "version": "2022.06.02",
+    "author": "Michael Laudenbach",
+    "copyright": "2022 Michael Laudenbach",
+    "saved": "2022-08-08-131118"
 }

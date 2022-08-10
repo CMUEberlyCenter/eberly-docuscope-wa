@@ -52,6 +52,7 @@ import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
+import DocuScopeHelp from '../../DocuScopeHelp';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
@@ -195,6 +196,7 @@ const StudentView = (props: {
       toolWidth,
     ]
   );
+
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
       if (toolSeparatorDragging || rightSeparatorDragging) {
@@ -204,10 +206,12 @@ const StudentView = (props: {
     },
     [toolSeparatorDragging, rightSeparatorDragging, onMove]
   );
+
   const onTouchMove = useCallback(
     (e: TouchEvent) => onMove(e.touches[0].clientX),
     [onMove]
   );
+
   const onMouseUp = useCallback(() => {
     if (toolSeparatorDragging) {
       setToolSeparatorDragging(false);
@@ -315,7 +319,10 @@ const StudentView = (props: {
   const onNavSelect = (eventKey: string | null) => {
     if (eventKey === "showTopicClusters") {
       setShowInfoColumn(!showInfoColumn);
-    } else if (eventKey === "resetView") {
+      return;
+    }
+
+    if (eventKey === "resetView") {
       if (toolRef.current) {
         toolRef.current.style.width = "";
         setToolWidth(toolRef.current.clientWidth);
@@ -324,6 +331,17 @@ const StudentView = (props: {
         rightRef.current.style.width = "";
         setRightWidth(rightRef.current.clientWidth);
       }
+      return;
+    }
+
+    if (eventKey === "showHelp") {
+      setShowHelp (true);
+      return;
+    }
+
+    if (eventKey === "showAbout") {
+
+      return;
     }
   };
   const tagging = useTaggerResults();
@@ -359,6 +377,39 @@ const StudentView = (props: {
     infocolumn=<div className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden ds-info"></div>;
   }
 
+  const [showHelp, setShowHelp] = useState(false);
+
+  let help;
+
+  const onCloseHelpPage = () => {
+    console.log ("onCloseHelpPage ()");
+    setShowHelp (false);
+  };
+
+  if (showHelp==true) {
+    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} />;
+  }
+
+  const [showAbout, setShowAbout] = useState(false);
+
+  let about;
+
+  const [showParagraphSelector, setShowParagraphSelector] = useState(false);
+
+  let paragraphselector;
+
+  if (showParagraphSelector==true) {
+    paragraphselector=<Form.Group>
+        <Form.Select>
+          {[1, 2, 3].map((num) => (
+            <option key={`${selectId}-${num}`} value={num}>{num}</option>
+          ))}
+        </Form.Select>
+      </Form.Group>;
+  } else {
+    paragraphselector=<div className="spacer"></div>;
+  }
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -381,6 +432,10 @@ const StudentView = (props: {
                     Reset View
                   </NavDropdown.Item>
                 </NavDropdown>
+                <NavDropdown title="Help" menuVariant="dark">
+                  <NavDropdown.Item eventKey={"showHelp"}>Show Help</NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showAbout"}>About</NavDropdown.Item>
+                </NavDropdown>                
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -412,16 +467,7 @@ const StudentView = (props: {
         
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
-            <Form.Group>
-              {/*<Form.Label>Paragraph</Form.Label>*/}
-              <Form.Select>
-                {[1, 2, 3].map((num) => (
-                  <option key={`${selectId}-${num}`} value={num}>
-                    {num}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
+            {paragraphselector}
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
@@ -463,6 +509,11 @@ const StudentView = (props: {
         <div className="statusbar-ruleversion"><FontAwesomeIcon icon={faBook} style={{marginLeft: "2px", marginRight: "2px"}} />{props.ruleManager.getVersion ()}</div>
         <div className="statusbar-language"><FontAwesomeIcon icon={faGlobe} style={{marginLeft: "2px", marginRight: "2px"}} />{language}</div>
       </footer>
+
+      {help}
+
+      {about}
+
     </div>
   );
 };

@@ -172,8 +172,15 @@ class ClusterPanel extends Component {
   createTopicEditor () {
     console.log ("createTopicEditor ()");
 
+    let enableEditor=true;
+
+    if (this.props.currentCluster==-1) {
+      enableEditor=false;
+    }
+
     return (<div className="cluster-topic-editor">
       <textarea
+        readonly={enableEditor}
         className="cluster-topic-input"
 	      value={this.state.topicText}
 	      onChange={this.onTopicsChange} />

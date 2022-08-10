@@ -14,6 +14,8 @@ import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.pn
 
 import ClusterPanel from '../ClusterPanel/ClusterPanel';
 
+import { upfrontValues } from "../../data/values";
+
 /*
 interface RuleProps {
   rule: ExpectationRule;

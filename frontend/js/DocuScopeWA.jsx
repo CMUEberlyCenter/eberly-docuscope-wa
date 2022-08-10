@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
+
 import '../css/docuscope.css';
 import '../css/main.css';
+
 import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
 import DataTools from './DataTools';
 import DocuScopeRules from './DocuScopeRules';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
-
 
 /**
  */

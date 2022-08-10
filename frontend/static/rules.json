@@ -1,30 +1,41 @@
 {
-    "name": "P1 Exploratory Data Analysis",
+    "name": "Writing User-Facing Statistics Reports",
     "rules": [
         {
             "name": "Describing Real-World Importance",
-            "description": "<body>\n<p>TBD</p></body>",
+            "description": "<body>\n<p>Throughout the report, you are interpreting the data as if you were writing for a client or a fellow researcher. Thus, the \u201creal-world importance\u201d appears differently in different sections. </p>\n<p>In the introduction, you should provide your reader with some background and context, as well as what your report accomplishes. </p>\n<p>In the discussion section, your reader should understand the main takeaways, as well as the limitations and possibilities of future research in the area you're writing about. </p></body>",
             "topics": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "What is motivating this research? What is the real-world importance?",
-                    "description": "<body>\n<p>Motivate the analysis of the data, with relation to the potential importance or impact in the world.\u00a0 Summarize the research questions that will be addressed, with connection to the motivation. </p>\n<p>The introduction should not have detailed methodological discussion, it should just be the place to catch the reader\u2019s interest. </p></body>",
+                    "name": "What is motivating this research? What is its point, or real-world importance?",
+                    "description": "<body>\n<p>For this topic cluster, consider why your analysis is important to your readers: motivate your reader to care about your report by conveying its potential importance or impact in the world.</p>\n<ul><li>What are the real-world implications of your analysis? </li>\n<li>What can the readers do with this information? </li>\n<li>What does this report contribute? </li></ul>\n<p>Focus on words or phrases that you might use to make connections to the practical applications of this analysis. For this assignment, why might you <span style=\"font-weight:600;\">expect to see this expectation met in the introduction and discussion?</span></p>\n<p>To do this, we typically see writers use something called <span style=\"font-weight:600;\">metadiscourse</span>: words and phrases that signal the purposes of the text for the reader. These can include transitions (<span style=\"font-style:italic;\">however, therefore, for example, </span>etc.) and phrases that refer to the text itself (<span style=\"font-style:italic;\">this study, this analysis, our goal,</span> etc.).</p>\n<p>For this expectation category, focus on words and phrases that refer to the report itself. </p></body>",
                     "topics": [
                         {
                             "lemma": "Real-World Connections",
                             "user_defined": true,
-                            "pre_defined_topics": [],
+                            "pre_defined_topics": [
+                                "my analysis",
+                                "my goal",
+                                "our analysis",
+                                "our goal ",
+                                "the goal",
+                                "the purpose",
+                                "this analysis",
+                                "this project",
+                                "this study",
+                                "this work"
+                            ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>TBD3</p></body>",
+                    "examples": "<body>\n<p>From Introduction sections:</p>\n<p>\"<span class=\"topic\">The goal</span> of this current project is to understand if the gender of the patient affects the number of interventions, ER visits, costs and age they are to experience. Therefore, <span class=\"topic\">this</span> will be useful for <span class=\"topic\">individuals and health care providers</span> to better identify those who are at a higher risk for heart disease.\"</p>\n<p>\"<span class=\"topic\">This work</span> may be educational for <span class=\"topic\">those in the market for a diamond</span> of some sort and may help provide an expectation for monetary association to diamonds based on some specific factor. \"</p>\n<p>\"Therefore, <span class=\"topic\">this report</span> will focus on the varying popularity of different categories of YouTube videos.\"</p>\n<p>From Discussion sections:</p>\n<p>\"<span class=\"topic\">Our analysis </span>of Covid-19 deaths <span class=\"topic\">suggests</span> that, while there was an increased risk to BAME persons over white persons, the conclusions stated in the widely-covered May 2020 ONS report may have created an unjustified level of fear and anxiety.\"</p>\n<p>\"<span class=\"topic\">Our analysis </span>and metrics would <span class=\"topic\">suggest</span> that, on the whole \u2013 but not all the time \u2013 odds are good at predicting the winner of an election on a binary basis\"</p>\n<p>\"<span class=\"topic\">This data analysis</span> targeted on <span class=\"topic\">the aggressiveness of worldwide soccer players</span> and the figures of their experience on World Cup as well as their nationalities.\"</p>\n<p>\"<span class=\"topic\">This study</span> may also help YouTube better understand the video streaming preferences of its user base.\"</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>TBD4</p></body>",
+                    "cv_description": "<body>\n<p>N/A</p></body>",
                     "values": [
                         "credible",
                         "considerate",
@@ -34,40 +45,56 @@
                     "parent": "Describing Real-World Importance"
                 },
                 {
-                    "name": "Can you interpret the results for a real-world audience?",
-                    "description": "<body>\n<p>Appropriately interpret and discuss your summaries/tables/figures in relation to the research question:\u00a0 Indicate whether and how they provide evidence to refute or confirm each of the three research questions, and what conclusion (if any) you can come to regarding each research question from the available EDA evidence.</p></body>",
+                    "name": "Can you interpret the data & results for a real-world audience?",
+                    "description": "<body>\n<p>For this topic cluster, consider words or noun phrases that are <span style=\"font-style:italic;\">less statistical </span>and more related to the <span style=\"font-style:italic;\">implications</span> of your results.</p>\n<ul><li>What trends did you identify in the data, and what do they suggest? </li>\n<li>What did you find in your results?</li>\n<li>What do these results suggest with regard to the corresponding research question? </li></ul>\n<p>For the pre-defined topics, consider how you might be using these words/phrases in context. </p>\n<p>In your <span style=\"font-weight:600;\">methods section</span>, </p>\n<p>In your <span style=\"font-weight:600;\">results section</span>, as you answer each research question with statistical analysis, focus on <span style=\"font-style:italic;\">interpreting </span>those results for your readers. Don't let the data speak for itself!</p>\n<p>In <span style=\"font-weight:600;\">results</span> sections, be sure to interpret each piece of your data story. In <span style=\"font-weight:600;\">discussion</span> sections, you should provide an <span style=\"font-style:italic;\">overview</span> of your major findings. </p>\n<p>Define your topic cluster with words and phrases that best match this description. These might include <span style=\"font-weight:600;\">language specific to your dataset</span>, or even specific verbs that you use to describe your findings.</p>\n<p></p></body>",
                     "topics": [
                         {
                             "lemma": "Meaning of Results",
                             "user_defined": true,
-                            "pre_defined_topics": [],
+                            "pre_defined_topics": [
+                                "I",
+                                "our",
+                                "our results ",
+                                "we",
+                                "we can see"
+                            ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>TBD</p></body>",
+                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"<span class=\"topic\">We</span> graphically <span class=\"topic\">investigated</span> the relationship between views and countries in side by side box plots as shown in Figure 3.\"</p>\n<p>\"<span class=\"topic\">Our results find</span> that the optimal time for pulling the goalie, if the team is down by one goal and has a face-off in the offensive zone, is a full 3 minutes earlier.\"</p>\n<p>\"To round out the discussion of ELO rating, <span class=\"topic\">we briefly describe </span>how ELO ratings are updated once a game is finished and an outcome is determined. \"</p>\n<p>From discussion sections:</p>\n<p>\"<span class=\"topic\">As a result</span> of the counterfactual modeling and validation described above, <span class=\"topic\">we can make</span> <span class=\"topic\">confident predictions </span>of the impact of NPIs in various regions.\"</p>\n<p></p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "cv_description": "<body>\n<p>N/A</p></body>",
                     "values": [],
                     "parent": "Describing Real-World Importance"
                 },
                 {
                     "name": "What are some suggestions for future research/action?",
-                    "description": "<body>\n<p>TBD</p></body>",
+                    "description": "<body>\n<p>Consider the audience you're writing for in your report: this might consist of other data analysts or readers who will use this information to make relevant decisions. </p>\n<p>Therefore, you should identify some \u201cnext steps\u201d for both types of readers: </p>\n<ul><li>What are some potential research questions that could complement your analysis? </li>\n<li>What were you unable to analyze based on the limitations of your data? </li>\n<li>What should researchers look for next? </li></ul>\n<p>Typically, the <span style=\"font-style:italic;\">limitations</span> of your report and suggestions for <span style=\"font-style:italic;\">future research</span> appear in the <span style=\"font-weight:600;\">conclusion/discussions section. </span></p>\n<p></p></body>",
                     "topics": [
                         {
                             "lemma": "Future Research",
                             "user_defined": true,
-                            "pre_defined_topics": [],
+                            "pre_defined_topics": [
+                                "a potential study",
+                                "another study",
+                                "further research",
+                                "future",
+                                "future analyses",
+                                "future analysis",
+                                "future research",
+                                "future studies",
+                                "future study"
+                            ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>TBD</p></body>",
+                    "examples": "<body>\n<p>From Discussion sections: </p>\n<p>\"<span class=\"topic\">Future studies</span> might think to <span class=\"topic\">further</span> explore the trends presented in this study with a more expansive data set containing individuals from all across the country.\"</p>\n<p>\"<span class=\"topic\">In future research</span>, we are interested in investigating the association between the clarity of diamonds and their prices.\"</p>\n<p>\"The results can be provided to current or <span class=\"topic\">future</span> soccer trainers and trainees to adjust their strategies like to familiarize the stadium before the official game starts.\"</p>\n<p>\"<span class=\"topic\">In the future</span>, trials are expected to become more adaptive, embracing modern computing power and adaptive decision-making.\"</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "cv_description": "<body>\n<p>N/A</p></body>",
                     "values": [],
                     "parent": "Describing Real-World Importance"
                 }
@@ -78,7 +105,7 @@
         },
         {
             "name": "Describing concerns of the data & methods",
-            "description": "<body>\n<p></p></body>",
+            "description": "<body>\n<p>In order to interpret the credibility and accuracy of your results, your reader needs to understand your data. In addition, your reader should understand how you arrived at your analytical decisions. </p>\n<p>In the<span style=\"font-weight:600;\"> methods section</span>, your reader expects to see more <span style=\"font-style:italic;\">statistical terms. </span></p>\n<p>Keep in mind that while we refer to the \u201cmethods\u201d section, you might have an adjacent section that accomplishes the same task for your readers. <span style=\"font-weight:600;\">Consider how your own text varies from these slightly more generic expectations. </span></p></body>",
             "topics": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
@@ -86,86 +113,38 @@
             "children": [
                 {
                     "name": "Can you summarize the data?",
-                    "description": "<body>\n<p></p></body>",
+                    "description": "<body>\n<p>To understand your report, your reader must understand your data:</p>\n<ul><li>When and where was the data collected? </li>\n<li>Who or what are the subjects under study?</li>\n<li>What procedures were used to select subjects and collect measurements?</li>\n<li>What are your quantitative and categorical variables?</li></ul>\n<p>These questions are typically answered in the <span style=\"font-weight:600;\">methods section</span>, or an EDA section in some reports (like in project 1). </p>\n<p>Focus on populating this topic cluster with words and phrases specific to your datset. </p>\n<p><span style=\"font-weight:600;\">Similar words and phrases may appear in the context of the results/research section, serving a different rhetorical purpose for your readers. </span> </p></body>",
                     "topics": [
                         {
                             "lemma": "Data Descriptors",
                             "user_defined": true,
                             "pre_defined_topics": [
                                 "IQR",
-                                "bimodal",
-                                "inter-quartile range",
-                                "max",
-                                "maximum",
-                                "meadian ",
                                 "mean",
-                                "min ",
-                                "minimum",
-                                "mode ",
-                                "quartile",
-                                "sample",
-                                "sample size",
-                                "small sample",
-                                "spread",
+                                "median",
+                                "mode",
                                 "standard deviation",
-                                "unimodal ",
-                                "variability",
-                                "variation ",
-                                "varied ",
-                                "vary"
+                                "the data",
+                                "the dataset",
+                                "this dataset"
                             ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p></p></body>",
+                    "examples": "<body>\n<p>From methods/data sections: </p>\n<p>\"<span class=\"topic\">We have data compiled</span> on the <span class=\"topic\">passing performances </span>of every <span class=\"topic\">NFL player</span> from 2009 through the end of the regular season in 2018. The data was collected as a portion of the nflscrapR package, which is an R studio resource that utilizes NFL data, by Ron Yurko. \"</p>\n<p>\"<span class=\"topic\">The data</span> analyzed for the world come from the World Heath Organization WHO, and are available for download as a CSV. <span class=\"topic\">The data </span>is organized by country and by day, and are broken down into <span class=\"topic\">four categories</span>: cumulative cases, new daily cases, cumulative deaths, and new daily deaths. \"</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p></p></body>",
+                    "cv_description": "<body>\n<p>N/A</p></body>",
                     "values": [],
                     "parent": "Describing concerns of the data & methods"
                 },
                 {
                     "name": "Are there any concerns that you have with the data?",
-                    "description": "<body>\n<p>Do you have any concerns with the methods used to collect this data? Consider the background sources and potential issues with the data that your reader might be concerned about. </p>\n<p>How relatively well is this assumption satisfied by the study described? Does the relative representativeness of the sample (or lack thereof) give you much cause for concern about the relative validity of the final results of the hypothesis test? Why or why not?</p>\n<p>Background sources and issues</p></body>",
+                    "description": "<body>\n<p>Typically, writers justify and explain their data and methods prior to presenting the results of their analysis. We make many decisions when we analyze data, and we should make a case for those decisions to potentially skeptical readers. </p>\n<p><span style=\"font-weight:600;\">Do you have any concerns with the methods used to collect this data?</span> Consider the background sources and potential issues with the data that your reader might be concerned about. </p>\n<p><span style=\"font-weight:600;\">How relatively well is this assumption satisfied by the study described?</span> Does the relative representativeness of the sample (or lack thereof) give you much cause for concern about the relative validity of the final results of the hypothesis test? Why or why not?</p></body>",
                     "topics": [
                         {
                             "lemma": "Quality of Data",
-                            "user_defined": true,
-                            "pre_defined_topics": [
-                                "concerning",
-                                "outlier",
-                                "outliers",
-                                "problematic",
-                                "sample sizes",
-                                "sampling method",
-                                "selection method",
-                                "skew",
-                                "skewed",
-                                "skewness",
-                                "skews",
-                                "sparse"
-                            ],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p></p></body>",
-                    "values": [
-                        "considerate",
-                        "ethical"
-                    ],
-                    "parent": "Describing concerns of the data & methods"
-                },
-                {
-                    "name": "How might you justify your techniques for your readers?",
-                    "description": "<body>\n<p>Consider a reader with experience in data analysis. How would you address their potential concerns? </p>\n<p>Do you have any concerns with the methodologies used to analyze this data?</p>\n<p>appears in conclusion as well (limitations) </p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Quality of Methods",
                             "user_defined": true,
                             "pre_defined_topics": [
                                 "bin",
@@ -174,20 +153,61 @@
                                 "combine",
                                 "combined",
                                 "combining",
-                                "grouping",
+                                "outlier",
+                                "outliers",
+                                "problematic",
+                                "sample",
+                                "sample size",
+                                "sample sizes",
+                                "skew",
+                                "skewness",
+                                "spread",
+                                "the sampling method",
+                                "the selection method"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>From methods/data sections:</p>\n<p>\"This dataset has an average weight(in carats) of 0.793 and a standard deviation of 0.469. The distribution of carats is essentially <span class=\"topic\">unimodal</span> and <span class=\"topic\">skewed</span> to the right.\"</p>\n<p>\"<span class=\"topic\">Despite this</span>, these concerns should not be <span class=\"topic\">problematic</span> in relation to the validity of the outcomes. \"</p>\n<p>From results sections: </p>\n<p>\"To further confirm these results, we <span class=\"topic\">combine</span> the groups into two broad categories called weekday and weekend, and perform a Welch two-sample t-test.\"</p>\n<p>\"Even though our box plot showed some <span class=\"topic\">outliers</span> and <span class=\"topic\">skewness</span>, an ANOVA test remains <span class=\"topic\">justified</span> <span class=\"topic\">since</span> the group sizes of our four groups are relatively large.\"</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "values": [
+                        "considerate",
+                        "ethical"
+                    ],
+                    "parent": "Describing concerns of the data & methods"
+                },
+                {
+                    "name": "How might you justify your techniques for your readers?",
+                    "description": "<body>\n<p>Consider a reader with experience in data analysis: how would you address their potential concerns with your statistical choices? </p>\n<ul><li><span style=\"font-weight:600;\">What types of data manipulation did you perform? </span>Be sure to address any potential concerns that the reader might have with your use of the data. </li>\n<li>Would a reader have any concerns with the methodologies used to analyze this data? If so, can you <span style=\"font-style:italic;\">justify</span> your decisions for your reader?</li></ul>\n<p>These limitations typically appear in the methods section and in your conclusion/discussion section. </p>\n<p>In the <span style=\"font-weight:600;\">methods section</span>, you should: </p>\n<ul><li>justify your choices for your reader</li></ul>\n<p>In the <span style=\"font-weight:600;\">discussion section</span>, you should: </p>\n<ul><li>note limitations of your analysis to help researchers with future work</li></ul>\n<p>Populate this topic cluster with words and phrases specific to the methods you used. </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Quality of Methods",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "cell size",
+                                "group size",
+                                "limitation",
+                                "limitations",
                                 "linearity",
+                                "method",
                                 "normality",
+                                "technique",
+                                "this method",
+                                "this technique ",
                                 "transformation",
                                 "transformations"
                             ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>TBD</p></body>",
+                    "examples": "<body>\n<p>From methods sections:</p>\n<p>\"In addition, <span class=\"topic\">modeling</span> the probability of only two outcomes\u2014a win or a loss\u2014is also quite <span class=\"topic\">restrictive</span>; chess games against similarly matched opponents will often end in a draw. <span class=\"topic\">Yet</span>, even with these <span class=\"topic\">limitations</span>, this rather simplistic and restrictive <span class=\"topic\">model produces</span> fairly reasonable approximations.\"</p>\n<p>\"Although elegant, <span class=\"topic\">this technique</span> is rather <span class=\"topic\">limited</span>, requiring the regressor uncertainty to be the same at each point and being limited to a few special and simple kernel functions for which the distribution of the derivative in 5 can be computed by manual calculus.\"</p>\n<p>From discussion sections:</p>\n<p>\"<span class=\"topic\">Possible limitations</span> in the study include the fact that a relatively small dataset was used, and the dataset was taken from only one company.\"</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "cv_description": "<body>\n<p>N/A</p></body>",
                     "values": [
                         "credible",
                         "considerate",
@@ -203,7 +223,7 @@
         },
         {
             "name": "Statistical Analysis & Interpretation",
-            "description": "<body>\n<p></p></body>",
+            "description": "<body>\n<p>When you present your results to your readers, focus on those that are most relevant. This is the space where, with the help of the visualizations you've created, you can describe <span style=\"font-style:italic;\">what</span> you found.</p>\n<p>There are many ways to organize a results section, but remember to use language that foregrounds your results rather than your process. </p></body>",
             "topics": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
@@ -211,29 +231,83 @@
             "children": [
                 {
                     "name": "What can the reader learn from your figures?",
-                    "description": "<body>\n<p>make sure you reference each figure </p>\n<p>concept maps for each figure </p>\n<p>(200?) do you refer to each plot in the text? </p></body>",
+                    "description": "<body>\n<p>When you present your <span style=\"font-weight:600;\">results</span>, be sure to reference each figure or table that you include. Your choices in how you visually represent your data will affect your reader's interpretation of your claims, and sometimes your credibility. So, when planning your tables and figures, think of them like a storyboard for the data story you want to tell.</p>\n<p>For each visualization, you should report and interpret the main data trends for your reader. </p>\n<ul><li>Do you refer to each plot by name in the text? </li>\n<li>Do you explain the main data trends of that plot for your reader? </li>\n<li>Are you using effective verbs that convey the information in the figure or table? Some examples include: <span style=\"font-style:italic;\">suggests, displays, shows, illustrates, </span>etc. </li></ul>\n<p></p></body>",
                     "topics": [
                         {
                             "lemma": "Visual Descriptors",
                             "user_defined": true,
-                            "pre_defined_topics": [],
+                            "pre_defined_topics": [
+                                "Figure",
+                                "Figures",
+                                "Table",
+                                "Tables"
+                            ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p></p></body>",
+                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"<span class=\"topic\">Figure 2 shows</span> that the data for females\u2019 ER visits is slightly more skewed right than that of the males\u2019 ER visits.\"</p>\n<p>\"<span class=\"topic\">Figures 8 and 9 show </span>that the odds consistently underestimate the probability of the eventual victor winning, sometimes hugely (as in 1970).\"</p>\n<p>\"To best summarize the data for relationship status and income, we will use <span class=\"topic\">Table 2</span>. We can note that the highest income mean came from individuals who were married. The second-lowest and lowest mean income came from individuals who were seeing someone and unknown respectively. We can then graphically analyze the two variables in side-by-side box plots, <span class=\"topic\">shown in Figure 3</span>.\"</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p></p></body>",
-                    "values": [],
+                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
+                    ],
                     "parent": "Statistical Analysis & Interpretation"
                 },
                 {
                     "name": "What can the reader learn from your statistical results?",
-                    "description": "<body>\n<p></p></body>",
+                    "description": "<body>\n<p>The goal of this paper is to report and interpret the results of your inferential statistical analysis. What tests did you perform? What can you interpret from your results? </p>\n<p><span style=\"font-weight:600;\">Visualizations graphically summarize data for readers. But the text itself allows you to narrate that data</span>, reporting particularly <span style=\"font-style:italic;\">relevant data points</span> and focusing the reader's attention on <span style=\"font-style:italic;\">specific trends or findings. </span></p>\n<ul><li>What are the phrases you use to refer to the results in your figures? </li>\n<li>What verbs are you using to present your results?</li></ul></body>",
                     "topics": [
                         {
                             "lemma": "Statistical Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "ANOVA",
+                                "association",
+                                "chi-square",
+                                "maximum",
+                                "minimum",
+                                "p-value",
+                                "reject",
+                                "significance ",
+                                "the mean",
+                                "the median",
+                                "the results of"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"From the result of the <span class=\"topic\">chi-square</span> test, we can reject the null hypothesis since our <span class=\"topic\">p-value</span>, in this case, is smaller than our \u03b1 level of 5%.\"</p>\n<p>\"<span class=\"topic\">To formally test</span> the question of whether mean income differs by affection for pets, we conducted an analysis of variance (<span class=\"topic\">ANOVA</span>) test with the <span class=\"topic\">null hypothesis</span> that the average income is the same across all levels of affection for pets.\"</p>\n<p>\"We used a <span class=\"topic\">chi-square</span> test to determine whether there is an <span class=\"topic\">association</span> between diagnosis and the presence of MDRB in the intestines.\"</p>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Title and Citations",
+            "description": "<body>\n<p></p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "Is your title informative for the reader?",
+                    "description": "<body>\n<p>Titles serve an important role in papers. Your title should include keywords that inform your reader about the content of your paper. Although this is a class assignment, consider what other readers or researchers would be interested in seeing in your title. </p>\n<p><span style=\"font-weight:600;\">Populate this topic cluster with nouns/noun phrases relevant to your report. </span>Do these items appear in your title? Can you include them without overloading your reader with information? </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Title Keywords",
                             "user_defined": true,
                             "pre_defined_topics": [],
                             "no_lexical_overlap": false
@@ -245,26 +319,33 @@
                     "children": [],
                     "cv_description": "<body>\n<p></p></body>",
                     "values": [],
-                    "parent": "Statistical Analysis & Interpretation"
+                    "parent": "Title and Citations"
                 },
                 {
-                    "name": "What interpretations can you draw from these results?",
-                    "description": "<body>\n<p>What is motivating these questions? Why does the reader care?</p></body>",
+                    "name": "Optional: Do you include citations that serve a rhetorical purpose?",
+                    "description": "<body>\n<p>When you cite other work in your writing, it can help to build your credibility as an author. Moreover, each time you incorporate an outside source into your own writing, you are making a rhetorical choice and signalling something to your reader. </p>\n<p>For instance, you might align yourself with certain sources that you introduce as an authority on the subject, or you may disagree with and critique other research. In other contexts, you might neutrally present outside sources to convey information. </p>\n<p><span style=\"font-weight:600;\">Outside sources are optional for this assignment.</span> If you do include them, be sure to cite them properly using the APA style guide. </p></body>",
                     "topics": [
                         {
-                            "lemma": "Real-World Interpretations of Results",
+                            "lemma": "Citation language",
                             "user_defined": true,
-                            "pre_defined_topics": [],
+                            "pre_defined_topics": [
+                                "Bibliography",
+                                "Endnotes",
+                                "Footnotes ",
+                                "References",
+                                "Work Cited",
+                                "Works Cited"
+                            ],
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>TBD</p></body>",
-                    "type": "active",
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "optional",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "cv_description": "<body>\n<p></p></body>",
                     "values": [],
-                    "parent": "Statistical Analysis & Interpretation"
+                    "parent": "Title and Citations"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",
