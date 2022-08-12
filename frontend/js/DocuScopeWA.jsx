@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 import '../css/docuscope.css';
 import '../css/main.css';
 
+import EberlyLTIBase from './EberlyLTIBase';
 import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
 import DataTools from './DataTools';
 import DocuScopeTools from './DocuScopeTools';
@@ -12,8 +13,9 @@ import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
 
 /**
+ * 
  */
-export default class DocuScopeWA extends Component {
+export default class DocuScopeWA extends EberlyLTIBase {
 
   static DOCUSCOPE_STATE_FATAL=-1;
   static DOCUSCOPE_STATE_CONNECTING=0;
@@ -277,7 +279,6 @@ export default class DocuScopeWA extends Component {
       return (false);
     }
 
-
     if (!window.serverContext.roles) {
       return (false);
     }
@@ -285,7 +286,7 @@ export default class DocuScopeWA extends Component {
     var splitter=window.serverContext.roles.split (",");
 
     for (var i=0;i<splitter.length;i++) {
-      if (splitter [i]=="urn:lti:instrole:ims/lis/Student") {
+      if ((splitter [i]=="urn:lti:instrole:ims/lis/Student") || (splitter [i]=="Student")) {
         return(true);
       }
     }
@@ -305,16 +306,19 @@ export default class DocuScopeWA extends Component {
       return (false);
     }
 
+    if (!window.serverContext.lti) {
+      return (false);
+    }    
 
-    if (!window.serverContext.roles) {
+
+    if (!window.serverContext.lti.roles) {
       return (false);
     }
 
-
-    var splitter=window.serverContext.roles.split (",");
+    var splitter=window.serverContext.lti.roles.split (",");
 
     for (var i=0;i<splitter.length;i++) {
-      if (splitter [i]=="urn:lti:instrole:ims/lis/Instructor") {
+      if ((splitter [i]=="urn:lti:instrole:ims/lis/Instructor") || (splitter [i]=="urn:lti:instrole:ims/lis/Administrator") || (splitter [i]=="Instructor")) {
         return(true);
       }
     }
@@ -336,52 +340,20 @@ export default class DocuScopeWA extends Component {
   /**
    *
    */
-  showLoader () {
-    return (<div className="loader">
-        <button id="launcher" className="center_button" onClick={this.onLaunch}>Open in new Window</button>
-        <div className="iframe">
-          <form id="ltirelayform" target="docuscopewa" method="post"></form>
-        </div>
-      </div>);//progress
+  onLaunch (e) {
+    this.docuscopeTools.launch (false);
   }
 
   /**
    *
    */
-  onLaunch () {
-    console.log ("onLaunch ("+window.location.href+")");
-
-    var ltiFields = window.serverContext.lti;
-
-    console.log (ltiFields);
-
-    var relayform = document.getElementById ("ltirelayform");
-
-    for (let key in ltiFields) {
-      if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
-        console.log("Appending: " + key + " -> " + ltiFields[key]);
-
-        var ltiField=document.createElement ("input");
-        ltiField.type="hidden";
-        ltiField.id=key;
-        ltiField.name=key;
-        ltiField.value=ltiFields [key];
-        /*
-        $('<input>').attr({
-          type: 'hidden',
-          id: key,
-          name: key,
-          value: ltiFields [key]
-        }).appendTo('#ltirelayform');
-        */
-
-        relayform.appendChild (ltiField);
-      }
-    }
-
-    relayform.setAttribute ("action",window.location.href);
-    relayform.submit();
-    relayform.style.visibility="hidden";
+  showLoader () {
+    return (<div className="loader">
+        <button id="launcher" className="center_button" onClick={(e) => this.onLaunch(e)}>Open in new Window</button>
+        <div className="iframe">
+          <form id="ltirelayform" target="docuscopewa" method="post"></form>
+        </div>
+      </div>);
   }
 
   /**
@@ -391,6 +363,10 @@ export default class DocuScopeWA extends Component {
     let progresswindow;
     let mainPage;
 
+    if (this.isInstructor ()) {
+      return (<DocuScopeWAScrim><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>);
+    }
+
     if (this.inIframe ()==true) {
       return (this.showLoader ());
     }
@@ -399,11 +375,7 @@ export default class DocuScopeWA extends Component {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
-      if (this.isInstructor ()) {
-        mainPage=<DocuScopeWAScrim><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>;
-      } else {
-        mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></StudentView></DocuScopeWAScrim>;
-      }
+      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></StudentView></DocuScopeWAScrim>;
     }
 
     return (mainPage);
