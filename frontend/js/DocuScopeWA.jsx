@@ -5,6 +5,7 @@ import '../css/main.css';
 
 import DocuScopeProgressWindow from './components/DocuScopeProgressWindow/DocuScopeProgressWindow';
 import DataTools from './DataTools';
+import DocuScopeTools from './DocuScopeTools';
 import DocuScopeRules from './DocuScopeRules';
 import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
@@ -29,6 +30,7 @@ export default class DocuScopeWA extends Component {
     console.log ("DocuScopeWA ()");
 
     this.dataTools=new DataTools ();
+    this.docuscopeTools=new DocuScopeTools ();
 
     this.ruleManager=new DocuScopeRules ();
     
@@ -139,13 +141,6 @@ export default class DocuScopeWA extends Component {
   /**
    *
    */
-  /*componentWillUnmount () {
-    console.log ("componentWillUnmount ()");
-  }*/
-
-  /**
-   *
-   */
   evaluateResult (aMessage) {
     if (aMessage.status!="success") {
       return (aMessage.message);
@@ -169,7 +164,10 @@ export default class DocuScopeWA extends Component {
    *
    */
   apiPOSTCall (aURL,aData) {
+    console.log ("apiPOSTCall ()");
+
     let payload=this.createDataMessage (aData);
+    let that=this;
 
     return new Promise((resolve, reject) => {
       fetch(aURL,{
@@ -185,6 +183,11 @@ export default class DocuScopeWA extends Component {
         if (evaluation!=null) {
           reject(evaluation);
         } else {
+          if (raw.data.html) {
+            let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            console.log (html);
+            that.setState ({html: html});
+          }
           resolve (raw.data);
         }
       }).catch((error) => {
@@ -202,6 +205,9 @@ export default class DocuScopeWA extends Component {
    *
    */
   apiGETCall (aURL, _aData) {
+    console.log ("apiGETCall ()");
+
+    let that=this;
     return new Promise((resolve, reject) => {
       fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
         let raw=JSON.parse(result);
@@ -209,6 +215,11 @@ export default class DocuScopeWA extends Component {
         if (evaluation!=null) {
           reject(evaluation);
         } else {
+          if (raw.data.html) {
+            let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            console.log (html);
+            that.setState ({html: html});
+          }          
           resolve (raw.data);
         }
       }).catch((error) => {

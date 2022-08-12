@@ -62,19 +62,11 @@ class ClusterPanel extends Component {
    * Update with the latest from the actual data
    */
   componentDidUpdate(prevProps) {
-    console.log ("componentDidUpdate ()");
+    //console.log ("componentDidUpdate ()");
 
     if ((prevProps.currentRule!=this.props.currentRule) || (prevProps.currentCluster!=this.props.currentCluster)) {
-      /*
-      this.setState ({
-        topicText: "bingo, boingo"
-      });      
-      */
-
       let aText=this.getTopicText ();
-
-      console.log ("Topic text: " + aText + ", type: "  + typeof aText);
-
+    
       this.setState ({
         topicText: aText
       });      
@@ -170,18 +162,18 @@ class ClusterPanel extends Component {
    * 
    */
   createTopicEditor () {
-    console.log ("createTopicEditor ()");
-
     let enableEditor=true;
+    let textareaClassName="cluster-topic-input";
 
     if (this.props.currentCluster==-1) {
       enableEditor=false;
+      textareaClassName="cluster-topic-input cluster-textarea-disabled";
     }
 
     return (<div className="cluster-topic-editor">
       <textarea
         readonly={enableEditor}
-        className="cluster-topic-input"
+        className={textareaClassName}
 	      value={this.state.topicText}
 	      onChange={this.onTopicsChange} />
     	<div className="cluster-topic-controls">

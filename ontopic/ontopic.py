@@ -130,7 +130,8 @@ class OnTopic:
 
     coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()
-    html=document.toHtml_OTOnly(coherence,-1)
+    topics=document.getCurrentTopics ()
+    html=document.toHtml_OTOnly_DSWA(topics,-1)
 
     # https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
     html_bytes = html.encode('utf-8')

@@ -2350,6 +2350,245 @@ class DSDocument():
 
         return html_str
 
+    ########################################
+    #
+    # Methods for creating HTML/XML strings from the text data
+    # Doesn't rely on DocuScope tagging, does rely on PythonDocX
+    #
+    # DSWA specific version that makes it easier to display and
+    # manager in the React displace
+    #
+    ########################################
+
+    def toHtml_OTOnly_DSWA(self, topics=[], para_pos=-1, font_info=default_font_info):
+        """
+        This method is used if there is no docusope dictionary. In Write & Audit, this means
+        that it is either used without the Impressions panel, or it is used from the Online version
+        where docuscope is not integrated into the Coherence visualization.
+        """
+
+        data = self.sections[self.current_section]['data']
+
+        if data is None:
+            return ""
+
+        total_paras = len(data['paragraphs'])
+        html_str = ""
+        pcount  = 1
+
+        for para in data['paragraphs']: # for each paragraph
+
+            if para_pos != -1 and (para_pos+1) != pcount:
+                pcount += 1
+                continue
+
+            total_sents = len(para['sentences'])
+
+            para_style = para['style']
+            font_size = font_info[para_style]            
+            html_str += '<p class=\'paragraph p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+
+            scount = 1
+
+            for sent in para['sentences']: # for each sentence
+
+                total_words = len(sent['text_w_info'])
+                is_combo = False
+                word_count = 0
+                html_str += '<span class=\'sentence p{} s{}\'>'.format(pcount, scount)
+
+                while word_count < total_words:
+
+                    w = sent['text_w_info'][word_count]
+                    word  = w[WORD]         # ontopic word
+                    lemma = w[LEMMA]        # lemma/topic
+
+                    # if w[LEMMA] in topics:
+                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
+                        # we need to remove periods.
+                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                        html_word = "<span class=\'word {} p{} s{}\'>{}</span>".format(topic, pcount, scount, word)
+                    else:
+                        html_word = word
+
+                    is_space = True
+                    is_combo = False
+                    temp_word_count = 0
+
+                    if word_count < total_words-1:
+
+                        # Let's deal with hyphenations and words followed by a no-space units.
+                        next_w = sent['text_w_info'][word_count+1]
+                        next_next_w = None
+                        
+                        if word_count+1 < total_words-1:
+                            next_next_w = sent['text_w_info'][word_count+2]
+
+                        if word in right_quotes and html_str[-1] == ' ':
+                            # if w[WORD] is a right side quotes, and the current html_str string ends
+                            # with a space, remove the space.
+                            html_str = html_str[:-1]
+
+                        if word in left_quotes or word in hyphen_slash:
+                            # w is a left side punct or a dash (not em-dash or en-dash)
+                            is_space = False
+
+                        elif word == '.' and next_w[WORD].isdigit():
+                            # if word is a period and the next word is a digit + %, it's a decimal point.
+                            is_space = False
+
+                        elif word == '.' and len(next_w[WORD]) == 1 and next_w[WORD].isalpha():
+                            # if word is a period and the next word is single alphabet, it's a decimal point
+                            # or multi-level figure numbers.
+                            is_space = False
+
+                        elif word == 'can' and next_w[WORD] == 'not' and next_next_w is not None and next_next_w[WORD] != 'only':
+                            # we always spell 'can not' without a space, except when it is followd by 'only'.
+                            is_space = False
+
+                        elif next_w[WORD] not in left_quotes:
+
+                            # next_w is a punct, which is not on one of the left quotes
+                            temp_word_count = 0
+                            if next_w[WORD] in no_space_patterns:
+
+                                combo_word = html_word + next_w[WORD]
+                                temp_word_count = word_count + 2
+
+                                if temp_word_count < total_words:    # is the folloiwng word punct?
+                                    temp_w = sent['text_w_info'][temp_word_count]
+
+                                    if temp_w[WORD] in no_space_patterns or temp_w[WORD] in right_quotes:
+                                        combo_word = combo_word + temp_w[WORD]
+                                        word_count = temp_word_count
+                                        is_space = True
+                                        is_combo = True
+
+                                    elif temp_w[POS] == 'PUNCT' and temp_w[WORD] not in dashes and temp_w[WORD] != ellipsis:
+                                        combo_word = combo_word + temp_w[WORD]
+                                        word_count = temp_word_count
+                                        is_space = True
+                                        is_combo = True
+
+                                    else:
+                                        word_count += 1
+                                        is_space = True
+                                        is_combo = True
+
+                                else:
+                                    word_count += 1  # skip the next word
+                                    is_space = True
+                                    is_combo = True
+
+                            elif next_w[WORD] in hyphen_slash:
+                                combo_word = html_word + next_w[WORD] # word + '-' or '/'
+                                temp_word_count = word_count + 2
+
+                                if temp_word_count >= total_words:
+                                    pass
+
+                                temp_next_w = None
+                                while True:
+
+                                    if temp_word_count >= (total_words):
+                                        break
+
+                                    # get the next pair
+                                    temp_w = sent['text_w_info'][temp_word_count]
+                                    if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
+                                        topic = unidecode.unidecode(w[LEMMA].replace('.',''))
+                                        html_temp_word = "<span class=\'word {} p{} s{}\'>{}</t>".format(topic, 
+                                                                                                 pcount, scount, 
+                                                                                                 temp_w[WORD])
+                                    else:
+                                        html_temp_word = temp_w[WORD]
+
+                                    if temp_word_count+1 < (total_words):
+                                        temp_next_w = sent['text_w_info'][temp_word_count+1]
+
+                                        if temp_next_w[WORD] in hyphen_slash:
+                                            combo_word += html_temp_word
+                                            combo_word += temp_next_w[WORD]  # word + '-' or '/'
+                                            temp_word_count += 2
+                                        else:
+                                            combo_word += html_temp_word
+                                            break
+                                    else:
+                                        combo_word += html_temp_word
+                                        break
+
+                                if temp_next_w is not None:
+
+                                    if temp_next_w[WORD] in no_space_patterns or \
+                                       temp_next_w[WORD] in right_quotes:
+                                        is_space = False
+
+                                    elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
+                                                                         and temp_next_w[WORD] != ellipsis:
+                                        is_space = False                                        
+
+                                    else:
+                                        is_space = True
+                                else:
+                                    is_space = True
+
+                                word_count = temp_word_count # skip all the words in the hyphenated word
+                                is_space = True
+                                is_combo = True
+
+                            elif next_w[WORD] in right_quotes:
+                                is_space = False 
+             
+                            elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
+                                is_space = False
+
+                            else:
+                                is_space = True
+
+                        if is_space:        
+                            next_char = ' '          
+                        else:    
+                            next_char = ''   
+
+                    else:  # last word/char in 'sent'
+                        if word in ['\u201C', '\u2018']:
+                            # If the last word is an opening/left single/double quote, no space should be added.
+                            # This case should only happen if the NLP parser's result is incorrect.
+                            next_char = ''
+
+                        elif word in right_quotes:
+                            if html_str[-1] == ' ':
+                                html_str = html_str.rstrip()
+                            next_char = ' '
+                        else:
+                            next_char = ' '       # end of 'sent' 
+
+
+                    if is_combo:
+                        html_str += combo_word
+                    else:
+                        html_str += html_word
+                        
+                    html_str += next_char
+                    word_count += 1
+
+                # if bTagOpen == True:
+                    # html_str += '</ds>'
+                    # bTagOpen = False
+
+                #  word
+                html_str += '</span>'
+                html_str += next_char
+                scount += 1
+
+            # sent
+            pcount += 1
+            html_str += '</p>'   # Close the paragraph tag
+
+        html_str = "<html><body>\n" + html_str + "\n</body></html>"
+
+        return html_str
+
     def toHtml(self, topics=[], para_pos=-1, font_info=default_font_info):
         """
         This method is used only by the desktop version of Write & Audit. It genreates an HTML string
@@ -5264,3 +5503,15 @@ class DSDocument():
                         line += "  "
 
                 print(line)
+
+    def getCurrentTopics(self):
+
+        topics = self.global_topics
+
+        for key, value in self.local_topics_dict.items(): 
+            local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
+            topics += local_topics
+
+        topics = list(set(topics))
+
+        return topics
