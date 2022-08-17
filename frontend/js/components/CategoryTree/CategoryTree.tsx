@@ -129,7 +129,7 @@ const Patterns = (props: { data: PatternData[] }) => {
   return (
     <div className="table-responsive patterns-container ms-5">
       <table className="table table-sm patterns overflow-auto">
-        <thead className="header">
+        <thead className="header table-primary">
           <tr>
             <th scope="col">Pattern</th>
             <th scope="col" className="text-end">
