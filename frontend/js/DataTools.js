@@ -213,6 +213,20 @@ export default class DataTools {
   }
 
   /**
+   * 
+   */
+  topicsToArray (aTopicText) {
+    let topics=[];
+
+    let splitter=aTopicText.split ("\n");
+    for (let i=0;i<splitter.length;i++) {
+      topics.push (splitter [i]);
+    }
+
+    return (topics);
+  }
+
+  /**
    * Convert a list containing terms separated by newlines into a string with semicolons representing the newlines
    * This is used to transmit custom topics and pre-defined topics to the OnTopic backend. It is very important that
    * this method returns a valid string, this might be empty but it needs to be valid. That ensures a lot less

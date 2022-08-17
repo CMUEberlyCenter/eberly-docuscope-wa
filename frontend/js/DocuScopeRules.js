@@ -213,10 +213,10 @@ export default class DocuScopeRules {
     }
 
     return null;
-  }  
+  }
 
   /**
-   * 
+   * Return the array of custom/pre-defined topics as a single newline separated string
    */
   getClusterTopicText (aCluster) {
     //console.log ("getClusterTopicText ()");
@@ -230,19 +230,35 @@ export default class DocuScopeRules {
     }
 
     let clusterObject=aCluster.raw;
-
-    //console.log (clusterObject);
-
+    
     let topics=clusterObject.topics;
+
+    /*
     if (topics) {
       for (let i=0;i<topics.length;i++) {
         let topicList=topics [i].pre_defined_topics;
         if (i>0) {
           topicText+="\n";
         }
-        topicText+=topicList;
+        for (let j=0;j<topicList.length;j++) {
+          topicText+="\n";
+          topicText+=topicList[j];
+        }
       }
     }
+    */
+
+    if (topics) {
+      let topicList=topics [0].pre_defined_topics;
+      if (topicList) {
+        for (let j=0;j<topicList.length;j++) {
+          if (j>0) {
+            topicText+="\n";
+          }
+          topicText+=topicList[j];
+        }
+      }
+    }    
 
     return (topicText);
   }
@@ -264,10 +280,8 @@ export default class DocuScopeRules {
         let topics=clusterObject.topics;
         if (topics) {
           if (topics.length>0) {
-            //return (topics [0].pre_defined_topics);
             let rawTopics=topics [0].pre_defined_topics;
             for (let k=0;k<rawTopics.length;k++) {
-              //topicText+=(";"+rawTopics [k]);
               tempList.push(rawTopics [k]);
             }
           }
@@ -288,7 +302,7 @@ export default class DocuScopeRules {
   }
 
   /**
-   * 
+   * aCustomTopicSet needs to be an array if terms: ["Topic 1","Topic 2"]
    */
   setClusterCustomTopics (aRule, aCluster, aCustomTopicSet) {
     console.log ("setClusterCustomTopics ("+aRule + ", " + aCluster +")");
@@ -301,9 +315,6 @@ export default class DocuScopeRules {
 
     // Let's change in place for now
     let clusterObject=cluster.raw;
-
-    //console.log ("Before:");
-    //console.log (clusterObject);
 
     let topics=clusterObject.topics;
     if (topics) {
@@ -318,9 +329,6 @@ export default class DocuScopeRules {
     } else {
       return (false);
     }
-
-    //console.log ("After:");
-    //console.log (clusterObject);    
 
     this.save();
 

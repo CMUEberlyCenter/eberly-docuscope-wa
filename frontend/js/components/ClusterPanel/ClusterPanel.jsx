@@ -1,7 +1,7 @@
 import React, { Component, useRef, useEffect } from "react";
 import { Button, Alert, Card, Container, Form, Nav, Navbar, NavDropdown, Tab, Tabs } from "react-bootstrap";
 
-//import TopicEditor from '../TopicEditor/TopicEditor';
+import DataTools from "../../DataTools";
 
 import './ClusterPanel.scss';
 import './ClusterTopics.scss';
@@ -48,6 +48,8 @@ class ClusterPanel extends Component {
   constructor (props) {
     super (props);
 
+    this.dataTools=new DataTools ();
+
     this.state = {      
       currentTab: "expectationabout",
       topicText: ""
@@ -86,8 +88,6 @@ class ClusterPanel extends Component {
       console.log ("Warning cluster not found");
     }
 
-    //console.log ("Topic text: " + topictext);
-
   	return (topictext);
   }
 
@@ -117,7 +117,9 @@ class ClusterPanel extends Component {
    */
   onCustomTopicUpdate (e) {
     //console.log ("onCustomTopicUpdate ()");
-    if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, this.state.topicText)==false) {
+    let topicArray=this.dataTools.topicsToArray (this.state.topicText);
+
+    if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, topicArray)==false) {
       console.log ("Show an error dialog to the user");
     }
   }
