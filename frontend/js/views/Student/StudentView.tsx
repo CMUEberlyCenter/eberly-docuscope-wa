@@ -93,7 +93,8 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  */
 const StudentView = (props: { 
     api: apiCall,
-    ruleManager: any
+    ruleManager: any,
+    html: string
   }) => {
 
   // Status handlers
@@ -344,12 +345,42 @@ const StudentView = (props: {
       setShowAbout (true);
       return;
     }
+
+    if (eventKey === "showGettingStarted") {
+      setShowGettingStarted (true);
+      return;
+    }
+
+    if (eventKey === "showTroubleshooting") {
+      setShowTroubleshooting (true);
+      return;
+    }    
   };
+
   const tagging = useTaggerResults();
-  // should the special tagged text rendering be used?
-  const showTaggedText =
-    currentTab === "impressions" && !editable && isTaggerResult(tagging);
+
+  // should the special tagged text rendering be used? (Mike's panel)
+  const showTaggedText = (currentTab === "impressions") && (!editable) && (isTaggerResult(tagging));
+  let showOnTopicText = false;
+
   const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
+
+  let topicTaggedContent;
+
+  // Every other panel that needs it. We'll clean up the logic later
+  if (showTaggedText==false) {  
+    showOnTopicText = (currentTab === "coherence") && (!editable) && (props.html!=null);
+    if (showOnTopicText==false) {
+      showOnTopicText = (currentTab === "clarity") && (!editable) && (props.html!=null);
+    }
+  }
+
+  if (showOnTopicText==true) {
+    topicTaggedContent = <div
+      className="tagged-text"
+      dangerouslySetInnerHTML={{ __html: props.html }}></div>;
+  }
+  
   // Special rendering of tagger results.
   const taggedText = (
     <React.Fragment>
@@ -381,16 +412,25 @@ const StudentView = (props: {
   //>--------------------------------------------------------
 
   const [showHelp, setShowHelp] = useState(false);
+  const [showGettingStarted, setShowGettingStarted] = useState(false);
+  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
 
   let help;
 
   const onCloseHelpPage = () => {
-    console.log ("onCloseHelpPage ()");
     setShowHelp (false);
   };
 
   if (showHelp==true) {
-    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} />;
+    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="main" />;
+  }
+
+  if (showGettingStarted==true) {
+    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="gettingstarted" />;
+  }
+
+  if (showTroubleshooting==true) {
+    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="troubleshooting" />;
   }
 
   //>--------------------------------------------------------
@@ -440,6 +480,7 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <NavDropdown title="View" menuVariant="dark">
                   <NavDropdown.Item
+                    disabled={true}
                     eventKey={"showTopicClusters"}
                     active={showInfoColumn}
                     aria-current={showInfoColumn}
@@ -452,6 +493,8 @@ const StudentView = (props: {
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
                   <NavDropdown.Item eventKey={"showHelp"}>Show Help</NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showGettingStarted"}>Getting Started</NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showTroubleshooting"}>Troubleshooting</NavDropdown.Item>                                    
                   <NavDropdown.Item eventKey={"showAbout"}>About</NavDropdown.Item>
                 </NavDropdown>                
               </Nav>
@@ -494,30 +537,31 @@ const StudentView = (props: {
           </Card.Header>
           <Card.Body className="overflow-auto">
             {showTaggedText ? taggedText : ""}
+            {topicTaggedContent}
             <Slate
-              editor={editor}
-              value={editorValue}
-              onChange={(content: Descendant[]) => {
-                // only if change is not selection change.
-                if (editor.operations.some(op => 'set_selection' !== op.type)) {
-                  editorText.next(content);
-                  setEditorValue(content);
-                  sessionStorage.setItem('content', JSON.stringify(content));
-                }
-              }}
-            >
-              <Editable
-                className={showTaggedText ? "d-none" : ""}
-                readOnly={!editable}
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                placeholder={
-                  editable
-                    ? "Enter some text..."
-                    : "Unlock and enter some text..."
-                }
-              />
-            </Slate>
+                editor={editor}
+                value={editorValue}
+                onChange={(content: Descendant[]) => {
+                  // only if change is not selection change.
+                  if (editor.operations.some(op => 'set_selection' !== op.type)) {
+                    editorText.next(content);
+                    setEditorValue(content);
+                    sessionStorage.setItem('content', JSON.stringify(content));
+                  }
+                }}
+              >
+                <Editable
+                  className={(showTaggedText || showOnTopicText) ? "d-none" : ""}
+                  readOnly={!editable}
+                  renderElement={renderElement}
+                  renderLeaf={renderLeaf}
+                  placeholder={
+                    editable
+                      ? "Enter some text..."
+                      : "Unlock and enter some text..."
+                  }
+                />
+              </Slate>
           </Card.Body>
         </Card>
         {infocolumn}
@@ -527,11 +571,8 @@ const StudentView = (props: {
         <div className="statusbar-ruleversion"><FontAwesomeIcon icon={faBook} style={{marginLeft: "2px", marginRight: "2px"}} />{props.ruleManager.getVersion ()}</div>
         <div className="statusbar-language"><FontAwesomeIcon icon={faGlobe} style={{marginLeft: "2px", marginRight: "2px"}} />{language}</div>
       </footer>
-
       {help}
-
       {about}
-
     </div>
   );
 };

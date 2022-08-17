@@ -185,6 +185,13 @@ export default class DataTools {
   /**
    *
    */
+  isEmpty(obj) {
+    return Object.keys(obj).length === 0;
+  }
+
+  /**
+   *
+   */
   isEmptyRow(aRow) {
     for (let i = 0; i < aRow.length; i++) {
       let testObject = aRow[i];
@@ -210,6 +217,8 @@ export default class DataTools {
    * This is used to transmit custom topics and pre-defined topics to the OnTopic backend. It is very important that
    * this method returns a valid string, this might be empty but it needs to be valid. That ensures a lot less
    * issues on the server side.
+   * 
+   * Note: make sure that the topics are unique
    */
   textToOnTopicList (aTextBlock) {
     if (aTextBlock==null) {

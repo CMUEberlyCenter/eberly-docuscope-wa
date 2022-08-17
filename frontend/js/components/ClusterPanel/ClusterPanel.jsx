@@ -50,7 +50,7 @@ class ClusterPanel extends Component {
 
     this.state = {      
       currentTab: "expectationabout",
-      topictext: ""
+      topicText: ""
     };
 
     this.switchTab=this.switchTab.bind(this);
@@ -62,11 +62,10 @@ class ClusterPanel extends Component {
    * Update with the latest from the actual data
    */
   componentDidUpdate(prevProps) {
-    //console.log ("componentDidUpdate ()");
+    console.log ("componentDidUpdate ()");
 
     if ((prevProps.currentRule!=this.props.currentRule) || (prevProps.currentCluster!=this.props.currentCluster)) {
-      let aText=this.getTopicText ();
-    
+      let aText=this.getTopicText ();    
       this.setState ({
         topicText: aText
       });      
@@ -77,7 +76,7 @@ class ClusterPanel extends Component {
    * 
    */
   getTopicText () {
-    console.log ("getTopicText ("+this.props.currentRule + "," + this.props.currentCluster+")");
+    //console.log ("getTopicText ("+this.props.currentRule + "," + this.props.currentCluster+")");
 
   	let topictext="";
   	let cluster=this.props.ruleManager.getClusterByIndex (this.props.currentRule,this.props.currentCluster);
@@ -96,7 +95,7 @@ class ClusterPanel extends Component {
    * 
    */
   switchTab (key) {
-  	console.log ("switchTab ("+key+")");
+  	//console.log ("switchTab ("+key+")");
 
     this.setState ({
       currentTab: key
@@ -107,10 +106,9 @@ class ClusterPanel extends Component {
    * 
    */
   onTopicsChange (e) {
-  	console.log ("onTopicsChange ()");
-  	
+  	//console.log ("onTopicsChange ()");    
   	this.setState ({
-      topictext: e.target.value
+      topicText: e.target.value
   	});  	
   }
 
@@ -118,9 +116,10 @@ class ClusterPanel extends Component {
    * 
    */
   onCustomTopicUpdate (e) {
-    console.log ("onCustomTopicUpdate ()");
-
-    this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster,e.target.value);
+    //console.log ("onCustomTopicUpdate ()");
+    if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, this.state.topicText)==false) {
+      console.log ("Show an error dialog to the user");
+    }
   }
 
   /**
@@ -162,11 +161,11 @@ class ClusterPanel extends Component {
    * 
    */
   createTopicEditor () {
-    let enableEditor=true;
+    let enableEditor=false;
     let textareaClassName="cluster-topic-input";
 
     if (this.props.currentCluster==-1) {
-      enableEditor=false;
+      enableEditor=true;
       textareaClassName="cluster-topic-input cluster-textarea-disabled";
     }
 
@@ -175,7 +174,8 @@ class ClusterPanel extends Component {
         readonly={enableEditor}
         className={textareaClassName}
 	      value={this.state.topicText}
-	      onChange={this.onTopicsChange} />
+	      onChange={(e) => this.onTopicsChange (e)}>
+      </textarea>
     	<div className="cluster-topic-controls">
     	  <Button onClick={(e) => this.onCustomTopicUpdate (e)}>Update</Button>
     	</div>

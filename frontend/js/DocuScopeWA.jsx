@@ -33,7 +33,6 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.dataTools=new DataTools ();
     this.docuscopeTools=new DocuScopeTools ();
-
     this.ruleManager=new DocuScopeRules ();
     
     this.pingEnabled=true;
@@ -48,6 +47,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.state = {
       state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTING,
+      html: null,
       progress: 0,
       progressTitle: "Loading ...",
       globallyDisabled: false,
@@ -77,7 +77,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
       });
 
       this.apiCall ("rules",null,"GET").then ((result) => {
-        this.ruleManager.parse (result);
+        this.ruleManager.load (result);
 
         if (this.ruleManager.getReady ()==true) {
           if (this.pingEnabled==false) {
@@ -375,7 +375,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
-      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager}></StudentView></DocuScopeWAScrim>;
+      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} html={this.state.html}></StudentView></DocuScopeWAScrim>;
     }
 
     return (mainPage);

@@ -1,5 +1,7 @@
+
 import DataTools from "./DataTools";
 import DocuScopeRule from "./DocuScopeRule";
+import DocuScopeSessionStorage from "./DocuScopeSessionStorage";
 
 /**
  * This needs to be refactored to: DocuScopeRuleManager
@@ -16,6 +18,7 @@ export default class DocuScopeRules {
     this.version = "1.0.0?";
 
     this.dataTools=new DataTools ();
+    this.sessionStorage=new DocuScopeSessionStorage ("dswa");
   }
 
   /**
@@ -40,28 +43,94 @@ export default class DocuScopeRules {
    *
    */
   parseString(aString) {
-    this.parse(JSON.parse(aString));
+    this.original=JSON.parse (aString);
+    this.parse();
   }
 
   /**
-   *
+   * 
    */
-  parse(anObject) {
+  parse () {
     console.log ("parse ()");
 
-    this.original = anObject;
-    this.name = anObject.name;
+    // Does this even make sense?
+    //this.name = this.original.name;
 
-    for (let i = 0; i < anObject.rules.length; i++) {
-      let ruleObject = anObject.rules[i];
+    for (let i = 0; i < this.original.length; i++) {
+      let ruleObject = this.original [i];
       let newRule = new DocuScopeRule();
       newRule.parse(ruleObject);
       this.rules.push(newRule);
+    }
+  }
+
+  /**
+   * 
+   */
+  getJSONObject () {
+    let constructed=[];
+
+    for (let i=0;i<this.rules.length;i++) {
+      let aRule=this.rules [i];
+      constructed.push (aRule.getJSONObject ());  
+    }
+
+    return (constructed);
+  }
+
+  /**
+   * When this method is called it is given a fresh JSON object, which represents the template
+   * rules as we got them from the server. However, we need to compare that to what the user
+   * might have already worked on
+   */
+  load(anObject) {
+    console.log ("load ()");
+    
+    let newRules=true;
+
+    // We have to make a small accomodation for rules coming in as part of a JSON HTTP message
+    // This will be smoothed out soon after v1.
+    this.original = anObject.rules;
+
+    let stored=this.sessionStorage.getJSONObject("rules");
+
+    // First time use, we'll make the rules loaded from the server our place to start
+    if (stored!=null) {
+      if (this.dataTools.isEmpty (stored)==false) {
+        console.log ("Using stored rules");
+        this.original = stored;
+        newRules=false;
+      } else {
+        console.log ("Nothing stored yet, defaulting to template version");
+      }
+    }
+
+    this.parse ();
+
+    // Make sure we have at least something stored in case this is the first time
+    // we load the data from the template. Shouldn't hurt if we overwrite
+    if (newRules==true) {
+      this.save ();
     }
 
     this.ready = true;
 
     this.debugRules();
+  }
+
+  /**
+   *
+   */
+  save () {
+    console.log ("save ()");
+
+    // Re-create the JSON structure
+    let raw=this.getJSONObject ();
+
+    console.log ("Saving: ");
+    console.log (raw);
+
+    this.sessionStorage.setJSONObject("rules",raw);
   }
 
   /**
@@ -100,28 +169,6 @@ export default class DocuScopeRules {
 
     return null;
   }
-
-  /**
-   *
-   */
-  /* 
-  getRuleChild(anId) {
-    console.log("getRule (" + anId + ")");
-
-    for (let i = 0; i < this.rules.length; i++) {
-      let aRule = this.rules[i];
-
-      for (let j = 0; j < aRule.children.length; j++) {
-        let aRuleChild = aRule.children[j];
-        if (aRuleChild.id == anId) {
-          return aRuleChild;
-        }
-      }
-    }
-
-    return null;
-  }
-  */
 
   /**
    * 
@@ -190,9 +237,10 @@ export default class DocuScopeRules {
     if (topics) {
       for (let i=0;i<topics.length;i++) {
         let topicList=topics [i].pre_defined_topics;
-        for (let j=0;j<topicList.length;j++) {
-          topicText=topicText+(topicList [j]+"\n");
+        if (i>0) {
+          topicText+="\n";
         }
+        topicText+=topicList;
       }
     }
 
@@ -243,23 +291,38 @@ export default class DocuScopeRules {
    * 
    */
   setClusterCustomTopics (aRule, aCluster, aCustomTopicSet) {
+    console.log ("setClusterCustomTopics ("+aRule + ", " + aCluster +")");
+
+    // This retrieves one of our own objects, not a raw JSON object
     let cluster=this.getClusterByIndex (aRule,aCluster);
     if (cluster==null) {
       return (false);
     }
 
-    let clusterObject=this.dataTools.deepCopy (cluster.raw);
+    // Let's change in place for now
+    let clusterObject=cluster.raw;
+
+    //console.log ("Before:");
+    //console.log (clusterObject);
 
     let topics=clusterObject.topics;
     if (topics) {
       if (topics.length>0) {
         let defaulTopicObject=topics [0];
-        if (defaultTopicObject.pre_defined_topics) {
-          defaultTopicObject.pre_defined_topics=this.dataTools.textToOnTopicList (aCustomTopicSet);
-          cluster.raw=clusterObject;
+        if (defaulTopicObject.pre_defined_topics) {
+          defaulTopicObject.pre_defined_topics=aCustomTopicSet;
         }
+      } else {
+        return (false);
       }
+    } else {
+      return (false);
     }
+
+    //console.log ("After:");
+    //console.log (clusterObject);    
+
+    this.save();
 
     return (true);
   }
