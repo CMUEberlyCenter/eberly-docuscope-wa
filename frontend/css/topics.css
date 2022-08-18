@@ -1,0 +1,23 @@
+.paragraph {
+
+}
+
+.paragraph:hover {
+  background: #0eed0e36;
+}
+
+.paragraph-highlight {
+  background: #0eed0e36;
+}
+
+.sentence {
+
+}
+
+.sentence:hover {
+  background: yellow;	
+}
+
+.sentence-highlight {
+  background: yellow;
+}

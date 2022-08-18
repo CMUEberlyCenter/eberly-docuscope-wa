@@ -89,18 +89,6 @@ const Expectations = (props: {
   /**
    * 
    */
-  const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
-
-    e.preventDefault ();
-    e.stopPropagation ();
-
-    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
-  }
-
-  /**
-   * 
-   */
   const onRuleClick = (e:any, ruleIndex: number) => {
     console.log ("onRuleClick ("+ruleIndex+")");
 
@@ -109,6 +97,18 @@ const Expectations = (props: {
    
     setCurrentRuleState ({currentRule: ruleIndex, currentCluster: -1});
   }
+
+  /**
+   * 
+   */
+  const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
+    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+
+    e.preventDefault ();
+    e.stopPropagation ();
+
+    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
+  }  
 
   /**
    * 

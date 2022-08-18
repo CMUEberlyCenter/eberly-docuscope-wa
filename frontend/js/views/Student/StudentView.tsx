@@ -46,7 +46,6 @@ import {
   editorText,
   useEditorState
 } from "../../service/editor-state.service";
-import "./StudentView.scss";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
 import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
@@ -54,6 +53,9 @@ import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
 import DocuScopeHelp from '../../DocuScopeHelp';
 import DocuScopeAbout from '../../DocuScopeAbout';
+
+import "./StudentView.scss";
+import "../../../css/topics.css";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'

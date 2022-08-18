@@ -3,6 +3,7 @@ import React, { Component } from "react";
 import './CoherencePanel.scss';
 
 import OnTopicDataTools from "../../lang/OnTopicDataTools";
+import TopicHighlighter  from "../../TopicHighlighter";
 
 import topic_left_dark_icon from '../../../css/icons/topic_left_dark_icon.png';
 import topic_left_icon from '../../../css/icons/topic_left_icon.png';
@@ -52,6 +53,7 @@ class CoherencePanel extends Component {
     };
 
     this.dataTools=new OnTopicDataTools ();
+    this.topicHighlighter=new TopicHighlighter ();
 
     this.onTopicClick=this.onTopicClick.bind(this);
     this.onTopicParagraphClick=this.onTopicParagraphClick.bind(this);
@@ -220,6 +222,7 @@ class CoherencePanel extends Component {
   onGlobalTopicClick (e,anIndex) {
     console.log ("onGlobalTopicClick ("+anIndex+")");
 
+    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,anIndex);
   }
 
   /**
@@ -240,7 +243,10 @@ class CoherencePanel extends Component {
       */
 
       this.setState ({
-        selectedParagraph: anIndex});
+        selectedParagraph: anIndex
+      });
+
+      this.topicHighlighter.highlightParagraph (anIndex);
     }
   }
 
@@ -250,6 +256,7 @@ class CoherencePanel extends Component {
   onSentenceClick (e,anIndex) {
     console.log ("onSentenceClick ("+anIndex+")");
 
+    this.topicHighlighter.highlightSentence (this.state.selectedParagraph,anIndex);
   }  
 
   /**
@@ -484,20 +491,33 @@ class CoherencePanel extends Component {
    * 
    */
   generateSentenceControls (paraCount) {
+    console.log ("generateSentenceControls )");
+
     let sentenceElements=[];
 
-    //if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
     if ((this.state.selectedParagraph==-1) || (this.props.data==null)) {
       return (sentenceElements);
     }
 
-    //for (let i=0;i<this.state.selectedLocal.num_sents;i++) {
-    for (let i=0;i<this.props.data.num_sents;i++) {      
-      let paraClass="paragraph-toggle";
+    let topics=this.props.local [this.state.selectedParagraph].data;
+    let num_sents=0;
+    
+    if (topics.num_sents) {
+      num_sents=topics.num_sents;
+    } else {
+      num_sents=this.countSentences (this.state.selectedParagraph);
+    }
+
+    if (num_sents==0) {
+      return (sentenceElements);
+    }    
+
+    for (let i=0;i<num_sents;i++) {      
+      let sentenceClass="paragraph-toggle";
       if (i==this.state.selectedSentence) {
-        paraClass="paragraph-toggled";
+        sentenceClass="paragraph-toggled";
       }
-      sentenceElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onSentenceClick (e,i)}>{""+(i+1)}</div>);
+      sentenceElements.push (<div key={"key-paragraph-"+i} className={sentenceClass} onClick={(e) => this.onSentenceClick (e,i)}>{""+(i+1)}</div>);
     }
 
     sentenceElements.push (<div className="paragraph-padding"></div>);

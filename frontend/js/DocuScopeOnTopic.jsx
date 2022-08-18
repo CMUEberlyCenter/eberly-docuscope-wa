@@ -7,6 +7,8 @@ import {Topic, OnTopicDataTools, OnTopicConstants, OnTopicVisualization, } from 
 
 import HashTable from "./HashTable";
 
+import TopicHighlighter  from "./TopicHighlighter";
+
 /**
  *
  */
@@ -18,6 +20,7 @@ class DocuScopeOnTopic extends Component {
     super(props);
 
     this.dataTools = new OnTopicDataTools();
+    this.topicHighlighter = new TopicHighlighter ();
 
     this.state = {
       locked: false,
@@ -31,7 +34,6 @@ class DocuScopeOnTopic extends Component {
 
     this.onHandleTopic=this.onHandleTopic.bind(this);
     this.onHandleSentence = this.onHandleSentence.bind(this);
-
     this.onSentenceChange = this.onSentenceChange.bind(this);
   }
 
@@ -163,29 +165,17 @@ class DocuScopeOnTopic extends Component {
   /**
    *
    */
-  onHandleSentence (aSentenceObject) {
+  onHandleSentence (aParagraphIndex,aSentenceIndex,aBlock,aSentence) {
     console.log ("onHandleSentence ()");
-    //console.log (aSentenceObject);
 
-    /*
-    if (aSentenceObject==null) {
-      if (this.props.setStatus) {
-        this.props.setStatus ("");
-      }
-      return;
-    }
-
-    this.setState({ sentence: aSentenceObject }, (e) => {
-      this.onSentenceChange();
-    });
-    */
+    this.topicHighlighter.highlightSentence (aParagraphIndex, aSentenceIndex);
   }
 
   /**
    *
    */
   onSentenceChange () {
-    console.log ("onSentenceChange ()");
+    //console.log ("onSentenceChange ()");
 
     if (this.props.setStatus) {
       this.props.setStatus ("Selected sentence, at paragraph " + this.state.sentence.paragraphIndex + ", and sentence " + this.state.sentence.sentenceIndex + ", with main verb: " + this.state.sentence.verb);

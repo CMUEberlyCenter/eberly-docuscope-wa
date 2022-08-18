@@ -2386,7 +2386,7 @@ class DSDocument():
 
             para_style = para['style']
             font_size = font_info[para_style]            
-            html_str += '<p class=\'paragraph p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+            html_str += '<p id=\'p{}\' class=\'paragraph p{}\'>'.format(pcount,pcount)
 
             scount = 1
 
@@ -2395,7 +2395,7 @@ class DSDocument():
                 total_words = len(sent['text_w_info'])
                 is_combo = False
                 word_count = 0
-                html_str += '<span class=\'sentence p{} s{}\'>'.format(pcount, scount)
+                html_str += '<span id=\'p{}s{}\' class=\'sentence p{} s{}\'>'.format(pcount, scount, pcount, scount)
 
                 while word_count < total_words:
 
@@ -2585,7 +2585,7 @@ class DSDocument():
             pcount += 1
             html_str += '</p>'   # Close the paragraph tag
 
-        html_str = "<html><body>\n" + html_str + "\n</body></html>"
+        #html_str = "<html><body>\n" + html_str + "\n</body></html>"
 
         return html_str
 

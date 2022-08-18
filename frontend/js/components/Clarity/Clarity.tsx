@@ -55,13 +55,12 @@ const Clarity = (props: {
       const encoded = window.btoa(escaped);
 
       props.api("ontopic", { custom: "", base: encoded }, "POST").then((incoming : any) => {
-        console.log ("Processing incoming clarity data ...");
-
-        console.log (incoming);
+        //console.log ("Processing incoming clarity data ...");
+        //console.log (incoming);
 
         const clarityData=incoming.clarity;
 
-        console.log (clarityData);
+        //console.log (clarityData);
 
         //const decoded = window.atob(incoming.html);
 
