@@ -52,6 +52,7 @@ import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
 import DocuScopeAbout from '../../DocuScopeAbout';
+import TopicHighlighter  from "../../TopicHighlighter";
 
 import "./StudentView.scss";
 import "../../../css/topics.css";
@@ -102,6 +103,8 @@ const StudentView = (props: {
     html: string
   }) => {
 
+  const topicHighlighter=new TopicHighlighter ();
+
   // Status handlers
   const [status, setStatus] = useState("Application ready, rules loaded");
   const [language, setLanguage] = useState("ENG");
@@ -115,6 +118,7 @@ const StudentView = (props: {
   const switchTab = (key: string | null) => {
     setCurrentTab(key);
     currentTool.next(key);
+    topicHighlighter.clearAllHighlights ();
   };
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
