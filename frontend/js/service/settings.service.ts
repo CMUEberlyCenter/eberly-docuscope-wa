@@ -28,7 +28,9 @@ const DEFAULT: Settings = {
 
 // useSettings: for use in a component, settings$: the rxjs observable
 export const [useSettings, settings$] = bind(
-  fromFetch<Settings>(SETTINGS_URL.toString(), {selector: response => response.json()}).pipe(
+  fromFetch<Settings>(SETTINGS_URL.toString(), {
+    selector: (response) => response.json(),
+  }).pipe(
     map((data) => ({ ...DEFAULT, ...data })),
     shareReplay(1),
     catchError((err) => {

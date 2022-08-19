@@ -421,30 +421,6 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  //const [showHelp, setShowHelp] = useState(false);
-  //const [showGettingStarted, setShowGettingStarted] = useState(false);
-  //const [showTroubleshooting, setShowTroubleshooting] = useState(false);
-
-  //let help;
-
-  //const onCloseHelpPage = () => {
-  //  setShowHelp (false);
-  //};
-
-  /*if (showHelp==true) {
-    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="main" />;
-  }*/
-
-  /*if (showGettingStarted==true) {
-    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="gettingstarted" />;
-  }
-
-  if (showTroubleshooting==true) {
-    help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="troubleshooting" />;
-  }*/
-
-  //>--------------------------------------------------------
-
   const [showAbout, setShowAbout] = useState(false);
 
   let about;
