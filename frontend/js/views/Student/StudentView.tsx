@@ -51,7 +51,6 @@ import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
 import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
-import DocuScopeHelp from '../../DocuScopeHelp';
 import DocuScopeAbout from '../../DocuScopeAbout';
 
 import "./StudentView.scss";
@@ -59,6 +58,10 @@ import "../../../css/topics.css";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
+import { HelpModal } from "../../components/HelpDialogs/HelpModal";
+import { showHelp, showGettingStarted, showTroubleshooting } from "../../service/help.service";
+import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
+import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -339,7 +342,7 @@ const StudentView = (props: {
     }
 
     if (eventKey === "showHelp") {
-      setShowHelp (true);
+      showHelp(true);
       return;
     }
 
@@ -349,12 +352,13 @@ const StudentView = (props: {
     }
 
     if (eventKey === "showGettingStarted") {
-      setShowGettingStarted (true);
+      showGettingStarted(true);
       return;
     }
 
     if (eventKey === "showTroubleshooting") {
-      setShowTroubleshooting (true);
+      console.log('showTrouble');
+      showTroubleshooting(true);
       return;
     }    
   };
@@ -413,27 +417,27 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const [showHelp, setShowHelp] = useState(false);
-  const [showGettingStarted, setShowGettingStarted] = useState(false);
-  const [showTroubleshooting, setShowTroubleshooting] = useState(false);
+  //const [showHelp, setShowHelp] = useState(false);
+  //const [showGettingStarted, setShowGettingStarted] = useState(false);
+  //const [showTroubleshooting, setShowTroubleshooting] = useState(false);
 
-  let help;
+  //let help;
 
-  const onCloseHelpPage = () => {
-    setShowHelp (false);
-  };
+  //const onCloseHelpPage = () => {
+  //  setShowHelp (false);
+  //};
 
-  if (showHelp==true) {
+  /*if (showHelp==true) {
     help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="main" />;
-  }
+  }*/
 
-  if (showGettingStarted==true) {
+  /*if (showGettingStarted==true) {
     help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="gettingstarted" />;
   }
 
   if (showTroubleshooting==true) {
     help=<DocuScopeHelp onCloseHelpPage={onCloseHelpPage} context="troubleshooting" />;
-  }
+  }*/
 
   //>--------------------------------------------------------
 
@@ -573,8 +577,10 @@ const StudentView = (props: {
         <div className="statusbar-ruleversion"><FontAwesomeIcon icon={faBook} style={{marginLeft: "2px", marginRight: "2px"}} />{props.ruleManager.getVersion ()}</div>
         <div className="statusbar-language"><FontAwesomeIcon icon={faGlobe} style={{marginLeft: "2px", marginRight: "2px"}} />{language}</div>
       </footer>
-      {help}
       {about}
+      <HelpModal/>
+      <GettingStartedModal/>
+      <TroubleshootingModal/>
     </div>
   );
 };
