@@ -21,3 +21,19 @@
 .sentence-highlight {
   background: yellow;
 }
+
+.word {
+  border: 1px solid #d7d1d1;
+  border-radius: 5px;
+  padding-left: 2px;
+  padding-right: 2px;
+  background: #ffeb3b;
+}
+
+.word:hover {
+  background: #f7f7f7;
+}
+
+.word-highlight {
+  background: #f7f7f7;
+}

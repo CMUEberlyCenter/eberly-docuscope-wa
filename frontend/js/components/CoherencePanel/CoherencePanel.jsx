@@ -117,14 +117,14 @@ class CoherencePanel extends Component {
     let envelope=copy [aParagraphIndex]; // Get the first paragraph
 
     if (envelope.error) {
-      console.log ("No topics found in this sentence");
+      //console.log ("No topics found in this sentence");
       return (0);
     }    
 
     let data=envelope.data; // Get the data block from the first paragraph
     let actual=data [0]; // For some reason there is another nested array in here
 
-    console.log ("Nr sentences: " + actual.sentences.length);
+    //console.log ("Nr sentences: " + actual.sentences.length);
 
     return (actual.sentences.length);
   }  
@@ -165,19 +165,6 @@ class CoherencePanel extends Component {
     }
 
     let localTopics=this.props.local;
-
-    //console.log (localTopics);
-
-    /*
-    let localTopics=topics [anIndex];
-
-    if (localTopics.error) {
-      console.log ("No topics found in this sentence");
-      return (null);
-    }
-
-    return (topics [anIndex]);
-    */
 
     let envelope=localTopics [anIndex]; // Get the first paragraph
 
@@ -234,14 +221,6 @@ class CoherencePanel extends Component {
     if (this.state.selectedParagraph==anIndex) {
       this.setState ({selectedParagraph: -1});
     } else {
-      /*
-      console.log ("Hardcoded: ");
-      console.log (coherenceDataLocal);
-
-      console.log ("Incoming:");
-      console.log (this.props.data);
-      */
-
       this.setState ({
         selectedParagraph: anIndex
       });
@@ -256,7 +235,15 @@ class CoherencePanel extends Component {
   onSentenceClick (e,anIndex) {
     console.log ("onSentenceClick ("+anIndex+")");
 
-    this.topicHighlighter.highlightSentence (this.state.selectedParagraph,anIndex);
+    if (this.state.selectedSentence==anIndex) {
+      this.setState ({selectedSentence: -1});
+    } else {
+      this.setState ({
+        selectedSentence: anIndex
+      });
+
+      this.topicHighlighter.highlightSentence (this.state.selectedParagraph,anIndex);
+    }    
   }  
 
   /**
@@ -388,7 +375,7 @@ class CoherencePanel extends Component {
    * 
    */
   generateLocalTopics () {
-    console.log ("generateLocalTopics ()");
+    //console.log ("generateLocalTopics ()");
 
     let topicElements=[];
 
@@ -491,17 +478,23 @@ class CoherencePanel extends Component {
    * 
    */
   generateSentenceControls (paraCount) {
-    console.log ("generateSentenceControls )");
+    console.log ("generateSentenceControls ()");
 
     let sentenceElements=[];
 
     if ((this.state.selectedParagraph==-1) || (this.props.data==null)) {
-      return (sentenceElements);
+      return (<div className="paragraph-row">{sentenceElements}</div>);
     }
 
     let topics=this.props.local [this.state.selectedParagraph].data;
     let num_sents=0;
-    
+
+    if (topics==null) {
+      return (<div className="paragraph-row">{sentenceElements}</div>);
+    }
+
+    console.log (topics);
+
     if (topics.num_sents) {
       num_sents=topics.num_sents;
     } else {
@@ -509,7 +502,7 @@ class CoherencePanel extends Component {
     }
 
     if (num_sents==0) {
-      return (sentenceElements);
+      return (<div className="paragraph-row">{sentenceElements}</div>);
     }    
 
     for (let i=0;i<num_sents;i++) {      
