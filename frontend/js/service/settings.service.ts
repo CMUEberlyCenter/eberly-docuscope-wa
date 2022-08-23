@@ -9,7 +9,7 @@
  */
 import { bind } from '@react-rxjs/core';
 import { catchError, map, of, shareReplay } from 'rxjs';
-import { ajax } from 'rxjs/ajax';
+import { fromFetch } from 'rxjs/fetch';
 
 // URL for settings.json, 'base' gets it to work with webpack.
 const SETTINGS_URL = new URL('../assets/settings.json', import.meta.url);
@@ -28,7 +28,9 @@ const DEFAULT: Settings = {
 
 // useSettings: for use in a component, settings$: the rxjs observable
 export const [useSettings, settings$] = bind(
-  ajax.getJSON<Settings>(SETTINGS_URL.toString()).pipe(
+  fromFetch<Settings>(SETTINGS_URL.toString(), {
+    selector: (response) => response.json(),
+  }).pipe(
     map((data) => ({ ...DEFAULT, ...data })),
     shareReplay(1),
     catchError((err) => {
