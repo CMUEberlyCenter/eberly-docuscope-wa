@@ -145,8 +145,8 @@ class OnTopic:
 
     for i in range(nrParagraphs):
       localSelected=[];
-      localSelected.append(i);
-      print ("Processing paragraph " + str(i) + ", with selected paragraph: " + str (localSelected));
+      localSelected.append(i+1);
+      print ("Processing paragraph " + str(i+1) + ", with selected paragraph: " + str (localSelected));
       localDict=document.generateLocalVisData (localSelected,1,2);
       print (localDict);
       #local.append (json.dumps(localDict));

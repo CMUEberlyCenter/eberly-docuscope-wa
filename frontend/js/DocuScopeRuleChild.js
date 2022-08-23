@@ -27,7 +27,7 @@ export default class DocuScopeRuleChild {
   }
 
   /**
-   *
+   * Here we make sure that we have a custom_topics field
    */
   parse(anObject) {
     //console.log("parse ()");
@@ -37,6 +37,20 @@ export default class DocuScopeRuleChild {
     this.name = anObject.name;
     this.description = anObject.description;
     this.examples = anObject.examples;
+
+    let topics=anObject.topics;
+
+    if (topics) {
+      if (topics.length>0) {
+        if (!topics [0].pre_defined_topics) {
+          topics [0].pre_defined_topics=[];
+        }
+
+        if (!topics [0].custom_topics) {
+          topics [0].custom_topics=[];
+        }
+      }
+    }     
 
     //console.log (this.raw);
   }

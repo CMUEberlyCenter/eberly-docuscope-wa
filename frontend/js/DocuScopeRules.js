@@ -216,12 +216,56 @@ export default class DocuScopeRules {
   }
 
   /**
+   * We should provide an alternative method that doesn't need to traverse the
+   * tree to obtain the count but which is given a pointer to the cluster to
+   * start with
+   */
+  getClusterTopicCount (aRuleIndex, aClusterIndex) {
+    //console.log ("getClusterTopicCount ("+ aRule + "," + aCluster + ")");
+
+    if ((aRuleIndex==-1) || (aClusterIndex==-1)) { 
+      return (0);
+    }
+
+    let rule = this.rules[aRuleIndex];
+
+    if (rule!=null) {
+      if (rule.children) {
+        let aCluster=rule.children [aClusterIndex];
+        
+        let clusterObject=aCluster.raw;
+        
+        let topics=clusterObject.topics;
+
+        if (topics) {
+          /*
+          let topicList=topics [0].pre_defined_topics;
+          return (topicList.length);
+          */
+          if (topics [0].custom_topics) {
+            let topicList=topics [0].custom_topics;
+            return (topicList.length);
+          }
+        }         
+      }
+    }
+
+    return 0;
+  }  
+
+  /**
+   * 
+   */
+  topicSentenceCount (aRule, aCluster) {
+    return(0);
+  }
+
+  /**
    * Return the array of custom/pre-defined topics as a single newline separated string
    */
-  getClusterTopicText (aCluster) {
-    //console.log ("getClusterTopicText ()");
-    //console.log (aCluster);
-
+  getClusterTopicTextStatic (aCluster) {
+    //console.log ("getClusterTopicTextStatic ()");
+    
     let topicText="";
 
     if (aCluster==null) {
@@ -232,21 +276,6 @@ export default class DocuScopeRules {
     let clusterObject=aCluster.raw;
     
     let topics=clusterObject.topics;
-
-    /*
-    if (topics) {
-      for (let i=0;i<topics.length;i++) {
-        let topicList=topics [i].pre_defined_topics;
-        if (i>0) {
-          topicText+="\n";
-        }
-        for (let j=0;j<topicList.length;j++) {
-          topicText+="\n";
-          topicText+=topicList[j];
-        }
-      }
-    }
-    */
 
     if (topics) {
       let topicList=topics [0].pre_defined_topics;
@@ -262,6 +291,38 @@ export default class DocuScopeRules {
 
     return (topicText);
   }
+
+  /**
+   * Return the array of custom/pre-defined topics as a single newline separated string
+   */
+  getClusterTopicText (aCluster) {
+    //console.log ("getClusterTopicText ()");
+    
+    let topicText="";
+
+    if (aCluster==null) {
+      console.log ("Warning: cluster is null");
+      return (topicText);
+    }
+
+    let clusterObject=aCluster.raw;
+    
+    let topics=clusterObject.topics;
+
+    if (topics) {
+      let topicList=topics [0].custom_topics;
+      if (topicList) {
+        for (let j=0;j<topicList.length;j++) {
+          if (j>0) {
+            topicText+="\n";
+          }
+          topicText+=topicList[j];
+        }
+      }
+    }    
+
+    return (topicText);
+  }  
 
   /**
    * Get all the custom topics from all the rules and all the clusters. This should be whatever
@@ -280,10 +341,16 @@ export default class DocuScopeRules {
         let topics=clusterObject.topics;
         if (topics) {
           if (topics.length>0) {
-            let rawTopics=topics [0].pre_defined_topics;
+
+            let rawTopicsStatic=topics [0].pre_defined_topics;
+            for (let k=0;k<rawTopicsStatic.length;k++) {
+              tempList.push(rawTopicsStatic [k]);
+            }
+
+            let rawTopics=topics [0].custom_topics;
             for (let k=0;k<rawTopics.length;k++) {
               tempList.push(rawTopics [k]);
-            }
+            }            
           }
         }
       }
@@ -320,9 +387,14 @@ export default class DocuScopeRules {
     if (topics) {
       if (topics.length>0) {
         let defaulTopicObject=topics [0];
+        /*
         if (defaulTopicObject.pre_defined_topics) {
           defaulTopicObject.pre_defined_topics=aCustomTopicSet;
         }
+        */
+        if (defaulTopicObject.custom_topics) {
+          defaulTopicObject.custom_topics=aCustomTopicSet;
+        }        
       } else {
         return (false);
       }

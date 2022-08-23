@@ -61,7 +61,8 @@
   padding: 2px;
   /*max-height: 159px;*/
   overflow-y: auto;
-  resize: none;
+  /*resize: none;*/
+  resize: vertical;
 }
 
 .cluster-topic-controls {

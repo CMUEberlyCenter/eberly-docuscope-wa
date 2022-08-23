@@ -11,6 +11,7 @@ import "./Expectations.scss";
 import optionalRuleIcon from "../../../css/icons/optional_icon.png";
 import clusterActiveIcon from "../../../css/icons/active_icon.png";
 import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.png";
+import clusterUpIcon from "../../../css/icons/active_arrow_icon.png";
 
 import ClusterPanel from '../ClusterPanel/ClusterPanel';
 
@@ -119,8 +120,10 @@ const Expectations = (props: {
     for (let i=0;i<ruleManager.rules.length;i++) {
       let aRule:any=ruleManager.rules [i];
       let clusterList=[];
-
+      let clustercount=<img className="cluster-mini-icon" src={clusterWarningIcon}/>;
+      
       for (let j=0;j<aRule.children.length;j++) {
+        let topicsentencecount=0;
         let aCluster=aRule.children [j];
         let id="rule-"+i+"-"+j;
 
@@ -130,14 +133,21 @@ const Expectations = (props: {
           clusterClass="cluster-line cluster-selected";
         }
 
+        let topicCount=ruleManager.getClusterTopicCount (i,j);
+        if (topicCount>0) {
+          clustercount=<div className="cluster-mini-icon" />;
+        }
+
+        topicsentencecount=ruleManager.topicSentenceCount (currentRule,currentCluster);
+
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
           <div className={clusterClass}>
             <div className="cluster-line-label">{aCluster.name}</div>
-            <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterWarningIcon}/></div>
+            <div className="cluster-line-icon">{clustercount}</div>
             <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
             <div className="cluster-mini-label">Expected</div>
-            <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>            
-            <div className="cluster-mini-label">0</div>
+            <div className="cluster-line-icon"><img className="cluster-mini-icon" style={{paddingTop: "0px !important"}} src={clusterUpIcon}/></div>
+            <div className="cluster-mini-label">{topicsentencecount}</div>
           </div>
         </li>);
       }

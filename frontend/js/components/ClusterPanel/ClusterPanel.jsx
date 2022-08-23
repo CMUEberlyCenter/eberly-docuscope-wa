@@ -52,7 +52,9 @@ class ClusterPanel extends Component {
 
     this.state = {      
       currentTab: "expectationabout",
-      topicText: ""
+      topicText: "",
+      topicTextStatic: "",
+      badUpdatecounter: 0
     };
 
     this.switchTab=this.switchTab.bind(this);
@@ -68,10 +70,29 @@ class ClusterPanel extends Component {
 
     if ((prevProps.currentRule!=this.props.currentRule) || (prevProps.currentCluster!=this.props.currentCluster)) {
       let aText=this.getTopicText ();    
+      let aTextStatic=this.getTopicTextStatic ();
       this.setState ({
-        topicText: aText
+        topicText: aText,
+        topicTextStatic: aTextStatic
       });      
     }
+  }
+
+  /**
+   * 
+   */
+  getTopicTextStatic () {
+    //console.log ("getTopicTextStatic ("+this.props.currentRule + "," + this.props.currentCluster+")");
+
+    let topictextStatic="";
+    let cluster=this.props.ruleManager.getClusterByIndex (this.props.currentRule,this.props.currentCluster);
+    if (cluster!=null) {
+      topictextStatic=this.props.ruleManager.getClusterTopicTextStatic (cluster);
+    } else {
+      console.log ("Warning cluster not found");
+    }
+
+    return (topictextStatic);
   }
 
   /**
@@ -122,6 +143,9 @@ class ClusterPanel extends Component {
     if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, topicArray)==false) {
       console.log ("Show an error dialog to the user");
     }
+
+    // Really bad way to do this!
+    this.setState ({badUpdatecounter: this.state.badUpdatecounter++});
   }
 
   /**
@@ -172,6 +196,13 @@ class ClusterPanel extends Component {
     }
 
     return (<div className="cluster-topic-editor">
+      <div>Pre-defined Topics:</div>
+      <textarea
+        readonly={true}
+        className={textareaClassName}
+        value={this.state.topicTextStatic}>
+      </textarea>      
+      <div>Custom Topics:</div>
       <textarea
         readonly={enableEditor}
         className={textareaClassName}
