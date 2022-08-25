@@ -1,5 +1,6 @@
 
 import DataTools from "./DataTools";
+import DocuScopeTools from "./DocuScopeTools";
 import DocuScopeRule from "./DocuScopeRule";
 import DocuScopeSessionStorage from "./DocuScopeSessionStorage";
 
@@ -18,7 +19,11 @@ export default class DocuScopeRules {
     this.version = "1.0.0?";
 
     this.dataTools=new DataTools ();
+    this.docuscopeTools = new DocuScopeTools ();
+
     this.sessionStorage=new DocuScopeSessionStorage ("dswa");
+
+    this.updateNotice=null;
   }
 
   /**
@@ -127,8 +132,8 @@ export default class DocuScopeRules {
     // Re-create the JSON structure
     let raw=this.getJSONObject ();
 
-    console.log ("Saving: ");
-    console.log (raw);
+    //console.log ("Saving: ");
+    //console.log (raw);
 
     this.sessionStorage.setJSONObject("rules",raw);
   }
@@ -158,7 +163,7 @@ export default class DocuScopeRules {
    *
    */
   getRule(anId) {
-    console.log("getRule (" + anId + ")");
+    //console.log("getRule (" + anId + ")");
 
     for (let i = 0; i < this.rules.length; i++) {
       let aRule = this.rules[i];
@@ -174,7 +179,7 @@ export default class DocuScopeRules {
    * 
    */
   getCluster (aRule, aCluster) {
-    console.log ("getCluster ("+ aRule + "," + aCluster + ")");
+    //console.log ("getCluster ("+ aRule + "," + aCluster + ")");
 
     for (let i = 0; i < this.rules.length; i++) {
       let rule = this.rules[i];
@@ -188,7 +193,7 @@ export default class DocuScopeRules {
       }
     }
 
-    console.log ("No cluster found");
+    //console.log ("No cluster found");
 
     return null;
   }
@@ -221,9 +226,10 @@ export default class DocuScopeRules {
    * start with
    */
   getClusterTopicCount (aRuleIndex, aClusterIndex) {
-    //console.log ("getClusterTopicCount ("+ aRule + "," + aCluster + ")");
+    //console.log ("getClusterTopicCount ("+ aRuleIndex + "," + aClusterIndex + ")");
 
     if ((aRuleIndex==-1) || (aClusterIndex==-1)) { 
+      //console.log ("No valid rule or cluster provided");
       return (0);
     }
 
@@ -238,10 +244,6 @@ export default class DocuScopeRules {
         let topics=clusterObject.topics;
 
         if (topics) {
-          /*
-          let topicList=topics [0].pre_defined_topics;
-          return (topicList.length);
-          */
           if (topics [0].custom_topics) {
             let topicList=topics [0].custom_topics;
             return (topicList.length);
@@ -256,7 +258,12 @@ export default class DocuScopeRules {
   /**
    * 
    */
-  topicSentenceCount (aRule, aCluster) {
+  topicSentenceCount (aRuleIndex, aClusterIndex) {
+    let aCluster=this.getClusterByIndex (aRuleIndex, aClusterIndex);
+    if (aCluster) {
+      return (aCluster.sentenceCount);
+    }
+
     return(0);
   }
 
@@ -373,6 +380,7 @@ export default class DocuScopeRules {
    */
   setClusterCustomTopics (aRule, aCluster, aCustomTopicSet) {
     console.log ("setClusterCustomTopics ("+aRule + ", " + aCluster +")");
+    console.log (aCustomTopicSet);
 
     // This retrieves one of our own objects, not a raw JSON object
     let cluster=this.getClusterByIndex (aRule,aCluster);
@@ -404,6 +412,49 @@ export default class DocuScopeRules {
 
     this.save();
 
+    if (this.updateNotice) {
+      this.updateNotice ();
+    }
+
     return (true);
+  }
+
+  /**
+   * 
+   */
+  updateLemmaCounts (aCountList) {
+    console.log ("updateLemmaCounts ()");
+
+    for (let i=0;i<aCountList.length;i++) {
+      let aLemmaCount=aCountList [i];
+
+      for (let i=0;i<this.rules.length;i++) {
+        let rule=this.rules [i];
+        for (let j=0;j<rule.children.length;j++) {
+          let cluster=rule.children [j];
+          let clusterObject=cluster.raw;
+
+          let topics=clusterObject.topics;
+          if (topics) {
+            if (topics.length>0) {
+              let targetTopic=topics [0];
+              if (targetTopic.lemma) {                
+                // Find the lemma (this will be more complex if we start to include plurals and other forms)
+                for (let j=0;j<aCountList.length;j++) {
+                  aCountObject=aCountList [j];
+                  if (this.docuscopeTools.compareLemmas (aCountObject.lemma,targetTopic.lemma)==true) {
+                    cluster.sentenceCount=aCountObject.count;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    if (this.updateNotice) {
+      this.updateNotice ();
+    }    
   }
 }

@@ -1,3 +1,4 @@
+
 import DataTools from "./DataTools";
 
 /**
@@ -8,12 +9,13 @@ export default class DocuScopeRuleChild {
    *
    */
   constructor() {
-    let dTools = new DataTools();
+    let dataTools = new DataTools();
 
-    this.id = dTools.uuidv4();
+    this.id = dataTools.uuidv4();
     this.name = "";
     this.description = "";
     this.examples = "";
+    this.sentenceCount = 0;
 
     this.raw = {};
   }
@@ -37,6 +39,10 @@ export default class DocuScopeRuleChild {
     this.name = anObject.name;
     this.description = anObject.description;
     this.examples = anObject.examples;
+
+    if (anObject.sentenceCount) {
+      this.sentenceCount=anObject.sentenceCount;
+    }
 
     let topics=anObject.topics;
 

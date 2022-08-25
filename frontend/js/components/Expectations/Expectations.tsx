@@ -91,7 +91,7 @@ const Expectations = (props: {
    * 
    */
   const onRuleClick = (e:any, ruleIndex: number) => {
-    console.log ("onRuleClick ("+ruleIndex+")");
+    //console.log ("onRuleClick ("+ruleIndex+")");
 
     e.preventDefault ();
     e.stopPropagation ();
@@ -103,7 +103,7 @@ const Expectations = (props: {
    * 
    */
   const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+    //console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
 
     e.preventDefault ();
     e.stopPropagation ();
@@ -115,6 +115,8 @@ const Expectations = (props: {
    * 
    */
   const createRuleTree = (ruleManager: any, currentRule: number, currentCluster: number) => {
+    //console.log ("createRuleTree ()");
+
     let listElements=[];
 
     for (let i=0;i<ruleManager.rules.length;i++) {
@@ -138,7 +140,7 @@ const Expectations = (props: {
           clustercount=<div className="cluster-mini-icon" />;
         }
 
-        topicsentencecount=ruleManager.topicSentenceCount (currentRule,currentCluster);
+        topicsentencecount=ruleManager.topicSentenceCount (i,j);
 
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
           <div className={clusterClass}>
@@ -146,7 +148,7 @@ const Expectations = (props: {
             <div className="cluster-line-icon">{clustercount}</div>
             <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
             <div className="cluster-mini-label">Expected</div>
-            <div className="cluster-line-icon"><img className="cluster-mini-icon" style={{paddingTop: "0px !important"}} src={clusterUpIcon}/></div>
+            <div className="cluster-line-icon"><img className="cluster-up-arrow" src={clusterUpIcon}/></div>
             <div className="cluster-mini-label">{topicsentencecount}</div>
           </div>
         </li>);

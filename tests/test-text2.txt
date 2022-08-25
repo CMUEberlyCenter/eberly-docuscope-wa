@@ -33,6 +33,3 @@ The X-squred(chi-square) statistic from this test is 36.109 and the p-value of 0
 Formally, since the p-value is less than 0.05(the significance level that we have set), we reject the null hypothesis. In context, this means that we have sufficient evidence of an association between Diagnosis and Patient MDRB.
 Discussion
 This project focused on Diagnosis (reasons for getting a liver transplant) for 401 patients in the sample and observed associations with LTDays, severity, diversity and Patient MDRB. We found that there isn’t sufficient evidence to claim that there is a relationship between LTDays and Diagnosis through the ANOVA test and that observing the severity and diversity could allow us to estimate the diagnosis group that a patient could be part of. Not only that, we have found that there is an association between Diagnosis and Patient MDRB by the chi-square test. An example of a future analysis could be on identifying a relationship between Diagnosis and the type of side effects of the liver transplant so rather than indicating whether there was MDRB present of not, we could give a more detailed insight into which specific problems tend to occur.
-
-36-200_EOCNI8515A.txt
-Displaying 36-200_EOCNI8515A.txt.

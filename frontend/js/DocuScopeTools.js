@@ -52,5 +52,60 @@ export default class DocuScopeTools {
     relayform.setAttribute ("action",window.location.href);
     relayform.submit();
     relayform.style.visibility="hidden";
-  }  
+  }
+
+  /**
+   * 
+   */
+  coherenceToClusterCounts (aCoherenceData) {
+    console.log ("coherenceToClusterCounts ()");
+
+    let counts=[];
+
+    if (!aCoherenceData.data) {
+      return (counts);
+    }
+
+    for (let i=0;i<aCoherenceData.data.length;i++) {
+      let testLemma=aCoherenceData.data [i];
+      if (testLemma.sent_count) {
+        console.log ("Found sentence count: " + testLemma.sent_count);
+
+        let lemmaFound={
+          count: testLemma.sent_count,
+          lemma: ""
+        };
+       
+        if (testLemma.topic) {
+          if (testLemma.topic.length==3) {
+            lemmaFound.lemma=testLemma.topic [2];
+          } else {
+            if (testLemma.topic.length==2) {
+              lemmaFound.lemma=testLemma.topic [1];
+            }
+          }
+        }
+
+        counts.push (lemmaFound);
+      }
+    }
+
+    console.log (counts);
+
+    return (counts);
+  }
+
+  /**
+   * The toLowerCase() method converts a string to lowercase letters.
+   * The toLowerCase() method does not change the original string.
+   */
+  compareLemmas (aLemmaA,aLemmaB) {
+    console.log ("compareLemmas ("+aLemmaA+","+aLemmaB+")");
+
+    if (aLemmaA.toLowerCase ()==aLemmaB.toLowerCase ()) {
+      return (true);
+    }
+
+    return (false);
+  }
 }

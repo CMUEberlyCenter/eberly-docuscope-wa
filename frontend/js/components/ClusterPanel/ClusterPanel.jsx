@@ -53,8 +53,7 @@ class ClusterPanel extends Component {
     this.state = {      
       currentTab: "expectationabout",
       topicText: "",
-      topicTextStatic: "",
-      badUpdatecounter: 0
+      topicTextStatic: ""
     };
 
     this.switchTab=this.switchTab.bind(this);
@@ -66,7 +65,7 @@ class ClusterPanel extends Component {
    * Update with the latest from the actual data
    */
   componentDidUpdate(prevProps) {
-    console.log ("componentDidUpdate ()");
+    //console.log ("componentDidUpdate ()");
 
     if ((prevProps.currentRule!=this.props.currentRule) || (prevProps.currentCluster!=this.props.currentCluster)) {
       let aText=this.getTopicText ();    
@@ -138,14 +137,15 @@ class ClusterPanel extends Component {
    */
   onCustomTopicUpdate (e) {
     //console.log ("onCustomTopicUpdate ()");
-    let topicArray=this.dataTools.topicsToArray (this.state.topicText);
+    let topicArray=[];
+
+    if ((typeof this.state.topicText === 'string') && (this.state.topicText.trim().length > 0)) {
+      topicArray=this.dataTools.topicsToArray (this.state.topicText);
+    }
 
     if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, topicArray)==false) {
       console.log ("Show an error dialog to the user");
     }
-
-    // Really bad way to do this!
-    this.setState ({badUpdatecounter: this.state.badUpdatecounter++});
   }
 
   /**

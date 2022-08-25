@@ -4650,21 +4650,23 @@ class DSDocument():
 
             return vis_data
 
+
     def generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE):
         """
         This method returns a python dictionary that contains the data that are needed for
         the visualization of coherence across paragraphs.
-
         min_topics:             The minimum number of lexical overlaps between sentences.
         max_topic_sents:        The total number of sentences at the beginning of paragraphs that
                                 should be considered a topic sentence.
         sort_by:                The sorting method option.
-
         """
 
         global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
         self.updateLocalTopics()
         self.updateGlobalTopics(global_data)
+
+        topics = self.getCurrentTopics()         # These 2 lines create a data structure that allows us
+        self.locateTopics(topics)                # to count the # of sentences each topic appears later. 8/23/2022.
 
         if global_data is None:
             return ({'error': 'ncols is 0'});
@@ -4694,7 +4696,7 @@ class DSDocument():
         sent_filter     = self.filterTopics(data, nrows, ncols)          # 
         topic_filter    = TOPIC_FILTER_LEFT_RIGHT                   # 
 
-        sent_count = 0
+        num_sents_per_topic = 0
         b_break = False
         true_left_count = 0
         l_count = 0
@@ -4827,10 +4829,13 @@ class DSDocument():
             else:
                 is_non_local = False
 
+            num_sents_per_topic = self.countSentencesWithTopic(topic)
+
             vis_data['data'].append({'paragraphs':       topic_data,
                                      'is_topic_cluster': is_tc,
                                      'is_non_local':     is_non_local,
-                                     'topic':            list(topic_info[0:3])})
+                                     'topic':            list(topic_info[0:3]),
+                                     'sent_count':       num_sents_per_topic})
 
             vis_data['num_paras']  = (p_ri)
 
@@ -4839,16 +4844,18 @@ class DSDocument():
         if tcs is not None:
             missing_tcs = list(set(tcs) - set(self.global_topics))
             for tc  in missing_tcs:
+
                 topic_info = ['NOUN', '', tc]
 
                 vis_data['data'].append({'paragraphs': [], 
                                          'is_topic_cluster': True,
                                          'is_non_local':     False,
-                                         'topic': topic_info})
+                                         'topic':            topic_info,
+                                         'sent_count':       0})
 
         # debug
         # with open("sample_global_coherence_data.json", 'w') as fout:
-        #     json.dump(vis_data, fout, indent=4)
+            # json.dump(vis_data, fout, indent=4)
 
         return vis_data
 
@@ -5515,3 +5522,82 @@ class DSDocument():
         topics = list(set(topics))
 
         return topics
+
+    def countSentencesWithTopic(self, topic):
+        """
+        Given a topic <string>, this method returns the toal number of sentences
+        that includes the topic.
+        """
+        topics = list()
+        if self.topic_location_dict is not None and topics != None:
+            locations = self.topic_location_dict.get(topic, None)
+
+        temp = list()
+        topic_positions = locations.getTopicPositions()
+        for t in topic_positions:
+            if t[:2] not in temp:
+                temp.append(t[:2])
+
+        count = len(temp)
+        return count
+
+    def locateTopics(self, topics):        
+        """
+        Given a set of topics, this method locates the topics in a current document,
+        and update self.topic_location_dict.
+        """
+
+        def locateATopic(topic):
+            """
+            This method is called by locateTopics(), and should not 
+            """
+
+            if self.sections is None:
+                return "Error in locateATopic()"
+            else:
+                try:
+                    data = self.sections[self.current_section]['data']
+                    if data is None:
+                        raise valueError;
+                except:
+                    return
+
+            adj_stats = AdjacencyStats(topic=topic, controller=self.controller)
+            topic_filter = TOPIC_FILTER_LEFT_RIGHT
+            
+            # Let's find which paragraphs/sentences the selected 'topic' is included.
+            pcount = 1
+            for para in data['paragraphs']:
+                scount = 1
+
+                # if para_pos != -1 and (para_pos+1) != pcount:
+                    # pcount += 1
+                    # continue
+
+                for sent in para['sentences']:
+
+                    wcount = 1
+                    for w in sent['text_w_info']: 
+                        if w[LEMMA] == topic and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
+                            if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  ## NEW 3/2/21
+                                pass
+                            else:
+                                adj_stats.addParagraphID(pcount)
+                                adj_stats.addSentenceID(pcount, scount)
+                                adj_stats.addTopicPosition(pcount, scount, wcount)
+
+                        wcount += 1
+
+                    scount+=1
+
+                pcount+=1
+            
+            return adj_stats
+
+        if topics is None or topics == []:
+            self.topic_location_dict = None
+            return None
+
+        self.topic_location_dict = dict()
+        for topic in topics:
+            self.topic_location_dict[topic] = locateATopic(topic)

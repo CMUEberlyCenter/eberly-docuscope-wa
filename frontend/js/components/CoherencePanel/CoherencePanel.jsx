@@ -478,7 +478,7 @@ class CoherencePanel extends Component {
    * 
    */
   generateSentenceControls (paraCount) {
-    console.log ("generateSentenceControls ()");
+    //console.log ("generateSentenceControls ()");
 
     let sentenceElements=[];
 
@@ -493,7 +493,7 @@ class CoherencePanel extends Component {
       return (<div className="paragraph-row">{sentenceElements}</div>);
     }
 
-    console.log (topics);
+    //console.log (topics);
 
     if (topics.num_sents) {
       num_sents=topics.num_sents;

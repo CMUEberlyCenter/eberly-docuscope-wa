@@ -12,6 +12,9 @@ import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
 
+// Replace with RxJS
+var badThat=null;
+
 /**
  * 
  */
@@ -29,11 +32,14 @@ export default class DocuScopeWA extends EberlyLTIBase {
   constructor(props) {
     super(props);
 
+    badThat=this;
+
     console.log ("DocuScopeWA ()");
 
     this.dataTools=new DataTools ();
     this.docuscopeTools=new DocuScopeTools ();
     this.ruleManager=new DocuScopeRules ();
+    this.ruleManager.updateNotice=this.updateNotice;
     
     this.pingEnabled=true;
     this.pingTimer=-1;
@@ -53,12 +59,15 @@ export default class DocuScopeWA extends EberlyLTIBase {
       globallyDisabled: false,
       activeIndex: 1,
       ruleManager: this.ruleManager,
+      clusterCountData: [],
       server: {
         uptime: "retrieving ...",
         version: "retrieving ..."
-      }
+      },
+      badUpdatecounter: 0
     }
 
+    this.updateNotice=this.updateNotice.bind(this);
     this.onLaunch=this.onLaunch.bind(this);
     this.apiCall=this.apiCall.bind(this);
   }
@@ -68,6 +77,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
    */
   componentDidMount () {
     console.log ("componentDidMount ()");
+
+    badThat=this;
 
     setTimeout ((_e) => {
       this.setState ({
@@ -141,6 +152,20 @@ export default class DocuScopeWA extends EberlyLTIBase {
   }
 
   /**
+   * Replace with RxJS
+   */
+  updateNotice () {
+    console.log ("updateNotice ()");
+    
+    // Really bad way to do this!
+    if (badThat!=null) {
+      badThat.setState ({
+        badUpdatecounter: Math.floor(Math.random() * 10000)
+      }); 
+    }
+  }
+
+  /**
    *
    */
   evaluateResult (aMessage) {
@@ -187,9 +212,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
         } else {
           if (raw.data.html) {
             let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
-            console.log (html);
+            //console.log (html);
             that.setState ({html: html});
           }
+          
+          if (raw.data.coherence) {
+            that.setState ({
+              clusterCountData: this.docuscopeTools.coherenceToClusterCounts (raw.data.coherence)
+            })
+          }
+
           resolve (raw.data);
         }
       }).catch((error) => {
@@ -219,9 +251,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
         } else {
           if (raw.data.html) {
             let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
-            console.log (html);
+            //console.log (html);
             that.setState ({html: html});
-          }          
+          }
+
+          if (raw.data.coherence) {
+            that.setState ({
+              clusterCountData: this.docuscopeTools.coherenceToClusterCounts (raw.data.coherence)
+            })
+          }
+
           resolve (raw.data);
         }
       }).catch((error) => {
