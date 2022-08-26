@@ -57,9 +57,6 @@ export default class DocuScopeRules {
   parse () {
     console.log ("parse ()");
 
-    // Does this even make sense?
-    //this.name = this.original.name;
-
     for (let i = 0; i < this.original.length; i++) {
       let ruleObject = this.original [i];
       let newRule = new DocuScopeRule();
@@ -114,7 +111,11 @@ export default class DocuScopeRules {
     // Make sure we have at least something stored in case this is the first time
     // we load the data from the template. Shouldn't hurt if we overwrite
     if (newRules==true) {
+      this.name=anObject.name.replaceAll (";",","); // Make sure we don't have a key/value separation clash
+      this.sessionStorage.setValue ("title",this.name);
       this.save ();
+    } else {
+      this.name=this.sessionStorage.getValue ("title");
     }
 
     this.ready = true;
@@ -379,7 +380,7 @@ export default class DocuScopeRules {
    */
   setClusterCustomTopics (aRule, aCluster, aCustomTopicSet) {
     console.log ("setClusterCustomTopics ("+aRule + ", " + aCluster +")");
-    console.log (aCustomTopicSet);
+    //console.log (aCustomTopicSet);
 
     // This retrieves one of our own objects, not a raw JSON object
     let cluster=this.getClusterByIndex (aRule,aCluster);
@@ -394,11 +395,7 @@ export default class DocuScopeRules {
     if (topics) {
       if (topics.length>0) {
         let defaulTopicObject=topics [0];
-        /*
-        if (defaulTopicObject.pre_defined_topics) {
-          defaulTopicObject.pre_defined_topics=aCustomTopicSet;
-        }
-        */
+
         if (defaulTopicObject.custom_topics) {
           defaulTopicObject.custom_topics=aCustomTopicSet;
         }        

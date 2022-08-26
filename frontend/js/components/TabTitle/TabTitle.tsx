@@ -17,7 +17,7 @@ interface Props {
  * @returns
  */
 const TabTitle: React.FC<Props> = ({ children }) => (
-  <h3 className="text-warning ds-tab-title" role={"heading"}>
+  <h3 className="ds-tab-title" role={"heading"}>
     <Image
       alt="DocuScope Audit Icon"
       fluid={true}

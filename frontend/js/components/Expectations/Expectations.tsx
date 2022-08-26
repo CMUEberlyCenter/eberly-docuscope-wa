@@ -123,9 +123,9 @@ const Expectations = (props: {
     for (let i=0;i<ruleManager.rules.length;i++) {
       let aRule:any=ruleManager.rules [i];
       let clusterList=[];
-      let clustercount=<img className="cluster-mini-icon" src={clusterWarningIcon}/>;
-      
+          
       for (let j=0;j<aRule.children.length;j++) {
+        let clustercount=<img className="cluster-mini-icon" src={clusterWarningIcon}/>;
         let topicsentencecount=0;
         let aCluster=aRule.children [j];
         let id="rule-"+i+"-"+j;
@@ -155,12 +155,12 @@ const Expectations = (props: {
         </li>);
       }
 
-      let subRules=<ol type="a" className="expectations-clusters">{clusterList}</ol>
+      let subRules=<ol type="1" className="expectations-clusters">{clusterList}</ol>
 
       listElements.push (<li className="expectations-rule" key={"rule"+i} id={"rule-"+i} onClick={(e) => onRuleClick (e,i)}><div className="expectations-rule-selected">{aRule.name}</div>{subRules}</li>)    
     }
 
-    return (<ol type="1" className="expectations-list">{listElements}</ol>);
+    return (<ol type="a" className="expectations-list">{listElements}</ol>);
   }
 
   const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
