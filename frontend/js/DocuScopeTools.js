@@ -58,7 +58,7 @@ export default class DocuScopeTools {
    * 
    */
   coherenceToClusterCounts (aCoherenceData) {
-    console.log ("coherenceToClusterCounts ()");
+    //console.log ("coherenceToClusterCounts ()");
 
     let counts=[];
 
@@ -69,13 +69,15 @@ export default class DocuScopeTools {
     for (let i=0;i<aCoherenceData.data.length;i++) {
       let testLemma=aCoherenceData.data [i];
       if (testLemma.sent_count) {
-        console.log ("Found sentence count: " + testLemma.sent_count);
+        //console.log ("Found sentence count: " + testLemma.sent_count);
 
         let lemmaFound={
           count: testLemma.sent_count,
           lemma: ""
         };
        
+        // We need to make sure we take the plurals as well
+
         if (testLemma.topic) {
           if (testLemma.topic.length==3) {
             lemmaFound.lemma=testLemma.topic [2];
@@ -90,7 +92,7 @@ export default class DocuScopeTools {
       }
     }
 
-    console.log (counts);
+    //console.log (counts);
 
     return (counts);
   }
@@ -100,9 +102,10 @@ export default class DocuScopeTools {
    * The toLowerCase() method does not change the original string.
    */
   compareLemmas (aLemmaA,aLemmaB) {
-    console.log ("compareLemmas ("+aLemmaA+","+aLemmaB+")");
+    //console.log ("compareLemmas ("+aLemmaA+","+aLemmaB+")");
 
     if (aLemmaA.toLowerCase ()==aLemmaB.toLowerCase ()) {
+      //console.log ("Matched " + aLemmaA + " to " + aLemmaB);
       return (true);
     }
 

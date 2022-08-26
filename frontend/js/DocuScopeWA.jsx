@@ -59,7 +59,6 @@ export default class DocuScopeWA extends EberlyLTIBase {
       globallyDisabled: false,
       activeIndex: 1,
       ruleManager: this.ruleManager,
-      clusterCountData: [],
       server: {
         uptime: "retrieving ...",
         version: "retrieving ..."
@@ -211,18 +210,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
           reject(evaluation);
         } else {
           if (raw.data.html) {
-            let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
             //console.log (html);
             that.setState ({html: html});
           }
-          
-          if (raw.data.coherence) {
-            that.setState ({
-              clusterCountData: this.docuscopeTools.coherenceToClusterCounts (raw.data.coherence)
-            })
-          }
 
           resolve (raw.data);
+
+          if (raw.data.coherence) {
+            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence));          
+          }
         }
       }).catch((error) => {
         this.setState ({
@@ -245,23 +242,21 @@ export default class DocuScopeWA extends EberlyLTIBase {
     return new Promise((resolve, reject) => {
       fetch(aURL,this.standardHeader).then(resp => resp.text()).then((result) => {
         let raw=JSON.parse(result);
-        let evaluation=this.evaluateResult (raw);
+        let evaluation=that.evaluateResult (raw);
         if (evaluation!=null) {
           reject(evaluation);
         } else {
           if (raw.data.html) {
-            let html=this.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
             //console.log (html);
             that.setState ({html: html});
           }
 
-          if (raw.data.coherence) {
-            that.setState ({
-              clusterCountData: this.docuscopeTools.coherenceToClusterCounts (raw.data.coherence)
-            })
-          }
-
           resolve (raw.data);
+
+          if (raw.data.coherence) {
+            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence));
+          }
         }
       }).catch((error) => {
         //console.log (error);

@@ -75,7 +75,8 @@ const ErrorFallback = (props: { error?: Error }) => (
  */
 const Expectations = (props: { 
     api: apiCall,
-    ruleManager: any
+    ruleManager: any,
+    editorValue: string
   }) => {
 
   // MvV: We should load this from disk through the node service since this will
@@ -145,11 +146,11 @@ const Expectations = (props: {
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
           <div className={clusterClass}>
             <div className="cluster-line-label">{aCluster.name}</div>
-            <div className="cluster-line-icon">{clustercount}</div>
-            <div className="cluster-line-icon"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
+            <div className="cluster-line-icon" title="Custom topics not defined here">{clustercount}</div>
+            <div className="cluster-line-icon" title="Current expectation value"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
             <div className="cluster-mini-label">Expected</div>
             <div className="cluster-line-icon"><img className="cluster-up-arrow" src={clusterUpIcon}/></div>
-            <div className="cluster-mini-label">{topicsentencecount}</div>
+            <div className="cluster-mini-label" title="Nr. sentences matching topics">{topicsentencecount}</div>
           </div>
         </li>);
       }
@@ -164,7 +165,7 @@ const Expectations = (props: {
 
   const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
 
-  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} />;
+  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} editorValue={props.editorValue} />;
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">

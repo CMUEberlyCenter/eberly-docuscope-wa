@@ -137,10 +137,17 @@ class OnTopic:
     html_bytes = html.encode('utf-8')
     html_base64 = base64.b64encode(html_bytes)
 
-    nrParagraphs=coherence ['num_paras'];
+    # If there is not enough text to process or if there aren't enough results the coherence data might
+    # result to be: {'error': 'ncols is 0'}
 
-    print ("Number of paragraphs processed: " + str(nrParagraphs));
+    nrParagraphs=coherence.get ('num_paras');
 
+    if nrParagraphs:
+      print ("Number of paragraphs processed: " + str(nrParagraphs) + " (might be 1 for very short text)");
+    else:
+      print ("Error obtaining nr of paragraphs, setting to 0")
+      nrParagraphs=0;
+ 
     local=[]
 
     for i in range(nrParagraphs):

@@ -64,6 +64,22 @@ import { showHelp, showGettingStarted, showTroubleshooting } from "../../service
 import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
 import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
 
+// The imports below are purely to support the serialize function. Should probably import
+// from service
+import {
+  BehaviorSubject,
+  combineLatest,
+  distinctUntilChanged,
+  filter,
+  map,
+} from 'rxjs';
+import { Node } from 'slate';
+
+// Should probably import from the service
+const serialize = (nodes: Descendant[]): string => {
+  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
+};
+
 /**
  * For handling clicks on the tagged text for the impressions tool.
  * It will reveal the tag for the clicked on pattern while hiding
@@ -132,6 +148,8 @@ const StudentView = (props: {
       },
     ]);
 
+  const [editorTextValue, setEditorTextValue] = useState <string> ("");
+
   useEffect(() => {
     // Set editor text if initializing from session storage.
     // Necessary for analysis tool to receive the initial
@@ -139,6 +157,7 @@ const StudentView = (props: {
     const content = sessionStorage.getItem('content');
     if (content) {
       editorText.next(JSON.parse(content));
+      setEditorTextValue (serialize(JSON.parse(content)));
     }
   }, []); // [] dependency means this runs only once.
 
@@ -492,7 +511,7 @@ const StudentView = (props: {
         <aside ref={toolRef} className="d-flex flex-column tools-pane">
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
-              <Expectations api={props.api} ruleManager={props.ruleManager}/>
+              <Expectations api={props.api} ruleManager={props.ruleManager} editorValue={editorTextValue} />
             </Tab>
             <Tab eventKey={"coherence"} title="Coherence">
               <Coherence api={props.api} ruleManager={props.ruleManager} />
@@ -532,6 +551,7 @@ const StudentView = (props: {
                   if (editor.operations.some(op => 'set_selection' !== op.type)) {
                     editorText.next(content);
                     setEditorValue(content);
+                    setEditorTextValue (serialize(content));
                     sessionStorage.setItem('content', JSON.stringify(content));
                   }
                 }}

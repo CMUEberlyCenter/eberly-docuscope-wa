@@ -21,8 +21,10 @@ import CoherencePanel from "../CoherencePanel/CoherencePanel";
 import TopicHighlighter from "../../TopicHighlighter";
 
 // Dummy data so that we can keep working on our visualization widget set
+/*
 import { coherenceData } from "../../data/coherencedata";
 import { coherenceDataLocal } from "../../data/coherencedatalocal";
+*/
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
@@ -112,20 +114,8 @@ const Coherence = (props: {
         let coherence=incoming.coherence;
         let local=incoming.local;
 
-        /*
-        console.log ("coherence:");
-        console.log (coherence);
-        console.log ("local:");
-        console.log (local);
-        */
-
         setCoherenceData(coherence);
         setLocalCoherenceData(local);
-
-        //const decoded = window.atob(incoming.html);
-
-        // Use dummy data for now
-        //setCoherenceData(coherenceData);
 
         setStatus("Data retrieved");
       });

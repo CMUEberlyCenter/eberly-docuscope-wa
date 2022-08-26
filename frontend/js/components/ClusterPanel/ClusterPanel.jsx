@@ -145,6 +145,18 @@ class ClusterPanel extends Component {
 
     if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, topicArray)==false) {
       console.log ("Show an error dialog to the user");
+    } else {
+      // Request new data from the server
+
+      let text=this.props.editorValue;
+
+      let customTopics=this.props.ruleManager.getAllCustomTopics ();
+      
+      const escaped = encodeURIComponent(text);
+
+      const encoded = window.btoa(escaped);
+
+      this.props.api("ontopic", { custom: customTopics, base: encoded }, "POST").then((incoming) => {});
     }
   }
 
@@ -210,7 +222,7 @@ class ClusterPanel extends Component {
 	      onChange={(e) => this.onTopicsChange (e)}>
       </textarea>
     	<div className="cluster-topic-controls">
-    	  <Button onClick={(e) => this.onCustomTopicUpdate (e)}>Update</Button>
+    	  <Button onClick={(e) => this.onCustomTopicUpdate (e)} disabled={enableEditor}>Update</Button>
     	</div>
     </div>);
   }

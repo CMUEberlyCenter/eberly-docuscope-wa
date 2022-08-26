@@ -18,12 +18,11 @@ export default class DocuScopeRules {
     this.original = null;
     this.version = "1.0.0?";
 
-    this.dataTools=new DataTools ();
+    this.dataTools = new DataTools ();
     this.docuscopeTools = new DocuScopeTools ();
+    this.sessionStorage = new DocuScopeSessionStorage ("dswa");
 
-    this.sessionStorage=new DocuScopeSessionStorage ("dswa");
-
-    this.updateNotice=null;
+    this.updateNotice = null;
   }
 
   /**
@@ -432,21 +431,48 @@ export default class DocuScopeRules {
         let rule=this.rules [i];
         for (let j=0;j<rule.children.length;j++) {
           let cluster=rule.children [j];
+          // Reset the count, we can do that because the count list has everything coming in from the back-end
+          cluster.sentenceCount=0; 
           let clusterObject=cluster.raw;
-
           let topics=clusterObject.topics;
+
           if (topics) {
             if (topics.length>0) {
               let targetTopic=topics [0];
-              if (targetTopic.lemma) {                
-                // Find the lemma (this will be more complex if we start to include plurals and other forms)
-                for (let j=0;j<aCountList.length;j++) {
-                  aCountObject=aCountList [j];
-                  if (this.docuscopeTools.compareLemmas (aCountObject.lemma,targetTopic.lemma)==true) {
-                    cluster.sentenceCount=aCountObject.count;
-                  }
+              let debit=0;
+
+              // Match pre-defined toptics first
+              
+              if (targetTopic.pre_defined_topics) {
+                for (let k=0;k<targetTopic.pre_defined_topics.length;k++) {
+                  let topic=targetTopic.pre_defined_topics [k];
+                  for (let l=0;l<aCountList.length;l++) {
+                    let aCountObject=aCountList [l];
+                    if (this.docuscopeTools.compareLemmas (aCountObject.lemma,topic)==true) {
+                      debit+=aCountObject.count;
+                    }
+                  }                  
                 }
               }
+
+              // Then match custom-defined topics
+              console.log ("Matching custom topics ...");
+
+              if (targetTopic.custom_topics) {
+                for (let k=0;k<targetTopic.custom_topics.length;k++) {
+                  let topic=targetTopic.custom_topics [k];
+                  for (let l=0;l<aCountList.length;l++) {
+                    let aCountObject=aCountList [l];
+                    if (this.docuscopeTools.compareLemmas (aCountObject.lemma,topic)==true) {
+                      debit+=aCountObject.count;
+                    }
+                  }                  
+                }
+              }              
+
+              // Do the accounting
+
+              cluster.sentenceCount=debit;
             }
           }
         }
