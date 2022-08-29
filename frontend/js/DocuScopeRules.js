@@ -1,4 +1,5 @@
 
+import HashTable from "./HashTable";
 import DataTools from "./DataTools";
 import DocuScopeTools from "./DocuScopeTools";
 import DocuScopeRule from "./DocuScopeRule";
@@ -63,6 +64,8 @@ export default class DocuScopeRules {
       newRule.parse(ruleObject);
       this.rules.push(newRule);
     }
+
+    console.log (this.listClusters ());
   }
 
   /**
@@ -480,4 +483,63 @@ export default class DocuScopeRules {
       this.updateNotice ();
     }    
   }
+
+  /**
+   * 
+   */
+  listClusters () {
+    //console.log ("listClusters ()");
+
+    let hashTable=new HashTable ();
+    let clusterList=[];
+
+    for (let i=0;i<this.rules.length;i++) {
+      let rule=this.rules [i];
+      for (let j=0;j<rule.children.length;j++) {
+        let cluster=rule.children [j];
+        let clusterObject=cluster.raw;
+
+        let topics=clusterObject.topics;
+        if (topics) {
+          if (topics.length>0) {
+            console.log ("Lemma: " + topics [0].lemma);
+            //clusterList.push (topics [0].lemma);
+            hashTable.setItem (topics [0].lemma,topics [0].lemma);
+          }
+        }
+      }
+    }
+
+    let items=hashTable.keys();
+
+    //console.log (JSON.stringify (items));
+
+    for (let k=0;k<items.length;k++) {
+      clusterList.push (items [k]);
+    }
+
+    return (clusterList);
+  }
+  /**
+   * 
+   */
+  listClustersForRule (aRuleIndex, aClusterIndex) {
+    //console.log ("listClustersForRule (" + aRuleIndex + "," + aClusterIndex + ")");
+
+    let clusterList=[];
+
+    let rule=this.rules [aRuleIndex];
+    let cluster=rule.children [aClusterIndex];
+    let clusterObject=cluster.raw;
+
+    let topics=clusterObject.topics;
+    if (topics) {
+      if (topics.length>0) {
+        //console.log ("Lemma: " + topics [0].lemma);
+        clusterList.push (topics [0].lemma);
+      }
+    }
+    
+    return (clusterList);
+  }  
 }

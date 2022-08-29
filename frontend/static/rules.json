@@ -1,102 +1,96 @@
 {
-    "name": "Writing User-Facing Statistics Reports",
+    "name": "Change Proposal",
     "rules": [
         {
-            "name": "Describing Real-World Importance",
-            "description": "<body>\n<p>Throughout the report, you are interpreting the data as if you were writing for a client or a fellow researcher. Thus, the \u201creal-world importance\u201d appears differently in different sections. </p>\n<p>In the introduction, you should provide your reader with some background and context, as well as what your report accomplishes. </p>\n<p>In the discussion section, your reader should understand the main takeaways, as well as the limitations and possibilities of future research in the area you're writing about. </p></body>",
-            "topics": [],
+            "name": "Establish the Current Conditions",
+            "description": "<body>\n<p>In a change proposal, you first want to establish the <span style=\"font-weight:600;\">current conditions</span>. These are the present conditions in need of change. Another common name for the current conditions is the <span style=\"font-weight:600;\">status quo</span>. </p>\n<p></p></body>",
+            "topics": [
+                {
+                    "lemma": "-",
+                    "user_defined": true,
+                    "prompt": "",
+                    "no_lexical_overlap": false
+                }
+            ],
+            "experiences": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "What is motivating this research? What is its point, or real-world importance?",
-                    "description": "<body>\n<p>For this topic cluster, consider why your analysis is important to your readers: motivate your reader to care about your report by conveying its potential importance or impact in the world.</p>\n<ul><li>What are the real-world implications of your analysis? </li>\n<li>What can the readers do with this information? </li>\n<li>What does this report contribute? </li></ul>\n<p>Focus on words or phrases that you might use to make connections to the practical applications of this analysis. For this assignment, why might you <span style=\"font-weight:600;\">expect to see this expectation met in the introduction and discussion?</span></p>\n<p>To do this, we typically see writers use something called <span style=\"font-weight:600;\">metadiscourse</span>: words and phrases that signal the purposes of the text for the reader. These can include transitions (<span style=\"font-style:italic;\">however, therefore, for example, </span>etc.) and phrases that refer to the text itself (<span style=\"font-style:italic;\">this study, this analysis, our goal,</span> etc.).</p>\n<p>For this expectation category, focus on words and phrases that refer to the report itself. </p></body>",
+                    "name": "What are the current conditions?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by associating words/phrases from the user-defined topic cluster \u201cCurrent Conditions\u201d with words/phrases that convey  elaboration impressions--impressions that furnish neutral background.</p>\n<p>Consider a writer who is a member of their college's rowing club. The writer can think of many neutral, positive, and negative things to say about club. Neutrally, the rowing club has been in existence for decades, has at any time about twenty members, and recruits students from across campus. Positively, the rowing club has won many competitive awards against other clubs from other colleges and boasts many student athletes. Negatively, the rowing club is not a varsity sport and it faces many uphill disadvantages because it is not. The change proposed will be to make it a varsity sport.</p>\n<p>When answering this question, the expectation is that you will associate the \u201cCurrent Conditions\u201d with neutral impressions. You will associate the topical cluster \u201cCurrent Conditions\u201d with \u201crowing\u201d and \u201crowing club\u201d and in the predicate you will elaborate these topics with neutral impressions of the club that helps orient readers to the issue.</p>\n<p></p></body>",
                     "topics": [
                         {
-                            "lemma": "Real-World Connections",
+                            "lemma": "Current Conditions",
                             "user_defined": true,
-                            "pre_defined_topics": [
-                                "my analysis",
-                                "my goal",
-                                "our analysis",
-                                "our goal ",
-                                "the goal",
-                                "the purpose",
-                                "this analysis",
-                                "this project",
-                                "this study",
-                                "this work"
-                            ],
+                            "prompt": "List the words and phrases you associate with the present condition.",
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>From Introduction sections:</p>\n<p>\"<span class=\"topic\">The goal</span> of this current project is to understand if the gender of the patient affects the number of interventions, ER visits, costs and age they are to experience. Therefore, <span class=\"topic\">this</span> will be useful for <span class=\"topic\">individuals and health care providers</span> to better identify those who are at a higher risk for heart disease.\"</p>\n<p>\"<span class=\"topic\">This work</span> may be educational for <span class=\"topic\">those in the market for a diamond</span> of some sort and may help provide an expectation for monetary association to diamonds based on some specific factor. \"</p>\n<p>\"Therefore, <span class=\"topic\">this report</span> will focus on the varying popularity of different categories of YouTube videos.\"</p>\n<p>From Discussion sections:</p>\n<p>\"<span class=\"topic\">Our analysis </span>of Covid-19 deaths <span class=\"topic\">suggests</span> that, while there was an increased risk to BAME persons over white persons, the conclusions stated in the widely-covered May 2020 ONS report may have created an unjustified level of fear and anxiety.\"</p>\n<p>\"<span class=\"topic\">Our analysis </span>and metrics would <span class=\"topic\">suggest</span> that, on the whole \u2013 but not all the time \u2013 odds are good at predicting the winner of an election on a binary basis\"</p>\n<p>\"<span class=\"topic\">This data analysis</span> targeted on <span class=\"topic\">the aggressiveness of worldwide soccer players</span> and the figures of their experience on World Cup as well as their nationalities.\"</p>\n<p>\"<span class=\"topic\">This study</span> may also help YouTube better understand the video streaming preferences of its user base.\"</p></body>",
+                    "experiences": [
+                        "Elaboration"
+                    ],
+                    "examples": "<body>\n<p>The <span class=\"topic\">rowing club</span> at our university was <span class=\"experience\">founded in 1985</span> and <span class=\"experience\">takes in students from many majors </span>across campus.</p>\n<p>The <span class=\"topic\">technical interview process</span> is something almost all <span class=\"experience\">computer science majors</span> <span class=\"experience\">go through</span> <span class=\"experience\">when they graduate</span>.</p>\n<p><span class=\"topic\">Interviewers</span> recruit students who can <span class=\"experience\">exhibit</span> a throough and mature <span class=\"experience\">thought process</span>.</p>\n<p>This generation of <span class=\"topic\">college students</span> is well-known to be <span class=\"experience\">actively involved</span> in <span class=\"experience\">community service</span>.</p>\n<p>Most <span class=\"topic\">campus eateries </span>provide <span class=\"topic\">allergen sheets</span> that <span class=\"experience\">list the allergens</span> in their <span class=\"experience\">foods</span>.</p>\n<p></p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>By meeting this expectation, you make your writing more considerate. Your reader needs a neutral picture of what's going on now as a baseline for helping the reader understand why you are invested in the status quo and why you want to change it. By supporting the reader's need for this neutral picture before you complicate it, your text is <span style=\"font-style:italic;\">considerate.</span></p></body>",
+                    "values": [
+                        "considerate"
+                    ],
+                    "parent": "Establish the Current Conditions"
+                },
+                {
+                    "name": "What's positive about these conditions?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by aligning \u201cCurrent Conditions\u201d in the subject slot with positively-aligned (or simply positive) impressions in the predicate slot.</p>\n<p>Let's return to our rower who wants their college to upgrade rowing from a club sport to a varsity sport. The rower will want to create positive information about the current conditions that makes investment in that upgrade persuasive. Positive words and phrases associated with the current rowing club might be \u201crecruits committed individuals\u201d, \u201chas won many trophies in community competition\u201d, and \u201crespresents some of the university's best scholar-athletes\u201d.</p>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Current Conditions",
+                            "user_defined": true,
+                            "prompt": "List the words and phrases you associate with the present condition.",
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "experiences": [
+                        "PositiveAlignments"
+                    ],
+                    "examples": "<body>\n<p>The <span class=\"topic\">rowing club</span> has boasted many <span class=\"experience\">top student athletes</span> over the years.</p>\n<p>Today's <span class=\"topic\">students</span> are <span class=\"experience\">greatly interested in</span> learning everything they can about personal finance.</p>\n<p>The <span class=\"topic\">sacrifices </span>many <span class=\"topic\">students</span> now make to earn a college degree are<span class=\"experience\"> laudable</span>.</p>\n<p><span class=\"topic\">Students </span>often consider lifetime <span class=\"experience\">earning power</span> and peronal <span class=\"experience\">happiness</span> as different but important factors when considering a major.</p>\n<p>Even <span class=\"topic\">students</span> who <span class=\"experience\">pride</span> themsevles on <span class=\"experience\">making it to class consistentl</span>y and <span class=\"experience\">on-time</span> are having more trouble doing so.</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>By meeting this expectation, you show your reader that the status quo contains positive features not only worth preserving but worth investing in further. Your positive investment in the current conditions enhances your <span style=\"font-style:italic;\">crediblity</span> to steward the status quo into the future and that in turn makes your writing more <span style=\"font-style:italic;\">compelliing. </span>In addition, to comprehend your proposal, your reader needs a clear picture of what's right about the current conditions to understand why the status quo deserves additional investment. Your support of the reader's comprehension and informed judgment makes you a <span style=\"font-style:italic;\">considerate</span> writer.</p></body>",
                     "values": [
                         "credible",
                         "considerate",
-                        "compelling",
-                        "ethical"
+                        "compelling"
                     ],
-                    "parent": "Describing Real-World Importance"
+                    "parent": "Establish the Current Conditions"
                 },
                 {
-                    "name": "Can you interpret the data & results for a real-world audience?",
-                    "description": "<body>\n<p>For this topic cluster, consider words or noun phrases that are <span style=\"font-style:italic;\">less statistical </span>and more related to the <span style=\"font-style:italic;\">implications</span> of your results.</p>\n<ul><li>What trends did you identify in the data, and what do they suggest? </li>\n<li>What did you find in your results?</li>\n<li>What do these results suggest with regard to the corresponding research question? </li></ul>\n<p>For the pre-defined topics, consider how you might be using these words/phrases in context. </p>\n<p>In your <span style=\"font-weight:600;\">methods section</span>, </p>\n<p>In your <span style=\"font-weight:600;\">results section</span>, as you answer each research question with statistical analysis, focus on <span style=\"font-style:italic;\">interpreting </span>those results for your readers. Don't let the data speak for itself!</p>\n<p>In <span style=\"font-weight:600;\">results</span> sections, be sure to interpret each piece of your data story. In <span style=\"font-weight:600;\">discussion</span> sections, you should provide an <span style=\"font-style:italic;\">overview</span> of your major findings. </p>\n<p>Define your topic cluster with words and phrases that best match this description. These might include <span style=\"font-weight:600;\">language specific to your dataset</span>, or even specific verbs that you use to describe your findings.</p>\n<p></p></body>",
+                    "name": "What's negative about these conditions? (gaps)",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by associating the topical cluster \u201cCurrent Conditions\u201d with the impression of negatively-aligned (or simply negative) information. The resulting sentences will be \u201cgap\u201d sentences, sentences that pinpoint where change is needed.</p>\n<p>Let's return to our rower who wants their college to upgrade rowing from a club sport to a varsity sport. The rower will want to list negative information about the current conditions that makes change seem necessary. Negative words and phrases associated with the current conditions might be that, because rowing remains only a club and not a varsity sport, the college \u201closes top recruits to other schools while the rowers are left to rely on \u201doutdated rowing equipment\u201c, and \u201dinadequate\u201c medical coverage compared to the coverage extended to the members of the varsity sports.</p>\n<p></p></body>",
                     "topics": [
                         {
-                            "lemma": "Meaning of Results",
+                            "lemma": "Current Conditions",
                             "user_defined": true,
-                            "pre_defined_topics": [
-                                "I",
-                                "our",
-                                "our results ",
-                                "we",
-                                "we can see"
-                            ],
+                            "prompt": "List the negative words and phrases you associate with the present condition.",
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"<span class=\"topic\">We</span> graphically <span class=\"topic\">investigated</span> the relationship between views and countries in side by side box plots as shown in Figure 3.\"</p>\n<p>\"<span class=\"topic\">Our results find</span> that the optimal time for pulling the goalie, if the team is down by one goal and has a face-off in the offensive zone, is a full 3 minutes earlier.\"</p>\n<p>\"To round out the discussion of ELO rating, <span class=\"topic\">we briefly describe </span>how ELO ratings are updated once a game is finished and an outcome is determined. \"</p>\n<p>From discussion sections:</p>\n<p>\"<span class=\"topic\">As a result</span> of the counterfactual modeling and validation described above, <span class=\"topic\">we can make</span> <span class=\"topic\">confident predictions </span>of the impact of NPIs in various regions.\"</p>\n<p></p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
-                    "parent": "Describing Real-World Importance"
-                },
-                {
-                    "name": "What are some suggestions for future research/action?",
-                    "description": "<body>\n<p>Consider the audience you're writing for in your report: this might consist of other data analysts or readers who will use this information to make relevant decisions. </p>\n<p>Therefore, you should identify some \u201cnext steps\u201d for both types of readers: </p>\n<ul><li>What are some potential research questions that could complement your analysis? </li>\n<li>What were you unable to analyze based on the limitations of your data? </li>\n<li>What should researchers look for next? </li></ul>\n<p>Typically, the <span style=\"font-style:italic;\">limitations</span> of your report and suggestions for <span style=\"font-style:italic;\">future research</span> appear in the <span style=\"font-weight:600;\">conclusion/discussions section. </span></p>\n<p></p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Future Research",
-                            "user_defined": true,
-                            "pre_defined_topics": [
-                                "a potential study",
-                                "another study",
-                                "further research",
-                                "future",
-                                "future analyses",
-                                "future analysis",
-                                "future research",
-                                "future studies",
-                                "future study"
-                            ],
-                            "no_lexical_overlap": false
-                        }
+                    "experiences": [
+                        "NegativeAlignments"
                     ],
-                    "examples": "<body>\n<p>From Discussion sections: </p>\n<p>\"<span class=\"topic\">Future studies</span> might think to <span class=\"topic\">further</span> explore the trends presented in this study with a more expansive data set containing individuals from all across the country.\"</p>\n<p>\"<span class=\"topic\">In future research</span>, we are interested in investigating the association between the clarity of diamonds and their prices.\"</p>\n<p>\"The results can be provided to current or <span class=\"topic\">future</span> soccer trainers and trainees to adjust their strategies like to familiarize the stadium before the official game starts.\"</p>\n<p>\"<span class=\"topic\">In the future</span>, trials are expected to become more adaptive, embracing modern computing power and adaptive decision-making.\"</p></body>",
+                    "examples": "<body>\n<p>The <span class=\"topic\">rowing club</span> on this campus is <span class=\"experience\">imperiled</span> because it has <span class=\"experience\">not been granted status</span> as a variety sport.</p>\n<p>The current <span class=\"topic\">tests</span> that many technology companies give to evalulate student applicant programming skills are <span class=\"experience\">unfair</span> and <span class=\"experience\">invalid </span>meausres of what professional programmers need to do on the job.</p>\n<p>A <span class=\"topic\">street</span> that hundreds of <span class=\"topic\">students</span> cross per hour to get to their classes <span class=\"experience\">lacks</span> crosswalks, stop signs, and traffic lights, and is a prsent <span class=\"experience\">danger</span> to students.</p>\n<p>Our campus currently has <span class=\"experience\">no</span> <span class=\"topic\">eatery</span> that satisfies the nutritional requirements of vegans.</p>\n<p>There is a <span class=\"experience\">dearth</span> of <span class=\"topic\">reporters</span> on the campus <span class=\"topic\">newspaper</span> primarily due to<span class=\"experience\"> apathy</span>.</p>\n<p></p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
-                    "parent": "Describing Real-World Importance"
+                    "cv_description": "<body>\n<p>By creating easily identifiable and troubling gap sentences, you show your <span style=\"font-style:italic;\">crediblity </span>to motivate change and you show your considerateness to readers to prepare them to comprehend the change you propose. </p></body>",
+                    "values": [
+                        "credible",
+                        "considerate"
+                    ],
+                    "parent": "Establish the Current Conditions"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",
@@ -104,117 +98,42 @@
             "parent": null
         },
         {
-            "name": "Describing concerns of the data & methods",
-            "description": "<body>\n<p>In order to interpret the credibility and accuracy of your results, your reader needs to understand your data. In addition, your reader should understand how you arrived at your analytical decisions. </p>\n<p>In the<span style=\"font-weight:600;\"> methods section</span>, your reader expects to see more <span style=\"font-style:italic;\">statistical terms. </span></p>\n<p>Keep in mind that while we refer to the \u201cmethods\u201d section, you might have an adjacent section that accomplishes the same task for your readers. <span style=\"font-weight:600;\">Consider how your own text varies from these slightly more generic expectations. </span></p></body>",
-            "topics": [],
+            "name": "Present My Change Proposal",
+            "description": "<body>\n<p>After you have established the current conditions, you are ready to present your proposal for change. </p></body>",
+            "topics": [
+                {
+                    "lemma": "-",
+                    "user_defined": true,
+                    "prompt": "",
+                    "no_lexical_overlap": false
+                }
+            ],
+            "experiences": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "Can you summarize the data?",
-                    "description": "<body>\n<p>To understand your report, your reader must understand your data:</p>\n<ul><li>When and where was the data collected? </li>\n<li>Who or what are the subjects under study?</li>\n<li>What procedures were used to select subjects and collect measurements?</li>\n<li>What are your quantitative and categorical variables?</li></ul>\n<p>These questions are typically answered in the <span style=\"font-weight:600;\">methods section</span>, or an EDA section in some reports (like in project 1). </p>\n<p>Focus on populating this topic cluster with words and phrases specific to your datset. </p>\n<p><span style=\"font-weight:600;\">Similar words and phrases may appear in the context of the results/research section, serving a different rhetorical purpose for your readers. </span> </p></body>",
+                    "name": "What concrete change(s) do I propose?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by including as topic clusters the specific changes you propose. You don't need to worry about tracking impressions in these sentences. </p>\n<p>Let's return to our rower who wants to make rowing a varsity sport on campus. The change proposed is the topic cluster \u201cmake rowing a varsity sport\u201d or simply \u201cvarsity sport\u201d. Sentences containing that topic, and variations, should recur consistently throughout the change proposal, and with each recurrence, the reader will take it for the proposed solution.</p></body>",
                     "topics": [
                         {
-                            "lemma": "Data Descriptors",
+                            "lemma": "Proposed Change",
                             "user_defined": true,
-                            "pre_defined_topics": [
-                                "IQR",
-                                "mean",
-                                "median",
-                                "mode",
-                                "standard deviation",
-                                "the data",
-                                "the dataset",
-                                "this dataset"
-                            ],
+                            "prompt": "List all the words and phrases associated with the change you propose.",
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>From methods/data sections: </p>\n<p>\"<span class=\"topic\">We have data compiled</span> on the <span class=\"topic\">passing performances </span>of every <span class=\"topic\">NFL player</span> from 2009 through the end of the regular season in 2018. The data was collected as a portion of the nflscrapR package, which is an R studio resource that utilizes NFL data, by Ron Yurko. \"</p>\n<p>\"<span class=\"topic\">The data</span> analyzed for the world come from the World Heath Organization WHO, and are available for download as a CSV. <span class=\"topic\">The data </span>is organized by country and by day, and are broken down into <span class=\"topic\">four categories</span>: cumulative cases, new daily cases, cumulative deaths, and new daily deaths. \"</p></body>",
+                    "experiences": [],
+                    "examples": "<body>\n<p>Rowing needs to be turned into a <span class=\"topic\">varsity spor</span>t.</p>\n<p>Companies need <span class=\"topic\">fairer ways to test the ability of programmers</span>.</p>\n<p>The university needs to place a <span class=\"topic\">stop sign and crosswalk</span> at this dangerous intersection.</p>\n<p>Dining services on campus should <span class=\"topic\">label all foods</span> sold <span class=\"topic\">with nutritional and allergenic information</span>.</p>\n<p></p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
-                    "parent": "Describing concerns of the data & methods"
-                },
-                {
-                    "name": "Are there any concerns that you have with the data?",
-                    "description": "<body>\n<p>Typically, writers justify and explain their data and methods prior to presenting the results of their analysis. We make many decisions when we analyze data, and we should make a case for those decisions to potentially skeptical readers. </p>\n<p><span style=\"font-weight:600;\">Do you have any concerns with the methods used to collect this data?</span> Consider the background sources and potential issues with the data that your reader might be concerned about. </p>\n<p><span style=\"font-weight:600;\">How relatively well is this assumption satisfied by the study described?</span> Does the relative representativeness of the sample (or lack thereof) give you much cause for concern about the relative validity of the final results of the hypothesis test? Why or why not?</p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Quality of Data",
-                            "user_defined": true,
-                            "pre_defined_topics": [
-                                "bin",
-                                "binned",
-                                "binning",
-                                "combine",
-                                "combined",
-                                "combining",
-                                "outlier",
-                                "outliers",
-                                "problematic",
-                                "sample",
-                                "sample size",
-                                "sample sizes",
-                                "skew",
-                                "skewness",
-                                "spread",
-                                "the sampling method",
-                                "the selection method"
-                            ],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>From methods/data sections:</p>\n<p>\"This dataset has an average weight(in carats) of 0.793 and a standard deviation of 0.469. The distribution of carats is essentially <span class=\"topic\">unimodal</span> and <span class=\"topic\">skewed</span> to the right.\"</p>\n<p>\"<span class=\"topic\">Despite this</span>, these concerns should not be <span class=\"topic\">problematic</span> in relation to the validity of the outcomes. \"</p>\n<p>From results sections: </p>\n<p>\"To further confirm these results, we <span class=\"topic\">combine</span> the groups into two broad categories called weekday and weekend, and perform a Welch two-sample t-test.\"</p>\n<p>\"Even though our box plot showed some <span class=\"topic\">outliers</span> and <span class=\"topic\">skewness</span>, an ANOVA test remains <span class=\"topic\">justified</span> <span class=\"topic\">since</span> the group sizes of our four groups are relatively large.\"</p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>By meeting this expectation, you make it easy for your reader to pick out your proposed change and this makes your text a considerate text.</p></body>",
                     "values": [
-                        "considerate",
-                        "ethical"
+                        "considerate"
                     ],
-                    "parent": "Describing concerns of the data & methods"
-                },
-                {
-                    "name": "How might you justify your techniques for your readers?",
-                    "description": "<body>\n<p>Consider a reader with experience in data analysis: how would you address their potential concerns with your statistical choices? </p>\n<ul><li><span style=\"font-weight:600;\">What types of data manipulation did you perform? </span>Be sure to address any potential concerns that the reader might have with your use of the data. </li>\n<li>Would a reader have any concerns with the methodologies used to analyze this data? If so, can you <span style=\"font-style:italic;\">justify</span> your decisions for your reader?</li></ul>\n<p>These limitations typically appear in the methods section and in your conclusion/discussion section. </p>\n<p>In the <span style=\"font-weight:600;\">methods section</span>, you should: </p>\n<ul><li>justify your choices for your reader</li></ul>\n<p>In the <span style=\"font-weight:600;\">discussion section</span>, you should: </p>\n<ul><li>note limitations of your analysis to help researchers with future work</li></ul>\n<p>Populate this topic cluster with words and phrases specific to the methods you used. </p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Quality of Methods",
-                            "user_defined": true,
-                            "pre_defined_topics": [
-                                "cell size",
-                                "group size",
-                                "limitation",
-                                "limitations",
-                                "linearity",
-                                "method",
-                                "normality",
-                                "technique",
-                                "this method",
-                                "this technique ",
-                                "transformation",
-                                "transformations"
-                            ],
-                            "no_lexical_overlap": false
-                        }
-                    ],
-                    "examples": "<body>\n<p>From methods sections:</p>\n<p>\"In addition, <span class=\"topic\">modeling</span> the probability of only two outcomes\u2014a win or a loss\u2014is also quite <span class=\"topic\">restrictive</span>; chess games against similarly matched opponents will often end in a draw. <span class=\"topic\">Yet</span>, even with these <span class=\"topic\">limitations</span>, this rather simplistic and restrictive <span class=\"topic\">model produces</span> fairly reasonable approximations.\"</p>\n<p>\"Although elegant, <span class=\"topic\">this technique</span> is rather <span class=\"topic\">limited</span>, requiring the regressor uncertainty to be the same at each point and being limited to a few special and simple kernel functions for which the distribution of the derivative in 5 can be computed by manual calculus.\"</p>\n<p>From discussion sections:</p>\n<p>\"<span class=\"topic\">Possible limitations</span> in the study include the fact that a relatively small dataset was used, and the dataset was taken from only one company.\"</p></body>",
-                    "type": "active",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [
-                        "credible",
-                        "considerate",
-                        "compelling",
-                        "ethical"
-                    ],
-                    "parent": "Describing concerns of the data & methods"
+                    "parent": "Present My Change Proposal"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",
@@ -222,72 +141,69 @@
             "parent": null
         },
         {
-            "name": "Statistical Analysis & Interpretation",
-            "description": "<body>\n<p>When you present your results to your readers, focus on those that are most relevant. This is the space where, with the help of the visualizations you've created, you can describe <span style=\"font-style:italic;\">what</span> you found.</p>\n<p>There are many ways to organize a results section, but remember to use language that foregrounds your results rather than your process. </p></body>",
-            "topics": [],
+            "name": "Show How My Proposal Fills the Gaps",
+            "description": "<body>\n<p>In a change proposal, you need to show how your proposal addresses the gaps in the present situation. </p></body>",
+            "topics": [
+                {
+                    "lemma": "-",
+                    "user_defined": true,
+                    "prompt": "",
+                    "no_lexical_overlap": false
+                }
+            ],
+            "experiences": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "What can the reader learn from your figures?",
-                    "description": "<body>\n<p>When you present your <span style=\"font-weight:600;\">results</span>, be sure to reference each figure or table that you include. Your choices in how you visually represent your data will affect your reader's interpretation of your claims, and sometimes your credibility. So, when planning your tables and figures, think of them like a storyboard for the data story you want to tell.</p>\n<p>For each visualization, you should report and interpret the main data trends for your reader. </p>\n<ul><li>Do you refer to each plot by name in the text? </li>\n<li>Do you explain the main data trends of that plot for your reader? </li>\n<li>Are you using effective verbs that convey the information in the figure or table? Some examples include: <span style=\"font-style:italic;\">suggests, displays, shows, illustrates, </span>etc. </li></ul>\n<p></p></body>",
+                    "name": "How does my proposal fill the gaps?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by including words and phrases for your proposed change in the subject position and positively-aligned (positive) impressions in the predicate position. </p>\n<p>Consider our rowing example where the proposed change is to upgrade rowing from a club sport to a varsity sport. Here the phrase \u201cvarsity sport\u201d would be part of a topic cluster related to the proposed change and it would be related to positive phrases like </p>\n<ul><li>\u201cMaking rowing a varsity sport will help recruit the best rowers graduating from high school\u201d</li>\n<li>\u201cAs a varsity sport, rowing will put our rowing team on the map\u201d</li>\n<li>\u201cUpgrading rowing to a varsity sport will grow our population of student athletes\u201d </li></ul>\n<p></p></body>",
                     "topics": [
                         {
-                            "lemma": "Visual Descriptors",
+                            "lemma": "Proposed Change",
                             "user_defined": true,
-                            "pre_defined_topics": [
-                                "Figure",
-                                "Figures",
-                                "Table",
-                                "Tables"
-                            ],
+                            "prompt": "List all the words and phrases associated with the change you propose.",
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"<span class=\"topic\">Figure 2 shows</span> that the data for females\u2019 ER visits is slightly more skewed right than that of the males\u2019 ER visits.\"</p>\n<p>\"<span class=\"topic\">Figures 8 and 9 show </span>that the odds consistently underestimate the probability of the eventual victor winning, sometimes hugely (as in 1970).\"</p>\n<p>\"To best summarize the data for relationship status and income, we will use <span class=\"topic\">Table 2</span>. We can note that the highest income mean came from individuals who were married. The second-lowest and lowest mean income came from individuals who were seeing someone and unknown respectively. We can then graphically analyze the two variables in side-by-side box plots, <span class=\"topic\">shown in Figure 3</span>.\"</p></body>",
+                    "experiences": [
+                        "PositiveAlignments"
+                    ],
+                    "examples": "<body>\n<p><span class=\"topic\">Making rowing a varsity sport </span>will <span class=\"experience\">double our population of student athletes</span>.</p>\n<p>By making <span class=\"topic\">company tests for hiring programmers open book a</span>nd <span class=\"topic\">focused on practical problems</span>, companies <span class=\"experience\">will make better hiriing decisions </span>and students coming out of school <span class=\"experience\">will be treated more fairly</span>.</p>\n<p><span class=\"topic\">Placing a stop sign and crosswalk</span> on Elm and Fifth will <span class=\"experience\">improve the safety of students</span> who rely on that intersection to get to classes. It will also send the message that the <span class=\"experience\">university makes student safety a top priority.</span></p>\n<p><span class=\"topic\">Creating an eatery on campus that is entirely vegan</span> will <span class=\"experience\">accommodate the increasing number of students who are vegan</span> or who want to explore a vegan lifestyle. <span class=\"topic\">It</span> will also <span class=\"experience\">help recruit students from high school who are vegan or want to try it in their college years</span>.</p>\n<p>By <span class=\"topic\">developing a policy on campus free speech that respects free speech as a constitutional right</span> while <span class=\"topic\">upholding the university's values of respect and dignity for all</span> is important for <span class=\"experience\">maintaining a healthy campus climate, encouraging open inquiry, and better deflecting hate speech</span>.</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>By crafting sentences that meet this expectation, you show you can credibly (from a problem-solving point of view) and compellingly (from a reader point of view) link your proposed change to tangible advantages.</p></body>",
                     "values": [
                         "credible",
-                        "considerate",
-                        "compelling",
-                        "ethical"
+                        "compelling"
                     ],
-                    "parent": "Statistical Analysis & Interpretation"
+                    "parent": "Show How My Proposal Fills the Gaps"
                 },
                 {
-                    "name": "What can the reader learn from your statistical results?",
-                    "description": "<body>\n<p>The goal of this paper is to report and interpret the results of your inferential statistical analysis. What tests did you perform? What can you interpret from your results? </p>\n<p><span style=\"font-weight:600;\">Visualizations graphically summarize data for readers. But the text itself allows you to narrate that data</span>, reporting particularly <span style=\"font-style:italic;\">relevant data points</span> and focusing the reader's attention on <span style=\"font-style:italic;\">specific trends or findings. </span></p>\n<ul><li>What are the phrases you use to refer to the results in your figures? </li>\n<li>What verbs are you using to present your results?</li></ul></body>",
+                    "name": "How does my proposal affirm the values of my target audience?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How Is this expectation met in English sentences?</span></p>\n<p>You meet it by identifying your target audience as a user-defined topical cluster in subject position; in the predicate, specify (as impressions) the positive values exemplified by your proposed change that your target audience also cherishes.</p>\n<p></p></body>",
                     "topics": [
                         {
-                            "lemma": "Statistical Results",
+                            "lemma": "Target Audience",
                             "user_defined": true,
-                            "pre_defined_topics": [
-                                "ANOVA",
-                                "association",
-                                "chi-square",
-                                "maximum",
-                                "minimum",
-                                "p-value",
-                                "reject",
-                                "significance ",
-                                "the mean",
-                                "the median",
-                                "the results of"
-                            ],
+                            "prompt": "List the target audiences that are most important for turning your proposal into reality.",
                             "no_lexical_overlap": false
                         }
                     ],
-                    "examples": "<body>\n<p>From results sections:</p>\n<p>\"From the result of the <span class=\"topic\">chi-square</span> test, we can reject the null hypothesis since our <span class=\"topic\">p-value</span>, in this case, is smaller than our \u03b1 level of 5%.\"</p>\n<p>\"<span class=\"topic\">To formally test</span> the question of whether mean income differs by affection for pets, we conducted an analysis of variance (<span class=\"topic\">ANOVA</span>) test with the <span class=\"topic\">null hypothesis</span> that the average income is the same across all levels of affection for pets.\"</p>\n<p>\"We used a <span class=\"topic\">chi-square</span> test to determine whether there is an <span class=\"topic\">association</span> between diagnosis and the presence of MDRB in the intestines.\"</p>\n<p></p></body>",
+                    "experiences": [
+                        "PositiveAlignments"
+                    ],
+                    "examples": "<body>\n<p>The <span class=\"topic\">university</span> has an overriding interest to <span class=\"experience\">recruit the best student-athletes graduating from high schoo</span>l. It happens that, across all sports, rowing attracts some of the best student athletes.</p>\n<p>The <span class=\"topic\">university</span> has a significant interest in the <span class=\"experience\">safety of students</span>. And this is why making campus intersections safe is such a compelling interest.</p>\n<p><span class=\"topic\">Campus leaders</span> undertand that while students are here to acquire knowledge, their <span class=\"experience\">health and nutritional well-being</span> are also very important.</p>\n<p><span class=\"topic\">Tech companies</span> hiring programmers out of college need students who can <span class=\"experience\">solve practical programming problems</span>. If they are to meet this need, they need to make sure they screen for applicants with this practical programming sense.</p>\n<p></p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
-                    "parent": "Statistical Analysis & Interpretation"
+                    "cv_description": "<body>\n<p>By linking the values of your change proposal to the deepest values of your target audience, you make your text compelling.</p></body>",
+                    "values": [
+                        "compelling"
+                    ],
+                    "parent": "Show How My Proposal Fills the Gaps"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",
@@ -295,57 +211,94 @@
             "parent": null
         },
         {
-            "name": "Title and Citations",
-            "description": "<body>\n<p></p></body>",
-            "topics": [],
+            "name": "Acknowledge the Limitations In My Proposal",
+            "description": "<body>\n<p>In a change proposal, your proposal is bound to have some limitations and you need to acknowledge them. </p></body>",
+            "topics": [
+                {
+                    "lemma": "-",
+                    "user_defined": true,
+                    "prompt": "",
+                    "no_lexical_overlap": false
+                }
+            ],
+            "experiences": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "group",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "What are the limitations of my proposal?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences?</span></p>\n<p>You meet it by associating your proposed change early in the sentence with the negatively-aligned (negative) impressions following later in the predicate. It's often advisable to front these sentences with beginnings like \u201cI acknowledge|I recognize|I concede\u201d.</p>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Proposed Change",
+                            "user_defined": true,
+                            "prompt": "List all the words and phrases associated with the change you propose.",
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "experiences": [
+                        "NegativeAlignments"
+                    ],
+                    "examples": "<body>\n<p>I acknowlege that <span class=\"topic\">my proposal </span>comes with an <span class=\"experience\">expensive price tag</span>. </p>\n<p>After talking to unversity officials, I learned that we can get a <span class=\"topic\">vegan eatery</span>, but only if we <span class=\"experience\">eliminate</span> an existing eatery.</p>\n<p>I recognize that <span class=\"topic\">my proposal to expand greek life on campus</span> is a <span class=\"experience\">low priority</span> for the administration.</p>\n<p>A <span class=\"topic\">bike-sharing program</span> for campus, which I propose, was tried a few years ago and it <span class=\"experience\">failed</span>.</p>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>Let's return to our rower who wants their college to upgrade rowing to a varsity sport. This is an appealing solution for the rowing club. But it is also an expensive solution. And the university has many sports to support! Proposal writers lose credibility when they fail to address the limitations in their proposal. They also show lapses of ethical balance by appearing to think that the strengths of their proposal should count more than the weaknesses and a lapse of ethics and considerateness by failing to be transparent about their weaknesses.</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "ethical"
+                    ],
+                    "parent": "Acknowledge the Limitations In My Proposal"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Address the Limitations in My Proposal",
+            "description": "<body>\n<p>In a change proposal, you will want to address the limitations in your proposal. In some cases, the limitations come from misimpressions that you will want to correct. In many cases, the limitations come because your proposal is too ambitious, too expensive, or has too many moving parts to show gains in a reasonable amount of time.  In such cases, you will want to show your willingness to scale back on aspects of your proposal if your audience finds the full proposal unworkable.</p></body>",
+            "topics": [
+                {
+                    "lemma": "-",
+                    "user_defined": true,
+                    "prompt": "",
+                    "no_lexical_overlap": false
+                }
+            ],
+            "experiences": [],
             "examples": "<body>\n<p></p></body>",
             "type": "bounded_optional",
             "is_group": true,
             "children": [
                 {
-                    "name": "Is your title informative for the reader?",
-                    "description": "<body>\n<p>Titles serve an important role in papers. Your title should include keywords that inform your reader about the content of your paper. Although this is a class assignment, consider what other readers or researchers would be interested in seeing in your title. </p>\n<p><span style=\"font-weight:600;\">Populate this topic cluster with nouns/noun phrases relevant to your report. </span>Do these items appear in your title? Can you include them without overloading your reader with information? </p></body>",
+                    "name": "How do I address these limitations?",
+                    "description": "<body>\n<p><span style=\"font-weight:600;\">How is this expectation met in English sentences? </span></p>\n<p>You meet it by creating a new topical cluster around the limitations in your proposal. Include these limitations in your sentences. In the same sentence or adjoining sentences, indicate scaled-down adjustments or refinements you'd be willing to make if your entire proposal strikes your audience as too big. Continue to emphasize the positive benefits that can still result from these scale-downs. </p>\n<p>Words and phrases associated with such accommodating language are the following:</p>\n<ul><li>\u201cIf/While my full proposal is too big for immediate implementation, we can proceed incrementally\u201d</li>\n<li>\u201cIf need be, we can define some first steps that are more affordable and less controversial\u201d</li></ul>\n<p></p></body>",
                     "topics": [
                         {
-                            "lemma": "Title Keywords",
+                            "lemma": "Limitations In Your Proposal",
                             "user_defined": true,
-                            "pre_defined_topics": [],
-                            "no_lexical_overlap": false
+                            "prompt": "Indicate the words and phrases that reference the scale-downs, compromises, and adjustments you woiuld be willing to make if your proposal can't be accepted at its original size or scope.",
+                            "no_lexical_overlap": true
                         }
                     ],
-                    "examples": "<body>\n<p></p></body>",
+                    "experiences": [
+                        "PositiveAlignments"
+                    ],
+                    "examples": "<body>\n<p>Making rowing a varsity sport has a range of <span class=\"topic\">upfront and hidden costs</span> that we may <span class=\"topic\">not be able to afford</span>. If that is the case, we might think of a one-time investment to bring the equipment up to <span class=\"experience\">well-recognized standards of performance and safety</span>.</p>\n<p>If a traffic light and cross-walk are <span class=\"topic\">too expensive</span> for this intersection, we should consider a stop sign or even a \"yield to pedestrian\" sign. That could still turn out to be <span class=\"experience\">very effective</span>.</p>\n<p>An eatery dedicated to vegan food may be l<span class=\"topic\">ogistically and financially challenging </span>for the university. If that is the case, I have checked and it would be less challenging to make sure a few existing eateries increase their stock of vegan products. Even a modest increase <span class=\"experience\">could go a long way addressing the problem</span>.</p>\n<p>Completely changing the corporate tests for student programmers may be <span class=\"topic\">impossible</span> for many computer companies. However, even if that were the case, there would be <span class=\"experience\">no great effort or cost</span> in <span class=\"experience\">allowing the tests</span> to be open-book to <span class=\"experience\">cut down on meaningless memorization</span>.</p></body>",
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p></p></body>",
-                    "values": [],
-                    "parent": "Title and Citations"
-                },
-                {
-                    "name": "Optional: Do you include citations that serve a rhetorical purpose?",
-                    "description": "<body>\n<p>When you cite other work in your writing, it can help to build your credibility as an author. Moreover, each time you incorporate an outside source into your own writing, you are making a rhetorical choice and signalling something to your reader. </p>\n<p>For instance, you might align yourself with certain sources that you introduce as an authority on the subject, or you may disagree with and critique other research. In other contexts, you might neutrally present outside sources to convey information. </p>\n<p><span style=\"font-weight:600;\">Outside sources are optional for this assignment.</span> If you do include them, be sure to cite them properly using the APA style guide. </p></body>",
-                    "topics": [
-                        {
-                            "lemma": "Citation language",
-                            "user_defined": true,
-                            "pre_defined_topics": [
-                                "Bibliography",
-                                "Endnotes",
-                                "Footnotes ",
-                                "References",
-                                "Work Cited",
-                                "Works Cited"
-                            ],
-                            "no_lexical_overlap": false
-                        }
+                    "cv_description": "<body>\n<p>By addressing the limitations of your proposal, you show you are interested in presenting a balanced account (ethical) that is respectful of the reader's potential objections and concerns (considerate). And these impressions in turn contribute to the reader's perception of your credibility as a writer and your willingness to co-construct the proposal with the audience/potential funder to make it compelling.</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
                     ],
-                    "examples": "<body>\n<p></p></body>",
-                    "type": "optional",
-                    "is_group": false,
-                    "children": [],
-                    "cv_description": "<body>\n<p></p></body>",
-                    "values": [],
-                    "parent": "Title and Citations"
+                    "parent": "Address the Limitations in My Proposal"
                 }
             ],
             "cv_description": "<body>\n<p></p></body>",

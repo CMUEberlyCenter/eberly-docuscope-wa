@@ -2,6 +2,7 @@ import React, { Component, useRef, useEffect } from "react";
 import { Button, Alert, Card, Container, Form, Nav, Navbar, NavDropdown, Tab, Tabs } from "react-bootstrap";
 
 import DataTools from "../../DataTools";
+import DocuScopeTools from "../../DocuScopeTools";
 
 import './ClusterPanel.scss';
 import './ClusterTopics.scss';
@@ -49,6 +50,7 @@ class ClusterPanel extends Component {
     super (props);
 
     this.dataTools=new DataTools ();
+    this.docuscopeTools=new DocuScopeTools ();
 
     this.state = {      
       currentTab: "expectationabout",
@@ -281,10 +283,13 @@ class ClusterPanel extends Component {
     if (this.props.currentCluster!=-1) {
       let cluster=this.props.ruleManager.getClusterByIndex (this.props.currentRule,this.props.currentCluster);
 
+      let clusterList=this.props.ruleManager.listClustersForRule (this.props.currentRule,this.props.currentCluster);
+      let clusterSentence=this.docuscopeTools.clusterListToSentence (clusterList);      
+
       let defined="<p>Enter words and phrases associated with <b style=\"color: black;\">\"[replacer]\"</b> in the text field.</p> <br> <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>";
       let clean=defined;
       if (cluster!=null) {
-        clean=defined.replace ("[replacer]", cluster.name);
+        clean=defined.replace ("[replacer]", clusterSentence);
       }
       return (clean);
     }

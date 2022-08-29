@@ -111,4 +111,28 @@ export default class DocuScopeTools {
 
     return (false);
   }
+
+  /**
+   * 
+   */
+  clusterListToSentence (aList) {
+    //console.log ("clusterListToSentence ()");
+    //console.log (aList);
+
+    let sentence="";
+
+    if (aList.length==0) {
+      return (sentence);
+    }
+
+    if (aList.length==1) {
+      sentence=aList [0];
+    }
+
+    if (aList.length==2) {
+      sentence = aList [0] + " and " + aList [1];
+    }
+
+    return (sentence);
+  }
 }
