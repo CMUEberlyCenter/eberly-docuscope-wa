@@ -52,6 +52,7 @@ import * as d3 from "d3";
 import { currentTool } from "../../service/current-tool.service";
 import Divider from "../../components/Divider/Divider";
 import DocuScopeAbout from '../../DocuScopeAbout';
+import DocuScopeReset from '../../DocuScopeReset';
 import TopicHighlighter  from "../../TopicHighlighter";
 
 import "./StudentView.scss";
@@ -59,6 +60,7 @@ import "../../../css/topics.css";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
+
 import { HelpModal } from "../../components/HelpDialogs/HelpModal";
 import { showHelp, showGettingStarted, showTroubleshooting } from "../../service/help.service";
 import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
@@ -352,6 +354,10 @@ const StudentView = (props: {
       return;
     }
 
+    if (eventKey === "resetData") {
+      setShowReset (true);
+    }
+
     if (eventKey === "resetView") {
       if (toolRef.current) {
         toolRef.current.style.width = "";
@@ -444,13 +450,33 @@ const StudentView = (props: {
 
   let about;
 
-  const onCloseAboutPage = () => {
-    console.log ("onCloseAboutPage ()");
+  const onCloseAboutPage = () => {    
     setShowAbout (false);
   };
 
   if (showAbout==true) {
     about=<DocuScopeAbout onCloseAboutPage={onCloseAboutPage} ruleManager={props.ruleManager}/>;
+  }
+
+  //>--------------------------------------------------------
+
+  const [showReset, setShowReset] = useState(false);
+
+  let reset;
+
+  const onCloseResetDialog = (afirm: boolean) => {    
+    setShowReset (false);
+    if (afirm==true) {
+      // Reset the data from the template
+      props.ruleManager.reset ();
+
+      // Reset the interface
+      switchTab ("expectations");
+    }
+  };
+
+  if (showReset==true) {
+    about=<DocuScopeReset onCloseResetDialog={onCloseResetDialog}/>;
   }
 
   //>--------------------------------------------------------
@@ -483,6 +509,7 @@ const StudentView = (props: {
             <Navbar.Toggle aria-controls={navId}></Navbar.Toggle>
             <Navbar.Collapse id={navId}>
               <Nav className="me-auto" onSelect={onNavSelect}>
+                <Nav.Link eventKey={"resetData"}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
                   <NavDropdown.Item
                     disabled={true}

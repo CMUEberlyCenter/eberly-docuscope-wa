@@ -18,6 +18,7 @@ export default class DocuScopeRules {
     this.ready = false;
     this.original = null;
     this.version = "1.0.0?";
+    this.clusters = [];
 
     this.dataTools = new DataTools ();
     this.docuscopeTools = new DocuScopeTools ();
@@ -55,6 +56,25 @@ export default class DocuScopeRules {
   /**
    * 
    */
+  reset () {
+    console.log ("reset ()");
+
+    //this.name = "unassigned";
+    this.rules = [];
+    this.clusters = [];
+
+    this.parse ();
+
+    this.save ();
+
+    if (this.updateNotice) {
+      this.updateNotice (true);
+    }
+  }
+
+  /**
+   * 
+   */
   parse () {
     console.log ("parse ()");
 
@@ -65,7 +85,18 @@ export default class DocuScopeRules {
       this.rules.push(newRule);
     }
 
-    console.log (this.listClusters ());
+    // We don't have any clusters yet, we'll need to create them from
+    // the rules file
+    if (this.clusters.length==0) {
+      let rawClusters=this.listClusters ();
+      for (let j=0;j<rawClusters.length;j++) {
+        let clusterObject={
+          name: rawClusters [j],
+          custom_topics: []
+        };
+        this.clusters.push (clusterObject);
+      }
+    }
   }
 
   /**
@@ -94,7 +125,8 @@ export default class DocuScopeRules {
 
     // We have to make a small accomodation for rules coming in as part of a JSON HTTP message
     // This will be smoothed out soon after v1.
-    this.original = anObject.rules;
+    this.original=anObject.rules;
+    this.clusters=this.sessionStorage.getJSONObject("clusters");
 
     let stored=this.sessionStorage.getJSONObject("rules");
 
@@ -124,6 +156,7 @@ export default class DocuScopeRules {
     this.ready = true;
 
     this.debugRules();
+    this.debugClusters();
   }
 
   /**
@@ -139,6 +172,7 @@ export default class DocuScopeRules {
     //console.log (raw);
 
     this.sessionStorage.setJSONObject("rules",raw);
+    this.sessionStorage.setJSONObject("clusters",this.clusters);
   }
 
   /**
@@ -147,19 +181,15 @@ export default class DocuScopeRules {
   debugRules() {
     console.log("debugRules ()");
 
-    console.log (this.original);
+    console.log (this.getJSONObject ());
+  }
 
-    /*
-    console.log("+ Name: " + this.name);
-    console.log("+ Rules ");
-
-    for (let i = 0; i < this.rules.length; i++) {
-      let aRule = this.rules[i];
-      console.log("+-- " + aRule.name);
-      console.log("  +-- " + aRule.description);
-      console.log("  +-- " + aRule.type);
-    }
-    */
+  /**
+   *
+   */
+  debugClusters () {
+    console.log("debugClusters ()");
+    console.log (this.clusters);
   }
 
   /**
@@ -412,7 +442,7 @@ export default class DocuScopeRules {
     this.save();
 
     if (this.updateNotice) {
-      this.updateNotice ();
+      this.updateNotice (false);
     }
 
     return (true);
@@ -480,7 +510,7 @@ export default class DocuScopeRules {
     }
 
     if (this.updateNotice) {
-      this.updateNotice ();
+      this.updateNotice (false);
     }    
   }
 

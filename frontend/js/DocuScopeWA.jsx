@@ -153,14 +153,21 @@ export default class DocuScopeWA extends EberlyLTIBase {
   /**
    * Replace with RxJS
    */
-  updateNotice () {
-    console.log ("updateNotice ()");
+  updateNotice (resetState) {
+    console.log ("updateNotice (reset:"+resetState+")");
     
     // Really bad way to do this!
     if (badThat!=null) {
-      badThat.setState ({
-        badUpdatecounter: Math.floor(Math.random() * 10000)
-      }); 
+      if (resetState) {
+        badThat.setState ({
+          badUpdatecounter: Math.floor(Math.random() * 10000),
+          html: null
+        }); 
+      } else {
+        badThat.setState ({
+          badUpdatecounter: Math.floor(Math.random() * 10000)
+        }); 
+      }
     }
   }
 
@@ -233,7 +240,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
   }
 
   /**
-   *
+   * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
    */
   apiGETCall (aURL, _aData) {
     console.log ("apiGETCall ()");
@@ -272,20 +279,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
   }
 
   /**
-     https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-
-     {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-       'Content-Type': 'application/json'
-      },
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-    }
+   * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
    */
   apiCall (aCall,aData,aType) {
     console.log ("apiCall ("+aCall+")");

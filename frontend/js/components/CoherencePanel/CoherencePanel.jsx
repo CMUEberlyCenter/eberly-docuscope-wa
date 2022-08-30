@@ -190,6 +190,8 @@ class CoherencePanel extends Component {
     let topic=this.getTopicObject (anIndex);
 
     console.log (topic);
+
+    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,topic);
   }
 
   /**
@@ -209,7 +211,12 @@ class CoherencePanel extends Component {
   onGlobalTopicClick (e,anIndex) {
     console.log ("onGlobalTopicClick ("+anIndex+")");
 
-    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,anIndex);
+    //this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,anIndex);
+
+    if (this.props.ruleManager) {
+      let clusters=this.props.ruleManager.clusters;
+      let cluster=clusters[anIndex];
+    }    
   }
 
   /**
@@ -252,10 +259,13 @@ class CoherencePanel extends Component {
   generateGlobalClusters (paraCount) {
     let topicElements=[];
 
-    topicElements.push (<tr key={"topic-key-0"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,0)}>Current Conditions</div></td><td>&nbsp;</td></tr>)
-    topicElements.push (<tr key={"topic-key-1"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,1)}>Target Audience</div></td><td>&nbsp;</td></tr>)
-    topicElements.push (<tr key={"topic-key-2"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,2)}>Limitations in Your Proposal</div></td><td>&nbsp;</td></tr>)
-    topicElements.push (<tr key={"topic-key-3"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,3)}>Proposed Change</div></td><td>&nbsp;</td></tr>)            
+    if (this.props.ruleManager) {
+      let clusters=this.props.ruleManager.clusters;
+
+      for (let i=0;i<clusters.length;i++) {
+        topicElements.push (<tr key={"topic-key-0"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,i)}>{clusters [i].name}</div></td><td>&nbsp;</td></tr>)
+      }
+    }
 
     return (topicElements);
   }
@@ -523,6 +533,7 @@ class CoherencePanel extends Component {
    */
   render () {
     let paraCount=this.countParagraphs ();
+    let visualizationTopics;
   	let visualizationGlobal;
     let visualizationLocal;
     let paragraphcontrols=this.generatePagraphControls (paraCount);
@@ -531,7 +542,8 @@ class CoherencePanel extends Component {
     if (this.props.showglobal==true) {
       visualizationGlobal=this.generateGlobalClusters (paraCount);
     } else {
-      visualizationGlobal=this.generateGlobalTopics (paraCount);
+      visualizationGlobal=this.generateGlobalClusters (paraCount);
+      visualizationTopics=this.generateGlobalTopics (paraCount);
       if (this.state.selectedParagraph!=-1) {
         visualizationLocal=this.generateLocalTopics ();
       }
@@ -544,6 +556,7 @@ class CoherencePanel extends Component {
             <td>Paragraphs:</td>
             <td>{paragraphcontrols}</td>
           </tr>
+          {visualizationTopics}          
           {visualizationGlobal}
           <tr>
             <td colspan="2" className="topic-separator">{"Coherence across sentences in paragraph: " + (this.state.selectedParagraph+1)}</td>
@@ -563,6 +576,7 @@ class CoherencePanel extends Component {
           <td>Paragraphs:</td>
           <td>{paragraphcontrols}</td>
         </tr>
+        {visualizationTopics}        
         {visualizationGlobal}
       </tbody>
     </table></div>);

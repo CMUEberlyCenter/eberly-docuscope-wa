@@ -116,8 +116,6 @@ const Expectations = (props: {
    * 
    */
   const createRuleTree = (ruleManager: any, currentRule: number, currentCluster: number) => {
-    //console.log ("createRuleTree ()");
-
     let listElements=[];
 
     for (let i=0;i<ruleManager.rules.length;i++) {

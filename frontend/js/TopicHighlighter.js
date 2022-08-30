@@ -78,10 +78,11 @@ class TopicHighlighter {
    * 
    */
   highlightTopic (aParagraphIndex, aSentenceIndex, aTopic) {
-    console.log ("highlightSentence ("+aParagraphIndex+","+aSentenceIndex+","+aTopic+")");
+    console.log ("highlightSentence ("+aParagraphIndex+","+aSentenceIndex+")");
 
     this.clearAllHighlights ();
 
+    console.log (aTopic);
   }
 }
 

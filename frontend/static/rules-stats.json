@@ -35,7 +35,7 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>When meeting this expectation, your writing should aim for a well-balanced transparency that speaks directly to the reader. The reader should understand the main points of your report as clearly as possible. </p></body>",
                     "values": [
                         "credible",
                         "considerate",
@@ -46,7 +46,7 @@
                 },
                 {
                     "name": "Can you interpret the data & results for a real-world audience?",
-                    "description": "<body>\n<p>For this topic cluster, consider words or noun phrases that are <span style=\"font-style:italic;\">less statistical </span>and more related to the <span style=\"font-style:italic;\">implications</span> of your results.</p>\n<ul><li>What trends did you identify in the data, and what do they suggest? </li>\n<li>What did you find in your results?</li>\n<li>What do these results suggest with regard to the corresponding research question? </li></ul>\n<p>For the pre-defined topics, consider how you might be using these words/phrases in context. </p>\n<p>In your <span style=\"font-weight:600;\">methods section</span>, </p>\n<p>In your <span style=\"font-weight:600;\">results section</span>, as you answer each research question with statistical analysis, focus on <span style=\"font-style:italic;\">interpreting </span>those results for your readers. Don't let the data speak for itself!</p>\n<p>In <span style=\"font-weight:600;\">results</span> sections, be sure to interpret each piece of your data story. In <span style=\"font-weight:600;\">discussion</span> sections, you should provide an <span style=\"font-style:italic;\">overview</span> of your major findings. </p>\n<p>Define your topic cluster with words and phrases that best match this description. These might include <span style=\"font-weight:600;\">language specific to your dataset</span>, or even specific verbs that you use to describe your findings.</p>\n<p></p></body>",
+                    "description": "<body>\n<p>For this topic cluster, consider words or noun phrases that are <span style=\"font-style:italic;\">less statistical </span>and more related to the <span style=\"font-style:italic;\">implications</span> of your results.</p>\n<ul><li>What trends did you identify in the data, and what do they suggest? </li>\n<li>What did you find in your results?</li>\n<li>What do these results suggest with regard to the corresponding research question? </li></ul>\n<p>For the pre-defined topics, consider how you might be using these words/phrases in context. </p>\n<p>In your <span style=\"font-weight:600;\">methods section</span>, you might be explaining summary statistics or justifying your methods for your reader. </p>\n<p>In your <span style=\"font-weight:600;\">results section</span>, as you answer each research question with statistical analysis, focus on <span style=\"font-style:italic;\">interpreting </span>those results for your readers. Don't let the data speak for itself!</p>\n<p>In <span style=\"font-weight:600;\">results</span> sections, be sure to interpret each piece of your data story. In <span style=\"font-weight:600;\">discussion</span> sections, you should provide an <span style=\"font-style:italic;\">overview</span> of your major findings. </p>\n<p>Define your topic cluster with words and phrases that best match this description. These might include <span style=\"font-weight:600;\">language specific to your dataset</span>, or even specific verbs that you use to describe your findings.</p>\n<p></p></body>",
                     "topics": [
                         {
                             "lemma": "Meaning of Results",
@@ -65,8 +65,13 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
+                    "cv_description": "<body>\n<p>For this expectation, accuracy and credibility is paramount. Your reader should have an easy time understanding the takeaways of your quantitative results. You should strategically use high or hedged confidence to clearly convey your stance on the findings. </p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
+                    ],
                     "parent": "Describing Real-World Importance"
                 },
                 {
@@ -94,8 +99,11 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
+                    "cv_description": "<body>\n<p>When suggesting future research, your writing should clearly link back to unanswered aspects on the research question, as well as the curiosities and demands of the users or \u201cclients\u201d reading the text. </p></body>",
+                    "values": [
+                        "credible",
+                        "compelling"
+                    ],
                     "parent": "Describing Real-World Importance"
                 }
             ],
@@ -113,7 +121,7 @@
             "children": [
                 {
                     "name": "Can you summarize the data?",
-                    "description": "<body>\n<p>To understand your report, your reader must understand your data:</p>\n<ul><li>When and where was the data collected? </li>\n<li>Who or what are the subjects under study?</li>\n<li>What procedures were used to select subjects and collect measurements?</li>\n<li>What are your quantitative and categorical variables?</li></ul>\n<p>These questions are typically answered in the <span style=\"font-weight:600;\">methods section</span>, or an EDA section in some reports (like in project 1). </p>\n<p>Focus on populating this topic cluster with words and phrases specific to your datset. </p>\n<p><span style=\"font-weight:600;\">Similar words and phrases may appear in the context of the results/research section, serving a different rhetorical purpose for your readers. </span> </p></body>",
+                    "description": "<body>\n<p>To understand your report, your reader must understand your data:</p>\n<ul><li>When and where was the data collected? </li>\n<li>Who or what are the subjects under study?</li>\n<li>What procedures were used to select subjects and collect measurements?</li>\n<li>What are your quantitative and categorical variables?</li></ul>\n<p>These questions are typically answered in the <span style=\"font-weight:600;\">methods section</span>, or an EDA section in some reports (like in project 1). </p>\n<p><span style=\"font-weight:600; font-style:italic;\">Focus on populating this topic cluster with words and phrases specific to your datset, especially variables.</span></p>\n<p><span style=\"font-weight:600;\">Similar words and phrases may appear in the context of the results/research section, serving a different rhetorical purpose for your readers. </span></p></body>",
                     "topics": [
                         {
                             "lemma": "Data Descriptors",
@@ -135,8 +143,12 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
+                    "cv_description": "<body>\n<p>When decsribing your data, your writing should aim to be neutral and transparent. Readers should easily be able to understand your dataset, and any concerns they may have about it should be answered in the methods section. </p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "ethical"
+                    ],
                     "parent": "Describing concerns of the data & methods"
                 },
                 {
@@ -172,8 +184,9 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>When decsribing your data, your writing should aim to be neutral and transparent. Readers should easily be able to understand your dataset, and any concerns they may have about it should be answered in the methods section. </p></body>",
                     "values": [
+                        "credible",
                         "considerate",
                         "ethical"
                     ],
@@ -181,7 +194,7 @@
                 },
                 {
                     "name": "How might you justify your techniques for your readers?",
-                    "description": "<body>\n<p>Consider a reader with experience in data analysis: how would you address their potential concerns with your statistical choices? </p>\n<ul><li><span style=\"font-weight:600;\">What types of data manipulation did you perform? </span>Be sure to address any potential concerns that the reader might have with your use of the data. </li>\n<li>Would a reader have any concerns with the methodologies used to analyze this data? If so, can you <span style=\"font-style:italic;\">justify</span> your decisions for your reader?</li></ul>\n<p>These limitations typically appear in the methods section and in your conclusion/discussion section. </p>\n<p>In the <span style=\"font-weight:600;\">methods section</span>, you should: </p>\n<ul><li>justify your choices for your reader</li></ul>\n<p>In the <span style=\"font-weight:600;\">discussion section</span>, you should: </p>\n<ul><li>note limitations of your analysis to help researchers with future work</li></ul>\n<p>Populate this topic cluster with words and phrases specific to the methods you used. </p></body>",
+                    "description": "<body>\n<p>Consider a reader with experience in data analysis: how would you address their potential concerns with your statistical choices? </p>\n<ul><li><span style=\"font-weight:600;\">What types of data manipulation did you perform? </span>Be sure to address any potential concerns that the reader might have with your use of the data. </li>\n<li>Would a reader have any concerns with the methodologies used to analyze this data? If so, can you <span style=\"font-style:italic;\">justify</span> your decisions for your reader?</li></ul>\n<p>These limitations typically appear in the methods section and in your conclusion/discussion section. </p>\n<p>In the <span style=\"font-weight:600;\">methods section</span>, you should: </p>\n<ul><li>justify your choices for your reader</li>\n<li>what kinds of statistical tests did you run, and why were they appropriate for yor research questions? </li></ul>\n<p>In the <span style=\"font-weight:600;\">discussion section</span>, you should: </p>\n<ul><li>note limitations of your analysis to help researchers with future work</li></ul>\n<p>Populate this topic cluster with words and phrases specific to the methods you used. </p></body>",
                     "topics": [
                         {
                             "lemma": "Quality of Methods",
@@ -207,11 +220,10 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>When decsribing your data, your writing should aim to be neutral and transparent. Readers should easily be able to understand your dataset, and any concerns they may have about it should be answered in the methods section. </p>\n<p></p>\n<p>You should ensure that your reader understands your decisions to use particular techniques as the researcher/writer of this report. </p></body>",
                     "values": [
                         "credible",
                         "considerate",
-                        "compelling",
                         "ethical"
                     ],
                     "parent": "Describing concerns of the data & methods"
@@ -249,18 +261,17 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
+                    "cv_description": "<body>\n<p>To meet this expectation, your reader should be able to easily understand the main data story told by a figure. That data story should be carefully written to accurately and effectively describe the data trends and takeaways that you're noticing. These analyses should use language that addresses any questions about confidence in the results that readers might have. </p></body>",
                     "values": [
                         "credible",
                         "considerate",
-                        "compelling",
-                        "ethical"
+                        "compelling"
                     ],
                     "parent": "Statistical Analysis & Interpretation"
                 },
                 {
                     "name": "What can the reader learn from your statistical results?",
-                    "description": "<body>\n<p>The goal of this paper is to report and interpret the results of your inferential statistical analysis. What tests did you perform? What can you interpret from your results? </p>\n<p><span style=\"font-weight:600;\">Visualizations graphically summarize data for readers. But the text itself allows you to narrate that data</span>, reporting particularly <span style=\"font-style:italic;\">relevant data points</span> and focusing the reader's attention on <span style=\"font-style:italic;\">specific trends or findings. </span></p>\n<ul><li>What are the phrases you use to refer to the results in your figures? </li>\n<li>What verbs are you using to present your results?</li></ul></body>",
+                    "description": "<body>\n<p>The goal of this paper is to report and interpret the results of your inferential statistical analysis. What tests did you perform? What can you interpret from your results? </p>\n<p>In your <span style=\"font-weight:600;\">methods section</span>, you might discuss statistical methods and explain them to your readers. In<span style=\"font-weight:600;\"> results sections</span>, you might instead report and narrate the results of these methods and tests.</p>\n<p><span style=\"font-weight:600;\">Visualizations graphically summarize data for readers. But the text itself allows you to narrate that data</span>, reporting particularly <span style=\"font-style:italic;\">relevant data points</span> and focusing the reader's attention on <span style=\"font-style:italic;\">specific trends or findings. </span></p>\n<ul><li>What are the phrases you use to refer to the results in your figures? </li>\n<li>What verbs are you using to present your results?</li></ul></body>",
                     "topics": [
                         {
                             "lemma": "Statistical Results",
@@ -274,8 +285,6 @@
                                 "p-value",
                                 "reject",
                                 "significance ",
-                                "the mean",
-                                "the median",
                                 "the results of"
                             ],
                             "no_lexical_overlap": false
@@ -285,8 +294,12 @@
                     "type": "active",
                     "is_group": false,
                     "children": [],
-                    "cv_description": "<body>\n<p>N/A</p></body>",
-                    "values": [],
+                    "cv_description": "<body>\n<p>To meet this expectation, your reader should be able to easily understand the main data story told by your quantitative results. That data story should be carefully written to accurately and effectively describe the data trends and takeaways that you're noticing. These analyses should use language that addresses any questions about confidence in the results that readers might have. </p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling"
+                    ],
                     "parent": "Statistical Analysis & Interpretation"
                 }
             ],

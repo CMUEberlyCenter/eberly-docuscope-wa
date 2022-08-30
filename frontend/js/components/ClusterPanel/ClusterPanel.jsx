@@ -286,7 +286,7 @@ class ClusterPanel extends Component {
       let clusterList=this.props.ruleManager.listClustersForRule (this.props.currentRule,this.props.currentCluster);
       let clusterSentence=this.docuscopeTools.clusterListToSentence (clusterList);      
 
-      let defined="<p>Enter words and phrases associated with <b style=\"color: black;\">\"[replacer]\"</b> in the text field.</p> <br> <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>";
+      let defined="<p>Enter words and phrases associated with <b style=\"color: black;\">[replacer]</b> in the text field.</p> <br> <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>";
       let clean=defined;
       if (cluster!=null) {
         clean=defined.replace ("[replacer]", clusterSentence);

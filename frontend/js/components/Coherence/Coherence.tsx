@@ -64,9 +64,6 @@ const Legend = () => (
 // Using react-rxjs to get observable to act like hooks.
 // On locking text with some text present and the tool is clarity
 // emit the text.
-//const [useCoherenceText /*coherenceText$*/] = bind(combineLatest ({ text: lockedEditorText$, tool: currentTool$ }).pipe (filter((data) => data.tool === "coherence"), map((data) => data.text)),"");
-
-// On locking with text and tool is clarity, then emit text.
 const [useCoherenceText /*coherenceText$*/] = bind(
   combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
     filter((data) => data.tool === "coherence"),
@@ -124,7 +121,7 @@ const Coherence = (props: {
 
   let visualization;
 
-  visualization=<CoherencePanel setStatus={setStatus} data={data} local={local} text={text} showglobal={showToggle} />;  
+  visualization=<CoherencePanel setStatus={setStatus} data={data} local={local} text={text} showglobal={showToggle} ruleManager={props.ruleManager}/>;  
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
