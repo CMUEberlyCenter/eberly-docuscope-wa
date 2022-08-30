@@ -7,27 +7,28 @@
  * The text is the user's text either in an editor or in an interactive
  * area showing the results of tagging.
  * The tools are arranged in tabs.
- * There is also a optional third area for displaying additional information.
- * The three main areas can be resized by the user.
  * Editor text is also cached in sessionStorage.
  */
+import * as d3 from "d3";
 import React, {
   createRef,
   useCallback,
   useEffect,
   useId,
-  useState
+  useState,
 } from "react";
 import {
-  Alert,
+  Badge,
   Card,
   Container,
   Form,
   Nav,
   Navbar,
   NavDropdown,
+  OverlayTrigger,
+  Popover,
   Tab,
-  Tabs
+  Tabs,
 } from "react-bootstrap";
 import { createEditor, Descendant } from "slate";
 import {
@@ -35,51 +36,47 @@ import {
   RenderElementProps,
   RenderLeafProps,
   Slate,
-  withReact
+  withReact,
 } from "slate-react";
 import Clarity from "../../components/Clarity/Clarity";
 import Coherence from "../../components/Coherence/Coherence";
+import Divider from "../../components/Divider/Divider";
 import Expectations from "../../components/Expectations/Expectations";
 import Impressions from "../../components/Impressions/Impressions";
+import LockSwitch from "../../components/LockSwitch/LockSwitch";
+import DocuScopeAbout from "../../DocuScopeAbout";
+import DocuScopeReset from "../../DocuScopeReset";
+import { currentTool } from "../../service/current-tool.service";
 import {
   editorState,
   editorText,
-  useEditorState
+  useEditorState,
 } from "../../service/editor-state.service";
-import LockSwitch from "../../components/LockSwitch/LockSwitch";
-import { useTaggerResults, isTaggerResult } from "../../service/tagger.service";
-import * as d3 from "d3";
-import { currentTool } from "../../service/current-tool.service";
-import Divider from "../../components/Divider/Divider";
-import DocuScopeAbout from '../../DocuScopeAbout';
-import DocuScopeReset from '../../DocuScopeReset';
-import TopicHighlighter  from "../../TopicHighlighter";
+import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
+import TopicHighlighter from "../../TopicHighlighter";
 
-import "./StudentView.scss";
 import "../../../css/topics.css";
+import "./StudentView.scss";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleUp, faAngleDown, faSearch, faCalendarCheck, faGlobe, faBook } from '@fortawesome/free-solid-svg-icons'
+import { faBook, faGlobe } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { HelpModal } from "../../components/HelpDialogs/HelpModal";
-import { showHelp, showGettingStarted, showTroubleshooting } from "../../service/help.service";
-import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
 import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
+import { HelpModal } from "../../components/HelpDialogs/HelpModal";
+import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
+import {
+  showGettingStarted,
+  showHelp,
+  showTroubleshooting,
+} from "../../service/help.service";
 
 // The imports below are purely to support the serialize function. Should probably import
 // from service
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  map,
-} from 'rxjs';
-import { Node } from 'slate';
+import { Node } from "slate";
 
 // Should probably import from the service
 const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
+  return nodes.map((n: Descendant) => Node.string(n)).join("\n\n");
 };
 
 /**
@@ -115,13 +112,12 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = (props: { 
-    api: apiCall,
-    ruleManager: any,
-    html: string
-  }) => {
-
-  const topicHighlighter=new TopicHighlighter ();
+const StudentView = (props: {
+  api: apiCall;
+  ruleManager: any;
+  html: string;
+}) => {
+  const topicHighlighter = new TopicHighlighter();
 
   // Status handlers
   const [status, setStatus] = useState("Application ready, rules loaded");
@@ -129,55 +125,48 @@ const StudentView = (props: {
 
   const navId = useId();
   const selectId = useId();
-  const [showInfoColumn, setShowInfoColumn] = useState(false);
   //const [status, setStatus] = useState('');
   const [currentTab, setCurrentTab] = useState<string | null>(null);
   // on tab switch update current and broadcast.
   const switchTab = (key: string | null) => {
     setCurrentTab(key);
     currentTool.next(key);
-    topicHighlighter.clearAllHighlights ();
+    topicHighlighter.clearAllHighlights();
   };
   const [editor] = useState(() => withReact(createEditor()));
   const editable = useEditorState();
   // Set initial value to stored session data or empty.
   const [editorValue, setEditorValue] = useState<Descendant[]>(
-    JSON.parse(sessionStorage.getItem('content') ?? 'null') ||
-    [
+    // get from session storage
+    JSON.parse(sessionStorage.getItem("content") ?? "null") || [
+      // or "empty" editor text
       {
         type: "paragraph",
         children: [{ text: "" }],
       },
-    ]);
+    ]
+  );
 
-  const [editorTextValue, setEditorTextValue] = useState <string> ("");
+  const [editorTextValue, setEditorTextValue] = useState<string>("");
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
     // Necessary for analysis tool to receive the initial
     // text value.
-    const content = sessionStorage.getItem('content');
+    const content = sessionStorage.getItem("content");
     if (content) {
       editorText.next(JSON.parse(content));
-      setEditorTextValue (serialize(JSON.parse(content)));
+      setEditorTextValue(serialize(JSON.parse(content)));
     }
   }, []); // [] dependency means this runs only once.
 
   // Resize panels
   const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
-  const [rightWidth, setRightWidth] = useState<undefined | number>(undefined);
   const [toolSeparatorXPosition, setToolSeparatorXPosition] = useState<
     undefined | number
   >(undefined);
-
   const [toolSeparatorDragging, setToolSeparatorDragging] = useState(false);
-  const [rightSeparatorXPosition, setRightSeparatorXPosition] = useState<
-    undefined | number
-  >(undefined);
-
-  const [rightSeparatorDragging, setRightSeparatorDragging] = useState(false);
   const toolRef = createRef<HTMLDivElement>();
-  const rightRef = createRef<HTMLDivElement>();
 
   const onMouseDownTool = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -191,52 +180,25 @@ const StudentView = (props: {
     setToolSeparatorDragging(true);
   };
 
-  const onMouseDownRight = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    setRightSeparatorXPosition(e.clientX);
-    setRightSeparatorDragging(true);
-  };
-
-  const onTouchStartRight = (event: React.TouchEvent<HTMLDivElement>) => {
-    setRightSeparatorXPosition(event.touches[0].clientX);
-    setRightSeparatorDragging(true);
-  };
-
   const onMove = useCallback(
     (clientX: number) => {
       if (toolSeparatorDragging && toolWidth && toolSeparatorXPosition) {
         const width = toolWidth + clientX - toolSeparatorXPosition;
         setToolSeparatorXPosition(clientX);
         setToolWidth(width);
-      } else if (
-        rightSeparatorDragging &&
-        rightWidth &&
-        rightSeparatorXPosition
-      ) {
-        const width = rightWidth - clientX + rightSeparatorXPosition;
-        setRightSeparatorXPosition(clientX);
-        setRightWidth(width);
       }
     },
-    [
-      rightSeparatorDragging,
-      rightSeparatorXPosition,
-      rightWidth,
-      toolSeparatorDragging,
-      toolSeparatorXPosition,
-      toolWidth,
-    ]
+    [toolSeparatorDragging, toolSeparatorXPosition, toolWidth]
   );
 
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
-      if (toolSeparatorDragging || rightSeparatorDragging) {
+      if (toolSeparatorDragging) {
         e.preventDefault;
       }
       onMove(e.clientX);
     },
-    [toolSeparatorDragging, rightSeparatorDragging, onMove]
+    [toolSeparatorDragging, onMove]
   );
 
   const onTouchMove = useCallback(
@@ -252,21 +214,7 @@ const StudentView = (props: {
         toolRef.current.style.width = `${toolWidth}px`;
       }
     }
-    if (rightSeparatorDragging) {
-      setRightSeparatorDragging(false);
-      if (rightRef.current) {
-        setRightWidth(rightRef.current.clientWidth);
-        rightRef.current.style.width = `${rightWidth}px`;
-      }
-    }
-  }, [
-    rightRef,
-    rightSeparatorDragging,
-    rightWidth,
-    toolRef,
-    toolSeparatorDragging,
-    toolWidth,
-  ]);
+  }, [toolRef, toolSeparatorDragging, toolWidth]);
 
   useEffect(() => {
     document.addEventListener("mousemove", onMouseMove);
@@ -288,16 +236,6 @@ const StudentView = (props: {
       toolRef.current.style.width = `${toolWidth}px`;
     }
   }, [toolRef, toolWidth]);
-
-  useEffect(() => {
-    if (rightRef.current) {
-      if (!rightWidth) {
-        setRightWidth(rightRef.current.clientWidth);
-        return;
-      }
-      rightRef.current.style.width = `${rightWidth}px`;
-    }
-  }, [rightRef, rightWidth]);
 
   // Rendering elements in the editor.
   const renderElement = useCallback(
@@ -349,23 +287,14 @@ const StudentView = (props: {
 
   // Tool bar menu handler.
   const onNavSelect = (eventKey: string | null) => {
-    if (eventKey === "showTopicClusters") {
-      setShowInfoColumn(!showInfoColumn);
-      return;
-    }
-
     if (eventKey === "resetData") {
-      setShowReset (true);
+      setShowReset(true);
     }
 
     if (eventKey === "resetView") {
       if (toolRef.current) {
         toolRef.current.style.width = "";
         setToolWidth(toolRef.current.clientWidth);
-      }
-      if (rightRef.current) {
-        rightRef.current.style.width = "";
-        setRightWidth(rightRef.current.clientWidth);
       }
       return;
     }
@@ -376,7 +305,7 @@ const StudentView = (props: {
     }
 
     if (eventKey === "showAbout") {
-      setShowAbout (true);
+      setShowAbout(true);
       return;
     }
 
@@ -386,16 +315,17 @@ const StudentView = (props: {
     }
 
     if (eventKey === "showTroubleshooting") {
-      console.log('showTrouble');
+      console.log("showTrouble");
       showTroubleshooting(true);
       return;
-    }    
+    }
   };
 
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Mike's panel)
-  const showTaggedText = (currentTab === "impressions") && (!editable) && (isTaggerResult(tagging));
+  const showTaggedText =
+    currentTab === "impressions" && !editable && isTaggerResult(tagging);
   let showOnTopicText = false;
 
   const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
@@ -403,33 +333,57 @@ const StudentView = (props: {
   let topicTaggedContent;
 
   // Every other panel that needs it. We'll clean up the logic later
-  if (showTaggedText==false) {  
-    showOnTopicText = (currentTab === "coherence") && (!editable) && (props.html!=null);
-    if (showOnTopicText==false) {
-      showOnTopicText = (currentTab === "clarity") && (!editable) && (props.html!=null);
+  if (showTaggedText == false) {
+    showOnTopicText =
+      currentTab === "coherence" && !editable && props.html != null;
+    if (showOnTopicText == false) {
+      showOnTopicText =
+        currentTab === "clarity" && !editable && props.html != null;
     }
   }
 
-  if (showOnTopicText==true) {
-    topicTaggedContent = <div
-      className="tagged-text"
-      dangerouslySetInnerHTML={{ __html: props.html }}></div>;
+  if (showOnTopicText == true) {
+    topicTaggedContent = (
+      <div
+        className="tagged-text"
+        dangerouslySetInnerHTML={{ __html: props.html }}
+      ></div>
+    );
   }
-  
+
   // Special rendering of tagger results.
   const taggedText = (
     <React.Fragment>
-      <h4>Tagged Text:</h4>
-      <Alert variant="info">
-        Please note that this is how DocuScope sees your text and it might
-        appear slightly different than your text, toggle the &quot;Edit
-        Mode&quot; to see your original text.
-        <br />
-        In the tagged text, you can click on words and phrases to see its
-        category tag. Not all words or phrases have tags. Selecting a category
-        from the Dictionary Categories tree will highlight all of the instances
-        of the selected categories in the tagged text.
-      </Alert>
+      <div className="d-flex align-items-start">
+        <h4>Tagged Text:&nbsp;</h4>
+        <OverlayTrigger
+          trigger="hover"
+          placement="right"
+          overlay={
+            <Popover>
+              <Popover.Header as="h3">Notes on Usage</Popover.Header>
+              <Popover.Body>
+                <p>
+                  Please note that this is how DocuScope sees your text and it
+                  might appear slightly different than your text, toggle the
+                  &quot;Edit Mode&quot; to see your original text.
+                </p>
+                <p>
+                  In the tagged text, you can click on words and phrases to see
+                  its category tag. Not all words or phrases have tags.
+                  Selecting a category from the Dictionary Categories tree will
+                  highlight all of the instances of the selected categories in
+                  the tagged text.
+                </p>
+              </Popover.Body>
+            </Popover>
+          }
+        >
+          <Badge bg="info">
+            <i className="fa-solid fa-info" />
+          </Badge>
+        </OverlayTrigger>
+      </div>
       <div
         className="tagged-text"
         onClick={(evt) => click_select(evt)}
@@ -438,24 +392,23 @@ const StudentView = (props: {
     </React.Fragment>
   );
 
-  let infocolumn;
-
-  if (showInfoColumn==true) {
-    infocolumn=<div className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden ds-info"></div>;
-  }
-
   //>--------------------------------------------------------
 
   const [showAbout, setShowAbout] = useState(false);
 
   let about;
 
-  const onCloseAboutPage = () => {    
-    setShowAbout (false);
+  const onCloseAboutPage = () => {
+    setShowAbout(false);
   };
 
-  if (showAbout==true) {
-    about=<DocuScopeAbout onCloseAboutPage={onCloseAboutPage} ruleManager={props.ruleManager}/>;
+  if (showAbout == true) {
+    about = (
+      <DocuScopeAbout
+        onCloseAboutPage={onCloseAboutPage}
+        ruleManager={props.ruleManager}
+      />
+    );
   }
 
   //>--------------------------------------------------------
@@ -464,19 +417,19 @@ const StudentView = (props: {
 
   let reset;
 
-  const onCloseResetDialog = (afirm: boolean) => {    
-    setShowReset (false);
-    if (afirm==true) {
+  const onCloseResetDialog = (afirm: boolean) => {
+    setShowReset(false);
+    if (afirm == true) {
       // Reset the data from the template
-      props.ruleManager.reset ();
+      props.ruleManager.reset();
 
       // Reset the interface
-      switchTab ("expectations");
+      switchTab("expectations");
     }
   };
 
-  if (showReset==true) {
-    about=<DocuScopeReset onCloseResetDialog={onCloseResetDialog}/>;
+  if (showReset == true) {
+    about = <DocuScopeReset onCloseResetDialog={onCloseResetDialog} />;
   }
 
   //>--------------------------------------------------------
@@ -485,19 +438,23 @@ const StudentView = (props: {
 
   let paragraphselector;
 
-  if (showParagraphSelector==true) {
-    paragraphselector=<Form.Group>
+  if (showParagraphSelector == true) {
+    paragraphselector = (
+      <Form.Group>
         <Form.Select>
           {[1, 2, 3].map((num) => (
-            <option key={`${selectId}-${num}`} value={num}>{num}</option>
+            <option key={`${selectId}-${num}`} value={num}>
+              {num}
+            </option>
           ))}
         </Form.Select>
-      </Form.Group>;
+      </Form.Group>
+    );
   } else {
-    paragraphselector=<div className="spacer"></div>;
+    paragraphselector = <div className="spacer"></div>;
   }
 
-  //>--------------------------------------------------------  
+  //>--------------------------------------------------------
 
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
@@ -511,24 +468,24 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <Nav.Link eventKey={"resetData"}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
-                  <NavDropdown.Item
-                    disabled={true}
-                    eventKey={"showTopicClusters"}
-                    active={showInfoColumn}
-                    aria-current={showInfoColumn}
-                  >
-                    Topic Clusters
-                  </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"resetView"} active={false}>
                     Reset View
                   </NavDropdown.Item>
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
-                  <NavDropdown.Item eventKey={"showHelp"}>Show Help</NavDropdown.Item>
-                  <NavDropdown.Item eventKey={"showGettingStarted"}>Getting Started</NavDropdown.Item>
-                  <NavDropdown.Item eventKey={"showTroubleshooting"}>Troubleshooting</NavDropdown.Item>                                    
-                  <NavDropdown.Item eventKey={"showAbout"}>About</NavDropdown.Item>
-                </NavDropdown>                
+                  <NavDropdown.Item eventKey={"showHelp"}>
+                    Show Help
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showGettingStarted"}>
+                    Getting Started
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showTroubleshooting"}>
+                    Troubleshooting
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey={"showAbout"}>
+                    About
+                  </NavDropdown.Item>
+                </NavDropdown>
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -538,7 +495,11 @@ const StudentView = (props: {
         <aside ref={toolRef} className="d-flex flex-column tools-pane">
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab eventKey={"expectations"} title="Expectations">
-              <Expectations api={props.api} ruleManager={props.ruleManager} editorValue={editorTextValue} />
+              <Expectations
+                api={props.api}
+                ruleManager={props.ruleManager}
+                editorValue={editorTextValue}
+              />
             </Tab>
             <Tab eventKey={"coherence"} title="Coherence">
               <Coherence api={props.api} ruleManager={props.ruleManager} />
@@ -557,7 +518,7 @@ const StudentView = (props: {
           onTouchEnd={onMouseUp}
           onTouchStart={onTouchStartTool}
         />
-        
+
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
@@ -571,43 +532,56 @@ const StudentView = (props: {
             {showTaggedText ? taggedText : ""}
             {topicTaggedContent}
             <Slate
-                editor={editor}
-                value={editorValue}
-                onChange={(content: Descendant[]) => {
-                  // only if change is not selection change.
-                  if (editor.operations.some(op => 'set_selection' !== op.type)) {
-                    editorText.next(content);
-                    setEditorValue(content);
-                    setEditorTextValue (serialize(content));
-                    sessionStorage.setItem('content', JSON.stringify(content));
-                  }
-                }}
-              >
-                <Editable
-                  className={(showTaggedText || showOnTopicText) ? "d-none" : ""}
-                  readOnly={!editable}
-                  renderElement={renderElement}
-                  renderLeaf={renderLeaf}
-                  placeholder={
-                    editable
-                      ? "Enter some text..."
-                      : "Unlock and enter some text..."
-                  }
-                />
-              </Slate>
+              editor={editor}
+              value={editorValue}
+              onChange={(content: Descendant[]) => {
+                // only if change is not selection change.
+                if (
+                  editor.operations.some((op) => "set_selection" !== op.type)
+                ) {
+                  editorText.next(content);
+                  setEditorValue(content);
+                  setEditorTextValue(serialize(content));
+                  sessionStorage.setItem("content", JSON.stringify(content));
+                }
+              }}
+            >
+              <Editable
+                className={showTaggedText || showOnTopicText ? "d-none" : ""}
+                readOnly={!editable}
+                renderElement={renderElement}
+                renderLeaf={renderLeaf}
+                placeholder={
+                  editable
+                    ? "Enter some text..."
+                    : "Unlock and enter some text..."
+                }
+              />
+            </Slate>
           </Card.Body>
         </Card>
-        {infocolumn}
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
-        <div className="statusbar-ruleversion"><FontAwesomeIcon icon={faBook} style={{marginLeft: "2px", marginRight: "2px"}} />{props.ruleManager.getVersion ()}</div>
-        <div className="statusbar-language"><FontAwesomeIcon icon={faGlobe} style={{marginLeft: "2px", marginRight: "2px"}} />{language}</div>
+        <div className="statusbar-ruleversion">
+          <FontAwesomeIcon
+            icon={faBook}
+            style={{ marginLeft: "2px", marginRight: "2px" }}
+          />
+          {props.ruleManager.getVersion()}
+        </div>
+        <div className="statusbar-language">
+          <FontAwesomeIcon
+            icon={faGlobe}
+            style={{ marginLeft: "2px", marginRight: "2px" }}
+          />
+          {language}
+        </div>
       </footer>
       {about}
-      <HelpModal/>
-      <GettingStartedModal/>
-      <TroubleshootingModal/>
+      <HelpModal />
+      <GettingStartedModal />
+      <TroubleshootingModal />
     </div>
   );
 };
