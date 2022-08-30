@@ -408,20 +408,17 @@ const CategoryTreeTop = () => {
     setRefresh(!refresh);
   };
   return data ? (
-    <React.Fragment>
-      <h3 className="mt-2">Dictionary Categories</h3>
-      <ul className="impressions-category-tree list-group">
-        {data &&
-          data.map((cat) => (
-            <CategoryNode
-              key={cat.id}
-              data={cat}
-              ancestors={[]}
-              onChange={onChange}
-            />
-          ))}
-      </ul>
-    </React.Fragment>
+    <ul className="impressions-category-tree list-group">
+      {data &&
+        data.map((cat) => (
+          <CategoryNode
+            key={cat.id}
+            data={cat}
+            ancestors={[]}
+            onChange={onChange}
+          />
+        ))}
+    </ul>
   ) : (
     <div />
   );

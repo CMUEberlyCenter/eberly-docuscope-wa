@@ -16,7 +16,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Spinner } from "react-bootstrap";
+import { Badge, OverlayTrigger, Popover, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
 import {
@@ -357,7 +357,34 @@ const SunburstChart = (props: SunburstChartProps) => (
     {/* contain component errors to component! */}
     <Suspense fallback={<Spinner animation={"border"} />}>
       <Subscribe>
-        <SunburstFigure {...props} />
+        <div className="d-flex align-items-start">
+          <SunburstFigure {...props} />
+          <OverlayTrigger
+            trigger="hover"
+            placement="right"
+            overlay={
+              <Popover>
+                <Popover.Header as="h3">Notes on Usage</Popover.Header>
+                <Popover.Body>
+                  <ul>
+                    <li>
+                      Hover over wedges to get more informaion about the
+                      category it represents.
+                    </li>
+                    <li>Click on a wedge in the diagram to zoom to it.</li>
+                    <li>
+                      Click in the center of the diagram to zoom out one level.
+                    </li>
+                  </ul>
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Badge bg="info">
+              <i className="fa-solid fa-info" />
+            </Badge>
+          </OverlayTrigger>
+        </div>
       </Subscribe>
     </Suspense>
   </ErrorBoundary>

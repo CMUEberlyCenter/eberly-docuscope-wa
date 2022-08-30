@@ -8,7 +8,7 @@
  */
 import { Subscribe } from "@react-rxjs/core";
 import * as React from "react";
-import { Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
+import { Accordion, Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {
   useEditorState,
@@ -45,7 +45,7 @@ const Impressions = () => {
       <div className="alert alert-warning m-5 shadow d-flex align-items-center">
         <span className="material-icons">warning</span>
         <span className="ms-1">
-          These tools is not valid when editing is enabled or there is no
+          These tools are not valid when editing is enabled or there is no text
           content.
         </span>
       </div>
@@ -83,12 +83,32 @@ const Impressions = () => {
         <ErrorBoundary FallbackComponent={ImpressionsErrorFallback}>
           <React.Suspense fallback={<Spinner animation={"border"} />}>
             <Subscribe>
-              <div className="impressions-content flex-grow-1 p-3">
-                {/* If no other content, show the sunburst chart. */}
-                {content ?? <SunburstChart width={400} />}
-                {/* Always show the category tree. It shows the
-                    common dictionary even if there is no tagger data */}
-                <CategoryTree />
+              <div className="impressions-content flex-grow-1 p-1">
+                {content}
+                <Accordion defaultActiveKey="categories" alwaysOpen>
+                  <Accordion.Item eventKey="sunburst">
+                    <Accordion.Header>
+                      <h4>Sunburst Chart</h4>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      {content ? (
+                        <span className="alert alert-warning shadow m-2">
+                          No valid data to chart.
+                        </span>
+                      ) : (
+                        <SunburstChart width={400} />
+                      )}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                  <Accordion.Item eventKey="categories">
+                    <Accordion.Header>
+                      <h4>Dictionary Categories</h4>
+                    </Accordion.Header>
+                    <Accordion.Body>
+                      <CategoryTree />
+                    </Accordion.Body>
+                  </Accordion.Item>
+                </Accordion>
               </div>
             </Subscribe>
           </React.Suspense>
