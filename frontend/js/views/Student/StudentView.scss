@@ -18,13 +18,17 @@ $cmu-secondary-gold: #a60;
 }
 
 .editor-pane {
-  max-width: 6.5in; // preference expressed during DocuScope classroom development.
+  //max-width: 6.5in; // preference expressed during DocuScope classroom development.
+  max-width: calc(100% - 390px); // needed for resizing
   min-width: 4in;
+  width: 6.5in;
 }
 .tools-pane {
-  max-width: 52rem; // based on legend size
+  //max-width: 52rem; // based on legend size
+  max-width: calc(100% - 4in); // needed for resizing
   min-width: 390px;
-  width: 390px;
+  width: calc(100% - 6.5in);
+  //width: 390px;
 }
 
 .tab-content {
@@ -75,9 +79,4 @@ $cmu-secondary-gold: #a60;
   min-width: 75px;
   padding: 0px 2px 0px 2px;
   text-align: right;
-}
-
-.ds-info {
-  width: 150px;
-  border: 1px solid red;
 }
