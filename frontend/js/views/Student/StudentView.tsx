@@ -118,7 +118,8 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
 const StudentView = (props: { 
     api: apiCall,
     ruleManager: any,
-    html: string
+    html: string,
+    htmlSentences: string
   }) => {
 
   const topicHighlighter=new TopicHighlighter ();
@@ -544,7 +545,7 @@ const StudentView = (props: {
               <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
             <Tab eventKey={"clarity"} title="Clarity">
-              <Clarity api={props.api} ruleManager={props.ruleManager} />
+              <Clarity api={props.api} ruleManager={props.ruleManager} htmlSentences={props.htmlSentences} />
             </Tab>
             <Tab eventKey={"impressions"} title="Impressions">
               <Impressions />

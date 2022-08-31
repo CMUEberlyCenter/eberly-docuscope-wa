@@ -54,6 +54,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     this.state = {
       state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTING,
       html: null,
+      htmlSentences: null,
       progress: 0,
       progressTitle: "Loading ...",
       globallyDisabled: false,
@@ -161,7 +162,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
       if (resetState) {
         badThat.setState ({
           badUpdatecounter: Math.floor(Math.random() * 10000),
-          html: null
+          html: null,
+          htmlSentences: null
         }); 
       } else {
         badThat.setState ({
@@ -218,8 +220,15 @@ export default class DocuScopeWA extends EberlyLTIBase {
         } else {
           if (raw.data.html) {
             let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
-            //console.log (html);
-            that.setState ({html: html});
+            let html_sentences=null;
+            if (raw.data.html_sentences) {
+              html_sentences=that.docuscopeTools.cleanAndRepairHTMLSentenceData (raw.data.html_sentences);
+            }
+
+            that.setState ({
+              html: html,
+              htmlSentences: html_sentences
+            });
           }
 
           resolve (raw.data);
@@ -255,8 +264,15 @@ export default class DocuScopeWA extends EberlyLTIBase {
         } else {
           if (raw.data.html) {
             let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
-            //console.log (html);
-            that.setState ({html: html});
+            let html_sentences=null;
+            if (raw.data.html_sentences) {
+              html_sentences=that.docuscopeTools.cleanAndRepairHTMLSentenceData (raw.data.html_sentences);
+            }
+
+            that.setState ({
+              html: html,
+              htmlSentences: html_sentences
+            });
           }
 
           resolve (raw.data);
@@ -403,7 +419,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
-      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} html={this.state.html}></StudentView></DocuScopeWAScrim>;
+      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} html={this.state.html} htmlSentences={this.state.htmlSentences}></StudentView></DocuScopeWAScrim>;
     }
 
     return (mainPage);

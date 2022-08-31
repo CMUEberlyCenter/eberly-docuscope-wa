@@ -35,7 +35,8 @@ const ClarityErrorFallback = (props: { error?: Error }) => (
 
 const Clarity = (props: { 
     api: apiCall,
-    ruleManager: any
+    ruleManager: any,
+    htmlSentences: string
   }) => {
   const [status, setStatus] = useState("");
   const [data, setClarityData] = useState<unknown>(null);
@@ -55,19 +56,7 @@ const Clarity = (props: {
       const encoded = window.btoa(escaped);
 
       props.api("ontopic", { custom: "", base: encoded }, "POST").then((incoming : any) => {
-        //console.log ("Processing incoming clarity data ...");
-        //console.log (incoming);
-
         const clarityData=incoming.clarity;
-
-        //console.log (clarityData);
-
-        //const decoded = window.atob(incoming.html);
-
-        /*
-        console.log (incoming.clarity);
-        console.log (sentenceData);
-        */
 
         setClarityData(clarityData);
 
@@ -78,7 +67,7 @@ const Clarity = (props: {
 
   let visualization;
 
-  visualization=<DocuScopeOnTopic setStatus={setStatus} sentences={data} text={text} />;
+  visualization=<DocuScopeOnTopic setStatus={setStatus} sentences={data} text={text} htmlSentences={props.htmlSentences}/>;
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">

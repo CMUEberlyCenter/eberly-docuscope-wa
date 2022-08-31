@@ -5601,3 +5601,98 @@ class DSDocument():
         self.topic_location_dict = dict()
         for topic in topics:
             self.topic_location_dict[topic] = locateATopic(topic)
+
+    def getHtmlSents(self, data):
+        """
+        This method returns a list that contains a set of lists. Each contains a set of sentences
+        in HTML formatted for the Clarity panel.
+        """
+
+        def generate_html(sent_data, sent_pos, word_pos_offset):
+
+            if type(sent_data) == str and sent_data == "\n":
+                return ""
+
+            np_positions = list()
+            analysis = sent_data[2]
+            is_be_verb = analysis['BE_VERB']
+
+            def getNPTag(wpos):
+                for pos in np_positions:
+                    if wpos == pos[0]:
+                        if is_be_verb:
+                                return "<b class=\"topic-text;\">"
+                        else:
+                            return "<b class=\"topic-text;\";>"                        
+                    elif wpos == pos[1]:
+                        return "</b>"
+                return ""
+
+            for np in analysis['NOUN_CHUNKS']:
+                np_positions.append((np['start'], np['end']))
+
+            wpos = 0
+            sent_dict = sent_data[3]
+
+            html_str = "<p class=\"non-topic-text;\">"
+
+            if is_be_verb:
+                verb_class = "be-verb"
+            else:
+                verb_class = "active-verb"
+
+            for w in sent_dict['text_w_info']:
+                wpos = w[WORD_POS] - word_pos_offset - sent_pos
+                word = w[WORD]
+
+                if word in right_quotes or word in end_puncts:
+                    html_str = html_str[:-1]
+                elif word == "%":
+                    html_str = html_str[:-1]                
+
+                html_str += getNPTag(wpos)
+                if w[DEP] == 'ROOT':
+                    html_str += "<span class=\"{};\"><b><u>{}</u></b></span>".format(verb_class, w[WORD])
+                else:
+                    html_str += word
+
+                if word not in left_quotes and word not in hyphen_slash:
+                    html_str += " "
+
+                wpos += 1            
+
+            html_str += "</p>"
+
+            return html_str
+
+        # 
+        res = list()
+        first_word_pos = 0
+        first_sent = True
+        sent_pos = 0
+        para_count = 1
+
+        for sent_data in data:
+
+            if type(sent_data[0]) == str and sent_data[0] == '\n': 
+                if para_count != 1:
+                    res.append(html_strs)
+                para_count += 1
+                html_strs = list()
+                
+            elif type(sent_data[0]) != str and first_sent:
+                sent_dict = sent_data[3]
+
+                w = sent_dict['text_w_info'][0] # get the first word
+                first_word_pos = w[WORD_POS]
+
+            html_strs.append(generate_html(sent_data, sent_pos, first_word_pos))
+
+            if type(sent_data[0]) == str and sent_data[0] == '\n':    # paragraph break
+                first_sent = True
+                sent_pos = 0
+            else:
+                first_sent = False
+                sent_pos += 1
+
+        return res

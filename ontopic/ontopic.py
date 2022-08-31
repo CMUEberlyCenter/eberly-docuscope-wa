@@ -132,10 +132,14 @@ class OnTopic:
     clarity=document.getSentStructureData()
     topics=document.getCurrentTopics ()
     html=document.toHtml_OTOnly_DSWA(topics,-1)
+    html_sentences=document.getHtmlSents (clarity);
 
     # https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
-    html_bytes = html.encode('utf-8')
-    html_base64 = base64.b64encode(html_bytes)
+    #html_bytes = html.encode('utf-8')
+    #html_base64 = base64.b64encode(html_bytes)
+    #html_base64 = base64.b64encode(html.encode('utf-8'));
+
+    #print (html_sentences)
 
     # If there is not enough text to process or if there aren't enough results the coherence data might
     # result to be: {'error': 'ncols is 0'}
@@ -153,10 +157,7 @@ class OnTopic:
     for i in range(nrParagraphs):
       localSelected=[];
       localSelected.append(i+1);
-      print ("Processing paragraph " + str(i+1) + ", with selected paragraph: " + str (localSelected));
       localDict=document.generateLocalVisData (localSelected,1,2);
-      print (localDict);
-      #local.append (json.dumps(localDict));
       local.append (localDict);
 
     #print ("Found coherence data: ")
@@ -179,7 +180,9 @@ class OnTopic:
     data['coherence'] = json.loads(json.dumps(coherence))
     data['local'] = local
     data['clarity'] = json.loads(json.dumps(clarity))
-    data['html'] = html_base64.decode("utf-8")
+    data['html'] = base64.b64encode(html.encode('utf-8')).decode("utf-8")
+    #data['html_sentences'] = base64.b64encode(html_sentences.encode('utf-8')).decode("utf-8")
+    data['html_sentences'] = json.loads(json.dumps(html_sentences))
 
     #print ("data: ")
     #print (data)

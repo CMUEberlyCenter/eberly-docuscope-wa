@@ -135,4 +135,30 @@ export default class DocuScopeTools {
 
     return (sentence);
   }
+
+  /**
+   * 
+   */
+  cleanAndRepairHTMLSentenceData (aData) {
+    console.log ("cleanAndRepairHTMLSentenceData ()");
+ 
+    for (let i=0;i<aData.length;i++) {
+      let aParagraph=aData [i];
+
+      let clean=false;
+      while (clean==false) {
+        clean=true;
+
+        for (let j=0;j<aParagraph.length;j++) {
+          if (aParagraph [j]=="") {
+            aParagraph.splice (j,1);
+            clean=false;
+            break;
+          }
+        }
+      }
+    }
+
+    return (aData);
+  }
 }
