@@ -96,7 +96,7 @@ const Impressions = () => {
                           No valid data to chart.
                         </span>
                       ) : (
-                        <SunburstChart width={400} />
+                        <SunburstChart width={500} />
                       )}
                     </Accordion.Body>
                   </Accordion.Item>
