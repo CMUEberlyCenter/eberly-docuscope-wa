@@ -369,7 +369,7 @@ const SunburstChart = (props: SunburstChartProps) => (
                 <Popover.Body>
                   <ul>
                     <li>
-                      Hover over wedges to get more informaion about the
+                      Hover over wedges to get more information about the
                       category it represents.
                     </li>
                     <li>Click on a wedge in the diagram to zoom to it.</li>
