@@ -263,7 +263,7 @@ class CoherencePanel extends Component {
       let clusters=this.props.ruleManager.clusters;
 
       for (let i=0;i<clusters.length;i++) {
-        topicElements.push (<tr key={"topic-key-0"}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,i)}>{clusters [i].name}</div></td><td>&nbsp;</td></tr>)
+        topicElements.push (<tr key={`topic-key-${i}`}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,i)}>{clusters [i].name}</div></td><td>&nbsp;</td></tr>)
       }
     }
 

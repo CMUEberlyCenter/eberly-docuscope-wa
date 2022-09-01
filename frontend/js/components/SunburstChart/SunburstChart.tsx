@@ -248,6 +248,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
   const root = useSunbrustData(); // changes on new tagging data
   const editing = useEditorState(); // changes on editor state
   const [parent, setParent] = useState(root);
+  const figureRef = useRef<HTMLDivElement>(null);
   const wedgeRef = useRef(null);
   const labelRef = useRef(null);
   const width = props.width ?? 300;
@@ -286,7 +287,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .join(" > ");
 
   return (
-    <figure
+    <figure ref={figureRef}
       {...props}
       className={`sunburst-chart ${
         editing || parent === null ? "placeholder w-100" : ""
@@ -360,7 +361,7 @@ const SunburstChart = (props: SunburstChartProps) => (
         <div className="d-flex align-items-start">
           <SunburstFigure {...props} />
           <OverlayTrigger
-            trigger="hover"
+            trigger="focus"
             placement="right"
             overlay={
               <Popover>
