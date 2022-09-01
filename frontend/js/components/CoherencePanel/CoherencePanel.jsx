@@ -479,7 +479,7 @@ class CoherencePanel extends Component {
       paraElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onParagraphClick (e,i)}>{""+(i+1)}</div>);
     }
 
-    paraElements.push (<div className="paragraph-padding"></div>);
+    paraElements.push (<div key={"key-paragraph-padding"} className="paragraph-padding"></div>);
 
     return (<div className="paragraph-row">{paraElements}</div>);
   }
