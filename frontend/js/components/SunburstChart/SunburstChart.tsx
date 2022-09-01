@@ -287,7 +287,8 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .join(" > ");
 
   return (
-    <figure ref={figureRef}
+    <figure
+      ref={figureRef}
       {...props}
       className={`sunburst-chart ${
         editing || parent === null ? "placeholder w-100" : ""
