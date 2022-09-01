@@ -359,7 +359,6 @@ const StudentView = (props: {
       <div className="d-flex align-items-start">
         <h4>Tagged Text:&nbsp;</h4>
         <OverlayTrigger
-          trigger="focus"
           placement="right"
           overlay={
             <Popover>

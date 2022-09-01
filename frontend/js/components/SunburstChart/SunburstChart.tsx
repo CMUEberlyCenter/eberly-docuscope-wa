@@ -361,7 +361,6 @@ const SunburstChart = (props: SunburstChartProps) => (
         <div className="d-flex align-items-start">
           <SunburstFigure {...props} />
           <OverlayTrigger
-            trigger="focus"
             placement="right"
             overlay={
               <Popover>
