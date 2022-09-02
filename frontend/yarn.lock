@@ -2168,6 +2168,14 @@
     "magic-string" "^0.26.2"
     "react-refresh" "^0.14.0"
 
+"@vitest/coverage-c8@^0.22.1":
+  "integrity" "sha512-KOOYpO7EGpaF+nD8GD+Y05D0JtZp12NUu6DdLXvBPqSOPo2HkZ7KNBtfR0rb6gOy3NLtGiWTYTzCwhajgb2HlA=="
+  "resolved" "https://registry.npmjs.org/@vitest/coverage-c8/-/coverage-c8-0.22.1.tgz"
+  "version" "0.22.1"
+  dependencies:
+    "c8" "^7.12.0"
+    "vitest" "0.22.1"
+
 "@webassemblyjs/ast@1.11.1":
   "integrity" "sha512-ukBh14qFLjxTQNTXocdyksN5QdM28S1CxHt2rdskFyL+xFV7VremuBLVbmCePj+URalXBENx/9Lm7lnhihtCSw=="
   "resolved" "https://registry.npmjs.org/@webassemblyjs/ast/-/ast-1.11.1.tgz"
@@ -8076,7 +8084,7 @@
   optionalDependencies:
     "fsevents" "~2.3.2"
 
-"vitest@^0.22.1":
+"vitest@^0.22.1", "vitest@0.22.1":
   "integrity" "sha512-+x28YTnSLth4KbXg7MCzoDAzPJlJex7YgiZbUh6YLp0/4PqVZ7q7/zyfdL0OaPtKTpNiQFPpMC8Y2MSzk8F7dw=="
   "resolved" "https://registry.npmjs.org/vitest/-/vitest-0.22.1.tgz"
   "version" "0.22.1"
