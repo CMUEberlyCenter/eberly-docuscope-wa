@@ -181,12 +181,12 @@ const Arc = (props: ArcProps) => {
     >
       <title>
         {/* title for tooltip, shows ancestors path */}
-        {`${props.node
+        {`Category: ${props.node
           .ancestors()
           .map((datum) => datum.data.name)
           .reverse()
           .slice(1)
-          .join(" > ")}\n${format(props.node.value ?? 0)}`}
+          .join(" / ")}\nCount: ${format(props.node.value ?? 0)}`}
       </title>
     </path>
   );
@@ -248,6 +248,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
   const root = useSunbrustData(); // changes on new tagging data
   const editing = useEditorState(); // changes on editor state
   const [parent, setParent] = useState(root);
+  const figureRef = useRef<HTMLDivElement>(null);
   const wedgeRef = useRef(null);
   const labelRef = useRef(null);
   const width = props.width ?? 300;
@@ -283,10 +284,11 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .reverse()
     .slice(1)
     .map((d) => d.data.name)
-    .join(" > ");
+    .join(" / ");
 
   return (
     <figure
+      ref={figureRef}
       {...props}
       className={`sunburst-chart ${
         editing || parent === null ? "placeholder w-100" : ""
@@ -329,11 +331,22 @@ const SunburstFigure = (props: SunburstChartProps) => {
             fill="none"
             pointerEvents="all"
             onClick={() => click(parent?.parent ?? null)}
-          />
+            className={parent?.parent ? "sunburst-clickable" : ""}
+          >
+            <title>
+              {current_path}
+              {current_path ? "\n" : ""}Count: {format(parent?.value ?? 0)}
+            </title>
+          </circle>
         </g>
       </svg>
       {/* caption shows path to current root */}
-      <figcaption>&nbsp;{current_path}</figcaption>
+      <figcaption>
+        &nbsp;{current_path}
+        <span className={`badge bg-primary rounded-pill ms-2`}>
+          {format(parent?.value ?? 0)}
+        </span>
+      </figcaption>
     </figure>
   );
 };
@@ -360,7 +373,6 @@ const SunburstChart = (props: SunburstChartProps) => (
         <div className="d-flex align-items-start">
           <SunburstFigure {...props} />
           <OverlayTrigger
-            trigger="hover"
             placement="right"
             overlay={
               <Popover>
@@ -368,7 +380,7 @@ const SunburstChart = (props: SunburstChartProps) => (
                 <Popover.Body>
                   <ul>
                     <li>
-                      Hover over wedges to get more informaion about the
+                      Hover over wedges to get more information about the
                       category it represents.
                     </li>
                     <li>Click on a wedge in the diagram to zoom to it.</li>

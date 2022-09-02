@@ -152,6 +152,7 @@ const Coherence = (props: {
               <label className="form-check-label me-1" htmlFor={toggleId}>Show only topic clusters:</label>
               <div className="form-check form-switch">
                 <input
+                  onChange={() => {}}
                   className="form-check-input"
                   type="checkbox"
                   role="switch"

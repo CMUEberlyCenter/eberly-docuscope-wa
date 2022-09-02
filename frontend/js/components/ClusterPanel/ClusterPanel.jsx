@@ -222,13 +222,13 @@ class ClusterPanel extends Component {
     return (<div className="cluster-topic-editor">
       <div>Pre-defined Topics:</div>
       <textarea
-        readonly={true}
+        readOnly={true}
         className={textareaClassName}
         value={this.state.topicTextStatic}>
       </textarea>      
       <div>Custom Topics:</div>
       <textarea
-        readonly={enableEditor}
+        readOnly={enableEditor}
         className={textareaClassName}
 	      value={this.state.topicText}
 	      onChange={(e) => this.onTopicsChange (e)}>

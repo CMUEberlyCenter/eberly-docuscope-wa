@@ -73,6 +73,7 @@ import {
 // The imports below are purely to support the serialize function. Should probably import
 // from service
 import { Node } from "slate";
+import type DocuScopeRules from "../../DocuScopeRules";
 
 // Should probably import from the service
 const serialize = (nodes: Descendant[]): string => {
@@ -112,18 +113,17 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = (props: { 
-    api: apiCall,
-    ruleManager: any,
-    html: string,
-    htmlSentences: string
-  }) => {
-
-  const topicHighlighter=new TopicHighlighter ();
+const StudentView = (props: {
+  api: apiCall;
+  ruleManager: DocuScopeRules;
+  html: string;
+  htmlSentences: string;
+}) => {
+  const topicHighlighter = new TopicHighlighter();
 
   // Status handlers
-  const [status, setStatus] = useState("Application ready, rules loaded");
-  const [language, setLanguage] = useState("ENG");
+  const [status/*, setStatus*/] = useState("Application ready, rules loaded");
+  const [language/*, setLanguage*/] = useState("ENG");
 
   const navId = useId();
   const selectId = useId();
@@ -363,7 +363,6 @@ const StudentView = (props: {
       <div className="d-flex align-items-start">
         <h4>Tagged Text:&nbsp;</h4>
         <OverlayTrigger
-          trigger="hover"
           placement="right"
           overlay={
             <Popover>
@@ -421,8 +420,6 @@ const StudentView = (props: {
 
   const [showReset, setShowReset] = useState(false);
 
-  let reset;
-
   const onCloseResetDialog = (afirm: boolean) => {
     setShowReset(false);
     if (afirm == true) {
@@ -440,7 +437,7 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const [showParagraphSelector, setShowParagraphSelector] = useState(false);
+  const [showParagraphSelector/*, setShowParagraphSelector*/] = useState(false);
 
   let paragraphselector;
 
@@ -511,7 +508,11 @@ const StudentView = (props: {
               <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
             <Tab eventKey={"clarity"} title="Clarity">
-              <Clarity api={props.api} ruleManager={props.ruleManager} htmlSentences={props.htmlSentences} />
+              <Clarity
+                api={props.api}
+                ruleManager={props.ruleManager}
+                htmlSentences={props.htmlSentences}
+              />
             </Tab>
             <Tab eventKey={"impressions"} title="Impressions">
               <Impressions />
