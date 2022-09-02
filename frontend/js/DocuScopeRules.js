@@ -257,7 +257,7 @@ export default class DocuScopeRules {
    * 
    */
   getClusterTopics (aRule, aCluster) {
-    console.log ("getClusterTopics ()");
+    //console.log ("getClusterTopics ()");
 
     let cluster=this.getClusterByIndex (aRule, aCluster);
     if (cluster==null) {

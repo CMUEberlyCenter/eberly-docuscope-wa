@@ -105,14 +105,13 @@ const Expectations = (props: {
    * 
    */
   const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+    //console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
 
     e.preventDefault ();
     e.stopPropagation ();
 
     setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
 
-    //let clusterObject=props.ruleManager.getClusterByIndex (ruleIndex, clusterIndex);
     let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
  
     let highlighter=new TopicHighlighter ();

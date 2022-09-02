@@ -2407,7 +2407,7 @@ class DSDocument():
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
                         # we need to remove periods.
                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                        html_word = "<span class=\'word {} p{} s{}\'>{}</span>".format(topic, pcount, scount, word)
+                        html_word = "<span class=\'word p{} s{}\'>{}</span>".format(pcount, scount, word)
                     else:
                         html_word = word
 
@@ -2497,9 +2497,7 @@ class DSDocument():
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
                                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                                        html_temp_word = "<span class=\'word {} p{} s{}\'>{}</t>".format(topic, 
-                                                                                                 pcount, scount, 
-                                                                                                 temp_w[WORD])
+                                        html_temp_word = "<span class=\'word p{} s{}\'>{}</t>".format(pcount, scount, temp_w[WORD])
                                     else:
                                         html_temp_word = temp_w[WORD]
 

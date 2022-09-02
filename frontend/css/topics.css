@@ -39,4 +39,5 @@
 .word-highlight {
   color: blue;
   background: #f7f7f7;
+  font-weight: bold;  
 }

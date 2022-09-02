@@ -1,9 +1,18 @@
 
+import DataTools from './DataTools';
+
 /**
  * 
  */
 class TopicHighlighter {
-  
+
+  /**
+   * 
+   */  
+  constructor () {
+  	this.dataTools=new DataTools ();
+  }
+
   /**
    * 
    */ 
@@ -21,9 +30,9 @@ class TopicHighlighter {
     }
 
     // Select all topics
-    var tElements = document.querySelectorAll(".topic");
+    var tElements = document.querySelectorAll(".word");
     for (let i = 0; i < tElements.length; i++) {
-      tElements [i].classList.remove("topic-highlight");
+      tElements [i].classList.remove("word-highlight");
     }    
   }
 
@@ -78,39 +87,44 @@ class TopicHighlighter {
    * 
    */
   highlightTopic (aParagraphIndex, aSentenceIndex, aTopicList) {
-    console.log ("highlightTopic ()");
-    //console.log (aTopicList);
+    console.log ("highlightTopic ("+aParagraphIndex+","+aSentenceIndex+")");
 
     this.clearAllHighlights ();
 
     let topicElements=document.getElementsByClassName ("word");
+
+    let testElements=[];
+    for (let i=0;i<topicElements.length;i++) {
+      testElements.push (topicElements [i].innerHTML);
+    }
+
+    console.log (aTopicList);
+    console.log (testElements);
+
+    //console.log ("Found " + topicElements.length + " topics embedded in the html");
     
-    if ((aParagraphIndex==-1) || (aSentenceIndex==-1)) {
+    if ((aParagraphIndex==-1) && (aSentenceIndex==-1)) {
+      console.log ("Global");
       for (let i=0;i<topicElements.length;i++) {
       	let anElement=topicElements [i];
-      	//console.log ("Examining (global) topic element: " + anElement.innerHTML);
 
         for (let j=0;j<aTopicList.length;j++) {
           if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
           	anElement.classList.add("word-highlight");
-          } else {
-          	anElement.classList.remove("word-highlight");
           }
         }
       }
     } else {
+      console.log ("Local");
       // This is a really bad and slow way of doing this!
       for (let i=0;i<topicElements.length;i++) {
       	if (i==aParagraphIndex) {
 	      let anElement=topicElements [i];
-	      //console.log ("Examining (local) topic element: " + anElement.innerHTML);
 
 	      for (let j=0;j<aTopicList.length;j++) {
 	      	if (j==aSentenceIndex) {
 	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
 	            anElement.classList.add("word-highlight");
-	          } else {
-	            anElement.classList.remove("word-highlight");
 	          }
 	        }
 	      }
