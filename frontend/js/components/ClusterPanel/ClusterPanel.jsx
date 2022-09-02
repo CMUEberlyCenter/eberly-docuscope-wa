@@ -3,6 +3,7 @@ import { Button, Alert, Card, Container, Form, Nav, Navbar, NavDropdown, Tab, Ta
 
 import DataTools from "../../DataTools";
 import DocuScopeTools from "../../DocuScopeTools";
+import TopicHighlighter from "../../TopicHighlighter";
 
 import './ClusterPanel.scss';
 import './ClusterTopics.scss';
@@ -37,6 +38,7 @@ import clusterIcon from '../../../css/icons/topic_cluster_icon.png';
 		        "varied ",
 		        "vary"
 		    ],
+        "custom_topics": [],
 		    "no_lexical_overlap": false
 		}
 	]
@@ -51,6 +53,7 @@ class ClusterPanel extends Component {
 
     this.dataTools=new DataTools ();
     this.docuscopeTools=new DocuScopeTools ();
+    this.topicHighlighter=new TopicHighlighter ();
 
     this.state = {      
       currentTab: "expectationabout",
@@ -128,7 +131,13 @@ class ClusterPanel extends Component {
    * 
    */
   onTopicsChange (e) {
-  	//console.log ("onTopicsChange ()");    
+  	//console.log ("onTopicsChange ()");
+
+    if (this.props.ruleManager.hasExistingTopic (this.props.currentRule,this.props.currentCluster,e.target.value)==true) {
+      // Sound the alarm
+      console.log ("Topic already exists in a different cluster!");
+    }
+
   	this.setState ({
       topicText: e.target.value
   	});  	
@@ -153,12 +162,13 @@ class ClusterPanel extends Component {
       let text=this.props.editorValue;
 
       let customTopics=this.props.ruleManager.getAllCustomTopics ();
+      let customTopicsStructured=this.props.ruleManager.getAllCustomTopicsStructured ();
       
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      this.props.api("ontopic", { custom: customTopics, base: encoded }, "POST").then((incoming) => {});
+      this.props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming) => {});
     }
   }
 

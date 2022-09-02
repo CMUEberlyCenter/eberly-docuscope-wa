@@ -98,14 +98,17 @@ const Coherence = (props: {
       //setStatus("Retrieving results...");
 
       let customTopics=props.ruleManager.getAllCustomTopics ();
+      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
 
-      //console.log ("Adding custom topics: " + customTopics);
+      console.log ("Adding custom topics (string): " + customTopics);
+      console.log ("Adding custom topics (structured): ");
+      console.log (customTopicsStructured);
       
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      props.api("ontopic", { custom: customTopics, base: encoded }, "POST").then((incoming : any) => {
+      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
         //console.log ("Processing incoming coherence data ...");
         
         let coherence=incoming.coherence;

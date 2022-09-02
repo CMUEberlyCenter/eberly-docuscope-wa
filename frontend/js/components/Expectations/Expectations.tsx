@@ -14,6 +14,7 @@ import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.pn
 import clusterUpIcon from "../../../css/icons/active_arrow_icon.png";
 
 import ClusterPanel from '../ClusterPanel/ClusterPanel';
+import TopicHighlighter from "../../TopicHighlighter";
 
 import { upfrontValues } from "../../data/values";
 
@@ -104,12 +105,19 @@ const Expectations = (props: {
    * 
    */
   const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    //console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
 
     e.preventDefault ();
     e.stopPropagation ();
 
     setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
+
+    //let clusterObject=props.ruleManager.getClusterByIndex (ruleIndex, clusterIndex);
+    let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
+ 
+    let highlighter=new TopicHighlighter ();
+
+    highlighter.highlightTopic (-1,-1,topicList);
   }  
 
   /**

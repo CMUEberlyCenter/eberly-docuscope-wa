@@ -11,6 +11,7 @@ import dslib.utils as utils
 import dslib.views as views
 
 from dslib.models.document import DSDocument
+from dslib.models.synonym import DSSynset
 
 driver=prometheus.PythonPrometheus ()
 
@@ -94,7 +95,13 @@ class OnTopic:
     return response
 
   ##
-  #
+  # 
+  # So in general we have to test 4 cases:
+  # - A garbage text
+  # - A text where the back-end will find some unrelated topics regardless of what is defined in the rules and clusters
+  # - A text where the back-end will find pre-defined topics and some unrelated topics
+  # - A text where the back-end will find pre-defined topics, custom topics and unrelated topics
+  # 
   ##
   def ontopic (self,request):    
     print ('ontopic()')
@@ -106,27 +113,44 @@ class OnTopic:
     data=envelope ["data"]
     raw=data["base"]
     customString=data["custom"]
+    customTopics=data["customStructured"];
     custom="";
+
+    print (customTopics)
+
+    # Load and process the non-structured semi-colon separated list of topics. We will
+    # remove this once the structured version works well
 
     if (isinstance(customString, str)):
       custom = customString.split(";")
 
-    #print ("Custom: ");
-    #print (custom);
-
     decoded=base64.b64decode(raw).decode('utf-8')
-
     unescaped=unquote(decoded)
 
-    #print ("decoded and unqoted:")
-    #print (unescaped)
+    multiword_topics = list();
+    synsets = list ()
+
+    for topic in customTopics:      
+      lemma = topic ["lemma"]
+      topics = topic ["topics"]
+      # Create a DSSynset object
+      sd = { "lemma": lemma, "synonyms": topics}
+      ss = DSSynset (synset_dict=sd)
+      for t in topics:
+        if ' ' in t:
+          multiword_topics.append(t)
+
+    # We should now be ready to start processing text
 
     document=DSDocument ()
     document.loadFromTxt (unescaped)
 
-    # What's the difference between the two methods below?
-    #document.setUserTopics (custom);
-    document.setUserDefinedTopics (custom);
+    # Old method, using the linear list
+    #document.setUserDefinedTopics (custom);
+
+    # New method, using the structured approach so that we can tie results back to topic clusters
+    document.setMultiwordTopics(multiword_topics)
+    document.setUserDefinedSynonyms(synsets)
 
     coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()
@@ -138,8 +162,6 @@ class OnTopic:
     #html_bytes = html.encode('utf-8')
     #html_base64 = base64.b64encode(html_bytes)
     #html_base64 = base64.b64encode(html.encode('utf-8'));
-
-    #print (html_sentences)
 
     # If there is not enough text to process or if there aren't enough results the coherence data might
     # result to be: {'error': 'ncols is 0'}
@@ -159,22 +181,6 @@ class OnTopic:
       localSelected.append(i+1);
       localDict=document.generateLocalVisData (localSelected,1,2);
       local.append (localDict);
-
-    #print ("Found coherence data: ")
-    #print(type(coherence))
-    #print (coherence)
-    #print (json.dumps(coherence))
-
-    #print ("Found clarity data (ontopic): ")
-    #print(type(clarity))
-    #print (clarity)
-    #print (json.dumps(clarity))
-
-    #print ("Found html data: ")
-    #print (html)
-
-    #print (json.dumps(topics))
-    #print (json.loads(json.dumps(topics)))
 
     data = {}
     data['coherence'] = json.loads(json.dumps(coherence))

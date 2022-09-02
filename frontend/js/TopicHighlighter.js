@@ -77,12 +77,46 @@ class TopicHighlighter {
   /**
    * 
    */
-  highlightTopic (aParagraphIndex, aSentenceIndex, aTopic) {
-    console.log ("highlightSentence ("+aParagraphIndex+","+aSentenceIndex+")");
+  highlightTopic (aParagraphIndex, aSentenceIndex, aTopicList) {
+    console.log ("highlightTopic ()");
+    //console.log (aTopicList);
 
     this.clearAllHighlights ();
 
-    console.log (aTopic);
+    let topicElements=document.getElementsByClassName ("word");
+    
+    if ((aParagraphIndex==-1) || (aSentenceIndex==-1)) {
+      for (let i=0;i<topicElements.length;i++) {
+      	let anElement=topicElements [i];
+      	//console.log ("Examining (global) topic element: " + anElement.innerHTML);
+
+        for (let j=0;j<aTopicList.length;j++) {
+          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
+          	anElement.classList.add("word-highlight");
+          } else {
+          	anElement.classList.remove("word-highlight");
+          }
+        }
+      }
+    } else {
+      // This is a really bad and slow way of doing this!
+      for (let i=0;i<topicElements.length;i++) {
+      	if (i==aParagraphIndex) {
+	      let anElement=topicElements [i];
+	      //console.log ("Examining (local) topic element: " + anElement.innerHTML);
+
+	      for (let j=0;j<aTopicList.length;j++) {
+	      	if (j==aSentenceIndex) {
+	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
+	            anElement.classList.add("word-highlight");
+	          } else {
+	            anElement.classList.remove("word-highlight");
+	          }
+	        }
+	      }
+	    }
+      }
+    }
   }
 }
 

@@ -51,11 +51,14 @@ const Clarity = (props: {
     if (text !== "") {    
       setStatus("Retrieving results...");
       
+      let customTopics=props.ruleManager.getAllCustomTopics ();
+      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      props.api("ontopic", { custom: "", base: encoded }, "POST").then((incoming : any) => {
+      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
         const clarityData=incoming.clarity;
 
         setClarityData(clarityData);

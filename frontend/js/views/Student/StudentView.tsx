@@ -128,7 +128,7 @@ const StudentView = (props: {
   const navId = useId();
   const selectId = useId();
   //const [status, setStatus] = useState('');
-  const [currentTab, setCurrentTab] = useState<string | null>(null);
+  const [currentTab, setCurrentTab] = useState<string | null>("expectations");
   // on tab switch update current and broadcast.
   const switchTab = (key: string | null) => {
     setCurrentTab(key);
@@ -326,8 +326,7 @@ const StudentView = (props: {
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Mike's panel)
-  const showTaggedText =
-    currentTab === "impressions" && !editable && isTaggerResult(tagging);
+  const showTaggedText = currentTab === "impressions" && !editable && isTaggerResult(tagging);
   let showOnTopicText = false;
 
   const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
@@ -336,13 +335,18 @@ const StudentView = (props: {
 
   // Every other panel that needs it. We'll clean up the logic later
   if (showTaggedText == false) {
-    showOnTopicText =
-      currentTab === "coherence" && !editable && props.html != null;
+    showOnTopicText = currentTab === "coherence" && !editable && props.html != null;
+
     if (showOnTopicText == false) {
-      showOnTopicText =
-        currentTab === "clarity" && !editable && props.html != null;
+      showOnTopicText = currentTab === "clarity" && !editable && props.html != null;
     }
+
+    if (showOnTopicText == false) {
+      showOnTopicText = currentTab === "expectations" && !editable && props.html != null;
+    }    
   }
+
+  console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
   if (showOnTopicText == true) {
     topicTaggedContent = (

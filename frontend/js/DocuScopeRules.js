@@ -254,6 +254,41 @@ export default class DocuScopeRules {
   }
 
   /**
+   * 
+   */
+  getClusterTopics (aRule, aCluster) {
+    console.log ("getClusterTopics ()");
+
+    let cluster=this.getClusterByIndex (aRule, aCluster);
+    if (cluster==null) {
+      console.log ("Error, no cluster found!");
+      return ([]);
+    }
+
+    let topicList=[];
+
+    let clusterObject=cluster.raw;
+    
+    let topics=clusterObject.topics;
+
+    if (topics) {
+      if (topics [0].pre_defined_topics) {
+        for (let i=0;i<topics [0].pre_defined_topics.length;i++) {
+          topicList.push(topics [0].pre_defined_topics[i]);
+        }
+      }
+
+      if (topics [0].custom_topics) {        
+        for (let i=0;i<topics [0].custom_topics.length;i++) {
+          topicList.push(topics [0].custom_topics[i]);
+        }        
+      }
+    }    
+
+    return (topicList);    
+  }
+
+  /**
    * We should provide an alternative method that doesn't need to traverse the
    * tree to obtain the count but which is given a pointer to the cluster to
    * start with
@@ -369,6 +404,8 @@ export default class DocuScopeRules {
    * we started with in the rules as edited by the user in the interface
    */
   getAllCustomTopics () {
+    console.log ("getAllCustomTopics ()");
+
     let topicText="";
     let tempList=[];
 
@@ -406,6 +443,47 @@ export default class DocuScopeRules {
     }
 
     return (topicText);
+  }
+
+  /**
+   * 
+   */
+  getAllCustomTopicsStructured  () {
+    console.log ("getAllCustomTopicsStructured ()");
+
+    let structuredTopics=[];
+
+    for (let i=0;i<this.rules.length;i++) {
+      let rule=this.rules [i];
+      for (let j=0;j<rule.children.length;j++) {
+        let cluster=rule.children [j];
+        let clusterObject=cluster.raw;
+
+        let topics=clusterObject.topics;
+        if (topics) {
+          if (topics.length>0) {
+            let topicObject={
+              lemma: topics [0].lemma,
+              topics: []
+            };
+
+            let rawTopicsStatic=topics [0].pre_defined_topics;
+            for (let k=0;k<rawTopicsStatic.length;k++) {
+              topicObject.topics.push(rawTopicsStatic [k]);
+            }
+
+            let rawTopics=topics [0].custom_topics;
+            for (let k=0;k<rawTopics.length;k++) {
+              topicObject.topics.push(rawTopics [k]);
+            }            
+
+            structuredTopics.push(topicObject);            
+          }
+        }
+      }
+    }
+
+    return (structuredTopics);
   }
 
   /**
@@ -532,8 +610,6 @@ export default class DocuScopeRules {
         let topics=clusterObject.topics;
         if (topics) {
           if (topics.length>0) {
-            console.log ("Lemma: " + topics [0].lemma);
-            //clusterList.push (topics [0].lemma);
             hashTable.setItem (topics [0].lemma,topics [0].lemma);
           }
         }
@@ -550,6 +626,7 @@ export default class DocuScopeRules {
 
     return (clusterList);
   }
+
   /**
    * 
    */
@@ -572,4 +649,46 @@ export default class DocuScopeRules {
     
     return (clusterList);
   }  
+
+  /**
+   * Note that aTopicList isn't an array, it's a newline separated string
+   */
+  hasExistingTopic (aRuleIndex, aClusterIndex, aTopicList) {
+    console.log ("hasExistingTopic ()");
+
+    let checkList=this.dataTools.topicsToArray (aTopicList);
+
+    if (checkList.length==0) {
+      return (false);
+    }
+
+    for (let i=0;i<this.rules.length;i++) {   
+      if (i!=aRuleIndex) {
+        let rule=this.rules [i];
+        for (let j=0;j<rule.children.length;j++) {
+          if (j!=aClusterIndex) {
+            let cluster=rule.children [j];
+            let clusterObject=cluster.raw;
+
+            let topics=clusterObject.topics;
+            if (topics) {
+              if (topics.length>0) {
+                let rawTopicsStatic=topics [0].pre_defined_topics;
+                if (this.dataTools.listContainsListElement (rawTopicsStatic, checkList)==true) {
+                  return (true);
+                }
+
+                let rawTopics=topics [0].custom_topics;
+                if (this.dataTools.listContainsListElement (rawTopics, checkList)==true) {
+                  return (true);
+                }
+              }
+            }
+          } 
+        }
+      }  
+    }
+
+    return (false);
+  }
 }

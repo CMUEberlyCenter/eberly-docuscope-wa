@@ -191,7 +191,7 @@ class CoherencePanel extends Component {
 
     console.log (topic);
 
-    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,topic);
+    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,[topic]);
   }
 
   /**
@@ -210,8 +210,6 @@ class CoherencePanel extends Component {
    */
   onGlobalTopicClick (e,anIndex) {
     console.log ("onGlobalTopicClick ("+anIndex+")");
-
-    //this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,anIndex);
 
     if (this.props.ruleManager) {
       let clusters=this.props.ruleManager.clusters;

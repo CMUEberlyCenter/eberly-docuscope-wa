@@ -56,8 +56,6 @@ class DocuScopeOnTopic extends Component {
     var newData = this.dataTools.copyData(this.state.textdata);
     newData.plain = plain;
 
-    //>--------------------------------------------------------------------
-
     if (this.state.mode == "SENTENCE") {
       newData.sentences = data;
 
@@ -68,91 +66,6 @@ class DocuScopeOnTopic extends Component {
         invalidated: false,
       });
     }
-
-    //>--------------------------------------------------------------------
-
-    /*
-    if (this.state.mode=="PARAGRAPH") {
-      newData.paragraphs=data;
-
-      this.setState({
-        sentence: null,
-        loading: false,
-        textdata: newData,
-        invalidated: false,
-      });
-    }
-    */
-
-    //>--------------------------------------------------------------------
-
-    /*
-    if (this.state.mode=="TEXT") {
-      let collapsed=data.collapsed;
-      let expanded=data.expanded;
-      let topics=new HashTable ();
-      let sentence=0;
-
-      if (expanded != null) {
-        for (let i = 0; i < expanded.length; i++) {
-          let row = expanded[i];
-
-          if (i == 0) {
-            for (let j = 0; j < row.length; j++) {
-              row[j][2] = this.dataTools.uuidv4();
-
-              let topic = new Topic();
-              topic.uuid = row[j][2];
-              topic.name = row[j][1];
-              topics.setItem(topic.uuid, topic);
-            }
-          } else {
-            let isParaBoundary = 0;
-
-            for (let j = 0; j < row.length; j++) {
-              let cell = row[j];
-              let isCellBoundary = false;
-
-              if (this.dataTools.isNumber(cell) == true) {
-                isCellBoundary = true;
-                isParaBoundary++;
-              }
-
-              // We have a valid row
-              if (isCellBoundary == false) {
-                if (cell[1] != false) {
-                  cell[13] = this.dataTools.uuidv4();
-
-                  let topic = new Topic();
-                  topic.uuid = cell[13];
-                  topic.name = cell[2];
-                  topic.sentence = sentence;
-                  topics.setItem(topic.uuid, topic);
-                }
-              }
-            }
-
-            if (isParaBoundary != row.length) {
-              sentence++;
-            }
-          }
-        }
-      }
-
-      newData.collapsed = collapsed;
-      newData.expanded = expanded;
-      newData.topics = topics;
-
-      this.setState({
-        sentence: null,
-        loading: false,
-        textdata: newData,
-        invalidated: false,
-      });
-    }
-    */
-
-    //>--------------------------------------------------------------------
   }
 
   /**
@@ -193,7 +106,7 @@ class DocuScopeOnTopic extends Component {
    * 
    */
   generateSentenceDetails (aParagraphIndex,aSentenceIndex) {
-    console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
+    //console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
 
     if ((aParagraphIndex==-1) || (aSentenceIndex==-1)) {
       console.log ("No valid paragraph or sentence index selected");
@@ -207,7 +120,7 @@ class DocuScopeOnTopic extends Component {
       return (null);
     }
 
-    console.log (aParagraph);
+    //console.log (aParagraph);
 
     let aSentence=aParagraph [aSentenceIndex];
 
@@ -218,7 +131,7 @@ class DocuScopeOnTopic extends Component {
 
     let sentencedetails=aSentence.replaceAll ('\\"','"');
 
-    console.log (sentencedetails);
+    //console.log (sentencedetails);
 
     return (<div className="ontopic-explanation" dangerouslySetInnerHTML={{__html: sentencedetails}}></div>);  
   }

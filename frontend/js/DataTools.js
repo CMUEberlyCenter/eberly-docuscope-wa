@@ -244,4 +244,21 @@ export default class DataTools {
     }
     return (aTextBlock.replace (/(?:\r\n|\r|\n)/g,";"));
   }
+
+  /**
+   * How much can this be optimized?
+   */
+  listContainsListElement (aListSource, aListTarget) {
+    for (let i=0;i<aListSource.length;i++) {
+      let testA=aListSource [i];
+      for (let j=0;j<aListTarget.length;j++) {
+        let testB=aListTarget[j];
+        if (testA.toLowerCase ()==testB.toLowerCase ()) {
+          return (true);
+        }
+      }
+    }
+
+    return (false);
+  }
 }
