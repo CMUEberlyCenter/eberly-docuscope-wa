@@ -181,12 +181,12 @@ const Arc = (props: ArcProps) => {
     >
       <title>
         {/* title for tooltip, shows ancestors path */}
-        {`${props.node
+        {`Category: ${props.node
           .ancestors()
           .map((datum) => datum.data.name)
           .reverse()
           .slice(1)
-          .join(" > ")}\n${format(props.node.value ?? 0)}`}
+          .join(" / ")}\nCount: ${format(props.node.value ?? 0)}`}
       </title>
     </path>
   );
@@ -284,7 +284,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
     .reverse()
     .slice(1)
     .map((d) => d.data.name)
-    .join(" > ");
+    .join(" / ");
 
   return (
     <figure
@@ -331,11 +331,22 @@ const SunburstFigure = (props: SunburstChartProps) => {
             fill="none"
             pointerEvents="all"
             onClick={() => click(parent?.parent ?? null)}
-          />
+            className={parent?.parent ? "sunburst-clickable" : ""}
+          >
+            <title>
+              {current_path}
+              {current_path ? "\n" : ""}Count: {format(parent?.value ?? 0)}
+            </title>
+          </circle>
         </g>
       </svg>
       {/* caption shows path to current root */}
-      <figcaption>&nbsp;{current_path}</figcaption>
+      <figcaption>
+        &nbsp;{current_path}
+        <span className={`badge bg-primary rounded-pill ms-2`}>
+          {format(parent?.value ?? 0)}
+        </span>
+      </figcaption>
     </figure>
   );
 };

@@ -39,6 +39,7 @@ const Impressions = () => {
   const text = useEditorText();
   const tagging = useTaggerResults();
   let content;
+  //let count;
   if (editing || text.length === 0 || tagging === null) {
     // alert box to show when entered text is empty or being edited
     content = (
@@ -73,6 +74,8 @@ const Impressions = () => {
         <span>{tagging.html_content}</span>
       </Alert>
     );
+    //} else {
+    //  count = tagging.patterns.filter(pat => pat.category !== '?').reduce((prev, data) => prev + data.patterns.reduce((p, pd) => p + pd.count, 0), 0).toLocaleString();
   }
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -85,7 +88,7 @@ const Impressions = () => {
             <Subscribe>
               <div className="impressions-content flex-grow-1 p-1">
                 {content}
-                <Accordion defaultActiveKey="categories" alwaysOpen>
+                <Accordion defaultActiveKey={["categories"]} alwaysOpen>
                   <Accordion.Item eventKey="sunburst">
                     <Accordion.Header>
                       <h4>Sunburst Chart</h4>
@@ -103,6 +106,11 @@ const Impressions = () => {
                   <Accordion.Item eventKey="categories">
                     <Accordion.Header>
                       <h4>Dictionary Categories</h4>
+                      {/* openCategories ? '' :
+                      <span className={`badge bg-${
+                        count && !editing ? "primary" : "secondary"
+                        } rounded-pill fs-6 ms-4`}
+                      >{count ?? '-'}</span>*/}
                     </Accordion.Header>
                     <Accordion.Body>
                       <CategoryTree />
