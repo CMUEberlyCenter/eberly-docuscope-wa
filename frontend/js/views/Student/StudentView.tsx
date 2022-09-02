@@ -73,6 +73,7 @@ import {
 // The imports below are purely to support the serialize function. Should probably import
 // from service
 import { Node } from "slate";
+import type DocuScopeRules from "../../DocuScopeRules";
 
 // Should probably import from the service
 const serialize = (nodes: Descendant[]): string => {
@@ -114,7 +115,7 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  */
 const StudentView = (props: {
   api: apiCall;
-  ruleManager: any;
+  ruleManager: DocuScopeRules;
   html: string;
   htmlSentences: string;
 }) => {
