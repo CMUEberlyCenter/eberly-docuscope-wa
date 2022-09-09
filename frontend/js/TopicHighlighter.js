@@ -121,6 +121,7 @@ class TopicHighlighter {
         for (let j=0;j<aTopicList.length;j++) {
           if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
           	anElement.classList.add("word-highlight");
+          	anElement.parentElement.classList.add("sentence-highlight");
           }
         }
       }
@@ -133,11 +134,13 @@ class TopicHighlighter {
           if (aSentenceIndex==-1) {	      
 	        if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
               anElement.classList.add("word-highlight");
+              anElement.parentElement.classList.add("sentence-highlight");
             }
           } else {
 	      	if (j==aSentenceIndex) {
 	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
                 anElement.classList.add("word-highlight");
+                anElement.parentElement.classList.add("sentence-highlight");
 	          }
 	        }
 	      }

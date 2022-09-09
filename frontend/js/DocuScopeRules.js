@@ -289,6 +289,56 @@ export default class DocuScopeRules {
   }
 
   /**
+   * 
+   */
+  getClusterTopicsByClusterIndex (aClusterIndex) {
+    console.log ("getClusterTopicsByClusterIndex ("+aClusterIndex+")");
+
+    let topicList=[];
+    let index=0;
+    let cluster=null;
+
+    for (let i = 0; i < this.rules.length; i++) {
+      let rule = this.rules[i];
+      for (let j = 0; j < rule.children.length; j++) {
+        if (index==aClusterIndex) {
+          cluster=rule.children [j];
+          break;
+        }
+        index++;
+      }
+    }
+
+    if (cluster==null) {
+      console.log ("Error: unable to find cluster by global cluster index");
+      return (topicList);
+    }
+
+    let clusterObject=cluster.raw;
+
+    console.log ("We've got topics to inspect");
+    console.log (clusterObject);    
+    
+    let topics=clusterObject.topics;
+
+    if (topics) {
+      if (topics [0].pre_defined_topics) {
+        for (let i=0;i<topics [0].pre_defined_topics.length;i++) {
+          topicList.push(topics [0].pre_defined_topics[i]);
+        }
+      }
+
+      if (topics [0].custom_topics) {        
+        for (let i=0;i<topics [0].custom_topics.length;i++) {
+          topicList.push(topics [0].custom_topics[i]);
+        }        
+      }
+    }    
+
+    return (topicList);    
+  }  
+
+  /**
    * We should provide an alternative method that doesn't need to traverse the
    * tree to obtain the count but which is given a pointer to the cluster to
    * start with

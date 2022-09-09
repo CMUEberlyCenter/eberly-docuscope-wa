@@ -238,8 +238,11 @@ class CoherencePanel extends Component {
     console.log ("onGlobalTopicClick ("+anIndex+")");
 
     if (this.props.ruleManager) {
-      let clusters=this.props.ruleManager.clusters;
-      let cluster=clusters[anIndex];
+      let topicList=this.props.ruleManager.getClusterTopicsByClusterIndex (anIndex);
+
+      console.log (topicList);
+ 
+      this.topicHighlighter.highlightTopic (-1,-1,topicList);
     }    
   }
 
