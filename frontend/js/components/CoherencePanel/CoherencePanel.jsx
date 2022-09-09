@@ -91,6 +91,34 @@ class CoherencePanel extends Component {
   }
 
   /**
+   * Let's figure out later how to optimize this!
+   */
+  getTopicListFromObject (anIndex,aTopicString) {
+    let topicObject=this.getTopicObject (anIndex);
+
+    let topicList=[];
+
+    if (topicObject) {
+      if (topicObject.topic.length>1) {
+        topicList.push (topicObject.topic [1]);
+        if (topicObject.topic.length>2) {
+          topicList.push (topicObject.topic [2]);
+        }
+      } else {
+        if (aTopicString) {
+          topicList.push(aTopicString);
+        }
+      }
+    } else {
+      if (aTopicString) {
+        topicList.push(aTopicString);
+      }
+    }
+    
+    return (topicList);
+  }  
+
+  /**
    * 
    */
   countParagraphs () {
@@ -187,22 +215,20 @@ class CoherencePanel extends Component {
   onTopicClick (e,anIndex) {
     console.log ("onTopicClick ("+anIndex+")");
 
-    let topic=this.getTopicObject (anIndex);
+    let topicList=this.getTopicListFromObject (anIndex,null);
 
-    console.log (topic);
-
-    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,[topic]);
+    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,topicList);
   }
 
   /**
    * 
    */
-  onTopicParagraphClick (e,anIndex,aParagraph) {
+  onTopicParagraphClick (e,anIndex,aParagraph,aTopic) {
     console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
 
-    let topic=this.getTopicObject (anIndex);
+    let topicList=this.getTopicListFromObject (anIndex,aTopic);
 
-    console.log (topic);
+    this.topicHighlighter.highlightTopic (aParagraph,-1,topicList);
   }  
 
   /**
@@ -368,7 +394,7 @@ class CoherencePanel extends Component {
 
           icon=<img alt={paraContent} title={paraContent} className={paraIconClass} src={paraIcon}/>;
         }
-        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{icon}</div>);
+        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j,topic)}>{icon}</div>);
       }
 
       topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)

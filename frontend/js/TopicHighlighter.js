@@ -16,6 +16,15 @@ class TopicHighlighter {
   /**
    * 
    */ 
+  getParagraphFromId (anId) {
+  	console.log ("getParagraphFromId ("+anId+")");
+
+    return (-1);
+  }
+
+  /**
+   * 
+   */ 
   clearAllHighlights () {
     // Select all paragraphs
     var pElements = document.querySelectorAll(".paragraph");
@@ -91,20 +100,21 @@ class TopicHighlighter {
 
     this.clearAllHighlights ();
 
-    let topicElements=document.getElementsByClassName ("word");
+    let paragraphElement=document.getElementById ("p"+(aParagraphIndex+1));
+
+    let topicElements=[];
+    if (paragraphElement) {
+      topicElements=paragraphElement.getElementsByClassName ("word");
+    } else {
+      topicElements=document.getElementsByClassName ("word");
+    }
 
     let testElements=[];
     for (let i=0;i<topicElements.length;i++) {
       testElements.push (topicElements [i].innerHTML);
     }
 
-    console.log (aTopicList);
-    console.log (testElements);
-
-    //console.log ("Found " + topicElements.length + " topics embedded in the html");
-    
     if ((aParagraphIndex==-1) && (aSentenceIndex==-1)) {
-      console.log ("Global");
       for (let i=0;i<topicElements.length;i++) {
       	let anElement=topicElements [i];
 
@@ -115,20 +125,23 @@ class TopicHighlighter {
         }
       }
     } else {
-      console.log ("Local");
       // This is a really bad and slow way of doing this!
       for (let i=0;i<topicElements.length;i++) {
-      	if (i==aParagraphIndex) {
-	      let anElement=topicElements [i];
+        let anElement=topicElements [i];
 
-	      for (let j=0;j<aTopicList.length;j++) {
+        for (let j=0;j<aTopicList.length;j++) {
+          if (aSentenceIndex==-1) {	      
+	        if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+              anElement.classList.add("word-highlight");
+            }
+          } else {
 	      	if (j==aSentenceIndex) {
-	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
-	            anElement.classList.add("word-highlight");
+	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+                anElement.classList.add("word-highlight");
 	          }
 	        }
 	      }
-	    }
+	    }	    
       }
     }
   }

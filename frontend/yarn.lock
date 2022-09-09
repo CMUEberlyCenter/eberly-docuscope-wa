@@ -986,10 +986,10 @@
   "resolved" "https://registry.npmjs.org/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz"
   "version" "0.2.3"
 
-"@cmu-eberly-center/eberly-ontopic-visualization@^0.5.24":
-  "integrity" "sha512-xa0EirGUEBKhcL6HcUo1UlTNnqNzGriop7LQEcYBf2g2M/q36/jj/1+bpL9ptmlqkcKP6zKZbpyE8/OhHHnKmw=="
-  "resolved" "https://registry.npmjs.org/@cmu-eberly-center/eberly-ontopic-visualization/-/eberly-ontopic-visualization-0.5.24.tgz"
-  "version" "0.5.24"
+"@cmu-eberly-center/eberly-ontopic-visualization@^0.5.25":
+  "integrity" "sha512-gUVP0h09TNAxWQdIlDTUc21rx5OsIs8HpGUgvy3SXP7TCbHOlcmLIDFEiuFZkAamxT5GU6JwVWCyQJSvSTEyBw=="
+  "resolved" "https://registry.npmjs.org/@cmu-eberly-center/eberly-ontopic-visualization/-/eberly-ontopic-visualization-0.5.25.tgz"
+  "version" "0.5.25"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.25"
     "@fortawesome/free-solid-svg-icons" "^5.11.2"

@@ -79,10 +79,15 @@ class DocuScopeOnTopic extends Component {
   /**
    *
    */
-  onHandleSentence (aParagraphIndex,aSentenceIndex,aBlock,aSentence) {
+  onHandleSentence (aParagraphIndex,aSentenceIndex,aBlock,aSentence,aTopic) {
     console.log ("onHandleSentence ()");
 
-    this.topicHighlighter.highlightSentence (aParagraphIndex, aSentenceIndex);
+    if (aTopic) {
+      this.topicHighlighter.highlightSentence (aParagraphIndex, aSentenceIndex, [aTopic]);
+    } else {
+      this.topicHighlighter.highlightSentence (aParagraphIndex, aSentenceIndex);
+    }
+
     this.setState ({
       paragraphIndex: aParagraphIndex, 
       sentenceIndex: aSentenceIndex
