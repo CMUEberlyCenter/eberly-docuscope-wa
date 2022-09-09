@@ -143,14 +143,14 @@ class OnTopic:
     # We should now be ready to start processing text
 
     document=DSDocument ()
-    document.loadFromTxt (unescaped)
-
-    # Old method, using the linear list
-    #document.setUserDefinedTopics (custom);
 
     # New method, using the structured approach so that we can tie results back to topic clusters
     document.setMultiwordTopics(multiword_topics)
     document.setUserDefinedSynonyms(synsets)
+    document.loadFromTxt (unescaped)
+
+    # Old method, using the linear list
+    #document.setUserDefinedTopics (custom);
 
     coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()
