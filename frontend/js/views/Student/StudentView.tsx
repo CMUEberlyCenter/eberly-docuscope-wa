@@ -464,6 +464,8 @@ const StudentView = (props: {
   const globalUpdate = (e:any) => {
     console.log ("globalUpdate ()");
 
+    // For now if someone requests (or really, forces) an update, let's switch
+    // the editor to read-only mode for now
   }
 
   //>--------------------------------------------------------

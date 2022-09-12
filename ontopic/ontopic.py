@@ -136,6 +136,7 @@ class OnTopic:
       # Create a DSSynset object
       sd = { "lemma": lemma, "synonyms": topics}
       ss = DSSynset (synset_dict=sd)
+      synsets.append (ss)
       for t in topics:
         if ' ' in t:
           multiword_topics.append(t)

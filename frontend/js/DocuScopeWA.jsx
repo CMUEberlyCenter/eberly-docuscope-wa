@@ -231,11 +231,14 @@ export default class DocuScopeWA extends EberlyLTIBase {
             });
           }
 
-          resolve (raw.data);
-
           if (raw.data.coherence) {
-            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence));          
+            // Clean and replace
+            raw.data.coherence=this.ruleManager.cleanCoherenceData (raw.data.coherence);
+            raw.data.local=this.ruleManager.cleanLocalCoherenceData (raw.data.local);
+            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence,raw.data.local));
           }
+
+          resolve (raw.data);
         }
       }).catch((error) => {
         this.setState ({
@@ -275,11 +278,14 @@ export default class DocuScopeWA extends EberlyLTIBase {
             });
           }
 
-          resolve (raw.data);
-
           if (raw.data.coherence) {
-            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence));
+            // Clean and replace
+            raw.data.coherence=this.ruleManager.cleanCoherenceData (raw.data.coherence);
+            raw.data.local=this.ruleManager.cleanLocalCoherenceData (raw.data.local);            
+            that.ruleManager.updateLemmaCounts (that.docuscopeTools.coherenceToClusterCounts (raw.data.coherence,raw.data.local));
           }
+
+          resolve (raw.data);
         }
       }).catch((error) => {
         //console.log (error);

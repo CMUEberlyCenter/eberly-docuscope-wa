@@ -49,7 +49,8 @@ class CoherencePanel extends Component {
 
     this.state = {
       selectedParagraph: -1,
-      selectedSentence: -1
+      selectedSentence: -1,
+      showGlobal: props.showglobal
     };
 
     this.dataTools=new OnTopicDataTools ();
@@ -65,17 +66,24 @@ class CoherencePanel extends Component {
   /**
    *
    */
-  /* 
   componentDidUpdate(prevProps) {
-  	console.log ("componentDidUpdate ()");
+  	//console.log ("componentDidUpdate ()");
 
-    //console.log (this.props.data);
+    if (prevProps.showglobal !== this.props.showglobal) {
+      console.log ("showglobal changed");
+      this.setState ({
+        selectedParagraph: -1,
+        selectedSentence: -1,        
+        showGlobal: this.props.showglobal
+      })
+    }
 
+    /*
   	if (prevProps.data !== this.props.data) {      
       this.setState ({data: this.props.data});
     }
+    */
   }
-  */
 
   /**
    * 
@@ -213,7 +221,7 @@ class CoherencePanel extends Component {
    * 
    */
   onTopicClick (e,anIndex) {
-    console.log ("onTopicClick ("+anIndex+")");
+    //console.log ("onTopicClick ("+anIndex+")");
 
     let topicList=this.getTopicListFromObject (anIndex,null);
 
@@ -224,7 +232,7 @@ class CoherencePanel extends Component {
    * 
    */
   onTopicParagraphClick (e,anIndex,aParagraph,aTopic) {
-    console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
+    //console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
 
     let topicList=this.getTopicListFromObject (anIndex,aTopic);
 
@@ -235,12 +243,12 @@ class CoherencePanel extends Component {
    * 
    */
   onGlobalTopicClick (e,anIndex) {
-    console.log ("onGlobalTopicClick ("+anIndex+")");
+    //console.log ("onGlobalTopicClick ("+anIndex+")");
 
     if (this.props.ruleManager) {
       let topicList=this.props.ruleManager.getClusterTopicsByClusterIndex (anIndex);
 
-      console.log (topicList);
+      //console.log (topicList);
  
       this.topicHighlighter.highlightTopic (-1,-1,topicList);
     }    
@@ -330,17 +338,19 @@ class CoherencePanel extends Component {
    *
    */
   generateGlobalTopics (paraCount) {
+    //console.log ("generateGlobalTopics ("+paraCount+")");
+
   	let topicElements=[];
 
   	if (!this.props.data) {
+      //console.log ("Info: no data yet!");
   	  return (topicElements);
   	}
 
     let copy=this.props.data;
 
-    //console.log (copy);
-
     if (!copy.data) {
+      //console.log ("Info: data does not contain a data attribute");
       return (topicElements);
     }
 
@@ -350,6 +360,7 @@ class CoherencePanel extends Component {
       let topicObject=this.getTopicObject (i);      
       let topic=topicObject.topic [2];
       let is_topic_cluster = topicObject.is_topic_cluster;
+      
       let is_non_local = topicObject.is_non_local;
       let paragraphs=topicObject.paragraphs;
       let paraElements=[];
@@ -400,7 +411,14 @@ class CoherencePanel extends Component {
         paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j,topic)}>{icon}</div>);
       }
 
-      topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
+      if (this.state.showGlobal == true) {
+        //console.log ("Cluster: " + topics + " => " + is_topic_cluster + " => " + this.state.showGlobal);
+        if (is_topic_cluster == true) {
+          topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
+        }
+      } else {
+        topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
+      }
     }
 
     //let nrParagraphs = parseInt (copy.num_paras);
@@ -566,14 +584,9 @@ class CoherencePanel extends Component {
     let paragraphcontrols=this.generatePagraphControls (paraCount);
     let sentencecontrols=this.generateSentenceControls ();
 
-    if (this.props.showglobal==true) {
-      visualizationGlobal=this.generateGlobalClusters (paraCount);
-    } else {
-      visualizationGlobal=this.generateGlobalClusters (paraCount);
-      visualizationTopics=this.generateGlobalTopics (paraCount);
-      if (this.state.selectedParagraph!=-1) {
-        visualizationLocal=this.generateLocalTopics ();
-      }
+    visualizationTopics=this.generateGlobalTopics (paraCount);
+    if (this.state.selectedParagraph!=-1) {
+      visualizationLocal=this.generateLocalTopics ();
     }
 
     if (this.state.selectedParagraph!=-1) {

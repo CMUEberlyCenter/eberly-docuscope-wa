@@ -15,7 +15,7 @@ export default class DocuScopeTools {
     return (transformedHTML);
     */
 
-    return (anHTMLDataset);
+    return (anHTMLDataset.replaceAll ("_"," "));
   }
 
   /**
@@ -57,8 +57,8 @@ export default class DocuScopeTools {
   /**
    * 
    */
-  coherenceToClusterCounts (aCoherenceData) {
-    //console.log ("coherenceToClusterCounts ()");
+  coherenceToClusterCounts (aCoherenceData,aCoherenceDataLocal) {
+    console.log ("coherenceToClusterCounts ()");
 
     let counts=[];
 
@@ -68,27 +68,29 @@ export default class DocuScopeTools {
 
     for (let i=0;i<aCoherenceData.data.length;i++) {
       let testLemma=aCoherenceData.data [i];
-      if (testLemma.sent_count) {
-        //console.log ("Found sentence count: " + testLemma.sent_count);
+      if (testLemma.is_topic_cluster==true) {
+        if (testLemma.sent_count) {
+          //console.log ("Found sentence count: " + testLemma.sent_count);
 
-        let lemmaFound={
-          count: testLemma.sent_count,
-          lemma: ""
-        };
-       
-        // We need to make sure we take the plurals as well
+          let lemmaFound={
+            count: testLemma.sent_count,
+            lemma: ""
+          };
+         
+          // We need to make sure we take the plurals as well
 
-        if (testLemma.topic) {
-          if (testLemma.topic.length==3) {
-            lemmaFound.lemma=testLemma.topic [2];
-          } else {
-            if (testLemma.topic.length==2) {
-              lemmaFound.lemma=testLemma.topic [1];
+          if (testLemma.topic) {
+            if (testLemma.topic.length==3) {
+              lemmaFound.lemma=testLemma.topic [2];
+            } else {
+              if (testLemma.topic.length==2) {
+                lemmaFound.lemma=testLemma.topic [1];
+              }
             }
           }
-        }
 
-        counts.push (lemmaFound);
+          counts.push (lemmaFound);
+        }
       }
     }
 

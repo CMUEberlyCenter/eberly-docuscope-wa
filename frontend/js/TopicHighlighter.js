@@ -97,6 +97,7 @@ class TopicHighlighter {
    */
   highlightTopic (aParagraphIndex, aSentenceIndex, aTopicList) {
     console.log ("highlightTopic ("+aParagraphIndex+","+aSentenceIndex+")");
+    console.log (aTopicList);
 
     this.clearAllHighlights ();
 
