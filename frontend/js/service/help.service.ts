@@ -19,7 +19,8 @@ const TROUBLESHOOTING_URL = new URL(
 );
 
 const LOADING = '<h3 class="text-info">Loading...</h3>';
-const unavailable = (title: string) => `<h2 class="text-danger">${title} content is unavailable.</h2>`;
+const unavailable = (title: string) =>
+  `<h2 class="text-danger">${title} content is unavailable.</h2>`;
 
 const show_help = new BehaviorSubject(false);
 export const showHelp = (show: boolean) => show_help.next(show);

@@ -3,7 +3,7 @@
  */
 import { bind } from '@react-rxjs/core';
 import { catchError, map, of, switchMap } from 'rxjs';
-import { ajax } from 'rxjs/ajax';
+import { fromFetch } from 'rxjs/fetch';
 import { settings$ } from './settings.service';
 
 /**** Common Dictionary schema ****/
@@ -118,7 +118,9 @@ export const [useCommonDictionary, commonDictionary$] = bind(
   // get url from settings.
   settings$.pipe(
     switchMap((settings) =>
-      ajax.getJSON<ICommonDictionary>(settings.common_dictionary).pipe(
+      fromFetch<ICommonDictionary>(settings.common_dictionary, {
+        selector: (res) => res.json(),
+      }).pipe(
         map((data) => new CommonDictionary(data)),
         catchError((err) => {
           console.error(err);
