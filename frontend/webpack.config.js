@@ -52,7 +52,7 @@ const config = {
       {
         test: /\.tsx?$/i,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /\.test\.tsx?/i],
       },
       {
         test: /\.(js|jsx)$/i,
