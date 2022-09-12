@@ -389,6 +389,7 @@ const StudentView = (props: {
           </Badge>
         </OverlayTrigger>
       </div>
+      <hr/>
       <div
         className="tagged-text"
         onClick={(evt) => click_select(evt)}
