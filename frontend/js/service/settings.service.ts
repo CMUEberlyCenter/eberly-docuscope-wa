@@ -34,7 +34,7 @@ export const [useSettings, settings$] = bind(
     map((data) => ({ ...DEFAULT, ...data })),
     shareReplay(1),
     catchError((err) => {
-      console.warn(`Failed to load settings, using defaults: ${err}`);
+      console.warn(`Failed to load ${SETTINGS_URL.toString()}, using defaults: ${err}`);
       return of(DEFAULT);
     })
   )

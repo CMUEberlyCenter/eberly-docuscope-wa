@@ -18,6 +18,9 @@ const TROUBLESHOOTING_URL = new URL(
   import.meta.url
 );
 
+const LOADING = '<h3 class="text-info">Loading...</h3>';
+const unavailable = (title: string) => `<h2 class="text-danger">${title} content is unavailable.</h2>`;
+
 const show_help = new BehaviorSubject(false);
 export const showHelp = (show: boolean) => show_help.next(show);
 export const [useShowHelp, showHelp$] = bind(show_help, false);
@@ -28,10 +31,10 @@ export const [useHelp, help$] = bind(
     shareReplay(1),
     catchError((err) => {
       console.warn(`Failed to load ${HELP_URL.toString()}: ${err}`);
-      return of('Help content is unavailable.');
+      return of(unavailable('Help'));
     })
   ),
-  '<h3>Loading...</h3>'
+  LOADING
 );
 
 const show_getting_started = new BehaviorSubject(false);
@@ -48,10 +51,10 @@ export const [useGettingStarted, gettingStarted$] = bind(
     shareReplay(1),
     catchError((err) => {
       console.warn(`Failed to load ${GETTING_STARTED_URL.toString()}: ${err}`);
-      return of('Getting Started content is unavailable.');
+      return of(unavailable('Getting Started'));
     })
   ),
-  '<h3>Loading...</h3>'
+  LOADING
 );
 
 const show_troubleshooting = new BehaviorSubject(false);
@@ -68,8 +71,8 @@ export const [useTroubleshooting, troubleshooting$] = bind(
     shareReplay(1),
     catchError((err) => {
       console.warn(`Failed to load ${TROUBLESHOOTING_URL.toString()}: ${err}`);
-      return of('Troubleshooting content is unavailable.');
+      return of(unavailable('Troubleshooting'));
     })
   ),
-  '<h3>Loading...</h3>'
+  LOADING
 );
