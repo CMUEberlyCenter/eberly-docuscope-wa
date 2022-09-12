@@ -7,7 +7,6 @@ export default defineConfig({
     globals: true,
     include: ['js/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     environment: 'jsdom',
-    setupFiles: ['./js/testing/mock_request.ts'],
     coverage: {
       exclude: ['js/testing/**', '**/*.test.*', '**/*.spec.*']
     }

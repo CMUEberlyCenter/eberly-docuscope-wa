@@ -7,7 +7,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
-  map,
+  map
 } from 'rxjs';
 import { Descendant, Node } from 'slate';
 
@@ -22,7 +22,10 @@ const serialize = (nodes: Descendant[]): string => {
 // For tracking the Editor text content.
 export const editorText = new BehaviorSubject<Descendant[]>([]);
 export const [useEditorText, editorText$] = bind(
-  editorText.pipe(distinctUntilChanged(), map(serialize)),
+  editorText.pipe(
+    distinctUntilChanged((prev, next) => serialize(prev) === serialize(next)),
+    map(serialize)
+  ),
   ''
 );
 
