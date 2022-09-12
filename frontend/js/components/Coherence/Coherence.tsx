@@ -100,9 +100,9 @@ const Coherence = (props: {
       let customTopics=props.ruleManager.getAllCustomTopics ();
       let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
 
-      console.log ("Adding custom topics (string): " + customTopics);
-      console.log ("Adding custom topics (structured): ");
-      console.log (customTopicsStructured);
+      //console.log ("Adding custom topics (string): " + customTopics);
+      //console.log ("Adding custom topics (structured): ");
+      //console.log (customTopicsStructured);
       
       const escaped = encodeURIComponent(text);
 

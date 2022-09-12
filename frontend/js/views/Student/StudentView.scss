@@ -1,5 +1,10 @@
 $cmu-secondary-gold: #a60;
 
+/* This one should really go into a global file */
+.spacer {
+  flex: 1;
+}
+
 .editor-content {
   outline: none;
   white-space: normal;

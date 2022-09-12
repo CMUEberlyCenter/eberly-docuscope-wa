@@ -1,6 +1,6 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
-import React, { useId, useState } from "react";
+import React, { useId, useState, Component, useRef, useEffect } from "react";
 import { Alert, Card, Collapse } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { ExpectationRule } from "../../service/expectations.service";
@@ -17,6 +17,13 @@ import ClusterPanel from '../ClusterPanel/ClusterPanel';
 import TopicHighlighter from "../../TopicHighlighter";
 
 import { upfrontValues } from "../../data/values";
+
+import { combineLatest, filter, map } from "rxjs";
+import { bind } from "@react-rxjs/core";
+
+import { currentTool$ } from "../../service/current-tool.service";
+import { lockedEditorText$ } from "../../service/editor-state.service";
+import { useLockedEditorText } from "../../service/editor-state.service";
 
 /*
 interface RuleProps {
@@ -63,6 +70,17 @@ const Rule = (props: RuleProps) => {
 };
 */
 
+// Using react-rxjs to get observable to act like hooks.
+// On locking text with some text present and the tool is clarity
+// emit the text.
+const [useCoherenceText /*coherenceText$*/] = bind(
+  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
+    filter((data) => data.tool === "expectations"),
+    map((data) => data.text)
+  ),
+  ""
+);
+
 /** Component specific error message. */
 const ErrorFallback = (props: { error?: Error }) => (
   <Alert variant="danger">
@@ -79,6 +97,37 @@ const Expectations = (props: {
     ruleManager: any,
     editorValue: string
   }) => {
+
+  const text = useCoherenceText();
+
+  useEffect(() => {
+    //console.log ("useEffect ()");
+
+    if (text !== "") {
+      //setStatus("Retrieving results...");
+
+      let customTopics=props.ruleManager.getAllCustomTopics ();
+      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+
+      //console.log ("Adding custom topics (string): " + customTopics);
+      //console.log ("Adding custom topics (structured): ");
+      //console.log (customTopicsStructured);
+      
+      const escaped = encodeURIComponent(text);
+
+      const encoded = window.btoa(escaped);
+
+      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
+        //console.log ("Processing incoming coherence data ...");
+        
+        let coherence=incoming.coherence;
+        let local=incoming.local;
+
+        //setCoherenceData(coherence);
+        //setLocalCoherenceData(local);        
+      });
+    }
+  }, [text, props.api]);
 
   // MvV: We should load this from disk through the node service since this will
   // be both authorable and different per course/context. So we shouldn't hardcode it
