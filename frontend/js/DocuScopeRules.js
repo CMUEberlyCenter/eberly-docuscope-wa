@@ -582,15 +582,40 @@ export default class DocuScopeRules {
   updateLemmaCounts (aCountList) {
     console.log ("updateLemmaCounts ()");
 
+    for (let t=0;t<this.rules.length;t++) {
+      let rule=this.rules [t];
+      for (let j=0;j<rule.children.length;j++) {
+        let cluster=rule.children [j];
+        // Reset the count, we can do that because the count list has everything coming in from the back-end
+        cluster.sentenceCount=0; 
+      }
+    }
+
     for (let i=0;i<aCountList.length;i++) {
       let aLemmaCount=aCountList [i];
 
-      for (let i=0;i<this.rules.length;i++) {
-        let rule=this.rules [i];
+      //console.log ("Updating lemma: " + aCountList [i].lemma + ", with count: " + aCountList [i].count);
+
+      for (let t=0;t<this.rules.length;t++) {
+        let rule=this.rules [t];
         for (let j=0;j<rule.children.length;j++) {
           let cluster=rule.children [j];
-          // Reset the count, we can do that because the count list has everything coming in from the back-end
-          cluster.sentenceCount=0; 
+
+          let clusterObject=cluster.raw;
+
+          let topics=clusterObject.topics;
+
+          if (topics) {
+            if (topics.length>0) {
+              let targetTopic=topics [0];
+              //console.log ("Comparing " + targetTopic.lemma + " to: " + aCountList [i].lemma);
+              if (targetTopic.lemma==aCountList [i].lemma) {
+                cluster.sentenceCount=aCountList [i].count;
+              }
+            }
+          }
+
+          /*
           let clusterObject=cluster.raw;
           let topics=clusterObject.topics;
 
@@ -633,9 +658,12 @@ export default class DocuScopeRules {
               cluster.sentenceCount=debit;
             }
           }
+          */
         }
       }
     }
+
+    console.log (this.rules);
 
     if (this.updateNotice) {
       this.updateNotice (false);
@@ -741,4 +769,63 @@ export default class DocuScopeRules {
 
     return (false);
   }
+
+  /**
+   * 
+   */
+  cleanCoherenceData (aCoherenceData) {
+    console.log ("cleanCoherenceData ()");
+
+    let cleanedData=this.dataTools.deepCopy (aCoherenceData);
+
+    let data=cleanedData.data;
+  
+    let replacedCount=0;
+
+    for (let i=0;i<data.length;i++) {
+      let topicObject=data[i];
+      let topic=topicObject.topic;
+      for (let j=0;j<topic.length;j++) {
+        if (topic[j].indexOf ("_")!=-1) {
+          topic[j]=topic[j].replaceAll ("_"," ");
+          replacedCount++;
+        }
+      }
+    }
+
+    console.log ("Cleaned " + replacedCount + " multiword topics (global)");
+
+    return (cleanedData);
+  }
+
+  /**
+   * 
+   */
+  cleanLocalCoherenceData (aCoherenceLocalData) {
+    console.log ("cleanLocalCoherenceData ()");
+
+    let cleanedData=this.dataTools.deepCopy (aCoherenceLocalData);
+
+    let replacedCount=0;
+
+    for (let i=0;i<cleanedData.length;i++) {
+      let topicObject=cleanedData[i];
+      if (topicObject.hasOwnProperty ("data")==true) {
+        let topicData=topicObject.data;
+        for (let k=0;k<topicData.length;k++) {
+          let topic=topicData[k].topic;
+          for (let j=0;j<topic.length;j++) {
+            if (topic[j].indexOf ("_")!=-1) {
+              topic[j]=topic[j].replaceAll ("_"," ");
+              replacedCount++;
+            }
+          }
+        }
+      }
+    }
+
+    console.log ("Cleaned " + replacedCount + " multiword topics (local)");
+
+    return (cleanedData);
+  }  
 }

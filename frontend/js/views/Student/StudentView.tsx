@@ -19,6 +19,7 @@ import React, {
 } from "react";
 import {
   Badge,
+  Button,
   Card,
   Container,
   Form,
@@ -333,7 +334,7 @@ const StudentView = (props: {
 
   let topicTaggedContent;
 
-  // Every other panel that needs it. We'll clean up the logic later
+  // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
   if (showTaggedText == false) {
     showOnTopicText = currentTab === "coherence" && !editable && props.html != null;
 
@@ -346,7 +347,7 @@ const StudentView = (props: {
     }    
   }
 
-  console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
+  //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
   if (showOnTopicText == true) {
     topicTaggedContent = (
@@ -460,6 +461,15 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
+  const globalUpdate = (e:any) => {
+    console.log ("globalUpdate ()");
+
+    // For now if someone requests (or really, forces) an update, let's switch
+    // the editor to read-only mode for now
+  }
+
+  //>--------------------------------------------------------
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -530,6 +540,7 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
+            <Button onClick={(e) => globalUpdate (e)}>Update</Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
