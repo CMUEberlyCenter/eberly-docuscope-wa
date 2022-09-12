@@ -1,5 +1,5 @@
 import { first } from 'rxjs';
-import { describe, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import { currentTool, currentTool$ } from './current-tool.service';
 
 describe('current-tool.service', () => {

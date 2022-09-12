@@ -7,7 +7,7 @@ import {
   combineLatest,
   distinctUntilChanged,
   filter,
-  map
+  map,
 } from 'rxjs';
 import { Descendant, Node } from 'slate';
 
