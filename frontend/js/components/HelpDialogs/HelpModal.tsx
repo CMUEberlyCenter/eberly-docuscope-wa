@@ -14,5 +14,5 @@ export const HelpModal = () => {
       </Modal.Body>
     </Modal>
   );
-};
+}
 export default HelpModal;
