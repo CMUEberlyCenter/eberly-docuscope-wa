@@ -1,11 +1,31 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import fetchMock from "fetch-mock";
 import React from "react";
-import { describe } from "vitest";
+import { first } from "rxjs";
+import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import {
+  showGettingStarted,
+  showGettingStarted$,
+} from "../../service/help.service";
 import GettingStartedModal from "./GettingStartedModal";
 
+beforeAll(() => {
+  fetchMock.get(/getting_started.html$/, "<div>getting started</div>");
+  fetchMock.catch(404);
+});
+afterAll(() => {
+  fetchMock.restore();
+});
 describe("GettingStartedModal", () => {
   test("creation", async () => {
     render(<GettingStartedModal />);
-    await waitFor(() => screen.queryByText("Getting Started"));
+    showGettingStarted(true);
+    await waitFor(() =>
+      expect(screen.getByText("Getting Started")?.textContent).toBe(
+        "Getting Started"
+      )
+    );
+    fireEvent.click(screen.getByLabelText("Close"));
+    showGettingStarted$.pipe(first()).subscribe((v) => expect(v).toBeFalsy());
   });
 });

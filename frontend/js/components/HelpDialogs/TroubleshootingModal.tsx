@@ -18,5 +18,5 @@ export const TroubleshootingModal = () => {
       </Modal.Body>
     </Modal>
   );
-};
+}
 export default TroubleshootingModal;

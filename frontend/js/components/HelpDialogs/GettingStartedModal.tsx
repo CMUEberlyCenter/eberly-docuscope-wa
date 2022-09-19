@@ -18,5 +18,5 @@ export const GettingStartedModal = () => {
       </Modal.Body>
     </Modal>
   );
-};
+}
 export default GettingStartedModal;
