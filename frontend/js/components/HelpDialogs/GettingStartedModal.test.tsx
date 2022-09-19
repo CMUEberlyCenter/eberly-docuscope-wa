@@ -27,5 +27,6 @@ describe("GettingStartedModal", () => {
     );
     fireEvent.click(screen.getByLabelText("Close"));
     showGettingStarted$.pipe(first()).subscribe((v) => expect(v).toBeFalsy());
+    await waitFor(() => expect(screen.queryByText("Getting Started")).toBe(null));
   });
 });

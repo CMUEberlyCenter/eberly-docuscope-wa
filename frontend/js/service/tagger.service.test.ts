@@ -10,7 +10,7 @@ import {
   test,
 } from 'vitest';
 import { currentTool } from './current-tool.service';
-import { editorState, editorText } from './editor-state.service';
+import { editorText, setEditorState } from './editor-state.service';
 import {
   taggerResults$,
   TaggerResults,
@@ -28,7 +28,7 @@ beforeAll(() => {
 });
 beforeEach(() => {
   currentTool.next('impressions');
-  editorState.next(false);
+  setEditorState(false);
 });
 afterAll(() => {
   fetchMock.restore();

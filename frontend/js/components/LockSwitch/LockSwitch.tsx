@@ -3,7 +3,7 @@ A simple two state button for showing and changing locked state.
 
 Shows a pa
 */
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import "./LockSwitch.scss";
 
 interface LockSwitchProps {
@@ -30,6 +30,8 @@ const LockSwitch = (props: LockSwitchProps) => {
     }
     setToggle(!toggle);
   };
+
+  useEffect(() => setToggle(props.checked), [props])
 
   return (
     <div

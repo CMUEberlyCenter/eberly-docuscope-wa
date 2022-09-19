@@ -49,7 +49,7 @@ import DocuScopeAbout from "../../DocuScopeAbout";
 import DocuScopeReset from "../../DocuScopeReset";
 import { currentTool } from "../../service/current-tool.service";
 import {
-  editorState,
+  setEditorState,
   editorText,
   useEditorState,
 } from "../../service/editor-state.service";
@@ -471,6 +471,7 @@ const StudentView = (props: {
     // the editor to read-only mode for now
 
     // 1. The edit toggle needs to be switched to off
+    setEditorState(false);
 
     // 2. The update method in the parent component needs to be called
     props.update (null);
@@ -566,10 +567,11 @@ const StudentView = (props: {
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
             <Button onClick={(e) => globalUpdate (editorTextValue)}>Update</Button>
+            <Button onClick={() => setEditorState(false)}>Update</Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => editorState.next(checked)}
+              onChange={(checked) => setEditorState(checked)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
