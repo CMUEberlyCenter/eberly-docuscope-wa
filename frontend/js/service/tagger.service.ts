@@ -9,6 +9,7 @@ import { bind } from '@react-rxjs/core';
 import {
   catchError,
   combineLatest,
+  distinctUntilKeyChanged,
   filter,
   mergeMap,
   Observable,
@@ -64,7 +65,7 @@ export function gen_patterns_map(
   res: TaggerResults
 ): Map<string, PatternData[]> {
   return new Map<string, PatternData[]>(
-    res.patterns.map((d) => [d.category, d.patterns ?? []])
+    res.patterns.map((d) => [d.category, d.patterns])
   );
 }
 
@@ -151,6 +152,7 @@ const tagText = combineLatest({
   filter((c) => !!c.settings),
   filter((c) => !c.state),
   filter((c) => c.text.trim().length > 0),
+  distinctUntilKeyChanged('text'),
   mergeMap((c) => tag(c.settings.tagger, c.text)),
   catchError((err: Error) =>
     // signal error and put error message in html_content.
