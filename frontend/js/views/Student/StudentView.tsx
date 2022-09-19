@@ -115,10 +115,11 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @returns
  */
 const StudentView = (props: {
-  api: apiCall;
-  ruleManager: DocuScopeRules;
-  html: string;
-  htmlSentences: string;
+  api: apiCall,
+  ruleManager: DocuScopeRules,
+  html: string,
+  htmlSentences: string,
+  update: any
 }) => {
   const topicHighlighter = new TopicHighlighter();
 
@@ -461,11 +462,35 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const globalUpdate = (e:any) => {
+  const globalUpdate = (text:string) => {
     console.log ("globalUpdate ()");
+
+    console.log (text);
 
     // For now if someone requests (or really, forces) an update, let's switch
     // the editor to read-only mode for now
+
+    // 1. The edit toggle needs to be switched to off
+
+    // 2. The update method in the parent component needs to be called
+    props.update (null);
+
+    // 3. Get the latest from the server    
+    if (text !== "") {
+      //setStatus("Retrieving results...");
+
+      let customTopics=props.ruleManager.getAllCustomTopics ();
+      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+
+      const escaped = encodeURIComponent(text);
+
+      const encoded = window.btoa(escaped);
+
+      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {        
+        //let coherence=incoming.coherence;
+        //let local=incoming.local;
+      });
+    }
   }
 
   //>--------------------------------------------------------
@@ -540,7 +565,7 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
-            <Button onClick={(e) => globalUpdate (e)}>Update</Button>
+            <Button onClick={(e) => globalUpdate (editorTextValue)}>Update</Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
@@ -548,7 +573,7 @@ const StudentView = (props: {
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
-            {showTaggedText ? taggedText : ""}
+            {(showTaggedText || showOnTopicText) ? taggedText : ""}
             {topicTaggedContent}
             <Slate
               editor={editor}
@@ -560,7 +585,7 @@ const StudentView = (props: {
                 ) {
                   editorText.next(content);
                   setEditorValue(content);
-                  setEditorTextValue(serialize(content));
+                  setEditorTextValue(serialize(content));                  
                   sessionStorage.setItem("content", JSON.stringify(content));
                 }
               }}

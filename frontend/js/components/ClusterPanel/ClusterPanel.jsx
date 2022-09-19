@@ -57,13 +57,18 @@ class ClusterPanel extends Component {
 
     this.state = {      
       currentTab: "expectationabout",
+      topicTextOriginal: "",
       topicText: "",
-      topicTextStatic: ""
+      topicTextStatic: "",
+      duplicateFound: false,
+      duplicate: null
     };
 
     this.switchTab=this.switchTab.bind(this);
     this.onTopicsChange=this.onTopicsChange.bind(this);
     this.onCustomTopicUpdate=this.onCustomTopicUpdate.bind(this);
+    this.onTopiEditorFocusOut=this.onTopiEditorFocusOut.bind(this);
+    this.onTopiEditorFocusIn=this.onTopiEditorFocusIn.bind(this);
   }
 
   /**
@@ -76,9 +81,39 @@ class ClusterPanel extends Component {
       let aText=this.getTopicText ();    
       let aTextStatic=this.getTopicTextStatic ();
       this.setState ({
+        topicTextOriginal: aText,
         topicText: aText,
         topicTextStatic: aTextStatic
       });      
+    }
+  }
+
+  /**
+   * 
+   */
+  onTopiEditorFocusOut (e) {
+    console.log ("onTopiEditorFocusOut ()");
+
+    if (this.state.topicText=="") {
+      if (this.props.disableTreeSelect) {
+        this.props.disableTreeSelect (false);
+      }
+    }
+
+    if (this.state.topicText==this.state.topicTextOriginal) {
+      if (this.props.disableTreeSelect) {
+        this.props.disableTreeSelect (false);
+      }
+    }    
+  }
+
+  /**
+   * 
+   */
+  onTopiEditorFocusIn (e) {
+    console.log ("onTopiEditorFocusIn ()");
+    if (this.props.disableTreeSelect) {
+      this.props.disableTreeSelect (true);
     }
   }
 
@@ -131,27 +166,47 @@ class ClusterPanel extends Component {
    * 
    */
   onTopicsChange (e) {
-  	//console.log ("onTopicsChange ()");
-
-    if (this.props.ruleManager.hasExistingTopic (this.props.currentRule,this.props.currentCluster,e.target.value)==true) {
-      // Sound the alarm
-      console.log ("Topic already exists in a different cluster!");
-    }
+  	console.log ("onTopicsChange ("+e.target.value+")");
 
   	this.setState ({
       topicText: e.target.value
-  	});  	
+  	},() => {
+      let topicArray=[];
+
+      if ((typeof this.state.topicText === 'string') && (this.state.topicText.trim().length > 0)) {
+        topicArray=this.dataTools.topicsToArray (this.state.topicText);
+      }
+
+      let found=false;
+      let duplicate=this.props.ruleManager.checkDuplicates (this.props.currentRule,this.props.currentCluster, topicArray);
+
+      if (duplicate!=null) {
+        console.log ("Error: duplicate topic found!");
+        found=true;
+      }
+
+      this.setState ({      
+        duplicateFound: found,
+        duplicate: duplicate
+      });
+    });
   }
 
   /**
    * 
    */
   onCustomTopicUpdate (e) {
-    //console.log ("onCustomTopicUpdate ()");
+    console.log ("onCustomTopicUpdate ()");
+
     let topicArray=[];
 
     if ((typeof this.state.topicText === 'string') && (this.state.topicText.trim().length > 0)) {
       topicArray=this.dataTools.topicsToArray (this.state.topicText);
+    }
+
+    if (this.props.ruleManager.checkDuplicates (this.props.currentRule,this.props.currentCluster, topicArray)==true) {
+      console.log ("Error: duplicate topic found!");
+      return;
     }
 
     if (this.props.ruleManager.setClusterCustomTopics (this.props.currentRule,this.props.currentCluster, topicArray)==false) {
@@ -169,6 +224,10 @@ class ClusterPanel extends Component {
       const encoded = window.btoa(escaped);
 
       this.props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming) => {});
+    }
+
+    if (this.props.disableTreeSelect) {
+      this.props.disableTreeSelect (false);
     }
   }
 
@@ -213,10 +272,17 @@ class ClusterPanel extends Component {
   createTopicEditor () {
     let enableEditor=false;
     let textareaClassName="cluster-topic-input";
+    let duplicateWarningClass="";
+    let duplicatewarning;
 
     if (this.props.currentCluster==-1) {
       enableEditor=true;
       textareaClassName="cluster-topic-input cluster-textarea-disabled";
+    }
+
+    if (this.state.duplicateFound==true) {
+      duplicateWarningClass=" cluster-duplicate";
+      duplicatewarning=<div className="cluster-warning">{"Warning: duplicate topic '"+this.state.duplicate.topic+"' found in " + this.state.duplicate.lemma}</div>;
     }
 
     return (<div className="cluster-topic-editor">
@@ -228,12 +294,16 @@ class ClusterPanel extends Component {
       </textarea>      
       <div>Custom Topics:</div>
       <textarea
+        tabindex={1}
         readOnly={enableEditor}
-        className={textareaClassName}
+        className={textareaClassName + duplicateWarningClass}
 	      value={this.state.topicText}
-	      onChange={(e) => this.onTopicsChange (e)}>
+	      onChange={(e) => this.onTopicsChange (e)}
+        onBlur={(e) => this.onTopiEditorFocusOut (e)}
+        onFocus={(e) => this.onTopiEditorFocusIn (e)}>
       </textarea>
     	<div className="cluster-topic-controls">
+        {duplicatewarning}
     	  <Button onClick={(e) => this.onCustomTopicUpdate (e)} disabled={enableEditor}>Update</Button>
     	</div>
     </div>);
@@ -287,7 +357,7 @@ class ClusterPanel extends Component {
    * 
    * topic_cluster_edu: >
    *  <p><b>What are topic clusters?</b> &mdash; Consider what your responses are for this expectation, and enter the words/phrases you need to convey them to your reader. A set of words/phrases for each response is called a topic cluster.</p>
- 
+   *
    */
   createClusterDefinition () {
     if (this.props.currentCluster!=-1) {
@@ -339,7 +409,7 @@ class ClusterPanel extends Component {
 	      <Tab eventKey={"examples"} title="Sample Sentences">
 	      {examples}
 	      </Tab>
-	    </Tabs>  		
+	    </Tabs> 
   	</div>);
   }
 }

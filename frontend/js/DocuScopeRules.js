@@ -720,55 +720,12 @@ export default class DocuScopeRules {
     let topics=clusterObject.topics;
     if (topics) {
       if (topics.length>0) {
-        //console.log ("Lemma: " + topics [0].lemma);
         clusterList.push (topics [0].lemma);
       }
     }
     
     return (clusterList);
   }  
-
-  /**
-   * Note that aTopicList isn't an array, it's a newline separated string
-   */
-  hasExistingTopic (aRuleIndex, aClusterIndex, aTopicList) {
-    console.log ("hasExistingTopic ()");
-
-    let checkList=this.dataTools.topicsToArray (aTopicList);
-
-    if (checkList.length==0) {
-      return (false);
-    }
-
-    for (let i=0;i<this.rules.length;i++) {   
-      if (i!=aRuleIndex) {
-        let rule=this.rules [i];
-        for (let j=0;j<rule.children.length;j++) {
-          if (j!=aClusterIndex) {
-            let cluster=rule.children [j];
-            let clusterObject=cluster.raw;
-
-            let topics=clusterObject.topics;
-            if (topics) {
-              if (topics.length>0) {
-                let rawTopicsStatic=topics [0].pre_defined_topics;
-                if (this.dataTools.listContainsListElement (rawTopicsStatic, checkList)==true) {
-                  return (true);
-                }
-
-                let rawTopics=topics [0].custom_topics;
-                if (this.dataTools.listContainsListElement (rawTopics, checkList)==true) {
-                  return (true);
-                }
-              }
-            }
-          } 
-        }
-      }  
-    }
-
-    return (false);
-  }
 
   /**
    * 
@@ -828,4 +785,73 @@ export default class DocuScopeRules {
 
     return (cleanedData);
   }  
+
+  /**
+   * 
+   */
+  checkDuplicates (aRuleIndex,aClusterIndex,aTopicList) {
+    console.log ("checkDuplicates ()");
+    console.log (aTopicList);
+
+    if (aTopicList.length==null) {
+      return (null);
+    }
+
+    let duplicateObject=null;
+
+    for (let i=0;i<this.rules.length;i++) {
+      if (i!=aRuleIndex) {
+
+      }
+
+      let rule=this.rules [i];
+      for (let j=0;j<rule.children.length;j++) {
+        if (j!=aClusterIndex) {
+
+        }
+
+        let cluster=rule.children [j];
+        let clusterObject=cluster.raw;
+
+        let topics=clusterObject.topics;
+        if (topics) {
+          if (topics.length>0) {
+            let rawTopicsStatic=topics [0].pre_defined_topics;
+            for (let k=0;k<rawTopicsStatic.length;k++) {
+              let duplicate=this.dataTools.listFindDuplucateInList (aTopicList,rawTopicsStatic);
+              if (duplicate!=null) {
+                duplicateObject={
+                  ruleIndex: i,
+                  clusterIndex: j,
+                  lemma: topics [0].lemma,
+                  topic: duplicate,
+                  type: 0
+                }
+
+                return (duplicateObject);
+              }
+            }
+
+            let rawTopics=topics [0].custom_topics;
+            for (let k=0;k<rawTopics.length;k++) {
+              let duplicate=this.dataTools.listFindDuplucateInList (aTopicList,rawTopics)
+              if (duplicate!=null) {
+                duplicateObject={
+                  ruleIndex: i,
+                  clusterIndex:j,
+                  lemma: topics [0].lemma,
+                  topic: duplicate,
+                  type: 1
+                }
+
+                return (duplicateObject);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    return (duplicateObject);
+  }
 }

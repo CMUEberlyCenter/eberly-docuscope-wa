@@ -100,6 +100,18 @@ const Expectations = (props: {
 
   const text = useCoherenceText();
 
+  //>---------------------------------------------
+
+  const [disabled, setDisabled] = useState(false);
+
+  const disableTreeSelect = (doDisable:boolean) => {
+    console.log ("disableTreeSelect ("+doDisable+")");
+
+    setDisabled(doDisable);
+  }  
+
+  //>---------------------------------------------
+
   useEffect(() => {
     //console.log ("useEffect ()");
 
@@ -109,17 +121,11 @@ const Expectations = (props: {
       let customTopics=props.ruleManager.getAllCustomTopics ();
       let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
 
-      //console.log ("Adding custom topics (string): " + customTopics);
-      //console.log ("Adding custom topics (structured): ");
-      //console.log (customTopicsStructured);
-      
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
-        //console.log ("Processing incoming coherence data ...");
-        
+      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {        
         let coherence=incoming.coherence;
         let local=incoming.local;
 
@@ -142,11 +148,16 @@ const Expectations = (props: {
    * 
    */
   const onRuleClick = (e:any, ruleIndex: number) => {
-    //console.log ("onRuleClick ("+ruleIndex+")");
+    console.log ("onRuleClick ("+ruleIndex+")");
 
     e.preventDefault ();
     e.stopPropagation ();
    
+    if (disabled==true) {
+      console.log ("Disabled!");
+      return;
+    }
+
     setCurrentRuleState ({currentRule: ruleIndex, currentCluster: -1});
   }
 
@@ -154,14 +165,30 @@ const Expectations = (props: {
    * 
    */
   const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    //console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
 
     e.preventDefault ();
     e.stopPropagation ();
 
-    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: clusterIndex});
+    if (disabled==true) {
+      console.log ("Disabled!");
+      return;
+    }    
 
     let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
+
+    /*
+    // Don't change context if we've found a duplicate in the current edit window
+    if (props.ruleManager.checkDuplicates (ruleIndex,clusterIndex,topicList)!=null) {
+      console.log ('Error: duplicate(s) found');
+      return;
+    }
+    */
+
+    setCurrentRuleState ({
+      currentRule: ruleIndex, 
+      currentCluster: clusterIndex
+    });
  
     let highlighter=new TopicHighlighter ();
 
@@ -219,7 +246,7 @@ const Expectations = (props: {
 
   const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
 
-  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} editorValue={props.editorValue} />;
+  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} editorValue={props.editorValue} disableTreeSelect={disableTreeSelect} />;
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">

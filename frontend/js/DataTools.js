@@ -261,4 +261,21 @@ export default class DataTools {
 
     return (false);
   }
+
+  /**
+   * How much can this be optimized?
+   */
+  listFindDuplucateInList (aListSource, aListTarget) {
+    for (let i=0;i<aListSource.length;i++) {
+      let testA=aListSource [i];
+      for (let j=0;j<aListTarget.length;j++) {
+        let testB=aListTarget[j];
+        if (testA.toLowerCase ()==testB.toLowerCase ()) {
+          return (testA);
+        }
+      }
+    }
+
+    return (null);
+  }  
 }

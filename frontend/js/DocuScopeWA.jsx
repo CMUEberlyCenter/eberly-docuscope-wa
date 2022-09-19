@@ -12,6 +12,12 @@ import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
 
+/*
+import { currentTool$ } from "../../service/current-tool.service";
+import { lockedEditorText$ } from "../../service/editor-state.service";
+import { useLockedEditorText } from "../../service/editor-state.service";
+*/
+
 // Replace with RxJS
 var badThat=null;
 
@@ -68,6 +74,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     }
 
     this.updateNotice=this.updateNotice.bind(this);
+    this.updateSerializedText=this.updateSerializedText.bind(this);
     this.onLaunch=this.onLaunch.bind(this);
     this.apiCall=this.apiCall.bind(this);
   }
@@ -196,6 +203,25 @@ export default class DocuScopeWA extends EberlyLTIBase {
   }
 
   /**
+   * Make sure the preview contains the same text as the editor. We call this to make sure that the 'hidden' 
+   * serialized text version of the editor is set so that we can go into read-only- mode
+   */
+  updateSerializedText (aText) {
+    console.log ("updateSerializedText ()");
+    /*
+    this.setState ({
+      html: aText,
+      htmlSentences: null
+    });
+    */
+
+    this.setState ({
+      html: null,
+      htmlSentences: null
+    });    
+  }
+
+  /**
    *
    */
   apiPOSTCall (aURL,aData) {
@@ -203,6 +229,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     let payload=this.createDataMessage (aData);
     let that=this;
+
+    this.updateSerializedText (null);
 
     return new Promise((resolve, reject) => {
       fetch(aURL,{
@@ -256,6 +284,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
    */
   apiGETCall (aURL, _aData) {
     console.log ("apiGETCall ()");
+
+    this.updateSerializedText (null);
 
     let that=this;
     return new Promise((resolve, reject) => {
@@ -425,7 +455,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
       mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
     } else {
-      mainPage=<DocuScopeWAScrim><StudentView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} html={this.state.html} htmlSentences={this.state.htmlSentences}></StudentView></DocuScopeWAScrim>;
+      mainPage=<DocuScopeWAScrim>
+        <StudentView 
+          api={this.apiCall} 
+          server={this.state.server} 
+          ruleManager={this.state.ruleManager} 
+          html={this.state.html} 
+          htmlSentences={this.state.htmlSentences}
+          update={this.updateSerializedText}>
+        </StudentView>
+      </DocuScopeWAScrim>;
     }
 
     return (mainPage);

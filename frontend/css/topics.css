@@ -3,11 +3,11 @@
 }
 
 .paragraph:hover {
-  background: #0eed0e36;
+  /*background: #0eed0e36;*/
 }
 
 .paragraph-highlight {
-  background: #0eed0e36;
+  /*background: #0eed0e36;*/
 }
 
 .sentence {
@@ -15,7 +15,7 @@
 }
 
 .sentence:hover {
-  background: yellow;	
+  /*background: yellow;*/
 }
 
 .sentence-highlight {
@@ -33,7 +33,7 @@
 }
 
 .word:hover {
-  background: #f7f7f7;
+  /*background: #f7f7f7;*/
 }
 
 .word-highlight {
