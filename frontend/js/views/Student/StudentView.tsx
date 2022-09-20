@@ -567,7 +567,6 @@ const StudentView = (props: {
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
             <Button onClick={(e) => globalUpdate (editorTextValue)}>Update</Button>
-            <Button onClick={() => setEditorState(false)}>Update</Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
