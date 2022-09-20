@@ -294,7 +294,7 @@ class ClusterPanel extends Component {
       </textarea>      
       <div>Custom Topics:</div>
       <textarea
-        tabindex={1}
+        tabIndex={1}
         readOnly={enableEditor}
         className={textareaClassName + duplicateWarningClass}
 	      value={this.state.topicText}
