@@ -20,11 +20,11 @@ afterAll(() => {
 describe("TroubleshootingModal", () => {
   test("creation", async () => {
     render(<TroubleshootingModal />);
-    showTroubleshooting(true);
+    await waitFor(() => showTroubleshooting(true));
     await waitFor(() =>
       expect(screen.getByText("Troubleshooting")).toBeDefined()
     );
-    fireEvent.click(screen.getByLabelText("Close"));
+    await waitFor(() => fireEvent.click(screen.getByLabelText("Close")));
     showTroubleshooting$.pipe(first()).subscribe((v) => expect(v).toBeFalsy());
   });
 });

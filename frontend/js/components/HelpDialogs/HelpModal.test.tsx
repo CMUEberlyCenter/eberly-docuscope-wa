@@ -17,11 +17,11 @@ afterAll(() => {
 describe("HelpModal", () => {
   test("creation", async () => {
     render(<HelpModal />);
-    showHelp(true);
+    await waitFor(() => showHelp(true));
     await waitFor(() =>
-      expect(screen.getByText("DocuScope Write & Audit")).toBeDefined()
+      expect(screen.queryByText("DocuScope Write & Audit")).toBeDefined()
     );
-    fireEvent.click(screen.getByLabelText("Close"));
+    await waitFor(() => fireEvent.click(screen.getByLabelText("Close")));
     showHelp$.pipe(first()).subscribe((show) => expect(show).toBeFalsy());
   });
 });
