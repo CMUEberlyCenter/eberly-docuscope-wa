@@ -531,27 +531,27 @@ const StudentView = (props: {
           </Container>
         </Navbar>
       </header>
-      <main className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden">
-        <aside ref={toolRef} className="d-flex flex-column tools-pane">
+      <main className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden h-100">
+        <aside ref={toolRef} className="d-flex flex-column tools-pane h-100 overflow-hidden">
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
-            <Tab eventKey={"expectations"} title="Expectations">
+            <Tab eventKey={"expectations"} title="Expectations" className="overflow-hidden h-100">
               <Expectations
                 api={props.api}
                 ruleManager={props.ruleManager}
                 editorValue={editorTextValue}
               />
             </Tab>
-            <Tab eventKey={"coherence"} title="Coherence">
+            <Tab eventKey={"coherence"} title="Coherence" className="overflow-hidden h-100">
               <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
-            <Tab eventKey={"clarity"} title="Clarity">
+            <Tab eventKey={"clarity"} title="Clarity" className="overflow-hidden h-100">
               <Clarity
                 api={props.api}
                 ruleManager={props.ruleManager}
                 htmlSentences={props.htmlSentences}
               />
             </Tab>
-            <Tab eventKey={"impressions"} title="Impressions">
+            <Tab eventKey={"impressions"} title="Impressions" className="overflow-hidden h-100">
               <Impressions />
             </Tab>
           </Tabs>
