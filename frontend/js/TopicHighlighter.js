@@ -96,7 +96,7 @@ class TopicHighlighter {
    * 
    */
   highlightTopic (aParagraphIndex, aSentenceIndex, aTopicList) {
-    console.log ("highlightTopic ("+aParagraphIndex+","+aSentenceIndex+")");
+    //console.log ("highlightTopic ("+aParagraphIndex+","+aSentenceIndex+")");
     console.log (aTopicList);
 
     this.clearAllHighlights ();
@@ -120,7 +120,9 @@ class TopicHighlighter {
       	let anElement=topicElements [i];
 
         for (let j=0;j<aTopicList.length;j++) {
-          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
+          let topic=anElement.dataset.topic;
+          //if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
+          if (topic.toLowerCase ()==aTopicList [j].toLowerCase()) {
           	anElement.classList.add("word-highlight");
           	anElement.parentElement.classList.add("sentence-highlight");
           }
@@ -133,13 +135,16 @@ class TopicHighlighter {
 
         for (let j=0;j<aTopicList.length;j++) {
           if (aSentenceIndex==-1) {	      
-	        if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+          let topic=anElement.dataset.topic;
+	        //if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+          if (topic.toLowerCase ()==aTopicList [j].toLowerCase()) {         
               anElement.classList.add("word-highlight");
               anElement.parentElement.classList.add("sentence-highlight");
             }
           } else {
 	      	if (j==aSentenceIndex) {
-	          if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+	          //if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {	        
+            if (topic.toLowerCase ()==aTopicList [j].toLowerCase()) {         
                 anElement.classList.add("word-highlight");
                 anElement.parentElement.classList.add("sentence-highlight");
 	          }
