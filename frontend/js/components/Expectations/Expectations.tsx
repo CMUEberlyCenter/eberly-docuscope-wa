@@ -135,11 +135,6 @@ const Expectations = (props: {
     }
   }, [text, props.api]);
 
-  // MvV: We should load this from disk through the node service since this will
-  // be both authorable and different per course/context. So we shouldn't hardcode it
-  // into the webpack bundle
-  //const expectations = useExpectations();
-
   const ref = useId();
 
   const [ruleState, setCurrentRuleState] = useState({currentRule: -1, currentCluster: -1});
@@ -207,7 +202,6 @@ const Expectations = (props: {
           
       for (let j=0;j<aRule.children.length;j++) {
         let clustercount=<img className="cluster-mini-icon" src={clusterWarningIcon}/>;
-        let topicsentencecount=0;
         let aCluster=aRule.children [j];
         let id="rule-"+i+"-"+j;
 
@@ -222,7 +216,8 @@ const Expectations = (props: {
           clustercount=<div className="cluster-mini-icon" />;
         }
 
-        topicsentencecount=ruleManager.topicSentenceCount (i,j);
+        let count=ruleManager.topicSentenceCount (i,j);
+        let topicsentencecount=("0" + count).slice(-2); // Format 2 digits so that the vertical alignment always works out
 
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
           <div className={clusterClass}>
