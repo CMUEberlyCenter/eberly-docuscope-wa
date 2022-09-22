@@ -218,8 +218,14 @@ const Expectations = (props: {
           clustercount=<div className="cluster-mini-icon" />;
         }
 
+        let upDog=<img className="cluster-up-arrow" src={clusterUpIcon}/>;
+
         let count=ruleManager.topicSentenceCount (i,j);
         let topicsentencecount=("0" + count).slice(-2); // Format 2 digits so that the vertical alignment always works out
+
+        if (count>0) {
+          upDog=<img className="cluster-up-arrow" style={{visibility: "hidden"}} src={clusterUpIcon}/>;          
+        }
 
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
           <div className={clusterClass}>
@@ -227,7 +233,7 @@ const Expectations = (props: {
             <div className="cluster-line-icon" title="Custom topics not defined here">{clustercount}</div>
             <div className="cluster-line-icon" title="Current expectation value"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
             <div className="cluster-mini-label">Expected</div>
-            <div className="cluster-line-icon"><img className="cluster-up-arrow" src={clusterUpIcon}/></div>
+            <div className="cluster-line-icon">{upDog}</div>
             <div className="cluster-mini-label" title="Nr. sentences matching topics">{topicsentencecount}</div>
           </div>
         </li>);
