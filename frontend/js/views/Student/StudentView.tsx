@@ -328,15 +328,15 @@ const StudentView = (props: {
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Mike's panel)
-  const showTaggedText = currentTab === "impressions" && !editable && isTaggerResult(tagging);
+  const showDocuScopeTaggedText = currentTab === "impressions" && !editable && isTaggerResult(tagging);
   let showOnTopicText = false;
 
-  const taggedTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
+  const taggedDocuScopeTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
 
   let topicTaggedContent;
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
-  if (showTaggedText == false) {
+  if (showDocuScopeTaggedText == false) {
     showOnTopicText = currentTab === "coherence" && !editable && props.html != null;
 
     if (showOnTopicText == false) {
@@ -360,7 +360,7 @@ const StudentView = (props: {
   }
 
   // Special rendering of tagger results.
-  const taggedText = (
+  const taggedDocuScopeText = (
     <React.Fragment>
       <div className="d-flex align-items-start">
         <h4>Tagged Text:&nbsp;</h4>
@@ -395,7 +395,7 @@ const StudentView = (props: {
       <div
         className="tagged-text"
         onClick={(evt) => click_select(evt)}
-        dangerouslySetInnerHTML={{ __html: taggedTextContent }}
+        dangerouslySetInnerHTML={{ __html: taggedDocuScopeTextContent }}
       ></div>
     </React.Fragment>
   );
@@ -566,7 +566,7 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
-            <Button onClick={(e) => globalUpdate (editorTextValue)}>Update</Button>
+            <Button onClick={(_e) => globalUpdate (editorTextValue)}>Update</Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
@@ -574,7 +574,7 @@ const StudentView = (props: {
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
-            {(showTaggedText || showOnTopicText) ? taggedText : ""}
+            {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
             {topicTaggedContent}
             <Slate
               editor={editor}
@@ -592,7 +592,7 @@ const StudentView = (props: {
               }}
             >
               <Editable
-                className={showTaggedText || showOnTopicText ? "d-none" : ""}
+                className={showDocuScopeTaggedText || showOnTopicText ? "d-none" : ""}
                 readOnly={!editable}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
