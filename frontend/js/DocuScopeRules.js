@@ -291,6 +291,45 @@ export default class DocuScopeRules {
   /**
    * 
    */
+  getClusterName (aRule, aCluster) {
+    //console.log ("getClusterTopics ()");
+
+    let cluster=this.getClusterByIndex (aRule, aCluster);
+    if (cluster==null) {
+      console.log ("Error, no cluster found!");
+      return ([]);
+    }
+
+    let topicList=[];
+
+    let clusterObject=cluster.raw;
+    
+    let topics=clusterObject.topics;
+
+    if (topics) {
+      /*
+      if (topics [0].pre_defined_topics) {
+        for (let i=0;i<topics [0].pre_defined_topics.length;i++) {
+          topicList.push(topics [0].pre_defined_topics[i]);
+        }
+      }
+
+      if (topics [0].custom_topics) {        
+        for (let i=0;i<topics [0].custom_topics.length;i++) {
+          topicList.push(topics [0].custom_topics[i]);
+        }        
+      }
+      */
+
+      return ([topics [0].lemma]);
+    }    
+
+    return (topicList);    
+  }
+
+  /**
+   * 
+   */
   getClusterTopicsByClusterIndex (aClusterIndex) {
     console.log ("getClusterTopicsByClusterIndex ("+aClusterIndex+")");
 

@@ -170,7 +170,9 @@ const Expectations = (props: {
       return;
     }    
 
-    let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
+    //let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
+
+    let topicList=props.ruleManager.getClusterName (ruleIndex, clusterIndex);
 
     /*
     // Don't change context if we've found a duplicate in the current edit window
