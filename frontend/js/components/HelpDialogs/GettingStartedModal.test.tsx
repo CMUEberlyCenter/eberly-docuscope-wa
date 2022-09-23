@@ -20,9 +20,13 @@ describe("GettingStartedModal", () => {
   test("creation", async () => {
     render(<GettingStartedModal />);
     await waitFor(() => showGettingStarted(true));
-    await waitFor(() => expect(screen.queryByText("Getting Started")).toBeDefined());
+    await waitFor(() =>
+      expect(screen.queryByText("Getting Started")).toBeDefined()
+    );
     await waitFor(() => fireEvent.click(screen.getByLabelText("Close")));
     showGettingStarted$.pipe(first()).subscribe((v) => expect(v).toBeFalsy());
-    await waitFor(() => expect(screen.queryByText("Getting Started")).toBe(null));
+    await waitFor(() =>
+      expect(screen.queryByText("Getting Started")).toBe(null)
+    );
   });
 });
