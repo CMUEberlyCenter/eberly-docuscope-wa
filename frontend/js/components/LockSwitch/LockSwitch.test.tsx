@@ -3,7 +3,7 @@
  */
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
-import { afterEach, describe, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 import LockSwitch from "./LockSwitch";
 
 describe("LockSwitch", () => {
