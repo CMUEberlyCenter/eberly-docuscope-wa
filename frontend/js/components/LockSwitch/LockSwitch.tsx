@@ -31,7 +31,7 @@ const LockSwitch = (props: LockSwitchProps) => {
     setToggle(!toggle);
   };
 
-  useEffect(() => setToggle(props.checked), [props])
+  useEffect(() => setToggle(props.checked), [props.checked]);
 
   return (
     <div
