@@ -53,10 +53,10 @@
                             "user_defined": true,
                             "pre_defined_topics": [
                                 "I",
-                                "my",
                                 "our",
                                 "our results ",
-                                "we"
+                                "we",
+                                "we can see"
                             ],
                             "no_lexical_overlap": false
                         }

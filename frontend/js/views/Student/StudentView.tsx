@@ -494,6 +494,10 @@ const StudentView = (props: {
     }
   }
 
+  let reset;
+
+  //reset=<NavDropdown.Item eventKey={"resetView"} active={false}>Reset View</NavDropdown.Item>;
+
   //>--------------------------------------------------------
 
   return (
@@ -508,9 +512,7 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <Nav.Link eventKey={"resetData"}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
-                  <NavDropdown.Item eventKey={"resetView"} active={false}>
-                    Reset View
-                  </NavDropdown.Item>
+                 {reset}
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
                   <NavDropdown.Item eventKey={"showHelp"}>

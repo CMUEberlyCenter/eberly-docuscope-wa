@@ -64,6 +64,8 @@ class DocuScopeOnTopic extends Component {
         loading: false,
         textdata: newData,
         invalidated: false,
+        paragraphIndex: -1, 
+        sentenceIndex: -1
       });
     }
   }
@@ -111,10 +113,17 @@ class DocuScopeOnTopic extends Component {
    * 
    */
   generateSentenceDetails (aParagraphIndex,aSentenceIndex) {
-    //console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
+    console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
 
     if ((aParagraphIndex==-1) || (aSentenceIndex==-1)) {
       //console.log ("No valid paragraph or sentence index selected");
+      return (null);
+    }
+
+    //console.log (this.props.htmlSentences);
+
+    if (this.props.htmlSentences.length<aParagraphIndex) {
+      console.log ("Error: paragraphIndex out of range");
       return (null);
     }
 

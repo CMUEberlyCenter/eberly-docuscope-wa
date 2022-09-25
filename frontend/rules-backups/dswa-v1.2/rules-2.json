@@ -1,0 +1,275 @@
+{
+    "name": "P1 Exploratory Data Analysis",
+    "rules": [
+        {
+            "name": "Describing Real-World Importance",
+            "description": "<body>\n<p>TBD</p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "What is motivating this research? What is the real-world importance?",
+                    "description": "<body>\n<p>Motivate the analysis of the data, with relation to the potential importance or impact in the world.\u00a0 Summarize the research questions that will be addressed, with connection to the motivation. </p>\n<p>The introduction should not have detailed methodological discussion, it should just be the place to catch the reader\u2019s interest. </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Real-World Connections",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD3</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD4</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
+                    ],
+                    "parent": "Describing Real-World Importance"
+                },
+                {
+                    "name": "Can you interpret the results for a real-world audience?",
+                    "description": "<body>\n<p>Appropriately interpret and discuss your summaries/tables/figures in relation to the research question:\u00a0 Indicate whether and how they provide evidence to refute or confirm each of the three research questions, and what conclusion (if any) you can come to regarding each research question from the available EDA evidence.</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Meaning of Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Describing Real-World Importance"
+                },
+                {
+                    "name": "What are some suggestions for future research/action?",
+                    "description": "<body>\n<p>TBD</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Future Research",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Describing Real-World Importance"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Describing concerns of the data & methods",
+            "description": "<body>\n<p></p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "Can you summarize the data?",
+                    "description": "<body>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Data Descriptors",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "IQR",
+                                "bimodal",
+                                "inter-quartile range",
+                                "max",
+                                "maximum",
+                                "meadian ",
+                                "mean",
+                                "min ",
+                                "minimum",
+                                "mode ",
+                                "quartile",
+                                "sample",
+                                "sample size",
+                                "small sample",
+                                "spread",
+                                "standard deviation",
+                                "unimodal ",
+                                "variability",
+                                "variation ",
+                                "varied ",
+                                "vary"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Describing concerns of the data & methods"
+                },
+                {
+                    "name": "Are there any concerns that you have with the data?",
+                    "description": "<body>\n<p>Do you have any concerns with the methods used to collect this data? Consider the background sources and potential issues with the data that your reader might be concerned about. </p>\n<p>How relatively well is this assumption satisfied by the study described? Does the relative representativeness of the sample (or lack thereof) give you much cause for concern about the relative validity of the final results of the hypothesis test? Why or why not?</p>\n<p>Background sources and issues</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Quality of Data",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "concerning",
+                                "outlier",
+                                "outliers",
+                                "problematic",
+                                "sample sizes",
+                                "sampling method",
+                                "selection method",
+                                "skew",
+                                "skewed",
+                                "skewness",
+                                "skews",
+                                "sparse"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [
+                        "considerate",
+                        "ethical"
+                    ],
+                    "parent": "Describing concerns of the data & methods"
+                },
+                {
+                    "name": "How might you justify your techniques for your readers?",
+                    "description": "<body>\n<p>Consider a reader with experience in data analysis. How would you address their potential concerns? </p>\n<p>Do you have any concerns with the methodologies used to analyze this data?</p>\n<p>appears in conclusion as well (limitations) </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Quality of Methods",
+                            "user_defined": true,
+                            "pre_defined_topics": [
+                                "bin",
+                                "binned",
+                                "binning",
+                                "combine",
+                                "combined",
+                                "combining",
+                                "grouping",
+                                "linearity",
+                                "normality",
+                                "transformation",
+                                "transformations"
+                            ],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [
+                        "credible",
+                        "considerate",
+                        "compelling",
+                        "ethical"
+                    ],
+                    "parent": "Describing concerns of the data & methods"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        },
+        {
+            "name": "Statistical Analysis & Interpretation",
+            "description": "<body>\n<p></p></body>",
+            "topics": [],
+            "examples": "<body>\n<p></p></body>",
+            "type": "bounded_optional",
+            "is_group": true,
+            "children": [
+                {
+                    "name": "What can the reader learn from your figures?",
+                    "description": "<body>\n<p>make sure you reference each figure </p>\n<p>concept maps for each figure </p>\n<p>(200?) do you refer to each plot in the text? </p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Visual Descriptors",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                },
+                {
+                    "name": "What can the reader learn from your statistical results?",
+                    "description": "<body>\n<p></p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Statistical Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p></p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p></p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                },
+                {
+                    "name": "What interpretations can you draw from these results?",
+                    "description": "<body>\n<p>What is motivating these questions? Why does the reader care?</p></body>",
+                    "topics": [
+                        {
+                            "lemma": "Real-World Interpretations of Results",
+                            "user_defined": true,
+                            "pre_defined_topics": [],
+                            "no_lexical_overlap": false
+                        }
+                    ],
+                    "examples": "<body>\n<p>TBD</p></body>",
+                    "type": "active",
+                    "is_group": false,
+                    "children": [],
+                    "cv_description": "<body>\n<p>TBD</p></body>",
+                    "values": [],
+                    "parent": "Statistical Analysis & Interpretation"
+                }
+            ],
+            "cv_description": "<body>\n<p></p></body>",
+            "values": [],
+            "parent": null
+        }
+    ]
+}
