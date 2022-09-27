@@ -9,6 +9,8 @@
   https://github.com/Cvmcosta/ltijs
 */
 
+const PrometheusMetrics = require ('./prometheus.js');
+
 const express = require('express')
 const fs = require('fs');
 const http = require('http');
@@ -20,6 +22,8 @@ const jwt = require('jsonwebtoken');
 
 const port = 8888;
 //const port = 80;
+
+var onTopicRequests=0;
 
 /**
  *
@@ -33,6 +37,9 @@ class DocuScopeWALTIService {
     console.log ("constructor ()");
 
     dotenv.config();
+
+    this.metrics = new PrometheusMetrics ();
+    this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
 
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
@@ -235,6 +242,18 @@ class DocuScopeWALTIService {
   /**
    *
    */
+  processMetrics (request, response) {
+    console.log ("processRequest ()");
+      
+    let metricsString=this.metrics.build ();
+
+    response.contentType('text/text');
+    response.send(metricsString);
+  }
+
+  /**
+   *
+   */
   apiPOSTCall (aURL, aData, aResponse) {  
     let url="/api/v1/"+aURL;
 
@@ -378,6 +397,10 @@ class DocuScopeWALTIService {
     if (request.path=="/api/v1/ontopic") {
       console.log ("Processing ontopic request ...");
 
+      onTopicRequests++;
+
+      this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+
       let msg=request.body;
 
       if (msg.status=="request") {
@@ -417,6 +440,11 @@ class DocuScopeWALTIService {
     }));    
 
     console.log ("Configuring endpoints ...");
+
+    this.app.get('/metrics', (request, response) => {
+      console.log ("get() metrics");
+      this.processMetrics (request,response);
+    });
 
     this.app.get('/api/v1/*', (request, response) => {
       //console.log ("get(api)");
