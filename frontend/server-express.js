@@ -11,10 +11,12 @@
 
 const PrometheusMetrics = require ('./prometheus.js');
 
-const express = require('express')
+const mysql = require('mysql2');
+const express = require('express');
 const fs = require('fs');
 const http = require('http');
 const cors = require('cors');
+const fileUpload = require('express-fileupload');
 //const fetch = require('node-fetch');
 
 const dotenv = require('dotenv');
@@ -24,6 +26,7 @@ const port = 8888;
 //const port = 80;
 
 var onTopicRequests=0;
+var onTopicRequestsAvg=0;
 
 /**
  *
@@ -38,8 +41,24 @@ class DocuScopeWALTIService {
 
     dotenv.config();
 
+    this.dbConn = mysql.createConnection({
+      host: "localhost",
+      port: 13306,
+      user: "dswa",
+      password: "4570WK821X6OiyT508srN09wV"
+    });
+
+    this.dbConn.connect(function(err) {
+      if (err) throw err;
+      console.log("Connected!");
+    });
+
+    this.initDB ();
+
     this.metrics = new PrometheusMetrics ();
     this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
+    setInterval(this.updateMetricsAvg,5*60*1000); // Every 5 minutes
 
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
@@ -104,7 +123,245 @@ class DocuScopeWALTIService {
     }));
 
     this.processBackendReply=this.processBackendReply.bind(this);
+
+    this.encodingTest ();
+ 
+    console.log ("Server ready");
   }
+
+  /**
+   * https://stackoverflow.com/questions/5396560/how-do-i-convert-special-utf-8-chars-to-their-iso-8859-1-equivalent-using-javasc
+   */
+  encodingTest () {
+    console.log ("encodingTest ()");
+
+    let testString="溫侯神射世間稀，曾向轅門獨解危";
+
+    let testObject={
+      string: testString
+    }
+
+    let input=JSON.stringify (testObject);
+
+    let escaped=escape (input);
+
+    let encoded=btoa (escaped);
+
+    console.log (encoded);
+
+    let decoded=atob(encoded);
+
+    let unescaped=unescape(decoded);
+
+    let testObjectResult=JSON.parse (unescaped);
+
+    console.log (testObjectResult);
+
+    console.log ("encodingTest () done");
+  }
+
+  /**
+   *
+   */
+  initDB () {
+    console.log ("initDB ()");
+
+    this.dbConn.query("CREATE DATABASE IF NOT EXISTS dswa", function (err, result) {
+      if (err) throw err;
+      console.log("Database created");
+    });
+
+    this.dbConn.query("CREATE TABLE IF NOT EXISTS dswa.files (id VARCHAR(40) NOT NULL, filename VARCHAR(100) NOT NULL, date VARCHAR(100) NOT NULL, data LONGTEXT NOT NULL, info LONGTEXT NOT NULL,  PRIMARY KEY (id));", function (err, result) {
+      if (err) throw err;
+      console.log("DSWA file table created");
+    });
+
+    this.dbConn.query("CREATE TABLE IF NOT EXISTS dswa.assignments (id VARCHAR(40) NOT NULL, fileid VARCHAR(100) NOT NULL, PRIMARY KEY (id));", function (err, result) {
+      if (err) throw err;
+      console.log("DSWA assignment table created");
+    });    
+ 
+    this.getFiles (null,null);
+
+    this.getFile (null,null,"14618");
+  }
+
+  /**
+   * 
+   */
+  getFiles (request,response) {
+    console.log ("getFiles ()");
+    let that=this;
+
+    this.dbConn.query("select id,filename,date,info from dswa.files", function (err, result, fields) {
+      if (err) {
+        //throw err;
+        if (response) {
+          response.json(that.generateErrorMessage (err.message));
+        } else {
+          console.log ("Error: " + err.message);
+        }
+      } else {
+        //console.log (result);
+        if (response) {
+          response.json (that.generateDataMessage (result));
+        } else {
+          console.log ("Not called in the context of a web request, bump");
+        }
+      }
+    });
+  }
+
+  /**
+   * 
+   */
+  getFile (request,response,aCourseId) {
+    console.log ("getFile ()");
+
+    let that=this;
+
+    let course_id=aCourseId;
+
+    if (!course_id) {
+      course_id=request.query.course_id;
+    }
+
+    this.dbConn.query("select fileid from dswa.assignments where id='"+course_id+"'", function (err, result, fields) {
+      if (err) {
+        console.log (err.message);
+        if (response) {
+          response.json(that.generateErrorMessage (err.message));
+        }
+        return;
+      }
+
+      console.log(result);
+
+      if (result.length>0) {
+        let fileId=result[0].fileid;
+
+        that.dbConn.query("select data from dswa.files where id='"+fileId+"'", function (err, result, fields) {
+          if (err) {
+            that.sendDefaultFile(request,response);
+            //throw err;
+            return;
+          }
+
+          if (result.length>0) {
+            let decoded=atob (result[0].data);
+
+            let unescaped=unescape (decoded);
+
+            let jData=JSON.parse (unescaped);
+
+            //console.log (jData.info);
+
+            if (response) {
+              response.json (that.generateDataMessage (jData.rules));
+            } else {
+              console.log ("Not called in the context of a web request, bump");
+            }
+          } else {
+            if (response) {
+              response.json(that.generateErrorMessage ("File data not found for assignment"));
+            }
+          }
+        });
+      } else {
+
+      } 
+    });    
+  }
+
+  /**
+   * 
+   */
+  getFileIdFromCourse (request,response) {
+    console.log ("getFileIdFromCourse ()");
+
+    let that=this;
+
+    let course_id=request.query.course_id;
+
+    this.dbConn.query("select * from dswa.assignments where id='"+course_id+"'", function (err, result, fields) {
+      if (err) {
+        console.log (err.message);
+        return;
+      }
+      
+      console.log("Result: " + result);
+
+      if (result.length==0) {
+        response.json (that.generateDataMessage ("global"));
+      } else {
+        response.json (that.generateDataMessage (result[0]));
+      }
+    });    
+  }
+
+  /**
+   *
+   */
+  sendDefaultFile(request,response) {
+    console.log ("sendDefaultFile ()");
+
+    let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
+    response.json (this.generateDataMessage (ruleData));    
+  }
+
+  /**
+   *
+   */
+  storeFile (request,response,aFilename, aDate, aJSONObject) {
+    console.log ("storeFile ()");
+
+    let that=this;
+    
+    let id=this.uuidv4 ();
+
+    var data=JSON.stringify (aJSONObject);
+    var escaped=escape (data);
+    var encoded=btoa (escaped);
+
+    var dataInfo=JSON.stringify (aJSONObject.info);
+    var escapedInfo=escape (dataInfo);
+    var encodedInfo=btoa (escapedInfo);
+
+    let queryString="INSERT INTO dswa.files (id, filename, date, data, info) VALUES (\""+id+"\",\""+aFilename+"\",\""+aDate+"\",\""+encoded+"\",\""+encodedInfo+"\") ON DUPLICATE KEY UPDATE data='" + encoded + "'";
+
+    this.dbConn.query(queryString, function (err, result, fields) {
+      if (err) {
+        throw err;
+        return;
+      }
+      //console.log("Result: " + result);
+      response.json (that.generateDataMessage ({
+        filename: aFilename,
+        date: aDate
+      }));
+    });    
+  }
+
+  /**
+   *
+   */
+  processCourseFileAssignment (request, response) {
+    console.log ("processCourseFileAssignment ()");
+
+    let course_id=request.query.course_id;
+    let id=request.query.id;
+
+    console.log ("Assigning " + id + " to course: " + course_id);
+
+    let queryString="INSERT INTO dswa.assignments (id, fileid) VALUES (\""+course_id+"\",\""+id+"\") ON DUPLICATE KEY UPDATE fileid='" + id + "'";
+
+    this.dbConn.query(queryString, function (err, result, fields) {
+      if (err) {
+        throw err;
+        return;
+      }
+    });       
+  }  
 
   /**
    *
@@ -243,12 +500,31 @@ class DocuScopeWALTIService {
    *
    */
   processMetrics (request, response) {
-    console.log ("processRequest ()");
+    console.log ("processMetrics ()");
       
     let metricsString=this.metrics.build ();
 
     response.contentType('text/text');
     response.send(metricsString);
+  }
+
+  /**
+   *
+   */
+  updateMetrics () {
+    onTopicRequests++;
+    onTopicRequestsAvg++;
+
+    this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
+  }
+
+  /**
+   *
+   */
+  updateMetricsAvg () {
+    console.log ("updateMetricsAvg ()");
+    onTopicRequestsAvg=0;
   }
 
   /**
@@ -315,7 +591,12 @@ class DocuScopeWALTIService {
    *
    */
   processRequest (request, response) {
-    console.log ("processRequest ()");
+    console.log ("processRequest ("+request.path+")");
+
+    if (request.path=="/upload") {
+      console.log ("Info: we've already processed this, need a better way of handling this situation");
+      return;
+    }
 
     if (this.useLTI==true) {
       if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) {
@@ -324,7 +605,7 @@ class DocuScopeWALTIService {
 
           //response.sendFile(__dirname + this.publicHome + request.path);
 
-          console.log (settingsObject);
+          //console.log (settingsObject);
 
           var stringed=JSON.stringify (settingsObject);
 
@@ -364,16 +645,32 @@ class DocuScopeWALTIService {
   /**
    * https://nodejs.dev/learn/making-http-requests-with-nodejs
    */
-  processAPIRequest (type,request, response) {
+  processAPIRequest (type, request, response) {
     console.log ("processAPIRequest ("+type+") => " + request.path);
 
-    if (request.path=="/api/v1/rules") {
-      // MvV: This file is course/assignment specific, we should therefore be able to load it
-      // dynamically. I already received 2 new files from Suguru that are each used by different
-      // courses. See the README file in the asset directory for more info.
-      let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
-      response.json (this.generateDataMessage (ruleData));
+    if (request.path=="/upload") {
+      console.log ("Info: we've already processed this, need a better way of handling this situation");
       return;
+    }
+
+    if (request.path=="/api/v1/rules") {
+      // First check to see if we have a course_id parameter, if so load from db
+
+      let course_id=request.query.course_id;
+
+      if (course_id) {
+        if (course_id!="global") {
+          console.log ("Loading rule set from database for course id: " + course_id);
+
+          this.getFile (request,response,course_id);
+          return;
+        }
+      }
+
+      // If we do not have a course_id parameter or if it's set to 'global' then fall back to
+      // baked-in ruleset
+
+      this.sendDefaultFile (request,response);
     }
 
     /*
@@ -397,9 +694,7 @@ class DocuScopeWALTIService {
     if (request.path=="/api/v1/ontopic") {
       console.log ("Processing ontopic request ...");
 
-      onTopicRequests++;
-
-      this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+      this.updateMetrics ();
 
       let msg=request.body;
 
@@ -439,12 +734,69 @@ class DocuScopeWALTIService {
       origin: '*'
     }));    
 
+    this.app.use(fileUpload({
+      createParentPath: true
+    }));
+
     console.log ("Configuring endpoints ...");
+
+    this.app.post('/upload', async (request, response) => {
+      console.log ("post() upload");
+
+      try {
+        if(!request.files) {
+          request.send({
+            status: false,
+            message: 'No file uploaded'
+          });
+        } else {
+          console.log ("Processing file upload ...");
+
+          let jsonFile=request.files.file;
+
+          var jsonObject = JSON.parse(jsonFile.data.toString('ascii'));
+
+          console.log ("Storing: " + jsonFile.name + " ("+request.body.date+") ...");
+
+          this.storeFile (request, response, jsonFile.name, request.body.date, jsonObject);
+
+          /*
+          response.send({
+            status: true,
+            message: 'File(s) uploaded'
+          });
+          */
+        }
+      } catch (err) {
+        //response.status(500).send(err.message);
+        response.json(this.generateErrorMessage (err.message));
+      }
+    });    
+
+    this.app.post('/listfiles', (request, response) => {
+      console.log ("get() listfiles");
+      this.getFiles (request,response);
+    });
+
+    this.app.get('/assign', (request, response) => {
+      console.log ("get() assign");
+      this.processCourseFileAssignment (request,response);
+    });       
+
+    this.app.post('/getfile', (request, response) => {
+      console.log ("post() getid");
+      this.getFile (request,response);
+    });
+
+    this.app.post('/getfileid', (request, response) => {
+      console.log ("post() getfileid");
+      this.getFileIdFromCourse (request,response);
+    });
 
     this.app.get('/metrics', (request, response) => {
       console.log ("get() metrics");
       this.processMetrics (request,response);
-    });
+    });    
 
     this.app.get('/api/v1/*', (request, response) => {
       //console.log ("get(api)");

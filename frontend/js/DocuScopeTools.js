@@ -8,6 +8,24 @@ export default class DocuScopeTools {
   /**
    * 
    */
+  getCourseId () {
+    let course_id="global";
+
+    if (serverContext) {
+      if (serverContext.lti) {
+        let testId=serverContext.lti.custom_canvas_course_id;
+        if (testId) {
+          course_id=testId;
+        }
+      }
+    }
+
+    return (course_id);
+  }
+
+  /**
+   * 
+   */
   onTopic2DSWAHTML (anHTMLDataset) {
     /*
     let transformedHTML=anHTMLDataset.replaceAll ("<sent","<span");

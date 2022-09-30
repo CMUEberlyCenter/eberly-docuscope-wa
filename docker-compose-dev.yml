@@ -7,11 +7,22 @@
 version: '3'
 services:
 
-  mongo:
-    image: mongo
+  db:
+    image: mysql:8.0.30
+    #image: mysql:5.7.22
+    # We don't need an externally exposed port since docker-compose makes 3306 available 
+    # to it's own private network anyway. However it is very helpful for testing
+    #ports:
+    # - 13306:3306
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: 458243507dsdf9245824
+      MYSQL_ROOT_PASSWORD: 4570WK821X6OiyT508srN09wI
+      MYSQL_DATABASE: dswa
+      MYSQL_USER: dswa
+      MYSQL_PASSWORD: 4570WK821X6OiyT508srN09wV
+      #MYSQL_TCP_PORT: 4307
+    volumes:
+      - ./dswadb:/var/lib/mysql 
+    user: ${MYSQL_UID}
 
   dswa-ontopic:
     build:    

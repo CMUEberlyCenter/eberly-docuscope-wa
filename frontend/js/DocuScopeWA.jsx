@@ -208,17 +208,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
    */
   updateSerializedText (aText) {
     console.log ("updateSerializedText ()");
-    /*
-    this.setState ({
-      html: aText,
-      htmlSentences: null
-    });
-    */
 
     this.setState ({
       html: null,
       htmlSentences: null
-    });    
+    });
   }
 
   /**
@@ -336,7 +330,9 @@ export default class DocuScopeWA extends EberlyLTIBase {
   apiCall (aCall,aData,aType) {
     console.log ("apiCall ("+aCall+")");
 
-    let aURL="/api/v1/"+aCall+"?token="+this.token+"&session="+this.session;
+    let course_id=this.docuscopeTools.getCourseId ();  
+
+    let aURL="/api/v1/"+aCall+"?token="+this.token+"&session="+this.session+"&course_id="+course_id;
 
     if (aType=="POST") {
       return (this.apiPOSTCall (aURL,aData));

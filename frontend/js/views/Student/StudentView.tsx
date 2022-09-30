@@ -76,6 +76,9 @@ import {
 import { Node } from "slate";
 import type DocuScopeRules from "../../DocuScopeRules";
 
+import DocuScopeTools from "../../DocuScopeTools";
+const dTools=new DocuScopeTools ();
+
 // Should probably import from the service
 const serialize = (nodes: Descendant[]): string => {
   return nodes.map((n: Descendant) => Node.string(n)).join("\n\n");

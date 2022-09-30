@@ -6,6 +6,9 @@ import '../../../css/main.css';
 import '../../../css/filestyles.css';
 import './InstuctorView.css';
 
+import { faRotate } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 import EberlyLTIBase from '../../EberlyLTIBase';
 import DocuScopeTools from '../../DocuScopeTools';
 import DocuScopeWAScrim from '../../DocuScopeWAScrim';
@@ -36,10 +39,13 @@ class InstuctorView extends EberlyLTIBase {
   constructor (props) {
     super(props);
 
-    //this.docuscopeTools=new DocuScopeTools ();
     this.state={
-      uploading: true
+      uploading: true,
+      files: [],
+      selected: ""
     };
+
+    this.dTools=new DocuScopeTools ();
 
     this.onLaunch=this.onLaunch.bind(this);
 
@@ -48,6 +54,56 @@ class InstuctorView extends EberlyLTIBase {
     this.uploadComplete=this.uploadComplete.bind(this);
     this.dragOverHandler=this.dragOverHandler.bind(this);
     this.dropHandler=this.dropHandler.bind(this);    
+    this.getFiles=this.getFiles.bind(this);
+    this.onFileSelectionChanged=this.onFileSelectionChanged.bind(this);
+  }
+
+  /**
+   *
+   */
+  componentDidMount () {
+    console.log ("componentDidMount ()");
+  
+    this.getFiles ();
+  }
+
+  /**
+   * 
+   */
+  getFiles () {
+    console.log ("getFiles ()");
+
+    let that=this;
+
+    fetch("/listfiles",{
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      method: "POST"
+    }).then(resp => resp.text()).then((result) => {
+      let raw=JSON.parse(result);
+      let course_id=that.dTools.getCourseId ();
+
+      that.setState ({
+        files: raw.data
+      },() => {
+        fetch("/getfileid?course_id="+course_id,{
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          method: "POST"
+        }).then(resp => resp.text()).then((result) => {
+          let raw=JSON.parse(result);
+          console.log (raw);
+          that.setState ({
+            selected: raw.data.fileid
+          });
+        });
+
+      });
+    });
   }
 
   /**
@@ -74,16 +130,14 @@ class InstuctorView extends EberlyLTIBase {
     let lower=aFile.name.toLowerCase();
     let validExtension=false;
 
-    if ((aFile.name.toLowerCase().indexOf (".xlsx")!=-1) || (aFile.name.toLowerCase().indexOf (".csv")!=-1)) {
+    if (aFile.name.toLowerCase().indexOf (".json")!=-1) {
       validExtension=true;
     }
 
     if (validExtension==false) {
-      console.log("Error: the file " + aFile.name + " is neither an XLSX file nor a CSV file");
+      console.log("Error: the file " + aFile.name + " is not a JSON file");
       return;
     }
-
-    //settings ["ownedby"]="instructor"; // Uploaded by instructor
 
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     let d = new Date();
@@ -91,7 +145,7 @@ class InstuctorView extends EberlyLTIBase {
 
     console.log(Intl.DateTimeFormat().resolvedOptions().timeZone);
 
-    let url = '/lti/coursenav/catme/upload';
+    let url = '/upload';
     let fd = new FormData();
     fd.append("file", aFile);
     fd.append("date",creationDate);
@@ -106,7 +160,7 @@ class InstuctorView extends EberlyLTIBase {
 
     let xhr = new XMLHttpRequest();
     xhr.upload.addEventListener("progress", this.uploadProgress, false);
-    xhr.addEventListener("load", this.uploadComplete, false);      
+    xhr.addEventListener("load", this.getFiles, false);      
     xhr.open("POST", url, true);
     xhr.send(fd);
 
@@ -142,27 +196,7 @@ class InstuctorView extends EberlyLTIBase {
     try {
       json=JSON.parse (event.currentTarget.response);
     } catch (error) {
-      this.setState({
-        scrimUp: true,
-        scrimMessage: "Error parsing uploaded file. Please contact the system administrator at eberly-assist@andrew.cmu.edu",
-        scrimExtended: error
-      });
-      console.log (error);
-      return;
     }
-
-    if (json==null) {
-      return;
-    }
-
-    let cleaned=this.CATMETools.prepIncomingData (json);
-
-    console.log (cleaned);
-
-    this.setState ({
-      uploading: false,
-      pre: cleaned
-    });
     */
   }
 
@@ -232,15 +266,43 @@ class InstuctorView extends EberlyLTIBase {
   }    
 
   /**
+   * Use the parent API call instead!
+   */
+  onFileSelectionChanged (e) {
+    let course_id=this.dTools.getCourseId ();
+
+    this.setState ({
+      selected: e.currentTarget.value
+    },() => {
+      fetch("/assign?course_id="+course_id+"&id="+this.state.selected,{
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: "GET"
+      });      
+    });
+  }
+
+  /**
    *
    */
   showLoader () {
-    return (<div className="loaderbar">
-        <button id="launcher" className="inline_button" onClick={(e) => this.onLaunch (e)}>Open in new Window (as student)</button>
+    if (this.state.selected=="") {
+      return (<div className="loaderbar">
+        <button id="launcher" className="inline_button">Open in new Window (as student)</button>
         <div className="iframe">
           <form id="ltirelayform" target="docuscopewa" method="post"></form>
         </div>
       </div>);
+    }
+
+    return (<div className="loaderbar">
+      <button id="launcher" className="inline_button" onClick={(e) => this.onLaunch (e)}>Open in new Window (as student)</button>
+      <div className="iframe">
+        <form id="ltirelayform" target="docuscopewa" method="post"></form>
+      </div>
+    </div>);
   }  
 
   /**
@@ -249,7 +311,7 @@ class InstuctorView extends EberlyLTIBase {
   generateUploadElement () {
     return (<div id="filecontainer" htmlFor="file" className="dropcontainer">
       <div className="box">
-        <input type="file" id="file" className="inputfile inputfile-4" onChange={this.onFileChange} />
+        <input type="file" id="file" multiple={false} className="inputfile inputfile-4" onChange={this.onFileChange} />
         <label htmlFor="file"
           onDrop={this.dropHandler}
           onDragOver={this.dragOverHandler}
@@ -268,19 +330,39 @@ class InstuctorView extends EberlyLTIBase {
    * 
    */
   generateFileListing () {
+    let files=[];
+
+    for (let i=0;i<this.state.files.length;i++) {
+      let file=this.state.files[i];
+      let infoString=file.info;
+      let decoded=atob(infoString);
+      let unescaped=unescape(decoded);
+      let info=JSON.parse (unescaped);
+
+      let infoList=<ul style={{listStyleType: "none"}}>
+        <li>{"Name: " + info.name}</li>
+        <li>{"Version: " + info.version}</li>
+        <li>{"Author: " + info.author}</li>
+        <li>{"Saved: " + info.saved}</li>
+        <li>{"Copyright: " + info.copyright}</li>
+      </ul>;
+
+      files.push(<tr key={"file-tr-"+file.id}><td><label><input id={file.id} type="radio" value={file.id} checked={this.state.selected === file.id} onChange={(e) => this.onFileSelectionChanged (e,file.id)} style={{marginLeft: "4px"}} /></label></td><td>{file.filename}</td><td>{file.date}</td><td>{infoList}</td></tr>); 
+    }
+
     return (<table className="dswa-table">
         <thead>
           <tr>
-            <th><label><input type="checkbox" checked={true} /></label>Active</th>
+            <th>
+              <div onClick={(e) => this.getFiles (e)}><FontAwesomeIcon icon={faRotate} style={{ marginLeft: "2px", marginRight: "2px" }} /></div>
+            </th>
             <th>Filename</th>
             <th>Upload Date</th>
+            <th>Info</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td><label><input type="checkbox" checked={true} /></label></td><td>rules.json</td><td>August 12th, 2022</td></tr>
-          <tr><td><label><input type="checkbox" checked={true} /></label></td><td>values.json</td><td>August 12th, 2022</td></tr>
-          <tr><td><label><input type="checkbox" checked={true} /></label></td><td>info.json</td><td>August 12th, 2022</td></tr>
-          <tr><td><label><input type="checkbox" checked={true} /></label></td><td>impressions.json</td><td>August 12th, 2022</td></tr>
+          {files}
         </tbody>
       </table>);
   }
