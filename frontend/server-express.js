@@ -4,7 +4,6 @@
   https://node-postgres.com/features/pooling
   https://expressjs.com/en/guide/routing.html
   https://stackabuse.com/get-http-post-body-in-express-js/
-  https://www.npmjs.com/package/lti-node-library
   https://github.com/js-kyle/nodejs-lti-provider/blob/master/lti/index.js
   https://github.com/Cvmcosta/ltijs
 */
@@ -23,13 +22,16 @@ const dotenv = require('dotenv');
 const jwt = require('jsonwebtoken');
 
 const port = 8888;
-//const port = 80;
 
 var onTopicRequests=0;
 var onTopicRequestsAvg=0;
+var onTopicUptime=0;
+var onTopicDBRetry=0;
+var onTopicService=null;
+var onTopicDBMaxRetry=100;
 
 /**
- *
+ * 
  */
 class DocuScopeWALTIService {
 
@@ -37,27 +39,29 @@ class DocuScopeWALTIService {
    *
    */
   constructor () {
-    console.log ("constructor ()");
+    console.log ("constructor ("+__dirname+")");
 
-    dotenv.config();
+    let envPath=__dirname+'/.env';
 
-    this.dbConn = mysql.createConnection({
-      host: "localhost",
-      port: 13306,
-      user: "dswa",
-      password: "4570WK821X6OiyT508srN09wV"
-    });
+    console.log (envPath);
 
-    this.dbConn.connect(function(err) {
-      if (err) throw err;
-      console.log("Connected!");
-    });
+    dotenv.config({ path: envPath, debug: true});
 
-    this.initDB ();
+    if (dotenv.error) {
+      console.error("Dotenv error: " + dotenv.error);
+    } else {
+      console.log("Dotenv parsed: " + dotenv.parsed);
+    }    
+
+    onTopicService=this;
+
+    this.initDBService ();
 
     this.metrics = new PrometheusMetrics ();
     this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
-    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
+    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
+    this.metrics.setMetricObject("eberly_dswa_uptime_total",onTopicUptime,this.metrics.METRIC_TYPE_COUNTER,"DSWA Server uptime");
+
     setInterval(this.updateMetricsAvg,5*60*1000); // Every 5 minutes
 
     this.pjson = require('./package.json');
@@ -66,24 +70,14 @@ class DocuScopeWALTIService {
     this.backendHost="localhost";
     if (process.env.DSWA_ONTOPIC_HOST) {
       this.backendHost=process.env.DSWA_ONTOPIC_HOST;
-    } else {
-      this.backendHost=dotenv.DSWA_ONTOPIC_HOST;
-      if (this.backendHost=="") {
-        this.backendHost="localhost";
-      }
     }
 
     this.backendPort=5000;
     if (process.env.DSWA_ONTOPIC_PORT) {
-      this.backendPort=process.env.DSWA_ONTOPIC_PORT;  
-    } else {
-      this.backendPort=dotenv.DSWA_ONTOPIC_PORT;
-      if (this.backendPort=="") {
-        this.backendPort=5000;
-      }
-    }
+      this.backendPort=parseInt (process.env.DSWA_ONTOPIC_PORT);
+    } 
 
-    console.log ("Configured the OnTopic backend url to be:" + this.backendHost + ": " + this.backendPort);
+    console.log ("Configured the OnTopic backend url to be: " + this.backendHost + ":" + this.backendPort);
 
     this.token=this.uuidv4();
     this.session=this.uuidv4();
@@ -106,8 +100,6 @@ class DocuScopeWALTIService {
       this.mode="production";
     }
 
-    console.log ("Configured secret through .env: " + this.secret);
-
     this.app = express();
 
     // Turn off caching for now (detect developer mode!)
@@ -124,7 +116,7 @@ class DocuScopeWALTIService {
 
     this.processBackendReply=this.processBackendReply.bind(this);
 
-    this.encodingTest ();
+    //this.encodingTest ();
  
     console.log ("Server ready");
   }
@@ -163,27 +155,64 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  initDB () {
-    console.log ("initDB ()");
+  initDBService () {
+    console.log ("initDBService (retry:"+onTopicDBRetry+" of max "+onTopicDBMaxRetry+")");
 
-    this.dbConn.query("CREATE DATABASE IF NOT EXISTS dswa", function (err, result) {
-      if (err) throw err;
-      console.log("Database created");
-    });
+    console.log ("Creating db connection: " + process.env.DB_HOST + ":"+process.env.DB_PORT);
 
-    this.dbConn.query("CREATE TABLE IF NOT EXISTS dswa.files (id VARCHAR(40) NOT NULL, filename VARCHAR(100) NOT NULL, date VARCHAR(100) NOT NULL, data LONGTEXT NOT NULL, info LONGTEXT NOT NULL,  PRIMARY KEY (id));", function (err, result) {
-      if (err) throw err;
-      console.log("DSWA file table created");
-    });
-
-    this.dbConn.query("CREATE TABLE IF NOT EXISTS dswa.assignments (id VARCHAR(40) NOT NULL, fileid VARCHAR(100) NOT NULL, PRIMARY KEY (id));", function (err, result) {
-      if (err) throw err;
-      console.log("DSWA assignment table created");
+    this.dbPool = mysql.createPool({
+      connectionLimit : 100, //important
+      host: process.env.DB_HOST,
+      port: parseInt (process.env.DB_PORT),
+      user: "dswa",
+      password: "4570WK821X6OiyT508srN09wV",
+      debug    :  false
     });    
- 
-    this.getFiles (null,null);
 
-    this.getFile (null,null,"14618");
+    this.dbConn=this.dbPool;
+
+    this.initDB ();
+  }
+
+  /**
+   *
+   */
+  initDB () {
+    console.log ("initDB (retry:"+onTopicDBRetry+" of max "+onTopicDBMaxRetry+")");
+
+    onTopicService.dbConn.getConnection((err, connection) => {
+        if (err) {
+          console.log ("Can't connect to database yet, entering retry ... ('"+err.message+"')");
+          onTopicDBRetry++;
+          if (onTopicDBRetry>onTopicDBMaxRetry) {
+            console.log ("Reached max retry");
+            throw err;
+          }
+          setTimeout (onTopicService.initDB,10000);
+          return;
+        }
+
+        console.log('Connected with thread id: ' + connection.threadId);
+
+        connection.query("CREATE DATABASE IF NOT EXISTS dswa", function (err, result) {
+          if (err) throw err;
+          console.log("Database created");
+        });
+
+        connection.query("CREATE TABLE IF NOT EXISTS dswa.files (id VARCHAR(40) NOT NULL, filename VARCHAR(100) NOT NULL, date VARCHAR(100) NOT NULL, data LONGTEXT NOT NULL, info LONGTEXT NOT NULL,  PRIMARY KEY (id));", function (err, result) {
+          if (err) throw err;
+          console.log("DSWA file table created");
+        });
+
+        connection.query("CREATE TABLE IF NOT EXISTS dswa.assignments (id VARCHAR(40) NOT NULL, fileid VARCHAR(100) NOT NULL, PRIMARY KEY (id));", function (err, result) {
+          if (err) throw err;
+          console.log("DSWA assignment table created");
+        });
+
+        onTopicService.getFiles (null,null);
+
+        onTopicService.getFile (null,null,"14618");        
+    });
   }
 
   /**
@@ -525,6 +554,7 @@ class DocuScopeWALTIService {
   updateMetricsAvg () {
     console.log ("updateMetricsAvg ()");
     onTopicRequestsAvg=0;
+    onTopicUptime+=(5*60*1000);
   }
 
   /**

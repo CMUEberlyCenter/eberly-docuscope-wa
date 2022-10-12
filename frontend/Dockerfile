@@ -1,4 +1,5 @@
-FROM node:latest
+#FROM node:latest
+FROM node:16.17
 
 # ENV NODE_ENV=production
 
@@ -19,5 +20,7 @@ RUN npm install --loglevel info --color=false
 RUN npm run build
 
 EXPOSE 8888
+
+RUN node --version
 
 CMD [ "node", "server-express.js" ]

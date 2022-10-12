@@ -7,9 +7,8 @@
 version: '3'
 services:
 
-  db:
+  dswadb:
     image: mysql:8.0.30
-    #image: mysql:5.7.22
     # We don't need an externally exposed port since docker-compose makes 3306 available 
     # to it's own private network anyway. However it is very helpful for testing
     #ports:
@@ -48,5 +47,5 @@ services:
     stdin_open: true
     restart: always
     depends_on:
-      - "dswa-ontopic"    
+      - "dswadb"    
     

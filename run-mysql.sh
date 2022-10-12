@@ -24,4 +24,4 @@ mkdir -pv ./dswadb
 
 echo "Starting docker-compose ..."
 
-MYSQL_UID=$MYSQL_UID docker-compose -f docker-compose-mysql.yml up --build
+MYSQL_UID=$MYSQL_UID docker-compose -f docker-compose-mysql.yml up --build --remove-orphans
