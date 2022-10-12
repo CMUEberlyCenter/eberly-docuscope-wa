@@ -63,6 +63,7 @@ class DocuScopeWALTIService {
     this.metrics.setMetricObject("eberly_dswa_uptime_total",onTopicUptime,this.metrics.METRIC_TYPE_COUNTER,"DSWA Server uptime");
 
     setInterval(this.updateMetricsAvg,5*60*1000); // Every 5 minutes
+    setInterval(this.updateUptime,1000); // Every second
 
     this.pjson = require('./package.json');
     console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
@@ -545,7 +546,7 @@ class DocuScopeWALTIService {
     onTopicRequestsAvg++;
 
     this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
-    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
+    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");    
   }
 
   /**
@@ -554,8 +555,17 @@ class DocuScopeWALTIService {
   updateMetricsAvg () {
     console.log ("updateMetricsAvg ()");
     onTopicRequestsAvg=0;
-    onTopicUptime+=(5*60*1000);
   }
+
+  /**
+   *
+   */
+  updateUptime () {
+    //console.log ("updateUptime ()");  
+    onTopicUptime+=(1000);
+
+    onTopicService.metrics.setMetricObject("eberly_dswa_uptime_total",onTopicUptime,onTopicService.metrics.METRIC_TYPE_COUNTER,"DSWA Server uptime");
+  }  
 
   /**
    *
