@@ -347,7 +347,7 @@ class InstuctorView extends EberlyLTIBase {
         <li>{"Copyright: " + info.copyright}</li>
       </ul>;
 
-      files.push(<tr key={"file-tr-"+file.id}><td><label><input id={file.id} type="radio" value={file.id} checked={this.state.selected === file.id} onChange={(e) => this.onFileSelectionChanged (e,file.id)} style={{marginLeft: "4px"}} /></label></td><td>{file.filename}</td><td>{file.date}</td><td>{infoList}</td></tr>); 
+      files.push(<tr key={"file-tr-"+file.id}><td><label><input id={file.id} type="radio" value={file.id} checked={this.state.selected === file.id} onChange={(e) => this.onFileSelectionChanged (e,file.id)} style={{marginLeft: "4px"}} /></label></td><td><a href={"/download?id="+file.id}>{file.filename}</a></td><td>{file.date}</td><td>{infoList}</td></tr>); 
     }
 
     return (<table className="dswa-table">

@@ -14,10 +14,12 @@ export default class DocuScopeRules {
    */
   constructor() {
     this.name = "unassigned";
+
     this.rules = [];
+    this.info = null;
+
     this.ready = false;
     this.original = null;
-    this.version = "1.0.0?";
     this.clusters = [];
 
     this.dataTools = new DataTools ();
@@ -37,12 +39,45 @@ export default class DocuScopeRules {
   /**
    * 
    */
+  getInfo () {
+    return (this.info);
+  }
+
+  /**
+   * 
+   */
+  getJSONObject () {
+    let constructed=[];
+
+    for (let i=0;i<this.rules.length;i++) {
+      let aRule=this.rules [i];
+      constructed.push (aRule.getJSONObject ());  
+    }
+
+    return (constructed);
+  }  
+
+  /**
+   * 
+   */
   getVersion () {
     if (this.ready==false) {
       return ("No rules loaded yet")
     }
 
-    return (this.name + ": (" + this.version + ")");
+    let version="?.?.?";
+
+    if (this.info) {
+      version=this.info.version;
+    }
+
+    let formatted=this.name;
+
+    if (formatted.length>30) {
+      formatted=this.name.substring (0,30);
+    }
+
+    return (formatted + ": (" + version + ")");
   }
 
   /**
@@ -100,26 +135,15 @@ export default class DocuScopeRules {
   }
 
   /**
-   * 
-   */
-  getJSONObject () {
-    let constructed=[];
-
-    for (let i=0;i<this.rules.length;i++) {
-      let aRule=this.rules [i];
-      constructed.push (aRule.getJSONObject ());  
-    }
-
-    return (constructed);
-  }
-
-  /**
    * When this method is called it is given a fresh JSON object, which represents the template
    * rules as we got them from the server. However, we need to compare that to what the user
    * might have already worked on
    */
   load(anObject) {
     console.log ("load ()");
+    console.log (anObject);
+
+    this.info=anObject.info;
     
     let newRules=true;
 
@@ -128,7 +152,8 @@ export default class DocuScopeRules {
     this.original=anObject.rules;
     this.clusters=this.sessionStorage.getJSONObject("clusters");
 
-    let stored=this.sessionStorage.getJSONObject("rules");
+    //let stored=this.sessionStorage.getJSONObject("rules");
+    let stored=this.sessionStorage.getJSONObject("dswa");
 
     // First time use, we'll make the rules loaded from the server our place to start
     if (stored!=null) {
@@ -171,7 +196,7 @@ export default class DocuScopeRules {
     //console.log ("Saving: ");
     //console.log (raw);
 
-    this.sessionStorage.setJSONObject("rules",raw);
+    this.sessionStorage.setJSONObject("dswa",raw);
     this.sessionStorage.setJSONObject("clusters",this.clusters);
   }
 

@@ -94,67 +94,76 @@ export default class DocuScopeWA extends EberlyLTIBase {
         progressTitle: "Backend connected, loading data ..."
       });
 
-      this.apiCall ("rules",null,"GET").then ((result) => {
-        this.ruleManager.load (result);
+      if (this.isInstructor ()==false) {        
+        this.apiCall ("rules",null,"GET").then ((result) => {
+          this.ruleManager.load (result);
 
-        if (this.ruleManager.getReady ()==true) {
-          if (this.pingEnabled==false) {
-            this.setState ({
-              state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-              progress: 100,
-              progressTitle: "Application ready"
-            });
-          } else {
-            this.setState ({
-              state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
-              progress: 75,
-              progressTitle: "Ruleset loaded, Initializing ..."
-            });
-
-            console.log ("Starting ping service timer ...");
-              
-            /*
-             Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-             problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-             to 'ding'
-            */
-            this.apiCall ("ding",null,"GET").then ((result) => {
+          if (this.ruleManager.getReady ()==true) {
+            if (this.pingEnabled==false) {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                server: result
+                progress: 100,
+                progressTitle: "Application ready"
               });
-            });
+            } else {
+              this.setState ({
+                state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
+                progress: 75,
+                progressTitle: "Ruleset loaded, Initializing ..."
+              });
 
-            /*
-             Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-             problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-             to 'ding'
-            */
-            /*
-            this.pingTimer=setInterval ((_e) => {
+              console.log ("Starting ping service timer ...");
+                
+              /*
+               Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+               problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+               to 'ding'
+              */
               this.apiCall ("ding",null,"GET").then ((result) => {
                 this.setState ({
                   state: DocuScopeWA.DOCUSCOPE_STATE_READY,
                   server: result
                 });
               });
-            },30000);
-            */
 
-            this.setState ({
-              state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+              /*
+               Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+               problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+               to 'ding'
+              */
+              /*
+              this.pingTimer=setInterval ((_e) => {
+                this.apiCall ("ding",null,"GET").then ((result) => {
+                  this.setState ({
+                    state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+                    server: result
+                  });
+                });
+              },30000);
+              */
+
+              this.setState ({
+                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+                progress: 100,
+                progressTitle: "Application ready"
+              });
+            }
+          } else {
+           this.setState ({
+              state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
               progress: 100,
-              progressTitle: "Application ready"
+              progressTitle: "Error: unable to process ruleset"
             });
           }
-        } else {
-         this.setState ({
-            state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
-            progress: 100,
-            progressTitle: "Error: unable to process ruleset"
-          });
-        }
-      });
+        });
+      } else {
+        console.log ("Operating in instructor mode, no need to fetch rule file");
+        this.setState ({
+          state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+          progress: 100,
+          progressTitle: "Application ready"
+        });     
+      }
     },1000);
   }
 

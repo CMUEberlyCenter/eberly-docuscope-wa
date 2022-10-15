@@ -30,6 +30,9 @@ var onTopicDBRetry=0;
 var onTopicService=null;
 var onTopicDBMaxRetry=100;
 
+var onTopicDBTimeTaken=0;
+var onTopicBackTimeTaken=0;
+
 /**
  * 
  */
@@ -210,9 +213,12 @@ class DocuScopeWALTIService {
           console.log("DSWA assignment table created");
         });
 
+        /*
         onTopicService.getFiles (null,null);
-
         onTopicService.getFile (null,null,"14618");        
+        */
+
+        console.log ("Database connection initialized");
     });
   }
 
@@ -221,9 +227,15 @@ class DocuScopeWALTIService {
    */
   getFiles (request,response) {
     console.log ("getFiles ()");
+
+    let startTime=Date.now();
+
     let that=this;
 
     this.dbConn.query("select id,filename,date,info from dswa.files", function (err, result, fields) {
+
+      let stopTime = Date.now();
+
       if (err) {
         //throw err;
         if (response) {
@@ -246,7 +258,9 @@ class DocuScopeWALTIService {
    * 
    */
   getFile (request,response,aCourseId) {
-    console.log ("getFile ()");
+    console.log ("getFile ("+aCourseId+")");
+
+    let startTime=Date.now();
 
     let that=this;
 
@@ -284,10 +298,11 @@ class DocuScopeWALTIService {
 
             let jData=JSON.parse (unescaped);
 
-            //console.log (jData.info);
+            console.log (jData.info);
 
             if (response) {
-              response.json (that.generateDataMessage (jData.rules));
+              //response.json (that.generateDataMessage (jData.rules));
+              response.json (that.generateDataMessage (jData));
             } else {
               console.log ("Not called in the context of a web request, bump");
             }
@@ -296,6 +311,8 @@ class DocuScopeWALTIService {
               response.json(that.generateErrorMessage ("File data not found for assignment"));
             }
           }
+
+          let stopTime = Date.now();
         });
       } else {
 
@@ -308,6 +325,8 @@ class DocuScopeWALTIService {
    */
   getFileIdFromCourse (request,response) {
     console.log ("getFileIdFromCourse ()");
+
+    let startTime=Date.now();    
 
     let that=this;
 
@@ -326,7 +345,9 @@ class DocuScopeWALTIService {
       } else {
         response.json (that.generateDataMessage (result[0]));
       }
-    });    
+
+      let stopTime = Date.now();
+    });
   }
 
   /**
@@ -335,7 +356,7 @@ class DocuScopeWALTIService {
   sendDefaultFile(request,response) {
     console.log ("sendDefaultFile ()");
 
-    let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
+    let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/dswa.json', 'utf8'));
     response.json (this.generateDataMessage (ruleData));    
   }
 
@@ -344,6 +365,8 @@ class DocuScopeWALTIService {
    */
   storeFile (request,response,aFilename, aDate, aJSONObject) {
     console.log ("storeFile ()");
+
+    let startTime=Date.now();    
 
     let that=this;
     
@@ -369,6 +392,8 @@ class DocuScopeWALTIService {
         filename: aFilename,
         date: aDate
       }));
+
+      let stopTime = Date.now();
     });    
   }
 
@@ -628,15 +653,45 @@ class DocuScopeWALTIService {
   }
 
   /**
+   * 
+   */
+  processJSONDownload (request, response) {
+    console.log ("processJSONDownload ("+request.query.id+")");    
+   
+    let fileId=request.query.id;
+  
+    this.dbConn.query("select data,filename from dswa.files where id='"+fileId+"'", function (err, result, fields) {
+      if (result.length>0) {
+        let decoded=atob (result[0].data);
+        let fileName=result[0].filename;
+
+        response.setHeader('Content-Type', 'application/json');
+        response.attachment(fileName);
+
+        let unescaped=unescape (decoded);
+
+        let jData=JSON.parse (unescaped);
+        console.log (jData.info);
+
+        response.send(unescaped);
+      }
+    });
+  }
+
+  /**
    *
    */
   processRequest (request, response) {
     console.log ("processRequest ("+request.path+")");
 
+    //>------------------------------------------------------------------
+
     if (request.path=="/upload") {
       console.log ("Info: we've already processed this, need a better way of handling this situation");
       return;
     }
+
+    //>------------------------------------------------------------------
 
     if (this.useLTI==true) {
       if ((request.path=="/") || (request.path=="/index.html") || (request.path=="/index.htm")) {
@@ -668,16 +723,22 @@ class DocuScopeWALTIService {
 
     let path=request.path;
 
+    //>------------------------------------------------------------------
+
     if (request.path.indexOf ("/lti/activity/docuscope")!=-1) {
       console.log ("We've got an LTI path, stripping ...");
       path=request.path.replace("/lti/activity/docuscope", "/");
     }
 
+    //>------------------------------------------------------------------
+
     if (path=="/") {
       path="/index.html";
     }
 
-    console.log (path);
+    //>------------------------------------------------------------------
+
+    //console.log (path);
 
     response.sendFile(__dirname + this.publicHome + path);
   }
@@ -688,10 +749,14 @@ class DocuScopeWALTIService {
   processAPIRequest (type, request, response) {
     console.log ("processAPIRequest ("+type+") => " + request.path);
 
+    //>------------------------------------------------------------------
+
     if (request.path=="/upload") {
       console.log ("Info: we've already processed this, need a better way of handling this situation");
       return;
     }
+
+    //>------------------------------------------------------------------    
 
     if (request.path=="/api/v1/rules") {
       // First check to see if we have a course_id parameter, if so load from db
@@ -699,12 +764,16 @@ class DocuScopeWALTIService {
       let course_id=request.query.course_id;
 
       if (course_id) {
+        console.log("Using course id: " + course_id);
+
         if (course_id!="global") {
           console.log ("Loading rule set from database for course id: " + course_id);
 
           this.getFile (request,response,course_id);
           return;
         }
+      } else {
+        console.log ("Error: we do not have a course_id provided, sending default ...");
       }
 
       // If we do not have a course_id parameter or if it's set to 'global' then fall back to
@@ -712,6 +781,8 @@ class DocuScopeWALTIService {
 
       this.sendDefaultFile (request,response);
     }
+
+    //>------------------------------------------------------------------    
 
     /*
      Originally named 'ping', we had to change this because a bunch of browser-addons have a big
@@ -730,6 +801,8 @@ class DocuScopeWALTIService {
 
       return;
     }
+
+    //>------------------------------------------------------------------    
 
     if (request.path=="/api/v1/ontopic") {
       console.log ("Processing ontopic request ...");
@@ -759,6 +832,8 @@ class DocuScopeWALTIService {
       return;
     }
 
+    //>------------------------------------------------------------------    
+
     response.json(this.generateErrorMessage ("Unknown API call made"));
   }
 
@@ -779,6 +854,11 @@ class DocuScopeWALTIService {
     }));
 
     console.log ("Configuring endpoints ...");
+
+    this.app.get('/download', (request, response) => {
+      console.log ("get() download");
+      this.processJSONDownload (request,response);
+    });      
 
     this.app.post('/upload', async (request, response) => {
       console.log ("post() upload");
