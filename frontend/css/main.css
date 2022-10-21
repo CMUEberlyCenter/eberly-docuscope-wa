@@ -47,6 +47,12 @@ body {
   height: 100%;
 }
 
+.warning {
+  color: red;
+  padding: 4px;
+  font-size: 14pt;
+}
+
 .ltiapp {
   margin: 0px;
   padding: 0px;
@@ -81,9 +87,10 @@ body {
   flex: 0;
   padding: 0px;
   margin: 0px;
+  margin-bottom: 10px;
   width: 100%;
-  /*height: 25px;*/
-  /*background: #eaeaea;*/
+  display: flex;
+  flex-direction: row;
 }
 
 .dswa-main {

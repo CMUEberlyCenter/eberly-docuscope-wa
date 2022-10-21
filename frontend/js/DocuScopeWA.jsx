@@ -44,8 +44,12 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.dataTools=new DataTools ();
     this.docuscopeTools=new DocuScopeTools ();
+
+    let course_id=this.docuscopeTools.getCourseId (); 
+    
     this.ruleManager=new DocuScopeRules ();
     this.ruleManager.updateNotice=this.updateNotice;
+    this.ruleManager.setContext (course_id);
     
     this.pingEnabled=true;
     this.pingTimer=-1;

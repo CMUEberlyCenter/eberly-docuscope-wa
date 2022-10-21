@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import '../css/about.css';
 
-import { ruleInfo } from './data/info.js';
+//import { ruleInfo } from './data/info.js';
 
 /**
  * 
@@ -32,6 +32,7 @@ class DocuScopeAbout extends Component {
    */
   render () {
   	let version=this.props.ruleManager.getVersion ();
+    let ruleInfo=this.props.ruleManager.getInfo ();
 
   	return (<div className="about-modal">
       <div className="about-modal-content">

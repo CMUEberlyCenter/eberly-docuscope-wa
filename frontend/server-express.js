@@ -315,7 +315,9 @@ class DocuScopeWALTIService {
           let stopTime = Date.now();
         });
       } else {
-
+        if (response) {
+          response.json(that.generateErrorMessage ("File data not found for assignment"));
+        }
       } 
     });    
   }
@@ -341,7 +343,11 @@ class DocuScopeWALTIService {
       console.log("Result: " + result);
 
       if (result.length==0) {
-        response.json (that.generateDataMessage ("global"));
+        //response.json (that.generateDataMessage ("global"));
+        let defaultData={
+          "fileid": "global"
+        };
+        response.json (that.generateDataMessage (defaultData));
       } else {
         response.json (that.generateDataMessage (result[0]));
       }
@@ -357,6 +363,7 @@ class DocuScopeWALTIService {
     console.log ("sendDefaultFile ()");
 
     let ruleData=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/dswa.json', 'utf8'));
+
     response.json (this.generateDataMessage (ruleData));    
   }
 
@@ -780,6 +787,7 @@ class DocuScopeWALTIService {
       // baked-in ruleset
 
       this.sendDefaultFile (request,response);
+      return;
     }
 
     //>------------------------------------------------------------------    

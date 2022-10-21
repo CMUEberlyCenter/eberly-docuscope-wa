@@ -13,20 +13,36 @@ export default class DocuScopeRules {
    *
    */
   constructor() {
-    this.name = "unassigned";
+    //this.name = "unassigned";
 
-    this.rules = [];
+    this.context="global";
+
+    this.original = null; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
+    this.data = null; // The full dataset, not just the rules
+    this.rules = []; // Only the rules section of the dataset
+    this.clusters = []; 
     this.info = null;
 
     this.ready = false;
-    this.original = null;
-    this.clusters = [];
+
+    this.sessionStorage = null;
 
     this.dataTools = new DataTools ();
     this.docuscopeTools = new DocuScopeTools ();
-    this.sessionStorage = new DocuScopeSessionStorage ("dswa");
+
+    this.setContext ("global");
 
     this.updateNotice = null;
+  }
+
+  /**
+   *
+   */
+  setContext (aContext) {
+    console.log ("setContext ("+aContext+")");
+
+    this.context=aContext;
+    this.sessionStorage = new DocuScopeSessionStorage ("dswa-"+this.context);
   }
 
   /**
@@ -61,23 +77,41 @@ export default class DocuScopeRules {
    * 
    */
   getVersion () {
-    if (this.ready==false) {
-      return ("No rules loaded yet")
-    }
-
     let version="?.?.?";
 
-    if (this.info) {
-      version=this.info.version;
+    if (this.ready==false) {
+      return (version);
     }
 
-    let formatted=this.name;
+    if (!this.data) {
+      return (version);
+    }    
+
+    let formatted=this.data.info.name;
 
     if (formatted.length>30) {
-      formatted=this.name.substring (0,30);
+      formatted=this.data.info.name.substring (0,30);
     }
 
     return (formatted + ": (" + version + ")");
+  }
+
+  /**
+   *
+   */
+  isNewVersion (newInfo,existingInfo) {
+    console.log ("isNewVersion ()");
+
+    if (typeof existingInfo === 'undefined') {
+      console.log ("Existing info is undefined, returning: true");
+      return (true);
+    }
+
+    if (newInfo.version!=existingInfo.version) {
+      return (true);
+    }
+
+    return (false);
   }
 
   /**
@@ -94,7 +128,7 @@ export default class DocuScopeRules {
   reset () {
     console.log ("reset ()");
 
-    //this.name = "unassigned";
+    this.data=this.dataTools.deepCopy (this.original);
     this.rules = [];
     this.clusters = [];
 
@@ -110,19 +144,24 @@ export default class DocuScopeRules {
   /**
    * 
    */
-  parse () {
+  parse (newRules) {
     console.log ("parse ()");
+    
+    let rulesRaw=this.data.rules;
+    
+    console.log (rulesRaw);
 
-    for (let i = 0; i < this.original.length; i++) {
-      let ruleObject = this.original [i];
+    for (let i = 0; i < rulesRaw.length; i++) {
+      let ruleObject = rulesRaw [i];      
       let newRule = new DocuScopeRule();
       newRule.parse(ruleObject);
       this.rules.push(newRule);
     }
 
     // We don't have any clusters yet, we'll need to create them from
-    // the rules file
-    if (this.clusters.length==0) {
+    // the rules file    
+    if (newRules==true) {
+      this.clusters=[];
       let rawClusters=this.listClusters ();
       for (let j=0;j<rawClusters.length;j++) {
         let clusterObject={
@@ -132,6 +171,8 @@ export default class DocuScopeRules {
         this.clusters.push (clusterObject);
       }
     }
+
+    console.log ("parse () done");
   }
 
   /**
@@ -139,17 +180,27 @@ export default class DocuScopeRules {
    * rules as we got them from the server. However, we need to compare that to what the user
    * might have already worked on
    */
-  load(anObject) {
+  load(incomingData) {
     console.log ("load ()");
-    console.log (anObject);
 
-    this.info=anObject.info;
+    incomingData=this.docuscopeTools.fixIncoming (incomingData);
+
+    console.log (incomingData);
+
+    if (this.sessionStorage == null) {
+      console.log ("Info: no context set yet, defaulting to 'global'");
+      this.setContext ("global");
+    }
+
+    this.info=incomingData.info;
     
     let newRules=true;
 
     // We have to make a small accomodation for rules coming in as part of a JSON HTTP message
     // This will be smoothed out soon after v1.
-    this.original=anObject.rules;
+    this.original=incomingData;
+    this.data=this.dataTools.deepCopy (incomingData);
+    this.rules=[];
     this.clusters=this.sessionStorage.getJSONObject("clusters");
 
     //let stored=this.sessionStorage.getJSONObject("rules");
@@ -158,24 +209,32 @@ export default class DocuScopeRules {
     // First time use, we'll make the rules loaded from the server our place to start
     if (stored!=null) {
       if (this.dataTools.isEmpty (stored)==false) {
-        console.log ("Using stored rules");
-        this.original = stored;
-        newRules=false;
+        console.log ("We have stored rules, checking version ...");
+        if (this.isNewVersion (incomingData.info,stored.info)==true) {
+          console.log ("The incoming version is newer than the stored version, using newer data");
+          this.original=incomingData;
+          this.data=this.dataTools.deepCopy (incomingData);
+          this.rules=[];
+          newRules=true;
+        } else {
+          console.log ("The stored version is newer or equal to the incoming version, we'll use the stored data");
+          console.log (stored);
+          this.original=stored;
+          this.data=this.dataTools.deepCopy (stored);
+          this.rules=[];
+          newRules=false;
+        }
       } else {
         console.log ("Nothing stored yet, defaulting to template version");
       }
     }
 
-    this.parse ();
+    this.parse (newRules);
 
     // Make sure we have at least something stored in case this is the first time
     // we load the data from the template. Shouldn't hurt if we overwrite
     if (newRules==true) {
-      this.name=anObject.name.replaceAll (";",","); // Make sure we don't have a key/value separation clash
-      this.sessionStorage.setValue ("title",this.name);
       this.save ();
-    } else {
-      this.name=this.sessionStorage.getValue ("title");
     }
 
     this.ready = true;
@@ -193,10 +252,13 @@ export default class DocuScopeRules {
     // Re-create the JSON structure
     let raw=this.getJSONObject ();
 
-    //console.log ("Saving: ");
-    //console.log (raw);
+    let saveCopy=this.dataTools.deepCopy (this.original);
+    saveCopy.rules=raw;
 
-    this.sessionStorage.setJSONObject("dswa",raw);
+    console.log ("Saving: ");
+    console.log (saveCopy);
+
+    this.sessionStorage.setJSONObject("dswa",saveCopy);
     this.sessionStorage.setJSONObject("clusters",this.clusters);
   }
 
@@ -738,7 +800,7 @@ export default class DocuScopeRules {
    * 
    */
   listClusters () {
-    //console.log ("listClusters ()");
+    console.log ("listClusters ()");
 
     let hashTable=new HashTable ();
     let clusterList=[];

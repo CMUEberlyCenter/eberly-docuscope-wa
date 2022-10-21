@@ -11,8 +11,8 @@ services:
     image: mysql:8.0.30
     # We don't need an externally exposed port since docker-compose makes 3306 available 
     # to it's own private network anyway. However it is very helpful for testing
-    #ports:
-    # - 13306:3306
+    ports:
+     - 33306:3306
     environment:
       MYSQL_ROOT_PASSWORD: 4570WK821X6OiyT508srN09wI
       MYSQL_DATABASE: dswa

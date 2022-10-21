@@ -97,11 +97,12 @@ class InstuctorView extends EberlyLTIBase {
         }).then(resp => resp.text()).then((result) => {
           let raw=JSON.parse(result);
           console.log (raw);
-          that.setState ({
-            selected: raw.data.fileid
-          });
+          if (raw.data.fileid!="global") {
+            that.setState ({
+              selected: raw.data.fileid
+            });
+          }
         });
-
       });
     });
   }
@@ -110,6 +111,13 @@ class InstuctorView extends EberlyLTIBase {
    * 
    */
   onLaunch (e) {
+    console.log ("onLaunch ("+this.state.selected+")");
+
+    if ((this.state.selected=="") || (this.state.selected=="global")) {
+      console.log ("There is no file selected for this assignment. Please upload or select a file below first");
+      return;
+    }
+
     let docuscopeTools=new DocuScopeTools ();
     docuscopeTools.launch (true);
   }
@@ -291,6 +299,7 @@ class InstuctorView extends EberlyLTIBase {
     if (this.state.selected=="") {
       return (<div className="loaderbar">
         <button id="launcher" className="inline_button">Open in new Window (as student)</button>
+        <div className="warning">Please select a file below first</div>
         <div className="iframe">
           <form id="ltirelayform" target="docuscopewa" method="post"></form>
         </div>

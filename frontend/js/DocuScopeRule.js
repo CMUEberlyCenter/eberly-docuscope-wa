@@ -48,7 +48,7 @@ export default class DocuScopeRule {
    *
    */
   parse(anObject) {
-    //console.log ("parse ()");
+    console.log ("parse ()");
 
     this.raw = anObject; // We will need to make sure we can remove this since everything should be wrapped    
 

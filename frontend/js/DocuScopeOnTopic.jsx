@@ -113,7 +113,7 @@ class DocuScopeOnTopic extends Component {
    * 
    */
   generateSentenceDetails (aParagraphIndex,aSentenceIndex) {
-    console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
+    //console.log ("generateSentenceDetails ("+aParagraphIndex+","+aSentenceIndex+")");
 
     if ((aParagraphIndex==-1) || (aSentenceIndex==-1)) {
       //console.log ("No valid paragraph or sentence index selected");

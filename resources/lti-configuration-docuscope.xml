@@ -12,6 +12,11 @@
     <blti:description>Docuscope Write and Audit Assignment</blti:description>
     <blti:icon>https://eberly.cmu.edu/favicon.png</blti:icon>
     <blti:launch_url>https://docuscope-wa.eberly.cmu.edu</blti:launch_url>
+    <blti:custom>
+      <lticm:property name="canvas_course_id">$Canvas.course.id</lticm:property>
+      <lticm:property name="canvas_student_email">$Person.email.primary</lticm:property>
+      <lticm:property name="canvas_student_id">$Canvas.user.id</lticm:property>             
+    </blti:custom>    
     <blti:extensions platform="canvas.instructure.com">
         <lticm:property name="tool_id">docuscopewa</lticm:property>
         <lticm:property name="privacy_level">name_only</lticm:property>
