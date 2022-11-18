@@ -12,6 +12,7 @@ import optionalRuleIcon from "../../../css/icons/optional_icon.png";
 import clusterActiveIcon from "../../../css/icons/active_icon.png";
 import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.png";
 import clusterUpIcon from "../../../css/icons/active_arrow_icon.png";
+import clusterEditedIcon from "../../../css/icons/edited_icon.png";
 
 import ClusterPanel from '../ClusterPanel/ClusterPanel';
 import TopicHighlighter from "../../TopicHighlighter";
@@ -194,6 +195,23 @@ const Expectations = (props: {
 
   /**
    * 
+   * Right now, each expectation has 2 states:
+   * 
+   *   topic cluster associated with it is empty (Warning Icon)
+   *   topic cluster associated with it has at least one topic (word or phrase) in it. (No Icon)
+   * 
+   * In the new online version, I would like to visually differentiate the following 3 states per expectation:
+   * 
+   *   topic cluster associated with it is empty (zero pre-defined topics) —> Warning Icon
+   *   topic cluster associated with it has at least one pre-defined topic in it; and there are no user-defined topics. —> (No Icon)
+   *   topic cluster associated with it has art least one user-defined topic in it. There may be zero or more pre-defined topics —> (New Icon)
+   * 
+   * From the user’s perspective: 
+   * 
+   *   If an expectation is in state #1, the user must enter some topics to the topic cluster.
+   *   If an expectation is in state #2, the user may enter user-defined topics, but it is not required (thus no Icon).
+   *   If an expectation is in state #3, the user is reminded that the expectation’s topic cluster has been customized by them.
+   * 
    */
   const createRuleTree = (ruleManager: any, currentRule: number, currentCluster: number) => {
     let listElements=[];
@@ -213,9 +231,15 @@ const Expectations = (props: {
           clusterClass="cluster-line cluster-selected";
         }
 
-        let topicCount=ruleManager.getClusterTopicCount (i,j);
-        if (topicCount>0) {
+        let predefCount=ruleManager.getClusterTopicCountPredefined (i,j);
+        let customCount=ruleManager.getClusterTopicCountCustom (i,j);
+
+        if (predefCount>0) {
           clustercount=<div className="cluster-mini-icon" />;
+        }
+
+        if (customCount>0) {
+          clustercount=<img className="cluster-mini-icon" src={clusterEditedIcon}/>;
         }
 
         let upDog=<img className="cluster-up-arrow" src={clusterUpIcon}/>;
@@ -225,6 +249,8 @@ const Expectations = (props: {
 
         if (count>0) {
           upDog=<img className="cluster-up-arrow" style={{visibility: "hidden"}} src={clusterUpIcon}/>;          
+        } else {
+
         }
 
         clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>

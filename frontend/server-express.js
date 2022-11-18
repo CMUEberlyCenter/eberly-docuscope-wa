@@ -768,6 +768,8 @@ class DocuScopeWALTIService {
     if (request.path=="/api/v1/rules") {
       // First check to see if we have a course_id parameter, if so load from db
 
+      this.updateMetrics ();
+
       let course_id=request.query.course_id;
 
       if (course_id) {

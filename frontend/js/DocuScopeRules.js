@@ -469,8 +469,44 @@ export default class DocuScopeRules {
    * tree to obtain the count but which is given a pointer to the cluster to
    * start with
    */
-  getClusterTopicCount (aRuleIndex, aClusterIndex) {
-    //console.log ("getClusterTopicCount ("+ aRuleIndex + "," + aClusterIndex + ")");
+  getClusterTopicCountPredefined (aRuleIndex, aClusterIndex) {
+    //console.log ("getClusterTopicCountPredefined ("+ aRuleIndex + "," + aClusterIndex + ")");
+
+    if ((aRuleIndex==-1) || (aClusterIndex==-1)) { 
+      //console.log ("No valid rule or cluster provided");
+      return (0);
+    }
+
+    let rule = this.rules[aRuleIndex];
+
+    if (rule!=null) {
+      if (rule.children) {
+        let aCluster=rule.children [aClusterIndex];
+        
+        let clusterObject=aCluster.raw;
+        
+        let topics=clusterObject.topics;
+
+        if (topics) {
+          if (topics [0].pre_defined_topics) {
+            let topicList=topics [0].pre_defined_topics;
+            return (topicList.length);
+          }
+        }         
+      }
+    }
+
+    return 0;
+  }  
+
+
+  /**
+   * We should provide an alternative method that doesn't need to traverse the
+   * tree to obtain the count but which is given a pointer to the cluster to
+   * start with
+   */
+  getClusterTopicCountCustom (aRuleIndex, aClusterIndex) {
+    //console.log ("getClusterTopicCountCustom ("+ aRuleIndex + "," + aClusterIndex + ")");
 
     if ((aRuleIndex==-1) || (aClusterIndex==-1)) { 
       //console.log ("No valid rule or cluster provided");
