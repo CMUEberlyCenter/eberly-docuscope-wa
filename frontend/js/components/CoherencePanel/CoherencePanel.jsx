@@ -49,8 +49,7 @@ class CoherencePanel extends Component {
 
     this.state = {
       selectedParagraph: -1,
-      selectedSentence: -1,
-      showGlobal: props.showglobal
+      selectedSentence: -1
     };
 
     this.dataTools=new OnTopicDataTools ();
@@ -73,8 +72,7 @@ class CoherencePanel extends Component {
       console.log ("showglobal changed");
       this.setState ({
         selectedParagraph: -1,
-        selectedSentence: -1,        
-        showGlobal: this.props.showglobal
+        selectedSentence: -1
       })
     }
 
@@ -411,8 +409,8 @@ class CoherencePanel extends Component {
         paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j,topic)}>{icon}</div>);
       }
 
-      if (this.state.showGlobal == true) {
-        //console.log ("Cluster: " + topics + " => " + is_topic_cluster + " => " + this.state.showGlobal);
+      if (this.props.showglobal == true) {
+        //console.log ("Cluster: " + topics + " => " + is_topic_cluster + " => " + this.props.showglobal);
         if (is_topic_cluster == true) {
           topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
         }

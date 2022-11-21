@@ -85,7 +85,7 @@ const Coherence = (props: {
   const topicHighlighter=new TopicHighlighter ();
 
   const [status, setStatus] = useState("");
-  const [showToggle, setShowToggle] = useState(false);
+  const [showToggle, setShowToggle] = useState(true);
   const [data, setCoherenceData] = useState<unknown>(null);
   const [local, setLocalCoherenceData] = useState<unknown>(null);
   
