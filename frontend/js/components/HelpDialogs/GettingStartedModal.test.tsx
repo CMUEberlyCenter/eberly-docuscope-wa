@@ -7,7 +7,7 @@ import {
   showGettingStarted,
   showGettingStarted$,
 } from "../../service/help.service";
-import GettingStartedModal from "./GettingStartedModal";
+import { GettingStartedModal } from "./GettingStartedModal";
 
 beforeAll(() => {
   fetchMock.get(/getting_started.html$/, "<div>getting started</div>");

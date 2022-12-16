@@ -4,7 +4,7 @@ import React from "react";
 import { first } from "rxjs";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { showHelp, showHelp$ } from "../../service/help.service";
-import HelpModal from "./HelpModal";
+import { HelpModal } from "./HelpModal";
 
 beforeAll(() => {
   fetchMock.get(/help.html$/, "<div>help content</div>");
