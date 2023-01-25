@@ -7,7 +7,7 @@ import {
   showTroubleshooting,
   showTroubleshooting$,
 } from "../../service/help.service";
-import TroubleshootingModal from "./TroubleshootingModal";
+import { TroubleshootingModal } from "./TroubleshootingModal";
 
 beforeAll(() => {
   fetchMock.get(/troubleshooting.html$/, "<div>troubleshooting</div>");
