@@ -76,8 +76,8 @@ import {
 import { Node } from "slate";
 import type DocuScopeRules from "../../DocuScopeRules";
 
-import DocuScopeTools from "../../DocuScopeTools";
-const dTools=new DocuScopeTools ();
+//import DocuScopeTools from "../../DocuScopeTools";
+//const dTools=new DocuScopeTools ();
 
 // Should probably import from the service
 const serialize = (nodes: Descendant[]): string => {
@@ -118,17 +118,17 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @returns
  */
 const StudentView = (props: {
-  api: apiCall,
-  ruleManager: DocuScopeRules,
-  html: string,
-  htmlSentences: string,
-  update: any
+  api: apiCall;
+  ruleManager: DocuScopeRules;
+  html: string;
+  htmlSentences: string;
+  update: (a: unknown) => void;
 }) => {
   const topicHighlighter = new TopicHighlighter();
 
   // Status handlers
-  const [status/*, setStatus*/] = useState("Application ready, rules loaded");
-  const [language/*, setLanguage*/] = useState("ENG");
+  const [status /*, setStatus*/] = useState("Application ready, rules loaded");
+  const [language /*, setLanguage*/] = useState("ENG");
 
   const navId = useId();
   const selectId = useId();
@@ -169,6 +169,18 @@ const StudentView = (props: {
 
   // Resize panels
   const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
+  useEffect(() => {
+    // get initial value from storage if possible on mount.
+    const width = sessionStorage.getItem("tool_width");
+    if (width && !isNaN(Number(width))) {
+      setToolWidth(Number(width));
+    }
+  }, []);
+  // Update stored tool_width
+  useEffect(
+    () => sessionStorage.setItem("tool_width", String(toolWidth)),
+    [toolWidth]
+  );
   const [toolSeparatorXPosition, setToolSeparatorXPosition] = useState<
     undefined | number
   >(undefined);
@@ -235,11 +247,7 @@ const StudentView = (props: {
   }, [onMouseMove, onMouseUp, onTouchMove]);
 
   useEffect(() => {
-    if (toolRef.current) {
-      if (!toolWidth) {
-        setToolWidth(toolRef.current.clientWidth);
-        //return;
-      }
+    if (toolRef.current && toolWidth) {
       toolRef.current.style.width = `${toolWidth}px`;
     }
   }, [toolRef, toolWidth]);
@@ -331,24 +339,30 @@ const StudentView = (props: {
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Mike's panel)
-  const showDocuScopeTaggedText = currentTab === "impressions" && !editable && isTaggerResult(tagging);
+  const showDocuScopeTaggedText =
+    currentTab === "impressions" && !editable && isTaggerResult(tagging);
   let showOnTopicText = false;
 
-  const taggedDocuScopeTextContent = isTaggerResult(tagging) ? tagging.html_content : "";
+  const taggedDocuScopeTextContent = isTaggerResult(tagging)
+    ? tagging.html_content
+    : "";
 
   let topicTaggedContent;
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
   if (showDocuScopeTaggedText == false) {
-    showOnTopicText = currentTab === "coherence" && !editable && props.html != null;
+    showOnTopicText =
+      currentTab === "coherence" && !editable && props.html != null;
 
     if (showOnTopicText == false) {
-      showOnTopicText = currentTab === "clarity" && !editable && props.html != null;
+      showOnTopicText =
+        currentTab === "clarity" && !editable && props.html != null;
     }
 
     if (showOnTopicText == false) {
-      showOnTopicText = currentTab === "expectations" && !editable && props.html != null;
-    }    
+      showOnTopicText =
+        currentTab === "expectations" && !editable && props.html != null;
+    }
   }
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
@@ -394,7 +408,7 @@ const StudentView = (props: {
           </Badge>
         </OverlayTrigger>
       </div>
-      <hr/>
+      <hr />
       <div
         className="tagged-text"
         onClick={(evt) => click_select(evt)}
@@ -443,7 +457,8 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const [showParagraphSelector/*, setShowParagraphSelector*/] = useState(false);
+  const [showParagraphSelector /*, setShowParagraphSelector*/] =
+    useState(false);
 
   let paragraphselector;
 
@@ -465,8 +480,8 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const globalUpdate = (text:string) => {
-    console.log ("globalUpdate ()");
+  const globalUpdate = (text: string) => {
+    console.log("globalUpdate ()");
 
     //console.log (text);
 
@@ -477,25 +492,36 @@ const StudentView = (props: {
     setEditorState(false);
 
     // 2. The update method in the parent component needs to be called
-    props.update (null);
+    props.update(null);
 
-    // 3. Get the latest from the server    
+    // 3. Get the latest from the server
     if (text !== "") {
       //setStatus("Retrieving results...");
 
-      let customTopics=props.ruleManager.getAllCustomTopics ();
-      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+      const customTopics = props.ruleManager.getAllCustomTopics();
+      const customTopicsStructured =
+        props.ruleManager.getAllCustomTopicsStructured();
 
       const escaped = encodeURIComponent(text);
 
       const encoded = window.btoa(escaped);
 
-      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {        
-        //let coherence=incoming.coherence;
-        //let local=incoming.local;
-      });
+      props
+        .api(
+          "ontopic",
+          {
+            custom: customTopics,
+            customStructured: customTopicsStructured,
+            base: encoded,
+          },
+          "POST"
+        )
+        .then((/*incoming : any*/) => {
+          //let coherence=incoming.coherence;
+          //let local=incoming.local;
+        });
     }
-  }
+  };
 
   let reset;
 
@@ -515,7 +541,7 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <Nav.Link eventKey={"resetData"}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
-                 {reset}
+                  {reset}
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
                   <NavDropdown.Item eventKey={"showHelp"}>
@@ -537,26 +563,45 @@ const StudentView = (props: {
         </Navbar>
       </header>
       <main className="d-flex flex-grow-1 bg-white justify-content-start overflow-hidden h-100">
-        <aside ref={toolRef} className="d-flex flex-column tools-pane h-100 overflow-hidden">
+        <aside
+          ref={toolRef}
+          className="d-flex flex-column tools-pane h-100 overflow-hidden"
+        >
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
-            <Tab eventKey={"expectations"} title="Expectations" className="overflow-hidden h-100">
+            <Tab
+              eventKey={"expectations"}
+              title="Expectations"
+              className="overflow-hidden h-100"
+            >
               <Expectations
                 api={props.api}
                 ruleManager={props.ruleManager}
                 editorValue={editorTextValue}
               />
             </Tab>
-            <Tab eventKey={"coherence"} title="Coherence" className="overflow-hidden h-100">
+            <Tab
+              eventKey={"coherence"}
+              title="Coherence"
+              className="overflow-hidden h-100"
+            >
               <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
-            <Tab eventKey={"clarity"} title="Clarity" className="overflow-hidden h-100">
+            <Tab
+              eventKey={"clarity"}
+              title="Clarity"
+              className="overflow-hidden h-100"
+            >
               <Clarity
                 api={props.api}
                 ruleManager={props.ruleManager}
                 htmlSentences={props.htmlSentences}
               />
             </Tab>
-            <Tab eventKey={"impressions"} title="Impressions" className="overflow-hidden h-100">
+            <Tab
+              eventKey={"impressions"}
+              title="Impressions"
+              className="overflow-hidden h-100"
+            >
               <Impressions />
             </Tab>
           </Tabs>
@@ -571,7 +616,9 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
             {paragraphselector}
-            <Button onClick={(_e) => globalUpdate (editorTextValue)}>Update</Button>
+            <Button onClick={(_e) => globalUpdate(editorTextValue)}>
+              Update
+            </Button>
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
@@ -591,13 +638,15 @@ const StudentView = (props: {
                 ) {
                   editorText.next(content);
                   setEditorValue(content);
-                  setEditorTextValue(serialize(content));                  
+                  setEditorTextValue(serialize(content));
                   sessionStorage.setItem("content", JSON.stringify(content));
                 }
               }}
             >
               <Editable
-                className={showDocuScopeTaggedText || showOnTopicText ? "d-none" : ""}
+                className={
+                  showDocuScopeTaggedText || showOnTopicText ? "d-none" : ""
+                }
                 readOnly={!editable}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}

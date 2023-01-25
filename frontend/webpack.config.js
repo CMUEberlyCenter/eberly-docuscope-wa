@@ -20,7 +20,7 @@ const config = {
     // prefixed with the 'publicPath', e.g.:
     //   <script src='http://localhost:9001/assets/bundle.js'>
     //   </script>
-    publicPath: '/public/',    // The local filesystem directory where static html files
+    //publicPath: '/public/',    // The local filesystem directory where static html files
     // should be placed.
     // Put your main static html page containing the <script> tag
     // here to enjoy 'live-reloading'
@@ -28,12 +28,13 @@ const config = {
     // put 'index.html' in '../views/main/index.html', and
     // it will be available at the url:
     //   https://localhost:9001/main/index.html
-    contentBase: path.resolve(__dirname, "./views"),    // 'Live-reloading' happens when you make changes to code
+    //contentBase: path.resolve(__dirname, "./views"),    // 'Live-reloading' happens when you make changes to code
     // dependency pointed to by 'entry' parameter explained earlier.
     // To make live-reloading happen even when changes are made
     // to the static html pages in 'contentBase', add
     // 'watchContentBase'
-    watchContentBase: true,
+    //watchContentBase: true,
+    hot: true,
     compress: true,
     port: 8082
   },
