@@ -356,7 +356,17 @@ class InstuctorView extends EberlyLTIBase {
 
       console.log ("unescaped: " + unescaped);
 
-      let info=JSON.parse (unescaped);
+      let info={
+        name: "unassigned",
+        version: "0.0.0",
+        author: "unassigned"
+        saved: true,
+        copyright: "empty"
+      };
+
+      if (unescaped!="undefined") {
+        info=JSON.parse (unescaped);
+      }
 
       let infoList=<ul style={{listStyleType: "none"}}>
         <li>{"Name: " + info.name}</li>
