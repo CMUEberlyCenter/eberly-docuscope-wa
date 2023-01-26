@@ -359,7 +359,7 @@ class InstuctorView extends EberlyLTIBase {
       let info={
         name: "unassigned",
         version: "0.0.0",
-        author: "unassigned"
+        author: "unassigned",
         saved: true,
         copyright: "empty"
       };
