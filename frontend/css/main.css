@@ -47,6 +47,11 @@ body {
   height: 100%;
 }
 
+.versionlabel {
+  font-size: 8pt;
+  color: grey;
+}
+
 .warning {
   color: red;
   padding: 4px;

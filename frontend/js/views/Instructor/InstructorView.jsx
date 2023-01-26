@@ -42,7 +42,8 @@ class InstuctorView extends EberlyLTIBase {
     this.state={
       uploading: true,
       files: [],
-      selected: ""
+      selected: "",
+      version: "0.9.5"
     };
 
     this.dTools=new DocuScopeTools ();
@@ -344,8 +345,17 @@ class InstuctorView extends EberlyLTIBase {
     for (let i=0;i<this.state.files.length;i++) {
       let file=this.state.files[i];
       let infoString=file.info;
+
+      console.log ("infoString: " + file.info);
+
       let decoded=atob(infoString);
+
+      console.log ("decoded: " + decoded);
+
       let unescaped=unescape(decoded);
+
+      console.log ("unescaped: " + unescaped);
+
       let info=JSON.parse (unescaped);
 
       let infoList=<ul style={{listStyleType: "none"}}>
@@ -385,6 +395,7 @@ class InstuctorView extends EberlyLTIBase {
     let filelisting=this.generateFileListing ();
 
     return (<div tabIndex={0} className="ltiapp">
+      <div className="versionlabel">Eberly DocuScope Write & Audit version: {this.state.version}</div>
       <div className="logo">
       DocuScope Write & Audit
       </div>
