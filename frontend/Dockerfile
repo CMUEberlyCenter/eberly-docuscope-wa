@@ -4,6 +4,7 @@ FROM node:16.17
 # ENV NODE_ENV=production
 
 COPY . /app
+COPY .env /app/.env
 WORKDIR /app
 
 # With the --production flag (or when the NODE_ENV environment variable is set to production), 

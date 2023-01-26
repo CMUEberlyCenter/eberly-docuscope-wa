@@ -5,6 +5,7 @@ db
 *.rbc
 *.sassc
 .sass-cache
+*.sql
 capybara-*.html
 .rspec
 /.bundle

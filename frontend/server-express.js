@@ -168,8 +168,8 @@ class DocuScopeWALTIService {
       connectionLimit : 100, //important
       host: process.env.DB_HOST,
       port: parseInt (process.env.DB_PORT),
-      user: "dswa",
-      password: "4570WK821X6OiyT508srN09wV",
+      user: process.env.MYSQL_USER,
+      password: process.env.MYSQL_PASSWORD,
       debug    :  false
     });    
 
@@ -202,6 +202,8 @@ class DocuScopeWALTIService {
           if (err) throw err;
           console.log("Database created");
         });
+
+        // Need to add a field here to identify the uploader/owner!
 
         connection.query("CREATE TABLE IF NOT EXISTS dswa.files (id VARCHAR(40) NOT NULL, filename VARCHAR(100) NOT NULL, date VARCHAR(100) NOT NULL, data LONGTEXT NOT NULL, info LONGTEXT NOT NULL,  PRIMARY KEY (id));", function (err, result) {
           if (err) throw err;
@@ -562,7 +564,7 @@ class DocuScopeWALTIService {
    *
    */
   processMetrics (request, response) {
-    console.log ("processMetrics ()");
+    //console.log ("processMetrics ()");
       
     let metricsString=this.metrics.build ();
 
@@ -585,7 +587,7 @@ class DocuScopeWALTIService {
    *
    */
   updateMetricsAvg () {
-    console.log ("updateMetricsAvg ()");
+    //console.log ("updateMetricsAvg ()");
     onTopicRequestsAvg=0;
   }
 
@@ -924,7 +926,7 @@ class DocuScopeWALTIService {
     });
 
     this.app.get('/metrics', (request, response) => {
-      console.log ("get() metrics");
+      //console.log ("get() metrics");
       this.processMetrics (request,response);
     });    
 

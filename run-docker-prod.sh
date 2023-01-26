@@ -1,6 +1,15 @@
 clear
 cat banner.txt
 
+cd ./frontend
+./run-build.sh
+cd ..
+
+if [ ! -f ".env" ]; then
+  echo "Error: .env file found, please configure the environment first"
+  exit
+fi
+
 if [ -z ${MYSQL_UID+x} ]; 
 then 
   echo "var is MYSQL_UID unset, setting ...";

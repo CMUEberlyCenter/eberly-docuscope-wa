@@ -1,6 +1,11 @@
 clear
 cat ./banner.txt
 
+if [ ! -f ".env" ]; then
+  echo "Error: .env file found, please configure the environment first"
+  exit
+fi
+
 if lsof -Pi :13306 -sTCP:LISTEN -t >/dev/null ; then
     echo "Error: the db listening port is already taken, aborting ..."
     exit 1

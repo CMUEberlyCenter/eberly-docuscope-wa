@@ -174,6 +174,7 @@ class DocuScopeOnTopic extends Component {
             loading={this.state.loading}
             invalidated={this.state.invalidated}
             textdata={this.state.textdata}
+            highlight={"#E2D2BB"}
           />
         </div>
         <div className="ontopic-help">
@@ -182,7 +183,7 @@ class DocuScopeOnTopic extends Component {
               <div className="box-green"></div>Noun phrase
             </span>
             <span className="topic-legend-item">
-              <div className="box-red"></div>Active verb
+              <div className="box-red"></div>Action verb
             </span>
             <span className="topic-legend-item">
               <div className="box-blue"></div>be verb
