@@ -462,7 +462,7 @@ const StudentView = (props: {
 
   let paragraphselector;
 
-  if (showParagraphSelector == true) {
+  if (showParagraphSelector === true) {
     paragraphselector = (
       <Form.Group>
         <Form.Select>
@@ -528,7 +528,7 @@ const StudentView = (props: {
   //reset=<NavDropdown.Item eventKey={"resetView"} active={false}>Reset View</NavDropdown.Item>;
 
   //>--------------------------------------------------------
-
+  const [zoom, setZoom] = useState<number>(100);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -615,6 +615,10 @@ const StudentView = (props: {
 
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between">
+            <div className="d-flex flex-column">
+            <Form.Label>Font Size: {zoom}%</Form.Label>
+            <Form.Range min={10} max={300} step={10} onChange={(event) => setZoom(event.target.valueAsNumber)} value={zoom}/>
+            </div>
             {paragraphselector}
             <Button onClick={(_e) => globalUpdate(editorTextValue)}>
               Update
@@ -625,7 +629,7 @@ const StudentView = (props: {
               onChange={(checked) => setEditorState(checked)}
             />
           </Card.Header>
-          <Card.Body className="overflow-auto">
+          <Card.Body className="overflow-auto" style={{fontSize: `${zoom}%`}}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
             {topicTaggedContent}
             <Slate
