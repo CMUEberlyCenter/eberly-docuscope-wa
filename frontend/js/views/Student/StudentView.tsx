@@ -499,8 +499,7 @@ const StudentView = (props: {
       //setStatus("Retrieving results...");
 
       const customTopics = props.ruleManager.getAllCustomTopics();
-      const customTopicsStructured =
-        props.ruleManager.getAllCustomTopicsStructured();
+      const customTopicsStructured = props.ruleManager.getAllCustomTopicsStructured();
 
       const escaped = encodeURIComponent(text);
 
@@ -522,6 +521,18 @@ const StudentView = (props: {
         });
     }
   };
+
+  //>--------------------------------------------------------
+
+  const lockAndUpdate = (checked: boolean, editorTextValue: string) => {
+    console.log ("lockAndUpdate ("+checked+")");
+    
+    setEditorState(checked);
+    
+    if (checked==true) {
+      globalUpdate(editorTextValue);
+    }
+  }
 
   let reset;
 
@@ -577,6 +588,7 @@ const StudentView = (props: {
                 api={props.api}
                 ruleManager={props.ruleManager}
                 editorValue={editorTextValue}
+                update={props.update}
               />
             </Tab>
             <Tab
@@ -622,7 +634,7 @@ const StudentView = (props: {
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => setEditorState(checked)}
+              onChange={(checked) => lockAndUpdate(checked,editorTextValue)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto">

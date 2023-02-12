@@ -26,6 +26,12 @@ import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
 import { useLockedEditorText } from "../../service/editor-state.service";
 
+import {
+  setEditorState,
+  editorText,
+  useEditorState,
+} from "../../service/editor-state.service";
+
 /*
 interface RuleProps {
   rule: ExpectationRule;
@@ -96,7 +102,8 @@ const ErrorFallback = (props: { error?: Error }) => (
 const Expectations = (props: { 
     api: apiCall,
     ruleManager: any,
-    editorValue: string
+    editorValue: string,
+    update: (a: unknown) => void;
   }) => {
 
   const text = useCoherenceText();
@@ -143,6 +150,17 @@ const Expectations = (props: {
   /**
    * 
    */
+  const disableEditor = () => {
+    // 1. The edit toggle needs to be switched to off
+    setEditorState(false);
+
+    // 2. The update method in the parent component needs to be called
+    props.update(null);
+  }
+
+  /**
+   * 
+   */
   const onRuleClick = (e:any, ruleIndex: number) => {
     console.log ("onRuleClick ("+ruleIndex+")");
 
@@ -153,6 +171,8 @@ const Expectations = (props: {
       console.log ("Disabled!");
       return;
     }
+
+    //disableEditor ();
 
     setCurrentRuleState ({currentRule: ruleIndex, currentCluster: -1});
   }
@@ -169,7 +189,9 @@ const Expectations = (props: {
     if (disabled==true) {
       console.log ("Disabled!");
       return;
-    }    
+    }
+
+    //disableEditor ();
 
     //let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
 
