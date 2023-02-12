@@ -341,40 +341,25 @@ const StudentView = (props: {
   // should the special tagged text rendering be used? (Mike's panel)
   const showDocuScopeTaggedText =
     currentTab === "impressions" && !editable && isTaggerResult(tagging);
-  let showOnTopicText = false;
 
   const taggedDocuScopeTextContent = isTaggerResult(tagging)
     ? tagging.html_content
     : "";
 
-  let topicTaggedContent;
-
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
-  if (showDocuScopeTaggedText == false) {
-    showOnTopicText =
-      currentTab === "coherence" && !editable && props.html != null;
-
-    if (showOnTopicText == false) {
-      showOnTopicText =
-        currentTab === "clarity" && !editable && props.html != null;
-    }
-
-    if (showOnTopicText == false) {
-      showOnTopicText =
-        currentTab === "expectations" && !editable && props.html != null;
-    }
-  }
+  const showOnTopicText = currentTab !== "impressions" && !editable && Boolean(props.html);
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
-  if (showOnTopicText == true) {
-    topicTaggedContent = (
+  const topicTaggedContent = (
+    <React.Fragment>
+      (/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */)
       <div
         className="tagged-text"
         dangerouslySetInnerHTML={{ __html: props.html }}
       ></div>
-    );
-  }
+    </React.Fragment>
+  );
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -639,7 +624,7 @@ const StudentView = (props: {
           </Card.Header>
           <Card.Body className="overflow-auto">
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
-            {topicTaggedContent}
+            {showOnTopicText ? topicTaggedContent : ""}
             <Slate
               editor={editor}
               value={editorValue}
