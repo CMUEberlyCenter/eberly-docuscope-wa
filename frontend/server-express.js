@@ -825,10 +825,9 @@ class DocuScopeWALTIService {
 
       if (msg.status=="request") {
         let raw=msg.data.base;
-
         let decoded=Buffer.from(raw, 'base64');
-
         let unescaped=unescape (decoded);
+        //let unescaped=raw;
       }
 
       console.log ("Forwarding request ...");

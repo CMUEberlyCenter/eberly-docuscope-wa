@@ -73,6 +73,12 @@ $cmu-secondary-gold: #a60;
   flex: 1;
 }
 
+.statusbar-version {
+  flex: 0;
+  min-width: 140px;
+  padding: 0px 2px 0px 2px;
+}
+
 .statusbar-ruleversion {
   flex: 0;
   min-width: 310px;

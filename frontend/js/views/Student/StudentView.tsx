@@ -9,6 +9,9 @@
  * The tools are arranged in tabs.
  * Editor text is also cached in sessionStorage.
  */
+
+var version="0.8.3";
+
 import * as d3 from "d3";
 import React, {
   createRef,
@@ -351,15 +354,28 @@ const StudentView = (props: {
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
+/*
   const topicTaggedContent = (
     <React.Fragment>
-      (/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */)
+      (
+       // TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example.
+      )
       <div
         className="tagged-text"
         dangerouslySetInnerHTML={{ __html: props.html }}
       ></div>
     </React.Fragment>
   );
+*/
+
+  const topicTaggedContent = (
+    <React.Fragment>
+      <div
+        className="tagged-text"
+        dangerouslySetInnerHTML={{ __html: props.html }}
+      ></div>
+    </React.Fragment>
+  );  
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -487,8 +503,9 @@ const StudentView = (props: {
       const customTopicsStructured = props.ruleManager.getAllCustomTopicsStructured();
 
       const escaped = encodeURIComponent(text);
-
       const encoded = window.btoa(escaped);
+
+      //const encoded = text;
 
       props
         .api(
@@ -514,7 +531,8 @@ const StudentView = (props: {
     
     setEditorState(checked);
     
-    if (checked==true) {
+    if (checked==false) {
+      console.log ("checked==true => update");
       globalUpdate(editorTextValue);
     }
   }
@@ -659,6 +677,7 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
+        <div className="statusbar-version">{"dswa version: " + version}</div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}
