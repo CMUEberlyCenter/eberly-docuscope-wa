@@ -10,7 +10,7 @@
  * Editor text is also cached in sessionStorage.
  */
 
-var version="0.8.4";
+const version = "0.8.4";
 
 import * as d3 from "d3";
 import React, {
@@ -350,32 +350,20 @@ const StudentView = (props: {
     : "";
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
-  const showOnTopicText = currentTab !== "impressions" && !editable && Boolean(props.html);
+  const showOnTopicText =
+    currentTab !== "impressions" && !editable && props.html.trim().length > 0;
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
-/*
   const topicTaggedContent = (
     <React.Fragment>
-      (
-       // TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example.
-      )
+      {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example.*/}
       <div
         className="tagged-text"
         dangerouslySetInnerHTML={{ __html: props.html }}
       ></div>
     </React.Fragment>
   );
-*/
-
-  const topicTaggedContent = (
-    <React.Fragment>
-      <div
-        className="tagged-text"
-        dangerouslySetInnerHTML={{ __html: props.html }}
-      ></div>
-    </React.Fragment>
-  );  
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -500,7 +488,8 @@ const StudentView = (props: {
       //setStatus("Retrieving results...");
 
       const customTopics = props.ruleManager.getAllCustomTopics();
-      const customTopicsStructured = props.ruleManager.getAllCustomTopicsStructured();
+      const customTopicsStructured =
+        props.ruleManager.getAllCustomTopicsStructured();
 
       const escaped = encodeURIComponent(text);
       const encoded = window.btoa(escaped);
@@ -527,15 +516,15 @@ const StudentView = (props: {
   //>--------------------------------------------------------
 
   const lockAndUpdate = (checked: boolean, editorTextValue: string) => {
-    console.log ("lockAndUpdate ("+checked+")");
-    
+    console.log("lockAndUpdate (" + checked + ")");
+
     setEditorState(checked);
-    
-    if (checked==false) {
-      console.log ("checked==true => update");
+
+    if (checked == false) {
+      console.log("checked==true => update");
       globalUpdate(editorTextValue);
     }
-  }
+  };
 
   let reset;
 
@@ -637,7 +626,7 @@ const StudentView = (props: {
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => lockAndUpdate(checked,editorTextValue)}
+              onChange={(checked) => lockAndUpdate(checked, editorTextValue)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
