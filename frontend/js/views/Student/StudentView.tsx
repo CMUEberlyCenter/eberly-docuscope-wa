@@ -10,7 +10,7 @@
  * Editor text is also cached in sessionStorage.
  */
 
-var version="0.8.3";
+var version="0.8.4";
 
 import * as d3 from "d3";
 import React, {
