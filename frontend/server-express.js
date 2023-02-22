@@ -583,8 +583,8 @@ class DocuScopeWALTIService {
     onTopicRequests++;
     onTopicRequestsAvg++;
 
-    this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
-    this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");    
+    onTopicService.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,onTopicService.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+    onTopicService.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,onTopicService.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");    
   }
 
   /**
@@ -595,6 +595,10 @@ class DocuScopeWALTIService {
     onTopicRequestsAvg=0;
     onTopicResponseAvg=0;
     onTopicResponseAvgCount=0;
+
+    onTopicService.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,onTopicService.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
+    onTopicService.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,onTopicService.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");    
+    onTopicService.metrics.setMetricObject("eberly_dswa_response_avg",0,onTopicService.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");
   }
 
   /**
@@ -616,7 +620,7 @@ class DocuScopeWALTIService {
     onTopicResponseAvgCount++;
 
     let average=onTopicResponseAvg/onTopicResponseAvgCount;
-    onTopicService.metrics.setMetricObject("eberly_dswa_response_avg",average,onTopicService.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");    
+    onTopicService.metrics.setMetricObject("eberly_dswa_response_avg",average,onTopicService.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");
   }
 
   /**
