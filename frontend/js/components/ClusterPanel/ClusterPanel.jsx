@@ -5,6 +5,10 @@ import DataTools from "../../DataTools";
 import DocuScopeTools from "../../DocuScopeTools";
 import TopicHighlighter from "../../TopicHighlighter";
 
+import {
+  setEditorState,
+} from "../../service/editor-state.service";
+
 import './ClusterPanel.scss';
 import './ClusterTopics.scss';
 
@@ -197,6 +201,8 @@ class ClusterPanel extends Component {
    */
   onCustomTopicUpdate (e) {
     console.log ("onCustomTopicUpdate ()");
+    
+    setEditorState(false);
 
     let topicArray=[];
 
@@ -219,9 +225,10 @@ class ClusterPanel extends Component {
       let customTopics=this.props.ruleManager.getAllCustomTopics ();
       let customTopicsStructured=this.props.ruleManager.getAllCustomTopicsStructured ();
       
-      const escaped = encodeURIComponent(text);
-
-      const encoded = window.btoa(escaped);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
+      
+      const encoded = encodeURIComponent(text);
 
       this.props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming) => {});
     }
