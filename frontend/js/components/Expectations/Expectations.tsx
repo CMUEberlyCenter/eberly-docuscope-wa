@@ -129,9 +129,10 @@ const Expectations = (props: {
       let customTopics=props.ruleManager.getAllCustomTopics ();
       let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
 
-      const escaped = encodeURIComponent(text);
-
-      const encoded = window.btoa(escaped);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
+      
+      const encoded = encodeURIComponent(text);
 
       props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {        
         let coherence=incoming.coherence;

@@ -10,7 +10,7 @@
  * Editor text is also cached in sessionStorage.
  */
 
-var version="0.8.4";
+var version="0.8.5";
 
 import * as d3 from "d3";
 import React, {
@@ -82,10 +82,14 @@ import type DocuScopeRules from "../../DocuScopeRules";
 //import DocuScopeTools from "../../DocuScopeTools";
 //const dTools=new DocuScopeTools ();
 
+import { serialize } from "../../service/editor-state.service";
+
 // Should probably import from the service
+/*
 const serialize = (nodes: Descendant[]): string => {
   return nodes.map((n: Descendant) => Node.string(n)).join("\n\n");
 };
+*/
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -481,10 +485,12 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
+  /**
+   * Note: at this point the text is as-is, including whatever extended characters were included.
+   * This also means any single and double quotes
+   */
   const globalUpdate = (text: string) => {
     console.log("globalUpdate ()");
-
-    //console.log (text);
 
     // For now if someone requests (or really, forces) an update, let's switch
     // the editor to read-only mode for now
@@ -502,10 +508,11 @@ const StudentView = (props: {
       const customTopics = props.ruleManager.getAllCustomTopics();
       const customTopicsStructured = props.ruleManager.getAllCustomTopicsStructured();
 
-      const escaped = encodeURIComponent(text);
-      const encoded = window.btoa(escaped);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
 
       //const encoded = text;
+      const encoded = encodeURIComponent(text);
 
       props
         .api(
@@ -532,8 +539,8 @@ const StudentView = (props: {
     setEditorState(checked);
     
     if (checked==false) {
-      console.log ("checked==true => update");
-      globalUpdate(editorTextValue);
+      console.log ("checked==false => update");
+      //globalUpdate(editorTextValue);
     }
   }
 

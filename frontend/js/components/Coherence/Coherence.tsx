@@ -104,9 +104,10 @@ const Coherence = (props: {
       //console.log ("Adding custom topics (structured): ");
       //console.log (customTopicsStructured);
       
-      const escaped = encodeURIComponent(text);
-
-      const encoded = window.btoa(escaped);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
+      
+      const encoded = encodeURIComponent(text);
 
       props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
         //console.log ("Processing incoming coherence data ...");

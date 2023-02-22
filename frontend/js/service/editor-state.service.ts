@@ -18,8 +18,13 @@ export const editorState = new BehaviorSubject(true);
 export const setEditorState = (state: boolean) => editorState.next(state);
 export const [useEditorState, editorState$] = bind(editorState, true);
 
-const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
+/**
+ * MvV: Didn't change anything, just added a variable as in-between so that I could add
+ * a debug line
+ */
+export const serialize = (nodes: Descendant[]): string => {
+  let serialized=nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
+  return (serialized);
 };
 
 // For tracking the Editor text content.

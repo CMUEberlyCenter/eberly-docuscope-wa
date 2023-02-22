@@ -26,6 +26,9 @@ const port = 8888;
 var onTopicRequests=0;
 var onTopicRequestsAvg=0;
 var onTopicUptime=0;
+var onTopicResponseAvg=0;
+var onTopicResponseAvgCount=0;
+
 var onTopicDBRetry=0;
 var onTopicService=null;
 var onTopicDBMaxRetry=100;
@@ -64,6 +67,7 @@ class DocuScopeWALTIService {
     this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
     this.metrics.setMetricObject("eberly_dswa_requests_avg",onTopicRequestsAvg,this.metrics.METRIC_TYPE_COUNTER,"Average number of requests made to the OnTopic backend");
     this.metrics.setMetricObject("eberly_dswa_uptime_total",onTopicUptime,this.metrics.METRIC_TYPE_COUNTER,"DSWA Server uptime");
+    this.metrics.setMetricObject("eberly_dswa_response_avg",onTopicResponseAvg,this.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");
 
     setInterval(this.updateMetricsAvg,5*60*1000); // Every 5 minutes
     setInterval(this.updateUptime,1000); // Every second
@@ -589,6 +593,8 @@ class DocuScopeWALTIService {
   updateMetricsAvg () {
     //console.log ("updateMetricsAvg ()");
     onTopicRequestsAvg=0;
+    onTopicResponseAvg=0;
+    onTopicResponseAvgCount=0;
   }
 
   /**
@@ -604,10 +610,25 @@ class DocuScopeWALTIService {
   /**
    *
    */
+  updateResponseAvg (aValue) {
+    //console.log ("updateResponseAvg ()");  
+    onTopicResponseAvg+=aValue;
+    onTopicResponseAvgCount++;
+
+    let average=onTopicResponseAvg/onTopicResponseAvgCount;
+    onTopicService.metrics.setMetricObject("eberly_dswa_response_avg",average,onTopicService.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");    
+  }
+
+  /**
+   *
+   */
   apiPOSTCall (aURL, aData, aResponse) {  
     let url="/api/v1/"+aURL;
 
     console.log ("apiPOSTCall ("+url+")");
+
+    let that=this;
+    let startDate = new Date();
 
     const data = JSON.stringify(aData);
 
@@ -635,8 +656,15 @@ class DocuScopeWALTIService {
             let json = JSON.parse(body);
             console.log ("Retrieved valid data from backend, forwarding to frontend ...");
             console.log (json);
+            
+            let endDate   = new Date();
+            let millis = (endDate.getTime() - startDate.getTime());
+
+            that.updateResponseAvg (millis);
+
             //this.processBackendReply (json);
-            aResponse.json (this.generateDataMessage (json));
+
+            aResponse.json (this.generateDataMessage (json));            
           } catch (error) {
             console.error(error.message);
           };
@@ -823,15 +851,20 @@ class DocuScopeWALTIService {
 
       let msg=request.body;
 
+      /*
       if (msg.status=="request") {
         let raw=msg.data.base;
         let decoded=Buffer.from(raw, 'base64');
         let unescaped=unescape (decoded);
         //let unescaped=raw;
+        console.log (unescaped);
       }
+      */
+
+      console.log (msg); 
 
       console.log ("Forwarding request ...");
-
+      
       this.apiPOSTCall ("ontopic", msg, response);
 
       /* 

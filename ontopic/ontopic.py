@@ -104,9 +104,24 @@ class OnTopic:
   # 
   ##
   def ontopic (self,request):    
-    print ('ontopic()')
+    print ('ontopic(self,request)')
 
-    envelope=request.get_json()
+    #envelope=request.get_json()
+
+    envelope=None
+
+    try:
+      envelope=request.get_json(force=True)
+    except Exception as e:
+      print("An exception occurred " + str(e))
+      print(request.data)
+      data = {}
+      data ["state"] = "error"
+      data ["message"] = str(e)
+      response = make_response(data, 200)
+      response.mimetype = "application/json"
+      response.headers["Content-Type"] = "application/json"
+      return response
 
     #print (envelope)
 
@@ -116,7 +131,7 @@ class OnTopic:
     customTopics=data["customStructured"];
     custom="";
 
-    print (customTopics)
+    #print (customTopics)
 
     # Load and process the non-structured semi-colon separated list of topics. We will
     # remove this once the structured version works well
@@ -124,8 +139,14 @@ class OnTopic:
     if (isinstance(customString, str)):
       custom = customString.split(";")
 
-    decoded=base64.b64decode(raw).decode('utf-8')
-    unescaped=unquote(decoded)
+    #decoded=base64.b64decode(raw).decode('utf-8')
+    #unescaped=unquote(decoded)
+    
+    #unescaped=raw
+
+    unescaped=unquote(raw)
+
+    #print (raw)
 
     multiword_topics = list();
     synsets = list ()
@@ -187,7 +208,8 @@ class OnTopic:
     data['coherence'] = json.loads(json.dumps(coherence))
     data['local'] = local
     data['clarity'] = json.loads(json.dumps(clarity))
-    data['html'] = base64.b64encode(html.encode('utf-8')).decode("utf-8")
+    data['html'] = html
+    #data['html'] = base64.b64encode(html.encode('utf-8')).decode("utf-8")
     #data['html_sentences'] = base64.b64encode(html_sentences.encode('utf-8')).decode("utf-8")
     data['html_sentences'] = json.loads(json.dumps(html_sentences))
 
