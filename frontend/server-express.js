@@ -69,6 +69,7 @@ class DocuScopeWALTIService {
     this.metrics.setMetricObject("eberly_dswa_uptime_total",onTopicUptime,this.metrics.METRIC_TYPE_COUNTER,"DSWA Server uptime");
     this.metrics.setMetricObject("eberly_dswa_response_avg",onTopicResponseAvg,this.metrics.METRIC_TYPE_COUNTER,"DSWA OnTopic average response time");
 
+    // Reset the avg values every 5 minutes
     setInterval(this.updateMetricsAvg,5*60*1000); // Every 5 minutes
     setInterval(this.updateUptime,1000); // Every second
 
@@ -588,7 +589,9 @@ class DocuScopeWALTIService {
   }
 
   /**
-   *
+   * Reset the average counters every 5 minutes. That way the code can just keep adding and re-calculating without having
+   * to worry about moving averages and queu sizes. We should probably change this in the near future to be more
+   * representative
    */
   updateMetricsAvg () {
     //console.log ("updateMetricsAvg ()");

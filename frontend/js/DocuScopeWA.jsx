@@ -40,6 +40,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     super(props);
 
     badThat=this;
+    this.progressTimer=-1;
 
     console.log ("DocuScopeWA ()");
 
@@ -82,6 +83,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
     this.updateSerializedText=this.updateSerializedText.bind(this);
     this.onLaunch=this.onLaunch.bind(this);
     this.apiCall=this.apiCall.bind(this);
+    this.updateProgress=this.updateProgress.bind(this);
+    this.ready=this.ready.bind(this);
   }
 
   /**
@@ -105,19 +108,13 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
           if (this.ruleManager.getReady ()==true) {
             if (this.pingEnabled==false) {
-              this.setState ({
-                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                progress: 100,
-                progressTitle: "Application ready"
-              });
+              this.ready();
             } else {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
                 progress: 75,
                 progressTitle: "Ruleset loaded, Initializing ..."
               });
-
-              console.log ("Starting ping service timer ...");
                 
               /*
                Originally named 'ping', we had to change this because a bunch of browser-addons have a big
@@ -125,33 +122,10 @@ export default class DocuScopeWA extends EberlyLTIBase {
                to 'ding'
               */
               this.apiCall ("ding",null,"GET").then ((result) => {
-                this.setState ({
-                  state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                  server: result
-                });
+                this.ready();
               });
 
-              /*
-               Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-               problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-               to 'ding'
-              */
-              /*
-              this.pingTimer=setInterval ((_e) => {
-                this.apiCall ("ding",null,"GET").then ((result) => {
-                  this.setState ({
-                    state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                    server: result
-                  });
-                });
-              },30000);
-              */
-
-              this.setState ({
-                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                progress: 100,
-                progressTitle: "Application ready"
-              });
+              //this.ready();
             }
           } else {
            this.setState ({
@@ -163,13 +137,40 @@ export default class DocuScopeWA extends EberlyLTIBase {
         });
       } else {
         console.log ("Operating in instructor mode, no need to fetch a rule file");
-        this.setState ({
-          state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-          progress: 100,
-          progressTitle: "Application ready"
-        });     
+        this.ready();   
       }
     },1000);
+  }
+
+  /**
+   * 
+   */
+  ready () {
+    if (this.progressTimer!=-1) {
+      clearInterval (this.progressTimer);
+      this.progressTimer=-1;
+    }
+
+    this.setState ({
+      state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+      progress: 100,
+      progressTitle: "Application ready"
+    });      
+  }
+
+  /**
+   * 
+   */
+  updateProgress () {
+    let tempProgress=this.state.progress;
+    tempProgress+=10;
+    if (tempProgress>100) {
+      tempProgress=100;
+    }
+
+    this.setState ({
+      progress: tempProgress
+    });
   }
 
   /**
@@ -242,9 +243,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.setState ({
       progress: 0,
-      progressTitle: "Retrieving data",      
+      progressTitle: "Retrieving data ...",
       state: DocuScopeWA.DOCUSCOPE_STATE_REQUESTING
-    });    
+    });
+
+    this.progressTimer=setInterval (this.updateProgress,1000);
 
     return new Promise((resolve, reject) => {
       fetch(aURL,{
@@ -255,11 +258,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
         method: "POST",
         body: payload
       }).then(resp => resp.text()).then((result) => {
-        that.setState ({
-          progress: 0,
-          progressTitle: "Loading ...",                
-          state: DocuScopeWA.DOCUSCOPE_STATE_READY
-        });
+        that.ready ();
 
         let raw=JSON.parse(result);
         let evaluation=this.evaluateResult (raw);
@@ -293,7 +292,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
-          progressTitle: "Error: unable to connect to server, retrying ..."
+          progressTitle: "Error: unable to connect to server"
         });
         reject(error);
       });
