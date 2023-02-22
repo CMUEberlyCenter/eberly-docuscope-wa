@@ -511,7 +511,6 @@ const StudentView = (props: {
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
 
-      //const encoded = text;
       const encoded = encodeURIComponent(text);
 
       props
