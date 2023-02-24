@@ -1,21 +1,20 @@
-import fetchMock from 'fetch-mock';
+import createFetchMock from 'vitest-fetch-mock';
+import { vi } from 'vitest';
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
+
 import { elementAt } from 'rxjs';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import { settings$ } from './settings.service';
 
-beforeAll(() => {
-  fetchMock.catch(404);
-});
 afterAll(() => {
-  fetchMock.restore();
-});
-afterEach(() => {
-  fetchMock.reset();
+  fetchMocker.mockClear();
 });
 
 describe('settings.service', () => {
   test('server error', () => {
     // needs to be first to get around caching.
+    fetchMocker.mockRejectOnce();
     settings$.subscribe((settings) => {
       expect(settings.common_dictionary).toBe(
         'https://docuscope.eberly.cmu.edu/common_dictionary'
@@ -33,10 +32,13 @@ describe('settings.service', () => {
     });
   });
   test('loading', () => {
-    fetchMock.once(/settings.json$/, {
-      common_dictionary: 'common_dictionary',
-      tagger: 'tag',
-    });
+    fetchMocker.mockOnceIf(
+      /settings.json$/,
+      JSON.stringify({
+        common_dictionary: 'common_dictionary',
+        tagger: 'tag',
+      })
+    );
     settings$.pipe(elementAt(1)).subscribe((settings) => {
       expect(settings.common_dictionary).toBe('common_dictionary');
     });

@@ -1,6 +1,10 @@
-import fetchMock from 'fetch-mock';
+import createFetchMock from 'vitest-fetch-mock';
+import { vi } from 'vitest';
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
+
 import { first } from 'rxjs';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 import { FAKE_COMMON_DICTIONARY } from '../testing/fake-common-dictionary';
 import {
   CommonDictionary,
@@ -8,17 +12,16 @@ import {
 } from './common-dictionary.service';
 
 beforeAll(() => {
-  fetchMock.get(/settings.json$/, {
-    common_dictionary: 'http://localhost/common_dictionary',
-    tagger: 'tag',
-  });
-  fetchMock.catch(404);
+  fetchMocker.mockIf(
+    /settings.json$/,
+    JSON.stringify({
+      common_dictionary: 'http://localhost/common_dictionary',
+      tagger: 'tag',
+    })
+  );
 });
 afterAll(() => {
-  fetchMock.restore();
-});
-afterEach(() => {
-  fetchMock.resetHistory();
+  fetchMocker.mockClear();
 });
 
 describe('common-dictionary.service', () => {
@@ -29,7 +32,10 @@ describe('common-dictionary.service', () => {
       .subscribe((err) => expect(err.message).toBeDefined());
   });
   test('commonDictionary', async () => {
-    fetchMock.get(/common_dictionary$/, FAKE_COMMON_DICTIONARY);
+    fetchMocker.mockOnceIf(
+      /common_dictionary$/,
+      JSON.stringify(FAKE_COMMON_DICTIONARY)
+    );
     commonDictionary$
       .pipe(first((obs) => obs instanceof CommonDictionary))
       .subscribe((dic) => {

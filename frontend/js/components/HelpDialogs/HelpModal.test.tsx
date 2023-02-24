@@ -1,5 +1,9 @@
+import createFetchMock from 'vitest-fetch-mock';
+import { vi } from 'vitest';
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
+
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import fetchMock from "fetch-mock";
 import React from "react";
 import { first } from "rxjs";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
@@ -7,11 +11,10 @@ import { showHelp, showHelp$ } from "../../service/help.service";
 import { HelpModal } from "./HelpModal";
 
 beforeAll(() => {
-  fetchMock.get(/help.html$/, "<div>help content</div>");
-  fetchMock.catch(404);
+  fetchMocker.mockIf(/help.html$/, "<div>help content</div>");
 });
 afterAll(() => {
-  fetchMock.restore();
+  fetchMocker.mockClear();
 });
 
 describe("HelpModal", () => {

@@ -50,8 +50,8 @@ import DocuScopeAbout from "../../DocuScopeAbout";
 import DocuScopeReset from "../../DocuScopeReset";
 import { currentTool } from "../../service/current-tool.service";
 import {
-  setEditorState,
   editorText,
+  setEditorState,
   useEditorState,
 } from "../../service/editor-state.service";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
@@ -74,12 +74,11 @@ import {
 
 // The imports below are purely to support the serialize function. Should probably import
 // from service
-import { Node } from "slate";
 import type DocuScopeRules from "../../DocuScopeRules";
 
 import { serialize } from "../../service/editor-state.service";
 
-import { DocuScopeConfig } from '../../global';
+import { DocuScopeConfig } from "../../global";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -345,32 +344,20 @@ const StudentView = (props: {
     : "";
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
-  const showOnTopicText = currentTab !== "impressions" && !editable && Boolean(props.html);
+  const showOnTopicText =
+    currentTab !== "impressions" && !editable && Boolean(props.html);
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
-/*
   const topicTaggedContent = (
     <React.Fragment>
-      (
-       // TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example.
-      )
+      {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
       <div
         className="tagged-text"
         dangerouslySetInnerHTML={{ __html: props.html }}
       ></div>
     </React.Fragment>
   );
-*/
-
-  const topicTaggedContent = (
-    <React.Fragment>
-      <div
-        className="tagged-text"
-        dangerouslySetInnerHTML={{ __html: props.html }}
-      ></div>
-    </React.Fragment>
-  );  
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -498,7 +485,8 @@ const StudentView = (props: {
       //setStatus("Retrieving results...");
 
       const customTopics = props.ruleManager.getAllCustomTopics();
-      const customTopicsStructured = props.ruleManager.getAllCustomTopicsStructured();
+      const customTopicsStructured =
+        props.ruleManager.getAllCustomTopicsStructured();
 
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
@@ -524,16 +512,16 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const lockAndUpdate = (checked: boolean, editorTextValue: string) => {
-    console.log ("lockAndUpdate ("+checked+")");
-    
+  const lockAndUpdate = (checked: boolean, _editorTextValue: string) => {
+    console.log("lockAndUpdate (" + checked + ")");
+
     setEditorState(checked);
-    
-    if (checked==false) {
-      console.log ("checked==false => update");
+
+    if (checked == false) {
+      console.log("checked==false => update");
       //globalUpdate(editorTextValue);
     }
-  }
+  };
 
   let reset;
 
@@ -635,7 +623,7 @@ const StudentView = (props: {
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => lockAndUpdate(checked,editorTextValue)}
+              onChange={(checked) => lockAndUpdate(checked, editorTextValue)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto">
@@ -675,7 +663,9 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
-        <div className="statusbar-version">{"DSWA Version: " + props.config.version}</div>
+        <div className="statusbar-version">
+          {"DSWA Version: " + props.config.version}
+        </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}
