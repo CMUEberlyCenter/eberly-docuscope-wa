@@ -1,6 +1,10 @@
-import fetchMock from 'fetch-mock';
+import createFetchMock from 'vitest-fetch-mock';
+import { vi } from 'vitest';
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
+
 import { elementAt, first } from 'rxjs';
-import { afterAll, afterEach, beforeAll, describe, expect, test } from 'vitest';
+import { afterAll, describe, expect, test } from 'vitest';
 import {
   gettingStarted$,
   help$,
@@ -13,15 +17,10 @@ import {
   troubleshooting$,
 } from './help.service';
 
-beforeAll(() => {
-  fetchMock.catch(404);
-});
 afterAll(() => {
-  fetchMock.restore();
+  fetchMocker.mockClear();
 });
-afterEach(() => {
-  fetchMock.reset();
-});
+
 describe('help.service', () => {
   describe('help', () => {
     test('showHelp', () => {
@@ -38,6 +37,7 @@ describe('help.service', () => {
         );
     });
     test('error loading help', () => {
+      fetchMocker.mockRejectOnce();
       help$
         .pipe(first())
         .subscribe((help) =>
@@ -52,7 +52,7 @@ describe('help.service', () => {
         );
     });
     test('loading help', () => {
-      fetchMock.once(/help.html$/, 'help content');
+      fetchMocker.mockOnceIf(/help.html$/, 'help content');
       help$
         .pipe(first())
         .subscribe((help) =>
@@ -78,6 +78,7 @@ describe('help.service', () => {
         );
     });
     test('error loading getting started', () => {
+      fetchMocker.mockRejectOnce();
       gettingStarted$
         .pipe(first())
         .subscribe((help) =>
@@ -92,7 +93,7 @@ describe('help.service', () => {
         );
     });
     test('loading getting started', () => {
-      fetchMock.once(/getting_started.html$/, 'getting started');
+      fetchMocker.mockOnceIf(/getting_started.html$/, 'getting started');
       gettingStarted$
         .pipe(first())
         .subscribe((help) =>
@@ -118,6 +119,7 @@ describe('help.service', () => {
         );
     });
     test('error loading troubleshooting', () => {
+      fetchMocker.mockRejectOnce();
       troubleshooting$
         .pipe(first())
         .subscribe((help) =>
@@ -132,7 +134,7 @@ describe('help.service', () => {
         );
     });
     test('loading troubleshooting', () => {
-      fetchMock.once(/troubleshooting.html/, 'troubleshooting');
+      fetchMocker.mockOnceIf(/troubleshooting.html/, 'troubleshooting');
       troubleshooting$
         .pipe(first())
         .subscribe((help) =>

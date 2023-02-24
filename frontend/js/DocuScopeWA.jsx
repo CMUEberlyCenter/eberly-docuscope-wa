@@ -12,14 +12,11 @@ import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
 
-/*
-import { currentTool$ } from "../../service/current-tool.service";
-import { lockedEditorText$ } from "../../service/editor-state.service";
-import { useLockedEditorText } from "../../service/editor-state.service";
-*/
-
 // Replace with RxJS
 var badThat=null;
+
+//import { DocuScopeConfig } from './global';
+import { config } from "./global";
 
 /**
  * 
@@ -31,6 +28,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
   static DOCUSCOPE_STATE_CONNECTED=1;
   static DOCUSCOPE_STATE_LOADING=2;
   static DOCUSCOPE_STATE_READY=3;
+  static DOCUSCOPE_STATE_REQUESTING=4;
 
   /**
    *
@@ -39,6 +37,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     super(props);
 
     badThat=this;
+    this.progressTimer=-1;
 
     console.log ("DocuScopeWA ()");
 
@@ -46,7 +45,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     this.docuscopeTools=new DocuScopeTools ();
 
     let course_id=this.docuscopeTools.getCourseId (); 
-    
+
     this.ruleManager=new DocuScopeRules ();
     this.ruleManager.updateNotice=this.updateNotice;
     this.ruleManager.setContext (course_id);
@@ -81,6 +80,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
     this.updateSerializedText=this.updateSerializedText.bind(this);
     this.onLaunch=this.onLaunch.bind(this);
     this.apiCall=this.apiCall.bind(this);
+    this.updateProgress=this.updateProgress.bind(this);
+    this.ready=this.ready.bind(this);
   }
 
   /**
@@ -104,19 +105,13 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
           if (this.ruleManager.getReady ()==true) {
             if (this.pingEnabled==false) {
-              this.setState ({
-                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                progress: 100,
-                progressTitle: "Application ready"
-              });
+              this.ready();
             } else {
               this.setState ({
                 state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
                 progress: 75,
                 progressTitle: "Ruleset loaded, Initializing ..."
               });
-
-              console.log ("Starting ping service timer ...");
                 
               /*
                Originally named 'ping', we had to change this because a bunch of browser-addons have a big
@@ -124,33 +119,10 @@ export default class DocuScopeWA extends EberlyLTIBase {
                to 'ding'
               */
               this.apiCall ("ding",null,"GET").then ((result) => {
-                this.setState ({
-                  state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                  server: result
-                });
+                this.ready();
               });
 
-              /*
-               Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-               problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-               to 'ding'
-              */
-              /*
-              this.pingTimer=setInterval ((_e) => {
-                this.apiCall ("ding",null,"GET").then ((result) => {
-                  this.setState ({
-                    state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                    server: result
-                  });
-                });
-              },30000);
-              */
-
-              this.setState ({
-                state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-                progress: 100,
-                progressTitle: "Application ready"
-              });
+              //this.ready();
             }
           } else {
            this.setState ({
@@ -161,14 +133,41 @@ export default class DocuScopeWA extends EberlyLTIBase {
           }
         });
       } else {
-        console.log ("Operating in instructor mode, no need to fetch rule file");
-        this.setState ({
-          state: DocuScopeWA.DOCUSCOPE_STATE_READY,
-          progress: 100,
-          progressTitle: "Application ready"
-        });     
+        console.log ("Operating in instructor mode, no need to fetch a rule file");
+        this.ready();   
       }
     },1000);
+  }
+
+  /**
+   * 
+   */
+  ready () {
+    if (this.progressTimer!=-1) {
+      clearInterval (this.progressTimer);
+      this.progressTimer=-1;
+    }
+
+    this.setState ({
+      state: DocuScopeWA.DOCUSCOPE_STATE_READY,
+      progress: 100,
+      progressTitle: "Application ready"
+    });      
+  }
+
+  /**
+   * 
+   */
+  updateProgress () {
+    let tempProgress=this.state.progress;
+    tempProgress+=10;
+    if (tempProgress>100) {
+      tempProgress=100;
+    }
+
+    this.setState ({
+      progress: tempProgress
+    });
   }
 
   /**
@@ -220,7 +219,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
    * serialized text version of the editor is set so that we can go into read-only- mode
    */
   updateSerializedText (aText) {
-    console.log ("updateSerializedText ()");
+    //console.log ("updateSerializedText ()");
 
     this.setState ({
       html: null,
@@ -239,6 +238,14 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.updateSerializedText (null);
 
+    this.setState ({
+      progress: 0,
+      progressTitle: "Retrieving data ...",
+      state: DocuScopeWA.DOCUSCOPE_STATE_REQUESTING
+    });
+
+    this.progressTimer=setInterval (this.updateProgress,1000);
+
     return new Promise((resolve, reject) => {
       fetch(aURL,{
         headers: {
@@ -248,13 +255,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
         method: "POST",
         body: payload
       }).then(resp => resp.text()).then((result) => {
+        that.ready ();
+
         let raw=JSON.parse(result);
         let evaluation=this.evaluateResult (raw);
         if (evaluation!=null) {
           reject(evaluation);
         } else {
           if (raw.data.html) {
-            let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            //let html=that.docuscopeTools.onTopic2DSWAHTML (window.atob (raw.data.html));
+            let html=that.docuscopeTools.onTopic2DSWAHTML (raw.data.html);
             let html_sentences=null;
             if (raw.data.html_sentences) {
               html_sentences=that.docuscopeTools.cleanAndRepairHTMLSentenceData (raw.data.html_sentences);
@@ -279,7 +289,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
-          progressTitle: "Error: unable to connect to server, retrying ..."
+          progressTitle: "Error: unable to connect to server"
         });
         reject(error);
       });
@@ -325,12 +335,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
           resolve (raw.data);
         }
       }).catch((error) => {
-        //console.log (error);
-
+        console.log (error);
         this.setState ({
           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
           progress: 100,
-          progressTitle: "Error: unable to connect to server, retrying ..."
+          progressTitle: "Error: unable to connect to server"
         });
         reject(error);
       });
@@ -451,9 +460,10 @@ export default class DocuScopeWA extends EberlyLTIBase {
   render() {
     let progresswindow;
     let mainPage;
+    let scrimup=false;
 
     if (this.isInstructor ()) {
-      return (<DocuScopeWAScrim><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>);
+      return (<DocuScopeWAScrim enabled={scrimup}><InstructorView config={config} api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>);
     }
 
     if (this.inIframe ()==true) {
@@ -461,20 +471,21 @@ export default class DocuScopeWA extends EberlyLTIBase {
     }
 
     if (this.state.state != DocuScopeWA.DOCUSCOPE_STATE_READY) {
+      scrimup=true;
       progresswindow=<DocuScopeProgressWindow title={this.state.progressTitle} progress={this.state.progress} />;
-      mainPage=<DocuScopeWAScrim>{progresswindow}</DocuScopeWAScrim>;
-    } else {
-      mainPage=<DocuScopeWAScrim>
-        <StudentView 
-          api={this.apiCall} 
-          server={this.state.server} 
-          ruleManager={this.state.ruleManager} 
-          html={this.state.html} 
-          htmlSentences={this.state.htmlSentences}
-          update={this.updateSerializedText}>
-        </StudentView>
-      </DocuScopeWAScrim>;
     }
+
+    mainPage=<DocuScopeWAScrim enabled={scrimup} dialog={progresswindow}>
+      <StudentView 
+        config={config} 
+        api={this.apiCall} 
+        server={this.state.server} 
+        ruleManager={this.state.ruleManager} 
+        html={this.state.html} 
+        htmlSentences={this.state.htmlSentences}
+        update={this.updateSerializedText}>
+      </StudentView>
+    </DocuScopeWAScrim>;
 
     return (mainPage);
   }

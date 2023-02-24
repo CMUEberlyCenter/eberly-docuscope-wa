@@ -11,22 +11,23 @@ export default class DocuScopeWAScrim extends Component {
    */
   constructor(props) {
     super(props);
-
-    console.log("DocuScopeWAScrim ()");
-
-    this.state = {
-      enabled: false,
-    };
   }
 
   /**
    *
    */
   render() {
+    let scrimup;
+
+    if (this.props.enabled==true) {
+      scrimup=<div className="editor-scrim"></div>;
+    }
+
     return (
       <div>
         {this.props.children}
-        <div className="docuscope_scrim"></div>
+        {scrimup}
+        {this.props.dialog}
       </div>
     );
   }

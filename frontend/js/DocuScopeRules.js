@@ -681,12 +681,12 @@ export default class DocuScopeRules {
 
             let rawTopicsStatic=topics [0].pre_defined_topics;
             for (let k=0;k<rawTopicsStatic.length;k++) {
-              topicObject.topics.push(rawTopicsStatic [k]);
+              topicObject.topics.push(rawTopicsStatic [k].trim());
             }
 
             let rawTopics=topics [0].custom_topics;
             for (let k=0;k<rawTopics.length;k++) {
-              topicObject.topics.push(rawTopics [k]);
+              topicObject.topics.push(rawTopics [k].trim());
             }            
 
             structuredTopics.push(topicObject);            

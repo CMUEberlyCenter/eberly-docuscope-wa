@@ -9,6 +9,7 @@
  * The tools are arranged in tabs.
  * Editor text is also cached in sessionStorage.
  */
+
 import * as d3 from "d3";
 import React, {
   createRef,
@@ -49,8 +50,8 @@ import DocuScopeAbout from "../../DocuScopeAbout";
 import DocuScopeReset from "../../DocuScopeReset";
 import { currentTool } from "../../service/current-tool.service";
 import {
-  setEditorState,
   editorText,
+  setEditorState,
   useEditorState,
 } from "../../service/editor-state.service";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
@@ -73,16 +74,11 @@ import {
 
 // The imports below are purely to support the serialize function. Should probably import
 // from service
-import { Node } from "slate";
 import type DocuScopeRules from "../../DocuScopeRules";
 
-//import DocuScopeTools from "../../DocuScopeTools";
-//const dTools=new DocuScopeTools ();
+import { serialize } from "../../service/editor-state.service";
 
-// Should probably import from the service
-const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join("\n\n");
-};
+import { DocuScopeConfig } from "../../global";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -118,6 +114,7 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @returns
  */
 const StudentView = (props: {
+  config: DocuScopeConfig;
   api: apiCall;
   ruleManager: DocuScopeRules;
   html: string;
@@ -341,40 +338,26 @@ const StudentView = (props: {
   // should the special tagged text rendering be used? (Mike's panel)
   const showDocuScopeTaggedText =
     currentTab === "impressions" && !editable && isTaggerResult(tagging);
-  let showOnTopicText = false;
 
   const taggedDocuScopeTextContent = isTaggerResult(tagging)
     ? tagging.html_content
     : "";
 
-  let topicTaggedContent;
-
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
-  if (showDocuScopeTaggedText == false) {
-    showOnTopicText =
-      currentTab === "coherence" && !editable && props.html != null;
-
-    if (showOnTopicText == false) {
-      showOnTopicText =
-        currentTab === "clarity" && !editable && props.html != null;
-    }
-
-    if (showOnTopicText == false) {
-      showOnTopicText =
-        currentTab === "expectations" && !editable && props.html != null;
-    }
-  }
+  const showOnTopicText =
+    currentTab !== "impressions" && !editable && Boolean(props.html);
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
-  if (showOnTopicText == true) {
-    topicTaggedContent = (
+  const topicTaggedContent = (
+    <React.Fragment>
+      {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
       <div
         className="tagged-text"
         dangerouslySetInnerHTML={{ __html: props.html }}
       ></div>
-    );
-  }
+    </React.Fragment>
+  );
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -430,6 +413,7 @@ const StudentView = (props: {
   if (showAbout == true) {
     about = (
       <DocuScopeAbout
+        config={props.config}
         onCloseAboutPage={onCloseAboutPage}
         ruleManager={props.ruleManager}
       />
@@ -480,10 +464,12 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
+  /**
+   * Note: at this point the text is as-is, including whatever extended characters were included.
+   * This also means any single and double quotes
+   */
   const globalUpdate = (text: string) => {
     console.log("globalUpdate ()");
-
-    //console.log (text);
 
     // For now if someone requests (or really, forces) an update, let's switch
     // the editor to read-only mode for now
@@ -502,9 +488,10 @@ const StudentView = (props: {
       const customTopicsStructured =
         props.ruleManager.getAllCustomTopicsStructured();
 
-      const escaped = encodeURIComponent(text);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
 
-      const encoded = window.btoa(escaped);
+      const encoded = encodeURIComponent(text);
 
       props
         .api(
@@ -520,6 +507,19 @@ const StudentView = (props: {
           //let coherence=incoming.coherence;
           //let local=incoming.local;
         });
+    }
+  };
+
+  //>--------------------------------------------------------
+
+  const lockAndUpdate = (checked: boolean, _editorTextValue: string) => {
+    console.log("lockAndUpdate (" + checked + ")");
+
+    setEditorState(checked);
+
+    if (checked == false) {
+      console.log("checked==false => update");
+      //globalUpdate(editorTextValue);
     }
   };
 
@@ -577,6 +577,7 @@ const StudentView = (props: {
                 api={props.api}
                 ruleManager={props.ruleManager}
                 editorValue={editorTextValue}
+                update={props.update}
               />
             </Tab>
             <Tab
@@ -626,12 +627,12 @@ const StudentView = (props: {
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => setEditorState(checked)}
+              onChange={(checked) => lockAndUpdate(checked, editorTextValue)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto" style={{fontSize: `${zoom}%`}}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
-            {topicTaggedContent}
+            {showOnTopicText ? topicTaggedContent : ""}
             <Slate
               editor={editor}
               value={editorValue}
@@ -666,6 +667,9 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
+        <div className="statusbar-version">
+          {"DSWA Version: " + props.config.version}
+        </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}

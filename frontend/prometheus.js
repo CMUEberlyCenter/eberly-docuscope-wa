@@ -90,6 +90,8 @@ class PrometheusMetrics {
     }
     
     metricObject.value=aValue;
+    
+    return (metricObject);
   }  
 
   /**

@@ -20,12 +20,6 @@ import "./Coherence.scss";
 import CoherencePanel from "../CoherencePanel/CoherencePanel";
 import TopicHighlighter from "../../TopicHighlighter";
 
-// Dummy data so that we can keep working on our visualization widget set
-/*
-import { coherenceData } from "../../data/coherencedata";
-import { coherenceDataLocal } from "../../data/coherencedatalocal";
-*/
-
 /** Legend for data representation for these tools. */
 const Legend = () => (
   <Container className="border p-2">
@@ -100,13 +94,12 @@ const Coherence = (props: {
       let customTopics=props.ruleManager.getAllCustomTopics ();
       let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
 
-      //console.log ("Adding custom topics (string): " + customTopics);
-      //console.log ("Adding custom topics (structured): ");
-      //console.log (customTopicsStructured);
-      
-      const escaped = encodeURIComponent(text);
+      // 2. Prep the text 
 
-      const encoded = window.btoa(escaped);
+      //const escaped = encodeURIComponent(text);
+      //const encoded = window.btoa(escaped);
+      
+      const encoded = encodeURIComponent(text);
 
       props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
         //console.log ("Processing incoming coherence data ...");
