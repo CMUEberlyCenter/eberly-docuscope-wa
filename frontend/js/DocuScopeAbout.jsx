@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import '../css/about.css';
 
-//import { ruleInfo } from './data/info.js';
+import { DocuScopeConfig } from './global';
 
 /**
  * 
@@ -31,7 +31,8 @@ class DocuScopeAbout extends Component {
    * 
    */
   render () {
-  	let version=this.props.ruleManager.getVersion ();
+  	let version=this.props.config.version;
+    let date=this.props.config.date;
     let ruleInfo=this.props.ruleManager.getInfo ();
 
   	return (<div className="about-modal">
@@ -47,9 +48,10 @@ class DocuScopeAbout extends Component {
           <hr/>
 
           <h2>Application Information</h2>
-          <p>
-          Application version: {version}
-          </p>
+          <ul>
+            <li>Application version: {version}</li>
+            <li>Build date: {date}</li>
+          </ul>
 
           <hr/>
 

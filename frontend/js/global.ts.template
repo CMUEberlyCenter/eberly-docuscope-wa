@@ -1,0 +1,9 @@
+export type DocuScopeConfig = {
+  version: string;
+  date: string;
+};
+
+export const config:DocuScopeConfig = {
+  version: "0.8.6",
+  date: "<now>"
+};

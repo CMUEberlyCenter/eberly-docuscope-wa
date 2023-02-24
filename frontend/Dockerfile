@@ -18,6 +18,8 @@ RUN npm config set color false
 
 RUN npm install --loglevel info --color=false
 
+RUN sed -e "s/<now>/$(date)/g" < ./js/global.ts.template > ./js/global.ts
+
 RUN npm run build
 
 EXPOSE 8888

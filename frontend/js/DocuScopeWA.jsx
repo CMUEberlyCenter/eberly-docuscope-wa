@@ -12,14 +12,11 @@ import DocuScopeWAScrim from './DocuScopeWAScrim';
 import InstructorView from './views/Instructor/InstructorView';
 import StudentView from './views/Student/StudentView';
 
-/*
-import { currentTool$ } from "../../service/current-tool.service";
-import { lockedEditorText$ } from "../../service/editor-state.service";
-import { useLockedEditorText } from "../../service/editor-state.service";
-*/
-
 // Replace with RxJS
 var badThat=null;
+
+//import { DocuScopeConfig } from './global';
+import { config } from "./global";
 
 /**
  * 
@@ -466,7 +463,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     let scrimup=false;
 
     if (this.isInstructor ()) {
-      return (<DocuScopeWAScrim enabled={scrimup}><InstructorView api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>);
+      return (<DocuScopeWAScrim enabled={scrimup}><InstructorView config={config} api={this.apiCall} server={this.state.server} ruleManager={this.state.ruleManager} /></DocuScopeWAScrim>);
     }
 
     if (this.inIframe ()==true) {
@@ -480,6 +477,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     mainPage=<DocuScopeWAScrim enabled={scrimup} dialog={progresswindow}>
       <StudentView 
+        config={config} 
         api={this.apiCall} 
         server={this.state.server} 
         ruleManager={this.state.ruleManager} 

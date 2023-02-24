@@ -10,8 +10,6 @@
  * Editor text is also cached in sessionStorage.
  */
 
-var version="0.8.5";
-
 import * as d3 from "d3";
 import React, {
   createRef,
@@ -79,17 +77,9 @@ import {
 import { Node } from "slate";
 import type DocuScopeRules from "../../DocuScopeRules";
 
-//import DocuScopeTools from "../../DocuScopeTools";
-//const dTools=new DocuScopeTools ();
-
 import { serialize } from "../../service/editor-state.service";
 
-// Should probably import from the service
-/*
-const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join("\n\n");
-};
-*/
+import { DocuScopeConfig } from '../../global';
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -125,6 +115,7 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @returns
  */
 const StudentView = (props: {
+  config: DocuScopeConfig;
   api: apiCall;
   ruleManager: DocuScopeRules;
   html: string;
@@ -435,6 +426,7 @@ const StudentView = (props: {
   if (showAbout == true) {
     about = (
       <DocuScopeAbout
+        config={props.config}
         onCloseAboutPage={onCloseAboutPage}
         ruleManager={props.ruleManager}
       />
@@ -683,7 +675,7 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
-        <div className="statusbar-version">{"dswa version: " + version}</div>
+        <div className="statusbar-version">{"DSWA Version: " + props.config.version}</div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}
