@@ -1,11 +1,13 @@
 /**
  * @fileoverview Unit testing of the CateogryTree component.
  */
+import createFetchMock from 'vitest-fetch-mock';
+import { vi } from 'vitest';
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
 
 import { render, screen, waitFor } from "@testing-library/react";
-import fetchMock from "fetch-mock";
 import React from "react";
-//import { TestScheduler } from "rxjs/testing";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { currentTool } from "../../service/current-tool.service";
 import { editorText, setEditorState } from "../../service/editor-state.service";
@@ -13,17 +15,14 @@ import { FAKE_COMMON_DICTIONARY } from "../../testing/fake-common-dictionary";
 import Impressions from "./Impressions";
 
 beforeAll(() => {
-  fetchMock.get(/settings.json$/, {
+  fetchMocker.mockIf(/settings.json$/, (_req) => JSON.stringify({
     common_dictionary: "https://docuscope.eberly.cmu.edu/common_dictionary",
     tagger: "https://docuscope.eberly.cmu.edu/tagger/tag",
-  });
-  //fetchMock.get(/common_dictionary$/, FAKE_COMMON_DICTIONARY);
-  //fetchMock.spy(/tag$/)
-  fetchMock.spy();
-  //fetchMock.catch(404);
+  }));
+  fetchMocker.mockIf(/common_dictionary$/, JSON.stringify(FAKE_COMMON_DICTIONARY));
 });
 afterAll(() => {
-  fetchMock.restore();
+  fetchMocker.mockClear();
 });
 
 describe("Impressions", () => {
