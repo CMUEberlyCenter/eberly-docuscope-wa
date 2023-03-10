@@ -33,3 +33,4 @@ deps.txt
 /ontopic/data/large_model
 /env
 dswadb
+.env
