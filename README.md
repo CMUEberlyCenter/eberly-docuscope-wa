@@ -2,7 +2,9 @@
 
 # Administration and Support
 
-This project and repository fork is supported and maintained by the [Eberly Center](https://www.cmu.edu/teaching/) at [Carnegie Mellon University](www.cmu.edu). For help with this fork, project or service please contact eberly-assist@andrew.cmu.edu.
+For any questions regarding the language model used, please contact suguru@cmu.edu
+
+The project code is supported and maintained by the [Eberly Center](https://www.cmu.edu/teaching/) at [Carnegie Mellon University](www.cmu.edu). For help with this fork, project or service please contact eberly-assist@andrew.cmu.edu.
 
 # Installation and Running
 
@@ -50,3 +52,7 @@ We provide a number of convenience shell scripts that allow you to rapidly deplo
 * **run.sh** The most direct and barebones execution of the system. Assumes you've executed **./run-install.sh**
 
 * **run-upgrade.sh** Does a number of package management tasks depending on the platform and project. Upgrades package.json in the case of a webpack or node project. Upgrades pip, python, etc in the case of a Python project
+
+# Acknowledgements
+
+This project partially funded by the A.W. Mellon Foundation, Carnegie Mellon’s Simon Initiative Seed Grant and Berkman Faculty Development Fund.
