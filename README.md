@@ -2,7 +2,7 @@
 
 # Administration and Support
 
-For any questions regarding the language model used, please contact suguru@cmu.edu
+For any questions regarding overall project or the language model used, please contact suguru@cmu.edu
 
 The project code is supported and maintained by the [Eberly Center](https://www.cmu.edu/teaching/) at [Carnegie Mellon University](www.cmu.edu). For help with this fork, project or service please contact eberly-assist@andrew.cmu.edu.
 
@@ -55,4 +55,4 @@ We provide a number of convenience shell scripts that allow you to rapidly deplo
 
 # Acknowledgements
 
-This project partially funded by the A.W. Mellon Foundation, Carnegie Mellon’s Simon Initiative Seed Grant and Berkman Faculty Development Fund.
+This project was partially funded by the A.W. Mellon Foundation, Carnegie Mellon’s Simon Initiative Seed Grant and Berkman Faculty Development Fund.
