@@ -22,6 +22,11 @@ then
   MYSQL_GID=$(id -g)
 fi
 
+if [ ! -d "./ontopic/data/default_model" ]; then
+  echo "Error: no model installed, please execute download and install a language model under ./data first"
+  exit
+fi
+
 echo "Configuring db for: $MYSQL_UID:$MYSQL_GID ..."
 
 mkdir -pv ./dswadb
