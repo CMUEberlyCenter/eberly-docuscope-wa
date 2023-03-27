@@ -19,8 +19,11 @@
 }
 
 .cluster-content {
-  flex: 1;
-  min-height: 100px;
+  flex: 1 0 auto;
+  overflow-y: scroll;
+  padding-bottom: 10px;
+  padding-right: 3px;
+  resize: vertical;
   display: flex;
   flex-direction: row;
 }

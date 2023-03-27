@@ -1,13 +1,13 @@
+
 .dswa-instructor {
   border: 1px solid #c7c3c3;
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   margin: 0px;
   padding: 14px;
+  overflow-y: scroll;
 }
-
 
 table.dswa {
   font-family: sans-serif;

@@ -346,15 +346,15 @@ class InstuctorView extends EberlyLTIBase {
       let file=this.state.files[i];
       let infoString=file.info;
 
-      console.log ("infoString: " + file.info);
+      //console.log ("infoString: " + file.info);
 
       let decoded=atob(infoString);
 
-      console.log ("decoded: " + decoded);
+      //console.log ("decoded: " + decoded);
 
       let unescaped=unescape(decoded);
 
-      console.log ("unescaped: " + unescaped);
+      //console.log ("unescaped: " + unescaped);
 
       let info={
         name: "unassigned",
