@@ -5,5 +5,5 @@ export type DocuScopeConfig = {
 
 export const config:DocuScopeConfig = {
   version: "0.8.6",
-  date: "Mon Mar 27 12:57:45 PM EDT 2023"
+  date: "Thu Jun  1 12:09:24 PM EDT 2023"
 };

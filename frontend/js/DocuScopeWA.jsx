@@ -277,6 +277,12 @@ export default class DocuScopeWA extends EberlyLTIBase {
           }
 
           if (raw.data.coherence) {
+            //console.log (raw.data.coherence);
+
+            // If there really is a very small amount of data, like a one word phrase, then you might get this exclusively:
+            // {error: "ncols is 0"} Let's handle that in cleanCoherenceData so that the rest of the code goes through its
+            // usual paces instead of creating a global exception
+
             // Clean and replace
             raw.data.coherence=this.ruleManager.cleanCoherenceData (raw.data.coherence);
             raw.data.local=this.ruleManager.cleanLocalCoherenceData (raw.data.local);

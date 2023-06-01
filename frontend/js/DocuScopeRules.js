@@ -890,12 +890,32 @@ export default class DocuScopeRules {
   }  
 
   /**
+   * If there really is a very small amount of data, like a one word phrase, then you might get this exclusively:
    * 
+   *  {error: "ncols is 0"} 
+   * 
+   * Let's handle that in cleanCoherenceData so that the rest of the code goes through its
+   * usual paces instead of creating a global exception
    */
   cleanCoherenceData (aCoherenceData) {
     console.log ("cleanCoherenceData ()");
 
+    console.log (aCoherenceData);
+
     let cleanedData=this.dataTools.deepCopy (aCoherenceData);
+
+    if (aCoherenceData.error) {
+      console.log ("Coherence generation error: " + aCoherenceData.error);
+      return (cleanedData);
+    }
+
+    // https://stackoverflow.com/questions/767486/how-do-i-check-if-a-variable-is-an-array-in-javascript
+
+    //if ((typeof aCoherenceData === "object" && aCoherenceData !== null) == true) {
+    //if (aCoherenceData.constructor != Array) {
+    //  console.log ("Variable is indeed of type object and is therefore not eligible data");
+    //  return (cleanedData);
+    //}
 
     let data=cleanedData.data;
   

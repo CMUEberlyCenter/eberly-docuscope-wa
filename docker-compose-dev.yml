@@ -14,10 +14,10 @@ services:
     ports:
      - 33306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: 4570WK821X6OiyT508srN09wI
-      MYSQL_DATABASE: dswa
-      MYSQL_USER: dswa
-      MYSQL_PASSWORD: 4570WK821X6OiyT508srN09wV
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
+      MYSQL_DATABASE: ${MYSQL_DATABASE} 
+      MYSQL_USER: ${MYSQL_USER} 
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       #MYSQL_TCP_PORT: 4307
     volumes:
       - ./dswadb:/var/lib/mysql 
@@ -27,8 +27,8 @@ services:
     build:    
       context: ./ontopic
       dockerfile: ./Dockerfile    
-    ports:
-     - 5000:5000
+    #ports:
+    # - 5000:5000
     tty: true
     stdin_open: true
 

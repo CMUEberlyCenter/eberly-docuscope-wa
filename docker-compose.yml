@@ -27,8 +27,8 @@ services:
       context: ./ontopic
       dockerfile: ./Dockerfile    
     restart: always      
-    ports:
-     - 5000:5000
+    #ports:
+    # - 5000:5000
     tty: true
     stdin_open: true
     restart: always

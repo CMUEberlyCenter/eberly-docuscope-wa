@@ -36,6 +36,8 @@ var onTopicDBMaxRetry=100;
 var onTopicDBTimeTaken=0;
 var onTopicBackTimeTaken=0;
 
+var dbCallback = null;
+
 /**
  * 
  */
@@ -60,8 +62,6 @@ class DocuScopeWALTIService {
     }    
 
     onTopicService=this;
-
-    this.initDBService ();
 
     this.metrics = new PrometheusMetrics ();
     this.metrics.setMetricObject("eberly_dswa_requests_total",onTopicRequests,this.metrics.METRIC_TYPE_COUNTER,"Number of requests made to the OnTopic backend");
@@ -114,6 +114,8 @@ class DocuScopeWALTIService {
     // Turn off caching for now (detect developer mode!)
     this.app.set('etag', false);
     this.app.use(express.json());
+    this.app.use(cors({ origin: '*' }));
+    this.app.use(fileUpload({ createParentPath: true }));
     this.app.use((req, res, next) => {
       res.set('Cache-Control', 'no-store')
       next()
@@ -164,10 +166,11 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  initDBService () {
+  initDBService (cb) {
     console.log ("initDBService (retry:"+onTopicDBRetry+" of max "+onTopicDBMaxRetry+")");
-
     console.log ("Creating db connection: " + process.env.DB_HOST + ":"+process.env.DB_PORT);
+
+    dbCallback=cb;
 
     this.dbPool = mysql.createPool({
       connectionLimit : 100, //important
@@ -186,7 +189,7 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  initDB () {
+  initDB (cb) {
     console.log ("initDB (retry:"+onTopicDBRetry+" of max "+onTopicDBMaxRetry+")");
 
     onTopicService.dbConn.getConnection((err, connection) => {
@@ -220,10 +223,11 @@ class DocuScopeWALTIService {
           console.log("DSWA assignment table created");
         });
 
-        /*
-        onTopicService.getFiles (null,null);
-        onTopicService.getFile (null,null,"14618");        
-        */
+        if (dbCallback) {
+          dbCallback ();
+        } else {
+          console.log ("Error: no callback provided");
+        }
 
         console.log ("Database connection initialized");
     });
@@ -894,16 +898,6 @@ class DocuScopeWALTIService {
   run () {
     console.log ("run ()");
 
-    console.log ("Configuring CORS ...");
-
-    this.app.use(cors({
-      origin: '*'
-    }));    
-
-    this.app.use(fileUpload({
-      createParentPath: true
-    }));
-
     console.log ("Configuring endpoints ...");
 
     this.app.get('/download', (request, response) => {
@@ -989,8 +983,11 @@ class DocuScopeWALTIService {
       this.processRequest (request,response);
     });
 
-    this.app.listen(port, () => {
-      console.log(`App running on port ${port}.`);
+    this.initDBService (() => {
+      console.log ("Database service initialized, ok to start listening ...");
+      this.app.listen(port, () => {
+        console.log(`App running on port ${port}.`);
+      });
     });
   }
 }
