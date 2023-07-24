@@ -635,7 +635,7 @@ const StudentView = (props: {
             {showOnTopicText ? topicTaggedContent : ""}
             <Slate
               editor={editor}
-              value={editorValue}
+              initialValue={editorValue}
               onChange={(content: Descendant[]) => {
                 // only if change is not selection change.
                 if (
