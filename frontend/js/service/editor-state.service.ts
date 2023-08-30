@@ -23,8 +23,7 @@ export const [useEditorState, editorState$] = bind(editorState, true);
  * a debug line
  */
 export const serialize = (nodes: Descendant[]): string => {
-  let serialized=nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
-  return (serialized);
+  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
 };
 
 // For tracking the Editor text content.
