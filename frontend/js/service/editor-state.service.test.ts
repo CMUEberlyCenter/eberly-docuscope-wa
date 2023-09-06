@@ -9,7 +9,8 @@ import {
 } from './editor-state.service';
 
 describe('editor-state.service', () => {
-  test('editorState', () => {
+  // rxjs marble like syntax for inputs and outputs
+  test('given -b a=true b=false when editorState then ^ab', () => {
     editorState$
       .pipe(first())
       .subscribe((state) =>
@@ -21,7 +22,7 @@ describe('editor-state.service', () => {
       .subscribe((state) => expect(state, 'False now.').toBeFalsy());
   });
   //test('serialize');
-  test('editorText', () => {
+  test('given -b a=<empty string> b=<some text> when editorText then ^ab', () => {
     editorText$
       .pipe(first())
       .subscribe((text) => expect(text, 'Initial editor text').toBe(''));
@@ -31,7 +32,7 @@ describe('editor-state.service', () => {
       .subscribe((text) => expect(text).toBe('A line of text in a paragraph.'));
     editorText.next([]);
   });
-  test('lockedEditorText', () => {
+  test('given - a=<empty string> when lockedEditorText then ^a', () => {
     lockedEditorText$
       .pipe(first())
       .subscribe((text) => expect(text, 'Initial value').toBe(''));

@@ -25,13 +25,13 @@ afterAll(() => {
 });
 
 describe('common-dictionary.service', () => {
-  test('commonDictionary error', () => {
+  test('given #404 when commonDictionary then error', () => {
     commonDictionary$.pipe(first()).subscribe((err) => expect(err).toBe(null));
     commonDictionary$
       .pipe(first((res) => res !== null))
       .subscribe((err) => expect(err.message).toBeDefined());
   });
-  test('commonDictionary', async () => {
+  test('given mock common-dictionary.json when commonDictionary then CommonDictionary', async () => {
     fetchMocker.mockOnceIf(
       /common_dictionary$/,
       JSON.stringify(FAKE_COMMON_DICTIONARY)

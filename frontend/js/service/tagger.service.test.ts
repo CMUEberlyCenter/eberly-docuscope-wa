@@ -24,6 +24,7 @@ import {
 //import { MockEvent, EventSource } from 'mocksse';
 
 beforeAll(() => {
+  // mock settings.json
   fetchMocker.mockIf(
     /settings.json$/,
     JSON.stringify({
@@ -33,8 +34,9 @@ beforeAll(() => {
   );
 });
 beforeEach(() => {
-  currentTool.next('impressions');
-  setEditorState(false);
+  // following is necessary to trigger impressions service.
+  currentTool.next('impressions'); // switch to impressions tab
+  setEditorState(false); // lock editor
 });
 afterAll(() => {
   fetchMocker.mockClear();
