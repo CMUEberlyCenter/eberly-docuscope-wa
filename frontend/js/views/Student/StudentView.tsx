@@ -317,10 +317,10 @@ const StudentView = (props: {
     //   return;
     // }
 
-    // if (eventKey === "showAbout") {
-    //   setShowAbout(true);
-    //   return;
-    // }
+    if (eventKey === "showAbout") {
+      setShowAbout(true);
+      return;
+    }
 
     // if (eventKey === "showGettingStarted") {
     //   showGettingStarted(true);
@@ -542,6 +542,16 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <Nav.Link eventKey={'resetData'}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
+                  <Form className='m-2'>
+                    <Form.Label>Editor Font Size: {zoom}%</Form.Label>
+                    <Form.Range
+                      min={10}
+                      max={300}
+                      step={10}
+                      onChange={(event) => setZoom(event.target.valueAsNumber)}
+                      value={zoom}
+                    />
+                  </Form>
                   {reset}
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
@@ -616,17 +626,7 @@ const StudentView = (props: {
         />
 
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
-          <Card.Header className="d-flex justify-content-between">
-            <div className="d-flex flex-column">
-              <Form.Label>Font Size: {zoom}%</Form.Label>
-              <Form.Range
-                min={10}
-                max={300}
-                step={10}
-                onChange={(event) => setZoom(event.target.valueAsNumber)}
-                value={zoom}
-              />
-            </div>
+          <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
             <Button onClick={(_e) => globalUpdate(editorTextValue)}>
               Update
