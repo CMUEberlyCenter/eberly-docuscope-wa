@@ -2,7 +2,6 @@
  * @fileoverview Hooks and observables for editor state changes.
  */
 import { bind } from '@react-rxjs/core';
-//import { createSignal } from '@react-rxjs/utils';
 import {
   BehaviorSubject,
   combineLatest,
@@ -13,14 +12,13 @@ import {
 import { Descendant, Node } from 'slate';
 
 // For tracking Editor editable toggle.
-//export const [editorStateChange$, setEditorState] = createSignal<boolean>();
 export const editorState = new BehaviorSubject(true);
 export const setEditorState = (state: boolean) => editorState.next(state);
 export const [useEditorState, editorState$] = bind(editorState, true);
 
 /**
- * MvV: Didn't change anything, just added a variable as in-between so that I could add
- * a debug line
+ * Convert editor's Descendants to a string with double newline between
+ * paragraphs.
  */
 export const serialize = (nodes: Descendant[]): string => {
   return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');

@@ -10,14 +10,14 @@
  * Editor text is also cached in sessionStorage.
  */
 
-import * as d3 from "d3";
+import * as d3 from 'd3';
 import React, {
   createRef,
   useCallback,
   useEffect,
   useId,
   useState,
-} from "react";
+} from 'react';
 import {
   Badge,
   Button,
@@ -31,54 +31,55 @@ import {
   Popover,
   Tab,
   Tabs,
-} from "react-bootstrap";
-import { createEditor, Descendant } from "slate";
+} from 'react-bootstrap';
+import { createEditor, Descendant } from 'slate';
 import {
   Editable,
   RenderElementProps,
   RenderLeafProps,
   Slate,
   withReact,
-} from "slate-react";
-import Clarity from "../../components/Clarity/Clarity";
-import Coherence from "../../components/Coherence/Coherence";
-import Divider from "../../components/Divider/Divider";
-import Expectations from "../../components/Expectations/Expectations";
-import Impressions from "../../components/Impressions/Impressions";
-import LockSwitch from "../../components/LockSwitch/LockSwitch";
-import DocuScopeAbout from "../../DocuScopeAbout";
-import DocuScopeReset from "../../DocuScopeReset";
-import { currentTool } from "../../service/current-tool.service";
+} from 'slate-react';
+import Clarity from '../../components/Clarity/Clarity';
+import Coherence from '../../components/Coherence/Coherence';
+import Divider from '../../components/Divider/Divider';
+import Expectations from '../../components/Expectations/Expectations';
+import Impressions from '../../components/Impressions/Impressions';
+import LockSwitch from '../../components/LockSwitch/LockSwitch';
+import DocuScopeAbout from '../../DocuScopeAbout';
+import DocuScopeReset from '../../DocuScopeReset';
+import { currentTool } from '../../service/current-tool.service';
 import {
   editorText,
   setEditorState,
   useEditorState,
-} from "../../service/editor-state.service";
-import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
-import TopicHighlighter from "../../TopicHighlighter";
+} from '../../service/editor-state.service';
+import { isTaggerResult, useTaggerResults } from '../../service/tagger.service';
+import TopicHighlighter from '../../TopicHighlighter';
 
-import "../../../css/topics.css";
-import "./StudentView.scss";
+import '../../../css/topics.css';
+import './StudentView.scss';
 
-import { faBook, faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBook, faGlobe } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
-import { HelpModal } from "../../components/HelpDialogs/HelpModal";
-import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
-import {
-  showGettingStarted,
-  showHelp,
-  showTroubleshooting,
-} from "../../service/help.service";
+// Disable this doumentation to resolve #13 #14 #15
+// import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
+// import { HelpModal } from "../../components/HelpDialogs/HelpModal";
+// import TroubleshootingModal from "../../components/HelpDialogs/TroubleshootingModal";
+// import {
+//   showGettingStarted,
+//   showHelp,
+//   showTroubleshooting,
+// } from "../../service/help.service";
 
 // The imports below are purely to support the serialize function. Should probably import
 // from service
-import type DocuScopeRules from "../../DocuScopeRules";
+import type DocuScopeRules from '../../DocuScopeRules';
 
-import { serialize } from "../../service/editor-state.service";
+import { serialize } from '../../service/editor-state.service';
 
-import { DocuScopeConfig } from "../../global";
+import { DocuScopeConfig } from '../../global';
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -88,22 +89,22 @@ import { DocuScopeConfig } from "../../global";
  */
 function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   let target: HTMLElement | null = evt.target as HTMLElement;
-  while (target && !target.getAttribute("data-key")) {
+  while (target && !target.getAttribute('data-key')) {
     // check ancestors until one with a data-key is found.
     target = target.parentElement;
   }
-  const key = target?.getAttribute("data-key");
+  const key = target?.getAttribute('data-key');
   if (target && key && key.trim()) {
     // see if it is already selected.
-    const isSelected = d3.select(target).classed("selected_text");
+    const isSelected = d3.select(target).classed('selected_text');
     // clear all selected text.
-    d3.selectAll(".selected_text").classed("selected_text", false);
-    d3.selectAll(".cluster_id").classed("d_none", true);
+    d3.selectAll('.selected_text').classed('selected_text', false);
+    d3.selectAll('.cluster_id').classed('d_none', true);
     // if it was not previously selected, select it.
     // otherwise leave it as unselected.
     if (!isSelected) {
-      d3.select(target).classed("selected_text", true);
-      d3.select(target).select("sup.cluster_id").classed("d_none", false);
+      d3.select(target).classed('selected_text', true);
+      d3.select(target).select('sup.cluster_id').classed('d_none', false);
     }
   }
 }
@@ -124,13 +125,13 @@ const StudentView = (props: {
   const topicHighlighter = new TopicHighlighter();
 
   // Status handlers
-  const [status /*, setStatus*/] = useState("Application ready, rules loaded");
-  const [language /*, setLanguage*/] = useState("ENG");
+  const [status /*, setStatus*/] = useState('Application ready, rules loaded');
+  const [language /*, setLanguage*/] = useState('ENG');
 
   const navId = useId();
   const selectId = useId();
   //const [status, setStatus] = useState('');
-  const [currentTab, setCurrentTab] = useState<string | null>("expectations");
+  const [currentTab, setCurrentTab] = useState<string | null>('expectations');
   // on tab switch update current and broadcast.
   const switchTab = (key: string | null) => {
     setCurrentTab(key);
@@ -142,22 +143,22 @@ const StudentView = (props: {
   // Set initial value to stored session data or empty.
   const [editorValue, setEditorValue] = useState<Descendant[]>(
     // get from session storage
-    JSON.parse(sessionStorage.getItem("content") ?? "null") || [
+    JSON.parse(sessionStorage.getItem('content') ?? 'null') || [
       // or "empty" editor text
       {
-        type: "paragraph",
-        children: [{ text: "" }],
+        type: 'paragraph',
+        children: [{ text: '' }],
       },
     ]
   );
 
-  const [editorTextValue, setEditorTextValue] = useState<string>("");
+  const [editorTextValue, setEditorTextValue] = useState<string>('');
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
     // Necessary for analysis tool to receive the initial
     // text value.
-    const content = sessionStorage.getItem("content");
+    const content = sessionStorage.getItem('content');
     if (content) {
       editorText.next(JSON.parse(content));
       setEditorTextValue(serialize(JSON.parse(content)));
@@ -168,14 +169,14 @@ const StudentView = (props: {
   const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
   useEffect(() => {
     // get initial value from storage if possible on mount.
-    const width = sessionStorage.getItem("tool_width");
+    const width = sessionStorage.getItem('tool_width');
     if (width && !isNaN(Number(width))) {
       setToolWidth(Number(width));
     }
   }, []);
   // Update stored tool_width
   useEffect(
-    () => sessionStorage.setItem("tool_width", String(toolWidth)),
+    () => sessionStorage.setItem('tool_width', String(toolWidth)),
     [toolWidth]
   );
   const [toolSeparatorXPosition, setToolSeparatorXPosition] = useState<
@@ -233,13 +234,13 @@ const StudentView = (props: {
   }, [toolRef, toolSeparatorDragging, toolWidth]);
 
   useEffect(() => {
-    document.addEventListener("mousemove", onMouseMove);
-    document.addEventListener("touchmove", onTouchMove);
-    document.addEventListener("mouseup", onMouseUp);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('touchmove', onTouchMove);
+    document.addEventListener('mouseup', onMouseUp);
     return () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("touchmove", onTouchMove);
-      document.removeEventListener("mouseup", onMouseUp);
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('mouseup', onMouseUp);
     };
   }, [onMouseMove, onMouseUp, onTouchMove]);
 
@@ -253,17 +254,17 @@ const StudentView = (props: {
   const renderElement = useCallback(
     ({ attributes, children, element }: RenderElementProps) => {
       switch (element.type) {
-        case "block-quote":
+        case 'block-quote':
           return <blockquote {...attributes}>{children}</blockquote>;
-        case "bulleted-list":
+        case 'bulleted-list':
           return <ul {...attributes}>{children}</ul>;
-        case "heading-one":
+        case 'heading-one':
           return <h1 {...attributes}>{children}</h1>;
-        case "heading-two":
+        case 'heading-two':
           return <h2 {...attributes}>{children}</h2>;
-        case "list-item":
+        case 'list-item':
           return <li {...attributes}>{children}</li>;
-        case "numbered-list":
+        case 'numbered-list':
           return <ol {...attributes}>{children}</ol>;
         default:
           return <p {...attributes}>{children}</p>;
@@ -275,17 +276,17 @@ const StudentView = (props: {
   const renderLeaf = useCallback(
     ({ attributes, children, leaf }: RenderLeafProps) => {
       switch (leaf.type) {
-        case "bold":
+        case 'bold':
           return <strong {...attributes}>{children}</strong>;
-        case "code":
+        case 'code':
           return <code {...attributes}>{children}</code>;
-        case "italic":
+        case 'italic':
           return <em {...attributes}>{children}</em>;
-        case "underlined":
+        case 'underlined':
           return <u {...attributes}>{children}</u>;
-        case "highlight":
+        case 'highlight':
           return (
-            <span {...attributes} style={{ backgroundColor: "#ffeeba" }}>
+            <span {...attributes} style={{ backgroundColor: '#ffeeba' }}>
               {children}
             </span>
           );
@@ -299,53 +300,53 @@ const StudentView = (props: {
 
   // Tool bar menu handler.
   const onNavSelect = (eventKey: string | null) => {
-    if (eventKey === "resetData") {
+    if (eventKey === 'resetData') {
       setShowReset(true);
     }
 
-    if (eventKey === "resetView") {
+    if (eventKey === 'resetView') {
       if (toolRef.current) {
-        toolRef.current.style.width = "";
+        toolRef.current.style.width = '';
         setToolWidth(toolRef.current.clientWidth);
       }
       return;
     }
 
-    if (eventKey === "showHelp") {
-      showHelp(true);
-      return;
-    }
+    // if (eventKey === "showHelp") {
+    //   showHelp(true);
+    //   return;
+    // }
 
     if (eventKey === "showAbout") {
       setShowAbout(true);
       return;
     }
 
-    if (eventKey === "showGettingStarted") {
-      showGettingStarted(true);
-      return;
-    }
+    // if (eventKey === "showGettingStarted") {
+    //   showGettingStarted(true);
+    //   return;
+    // }
 
-    if (eventKey === "showTroubleshooting") {
-      console.log("showTrouble");
-      showTroubleshooting(true);
-      return;
-    }
+    // if (eventKey === "showTroubleshooting") {
+    //   console.log("showTrouble");
+    //   showTroubleshooting(true);
+    //   return;
+    // }
   };
 
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Mike's panel)
   const showDocuScopeTaggedText =
-    currentTab === "impressions" && !editable && isTaggerResult(tagging);
+    currentTab === 'impressions' && !editable && isTaggerResult(tagging);
 
   const taggedDocuScopeTextContent = isTaggerResult(tagging)
     ? tagging.html_content
-    : "";
+    : '';
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
   const showOnTopicText =
-    currentTab !== "impressions" && !editable && Boolean(props.html);
+    currentTab !== 'impressions' && !editable && Boolean(props.html);
 
   //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
 
@@ -431,7 +432,7 @@ const StudentView = (props: {
       props.ruleManager.reset();
 
       // Reset the interface
-      switchTab("expectations");
+      switchTab('expectations');
     }
   };
 
@@ -469,7 +470,7 @@ const StudentView = (props: {
    * This also means any single and double quotes
    */
   const globalUpdate = (text: string) => {
-    console.log("globalUpdate ()");
+    console.log('globalUpdate ()');
 
     // For now if someone requests (or really, forces) an update, let's switch
     // the editor to read-only mode for now
@@ -481,7 +482,7 @@ const StudentView = (props: {
     props.update(null);
 
     // 3. Get the latest from the server
-    if (text !== "") {
+    if (text !== '') {
       //setStatus("Retrieving results...");
 
       const customTopics = props.ruleManager.getAllCustomTopics();
@@ -495,13 +496,13 @@ const StudentView = (props: {
 
       props
         .api(
-          "ontopic",
+          'ontopic',
           {
             custom: customTopics,
             customStructured: customTopicsStructured,
             base: encoded,
           },
-          "POST"
+          'POST'
         )
         .then((/*incoming : any*/) => {
           //let coherence=incoming.coherence;
@@ -513,12 +514,12 @@ const StudentView = (props: {
   //>--------------------------------------------------------
 
   const lockAndUpdate = (checked: boolean, _editorTextValue: string) => {
-    console.log("lockAndUpdate (" + checked + ")");
+    console.log('lockAndUpdate (' + checked + ')');
 
     setEditorState(checked);
 
     if (checked == false) {
-      console.log("checked==false => update");
+      console.log('checked==false => update');
       //globalUpdate(editorTextValue);
     }
   };
@@ -539,12 +540,22 @@ const StudentView = (props: {
             <Navbar.Toggle aria-controls={navId}></Navbar.Toggle>
             <Navbar.Collapse id={navId}>
               <Nav className="me-auto" onSelect={onNavSelect}>
-                <Nav.Link eventKey={"resetData"}>Reset</Nav.Link>
+                <Nav.Link eventKey={'resetData'}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
+                  <Form className='m-2'>
+                    <Form.Label>Editor Font Size: {zoom}%</Form.Label>
+                    <Form.Range
+                      min={10}
+                      max={300}
+                      step={10}
+                      onChange={(event) => setZoom(event.target.valueAsNumber)}
+                      value={zoom}
+                    />
+                  </Form>
                   {reset}
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
-                  <NavDropdown.Item eventKey={"showHelp"}>
+                  {/* <NavDropdown.Item eventKey={"showHelp"}>
                     Show Help
                   </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"showGettingStarted"}>
@@ -552,8 +563,8 @@ const StudentView = (props: {
                   </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"showTroubleshooting"}>
                     Troubleshooting
-                  </NavDropdown.Item>
-                  <NavDropdown.Item eventKey={"showAbout"}>
+                  </NavDropdown.Item> */}
+                  <NavDropdown.Item eventKey={'showAbout'}>
                     About
                   </NavDropdown.Item>
                 </NavDropdown>
@@ -569,7 +580,7 @@ const StudentView = (props: {
         >
           <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
             <Tab
-              eventKey={"expectations"}
+              eventKey={'expectations'}
               title="Expectations"
               className="overflow-hidden h-100"
             >
@@ -581,14 +592,14 @@ const StudentView = (props: {
               />
             </Tab>
             <Tab
-              eventKey={"coherence"}
+              eventKey={'coherence'}
               title="Coherence"
               className="overflow-hidden h-100"
             >
               <Coherence api={props.api} ruleManager={props.ruleManager} />
             </Tab>
             <Tab
-              eventKey={"clarity"}
+              eventKey={'clarity'}
               title="Clarity"
               className="overflow-hidden h-100"
             >
@@ -599,7 +610,7 @@ const StudentView = (props: {
               />
             </Tab>
             <Tab
-              eventKey={"impressions"}
+              eventKey={'impressions'}
               title="Impressions"
               className="overflow-hidden h-100"
             >
@@ -615,11 +626,7 @@ const StudentView = (props: {
         />
 
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
-          <Card.Header className="d-flex justify-content-between">
-            <div className="d-flex flex-column">
-            <Form.Label>Font Size: {zoom}%</Form.Label>
-            <Form.Range min={10} max={300} step={10} onChange={(event) => setZoom(event.target.valueAsNumber)} value={zoom}/>
-            </div>
+          <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
             <Button onClick={(_e) => globalUpdate(editorTextValue)}>
               Update
@@ -630,35 +637,35 @@ const StudentView = (props: {
               onChange={(checked) => lockAndUpdate(checked, editorTextValue)}
             />
           </Card.Header>
-          <Card.Body className="overflow-auto" style={{fontSize: `${zoom}%`}}>
-            {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
-            {showOnTopicText ? topicTaggedContent : ""}
+          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
+            {showDocuScopeTaggedText ? taggedDocuScopeText : ''}
+            {showOnTopicText ? topicTaggedContent : ''}
             <Slate
               editor={editor}
               initialValue={editorValue}
               onChange={(content: Descendant[]) => {
                 // only if change is not selection change.
                 if (
-                  editor.operations.some((op) => "set_selection" !== op.type)
+                  editor.operations.some((op) => 'set_selection' !== op.type)
                 ) {
                   editorText.next(content);
                   setEditorValue(content);
                   setEditorTextValue(serialize(content));
-                  sessionStorage.setItem("content", JSON.stringify(content));
+                  sessionStorage.setItem('content', JSON.stringify(content));
                 }
               }}
             >
               <Editable
                 className={
-                  showDocuScopeTaggedText || showOnTopicText ? "d-none" : ""
+                  showDocuScopeTaggedText || showOnTopicText ? 'd-none' : ''
                 }
                 readOnly={!editable}
                 renderElement={renderElement}
                 renderLeaf={renderLeaf}
                 placeholder={
                   editable
-                    ? "Enter some text..."
-                    : "Unlock and enter some text..."
+                    ? 'Enter some text...'
+                    : 'Unlock and enter some text...'
                 }
               />
             </Slate>
@@ -668,27 +675,27 @@ const StudentView = (props: {
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
         <div className="statusbar-version">
-          {"DSWA Version: " + props.config.version}
+          {'DSWA Version: ' + props.config.version}
         </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}
-            style={{ marginLeft: "2px", marginRight: "2px" }}
+            style={{ marginLeft: '2px', marginRight: '2px' }}
           />
           {props.ruleManager.getVersion()}
         </div>
         <div className="statusbar-language">
           <FontAwesomeIcon
             icon={faGlobe}
-            style={{ marginLeft: "2px", marginRight: "2px" }}
+            style={{ marginLeft: '2px', marginRight: '2px' }}
           />
           {language}
         </div>
       </footer>
       {about}
-      <HelpModal />
+      {/* <HelpModal />
       <GettingStartedModal />
-      <TroubleshootingModal />
+      <TroubleshootingModal /> */}
     </div>
   );
 };

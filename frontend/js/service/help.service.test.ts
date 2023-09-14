@@ -23,7 +23,7 @@ afterAll(() => {
 
 describe('help.service', () => {
   describe('help', () => {
-    test('showHelp', () => {
+    test('given -b a=false b=true when showHelp then ^ab', () => {
       showHelp$
         .pipe(first())
         .subscribe((help) =>
@@ -36,7 +36,7 @@ describe('help.service', () => {
           expect(help, 'True after show call.').toBeTruthy()
         );
     });
-    test('error loading help', () => {
+    test('given # a=loading... b=...unavailable when help$ then ^ab', () => {
       fetchMocker.mockRejectOnce();
       help$
         .pipe(first())
@@ -51,7 +51,7 @@ describe('help.service', () => {
           )
         );
     });
-    test('loading help', () => {
+    test('given a=loading... b=help.html when help$ then ^ab', () => {
       fetchMocker.mockOnceIf(/help.html$/, 'help content');
       help$
         .pipe(first())
@@ -64,7 +64,7 @@ describe('help.service', () => {
     });
   });
   describe('getting_started', () => {
-    test('showGettingStarted', () => {
+    test('given -b a=false b=true when showGettingStarted$ then ^ab', () => {
       showGettingStarted$
         .pipe(first())
         .subscribe((started) =>
@@ -77,7 +77,7 @@ describe('help.service', () => {
           expect(started, 'True after show call.').toBeTruthy()
         );
     });
-    test('error loading getting started', () => {
+    test('given # a=loading... b=...unavailable when gettingStarted$ then ^ab', () => {
       fetchMocker.mockRejectOnce();
       gettingStarted$
         .pipe(first())
@@ -92,7 +92,7 @@ describe('help.service', () => {
           )
         );
     });
-    test('loading getting started', () => {
+    test('given a=loading... b=getting_started.html when gettingStarted$ then ^ab', () => {
       fetchMocker.mockOnceIf(/getting_started.html$/, 'getting started');
       gettingStarted$
         .pipe(first())
@@ -105,7 +105,7 @@ describe('help.service', () => {
     });
   });
   describe('troubleshooting', () => {
-    test('showTroubleshooting', () => {
+    test('given a=false b=true -b when showTroubleshooting$ then ^ab', () => {
       showTroubleshooting$
         .pipe(first())
         .subscribe((trouble) =>
@@ -118,7 +118,7 @@ describe('help.service', () => {
           expect(trouble, 'True after show call.').toBeTruthy()
         );
     });
-    test('error loading troubleshooting', () => {
+    test('given #404 a=loading... b=...unavailable when troubleshooting$ then ^ab', () => {
       fetchMocker.mockRejectOnce();
       troubleshooting$
         .pipe(first())
@@ -133,7 +133,7 @@ describe('help.service', () => {
           )
         );
     });
-    test('loading troubleshooting', () => {
+    test('given a=loading... b=troubleshooting.html when troubleshooting$ then ^ab', () => {
       fetchMocker.mockOnceIf(/troubleshooting.html/, 'troubleshooting');
       troubleshooting$
         .pipe(first())

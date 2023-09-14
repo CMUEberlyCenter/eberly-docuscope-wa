@@ -12,7 +12,7 @@ afterAll(() => {
 });
 
 describe('settings.service', () => {
-  test('server error', () => {
+  test('given # when settings$ then default', () => {
     // needs to be first to get around caching.
     fetchMocker.mockRejectOnce();
     settings$.subscribe((settings) => {
@@ -21,7 +21,7 @@ describe('settings.service', () => {
       );
     });
   });
-  test('subscription', () => {
+  test('when settings$ then assets/settings.json', () => {
     settings$.subscribe((settings) => {
       expect(settings.common_dictionary).toBe(
         'https://docuscope.eberly.cmu.edu/common_dictionary'
@@ -31,7 +31,7 @@ describe('settings.service', () => {
       );
     });
   });
-  test('loading', () => {
+  test('given mock settings.json when settings$ then mock settings.json', () => {
     fetchMocker.mockOnceIf(
       /settings.json$/,
       JSON.stringify({

@@ -81,7 +81,14 @@ const config = {
               }
             }
           },
-          'sass-loader',
+          {
+            loader: 'sass-loader',
+            options: {
+              sassOptions: {
+                quietDeps: true
+              }
+            }
+          },
         ],
       },
       {
