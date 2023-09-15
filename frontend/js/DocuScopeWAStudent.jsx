@@ -34,13 +34,13 @@ import TabTitle from "./components/TabTitle/TabTitle";
 import { sentenceData } from "./data/sentencedata.js";
 //import DocuScopeWA from "./DocuScopeWAScrim";
 //import DocuScopeRules from "./DocuScopeRules";
-import DataTools from "./DataTools";
+import { deepCopy } from "./DataTools";
 import DocuScopeOnTopic from "./DocuScopeOnTopic";
 import { editorText, setEditorState } from "./service/editor-state.service";
 
 const serialize = (nodes) => {
-  return nodes.map((n) => Node.string(n)).join('\n')
-}
+  return nodes.map((n) => Node.string(n)).join("\n");
+};
 
 let initialValue = {
   document: {
@@ -93,8 +93,6 @@ export default class DocuScopeWAStudent extends Component {
           this.bURLPath
       );
     }
-
-    this.dataTools = new DataTools();
 
     let value = initialValue;
 
@@ -276,9 +274,7 @@ export default class DocuScopeWAStudent extends Component {
 
     //console.log("handleEditorToggle (" + toggled + "," + editorLocked + ")");
 
-    editorText.next(
-      checked ? "" : serialize(this.state.value)
-    );
+    editorText.next(checked ? "" : serialize(this.state.value));
     setEditorState(checked);
     this.setState({ editorActive: toggled, locked: editorLocked }, () => {
       if (this.state.editorActive == false) {
@@ -366,8 +362,8 @@ export default class DocuScopeWAStudent extends Component {
 
     this.setState({ value }, (_e) => {
       let invalidated = this.state.invalidated;
-      let expanded = this.dataTools.deepCopy(this.state.expanded);
-      let topic = this.dataTools.deepCopy(this.state.topic);
+      let expanded = deepCopy(this.state.expanded);
+      let topic = deepCopy(this.state.topic);
       let topics = null;
 
       /*
@@ -773,7 +769,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 1}
               >
-                <Expectations/>
+                <Expectations />
               </TabPanel>
 
               <TabPanel
@@ -781,7 +777,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 2}
               >
-                <Coherence/>
+                <Coherence />
               </TabPanel>
 
               <TabPanel
@@ -789,7 +785,7 @@ export default class DocuScopeWAStudent extends Component {
                 className="tabs-panel-override"
                 isActive={this.state.activeIndex === 3}
               >
-                <Clarity/>
+                <Clarity />
               </TabPanel>
 
               <TabPanel

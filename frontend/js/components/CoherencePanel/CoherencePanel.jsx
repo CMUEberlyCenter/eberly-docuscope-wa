@@ -1,18 +1,17 @@
 import React, { Component } from "react";
 
-import './CoherencePanel.scss';
+import "./CoherencePanel.scss";
 
-import OnTopicDataTools from "../../lang/OnTopicDataTools";
-import TopicHighlighter  from "../../TopicHighlighter";
+import TopicHighlighter from "../../TopicHighlighter";
 
-import topic_left_dark_icon from '../../../css/icons/topic_left_dark_icon.png';
-import topic_left_icon from '../../../css/icons/topic_left_icon.png';
-import topic_right_icon from '../../../css/icons/topic_right_icon.png';
-import topic_sent_icon_left from '../../../css/icons/topic_sent_icon_left.png';
-import topic_sent_icon_right from '../../../css/icons/topic_sent_icon_right.png';
+// import topic_left_dark_icon from "../../../css/icons/topic_left_dark_icon.png";
+import topic_left_icon from "../../../css/icons/topic_left_icon.png";
+import topic_right_icon from "../../../css/icons/topic_right_icon.png";
+import topic_sent_icon_left from "../../../css/icons/topic_sent_icon_left.png";
+import topic_sent_icon_right from "../../../css/icons/topic_sent_icon_right.png";
 
 // Dummy data so that we can keep working on our visualization widget set
-import { coherenceDataLocal } from "../../data/coherencedatalocal";
+// import { coherenceDataLocal } from "../../data/coherencedatalocal";
 
 /**
   Here is a brief summary of what the icons mean.
@@ -40,40 +39,38 @@ import { coherenceDataLocal } from "../../data/coherencedatalocal";
 
  */
 class CoherencePanel extends Component {
-
   /**
-   * 
+   *
    */
-  constructor (props) {
-    super (props);
+  constructor(props) {
+    super(props);
 
     this.state = {
       selectedParagraph: -1,
-      selectedSentence: -1
+      selectedSentence: -1,
     };
 
-    this.dataTools=new OnTopicDataTools ();
-    this.topicHighlighter=new TopicHighlighter ();
+    this.topicHighlighter = new TopicHighlighter();
 
-    this.onTopicClick=this.onTopicClick.bind(this);
-    this.onTopicParagraphClick=this.onTopicParagraphClick.bind(this);
-    this.onGlobalTopicClick=this.onGlobalTopicClick.bind(this);
-    this.onParagraphClick=this.onParagraphClick.bind(this);
-    this.onSentenceClick=this.onSentenceClick.bind(this);
+    this.onTopicClick = this.onTopicClick.bind(this);
+    this.onTopicParagraphClick = this.onTopicParagraphClick.bind(this);
+    this.onGlobalTopicClick = this.onGlobalTopicClick.bind(this);
+    this.onParagraphClick = this.onParagraphClick.bind(this);
+    this.onSentenceClick = this.onSentenceClick.bind(this);
   }
 
   /**
    *
    */
   componentDidUpdate(prevProps) {
-  	//console.log ("componentDidUpdate ()");
+    //console.log ("componentDidUpdate ()");
 
     if (prevProps.showglobal !== this.props.showglobal) {
-      console.log ("showglobal changed");
-      this.setState ({
+      console.log("showglobal changed");
+      this.setState({
         selectedParagraph: -1,
-        selectedSentence: -1
-      })
+        selectedSentence: -1,
+      });
     }
 
     /*
@@ -84,31 +81,31 @@ class CoherencePanel extends Component {
   }
 
   /**
-   * 
+   *
    */
-  getTopicObject (anIndex) {
+  getTopicObject(anIndex) {
     if (!this.props.data) {
-      return (null);
+      return null;
     }
 
-    let topics=this.props.data.data;
+    let topics = this.props.data.data;
 
-    return (topics [anIndex]);
+    return topics[anIndex];
   }
 
   /**
    * Let's figure out later how to optimize this!
    */
-  getTopicListFromObject (anIndex,aTopicString) {
-    let topicObject=this.getTopicObject (anIndex);
+  getTopicListFromObject(anIndex, aTopicString) {
+    let topicObject = this.getTopicObject(anIndex);
 
-    let topicList=[];
+    let topicList = [];
 
     if (topicObject) {
-      if (topicObject.topic.length>1) {
-        topicList.push (topicObject.topic [1]);
-        if (topicObject.topic.length>2) {
-          topicList.push (topicObject.topic [2]);
+      if (topicObject.topic.length > 1) {
+        topicList.push(topicObject.topic[1]);
+        if (topicObject.topic.length > 2) {
+          topicList.push(topicObject.topic[2]);
         }
       } else {
         if (aTopicString) {
@@ -120,187 +117,207 @@ class CoherencePanel extends Component {
         topicList.push(aTopicString);
       }
     }
-    
-    return (topicList);
-  }  
 
-  /**
-   * 
-   */
-  countParagraphs () {
-    if (!this.props.data) {
-      return (0);
-    }
-
-    let copy=this.props.data;
-
-    let nrParagraphs = parseInt (copy.num_paras);    
-
-    return (nrParagraphs);
+    return topicList;
   }
 
   /**
-   * 
+   *
    */
-  countSentences (aParagraphIndex) {
-    if (!this.props.local) {
-      return (0);
+  countParagraphs() {
+    if (!this.props.data) {
+      return 0;
     }
 
-    let copy=this.props.local;
-    let envelope=copy [aParagraphIndex]; // Get the first paragraph
+    let copy = this.props.data;
+
+    let nrParagraphs = parseInt(copy.num_paras);
+
+    return nrParagraphs;
+  }
+
+  /**
+   *
+   */
+  countSentences(aParagraphIndex) {
+    if (!this.props.local) {
+      return 0;
+    }
+
+    let copy = this.props.local;
+    let envelope = copy[aParagraphIndex]; // Get the first paragraph
 
     if (envelope.error) {
       //console.log ("No topics found in this sentence");
-      return (0);
-    }    
+      return 0;
+    }
 
-    let data=envelope.data; // Get the data block from the first paragraph
-    let actual=data [0]; // For some reason there is another nested array in here
+    let data = envelope.data; // Get the data block from the first paragraph
+    let actual = data[0]; // For some reason there is another nested array in here
 
     //console.log ("Nr sentences: " + actual.sentences.length);
 
-    return (actual.sentences.length);
-  }  
-
-  /**
-   * You might get this: {error: 'ncols is 0'}
-   */
-  getLocalTopic (anIndex) {
-    console.log ("getLocalTopic ("+anIndex+")");
-
-    if (!this.props.local) {
-      return (null);
-    }
-
-    let localTopics=this.props.local;
-
-    let envelope=localTopics [anIndex]; // Get the first paragraph
-
-    if (envelope.error) {
-      console.log ("No topics found in this sentence");
-      return (null);
-    }
-
-    console.log ("local topic root: ");
-    console.log (envelope);
-
-    return (envelope);
-  }  
-
-  /**
-   * You might get this: {error: 'ncols is 0'}
-   */
-  getLocalTopicObject (anIndex) {
-    console.log ("getLocalTopicObject ("+anIndex+")");
-
-    if (!this.props.local) {
-      return (null);
-    }
-
-    let localTopics=this.props.local;
-
-    let envelope=localTopics [anIndex]; // Get the first paragraph
-
-    if (envelope.error) {
-      console.log ("No topics found in this sentence");
-      return (null);
-    }
-
-    let data=envelope.data; // Get the data block from the first paragraph
-    let actual=data [0]; // For some reason there is another nested array in here    
-
-    console.log (actual);
-
-    return (actual);
-  }  
- 
-  /**
-   * 
-   */
-  onTopicClick (e,anIndex) {
-    //console.log ("onTopicClick ("+anIndex+")");
-
-    let topicList=this.getTopicListFromObject (anIndex,null);
-
-    this.topicHighlighter.highlightTopic (this.state.selectedParagraph,this.state.selectedSentence,topicList);
+    return actual.sentences.length;
   }
 
   /**
-   * 
+   * You might get this: {error: 'ncols is 0'}
    */
-  onTopicParagraphClick (e,anIndex,aParagraph,aTopic) {
-    //console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
+  getLocalTopic(anIndex) {
+    console.log("getLocalTopic (" + anIndex + ")");
 
-    let topicList=this.getTopicListFromObject (anIndex,aTopic);
+    if (!this.props.local) {
+      return null;
+    }
 
-    this.topicHighlighter.highlightTopic (aParagraph,-1,topicList);
-  }  
+    let localTopics = this.props.local;
+
+    let envelope = localTopics[anIndex]; // Get the first paragraph
+
+    if (envelope.error) {
+      console.log("No topics found in this sentence");
+      return null;
+    }
+
+    console.log("local topic root: ");
+    console.log(envelope);
+
+    return envelope;
+  }
 
   /**
-   * 
+   * You might get this: {error: 'ncols is 0'}
    */
-  onGlobalTopicClick (e,anIndex) {
+  getLocalTopicObject(anIndex) {
+    console.log("getLocalTopicObject (" + anIndex + ")");
+
+    if (!this.props.local) {
+      return null;
+    }
+
+    let localTopics = this.props.local;
+
+    let envelope = localTopics[anIndex]; // Get the first paragraph
+
+    if (envelope.error) {
+      console.log("No topics found in this sentence");
+      return null;
+    }
+
+    let data = envelope.data; // Get the data block from the first paragraph
+    let actual = data[0]; // For some reason there is another nested array in here
+
+    console.log(actual);
+
+    return actual;
+  }
+
+  /**
+   *
+   */
+  onTopicClick(e, anIndex) {
+    //console.log ("onTopicClick ("+anIndex+")");
+
+    let topicList = this.getTopicListFromObject(anIndex, null);
+
+    this.topicHighlighter.highlightTopic(
+      this.state.selectedParagraph,
+      this.state.selectedSentence,
+      topicList
+    );
+  }
+
+  /**
+   *
+   */
+  onTopicParagraphClick(e, anIndex, aParagraph, aTopic) {
+    //console.log ("onTopicParagraphClick ("+anIndex+","+aParagraph+")");
+
+    let topicList = this.getTopicListFromObject(anIndex, aTopic);
+
+    this.topicHighlighter.highlightTopic(aParagraph, -1, topicList);
+  }
+
+  /**
+   *
+   */
+  onGlobalTopicClick(e, anIndex) {
     //console.log ("onGlobalTopicClick ("+anIndex+")");
 
     if (this.props.ruleManager) {
-      let topicList=this.props.ruleManager.getClusterTopicsByClusterIndex (anIndex);
+      let topicList =
+        this.props.ruleManager.getClusterTopicsByClusterIndex(anIndex);
 
       //console.log (topicList);
- 
-      this.topicHighlighter.highlightTopic (-1,-1,topicList);
-    }    
-  }
 
-  /**
-   * 
-   */
-  onParagraphClick (e,anIndex) {
-    console.log ("onParagraphClick ("+anIndex+")");
-
-    if (this.state.selectedParagraph==anIndex) {
-      this.setState ({selectedParagraph: -1});
-    } else {
-      this.setState ({
-        selectedParagraph: anIndex
-      });
-
-      this.topicHighlighter.highlightParagraph (anIndex);
+      this.topicHighlighter.highlightTopic(-1, -1, topicList);
     }
   }
 
   /**
-   * 
+   *
    */
-  onSentenceClick (e,anIndex) {
-    console.log ("onSentenceClick ("+anIndex+")");
+  onParagraphClick(e, anIndex) {
+    console.log("onParagraphClick (" + anIndex + ")");
 
-    if (this.state.selectedSentence==anIndex) {
-      this.setState ({selectedSentence: -1});
+    if (this.state.selectedParagraph == anIndex) {
+      this.setState({ selectedParagraph: -1 });
     } else {
-      this.setState ({
-        selectedSentence: anIndex
+      this.setState({
+        selectedParagraph: anIndex,
       });
 
-      this.topicHighlighter.highlightSentence (this.state.selectedParagraph,anIndex);
-    }    
-  }  
+      this.topicHighlighter.highlightParagraph(anIndex);
+    }
+  }
 
   /**
-   * 
+   *
    */
-  generateGlobalClusters (paraCount) {
-    let topicElements=[];
+  onSentenceClick(e, anIndex) {
+    console.log("onSentenceClick (" + anIndex + ")");
+
+    if (this.state.selectedSentence == anIndex) {
+      this.setState({ selectedSentence: -1 });
+    } else {
+      this.setState({
+        selectedSentence: anIndex,
+      });
+
+      this.topicHighlighter.highlightSentence(
+        this.state.selectedParagraph,
+        anIndex
+      );
+    }
+  }
+
+  /**
+   *
+   */
+  generateGlobalClusters(paraCount) {
+    let topicElements = [];
 
     if (this.props.ruleManager) {
-      let clusters=this.props.ruleManager.clusters;
+      let clusters = this.props.ruleManager.clusters;
 
-      for (let i=0;i<clusters.length;i++) {
-        topicElements.push (<tr key={`topic-key-${i}`}><td style={{width: "175px"}}><div className="coherence-item" onClick={(e) => this.onGlobalTopicClick (e,i)}>{clusters [i].name}</div></td><td>&nbsp;</td></tr>)
+      for (let i = 0; i < clusters.length; i++) {
+        topicElements.push(
+          <tr key={`topic-key-${i}`}>
+            <td style={{ width: "175px" }}>
+              <div
+                className="coherence-item"
+                onClick={(e) => this.onGlobalTopicClick(e, i)}
+              >
+                {clusters[i].name}
+              </div>
+            </td>
+            <td>&nbsp;</td>
+          </tr>
+        );
       }
     }
 
-    return (topicElements);
+    return topicElements;
   }
 
   /**
@@ -335,289 +352,390 @@ class CoherencePanel extends Component {
               line += (c + " ")
    *
    */
-  generateGlobalTopics (paraCount) {
+  generateGlobalTopics(paraCount) {
     //console.log ("generateGlobalTopics ("+paraCount+")");
 
-  	let topicElements=[];
+    let topicElements = [];
 
-  	if (!this.props.data) {
+    if (!this.props.data) {
       //console.log ("Info: no data yet!");
-  	  return (topicElements);
-  	}
+      return topicElements;
+    }
 
-    let copy=this.props.data;
+    let copy = this.props.data;
 
     if (!copy.data) {
       //console.log ("Info: data does not contain a data attribute");
-      return (topicElements);
+      return topicElements;
     }
 
-    let topics=copy.data;
+    let topics = copy.data;
 
-    for (let i=0;i<topics.length;i++) {
-      let topicObject=this.getTopicObject (i);      
-      let topic=topicObject.topic [2];
+    for (let i = 0; i < topics.length; i++) {
+      let topicObject = this.getTopicObject(i);
+      let topic = topicObject.topic[2];
       let is_topic_cluster = topicObject.is_topic_cluster;
-      
+
       let is_non_local = topicObject.is_non_local;
-      let paragraphs=topicObject.paragraphs;
-      let paraElements=[];
+      let paragraphs = topicObject.paragraphs;
+      let paraElements = [];
 
       //for (let j=0;j<paragraphs.length;j++) {
       // Temporary fix. Already resolved in the Python code
-      for (let j=0;j<paraCount;j++) {
+      for (let j = 0; j < paraCount; j++) {
         let icon;
 
-        let paraType=paragraphs[j];
-        let paraContent=" ";
-        let paraIcon=null;
-        let paraIconClass="topic-icon-large";
+        let paraType = paragraphs[j];
+        let paraContent = " ";
+        let paraIcon = null;
+        let paraIconClass = "topic-icon-large";
 
-        if (paraType!=null) {
-          if (paraType.is_left==true) {
-            if (is_non_local==true) {
+        if (paraType != null) {
+          if (paraType.is_left == true) {
+            if (is_non_local == true) {
               paraContent = "l";
-              paraIconClass="topic-icon-small";            
+              paraIconClass = "topic-icon-small";
             } else {
               paraContent = "L";
             }
 
-            if (paraType.is_topic_sent==true) {
+            if (paraType.is_topic_sent == true) {
               paraContent += "*";
-              paraIcon=topic_sent_icon_left;
+              paraIcon = topic_sent_icon_left;
             } else {
-              paraIcon=topic_left_icon;
+              paraIcon = topic_left_icon;
             }
           } else {
-            if (is_non_local==true) {
+            if (is_non_local == true) {
               paraContent = "r";
-              paraIconClass="topic-icon-small";            
+              paraIconClass = "topic-icon-small";
             } else {
               paraContent = "R";
             }
 
-            if (paraType.is_topic_sent==true) {
+            if (paraType.is_topic_sent == true) {
               paraContent += "*";
-              paraIcon=topic_sent_icon_right;
+              paraIcon = topic_sent_icon_right;
             } else {
-              paraIcon=topic_right_icon;
+              paraIcon = topic_right_icon;
             }
           }
 
-          icon=<img alt={paraContent} title={paraContent} className={paraIconClass} src={paraIcon}/>;
+          icon = (
+            <img
+              alt={paraContent}
+              title={paraContent}
+              className={paraIconClass}
+              src={paraIcon}
+            />
+          );
         }
-        paraElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j,topic)}>{icon}</div>);
+        paraElements.push(
+          <div
+            key={"topic-key-" + i + "-" + j}
+            className="topic-type-default"
+            onClick={(e) => this.onTopicParagraphClick(e, i, j, topic)}
+          >
+            {icon}
+          </div>
+        );
       }
 
       if (this.props.showglobal == true) {
         //console.log ("Cluster: " + topics + " => " + is_topic_cluster + " => " + this.props.showglobal);
         if (is_topic_cluster == true) {
-          topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
+          topicElements.push(
+            <tr key={"topic-paragraph-key-" + i}>
+              <td style={{ width: "150px" }}>
+                <div
+                  className="coherence-item"
+                  onClick={(e) => this.onTopicClick(e, i)}
+                >
+                  {topic}
+                </div>
+              </td>
+              <td>
+                <div className="topic-container">{paraElements}</div>
+              </td>
+            </tr>
+          );
         }
       } else {
-        topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{paraElements}</div></td></tr>)
+        topicElements.push(
+          <tr key={"topic-paragraph-key-" + i}>
+            <td style={{ width: "150px" }}>
+              <div
+                className="coherence-item"
+                onClick={(e) => this.onTopicClick(e, i)}
+              >
+                {topic}
+              </div>
+            </td>
+            <td>
+              <div className="topic-container">{paraElements}</div>
+            </td>
+          </tr>
+        );
       }
     }
 
     //let nrParagraphs = parseInt (copy.num_paras);
 
-    return (topicElements);
+    return topicElements;
   }
 
   /**
-   * 
+   *
    */
-  generateLocalTopics () {
+  generateLocalTopics() {
     //console.log ("generateLocalTopics ()");
 
-    let topicElements=[];
+    let topicElements = [];
 
     //if ((this.state.selectedParagraph==-1) || (this.state.selectedLocal==null)) {
-    if ((this.state.selectedParagraph==-1) || (this.props.local==null)) {
-      return (topicElements);
+    if (this.state.selectedParagraph == -1 || this.props.local == null) {
+      return topicElements;
     }
 
-    let topics=this.props.local [this.state.selectedParagraph].data;
-    let num_sents=this.countSentences (this.state.selectedParagraph);
+    let topics = this.props.local[this.state.selectedParagraph].data;
+    let num_sents = this.countSentences(this.state.selectedParagraph);
 
-    if (num_sents==0) {
-      return (topicElements);
+    if (num_sents == 0) {
+      return topicElements;
     }
 
     //let num_sents=this.props.local.num_sents; // Not valid yet, needs to be fixed in the Python code
-  
-    for (let i=0;i<topics.length;i++) {
-      let topicObject=topics [i];
-      if (topicObject==null) {
-        return (topicElements);
+
+    for (let i = 0; i < topics.length; i++) {
+      let topicObject = topics[i];
+      if (topicObject == null) {
+        return topicElements;
       }
-      let topic=topicObject.topic [2];
+      let topic = topicObject.topic[2];
       let is_topic_cluster = topicObject.is_topic_cluster;
       let is_non_local = topicObject.is_non_local;
-      let sentences=topicObject.sentences;
-      let sentenceElements=[];
+      let sentences = topicObject.sentences;
+      let sentenceElements = [];
 
-      for (let j=0;j<num_sents;j++) {
+      for (let j = 0; j < num_sents; j++) {
         let icon;
 
-        let paraType=sentences[j];
-        let paraContent=" ";
-        let paraIcon=null;
-        let paraIconClass="topic-icon-large";
+        let paraType = sentences[j];
+        let paraContent = " ";
+        let paraIcon = null;
+        let paraIconClass = "topic-icon-large";
 
-        if (paraType!=null) {
-          if (paraType.is_left==true) {
-            if (is_non_local==true) {
+        if (paraType != null) {
+          if (paraType.is_left == true) {
+            if (is_non_local == true) {
               paraContent = "l";
-              paraIconClass="topic-icon-small";            
+              paraIconClass = "topic-icon-small";
             } else {
               paraContent = "L";
             }
 
-            if (paraType.is_topic_sent==true) {
+            if (paraType.is_topic_sent == true) {
               paraContent += "*";
-              paraIcon=topic_sent_icon_left;
+              paraIcon = topic_sent_icon_left;
             } else {
-              paraIcon=topic_left_icon;
+              paraIcon = topic_left_icon;
             }
           } else {
-            if (is_non_local==true) {
+            if (is_non_local == true) {
               paraContent = "r";
-              paraIconClass="topic-icon-small";            
+              paraIconClass = "topic-icon-small";
             } else {
               paraContent = "R";
             }
 
-            if (paraType.is_topic_sent==true) {
+            if (paraType.is_topic_sent == true) {
               paraContent += "*";
-              paraIcon=topic_sent_icon_right;
+              paraIcon = topic_sent_icon_right;
             } else {
-              paraIcon=topic_right_icon;
+              paraIcon = topic_right_icon;
             }
           }
 
-          icon=<img alt={paraContent} title={paraContent} className={paraIconClass} src={paraIcon}/>;
+          icon = (
+            <img
+              alt={paraContent}
+              title={paraContent}
+              className={paraIconClass}
+              src={paraIcon}
+            />
+          );
         }
 
-        sentenceElements.push (<div key={"topic-key-"+i+"-"+j} className="topic-type-default" onClick={(e) => this.onTopicParagraphClick (e,i,j)}>{icon}</div>);
+        sentenceElements.push(
+          <div
+            key={"topic-key-" + i + "-" + j}
+            className="topic-type-default"
+            onClick={(e) => this.onTopicParagraphClick(e, i, j)}
+          >
+            {icon}
+          </div>
+        );
       }
 
-      topicElements.push (<tr key={"topic-paragraph-key-"+i}><td style={{width: "150px"}}><div className="coherence-item" onClick={(e) => this.onTopicClick (e,i)}>{topic}</div></td><td><div className="topic-container">{sentenceElements}</div></td></tr>)
+      topicElements.push(
+        <tr key={"topic-paragraph-key-" + i}>
+          <td style={{ width: "150px" }}>
+            <div
+              className="coherence-item"
+              onClick={(e) => this.onTopicClick(e, i)}
+            >
+              {topic}
+            </div>
+          </td>
+          <td>
+            <div className="topic-container">{sentenceElements}</div>
+          </td>
+        </tr>
+      );
     }
 
-    return (topicElements);
+    return topicElements;
   }
 
   /**
-   * 
+   *
    */
-  generatePagraphControls (paraCount) {
-    let paraElements=[];
+  generatePagraphControls(paraCount) {
+    let paraElements = [];
 
-    for (let i=0;i<paraCount;i++) {
-      let paraClass="paragraph-toggle";
-      if (i==this.state.selectedParagraph) {
-        paraClass="paragraph-toggled";
+    for (let i = 0; i < paraCount; i++) {
+      let paraClass = "paragraph-toggle";
+      if (i == this.state.selectedParagraph) {
+        paraClass = "paragraph-toggled";
       }
-      paraElements.push (<div key={"key-paragraph-"+i} className={paraClass} onClick={(e) => this.onParagraphClick (e,i)}>{""+(i+1)}</div>);
+      paraElements.push(
+        <div
+          key={"key-paragraph-" + i}
+          className={paraClass}
+          onClick={(e) => this.onParagraphClick(e, i)}
+        >
+          {"" + (i + 1)}
+        </div>
+      );
     }
 
-    paraElements.push (<div key={"key-paragraph-padding"} className="paragraph-padding"></div>);
+    paraElements.push(
+      <div key={"key-paragraph-padding"} className="paragraph-padding"></div>
+    );
 
-    return (<div className="paragraph-row">{paraElements}</div>);
+    return <div className="paragraph-row">{paraElements}</div>;
   }
 
   /**
-   * 
+   *
    */
-  generateSentenceControls (paraCount) {
+  generateSentenceControls(paraCount) {
     //console.log ("generateSentenceControls ()");
 
-    let sentenceElements=[];
+    let sentenceElements = [];
 
-    if ((this.state.selectedParagraph==-1) || (this.props.data==null)) {
-      return (<div className="paragraph-row">{sentenceElements}</div>);
+    if (this.state.selectedParagraph == -1 || this.props.data == null) {
+      return <div className="paragraph-row">{sentenceElements}</div>;
     }
 
-    let topics=this.props.local [this.state.selectedParagraph].data;
-    let num_sents=0;
+    let topics = this.props.local[this.state.selectedParagraph].data;
+    let num_sents = 0;
 
-    if (topics==null) {
-      return (<div className="paragraph-row">{sentenceElements}</div>);
+    if (topics == null) {
+      return <div className="paragraph-row">{sentenceElements}</div>;
     }
 
     //console.log (topics);
 
     if (topics.num_sents) {
-      num_sents=topics.num_sents;
+      num_sents = topics.num_sents;
     } else {
-      num_sents=this.countSentences (this.state.selectedParagraph);
+      num_sents = this.countSentences(this.state.selectedParagraph);
     }
 
-    if (num_sents==0) {
-      return (<div className="paragraph-row">{sentenceElements}</div>);
-    }    
+    if (num_sents == 0) {
+      return <div className="paragraph-row">{sentenceElements}</div>;
+    }
 
-    for (let i=0;i<num_sents;i++) {      
-      let sentenceClass="paragraph-toggle";
-      if (i==this.state.selectedSentence) {
-        sentenceClass="paragraph-toggled";
+    for (let i = 0; i < num_sents; i++) {
+      let sentenceClass = "paragraph-toggle";
+      if (i == this.state.selectedSentence) {
+        sentenceClass = "paragraph-toggled";
       }
-      sentenceElements.push (<div key={"key-paragraph-"+i} className={sentenceClass} onClick={(e) => this.onSentenceClick (e,i)}>{""+(i+1)}</div>);
+      sentenceElements.push(
+        <div
+          key={"key-paragraph-" + i}
+          className={sentenceClass}
+          onClick={(e) => this.onSentenceClick(e, i)}
+        >
+          {"" + (i + 1)}
+        </div>
+      );
     }
 
-    sentenceElements.push (<div className="paragraph-padding"></div>);
+    sentenceElements.push(<div className="paragraph-padding"></div>);
 
-    return (<div className="paragraph-row">{sentenceElements}</div>);
+    return <div className="paragraph-row">{sentenceElements}</div>;
   }
 
   /**
-   * 
+   *
    */
-  render () {
-    let paraCount=this.countParagraphs ();
+  render() {
+    let paraCount = this.countParagraphs();
     let visualizationTopics;
-  	let visualizationGlobal;
+    let visualizationGlobal;
     let visualizationLocal;
-    let paragraphcontrols=this.generatePagraphControls (paraCount);
-    let sentencecontrols=this.generateSentenceControls ();
+    let paragraphcontrols = this.generatePagraphControls(paraCount);
+    let sentencecontrols = this.generateSentenceControls();
 
-    visualizationTopics=this.generateGlobalTopics (paraCount);
-    if (this.state.selectedParagraph!=-1) {
-      visualizationLocal=this.generateLocalTopics ();
+    visualizationTopics = this.generateGlobalTopics(paraCount);
+    if (this.state.selectedParagraph != -1) {
+      visualizationLocal = this.generateLocalTopics();
     }
 
-    if (this.state.selectedParagraph!=-1) {
-      return (<div className="coherence-list"><table>
-        <tbody>
-          <tr>
-            <td>Paragraphs:</td>
-            <td>{paragraphcontrols}</td>
-          </tr>
-          {visualizationTopics}          
-          {visualizationGlobal}
-          <tr>
-            <td colspan="2" className="topic-separator">{"Coherence across sentences in paragraph: " + (this.state.selectedParagraph+1)}</td>
-          </tr>
-          <tr>
-            <td>Sentences:</td>
-            <td>{sentencecontrols}</td>
-          </tr>      
-          {visualizationLocal}      
-        </tbody>
-      </table></div>);
+    if (this.state.selectedParagraph != -1) {
+      return (
+        <div className="coherence-list">
+          <table>
+            <tbody>
+              <tr>
+                <td>Paragraphs:</td>
+                <td>{paragraphcontrols}</td>
+              </tr>
+              {visualizationTopics}
+              {visualizationGlobal}
+              <tr>
+                <td colspan="2" className="topic-separator">
+                  {"Coherence across sentences in paragraph: " +
+                    (this.state.selectedParagraph + 1)}
+                </td>
+              </tr>
+              <tr>
+                <td>Sentences:</td>
+                <td>{sentencecontrols}</td>
+              </tr>
+              {visualizationLocal}
+            </tbody>
+          </table>
+        </div>
+      );
     }
 
-    return (<div className="coherence-list"><table>
-      <tbody>
-        <tr>
-          <td>Paragraphs:</td>
-          <td>{paragraphcontrols}</td>
-        </tr>
-        {visualizationTopics}        
-        {visualizationGlobal}
-      </tbody>
-    </table></div>);
+    return (
+      <div className="coherence-list">
+        <table>
+          <tbody>
+            <tr>
+              <td>Paragraphs:</td>
+              <td>{paragraphcontrols}</td>
+            </tr>
+            {visualizationTopics}
+            {visualizationGlobal}
+          </tbody>
+        </table>
+      </div>
+    );
   }
 }
 

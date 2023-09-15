@@ -1,12 +1,12 @@
 /* @fileoverview A modal for opting-in/out of scribe features */
-import * as React from 'react';
-import { Button, Form, Modal } from 'react-bootstrap';
+import * as React from "react";
+import { Button, Form, Modal } from "react-bootstrap";
 import {
   enableScribe,
   showScribeOption,
   useScribe,
   useShowScribeOption,
-} from '../../service/scribe.service';
+} from "../../service/scribe.service";
 
 export const ScribeOption = () => {
   const show = useShowScribeOption();
@@ -26,10 +26,10 @@ export const ScribeOption = () => {
           <li>ChatGPT text is (debatably) not copyrightable.</li>
         </ol>
         <p>
-          See{' '}
+          See{" "}
           <a href="https://openai.com/policies/terms-of-use">
             OpenAI&apos;s Terms of Use
-          </a>{' '}
+          </a>{" "}
           for more information.
         </p>
         <p>
@@ -43,7 +43,7 @@ export const ScribeOption = () => {
             onChange={handleChange}
             type="checkbox"
             checked={scribe}
-            label={'Enable A.I. Scribe and ChatGPT'}
+            label={"Enable A.I. Scribe and ChatGPT"}
           ></Form.Check>
         </Form>
         <Button onClick={() => showScribeOption(false)} color="secondary">

@@ -1,5 +1,4 @@
-
-import DataTools from "./DataTools";
+import { uuidv4 } from "./DataTools";
 
 /**
  * This needs to be refactored to: DocuScopeRuleCluster
@@ -9,9 +8,7 @@ export default class DocuScopeRuleChild {
    *
    */
   constructor() {
-    let dataTools = new DataTools();
-
-    this.id = dataTools.uuidv4();
+    this.id = uuidv4();
     this.name = "";
     this.description = "";
     this.examples = "";
@@ -24,8 +21,8 @@ export default class DocuScopeRuleChild {
    * For now the rule manager maintains this object in its raw form. In future versions
    * we will start parsing and processing it.
    */
-  getJSONObject () {
-    return (this.raw);
+  getJSONObject() {
+    return this.raw;
   }
 
   /**
@@ -41,22 +38,22 @@ export default class DocuScopeRuleChild {
     this.examples = anObject.examples;
 
     if (anObject.sentenceCount) {
-      this.sentenceCount=anObject.sentenceCount;
+      this.sentenceCount = anObject.sentenceCount;
     }
 
-    let topics=anObject.topics;
+    let topics = anObject.topics;
 
     if (topics) {
-      if (topics.length>0) {
-        if (!topics [0].pre_defined_topics) {
-          topics [0].pre_defined_topics=[];
+      if (topics.length > 0) {
+        if (!topics[0].pre_defined_topics) {
+          topics[0].pre_defined_topics = [];
         }
 
-        if (!topics [0].custom_topics) {
-          topics [0].custom_topics=[];
+        if (!topics[0].custom_topics) {
+          topics[0].custom_topics = [];
         }
       }
-    }     
+    }
 
     //console.log (this.raw);
   }

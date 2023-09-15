@@ -1,8 +1,8 @@
 /**
  * @fileoverview Unit testing of the CateogryTree component.
  */
-import createFetchMock from 'vitest-fetch-mock';
-import { vi } from 'vitest';
+import { vi } from "vitest";
+import createFetchMock from "vitest-fetch-mock";
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
 
@@ -15,11 +15,16 @@ import { FAKE_COMMON_DICTIONARY } from "../../testing/fake-common-dictionary";
 import Impressions from "./Impressions";
 
 beforeAll(() => {
-  fetchMocker.mockIf(/settings.json$/, (_req) => JSON.stringify({
-    common_dictionary: "https://docuscope.eberly.cmu.edu/common_dictionary",
-    tagger: "https://docuscope.eberly.cmu.edu/tagger/tag",
-  }));
-  fetchMocker.mockIf(/common_dictionary$/, JSON.stringify(FAKE_COMMON_DICTIONARY));
+  fetchMocker.mockIf(/settings.json$/, (_req) =>
+    JSON.stringify({
+      common_dictionary: "https://docuscope.eberly.cmu.edu/common_dictionary",
+      tagger: "https://docuscope.eberly.cmu.edu/tagger/tag",
+    })
+  );
+  fetchMocker.mockIf(
+    /common_dictionary$/,
+    JSON.stringify(FAKE_COMMON_DICTIONARY)
+  );
 });
 afterAll(() => {
   fetchMocker.mockClear();

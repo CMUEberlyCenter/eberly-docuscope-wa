@@ -1,4 +1,3 @@
-
 .cluster-container {
   display: flex;
   flex-direction: column;
@@ -46,15 +45,15 @@
  * Empty version of cluster-topic-editor (can be used interchangibly)
  */
 .cluster-content-right {
-  flex: 1;	
+  flex: 1;
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
 .cluster-topic-editor {
-  flex: 1;	
+  flex: 1;
   display: flex;
-  flex-direction: column;  
+  flex-direction: column;
 }
 
 .cluster-topic-input {

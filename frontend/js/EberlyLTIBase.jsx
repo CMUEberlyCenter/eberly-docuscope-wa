@@ -1,17 +1,16 @@
-import React, { Component } from 'react';
+import { Component } from "react";
 
 //import EberlyNetworkTools from './EberlyNetworkTools';
 
 var idleTime = 0;
-var tutorTimeout=5; // in minutes
-var disableCallback=null;
-var idleInterval=-1;
+var tutorTimeout = 5; // in minutes
+// var disableCallback = null;
+var idleInterval = -1;
 
 /**
- * 
+ *
  */
 class EberlyLTIBase extends Component {
-
   /**
    *
    */
@@ -21,46 +20,50 @@ class EberlyLTIBase extends Component {
     this.state = {
       scrimUp: false,
       scrimMessage: "Your session has timed out, please reload this page.",
-      scrimExtended: ""
-    }
+      scrimExtended: "",
+    };
 
     //this.networkTools=new EberlyNetworkTools ();
 
-    this.revokeTokens=this.revokeTokens.bind(this);
-    this.timerIncrement=this.timerIncrement.bind(this);
-    this.disableApp=this.disableApp.bind(this);
+    this.revokeTokens = this.revokeTokens.bind(this);
+    this.timerIncrement = this.timerIncrement.bind(this);
+    this.disableApp = this.disableApp.bind(this);
 
-    this.setIdleTimeout ();
+    this.setIdleTimeout();
   }
 
   /**
    *
    */
-  eraseCookie(name) {   
-    document.cookie = name+'=; Max-Age=-99999999;';  
+  eraseCookie(name) {
+    document.cookie = name + "=; Max-Age=-99999999;";
   }
 
   /**
    *
    */
   uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-      var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
+      /[xy]/g,
+      function (c) {
+        var r = (Math.random() * 16) | 0,
+          v = c == "x" ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      }
+    );
   }
 
   /**
    *
    */
-  setCookie(name,value,days) {
+  setCookie(name, value, days) {
     var expires = "";
     if (days) {
-        var date = new Date();
-        date.setTime(date.getTime() + (days*24*60*60*1000));
-        expires = "; expires=" + date.toUTCString();
+      var date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "") + expires + "; path=/";
   }
 
   /**
@@ -68,71 +71,75 @@ class EberlyLTIBase extends Component {
    */
   getCookie(name) {
     var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
     }
     return null;
   }
 
   /**
-  *
-  */
-  setIdleTimeout () {
+   *
+   */
+  setIdleTimeout() {
     // Increment the idle time counter every minute.
     idleInterval = setInterval(this.timerIncrement, 60000); // 1 minute or 60 * 1000 millis
 
     // Zero the idle timer on mouse movement.
-    document.addEventListener('mousemove', (e) => {
+    document.addEventListener("mousemove", (_e) => {
       //console.log ("reset idle time");
       idleTime = 0;
     });
 
-    document.addEventListener('keypress', (e) => {
+    document.addEventListener("keypress", (_e) => {
       //console.log ("reset idle time");
       idleTime = 0;
     });
   }
 
   /**
-  *
-  */
-  timerIncrement () {
-    if (idleTime<0) {
+   *
+   */
+  timerIncrement() {
+    if (idleTime < 0) {
       return;
     }
 
     idleTime = idleTime + 1;
 
-    if (idleTime > tutorTimeout) { // 20 minutes by default
-      idleTime=-1;
-      this.disableApp ();
+    if (idleTime > tutorTimeout) {
+      // 20 minutes by default
+      idleTime = -1;
+      this.disableApp();
     }
   }
 
   /**
    *
    */
-  disableApp () {
-    console.log ("disableApp ()");
+  disableApp() {
+    console.log("disableApp ()");
 
-    this.setState({
+    this.setState(
+      {
         scrimUp: true,
         scrimMessage: "Your session has timed out, please reload this page.",
-        scrimExtended: ""
-      },(e) => {
-      clearInterval (idleInterval);
-      this.revokeTokens ();
-    });
-  }  
+        scrimExtended: "",
+      },
+      (_e) => {
+        clearInterval(idleInterval);
+        this.revokeTokens();
+      }
+    );
+  }
 
   /**
    *
    */
-  revokeTokens () {
-    console.log ("revokeTokens ()");
+  revokeTokens() {
+    console.log("revokeTokens ()");
 
     //let result=this.networkTools.postData("/lti/activity/catme/revoketokens", window.settings);
     //console.log (result);

@@ -1,6 +1,6 @@
 /* @fileoverview A Modal dialog for displaying getting started help. */
-import { Modal } from "react-bootstrap";
 import * as React from "react";
+import { Modal } from "react-bootstrap";
 import {
   showGettingStarted,
   useGettingStarted,
@@ -18,5 +18,5 @@ export const GettingStartedModal = () => {
       </Modal.Body>
     </Modal>
   );
-}
+};
 export default GettingStartedModal;

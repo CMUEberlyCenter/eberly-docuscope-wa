@@ -1,6 +1,6 @@
 /* @fileoverview A Modal dialog for displaying troublshooting help. */
-import { Modal } from "react-bootstrap";
 import * as React from "react";
+import { Modal } from "react-bootstrap";
 import {
   showTroubleshooting,
   useShowTroubeshooting,
@@ -18,5 +18,5 @@ export const TroubleshootingModal = () => {
       </Modal.Body>
     </Modal>
   );
-}
+};
 export default TroubleshootingModal;

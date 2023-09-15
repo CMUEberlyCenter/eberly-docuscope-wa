@@ -1,36 +1,27 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
-import React, { useId, useState, Component, useRef, useEffect } from "react";
-import { Alert, Card, Collapse } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
+import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { ExpectationRule } from "../../service/expectations.service";
 import TabTitle from "../TabTitle/TabTitle";
 
 import "./Expectations.scss";
 
-import optionalRuleIcon from "../../../css/icons/optional_icon.png";
-import clusterActiveIcon from "../../../css/icons/active_icon.png";
-import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.png";
 import clusterUpIcon from "../../../css/icons/active_arrow_icon.png";
+import clusterActiveIcon from "../../../css/icons/active_icon.png";
 import clusterEditedIcon from "../../../css/icons/edited_icon.png";
+import clusterWarningIcon from "../../../css/icons/topic_cluster_warning_icon.png";
 
-import ClusterPanel from '../ClusterPanel/ClusterPanel';
 import TopicHighlighter from "../../TopicHighlighter";
+import ClusterPanel from "../ClusterPanel/ClusterPanel";
 
-import { upfrontValues } from "../../data/values";
-
-import { combineLatest, filter, map } from "rxjs";
 import { bind } from "@react-rxjs/core";
+import { combineLatest, filter, map } from "rxjs";
 
 import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
-import { useLockedEditorText } from "../../service/editor-state.service";
 
-import {
-  setEditorState,
-  editorText,
-  useEditorState,
-} from "../../service/editor-state.service";
+import DocuScopeRules from "../../DocuScopeRules";
 
 /*
 interface RuleProps {
@@ -97,26 +88,28 @@ const ErrorFallback = (props: { error?: Error }) => (
 );
 
 /**
- * 
+ *
  */
-const Expectations = (props: { 
-    api: apiCall,
-    ruleManager: any,
-    editorValue: string,
-    update: (a: unknown) => void;
-  }) => {
-
+const Expectations = ({
+  api,
+  ruleManager,
+  editorValue,
+}: {
+  api: apiCall;
+  ruleManager: DocuScopeRules;
+  editorValue: string;
+}) => {
   const text = useCoherenceText();
 
   //>---------------------------------------------
 
   const [disabled, setDisabled] = useState(false);
 
-  const disableTreeSelect = (doDisable:boolean) => {
-    console.log ("disableTreeSelect ("+doDisable+")");
+  const disableTreeSelect = (doDisable: boolean) => {
+    console.log("disableTreeSelect (" + doDisable + ")");
 
     setDisabled(doDisable);
-  }  
+  };
 
   //>---------------------------------------------
 
@@ -126,69 +119,77 @@ const Expectations = (props: {
     if (text !== "") {
       //setStatus("Retrieving results...");
 
-      let customTopics=props.ruleManager.getAllCustomTopics ();
-      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+      const customTopics = ruleManager.getAllCustomTopics();
+      const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
 
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
-      
+
       const encoded = encodeURIComponent(text);
 
-      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {        
-        let coherence=incoming.coherence;
-        let local=incoming.local;
+      api(
+        "ontopic",
+        {
+          custom: customTopics,
+          customStructured: customTopicsStructured,
+          base: encoded,
+        },
+        "POST"
+      );
+      // .then((incoming: any) => {
+      //   const coherence = incoming.coherence;
+      //   const local = incoming.local;
 
-        //setCoherenceData(coherence);
-        //setLocalCoherenceData(local);        
-      });
+      //   //setCoherenceData(coherence);
+      //   //setLocalCoherenceData(local);
+      // });
     }
-  }, [text, props.api]);
+  }, [text, api, ruleManager]);
 
-  const ref = useId();
+  // const ref = useId();
 
-  const [ruleState, setCurrentRuleState] = useState({currentRule: -1, currentCluster: -1});
-
-  /**
-   * 
-   */
-  const disableEditor = () => {
-    // 1. The edit toggle needs to be switched to off
-    setEditorState(false);
-
-    // 2. The update method in the parent component needs to be called
-    props.update(null);
-  }
+  const [ruleState, setCurrentRuleState] = useState({
+    currentRule: -1,
+    currentCluster: -1,
+  });
 
   /**
-   * 
+   *
    */
-  const onRuleClick = (e:any, ruleIndex: number) => {
-    console.log ("onRuleClick ("+ruleIndex+")");
+  const onRuleClick = (
+    e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    ruleIndex: number
+  ) => {
+    console.log("onRuleClick (" + ruleIndex + ")");
 
-    e.preventDefault ();
-    e.stopPropagation ();
-   
-    if (disabled==true) {
-      console.log ("Disabled!");
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (disabled == true) {
+      console.log("Disabled!");
       return;
     }
 
     //disableEditor ();
 
-    setCurrentRuleState ({currentRule: ruleIndex, currentCluster: -1});
-  }
+    setCurrentRuleState({ currentRule: ruleIndex, currentCluster: -1 });
+  };
 
   /**
-   * 
+   *
    */
-  const onClusterClick = (e:any, ruleIndex: number, clusterIndex: number) => {
-    console.log ("onClusterClick ("+ruleIndex+","+clusterIndex+")");    
+  const onClusterClick = (
+    e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    ruleIndex: number,
+    clusterIndex: number
+  ) => {
+    console.log("onClusterClick (" + ruleIndex + "," + clusterIndex + ")");
 
-    e.preventDefault ();
-    e.stopPropagation ();
+    e.preventDefault();
+    e.stopPropagation();
 
-    if (disabled==true) {
-      console.log ("Disabled!");
+    if (disabled == true) {
+      console.log("Disabled!");
       return;
     }
 
@@ -196,7 +197,7 @@ const Expectations = (props: {
 
     //let topicList=props.ruleManager.getClusterTopics (ruleIndex, clusterIndex);
 
-    let topicList=props.ruleManager.getClusterName (ruleIndex, clusterIndex);
+    const topicList = ruleManager.getClusterName(ruleIndex, clusterIndex);
 
     /*
     // Don't change context if we've found a duplicate in the current edit window
@@ -206,99 +207,165 @@ const Expectations = (props: {
     }
     */
 
-    setCurrentRuleState ({
-      currentRule: ruleIndex, 
-      currentCluster: clusterIndex
+    setCurrentRuleState({
+      currentRule: ruleIndex,
+      currentCluster: clusterIndex,
     });
- 
-    let highlighter=new TopicHighlighter ();
 
-    highlighter.highlightTopic (-1,-1,topicList);
-  }  
+    const highlighter = new TopicHighlighter();
+
+    highlighter.highlightTopic(-1, -1, topicList);
+  };
 
   /**
-   * 
+   *
    * Right now, each expectation has 2 states:
-   * 
+   *
    *   topic cluster associated with it is empty (Warning Icon)
    *   topic cluster associated with it has at least one topic (word or phrase) in it. (No Icon)
-   * 
+   *
    * In the new online version, I would like to visually differentiate the following 3 states per expectation:
-   * 
+   *
    *   topic cluster associated with it is empty (zero pre-defined topics) —> Warning Icon
    *   topic cluster associated with it has at least one pre-defined topic in it; and there are no user-defined topics. —> (No Icon)
    *   topic cluster associated with it has art least one user-defined topic in it. There may be zero or more pre-defined topics —> (New Icon)
-   * 
-   * From the user’s perspective: 
-   * 
+   *
+   * From the user’s perspective:
+   *
    *   If an expectation is in state #1, the user must enter some topics to the topic cluster.
    *   If an expectation is in state #2, the user may enter user-defined topics, but it is not required (thus no Icon).
    *   If an expectation is in state #3, the user is reminded that the expectation’s topic cluster has been customized by them.
-   * 
+   *
    */
-  const createRuleTree = (ruleManager: any, currentRule: number, currentCluster: number) => {
-    let listElements=[];
+  const createRuleTree = (
+    ruleManager: DocuScopeRules,
+    currentRule: number,
+    currentCluster: number
+  ) => {
+    const listElements = [];
 
-    for (let i=0;i<ruleManager.rules.length;i++) {
-      let aRule:any=ruleManager.rules [i];
-      let clusterList=[];
-          
-      for (let j=0;j<aRule.children.length;j++) {
-        let clustercount=<img className="cluster-mini-icon" src={clusterWarningIcon}/>;
-        let aCluster=aRule.children [j];
-        let id="rule-"+i+"-"+j;
+    for (let i = 0; i < ruleManager.rules.length; i++) {
+      const aRule: any = ruleManager.rules[i];
+      const clusterList = [];
 
-        let clusterClass="cluster-line";
+      for (let j = 0; j < aRule.children.length; j++) {
+        let clustercount = (
+          <img className="cluster-mini-icon" src={clusterWarningIcon} />
+        );
+        const aCluster = aRule.children[j];
+        const id = "rule-" + i + "-" + j;
 
-        if ((i==currentRule) && (j==currentCluster)) {
-          clusterClass="cluster-line cluster-selected";
+        let clusterClass = "cluster-line";
+
+        if (i == currentRule && j == currentCluster) {
+          clusterClass = "cluster-line cluster-selected";
         }
 
-        let predefCount=ruleManager.getClusterTopicCountPredefined (i,j);
-        let customCount=ruleManager.getClusterTopicCountCustom (i,j);
+        const predefCount = ruleManager.getClusterTopicCountPredefined(i, j);
+        const customCount = ruleManager.getClusterTopicCountCustom(i, j);
 
-        if (predefCount>0) {
-          clustercount=<div className="cluster-mini-icon" />;
+        if (predefCount > 0) {
+          clustercount = <div className="cluster-mini-icon" />;
         }
 
-        if (customCount>0) {
-          clustercount=<img className="cluster-mini-icon" src={clusterEditedIcon}/>;
+        if (customCount > 0) {
+          clustercount = (
+            <img className="cluster-mini-icon" src={clusterEditedIcon} />
+          );
         }
 
-        let upDog=<img className="cluster-up-arrow" src={clusterUpIcon}/>;
+        let upDog = <img className="cluster-up-arrow" src={clusterUpIcon} />;
 
-        let count=ruleManager.topicSentenceCount (i,j);
-        let topicsentencecount=("0" + count).slice(-2); // Format 2 digits so that the vertical alignment always works out
+        const count = ruleManager.topicSentenceCount(i, j);
+        const topicsentencecount = ("0" + count).slice(-2); // Format 2 digits so that the vertical alignment always works out
 
-        if (count>0) {
-          upDog=<img className="cluster-up-arrow" style={{visibility: "hidden"}} src={clusterUpIcon}/>;          
-        } else {
-
+        if (count > 0) {
+          upDog = (
+            <img
+              className="cluster-up-arrow"
+              style={{ visibility: "hidden" }}
+              src={clusterUpIcon}
+            />
+          );
+          // } else {
         }
 
-        clusterList.push (<li className="expectations-cluster" key={"cluster-"+i+"-"+j} id={id} onClick={(e) => onClusterClick (e,i,j)}>
-          <div className={clusterClass}>
-            <div className="cluster-line-label">{aCluster.name}</div>
-            <div className="cluster-line-icon" title="Custom topics not defined here">{clustercount}</div>
-            <div className="cluster-line-icon" title="Current expectation value"><img className="cluster-mini-icon" src={clusterActiveIcon}/></div>
-            <div className="cluster-mini-label">Expected</div>
-            <div className="cluster-line-icon">{upDog}</div>
-            <div className="cluster-mini-label" title="Nr. sentences matching topics">{topicsentencecount}</div>
-          </div>
-        </li>);
+        clusterList.push(
+          <li
+            className="expectations-cluster"
+            key={"cluster-" + i + "-" + j}
+            id={id}
+            onClick={(e) => onClusterClick(e, i, j)}
+          >
+            <div className={clusterClass}>
+              <div className="cluster-line-label">{aCluster.name}</div>
+              <div
+                className="cluster-line-icon"
+                title="Custom topics not defined here"
+              >
+                {clustercount}
+              </div>
+              <div
+                className="cluster-line-icon"
+                title="Current expectation value"
+              >
+                <img className="cluster-mini-icon" src={clusterActiveIcon} />
+              </div>
+              <div className="cluster-mini-label">Expected</div>
+              <div className="cluster-line-icon">{upDog}</div>
+              <div
+                className="cluster-mini-label"
+                title="Nr. sentences matching topics"
+              >
+                {topicsentencecount}
+              </div>
+            </div>
+          </li>
+        );
       }
 
-      let subRules=<ol type="1" className="expectations-clusters">{clusterList}</ol>
+      const subRules = (
+        <ol type="1" className="expectations-clusters">
+          {clusterList}
+        </ol>
+      );
 
-      listElements.push (<li className="expectations-rule" key={"rule"+i} id={"rule-"+i} onClick={(e) => onRuleClick (e,i)}><div className="expectations-rule-selected">{aRule.name}</div>{subRules}</li>)    
+      listElements.push(
+        <li
+          className="expectations-rule"
+          key={"rule" + i}
+          id={"rule-" + i}
+          onClick={(e) => onRuleClick(e, i)}
+        >
+          <div className="expectations-rule-selected">{aRule.name}</div>
+          {subRules}
+        </li>
+      );
     }
 
-    return (<ol type="a" className="expectations-list">{listElements}</ol>);
-  }
+    return (
+      <ol type="a" className="expectations-list">
+        {listElements}
+      </ol>
+    );
+  };
 
-  const ruleTree = createRuleTree (props.ruleManager, ruleState.currentRule, ruleState.currentCluster);
+  const ruleTree = createRuleTree(
+    ruleManager,
+    ruleState.currentRule,
+    ruleState.currentCluster
+  );
 
-  const clusterpanel = <ClusterPanel api={props.api} ruleManager={props.ruleManager} currentRule={ruleState.currentRule} currentCluster={ruleState.currentCluster} editorValue={props.editorValue} disableTreeSelect={disableTreeSelect} />;
+  const clusterpanel = (
+    <ClusterPanel
+      api={api}
+      ruleManager={ruleManager}
+      currentRule={ruleState.currentRule}
+      currentCluster={ruleState.currentCluster}
+      editorValue={editorValue}
+      disableTreeSelect={disableTreeSelect}
+    />
+  );
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -307,7 +374,7 @@ const Expectations = (props: {
       </Card.Header>
       <Card.Body className="overflow-auto">
         <Subscribe>
-          <Card.Title>{props.ruleManager.name}</Card.Title>
+          {/* <Card.Title>{ruleManager.name}</Card.Title> name is undefined */}
           <Card.Text>
             Respond to the following questions to meet the readers&apos;
             expectations. The sentences that you write to respond to each
@@ -316,7 +383,7 @@ const Expectations = (props: {
             in your draft that most likely match these expectations.
           </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-          {ruleTree}
+            {ruleTree}
           </ErrorBoundary>
         </Subscribe>
         {clusterpanel}

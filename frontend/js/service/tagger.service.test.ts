@@ -1,5 +1,5 @@
-import createFetchMock from 'vitest-fetch-mock';
 import { vi } from 'vitest';
+import createFetchMock from 'vitest-fetch-mock';
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
 
@@ -15,11 +15,11 @@ import {
 import { currentTool } from './current-tool.service';
 import { editorText, setEditorState } from './editor-state.service';
 import {
-  taggerResults$,
   TaggerResults,
-  isTaggerResult,
   gen_patterns_map,
+  isTaggerResult,
   tag,
+  taggerResults$,
 } from './tagger.service';
 //import { MockEvent, EventSource } from 'mocksse';
 

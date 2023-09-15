@@ -7,13 +7,14 @@ import { Alert, Card } from "react-bootstrap";
 
 import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, filter, map } from "rxjs";
-import { sentenceData } from "../../data/sentencedata";
+// import { sentenceData } from "../../data/sentencedata";
 
 import DocuScopeOnTopic from "../../DocuScopeOnTopic";
 import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
 
+import DocuScopeRules from "../../DocuScopeRules";
 import "./Clarity.scss";
 
 // On locking with text and tool is clarity, then emit text.
@@ -33,45 +34,62 @@ const ClarityErrorFallback = (props: { error?: Error }) => (
   </Alert>
 );
 
-const Clarity = (props: { 
-    api: apiCall,
-    ruleManager: any,
-    htmlSentences: string
-  }) => {
+const Clarity = ({
+  api,
+  ruleManager,
+  htmlSentences,
+}: {
+  api: apiCall;
+  ruleManager: DocuScopeRules;
+  htmlSentences: string;
+}) => {
   const [status, setStatus] = useState("");
   const [data, setClarityData] = useState<unknown>(null);
   const text = useClarityText();
 
   /**
-   * 
+   *
    */
   useEffect(() => {
-    console.log ("useEffect ()");
+    console.log("useEffect ()");
 
-    if (text !== "") {    
+    if (text !== "") {
       setStatus("Retrieving results...");
-      
-      let customTopics=props.ruleManager.getAllCustomTopics ();
-      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+
+      const customTopics = ruleManager.getAllCustomTopics();
+      const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
 
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
-      
+
       const encoded = encodeURIComponent(text);
 
-      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
-        const clarityData=incoming.clarity;
+      api(
+        "ontopic",
+        {
+          custom: customTopics,
+          customStructured: customTopicsStructured,
+          base: encoded,
+        },
+        "POST"
+      ).then((incoming: any) => {
+        const clarityData = incoming.clarity;
 
         setClarityData(clarityData);
 
         setStatus("Data retrieved");
       });
-    }    
-  }, [text, props.api]);
+    }
+  }, [text, api, ruleManager]);
 
-  let visualization;
-
-  visualization=<DocuScopeOnTopic setStatus={setStatus} sentences={data} text={text} htmlSentences={props.htmlSentences}/>;
+  const visualization = (
+    <DocuScopeOnTopic
+      setStatus={setStatus}
+      sentences={data}
+      text={text}
+      htmlSentences={htmlSentences}
+    />
+  );
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -80,9 +98,7 @@ const Clarity = (props: {
       </Card.Header>
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-          <Suspense>
-          {visualization}
-          </Suspense>
+          <Suspense>{visualization}</Suspense>
         </ErrorBoundary>
       </Card.Body>
       <Card.Footer>Status: {status}</Card.Footer>

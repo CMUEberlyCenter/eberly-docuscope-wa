@@ -13,4 +13,3 @@ type apiCall = (
   data: unknown,
   method: 'POST' | 'GET'
 ) => Promise<unknown>;
-

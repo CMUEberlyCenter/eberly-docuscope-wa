@@ -1,5 +1,5 @@
+import { uuidv4 } from "./DataTools";
 import DocuScopeRuleChild from "./DocuScopeRuleChild";
-import DataTools from "./DataTools";
 
 /**
  *
@@ -9,9 +9,7 @@ export default class DocuScopeRule {
    *
    */
   constructor() {
-    let dTools = new DataTools();
-
-    this.id = dTools.uuidv4();
+    this.id = uuidv4();
     this.name = "unassigned";
     this.description = "unassigned";
     this.type = "unassigned";
@@ -23,34 +21,25 @@ export default class DocuScopeRule {
   /**
    *
    */
-  getJSONObject () {
-    let aRule={};
-
-    aRule.id = this.id;
-    aRule.name = this.name;
-    aRule.description = this.description;
-    aRule.type = this.type;
-    aRule.is_group = this.is_group;
-    aRule.cv_description = this.cv_description;
-
-    aRule.children = [];
-
-    for (let i=0;i<this.children.length;i++) {
-      let aClusterObject=this.children [i];
-      let aTopicCluster=aClusterObject.getJSONObject ();
-      aRule.children.push (aTopicCluster);
-    }
-
-    return (aRule);
+  getJSONObject() {
+    return {
+      id: this.id,
+      name: this.name,
+      description: this.description,
+      type: this.type,
+      is_group: this.is_group,
+      cv_description: this.cv_description,
+      children: this.children.map((topic) => topic.getJSONObject()),
+    };
   }
 
   /**
    *
    */
   parse(anObject) {
-    console.log ("parse ()");
+    console.log("parse ()");
 
-    this.raw = anObject; // We will need to make sure we can remove this since everything should be wrapped    
+    this.raw = anObject; // We will need to make sure we can remove this since everything should be wrapped
 
     this.name = anObject.name;
     this.description = anObject.description;

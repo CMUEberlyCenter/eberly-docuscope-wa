@@ -1,4 +1,3 @@
-
 .coherence-table {
   padding: 0px;
   margin: 0px;
@@ -47,11 +46,11 @@
 }
 
 .paragraph-toggle:hover {
-  background-color: #E2D2BB;
+  background-color: #e2d2bb;
 }
 
 .paragraph-toggled {
-  background-color: #E2D2BB;
+  background-color: #e2d2bb;
   border: 1px solid gray;
   border-radius: 2px;
   width: 24px;
@@ -73,13 +72,13 @@
 
 .topic-separator {
   /* height: 10px; */
-  background-color: rgba(0,0,0,.03);
+  background-color: rgba(0, 0, 0, 0.03);
   padding: 3px;
 }
 
 .topic-container {
   display: flex;
-  flex-direction: row;  
+  flex-direction: row;
 }
 
 .topic-type-default {

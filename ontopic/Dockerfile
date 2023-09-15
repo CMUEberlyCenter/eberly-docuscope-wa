@@ -1,5 +1,5 @@
 # Regular image
-FROM python:3.7
+FROM docker.io/python:3.7
 # Small footprint image
 #FROM python:3.7-alpine
 

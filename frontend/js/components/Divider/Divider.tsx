@@ -15,8 +15,7 @@
  *  - mousemove
  *  - touchmove
  */
-import React from "react";
-import { HTMLProps } from "react";
+import React, { HTMLProps } from "react";
 import "./Divider.scss";
 
 const Divider = (props: HTMLProps<HTMLDivElement>) => (

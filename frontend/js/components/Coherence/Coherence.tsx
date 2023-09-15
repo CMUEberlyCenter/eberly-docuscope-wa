@@ -7,18 +7,19 @@ import React, { useEffect, useId, useState } from "react";
 
 import { Card, Col, Container, Row } from "react-bootstrap";
 
-import { combineLatest, filter, map } from "rxjs";
 import { bind } from "@react-rxjs/core";
+import { combineLatest, filter, map } from "rxjs";
 
 import { currentTool$ } from "../../service/current-tool.service";
 import { lockedEditorText$ } from "../../service/editor-state.service";
 import TabTitle from "../TabTitle/TabTitle";
 
-import { useLockedEditorText } from "../../service/editor-state.service";
+// import { useLockedEditorText } from "../../service/editor-state.service";
 
-import "./Coherence.scss";
 import CoherencePanel from "../CoherencePanel/CoherencePanel";
-import TopicHighlighter from "../../TopicHighlighter";
+import "./Coherence.scss";
+// import TopicHighlighter from "../../TopicHighlighter";
+import DocuScopeRules from "../../DocuScopeRules";
 
 /** Legend for data representation for these tools. */
 const Legend = () => (
@@ -34,21 +35,27 @@ const Legend = () => (
       <Col>
         <span
           className="text-nowrap"
-          title="A solid circle with a small circle in the upper left corner.">
+          title="A solid circle with a small circle in the upper left corner."
+        >
           <i
             className="fa-solid fa-circle text-legend"
-            style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}></i>
+            style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}
+          ></i>
           <i className="fa-solid fa-circle text-legend"></i>
         </span>{" "}
         Topic before the main verb of a topic sentence
       </Col>
       <Col>
-        <i className="fa-regular fa-circle text-legend"
-          title="An empty circle."></i>
+        <i
+          className="fa-regular fa-circle text-legend"
+          title="An empty circle."
+        ></i>
         Topic after the main verb
       </Col>
       <Col>
-        <span className="border rounded px-1 border-2" title="A boxed number.">1</span>{" "}
+        <span className="border rounded px-1 border-2" title="A boxed number.">
+          1
+        </span>{" "}
         Paragraph/Sentence number
       </Col>
     </Row>
@@ -67,22 +74,25 @@ const [useCoherenceText /*coherenceText$*/] = bind(
 );
 
 /**
- * 
+ *
  */
-const Coherence = (props: { 
-    api: apiCall,
-    ruleManager: any
-  }) => {
+const Coherence = ({
+  api,
+  ruleManager,
+}: {
+  api: apiCall;
+  ruleManager: DocuScopeRules;
+}) => {
   // api passed through on assumption that it will be used in submission.
   const toggleId = useId();
 
-  const topicHighlighter=new TopicHighlighter ();
+  // const topicHighlighter = new TopicHighlighter();
 
   const [status, setStatus] = useState("");
   const [showToggle, setShowToggle] = useState(true);
   const [data, setCoherenceData] = useState<unknown>(null);
   const [local, setLocalCoherenceData] = useState<unknown>(null);
-  
+
   const text = useCoherenceText();
 
   useEffect(() => {
@@ -91,21 +101,29 @@ const Coherence = (props: {
     if (text !== "") {
       //setStatus("Retrieving results...");
 
-      let customTopics=props.ruleManager.getAllCustomTopics ();
-      let customTopicsStructured=props.ruleManager.getAllCustomTopicsStructured ();
+      const customTopics = ruleManager.getAllCustomTopics();
+      const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
 
-      // 2. Prep the text 
+      // 2. Prep the text
 
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
-      
+
       const encoded = encodeURIComponent(text);
 
-      props.api("ontopic", { custom: customTopics, customStructured: customTopicsStructured, base: encoded }, "POST").then((incoming : any) => {
+      api(
+        "ontopic",
+        {
+          custom: customTopics,
+          customStructured: customTopicsStructured,
+          base: encoded,
+        },
+        "POST"
+      ).then((incoming: any) => {
         //console.log ("Processing incoming coherence data ...");
-        
-        let coherence=incoming.coherence;
-        let local=incoming.local;
+
+        const coherence = incoming.coherence;
+        const local = incoming.local;
 
         setCoherenceData(coherence);
         setLocalCoherenceData(local);
@@ -113,11 +131,7 @@ const Coherence = (props: {
         setStatus("Data retrieved");
       });
     }
-  }, [text, props.api]);
-
-  let visualization;
-
-  visualization=<CoherencePanel setStatus={setStatus} data={data} local={local} text={text} showglobal={showToggle} ruleManager={props.ruleManager}/>;  
+  }, [text, api, ruleManager]);
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -141,8 +155,11 @@ const Coherence = (props: {
             <span>Coherence across paragraphs</span>
             <div
               className="d-flex align-items-start"
-              onChange={() => setShowToggle(!showToggle)}>
-              <label className="form-check-label me-1" htmlFor={toggleId}>Show only topic clusters:</label>
+              onChange={() => setShowToggle(!showToggle)}
+            >
+              <label className="form-check-label me-1" htmlFor={toggleId}>
+                Show only topic clusters:
+              </label>
               <div className="form-check form-switch">
                 <input
                   onChange={() => {}}
@@ -156,7 +173,16 @@ const Coherence = (props: {
             </div>
           </Card.Header>
 
-          <Card.Body>{visualization}</Card.Body>
+          <Card.Body>
+            <CoherencePanel
+              setStatus={setStatus}
+              data={data}
+              local={local}
+              text={text}
+              showglobal={showToggle}
+              ruleManager={ruleManager}
+            />
+          </Card.Body>
         </Card>
         <Card>
           <Card.Header>Topic Cluster</Card.Header>

@@ -19,8 +19,8 @@ export default class DocuScopeWAScrim extends Component {
   render() {
     let scrimup;
 
-    if (this.props.enabled==true) {
-      scrimup=<div className="editor-scrim"></div>;
+    if (this.props.enabled == true) {
+      scrimup = <div className="editor-scrim"></div>;
     }
 
     return (
