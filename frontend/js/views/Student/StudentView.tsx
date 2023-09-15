@@ -80,6 +80,8 @@ import type DocuScopeRules from '../../DocuScopeRules';
 import { serialize } from '../../service/editor-state.service';
 
 import { DocuScopeConfig } from '../../global';
+import { showScribeOption } from '../../service/scribe.service';
+import { ScribeOption } from '../../components/ScribeOption/ScribeOption';
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -317,8 +319,13 @@ const StudentView = (props: {
     //   return;
     // }
 
-    if (eventKey === "showAbout") {
+    if (eventKey === 'showAbout') {
       setShowAbout(true);
+      return;
+    }
+
+    if (eventKey === 'showScribeOption') {
+      showScribeOption(true);
       return;
     }
 
@@ -542,7 +549,7 @@ const StudentView = (props: {
               <Nav className="me-auto" onSelect={onNavSelect}>
                 <Nav.Link eventKey={'resetData'}>Reset</Nav.Link>
                 <NavDropdown title="View" menuVariant="dark">
-                  <Form className='m-2'>
+                  <Form className="m-2">
                     <Form.Label>Editor Font Size: {zoom}%</Form.Label>
                     <Form.Range
                       min={10}
@@ -566,6 +573,9 @@ const StudentView = (props: {
                   </NavDropdown.Item> */}
                   <NavDropdown.Item eventKey={'showAbout'}>
                     About
+                  </NavDropdown.Item>
+                  <NavDropdown.Item eventKey={'showScribeOption'}>
+                    A.I. Scribe
                   </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
@@ -693,6 +703,7 @@ const StudentView = (props: {
         </div>
       </footer>
       {about}
+      <ScribeOption />
       {/* <HelpModal />
       <GettingStartedModal />
       <TroubleshootingModal /> */}
