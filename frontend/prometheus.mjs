@@ -1,6 +1,6 @@
 
 //https://www.npmjs.com/package/systeminformation
-const si = require ('systeminformation');
+import { mem, time } from 'systeminformation';
 
 /**
  *
@@ -22,7 +22,7 @@ class PrometheusMetrics {
     this.METRIC_TYPE_UNTYPED = "untyped";
 
     this.memory=null;
-    this.memoryDriver=si.mem();
+    this.memoryDriver=mem();
 
     this.updateValues=this.updateValues.bind (this);
 
@@ -33,7 +33,7 @@ class PrometheusMetrics {
    *
    */
   updateValues () {
-    this.memoryDriver=si.mem();
+    this.memoryDriver=mem();
     this.memoryDriver.then(memory => {
       this.memory=memory;
     });    
@@ -100,7 +100,7 @@ class PrometheusMetrics {
   build () {
     let formatted="";
 
-    let uptime=si.time();
+    let uptime=time();
 
     for (let i=0;i<this.metricTracker.length;i++) {
       let tempMetric=this.metricTracker[i];
@@ -129,4 +129,4 @@ class PrometheusMetrics {
 }
 
 //export default PrometheusMetrics;
-module.exports = PrometheusMetrics;
+export default PrometheusMetrics;

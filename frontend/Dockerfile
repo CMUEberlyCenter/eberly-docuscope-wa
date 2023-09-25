@@ -1,5 +1,5 @@
 #FROM node:latest
-FROM node:16.17
+FROM docker.io/node:latest
 
 # ENV NODE_ENV=production
 
@@ -16,7 +16,7 @@ WORKDIR /app
 
 RUN npm config set color false
 
-RUN npm install --loglevel info --color=false
+RUN npm ci --loglevel info --color=false
 
 RUN sed -e "s/<now>/$(date)/g" < ./js/global.ts.template > ./js/global.ts
 
