@@ -10,12 +10,12 @@
 import process from "node:process";
 import PrometheusMetrics from "./prometheus.mjs";
 
-import { createPool } from "mysql2";
+import cors from "cors";
 import express from "express";
+import fileUpload from "express-fileupload";
 import { readFileSync } from "fs";
 import { request } from "http";
-import cors from "cors";
-import fileUpload from "express-fileupload";
+import { createPool } from "mysql2";
 //const fetch = require('node-fetch');
 
 import "dotenv/config";
@@ -24,9 +24,9 @@ import { OpenAI } from "openai";
 import format from "string-format";
 import info from "./package.json" assert { type: "json" };
 
+import { open } from "node:fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
-import { open } from "node:fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -53,24 +53,6 @@ var dbCallback = null;
  *
  */
 class DocuScopeWALTIService {
-  get defaultRuleFilename() {
-    return path.join(__dirname, this.staticHome, "dswa.json");
-  }
-  /**
-   * 
-   * @returns {Promise<any>}
-   */
-  async getDefaultRuleData() {
-    try {
-      const file = await open(this.defaultRuleFilename);
-      const ruleFile = await file.readFile({ encoding: 'utf8' });
-      await file.close();
-      return JSON.parse(ruleFile);
-    } catch (err) {
-      console.log(err.message);
-      return {};
-    }
-  }
   /**
    *
    */
@@ -120,9 +102,9 @@ class DocuScopeWALTIService {
 
     console.log(
       "Configured the OnTopic backend url to be: " +
-      this.backendHost +
-      ":" +
-      this.backendPort
+        this.backendHost +
+        ":" +
+        this.backendPort
     );
 
     this.token = this.uuidv4();
@@ -171,20 +153,37 @@ class DocuScopeWALTIService {
 
   /**
    *
+   * @returns {Promise<any>}
+   */
+  async getDefaultRuleData() {
+    try {
+      const filename = path.join(__dirname, this.staticHome, "dswa.json");
+      const file = await open(filename);
+      const ruleFile = await file.readFile({ encoding: "utf8" });
+      await file.close();
+      return JSON.parse(ruleFile);
+    } catch (err) {
+      console.log(err.message);
+      return {};
+    }
+  }
+
+  /**
+   *
    */
   initDBService(cb) {
     console.log(
       "initDBService (retry:" +
-      onTopicDBRetry +
-      " of max " +
-      onTopicDBMaxRetry +
-      ")"
+        onTopicDBRetry +
+        " of max " +
+        onTopicDBMaxRetry +
+        ")"
     );
     console.log(
       "Creating db connection: " +
-      process.env.DB_HOST +
-      ":" +
-      process.env.DB_PORT
+        process.env.DB_HOST +
+        ":" +
+        process.env.DB_PORT
     );
 
     dbCallback = cb;
@@ -196,6 +195,7 @@ class DocuScopeWALTIService {
       user: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
       debug: false,
+      timezone: "UTC", // Makes TIMESTAMP work correctly
     });
 
     this.dbConn = this.dbPool;
@@ -215,8 +215,8 @@ class DocuScopeWALTIService {
       if (err) {
         console.log(
           "Can't connect to database yet, entering retry ... ('" +
-          err.message +
-          "')"
+            err.message +
+            "')"
         );
         onTopicDBRetry++;
         if (onTopicDBRetry > onTopicDBMaxRetry) {
@@ -274,97 +274,143 @@ class DocuScopeWALTIService {
 
   /**
    * Retrieve the list of configuration files and their meta-data
-   * @param {Request} _request 
-   * @param {Response} response 
+   * @param {Request} _request
+   * @param {Response} response
    */
   async getFiles(_request, response) {
     try {
-      const [rows,] = await this.dbConn.promise().query(
-        "SELECT BIN_TO_UUID(id) AS id, filename, date, JSON_EXTRACT(data, '$.info') AS info FROM dswa.files;");
-      //const files = result.map(d => ({ ...d, info: JSON.parse(decodeURIComponent(atob(d.info))) }));
+      const [rows] = await this.dbConn
+        .promise()
+        .query(
+          "SELECT BIN_TO_UUID(id) AS id, filename, date, JSON_EXTRACT(data, '$.info') AS info FROM dswa.files;"
+        );
       response.json(this.generateDataMessage(rows));
     } catch (err) {
-      response?.json(this.generateErrorMessage(err.message));
       console.error(err.message);
+      response.sendStatus(500);
     }
   }
 
   /**
    *
    * @param {Request} request
-   * @param {Response} response 
-   * @param {string?} aCourseId 
+   * @param {Response} response
+   * @param {string?} aCourseId
    */
   async getFile(request, response, aCourseId) {
     const course_id = aCourseId ?? request.query.course_id;
     try {
-      const [rows,] = await this.dbConn.promise().query(`SELECT data FROM dswa.files
-       WHERE id=(SELECT fileid FROM dswa.assignments WHERE id=?)`, [course_id]);
-      if (rows.length <= 0) { throw new Error("File data not found for assignment"); }
+      const [rows] = await this.dbConn.promise().query(
+        `SELECT data FROM dswa.files
+       WHERE id=(SELECT fileid FROM dswa.assignments WHERE id=?)`,
+        [course_id]
+      );
+      if (rows.length <= 0) {
+        throw new Error("File data not found for assignment");
+      }
       response.json(this.generateDataMessage(rows[0]));
     } catch (err) {
       console.err(err);
+      response.sendStatus(500);
+    }
+  }
+
+  /**
+   *
+   * @param {Request} request
+   * @param {Response} response
+   */
+  async getFileIdFromCourse(request, response) {
+    const { course_id } = request.query;
+    if (!course_id) {
+      console.warn("No course id in request.");
+      response.sendStatus(404);
+      return;
+    }
+    if (course_id === "global") {
+      this.sendDefaultFile(request, response);
+      return;
+    }
+    try {
+      const [rows] = await this.dbConn
+        .promise()
+        .query(
+          `SELECT BIN_TO_UUID(fileid) AS fileid FROM dswa.assignments WHERE id='${course_id}'`
+        );
+      const data = rows.at(0);
+      if (data) {
+        response.json(this.generateDataMessage(data));
+      } else {
+        response.sendStatus(404);
+      }
+    } catch (err) {
+      console.error(err);
+      response.sendStatus(500);
+    }
+  }
+
+  /**
+   *
+   * @param {Request} _request
+   * @param {Response} response
+   */
+  async sendDefaultFile(_request, response) {
+    try {
+      const ruleData = await this.getDefaultRuleData();
+      response.json(this.generateDataMessage(ruleData));
+    } catch (err) {
       response.json(this.generateErrorMessage(err.message));
     }
   }
 
   /**
    *
-   * @param {Request} request 
+   * @param {Request} _request
    * @param {Response} response
+   * @param {string} aFilename
+   * @param {string} aDate
+   * @param {*} aJSONObject
    */
-  async getFileIdFromCourse(request, response) {
-    const course_id = request.query.course_id;
+  async storeFile(_request, response, aFilename, aDate, aJSONObject) {
     try {
-      let data = { fileid: 'global' };
-      if (course_id !== 'global') {
-        const [rows,] = await this.dbConn.promise().query(
-          `SELECT BIN_TO_UUID(fileid) AS fileid FROM dswa.assignments WHERE id='${course_id}'`);
-        data = rows.at(0) ?? data;
-      }
-      response.json(this.generateDataMessage(data));
+      const data = JSON.stringify(aJSONObject);
+      await this.dbConn
+        .promise()
+        .query(`INSERT INTO dswa.files (filename, data) VALUES(?, ?)`, [
+          aFilename,
+          data,
+        ]);
+      response.json(
+        this.generateDataMessage({
+          filename: aFilename,
+          date: aDate,
+        })
+      );
     } catch (err) {
-      console.error(err);
+      response.status(500).send(err.message);
     }
   }
 
   /**
    *
-   * @param {Request} _request 
-   * @param {Response} response
+   * @param {Request} request
+   * @param {Response} _response
    */
-  async sendDefaultFile(_request, response) {
-    const ruleData = await this.getDefaultRuleData();
-    response.json(this.generateDataMessage(ruleData));
-  }
-
-  /**
-   *
-   */
-  async storeFile(_request, response, aFilename, aDate, aJSONObject) {
-    const data = JSON.stringify(aJSONObject);
-    await this.dbConn.promise().query(`INSERT INTO dswa.files (filename, data) VALUES(?, ?)`, [aFilename, data]);
-    response.json(
-      this.generateDataMessage({
-        filename: aFilename,
-        date: aDate,
-      })
-    );
-  }
-
-  /**
-   *
-   */
-  processCourseFileAssignment(request, _response) {
+  processCourseFileAssignment(request, response) {
     const { course_id, id } = request.query;
-
     console.log("Assigning " + id + " to course: " + course_id);
-
-    return this.dbConn.promise().query(
-      `INSERT INTO dswa.assignments (id, fileid)
-       VALUES (?, UUID_TO_BIN(?))
-       ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
-      [course_id, id, id]);
+    try {
+      this.dbConn.promise().query(
+        `INSERT INTO dswa.assignments (id, fileid)
+         VALUES (?, UUID_TO_BIN(?))
+         ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
+        [course_id, id, id]
+      );
+      response.sendStatus(200);
+    } catch (err) {
+      console.error(err.message);
+      response.sendStatus(500);
+    }
   }
 
   /**
@@ -459,7 +505,7 @@ class DocuScopeWALTIService {
 
   /**
    *
-   * @param {Request} request 
+   * @param {Request} request
    */
   generateSettingsObject(request) {
     const token = this.generateAccessToken("dummy");
@@ -723,7 +769,9 @@ class DocuScopeWALTIService {
           //response.render('main', { html: html });
           response.send(html);
         } else {
-          response.sendFile(path.join(__dirname, this.staticHome, "nolti.html"));
+          response.sendFile(
+            path.join(__dirname, this.staticHome, "nolti.html")
+          );
         }
 
         return;
@@ -865,36 +913,46 @@ class DocuScopeWALTIService {
   }
 
   /**
-   * 
-   * @param {string} assignment 
+   *
+   * @param {string} assignment
    * @param {'note_to_prose_propmt'|'clarity_prompt'|'grammar'} prompt
    * @returns {Promise<{genre: string, prompt: string}>}
    */
   async getPrompt(assignment, prompt) {
-    if (!['notes_to_prose_prompt', 'clarity_prompt', 'grammar'].includes(prompt)) {
-      console.error('Not a valid prompt!');
-      return { genre: '', prompt: '' };
+    if (
+      !["notes_to_prose_prompt", "clarity_prompt", "grammar"].includes(prompt)
+    ) {
+      console.error("Not a valid prompt!");
+      return { genre: "", prompt: "" };
     }
     try {
-      if (!assignment) { throw new Error('No assignment for rule data fetch.'); }
-      const [rows,] = await this.dbConn.promise().query(
+      if (!assignment) {
+        throw new Error("No assignment for rule data fetch.");
+      }
+      const [rows] = await this.dbConn.promise().query(
         `SELECT
          JSON_EXTRACT(data, '$.rules.name') AS genre,
          JSON_EXTRACT(data, '$.prompt_templates.${prompt}') AS prompt 
          FROM files
          WHERE id=(SELECT fileid FROM assignments
-          WHERE id="${assignment}")`);
-      if (rows.length <= 0) { throw new Error('File lookup error!'); }
+          WHERE id="${assignment}")`
+      );
+      if (rows.length <= 0) {
+        throw new Error("File lookup error!");
+      }
       return rows.at(0);
     } catch (err) {
       console.error(err);
-      console.warn('Using default data.');
+      console.warn("Using default data.");
       try {
         const data = await this.getDefaultRuleData();
-        return { genre: data.rules.name, prompt: data.prompt_templates[prompt] };
+        return {
+          genre: data.rules.name,
+          prompt: data.prompt_templates[prompt],
+        };
       } catch (err) {
         console.error(err.message);
-        return { genre: '', prompt: '' };
+        return { genre: "", prompt: "" };
       }
     }
   }
@@ -979,7 +1037,10 @@ class DocuScopeWALTIService {
 
     this.app.post("/api/v1/scribe/convert_notes", async (request, response) => {
       const { course_id, notes } = request.body;
-      const { genre, prompt } = await this.getPrompt(course_id, "notes_to_prose_prompt");
+      const { genre, prompt } = await this.getPrompt(
+        course_id,
+        "notes_to_prose_prompt"
+      );
       // const prompt = data?.prompt_templates?.notes_to_prose_prompt
       //   ?? `I am writing a {genre}, and I want you to generate prose from notes included using the following guidelines.
 
@@ -1004,7 +1065,7 @@ class DocuScopeWALTIService {
         response.json({});
         return;
       }
-      const content = format(prompt, { genre, notes, });
+      const content = format(prompt, { genre, notes });
       const prose = await openai.chat.completions.create({
         messages: [
           { role: "system", content: "You are a chatbot" },
@@ -1019,7 +1080,7 @@ class DocuScopeWALTIService {
     });
     this.app.get("/api/v1/scribe/fix_grammar", async (request, response) => {
       const { course_id, text } = request.body;
-      const { prompt } = await this.getPrompt(course_id, 'grammar');
+      const { prompt } = await this.getPrompt(course_id, "grammar");
       // const prompt = data?.prompt_templates?.grammar
       //   ?? `Please fix the grammar of the following text: {text}
 
