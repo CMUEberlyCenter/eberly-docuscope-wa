@@ -7,16 +7,20 @@ import {
   filter,
   mergeMap,
   of,
-  switchMap,
+  switchMap
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
+import { courseId } from './lti.service';
 
 // Showing the A.I. Scribe warning and setting dialog.
 const show_scribe_option = new BehaviorSubject<boolean>(true);
-export const showScribeOption = (show: boolean) =>
-  show_scribe_option.next(show);
+export const hideScribeOption = () => show_scribe_option.next(false);
+export const showScribeOption = () => {
+  // show_scribe_option.next(false);
+  show_scribe_option.next(true);
+}
 export const [useShowScribeOption, showScribeOption$] = bind(
-  show_scribe_option,
+  show_scribe_option,//.pipe(distinctUntilChanged()),
   true
 );
 
@@ -32,10 +36,11 @@ export const [useScribe, scribe$] = bind(scribe, true);
  * @returns
  */
 function requestConvertNotes(notes: string) {
+  const course_id = courseId();
   return fromFetch('/api/v1/scribe/convert_notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ notes }),
+    body: JSON.stringify({ course_id, notes }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
@@ -65,10 +70,11 @@ export const [useProse, prose$] = bind(convertedNotes);
 /*** Fix Grammar ***/
 
 function requestFixGrammar(text: string) {
+  const course_id = courseId();
   return fromFetch('/api/v1/scribe/fix_grammar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ course_id, text }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
@@ -98,10 +104,11 @@ export const [useFixedGrammar, fixedGrammar$] = bind(fixedGrammar);
 /*** Clarify selected text ***/
 
 function requestClarify(text: string) {
+  const course_id = courseId();
   return fromFetch('/api/v1/scribe/clarify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text }),
+    body: JSON.stringify({ course_id, text }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
