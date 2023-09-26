@@ -56,25 +56,25 @@ class DocuScopeWALTIService {
   get defaultRuleFilename() {
     return path.join(__dirname, this.staticHome, "dswa.json");
   }
-
+  /**
+   * 
+   * @returns {Promise<any>}
+   */
+  async getDefaultRuleData() {
+    try {
+      const file = await open(this.defaultRuleFilename);
+      const ruleFile = await file.readFile({ encoding: 'utf8' });
+      await file.close();
+      return JSON.parse(ruleFile);
+    } catch (err) {
+      console.log(err.message);
+      return {};
+    }
+  }
   /**
    *
    */
   constructor() {
-    console.log("constructor (" + __dirname + ")");
-
-    // let envPath=__dirname+'/.env';
-
-    // console.log (envPath);
-
-    // config({ path: envPath, debug: true});
-
-    // if (_error) {
-    //   console.error("Dotenv error: " + _error);
-    // } else {
-    //   console.log("Dotenv parsed: " + parsed);
-    // }
-
     this.metrics = new PrometheusMetrics();
     this.metrics.setMetricObject(
       "eberly_dswa_requests_total",
@@ -153,7 +153,7 @@ class DocuScopeWALTIService {
     this.app.use(express.json());
     this.app.use(cors({ origin: "*" }));
     this.app.use(fileUpload({ createParentPath: true }));
-    this.app.use((req, res, next) => {
+    this.app.use((_req, res, next) => {
       res.set("Cache-Control", "no-store");
       next();
     });
@@ -166,40 +166,7 @@ class DocuScopeWALTIService {
 
     this.processBackendReply = this.processBackendReply.bind(this);
 
-    //this.encodingTest ();
-
     console.log("Server ready");
-  }
-
-  /**
-   * https://stackoverflow.com/questions/5396560/how-do-i-convert-special-utf-8-chars-to-their-iso-8859-1-equivalent-using-javasc
-   */
-  encodingTest() {
-    console.log("encodingTest ()");
-
-    let testString = "溫侯神射世間稀，曾向轅門獨解危";
-
-    let testObject = {
-      string: testString,
-    };
-
-    let input = JSON.stringify(testObject);
-
-    let escaped = escape(input);
-
-    let encoded = btoa(escaped);
-
-    console.log(encoded);
-
-    let decoded = atob(encoded);
-
-    let unescaped = unescape(decoded);
-
-    let testObjectResult = JSON.parse(unescaped);
-
-    console.log(testObjectResult);
-
-    console.log("encodingTest () done");
   }
 
   /**
@@ -239,7 +206,7 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  initDB(_cb) {
+  initDB() {
     console.log(
       "initDB (retry:" + onTopicDBRetry + " of max " + onTopicDBMaxRetry + ")"
     );
@@ -367,9 +334,7 @@ class DocuScopeWALTIService {
    * @param {Response} response
    */
   async sendDefaultFile(_request, response) {
-    const file = await open(this.defaultRuleFilename);
-    const ruleFile = await file.readFile({ encoding: 'utf8' });
-    const ruleData = JSON.parse(ruleFile);
+    const ruleData = await this.getDefaultRuleData();
     response.json(this.generateDataMessage(ruleData));
   }
 
@@ -925,10 +890,7 @@ class DocuScopeWALTIService {
       console.error(err);
       console.warn('Using default data.');
       try {
-        const file = await open(this.defaultRuleFilename);
-        const dwsa = await file.readFile({ encoding: 'utf8' });
-        await file.close();
-        const data = JSON.parse(dwsa);
+        const data = await this.getDefaultRuleData();
         return { genre: data.rules.name, prompt: data.prompt_templates[prompt] };
       } catch (err) {
         console.error(err.message);
