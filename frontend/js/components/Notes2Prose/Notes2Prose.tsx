@@ -1,5 +1,5 @@
 import React from "react";
-import { Alert, Modal } from "react-bootstrap";
+import { Alert, Button, Modal } from "react-bootstrap";
 import {
   notes$,
   prose$,
@@ -20,6 +20,10 @@ export const Notes2Prose = ({
   const notes = useNotes();
   const prose = useProse();
 
+  const play = () => {
+    const utterance = new SpeechSynthesisUtterance(prose);
+    speechSynthesis.speak(utterance);
+  };
   const alert = (
     <Alert variant="warning">
       A.I. Scribe is currently disabled. See Help&gt;A.I. Scribe.
@@ -37,6 +41,7 @@ export const Notes2Prose = ({
         fallback={<Alert variant="info">Processing...</Alert>}
       >
         <div>{prose}</div>
+        <Button onClick={play}>Play Prose</Button>
       </Subscribe>
     </>
   );
