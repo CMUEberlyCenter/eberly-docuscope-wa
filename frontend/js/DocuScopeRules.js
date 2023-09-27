@@ -103,7 +103,7 @@ export default class DocuScopeRules {
       return true;
     }
 
-    if (newInfo.version != existingInfo.version) {
+    if (newInfo.version !== existingInfo.version) {
       return true;
     }
 
@@ -143,7 +143,7 @@ export default class DocuScopeRules {
   parse(newRules) {
     console.log("parse ()");
 
-    let rulesRaw = this.data.rules;
+    const rulesRaw = this.data.rules;
 
     console.log(rulesRaw);
 
@@ -200,10 +200,10 @@ export default class DocuScopeRules {
     this.clusters = this.sessionStorage.getJSONObject("clusters");
 
     //let stored=this.sessionStorage.getJSONObject("rules");
-    let stored = this.sessionStorage.getJSONObject("dswa");
+    const stored = this.sessionStorage.getJSONObject("dswa");
 
     // First time use, we'll make the rules loaded from the server our place to start
-    if (stored != null) {
+    if (stored !== null) {
       if (isEmpty(stored) == false) {
         console.log("We have stored rules, checking version ...");
         if (this.isNewVersion(incomingData.info, stored.info) == true) {
@@ -228,7 +228,7 @@ export default class DocuScopeRules {
         console.log("Nothing stored yet, defaulting to template version");
       }
     }
-
+    console.log(this.data);
     this.parse(newRules);
 
     // Make sure we have at least something stored in case this is the first time

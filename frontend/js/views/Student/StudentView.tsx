@@ -32,7 +32,7 @@ import {
   Tab,
   Tabs,
 } from "react-bootstrap";
-import { Descendant, createEditor } from "slate";
+import { Descendant, Editor, createEditor } from "slate";
 import {
   Editable,
   RenderElementProps,
@@ -40,7 +40,7 @@ import {
   Slate,
   withReact,
 } from "slate-react";
-import DocuScopeAbout from "../../DocuScopeAbout";
+import "../../../css/topics.css";
 import DocuScopeReset from "../../DocuScopeReset";
 import TopicHighlighter from "../../TopicHighlighter";
 import Clarity from "../../components/Clarity/Clarity";
@@ -55,9 +55,8 @@ import {
   setEditorState,
   useEditorState,
 } from "../../service/editor-state.service";
+import { showAbout } from "../../service/help.service";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
-
-import "../../../css/topics.css";
 import "./StudentView.scss";
 
 import { faBook, faGlobe } from "@fortawesome/free-solid-svg-icons";
@@ -79,9 +78,12 @@ import type DocuScopeRules from "../../DocuScopeRules";
 
 import { serialize } from "../../service/editor-state.service";
 
+// import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
+import { About } from "../../components/HelpDialogs/About";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
-import { DocuScopeConfig } from "../../global";
-import { showScribeOption } from "../../service/scribe.service";
+import { config } from "../../global";
+import { notes, showScribeOption, useScribe } from "../../service/scribe.service";
+import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -117,7 +119,6 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
  * @returns
  */
 const StudentView = (props: {
-  config: DocuScopeConfig;
   api: apiCall;
   ruleManager: DocuScopeRules;
   html: string;
@@ -155,6 +156,7 @@ const StudentView = (props: {
   );
 
   const [editorTextValue, setEditorTextValue] = useState<string>("");
+  const scribe = useScribe();
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
@@ -320,12 +322,12 @@ const StudentView = (props: {
     // }
 
     if (eventKey === "showAbout") {
-      setShowAbout(true);
+      showAbout(true);
       return;
     }
 
     if (eventKey === "showScribeOption") {
-      showScribeOption(true);
+      showScribeOption();
       return;
     }
 
@@ -410,23 +412,23 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
 
-  const [showAbout, setShowAbout] = useState(false);
+  // const [showAbout, setShowAbout] = useState(false);
 
   let about;
 
-  const onCloseAboutPage = () => {
-    setShowAbout(false);
-  };
+  // const onCloseAboutPage = () => {
+  //   setShowAbout(false);
+  // };
 
-  if (showAbout == true) {
-    about = (
-      <DocuScopeAbout
-        config={props.config}
-        onCloseAboutPage={onCloseAboutPage}
-        ruleManager={props.ruleManager}
-      />
-    );
-  }
+  // if (showAbout == true) {
+  //   about = (
+  //     <DocuScopeAbout
+  //       config={config}
+  //       onCloseAboutPage={onCloseAboutPage}
+  //       ruleManager={props.ruleManager}
+  //     />
+  //   );
+  // }
 
   //>--------------------------------------------------------
 
@@ -537,6 +539,13 @@ const StudentView = (props: {
 
   //>--------------------------------------------------------
   const [zoom, setZoom] = useState<number>(100);
+
+  const [showConvertNotes, setShowConvertNotes] = useState<boolean>(false);
+  const convertNotes = useCallback(() => {
+    setShowConvertNotes(true);
+    const selectedText = editor.selection ? Editor.string(editor, editor.selection) : "";
+    notes.next(selectedText);
+  }, [editor]);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -575,7 +584,7 @@ const StudentView = (props: {
                     About
                   </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"showScribeOption"}>
-                    A.I. Scribe
+                    A.I. Scribe: {scribe ? 'Enabled' : 'Disabled'}
                   </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
@@ -637,6 +646,7 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
+            <Button onClick={convertNotes}>Notes2Prose</Button>
             <Button onClick={(_e) => globalUpdate(editorTextValue)}>
               Update
             </Button>
@@ -684,7 +694,7 @@ const StudentView = (props: {
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
         <div className="statusbar-version">
-          {"DSWA Version: " + props.config.version}
+          {`DSWA Version: ${config.version}`}
         </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
@@ -701,8 +711,11 @@ const StudentView = (props: {
           {language}
         </div>
       </footer>
+      <About/>
       {about}
-      <ScribeOption />
+      {/* <ScribeOption show={showScribeOption} onHide={() => setShowScribeOption(false)}/> */}
+      <Notes2Prose show={showConvertNotes} onHide={() => setShowConvertNotes(false)} />
+      <ScribeOption/>
       {/* <HelpModal />
       <GettingStartedModal />
       <TroubleshootingModal /> */}

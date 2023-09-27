@@ -8,7 +8,6 @@ import DocuScopeRules from "./DocuScopeRules";
 import {
   cleanAndRepairHTMLSentenceData,
   coherenceToClusterCounts,
-  getCourseId,
   launch,
   onTopic2DSWAHTML,
 } from "./DocuScopeTools";
@@ -17,6 +16,7 @@ import EberlyLTIBase from "./EberlyLTIBase";
 import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
+import { courseId } from "./service/lti.service";
 
 // Replace with RxJS
 var badThat = null;
@@ -46,7 +46,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     console.log("DocuScopeWA ()");
 
-    let course_id = getCourseId();
+    let course_id = courseId();
 
     this.ruleManager = new DocuScopeRules();
     this.ruleManager.updateNotice = this.updateNotice;
@@ -101,7 +101,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
         progressTitle: "Backend connected, loading data ...",
       });
 
-      if (this.isInstructor() == false) {
+      if (!this.isInstructor()) {
         this.apiCall("rules", null, "GET").then((result) => {
           this.ruleManager.load(result);
 
@@ -384,7 +384,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
   apiCall(aCall, aData, aType) {
     console.log("apiCall (" + aCall + ")");
 
-    let course_id = getCourseId();
+    let course_id = courseId();
 
     let aURL =
       "/api/v1/" +
@@ -421,7 +421,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
       return false;
     }
 
-    var splitter = window.serverContext.roles.split(",");
+    var splitter = window.serverContext.lti.roles.split(",");
 
     for (var i = 0; i < splitter.length; i++) {
       if (
@@ -518,14 +518,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     if (this.isInstructor()) {
       return (
-        <DocuScopeWAScrim enabled={scrimup}>
-          <InstructorView
-            config={config}
-            api={this.apiCall}
-            server={this.state.server}
-            ruleManager={this.state.ruleManager}
-          />
-        </DocuScopeWAScrim>
+          <InstructorView/>
       );
     }
 

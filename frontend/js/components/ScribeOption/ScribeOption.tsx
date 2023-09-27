@@ -1,19 +1,21 @@
 /* @fileoverview A modal for opting-in/out of scribe features */
-import * as React from "react";
+import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import {
   enableScribe,
-  showScribeOption,
+  hideScribeOption,
   useScribe,
   useShowScribeOption,
 } from "../../service/scribe.service";
 
+// export const ScribeOption = ({show, onHide}: {show: boolean, onHide: () => void}) => {
 export const ScribeOption = () => {
-  const show = useShowScribeOption();
   const scribe = useScribe();
+  const show = useShowScribeOption();
+  const onHide = () => hideScribeOption();
   const handleChange = () => enableScribe(!scribe);
   return (
-    <Modal show={show} onHide={() => showScribeOption(false)} scrollable>
+    <Modal show={show} onHide={onHide} scrollable>
       <Modal.Header closeButton>A.I. Scribe</Modal.Header>
       <Modal.Body>
         <p>
@@ -46,7 +48,7 @@ export const ScribeOption = () => {
             label={"Enable A.I. Scribe and ChatGPT"}
           ></Form.Check>
         </Form>
-        <Button onClick={() => showScribeOption(false)} color="secondary">
+        <Button onClick={onHide} color="secondary">
           Close
         </Button>
       </Modal.Footer>

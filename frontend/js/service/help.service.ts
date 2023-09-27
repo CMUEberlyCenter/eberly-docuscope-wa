@@ -22,6 +22,10 @@ const LOADING = '<h3 class="text-info">Loading...</h3>';
 const unavailable = (title: string) =>
   `<h2 class="text-danger">${title} content is unavailable.</h2>`;
 
+const show_about = new BehaviorSubject(false);
+export const showAbout = (show: boolean) => show_about.next(show);
+export const [useShowAbout, showAbout$] = bind(show_about, false);
+
 const show_help = new BehaviorSubject(false);
 export const showHelp = (show: boolean) => show_help.next(show);
 export const [useShowHelp, showHelp$] = bind(show_help, false);

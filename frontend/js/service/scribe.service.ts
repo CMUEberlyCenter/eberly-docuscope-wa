@@ -1,4 +1,4 @@
-import { bind } from '@react-rxjs/core';
+import { SUSPENSE, bind } from '@react-rxjs/core';
 import {
   BehaviorSubject,
   catchError,
@@ -7,21 +7,22 @@ import {
   filter,
   mergeMap,
   of,
-  switchMap
+  switchMap,
+  distinctUntilChanged,
+  map,
+  concat,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { courseId } from './lti.service';
 
 // Showing the A.I. Scribe warning and setting dialog.
-const show_scribe_option = new BehaviorSubject<boolean>(true);
+const opt_in = false;
+const show_scribe_option = new BehaviorSubject<boolean>(opt_in);
 export const hideScribeOption = () => show_scribe_option.next(false);
-export const showScribeOption = () => {
-  // show_scribe_option.next(false);
-  show_scribe_option.next(true);
-}
+export const showScribeOption = () => show_scribe_option.next(true);
 export const [useShowScribeOption, showScribeOption$] = bind(
-  show_scribe_option,//.pipe(distinctUntilChanged()),
-  true
+  show_scribe_option.pipe(distinctUntilChanged()),
+  opt_in
 );
 
 // If scribe is currently enabled. // TODO: possibly set default from previous setting
@@ -56,6 +57,7 @@ function requestConvertNotes(notes: string) {
 }
 
 export const notes = new BehaviorSubject<string>('');
+export const [useNotes, notes$] = bind(notes, '');
 export const convertedNotes = combineLatest({
   notes: notes,
   scribe: scribe$,
@@ -63,9 +65,22 @@ export const convertedNotes = combineLatest({
   filter((c) => c.scribe),
   filter((c) => c.notes.trim().length !== 0),
   distinctUntilKeyChanged('notes'),
-  mergeMap((c) => requestConvertNotes(c.notes))
+  switchMap((c) =>
+    concat(of(SUSPENSE), requestConvertNotes(c.notes)).pipe(
+      map((data) => {
+        if (data.error) {
+          console.log(data.message);
+          return 'An error occured while converting your notes to prose.';
+        }
+        return data.choices?.at(0).message?.content ?? '';
+      })
+    )
+  )
 );
-export const [useProse, prose$] = bind(convertedNotes);
+export const [useProse, prose$] = bind(convertedNotes, SUSPENSE);
+
+notes.subscribe((notes) => console.log(`TODO log notes: ${notes}`));
+prose$.subscribe((prose) => console.log(`TODO log prose: ${prose}`));
 
 /*** Fix Grammar ***/
 

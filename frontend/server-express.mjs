@@ -308,7 +308,7 @@ class DocuScopeWALTIService {
       if (rows.length <= 0) {
         throw new Error("File data not found for assignment");
       }
-      response.json(this.generateDataMessage(rows[0]));
+      response.json(this.generateDataMessage(rows[0].data));
     } catch (err) {
       console.err(err);
       response.sendStatus(500);
@@ -831,7 +831,7 @@ class DocuScopeWALTIService {
       if (course_id) {
         console.log("Using course id: " + course_id);
 
-        if (course_id !== "global") {
+        if (course_id.trim().toLowerCase() !== "global") {
           console.log(
             "Loading rule set from database for course id: " + course_id
           );
