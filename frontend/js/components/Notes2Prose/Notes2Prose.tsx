@@ -8,6 +8,7 @@ import {
   useScribe,
 } from "../../service/scribe.service";
 import { Subscribe } from "@react-rxjs/core";
+import { ErrorBoundary } from "react-error-boundary";
 
 export const Notes2Prose = ({
   show = false,
@@ -30,7 +31,7 @@ export const Notes2Prose = ({
     </Alert>
   );
   const body = (
-    <>
+    <ErrorBoundary fallback={<Alert variant="danger">Notes to Prose is unavailable.</Alert>}>
       <h3>Notes</h3>
       <Subscribe source$={notes$}>
         <div>{notes}</div>
@@ -43,7 +44,7 @@ export const Notes2Prose = ({
         <div>{prose}</div>
         <Button onClick={play}>Play Prose</Button>
       </Subscribe>
-    </>
+    </ErrorBoundary>
   );
 
   return (
