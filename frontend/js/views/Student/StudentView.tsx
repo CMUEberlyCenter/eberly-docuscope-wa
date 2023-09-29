@@ -32,9 +32,11 @@ import {
   Tab,
   Tabs,
 } from "react-bootstrap";
-import { Descendant, Editor, createEditor } from "slate";
+import { Descendant, Editor, Range, Transforms, createEditor } from "slate";
 import {
+  DefaultLeaf,
   Editable,
+  ReactEditor,
   RenderElementProps,
   RenderLeafProps,
   Slate,
@@ -82,7 +84,7 @@ import { serialize } from "../../service/editor-state.service";
 import { About } from "../../components/HelpDialogs/About";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { config } from "../../global";
-import { notes, showScribeOption, useScribe } from "../../service/scribe.service";
+import { SelectedNotesProse, notes, showScribeOption, useScribe } from "../../service/scribe.service";
 import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 
 /**
@@ -278,24 +280,28 @@ const StudentView = (props: {
   );
   // Rendering leaf items in the editor.
   const renderLeaf = useCallback(
-    ({ attributes, children, leaf }: RenderLeafProps) => {
-      switch (leaf.type) {
+    (props: RenderLeafProps) => {
+      switch (props.leaf.type) {
         case "bold":
-          return <strong {...attributes}>{children}</strong>;
+          return <strong {...props.attributes}>{props.children}</strong>;
         case "code":
-          return <code {...attributes}>{children}</code>;
+          return <code {...props.attributes}>{props.children}</code>;
         case "italic":
-          return <em {...attributes}>{children}</em>;
+          return <em {...props.attributes}>{props.children}</em>;
         case "underlined":
-          return <u {...attributes}>{children}</u>;
+          return <u {...props.attributes}>{props.children}</u>;
         case "highlight":
           return (
-            <span {...attributes} style={{ backgroundColor: "#ffeeba" }}>
-              {children}
+            <span {...props.attributes} style={{ backgroundColor: "#ffeeba" }}>
+              {props.children}
             </span>
           );
+        // case "selected":
+        //   return <span {...props.attributes} style={{ backgroundColor: "rgba(255,0,255,0.5)"}}>
+        //     {props.children}
+        //   </span>
         default:
-          return <span {...attributes}>{children}</span>;
+          return <DefaultLeaf {...props} />
       }
     },
     []
@@ -543,8 +549,12 @@ const StudentView = (props: {
   const [showConvertNotes, setShowConvertNotes] = useState<boolean>(false);
   const convertNotes = useCallback(() => {
     setShowConvertNotes(true);
-    const selectedText = editor.selection ? Editor.string(editor, editor.selection) : "";
-    notes.next(selectedText);
+    if (editor.selection) {
+      const selectedText = Editor.string(editor, editor.selection);
+      if (selectedText) {
+        notes.next({ text: selectedText, range: editor.selection });
+      }
+    }
   }, [editor]);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
@@ -711,11 +721,20 @@ const StudentView = (props: {
           {language}
         </div>
       </footer>
-      <About/>
+      <About />
       {about}
       {/* <ScribeOption show={showScribeOption} onHide={() => setShowScribeOption(false)}/> */}
-      <Notes2Prose show={showConvertNotes} onHide={() => setShowConvertNotes(false)} />
-      <ScribeOption/>
+      <Notes2Prose show={showConvertNotes}
+        onHide={() => setShowConvertNotes(false)}
+        insert={(notes: SelectedNotesProse) => {
+          if (notes.prose && notes.range) {
+            setShowConvertNotes(false);
+            Transforms.insertText(editor, `\n${notes.prose}`, {at: Range.end(notes.range)});
+            ReactEditor.focus(editor);
+            Transforms.select(editor, notes.range);
+          }
+        }} />
+      <ScribeOption />
       {/* <HelpModal />
       <GettingStartedModal />
       <TroubleshootingModal /> */}

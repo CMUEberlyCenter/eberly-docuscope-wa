@@ -1,6 +1,7 @@
 import React, { Suspense } from "react";
 import { Alert, Button, Modal, Spinner } from "react-bootstrap";
 import {
+  SelectedNotesProse,
   notes$,
   prose$,
   retrieveConvertLog,
@@ -15,23 +16,22 @@ import { courseId } from "../../service/lti.service";
 export const Notes2Prose = ({
   show = false,
   onHide,
+  insert = () => undefined,
 }: {
   show: boolean;
   onHide: () => void;
+  insert: (notes: SelectedNotesProse) => void;
 }) => {
   const scribe = useScribe();
   const notes = useNotes();
-  const prose = useProse();
+  const response = useProse();
 
   // const play = () => {
   //   const utterance = new SpeechSynthesisUtterance(prose);
   //   speechSynthesis.speak(utterance);
   // };
   const copy = () => {
-    navigator.clipboard.writeText(prose);
-  }
-  const insert = () => {
-
+    navigator.clipboard.writeText(response.prose ?? '');
   }
   const downloadHistory = () => {
     // file object
@@ -59,7 +59,7 @@ export const Notes2Prose = ({
     <ErrorBoundary fallback={<Alert variant="danger">Notes to Prose is unavailable.</Alert>}>
       <h3>Notes</h3>
       <Subscribe source$={notes$}>
-        <div>{notes}</div>
+        <div>{notes?.text ?? ''}</div>
       </Subscribe>
       <h3>Prose</h3>
       <Subscribe
@@ -67,14 +67,14 @@ export const Notes2Prose = ({
         fallback={<Alert variant="info">Preprocessing...</Alert>}
       >
         <Suspense fallback={<Alert variant="info">Processing...</Alert>}>
-          <div className="w-100">{typeof (prose) !== 'string' ?  (
+          <div className="w-100">{typeof (response) !== 'object' ?  (
           <Spinner animation="border" role="status" variant="info" className="mx-auto">
             <span className="visually-hidden">Processing...</span>
           </Spinner>
-          ) : prose}</div>
+          ) : response.prose}</div>
           {/* <Button onClick={play}>Play Prose</Button> */}
           <Button onClick={copy}>Copy Prose to Clipboard</Button>
-          <Button onClick={insert}>Insert into Essay</Button>
+          <Button onClick={() => insert(response)}>Insert into Essay</Button>
           <Button onClick={downloadHistory}>Export History</Button>
         </Suspense>
       </Subscribe>

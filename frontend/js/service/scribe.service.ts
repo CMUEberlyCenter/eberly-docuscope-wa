@@ -15,6 +15,7 @@ import {
 import { fromFetch } from 'rxjs/fetch';
 import { courseId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
+import { type Range } from 'slate';
 
 // Showing the A.I. Scribe warning and setting dialog.
 const opt_in = false;
@@ -37,12 +38,12 @@ export const [useScribe, scribe$] = bind(scribe, true);
  * @param notes text of selected notes from editor
  * @returns
  */
-function requestConvertNotes(notes: string) {
+function requestConvertNotes(notes: SelectedNotesProse) {
   const course_id = courseId();
   return fromFetch('/api/v1/scribe/convert_notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ course_id, notes }),
+    body: JSON.stringify({ course_id, notes: notes.text }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
@@ -61,11 +62,13 @@ function requestConvertNotes(notes: string) {
         return 'An error occured while converting your notes to prose.';
       }
       if ('choices' in data) {
-        logCovertNotes(notes, data);
+        logCovertNotes(notes.text, data);
         return data.choices[0].message.content ?? '';
       }
       return '';
-    }));
+    }),
+    map(prose => {return {...notes, prose}})
+    );
 }
 
 const NOTES_TO_PROSE = 'notes2prose'
@@ -78,22 +81,26 @@ export function retrieveConvertLog() {
 }
 
 type ChatResponse = { error: boolean, message: string } | ChatCompletion;
-export const notes = new BehaviorSubject<string>('');
-export const [useNotes, notes$] = bind(notes, '');
+export interface SelectedNotesProse {
+  text: string;
+  range?: Range;
+  prose?: string; 
+}
+export const notes = new BehaviorSubject<SelectedNotesProse>({text: ''});
+export const [useNotes, notes$] = bind(notes, undefined);
 export const convertedNotes = combineLatest({
   notes: notes,
   scribe: scribe$,
 }).pipe(
   filter((c) => c.scribe),
-  filter((c) => c.notes.trim().length !== 0),
-  distinctUntilKeyChanged('notes'),
+  filter((c) => c.notes.text.trim().length !== 0),
+  distinctUntilKeyChanged('notes', (a, b) => a.text === b.text),
   switchMap((c) =>
-    concat<[SUSPENSE, string]>(of(SUSPENSE), requestConvertNotes(c.notes))
-  )
+    concat<[SUSPENSE, SelectedNotesProse]>(of(SUSPENSE), requestConvertNotes(c.notes)))
 );
-export const [useProse, prose$] = bind<SUSPENSE | string>(convertedNotes, SUSPENSE);
+export const [useProse, prose$] = bind<SUSPENSE | SelectedNotesProse>(convertedNotes, SUSPENSE);
 
-notes.subscribe((notes) => console.log(`TODO log notes: ${notes}`));
+notes.subscribe((notes) => notes !== undefined && console.log(`TODO log notes: ${notes.text}`));
 prose$.subscribe((prose) => typeof (prose) === 'string' && console.log(`TODO log prose: ${prose}`));
 
 /*** Fix Grammar ***/

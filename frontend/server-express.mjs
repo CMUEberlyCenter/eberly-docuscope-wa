@@ -927,7 +927,7 @@ class DocuScopeWALTIService {
          JSON_EXTRACT(data, '$.rules.name') AS genre,
          JSON_EXTRACT(data, '$.prompt_templates.${prompt}') AS prompt 
          FROM ${MYSQL_DB}.files
-         WHERE id=(SELECT fileid FROM assignments
+         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments
           WHERE id="${assignment}")`
       );
       if (rows.length <= 0) {
