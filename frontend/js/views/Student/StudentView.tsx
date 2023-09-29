@@ -84,7 +84,12 @@ import { serialize } from "../../service/editor-state.service";
 import { About } from "../../components/HelpDialogs/About";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { config } from "../../global";
-import { SelectedNotesProse, notes, showScribeOption, useScribe } from "../../service/scribe.service";
+import {
+  SelectedNotesProse,
+  notes,
+  showScribeOption,
+  useScribe,
+} from "../../service/scribe.service";
 import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 
 /**
@@ -279,33 +284,30 @@ const StudentView = (props: {
     []
   );
   // Rendering leaf items in the editor.
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => {
-      switch (props.leaf.type) {
-        case "bold":
-          return <strong {...props.attributes}>{props.children}</strong>;
-        case "code":
-          return <code {...props.attributes}>{props.children}</code>;
-        case "italic":
-          return <em {...props.attributes}>{props.children}</em>;
-        case "underlined":
-          return <u {...props.attributes}>{props.children}</u>;
-        case "highlight":
-          return (
-            <span {...props.attributes} style={{ backgroundColor: "#ffeeba" }}>
-              {props.children}
-            </span>
-          );
-        // case "selected":
-        //   return <span {...props.attributes} style={{ backgroundColor: "rgba(255,0,255,0.5)"}}>
-        //     {props.children}
-        //   </span>
-        default:
-          return <DefaultLeaf {...props} />
-      }
-    },
-    []
-  );
+  const renderLeaf = useCallback((props: RenderLeafProps) => {
+    switch (props.leaf.type) {
+      case "bold":
+        return <strong {...props.attributes}>{props.children}</strong>;
+      case "code":
+        return <code {...props.attributes}>{props.children}</code>;
+      case "italic":
+        return <em {...props.attributes}>{props.children}</em>;
+      case "underlined":
+        return <u {...props.attributes}>{props.children}</u>;
+      case "highlight":
+        return (
+          <span {...props.attributes} style={{ backgroundColor: "#ffeeba" }}>
+            {props.children}
+          </span>
+        );
+      // case "selected":
+      //   return <span {...props.attributes} style={{ backgroundColor: "rgba(255,0,255,0.5)"}}>
+      //     {props.children}
+      //   </span>
+      default:
+        return <DefaultLeaf {...props} />;
+    }
+  }, []);
   // Note: Newer versions of the slate editor did away with markings renderer.
 
   // Tool bar menu handler.
@@ -594,7 +596,7 @@ const StudentView = (props: {
                     About
                   </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"showScribeOption"}>
-                    A.I. Scribe: {scribe ? 'Enabled' : 'Disabled'}
+                    A.I. Scribe: {scribe ? "Enabled" : "Disabled"}
                   </NavDropdown.Item>
                 </NavDropdown>
               </Nav>
@@ -724,16 +726,20 @@ const StudentView = (props: {
       <About />
       {about}
       {/* <ScribeOption show={showScribeOption} onHide={() => setShowScribeOption(false)}/> */}
-      <Notes2Prose show={showConvertNotes}
+      <Notes2Prose
+        show={showConvertNotes}
         onHide={() => setShowConvertNotes(false)}
         insert={(notes: SelectedNotesProse) => {
           if (notes.prose && notes.range) {
             setShowConvertNotes(false);
-            Transforms.insertText(editor, `\n${notes.prose}`, {at: Range.end(notes.range)});
+            Transforms.insertText(editor, `\n${notes.prose}`, {
+              at: Range.end(notes.range),
+            });
             ReactEditor.focus(editor);
             Transforms.select(editor, notes.range);
           }
-        }} />
+        }}
+      />
       <ScribeOption />
       {/* <HelpModal />
       <GettingStartedModal />

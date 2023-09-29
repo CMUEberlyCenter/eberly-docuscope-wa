@@ -44,49 +44,56 @@ function requestConvertNotes(notes: SelectedNotesProse) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ course_id, notes: notes.text }),
-  }).pipe(
-    switchMap((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      return of({ error: true, message: `Error ${response.status}` });
-    }),
-    catchError((err) => {
-      console.error(err);
-      return of({ error: true, message: err.message });
-    })
-  ).pipe(
-    map((data: ChatResponse) => {
-      if ('error' in data) {
-        console.log(data.message);
-        return 'An error occured while converting your notes to prose.';
-      }
-      if ('choices' in data) {
-        logCovertNotes(notes.text, data);
-        return data.choices[0].message.content ?? '';
-      }
-      return '';
-    }),
-    map(prose => {return {...notes, prose}})
+  })
+    .pipe(
+      switchMap((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        return of({ error: true, message: `Error ${response.status}` });
+      }),
+      catchError((err) => {
+        console.error(err);
+        return of({ error: true, message: err.message });
+      })
+    )
+    .pipe(
+      map((data: ChatResponse) => {
+        if ('error' in data) {
+          console.log(data.message);
+          return 'An error occured while converting your notes to prose.';
+        }
+        if ('choices' in data) {
+          logCovertNotes(notes.text, data);
+          return data.choices[0].message.content ?? '';
+        }
+        return '';
+      }),
+      map((prose) => {
+        return { ...notes, prose };
+      })
     );
 }
 
-const NOTES_TO_PROSE = 'notes2prose'
+const NOTES_TO_PROSE = 'notes2prose';
 function logCovertNotes(notes: string, prose: ChatCompletion) {
   const data = JSON.parse(retrieveConvertLog());
-  sessionStorage.setItem(NOTES_TO_PROSE, JSON.stringify([...data, { notes, prose }]))
+  sessionStorage.setItem(
+    NOTES_TO_PROSE,
+    JSON.stringify([...data, { notes, prose }])
+  );
 }
 export function retrieveConvertLog() {
   return sessionStorage.getItem(NOTES_TO_PROSE) ?? '[]';
 }
 
-type ChatResponse = { error: boolean, message: string } | ChatCompletion;
+type ChatResponse = { error: boolean; message: string } | ChatCompletion;
 export interface SelectedNotesProse {
   text: string;
   range?: Range;
-  prose?: string; 
+  prose?: string;
 }
-export const notes = new BehaviorSubject<SelectedNotesProse>({text: ''});
+export const notes = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useNotes, notes$] = bind(notes, undefined);
 export const convertedNotes = combineLatest({
   notes: notes,
@@ -96,12 +103,24 @@ export const convertedNotes = combineLatest({
   filter((c) => c.notes.text.trim().length !== 0),
   distinctUntilKeyChanged('notes', (a, b) => a.text === b.text),
   switchMap((c) =>
-    concat<[SUSPENSE, SelectedNotesProse]>(of(SUSPENSE), requestConvertNotes(c.notes)))
+    concat<[SUSPENSE, SelectedNotesProse]>(
+      of(SUSPENSE),
+      requestConvertNotes(c.notes)
+    )
+  )
 );
-export const [useProse, prose$] = bind<SUSPENSE | SelectedNotesProse>(convertedNotes, SUSPENSE);
+export const [useProse, prose$] = bind<SUSPENSE | SelectedNotesProse>(
+  convertedNotes,
+  SUSPENSE
+);
 
-notes.subscribe((notes) => notes !== undefined && console.log(`TODO log notes: ${notes.text}`));
-prose$.subscribe((prose) => typeof (prose) === 'string' && console.log(`TODO log prose: ${prose}`));
+notes.subscribe(
+  (notes) => notes !== undefined && console.log(`TODO log notes: ${notes.text}`)
+);
+prose$.subscribe(
+  (prose) =>
+    typeof prose === 'string' && console.log(`TODO log prose: ${prose}`)
+);
 
 /*** Fix Grammar ***/
 

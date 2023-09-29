@@ -7,7 +7,7 @@
   https://github.com/js-kyle/nodejs-lti-provider/blob/master/lti/index.js
   https://github.com/Cvmcosta/ltijs
 */
-import { Command, Option } from 'commander';
+import { Command, Option } from "commander";
 import cors from "cors";
 import "dotenv/config";
 import express from "express";
@@ -31,16 +31,22 @@ const __dirname = path.dirname(__filename);
 const program = new Command();
 program
   .description("Backend server for DocuScope Write and Audit.")
-  .addOption(new Option("-p --port <number>", "Port to use for server.").env('PORT'))
-  .addOption(new Option("--db <string>", "Database").env('MYSQL_DB').default('dswa'));
+  .addOption(
+    new Option("-p --port <number>", "Port to use for server.").env("PORT")
+  )
+  .addOption(
+    new Option("--db <string>", "Database").env("MYSQL_DB").default("dswa")
+  );
 // .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
 program.parse();
 const options = program.opts();
 const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
-const MYSQL_DB = options.db ?? 'dswa';
+const MYSQL_DB = options.db ?? "dswa";
 
 const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
-const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT) ? 5000 : parseInt(process.env.DSWA_ONTOPIC_PORT);
+const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
+  ? 5000
+  : parseInt(process.env.DSWA_ONTOPIC_PORT);
 
 const openai = new OpenAI();
 
@@ -118,7 +124,7 @@ class DocuScopeWALTIService {
     //this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
-    this.mode = process.env.MODE ?? 'production';
+    this.mode = process.env.MODE ?? "production";
 
     this.app = express();
 
@@ -166,16 +172,16 @@ class DocuScopeWALTIService {
   initDBService(cb) {
     console.log(
       "initDBService (retry:" +
-      onTopicDBRetry +
-      " of max " +
-      onTopicDBMaxRetry +
-      ")"
+        onTopicDBRetry +
+        " of max " +
+        onTopicDBMaxRetry +
+        ")"
     );
     console.log(
       "Creating db connection: " +
-      process.env.DB_HOST +
-      ":" +
-      process.env.DB_PORT
+        process.env.DB_HOST +
+        ":" +
+        process.env.DB_PORT
     );
 
     dbCallback = cb;
@@ -207,8 +213,8 @@ class DocuScopeWALTIService {
       if (err) {
         console.log(
           "Can't connect to database yet, entering retry ... ('" +
-          err.message +
-          "')"
+            err.message +
+            "')"
         );
         onTopicDBRetry++;
         if (onTopicDBRetry > onTopicDBMaxRetry) {
@@ -271,16 +277,14 @@ class DocuScopeWALTIService {
    */
   async getFiles(_request, response) {
     try {
-      const [rows] = await this.dbConn
-        .promise()
-        .query(
-          `SELECT
+      const [rows] = await this.dbConn.promise().query(
+        `SELECT
              BIN_TO_UUID(id) AS id,
              filename,
              date,
              JSON_EXTRACT(data, '$.info') AS info
             FROM ${MYSQL_DB}.files`
-        );
+      );
       response.json(this.generateDataMessage(rows));
     } catch (err) {
       console.error(err.message);
@@ -695,16 +699,19 @@ class DocuScopeWALTIService {
 
   /**
    *
-   * @param {Request} request 
-   * @param {Response} response 
+   * @param {Request} request
+   * @param {Response} response
    */
   async processJSONDownload(request, response) {
     const fileId = request.query.id;
     console.log(`processJSONDownload (${fileId})`);
     try {
-      const [result] = await this.dbConn.promise().query(
-        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
-        [fileId]);
+      const [result] = await this.dbConn
+        .promise()
+        .query(
+          `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+          [fileId]
+        );
       if (result) {
         response.send(result[0].data);
       } else {
@@ -719,7 +726,7 @@ class DocuScopeWALTIService {
   /**
    *
    * @param {Request} request
-   * @param {Response} response  
+   * @param {Response} response
    */
   processRequest(request, response) {
     console.log("processRequest (" + request.path + ")");
