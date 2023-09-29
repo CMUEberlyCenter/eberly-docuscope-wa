@@ -145,7 +145,7 @@ const InstructorView = () => {
           />
         </td>
         <td>
-          <a href={`/download?id=${file.id}`}>{file.filename}</a>
+          <a href={`/download?id=${file.id}`} download={`${file.filename}`}>{file.filename}</a>
         </td>
         <td>{new Date(file.date).toLocaleString()}</td>
         <td>

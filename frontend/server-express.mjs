@@ -7,32 +7,42 @@
   https://github.com/js-kyle/nodejs-lti-provider/blob/master/lti/index.js
   https://github.com/Cvmcosta/ltijs
 */
-import process from "node:process";
-import PrometheusMetrics from "./prometheus.mjs";
-
+import { Command, Option } from 'commander';
 import cors from "cors";
+import "dotenv/config";
 import express from "express";
 import fileUpload from "express-fileupload";
 import { readFileSync } from "fs";
 import { request } from "http";
-import { createPool } from "mysql2";
-//const fetch = require('node-fetch');
-
-import "dotenv/config";
 import jwt from "jsonwebtoken";
-import { OpenAI } from "openai";
-import format from "string-format";
-import info from "./package.json" assert { type: "json" };
-
+import { createPool } from "mysql2";
 import { open } from "node:fs/promises";
+import process from "node:process";
+import { OpenAI } from "openai";
 import path from "path";
+import format from "string-format";
 import { fileURLToPath } from "url";
+import info from "./package.json" assert { type: "json" };
+import PrometheusMetrics from "./prometheus.mjs";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const openai = new OpenAI();
+const program = new Command();
+program
+  .description("Backend server for DocuScope Write and Audit.")
+  .addOption(new Option("-p --port <number>", "Port to use for server.").env('PORT'))
+  .addOption(new Option("--db <string>", "Database").env('MYSQL_DB').default('dswa'));
+// .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
+program.parse();
+const options = program.opts();
+const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
+const MYSQL_DB = options.db ?? 'dswa';
 
-const port = 8888;
+const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
+const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT) ? 5000 : parseInt(process.env.DSWA_ONTOPIC_PORT);
+
+const openai = new OpenAI();
 
 var onTopicRequests = 0;
 var onTopicRequestsAvg = 0;
@@ -87,24 +97,10 @@ class DocuScopeWALTIService {
     setInterval(this.updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
     setInterval(this.updateUptime, 1000); // Every second
 
-    this.pjson = info;
-    console.log("DocuScope-WA front-end proxy version: " + this.pjson.version);
-
-    this.backendHost = "localhost";
-    if (process.env.DSWA_ONTOPIC_HOST) {
-      this.backendHost = process.env.DSWA_ONTOPIC_HOST;
-    }
-
-    this.backendPort = 5000;
-    if (process.env.DSWA_ONTOPIC_PORT) {
-      this.backendPort = parseInt(process.env.DSWA_ONTOPIC_PORT);
-    }
+    console.log(`DocuScope-WA front-end proxy version: ${info.version}`);
 
     console.log(
-      "Configured the OnTopic backend url to be: " +
-        this.backendHost +
-        ":" +
-        this.backendPort
+      `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
     );
 
     this.token = this.uuidv4();
@@ -122,11 +118,7 @@ class DocuScopeWALTIService {
     //this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
 
     // access config var
-    this.backend = process.env.DWA_BACKEND;
-    this.mode = process.env.MODE;
-    if (!this.mode) {
-      this.mode = "production";
-    }
+    this.mode = process.env.MODE ?? 'production';
 
     this.app = express();
 
@@ -174,31 +166,31 @@ class DocuScopeWALTIService {
   initDBService(cb) {
     console.log(
       "initDBService (retry:" +
-        onTopicDBRetry +
-        " of max " +
-        onTopicDBMaxRetry +
-        ")"
+      onTopicDBRetry +
+      " of max " +
+      onTopicDBMaxRetry +
+      ")"
     );
     console.log(
       "Creating db connection: " +
-        process.env.DB_HOST +
-        ":" +
-        process.env.DB_PORT
+      process.env.DB_HOST +
+      ":" +
+      process.env.DB_PORT
     );
 
     dbCallback = cb;
 
-    this.dbPool = createPool({
+    // TODO retry until pool created.
+    this.dbConn = createPool({
       connectionLimit: 100, //important
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
       user: process.env.MYSQL_USER,
       password: process.env.MYSQL_PASSWORD,
+      // database: MYSQL_DB,
       debug: false,
-      timezone: "UTC", // Makes TIMESTAMP work correctly
+      timezone: "Z", // Makes TIMESTAMP work correctly
     });
-
-    this.dbConn = this.dbPool;
 
     this.initDB();
   }
@@ -215,8 +207,8 @@ class DocuScopeWALTIService {
       if (err) {
         console.log(
           "Can't connect to database yet, entering retry ... ('" +
-            err.message +
-            "')"
+          err.message +
+          "')"
         );
         onTopicDBRetry++;
         if (onTopicDBRetry > onTopicDBMaxRetry) {
@@ -230,7 +222,7 @@ class DocuScopeWALTIService {
       console.log("Connected with thread id: " + connection.threadId);
 
       connection.query(
-        "CREATE DATABASE IF NOT EXISTS dswa",
+        `CREATE DATABASE IF NOT EXISTS ${MYSQL_DB}`,
         function (err, _result) {
           if (err) throw err;
           console.log("Database created");
@@ -240,7 +232,7 @@ class DocuScopeWALTIService {
       // Need to add a field here to identify the uploader/owner!
 
       connection.query(
-        `CREATE TABLE IF NOT EXISTS dswa.files (
+        `CREATE TABLE IF NOT EXISTS ${MYSQL_DB}.files (
           id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) NOT NULL PRIMARY KEY,
           filename VARCHAR(100) NOT NULL,
           date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -252,10 +244,10 @@ class DocuScopeWALTIService {
       );
 
       connection.query(
-        `CREATE TABLE IF NOT EXISTS dswa.assignments (
+        `CREATE TABLE IF NOT EXISTS ${MYSQL_DB}.assignments (
           id VARCHAR(40) NOT NULL PRIMARY KEY,
           fileid BINARY(16) NOT NULL,
-          FOREIGN KEY (fileid) REFERENCES dswa.files(id))`,
+          FOREIGN KEY (fileid) REFERENCES ${MYSQL_DB}.files(id))`,
         function (err, _result) {
           if (err) throw err;
           console.log("DSWA assignment table created");
@@ -282,7 +274,12 @@ class DocuScopeWALTIService {
       const [rows] = await this.dbConn
         .promise()
         .query(
-          "SELECT BIN_TO_UUID(id) AS id, filename, date, JSON_EXTRACT(data, '$.info') AS info FROM dswa.files;"
+          `SELECT
+             BIN_TO_UUID(id) AS id,
+             filename,
+             date,
+             JSON_EXTRACT(data, '$.info') AS info
+            FROM ${MYSQL_DB}.files`
         );
       response.json(this.generateDataMessage(rows));
     } catch (err) {
@@ -301,8 +298,8 @@ class DocuScopeWALTIService {
     const course_id = aCourseId ?? request.query.course_id;
     try {
       const [rows] = await this.dbConn.promise().query(
-        `SELECT data FROM dswa.files
-       WHERE id=(SELECT fileid FROM dswa.assignments WHERE id=?)`,
+        `SELECT data FROM ${MYSQL_DB}.files
+         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments WHERE id=?)`,
         [course_id]
       );
       if (rows.length <= 0) {
@@ -335,7 +332,8 @@ class DocuScopeWALTIService {
       const [rows] = await this.dbConn
         .promise()
         .query(
-          `SELECT BIN_TO_UUID(fileid) AS fileid FROM dswa.assignments WHERE id='${course_id}'`
+          `SELECT BIN_TO_UUID(fileid) AS fileid FROM ${MYSQL_DB}.assignments WHERE id=?`,
+          [course_id]
         );
       const data = rows.at(0);
       if (data) {
@@ -373,12 +371,11 @@ class DocuScopeWALTIService {
    */
   async storeFile(_request, response, aFilename, aDate, aJSONObject) {
     try {
-      const data = JSON.stringify(aJSONObject);
       await this.dbConn
         .promise()
-        .query(`INSERT INTO dswa.files (filename, data) VALUES(?, ?)`, [
+        .query(`INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`, [
           aFilename,
-          data,
+          JSON.stringify(aJSONObject),
         ]);
       response.json(
         this.generateDataMessage({
@@ -394,14 +391,14 @@ class DocuScopeWALTIService {
   /**
    *
    * @param {Request} request
-   * @param {Response} _response
+   * @param {Response} response
    */
   processCourseFileAssignment(request, response) {
     const { course_id, id } = request.query;
     console.log("Assigning " + id + " to course: " + course_id);
     try {
       this.dbConn.promise().query(
-        `INSERT INTO dswa.assignments (id, fileid)
+        `INSERT INTO ${MYSQL_DB}.assignments (id, fileid)
          VALUES (?, UUID_TO_BIN(?))
          ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
         [course_id, id, id]
@@ -638,9 +635,9 @@ class DocuScopeWALTIService {
     const data = JSON.stringify(aData);
 
     const options = {
-      hostname: this.backendHost,
+      hostname: ONTOPIC_HOST,
       path: url,
-      port: 5000,
+      port: ONTOPIC_PORT,
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -698,35 +695,31 @@ class DocuScopeWALTIService {
 
   /**
    *
+   * @param {Request} request 
+   * @param {Response} response 
    */
-  processJSONDownload(request, response) {
-    console.log("processJSONDownload (" + request.query.id + ")");
-
-    let fileId = request.query.id;
-
-    this.dbConn.query(
-      "select data,filename from dswa.files where id='" + fileId + "'",
-      function (err, result, _fields) {
-        if (result.length > 0) {
-          let decoded = atob(result[0].data);
-          let fileName = result[0].filename;
-
-          response.setHeader("Content-Type", "application/json");
-          response.attachment(fileName);
-
-          let unescaped = decodeURIComponent(decoded);
-
-          let jData = JSON.parse(unescaped);
-          console.log(jData.info);
-
-          response.send(unescaped);
-        }
+  async processJSONDownload(request, response) {
+    const fileId = request.query.id;
+    console.log(`processJSONDownload (${fileId})`);
+    try {
+      const [result] = await this.dbConn.promise().query(
+        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+        [fileId]);
+      if (result) {
+        response.send(result[0].data);
+      } else {
+        response.sendStatus(404);
       }
-    );
+    } catch (err) {
+      console.error(err.message);
+      response.sendStatus(500);
+    }
   }
 
   /**
    *
+   * @param {Request} request
+   * @param {Response} response  
    */
   processRequest(request, response) {
     console.log("processRequest (" + request.path + ")");
@@ -793,7 +786,7 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    if (path == "/") {
+    if (path === "/") {
       path = "/index.html";
     }
 
@@ -866,7 +859,7 @@ class DocuScopeWALTIService {
       response.json(
         this.generateDataMessage({
           uptime: this.format(uptime),
-          version: this.pjson.version,
+          version: info.version,
         })
       );
 
@@ -933,7 +926,7 @@ class DocuScopeWALTIService {
         `SELECT
          JSON_EXTRACT(data, '$.rules.name') AS genre,
          JSON_EXTRACT(data, '$.prompt_templates.${prompt}') AS prompt 
-         FROM files
+         FROM ${MYSQL_DB}.files
          WHERE id=(SELECT fileid FROM assignments
           WHERE id="${assignment}")`
       );

@@ -14,6 +14,7 @@ import {
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { courseId } from './lti.service';
+import { type ChatCompletion } from 'openai/resources/chat';
 
 // Showing the A.I. Scribe warning and setting dialog.
 const opt_in = false;
@@ -53,9 +54,30 @@ function requestConvertNotes(notes: string) {
       console.error(err);
       return of({ error: true, message: err.message });
     })
-  );
+  ).pipe(
+    map((data: ChatResponse) => {
+      if ('error' in data) {
+        console.log(data.message);
+        return 'An error occured while converting your notes to prose.';
+      }
+      if ('choices' in data) {
+        logCovertNotes(notes, data);
+        return data.choices[0].message.content ?? '';
+      }
+      return '';
+    }));
 }
 
+const NOTES_TO_PROSE = 'notes2prose'
+function logCovertNotes(notes: string, prose: ChatCompletion) {
+  const data = JSON.parse(retrieveConvertLog());
+  sessionStorage.setItem(NOTES_TO_PROSE, JSON.stringify([...data, { notes, prose }]))
+}
+export function retrieveConvertLog() {
+  return sessionStorage.getItem(NOTES_TO_PROSE) ?? '[]';
+}
+
+type ChatResponse = { error: boolean, message: string } | ChatCompletion;
 export const notes = new BehaviorSubject<string>('');
 export const [useNotes, notes$] = bind(notes, '');
 export const convertedNotes = combineLatest({
@@ -66,21 +88,13 @@ export const convertedNotes = combineLatest({
   filter((c) => c.notes.trim().length !== 0),
   distinctUntilKeyChanged('notes'),
   switchMap((c) =>
-    concat(of(SUSPENSE), requestConvertNotes(c.notes)).pipe(
-      map((data) => {
-        if (data.error) {
-          console.log(data.message);
-          return 'An error occured while converting your notes to prose.';
-        }
-        return data.choices?.at(0).message?.content ?? '';
-      })
-    )
+    concat<[SUSPENSE, string]>(of(SUSPENSE), requestConvertNotes(c.notes))
   )
 );
-export const [useProse, prose$] = bind(convertedNotes, SUSPENSE);
+export const [useProse, prose$] = bind<SUSPENSE | string>(convertedNotes, SUSPENSE);
 
 notes.subscribe((notes) => console.log(`TODO log notes: ${notes}`));
-prose$.subscribe((prose) => console.log(`TODO log prose: ${prose}`));
+prose$.subscribe((prose) => typeof (prose) === 'string' && console.log(`TODO log prose: ${prose}`));
 
 /*** Fix Grammar ***/
 
