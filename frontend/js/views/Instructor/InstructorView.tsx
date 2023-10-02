@@ -113,7 +113,7 @@ const InstructorView = () => {
     const data = new FormData();
     data.append("file", file);
     try {
-      const response = await fetch("/upload", {
+      const response = await fetch("/configuration", {
         method: "POST",
         body: data,
       });
@@ -147,7 +147,7 @@ const InstructorView = () => {
           />
         </td>
         <td>
-          <a href={`/download?id=${file.id}`} download={`${file.filename}`}>
+          <a href={`/configuration/${file.id}`} download={`${file.filename}`}>
             {file.filename}
           </a>
         </td>

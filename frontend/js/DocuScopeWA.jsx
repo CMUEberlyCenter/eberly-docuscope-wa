@@ -16,13 +16,10 @@ import EberlyLTIBase from "./EberlyLTIBase";
 import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
-import { courseId } from "./service/lti.service";
+import { courseId, isInstructor } from "./service/lti.service";
 
 // Replace with RxJS
 var badThat = null;
-
-//import { DocuScopeConfig } from './global';
-import { config } from "./global";
 
 /**
  *
@@ -442,32 +439,33 @@ export default class DocuScopeWA extends EberlyLTIBase {
     if (this.state.globallyDisabled == true) {
       return false;
     }
+    return isInstructor();
 
-    if (!window.serverContext) {
-      return false;
-    }
+    // if (!window.serverContext) {
+    //   return false;
+    // }
 
-    if (!window.serverContext.lti) {
-      return false;
-    }
+    // if (!window.serverContext.lti) {
+    //   return false;
+    // }
 
-    if (!window.serverContext.lti.roles) {
-      return false;
-    }
+    // if (!window.serverContext.lti.roles) {
+    //   return false;
+    // }
 
-    var splitter = window.serverContext.lti.roles.split(",");
+    // var splitter = window.serverContext.lti.roles.split(",");
 
-    for (var i = 0; i < splitter.length; i++) {
-      if (
-        splitter[i] == "urn:lti:instrole:ims/lis/Instructor" ||
-        splitter[i] == "urn:lti:instrole:ims/lis/Administrator" ||
-        splitter[i] == "Instructor"
-      ) {
-        return true;
-      }
-    }
+    // for (var i = 0; i < splitter.length; i++) {
+    //   if (
+    //     splitter[i] == "urn:lti:instrole:ims/lis/Instructor" ||
+    //     splitter[i] == "urn:lti:instrole:ims/lis/Administrator" ||
+    //     splitter[i] == "Instructor"
+    //   ) {
+    //     return true;
+    //   }
+    // }
 
-    return false;
+    // return false;
   }
 
   /**
@@ -539,9 +537,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     mainPage = (
       <DocuScopeWAScrim enabled={scrimup} dialog={progresswindow}>
         <StudentView
-          config={config}
           api={this.apiCall}
-          server={this.state.server}
           ruleManager={this.state.ruleManager}
           html={this.state.html}
           htmlSentences={this.state.htmlSentences}

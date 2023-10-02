@@ -48,7 +48,9 @@ const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
   ? 5000
   : parseInt(process.env.DSWA_ONTOPIC_PORT);
 
-const openai = new OpenAI();
+const openai = new OpenAI(); // by default uses env.OPENAI_API_KEY
+
+const VERSION = info.version;
 
 var onTopicRequests = 0;
 var onTopicRequestsAvg = 0;
@@ -57,11 +59,7 @@ var onTopicResponseAvg = 0;
 var onTopicResponseAvgCount = 0;
 
 var onTopicDBRetry = 0;
-// var onTopicService = null;
 var onTopicDBMaxRetry = 100;
-
-// var onTopicDBTimeTaken = 0;
-// var onTopicBackTimeTaken = 0;
 
 var dbCallback = null;
 
@@ -103,7 +101,7 @@ class DocuScopeWALTIService {
     setInterval(this.updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
     setInterval(this.updateUptime, 1000); // Every second
 
-    console.log(`DocuScope-WA front-end proxy version: ${info.version}`);
+    console.log(`DocuScope-WA front-end proxy version: ${VERSION}`);
 
     console.log(
       `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
@@ -120,8 +118,7 @@ class DocuScopeWALTIService {
     this.publicHome = "/public";
     this.staticHome = "/static";
 
-    // See rule retrieval code for more detail
-    //this.rules=JSON.parse (fs.readFileSync(__dirname + this.staticHome + '/rules.json', 'utf8'));
+    this.defaultRules = null; // default rules file cache
 
     // access config var
     this.mode = process.env.MODE ?? "production";
@@ -154,16 +151,18 @@ class DocuScopeWALTIService {
    * @returns {Promise<any>}
    */
   async getDefaultRuleData() {
-    try {
-      const filename = path.join(__dirname, this.staticHome, "dswa.json");
-      const file = await open(filename);
-      const ruleFile = await file.readFile({ encoding: "utf8" });
-      await file.close();
-      return JSON.parse(ruleFile);
-    } catch (err) {
-      console.log(err.message);
-      return {};
+    if (!this.defaultRules) {
+      try {
+        const filename = path.join(__dirname, this.staticHome, "dswa.json");
+        const file = await open(filename);
+        const ruleFile = await file.readFile({ encoding: "utf8" });
+        await file.close();
+        this.defaultRules = JSON.parse(ruleFile);
+      } catch (err) {
+        console.log(err.message);
+      }
     }
+    return this.defaultRules ?? {};
   }
 
   /**
@@ -272,48 +271,42 @@ class DocuScopeWALTIService {
 
   /**
    * Retrieve the list of configuration files and their meta-data
-   * @param {Request} _request
-   * @param {Response} response
    */
-  async getFiles(_request, response) {
-    try {
-      const [rows] = await this.dbConn.promise().query(
-        `SELECT
-             BIN_TO_UUID(id) AS id,
-             filename,
-             date,
-             JSON_EXTRACT(data, '$.info') AS info
-            FROM ${MYSQL_DB}.files`
-      );
-      response.json(this.generateDataMessage(rows));
-    } catch (err) {
-      console.error(err.message);
-      response.sendStatus(500);
-    }
+  async getFiles() {
+    const [rows] = await this.dbConn.promise().query(
+      `SELECT
+        BIN_TO_UUID(id) AS id,
+        filename,
+        date,
+        JSON_EXTRACT(data, '$.info') AS info
+       FROM ${MYSQL_DB}.files`
+    );
+    return rows;
   }
 
+  async getFile(fileId) {
+    const [rows] = await this.dbConn
+      .promise()
+      .query(
+        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+        [fileId]
+      );
+    return rows ? rows[0].data : undefined;
+  }
   /**
    *
-   * @param {Request} request
-   * @param {Response} response
-   * @param {string?} aCourseId
+   * @param {string} course_id
    */
-  async getFile(request, response, aCourseId) {
-    const course_id = aCourseId ?? request.query.course_id;
-    try {
-      const [rows] = await this.dbConn.promise().query(
-        `SELECT data FROM ${MYSQL_DB}.files
+  async getFileForCourse(course_id) {
+    const [rows] = await this.dbConn.promise().query(
+      `SELECT data FROM ${MYSQL_DB}.files
          WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments WHERE id=?)`,
-        [course_id]
-      );
-      if (rows.length <= 0) {
-        throw new Error("File data not found for assignment");
-      }
-      response.json(this.generateDataMessage(rows[0].data));
-    } catch (err) {
-      console.err(err);
-      response.sendStatus(500);
+      [course_id]
+    );
+    if (rows.length <= 0) {
+      throw new Error("File data not found for assignment");
     }
+    return rows[0].data;
   }
 
   /**
@@ -361,35 +354,26 @@ class DocuScopeWALTIService {
       const ruleData = await this.getDefaultRuleData();
       response.json(this.generateDataMessage(ruleData));
     } catch (err) {
-      response.json(this.generateErrorMessage(err.message));
+      console.error(err.message);
+      response.sendStatus(404);
+      // response.json(this.generateErrorMessage(err.message));
     }
   }
 
   /**
    *
-   * @param {Request} _request
-   * @param {Response} response
-   * @param {string} aFilename
+   * @param {string} filename
    * @param {string} aDate
    * @param {*} aJSONObject
    */
-  async storeFile(_request, response, aFilename, aDate, aJSONObject) {
-    try {
-      await this.dbConn
-        .promise()
-        .query(`INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`, [
-          aFilename,
-          JSON.stringify(aJSONObject),
-        ]);
-      response.json(
-        this.generateDataMessage({
-          filename: aFilename,
-          date: aDate,
-        })
-      );
-    } catch (err) {
-      response.status(500).send(err.message);
-    }
+  async storeFile(filename, date, aJSONObject) {
+    await this.dbConn
+      .promise()
+      .query(`INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`, [
+        filename,
+        JSON.stringify(aJSONObject),
+      ]);
+    return { filename, date };
   }
 
   /**
@@ -529,10 +513,8 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  processMetrics(request, response) {
-    //console.log ("processMetrics ()");
-
-    let metricsString = this.metrics.build();
+  processMetrics(_request, response) {
+    const metricsString = this.metrics.build();
 
     response.contentType("text/text");
     response.send(metricsString);
@@ -565,7 +547,6 @@ class DocuScopeWALTIService {
    * representative
    */
   updateMetricsAvg() {
-    //console.log ("updateMetricsAvg ()");
     onTopicRequestsAvg = 0;
     onTopicResponseAvg = 0;
     onTopicResponseAvgCount = 0;
@@ -596,7 +577,6 @@ class DocuScopeWALTIService {
    *
    */
   updateUptime() {
-    //console.log ("updateUptime ()");
     onTopicUptime += 1000;
 
     if (this.metrics) {
@@ -613,7 +593,6 @@ class DocuScopeWALTIService {
    *
    */
   updateResponseAvg(aValue) {
-    //console.log ("updateResponseAvg ()");
     onTopicResponseAvg += aValue;
     onTopicResponseAvgCount++;
 
@@ -749,21 +728,21 @@ class DocuScopeWALTIService {
         request.path == "/index.htm"
       ) {
         if (this.verifyLTI(request) == true) {
-          var settingsObject = this.generateSettingsObject(request);
+          const settingsObject = this.generateSettingsObject(request);
 
           //response.sendFile(__dirname + this.publicHome + request.path);
 
           //console.log (settingsObject);
 
-          var stringed = JSON.stringify(settingsObject);
+          const stringed = JSON.stringify(settingsObject);
 
-          var raw = readFileSync(
+          const raw = readFileSync(
             __dirname + this.publicHome + "/index.html",
             "utf8"
           );
           var html = raw.replace(
             "/*SETTINGS*/",
-            "var serverContext=" + stringed + ";"
+            `var serverContext=${stringed};`
           );
 
           //response.render('main', { html: html });
@@ -821,52 +800,20 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    if (request.path == "/api/v1/rules") {
-      // First check to see if we have a course_id parameter, if so load from db
-
-      this.updateMetrics();
-
-      let course_id = request.query.course_id;
-
-      if (course_id) {
-        console.log("Using course id: " + course_id);
-
-        if (course_id.trim().toLowerCase() !== "global") {
-          console.log(
-            "Loading rule set from database for course id: " + course_id
-          );
-
-          this.getFile(request, response, course_id);
-          return;
-        }
-      } else {
-        console.log(
-          "Error: we do not have a course_id provided, sending default ..."
-        );
-      }
-
-      // If we do not have a course_id parameter or if it's set to 'global' then fall back to
-      // baked-in ruleset
-
-      this.sendDefaultFile(request, response);
-    }
-
-    //>------------------------------------------------------------------
-
     /*
      Originally named 'ping', we had to change this because a bunch of browser-addons have a big
      problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
      to 'ding'
     */
     if (request.path == "/api/v1/ding") {
-      let uptime = process.uptime();
+      const uptime = process.uptime();
 
       console.log(this.format(uptime));
 
       response.json(
         this.generateDataMessage({
           uptime: this.format(uptime),
-          version: info.version,
+          version: VERSION,
         })
       );
 
@@ -882,27 +829,11 @@ class DocuScopeWALTIService {
 
       let msg = request.body;
 
-      /*
-      if (msg.status=="request") {
-        let raw=msg.data.base;
-        let decoded=Buffer.from(raw, 'base64');
-        let unescaped=unescape (decoded);
-        //let unescaped=raw;
-        console.log (unescaped);
-      }
-      */
-
       console.log(msg);
 
       console.log("Forwarding request ...");
 
       this.apiPOSTCall("ontopic", msg, response);
-
-      /* 
-      response.json (this.generateDataMessage ({
-        sentences: {},
-      }));
-      */
 
       return;
     }
@@ -964,74 +895,69 @@ class DocuScopeWALTIService {
 
     console.log("Configuring endpoints ...");
 
-    this.app.get("/download", (request, response) => {
-      console.log("get() download");
-      this.processJSONDownload(request, response);
+    this.app.get("/configuration/:fileId", async (request, response) => {
+      const fileId = request.params.fileId;
+      try {
+        const data = await this.getFile(fileId);
+        if (data) {
+          response.send(data);
+        } else {
+          response.sendStatus(404);
+        }
+      } catch (err) {
+        console.error(err.message);
+        response.sendStatus(500);
+      }
     });
 
-    this.app.post("/upload", async (request, response) => {
+    this.app.post("/configuration", async (request, response) => {
       console.log("post() upload");
 
-      try {
-        if (!request.files) {
-          request.send({
-            status: false,
-            message: "No file uploaded",
-          });
-        } else {
-          console.log("Processing file upload ...");
+      if (!request.files) {
+        request.send({
+          status: false,
+          message: "No file uploaded",
+        });
+      } else {
+        console.log("Processing file upload ...");
 
-          let jsonFile = request.files.file;
+        try {
+          const jsonFile = request.files.file;
+          const jsonObject = JSON.parse(jsonFile.data);
 
-          var jsonObject = JSON.parse(jsonFile.data.toString("ascii"));
-
-          console.log(
-            "Storing: " + jsonFile.name + " (" + request.body.date + ") ..."
-          );
-
-          this.storeFile(
-            request,
-            response,
+          console.log(`Storing: ${jsonFile.name} ("${request.body.date}) ...`);
+          const filedata = await this.storeFile(
             jsonFile.name,
             request.body.date,
             jsonObject
           );
-
-          /*
-          response.send({
-            status: true,
-            message: 'File(s) uploaded'
-          });
-          */
+          response.json(this.generateDataMessage(filedata));
+        } catch (err) {
+          console.error(err.message);
+          response.sendStatus(500);
         }
-      } catch (err) {
-        //response.status(500).send(err.message);
-        response.json(this.generateErrorMessage(err.message));
       }
     });
 
-    this.app.post("/listfiles", (request, response) => {
-      console.log("get() listfiles");
-      this.getFiles(request, response);
+    this.app.post("/listfiles", async (_request, response) => {
+      try {
+        const files = await this.getFiles();
+        response.json(this.generateDataMessage(files));
+      } catch (err) {
+        console.error(err.message);
+        response.sendStatus(500);
+      }
     });
 
     this.app.get("/assign", (request, response) => {
-      console.log("get() assign");
       this.processCourseFileAssignment(request, response);
     });
 
-    this.app.post("/getfile", (request, response) => {
-      console.log("post() getid");
-      this.getFile(request, response);
-    });
-
     this.app.post("/getfileid", (request, response) => {
-      console.log("post() getfileid");
       this.getFileIdFromCourse(request, response);
     });
 
     this.app.get("/metrics", (request, response) => {
-      //console.log ("get() metrics");
       this.processMetrics(request, response);
     });
 
@@ -1041,26 +967,6 @@ class DocuScopeWALTIService {
         course_id,
         "notes_to_prose_prompt"
       );
-      // const prompt = data?.prompt_templates?.notes_to_prose_prompt
-      //   ?? `I am writing a {genre}, and I want you to generate prose from notes included using the following guidelines.
-
-      // In converting notes to prose, you should uphold the following six principles:
-
-      // Fidelity to Original Content: The prose must strictly adhere to the information presented in the notes. Any specific terminologies, abbreviations, or unique notations should be maintained or appropriately expanded without distortion.
-
-      // Avoidance of Interpretation: The prose should avoid any form of interpretation, qualitative judgments, embellishments, or additional substantive content. The inherent structure and tone of the notes should be preserved.
-
-      // Preservation of Original Tone: While enhancing readability, the prose should not introduce any non-neutral elements, including inadvertent biases, unless they are explicitly present in the notes.
-
-      // Grammatical Correctness: Despite the nature of the notes, the resulting prose should consist of grammatically correct sentences.
-
-      // Preservation of Note Coherence: The prose should reflect the order, coherence, or disjointedness of the original notes. You must not artificially introduce or modify the flow or connection between ideas.
-
-      // Transparency and Limitations: Users should be made aware that the coherence and intelligibility of the produced prose directly correspond to the clarity and structure of the original notes. Disjointed or unclear notes will lead to similarly disjointed prose.
-
-      // Adherence to genre conventions: The prose should be written by using the conventions that are commonly used in the specific genre.
-
-      // Notes: {notes}`;
       if (!genre || !prompt) {
         response.json({});
         return;
@@ -1081,12 +987,6 @@ class DocuScopeWALTIService {
     this.app.get("/api/v1/scribe/fix_grammar", async (request, response) => {
       const { course_id, text } = request.body;
       const { prompt } = await this.getPrompt(course_id, "grammar");
-      // const prompt = data?.prompt_templates?.grammar
-      //   ?? `Please fix the grammar of the following text: {text}
-
-      // Return a corrected text with a separate explanation of corrections. If there are no grammatical errors, return the original text.
-
-      // Use the following JSON format without any additional texts: {{"original": "this is the original text.", "correction": "this is a fixed text.", "explanattion": "this text provide the reasons for the corrections, if any."}}`;
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
@@ -1107,8 +1007,6 @@ class DocuScopeWALTIService {
     this.app.post("/api/v1/scribe/clarify", async (request, response) => {
       const { course_id, text } = request.body;
       const { prompt } = await this.getPrompt(course_id, "clarity_prompt");
-      // const prompt = data?.prompt_templates?.clarify_prompt
-      //   ?? "Please improve the clarity of the following text: {text}";
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
@@ -1127,23 +1025,38 @@ class DocuScopeWALTIService {
       response.json(clarified);
     });
 
+    this.app.get("/api/v1/rules", async (request, response) => {
+      const { course_id } = request.query;
+      // TODO use sessions to store/retrieve course_id
+      if (course_id && course_id.trim().toLowerCase() !== "global") {
+        try {
+          console.log(`loading rules for ${course_id}`);
+          const rules = await this.getFileForCourse(course_id);
+          response.json(this.generateDataMessage(rules));
+        } catch (err) {
+          console.error(err.message);
+          response.sendStatus(404);
+        }
+      } else {
+        console.warn(`Invalid course id (${course_id}), sending default.`);
+        const rules = await this.getDefaultRuleData();
+        response.json(this.generateDataMessage(rules));
+      }
+    });
+
     this.app.get("/api/v1/*", (request, response) => {
-      //console.log ("get(api)");
       this.processAPIRequest("GET", request, response);
     });
 
     this.app.post("/api/v1/*", (request, response) => {
-      //console.log ("post(api)");
       this.processAPIRequest("POST", request, response);
     });
 
     this.app.get("/*", (request, response) => {
-      //console.log ("get()");
       this.processRequest(request, response);
     });
 
     this.app.post("/*", (request, response) => {
-      //console.log ("post()");
       this.processRequest(request, response);
     });
 
