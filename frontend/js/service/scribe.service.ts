@@ -18,19 +18,20 @@ import { type ChatCompletion } from 'openai/resources/chat';
 import { type Range } from 'slate';
 
 // Showing the A.I. Scribe warning and setting dialog.
-const opt_in = false;
-const show_scribe_option = new BehaviorSubject<boolean>(opt_in);
+const showAtStartup = false;
+const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
 export const hideScribeOption = () => show_scribe_option.next(false);
 export const showScribeOption = () => show_scribe_option.next(true);
 export const [useShowScribeOption, showScribeOption$] = bind(
   show_scribe_option.pipe(distinctUntilChanged()),
-  opt_in
+  showAtStartup
 );
 
 // If scribe is currently enabled. // TODO: possibly set default from previous setting
-const scribe = new BehaviorSubject<boolean>(true); // Opt-out
+const optIn = false;
+const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
 export const enableScribe = (enable: boolean) => scribe.next(enable);
-export const [useScribe, scribe$] = bind(scribe, true);
+export const [useScribe, scribe$] = bind(scribe, optIn);
 
 /*** Notes to Prose ***/
 /**
@@ -85,6 +86,21 @@ function logCovertNotes(notes: string, prose: ChatCompletion) {
 }
 export function retrieveConvertLog() {
   return sessionStorage.getItem(NOTES_TO_PROSE) ?? '[]';
+}
+export function downloadHistory(): void {
+  // file object
+  const file = new Blob([retrieveConvertLog()], { type: 'application/json' });
+
+  // anchor link
+  const element = document.createElement('a');
+  element.href = URL.createObjectURL(file);
+  element.style.display = 'none';
+  element.download = `AIScribeHistory-${courseId()}-${Date.now()}.json`;
+
+  // simulate link click
+  document.body.appendChild(element); // Required for this to work in FireFox
+  element.click();
+  // remove element?
 }
 
 type ChatResponse = { error: boolean; message: string } | ChatCompletion;

@@ -658,7 +658,9 @@ const StudentView = (props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
-            <Button onClick={convertNotes}>Notes2Prose</Button>
+            <Button onClick={convertNotes} className="me-2">
+              Notes2Prose
+            </Button>
             <Button onClick={(_e) => globalUpdate(editorTextValue)}>
               Update
             </Button>

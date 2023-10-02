@@ -2,6 +2,7 @@
 import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import {
+  downloadHistory,
   enableScribe,
   hideScribeOption,
   useScribe,
@@ -14,6 +15,7 @@ export const ScribeOption = () => {
   const show = useShowScribeOption();
   const onHide = () => hideScribeOption();
   const handleChange = () => enableScribe(!scribe);
+
   return (
     <Modal show={show} onHide={onHide} scrollable>
       <Modal.Header closeButton>A.I. Scribe</Modal.Header>
@@ -37,6 +39,16 @@ export const ScribeOption = () => {
         <p>
           Use the toggle button below to enable or disable these extensions. If
           disabled, none of your text will be submitted to ChatGPT.
+        </p>
+        <p>
+          A log of interactions with this extension is stored in your
+          browser&apos;s session cache. This information is not collected by
+          this system and will be automatically deleted if you close this
+          application and the browser it runs in. Instructors might ask for this
+          information and it is available from this link:
+          <Button variant="link" onClick={downloadHistory}>
+            Export History
+          </Button>
         </p>
       </Modal.Body>
       <Modal.Footer>
