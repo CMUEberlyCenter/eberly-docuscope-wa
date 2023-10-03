@@ -18,7 +18,7 @@ import { type ChatCompletion } from 'openai/resources/chat';
 import { type Range } from 'slate';
 
 // Showing the A.I. Scribe warning and setting dialog.
-const showAtStartup = false;
+const showAtStartup = sessionStorage.getItem('show_scribe') !== 'false';
 const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
 export const hideScribeOption = () => show_scribe_option.next(false);
 export const showScribeOption = () => show_scribe_option.next(true);
@@ -26,12 +26,14 @@ export const [useShowScribeOption, showScribeOption$] = bind(
   show_scribe_option.pipe(distinctUntilChanged()),
   showAtStartup
 );
+show_scribe_option.subscribe((show) => show && sessionStorage.setItem('show_scribe', 'false'))
 
 // If scribe is currently enabled. // TODO: possibly set default from previous setting
-const optIn = false;
+const optIn = sessionStorage.getItem('enable_scribe') === true.toString();
 const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
 export const enableScribe = (enable: boolean) => scribe.next(enable);
 export const [useScribe, scribe$] = bind(scribe, optIn);
+scribe.subscribe((enable) => sessionStorage.setItem('enable_scribe', enable.toString()))
 
 /*** Notes to Prose ***/
 /**
