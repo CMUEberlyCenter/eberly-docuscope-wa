@@ -391,7 +391,7 @@ class DocuScopeWALTIService {
          ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
         [course_id, id, id]
       );
-      response.sendStatus(200);
+      response.sendStatus(201);
     } catch (err) {
       console.error(err.message);
       response.sendStatus(500);
@@ -911,10 +911,8 @@ class DocuScopeWALTIService {
     });
 
     this.app.post("/configuration", async (request, response) => {
-      console.log("post() upload");
-
       if (!request.files) {
-        request.send({
+        response.status(400).send({
           status: false,
           message: "No file uploaded",
         });
@@ -934,7 +932,13 @@ class DocuScopeWALTIService {
           response.json(this.generateDataMessage(filedata));
         } catch (err) {
           console.error(err.message);
-          response.sendStatus(500);
+          if (err instanceof SyntaxError) {
+            // likely bad json
+            response.sendStatus(400);
+          } else {
+            // likely bad db call
+            response.sendStatus(500);
+          }
         }
       }
     });
@@ -1025,9 +1029,7 @@ class DocuScopeWALTIService {
       response.json(clarified);
     });
 
-    this.app.get("/api/v1/rules", async (request, response) => {
-      const { course_id } = request.query;
-      // TODO use sessions to store/retrieve course_id
+    const getCourseConfig = async (response, course_id) => {
       if (course_id && course_id.trim().toLowerCase() !== "global") {
         try {
           console.log(`loading rules for ${course_id}`);
@@ -1042,6 +1044,19 @@ class DocuScopeWALTIService {
         const rules = await this.getDefaultRuleData();
         response.json(this.generateDataMessage(rules));
       }
+    };
+    this.app.get(
+      "/api/v1/assignments/:course_id/rules",
+      async (request, response) => {
+        // not currently used, but will be useful for deep-linking.
+        const { course_id } = request.params;
+        await getCourseConfig(response, course_id);
+      }
+    );
+    this.app.get("/api/v1/rules", async (request, response) => {
+      const { course_id } = request.query;
+      // TODO use sessions to store/retrieve course_id
+      await getCourseConfig(response, course_id);
     });
 
     this.app.get("/api/v1/*", (request, response) => {
