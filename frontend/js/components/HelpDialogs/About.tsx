@@ -1,12 +1,11 @@
+import { Subscribe } from "@react-rxjs/core";
 import * as React from "react";
-import { config } from "../../global";
 import { Modal } from "react-bootstrap";
+import { VERSION } from "../../service/application.service";
 import { showAbout, useShowAbout } from "../../service/help.service";
 import { rule$, useRules } from "../../service/rules.service";
-import { Subscribe } from "@react-rxjs/core";
 
 export const About = () => {
-  const { version, date } = config;
   const show = useShowAbout();
   const rules = useRules();
 
@@ -28,8 +27,8 @@ export const About = () => {
 
         <h2>Application Information</h2>
         <ul>
-          <li>Application version: {version}</li>
-          <li>Build date: {date}</li>
+          <li>Application version: {VERSION}</li>
+          {/* <li>Build date: {new Date(BUILT_ON).toLocaleString()}</li> */}
         </ul>
 
         <hr />

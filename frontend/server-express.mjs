@@ -15,7 +15,7 @@ import fileUpload from "express-fileupload";
 import { readFileSync } from "fs";
 import { request } from "http";
 import jwt from "jsonwebtoken";
-import { createPool } from "mysql2";
+import { createPool } from "mysql2/promise";
 import { open } from "node:fs/promises";
 import process from "node:process";
 import { OpenAI } from "openai";
@@ -53,7 +53,7 @@ const MYSQL_DB = options.db ?? "dswa";
  */
 function fromEnvFile(base, defaultValue) {
   if (process.env[`${base}_FILE`]) {
-    return readFileSync(process.env[`${base}_FILE`], 'utf-8');
+    return readFileSync(process.env[`${base}_FILE`], 'utf-8').trim();
   }
   if (process.env[base]) {
     return process.env[base];
@@ -71,7 +71,7 @@ const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
 
 const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET', '');
 
-const openai = new OpenAI({apiKey: fromEnvFile('OPEN_API_KEY')});
+const openai = new OpenAI({ apiKey: fromEnvFile('OPENAI_API_KEY') });
 
 const VERSION = info.version;
 
@@ -81,10 +81,68 @@ var onTopicUptime = 0;
 var onTopicResponseAvg = 0;
 var onTopicResponseAvgCount = 0;
 
-var onTopicDBRetry = 0;
-var onTopicDBMaxRetry = 100;
+const pool = createPool({
+  host: process.env.DB_HOST,
+  user: MYSQL_USER,
+  password: MYSQL_PASSWORD,
+  database: MYSQL_DB,
+  waitForConnections: true,
+  connectionLimit: 100,
+  timezone: 'Z', // Makes TIMESTAMP work correctly
+});
 
-var dbCallback = null;
+async function initializeDatabase() {
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS files (
+      id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) NOT NULL PRIMARY KEY,
+      filename VARCHAR(100) NOT NULL,
+      date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      data JSON NOT NULL)`);
+
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS assignments (
+      id VARCHAR(40) NOT NULL PRIMARY KEY,
+      fileid BINARY(16) NOT NULL,
+      FOREIGN KEY (fileid) REFERENCES files(id))`);
+}
+
+/**
+ * Retrieve the list of configuration files and their meta-data
+ */
+async function getFiles() {
+  const [rows] = await pool.query(
+    `SELECT
+        BIN_TO_UUID(id) AS id,
+        filename,
+        date,
+        JSON_EXTRACT(data, '$.info') AS info
+       FROM ${MYSQL_DB}.files`
+  );
+  return rows;
+}
+
+async function getFile(fileId) {
+  const [rows] = await pool.query(
+    `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+    [fileId]
+  );
+  return rows ? rows[0].data : undefined;
+}
+/**
+ *
+ * @param {string} course_id
+ */
+async function getFileForCourse(course_id) {
+  const [rows] = await pool.query(
+    `SELECT data FROM ${MYSQL_DB}.files
+         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments WHERE id=?)`,
+    [course_id]
+  );
+  if (rows.length <= 0) {
+    throw new Error("File data not found for assignment");
+  }
+  return rows[0].data;
+}
 
 /**
  *
@@ -190,150 +248,6 @@ class DocuScopeWALTIService {
 
   /**
    *
-   */
-  initDBService(cb) {
-    console.log(
-      "initDBService (retry:" +
-        onTopicDBRetry +
-        " of max " +
-        onTopicDBMaxRetry +
-        ")"
-    );
-    console.log(
-      "Creating db connection: " +
-        process.env.DB_HOST +
-        ":" +
-        process.env.DB_PORT
-    );
-
-    dbCallback = cb;
-
-    // TODO retry until pool created.
-    this.dbConn = createPool({
-      connectionLimit: 100, //important
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT),
-      user: MYSQL_USER,
-      password: MYSQL_PASSWORD,
-      // database: MYSQL_DB,
-      debug: false,
-      timezone: "Z", // Makes TIMESTAMP work correctly
-    });
-
-    this.initDB();
-  }
-
-  /**
-   *
-   */
-  initDB() {
-    console.log(
-      "initDB (retry:" + onTopicDBRetry + " of max " + onTopicDBMaxRetry + ")"
-    );
-
-    this.dbConn.getConnection((err, connection) => {
-      if (err) {
-        console.log(
-          "Can't connect to database yet, entering retry ... ('" +
-            err.message +
-            "')"
-        );
-        onTopicDBRetry++;
-        if (onTopicDBRetry > onTopicDBMaxRetry) {
-          console.log("Reached max retry");
-          throw err;
-        }
-        setTimeout(this.initDB, 10000);
-        return;
-      }
-
-      console.log("Connected with thread id: " + connection.threadId);
-
-      connection.query(
-        `CREATE DATABASE IF NOT EXISTS ${MYSQL_DB}`,
-        function (err, _result) {
-          if (err) throw err;
-          console.log("Database created");
-        }
-      );
-
-      // Need to add a field here to identify the uploader/owner!
-
-      connection.query(
-        `CREATE TABLE IF NOT EXISTS ${MYSQL_DB}.files (
-          id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) NOT NULL PRIMARY KEY,
-          filename VARCHAR(100) NOT NULL,
-          date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-          data JSON NOT NULL)`,
-        function (err, _result) {
-          if (err) throw err;
-          console.log("DSWA file table created");
-        }
-      );
-
-      connection.query(
-        `CREATE TABLE IF NOT EXISTS ${MYSQL_DB}.assignments (
-          id VARCHAR(40) NOT NULL PRIMARY KEY,
-          fileid BINARY(16) NOT NULL,
-          FOREIGN KEY (fileid) REFERENCES ${MYSQL_DB}.files(id))`,
-        function (err, _result) {
-          if (err) throw err;
-          console.log("DSWA assignment table created");
-        }
-      );
-
-      if (dbCallback) {
-        dbCallback();
-      } else {
-        console.log("Error: no callback provided");
-      }
-
-      console.log("Database connection initialized");
-    });
-  }
-
-  /**
-   * Retrieve the list of configuration files and their meta-data
-   */
-  async getFiles() {
-    const [rows] = await this.dbConn.promise().query(
-      `SELECT
-        BIN_TO_UUID(id) AS id,
-        filename,
-        date,
-        JSON_EXTRACT(data, '$.info') AS info
-       FROM ${MYSQL_DB}.files`
-    );
-    return rows;
-  }
-
-  async getFile(fileId) {
-    const [rows] = await this.dbConn
-      .promise()
-      .query(
-        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
-        [fileId]
-      );
-    return rows ? rows[0].data : undefined;
-  }
-  /**
-   *
-   * @param {string} course_id
-   */
-  async getFileForCourse(course_id) {
-    const [rows] = await this.dbConn.promise().query(
-      `SELECT data FROM ${MYSQL_DB}.files
-         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments WHERE id=?)`,
-      [course_id]
-    );
-    if (rows.length <= 0) {
-      throw new Error("File data not found for assignment");
-    }
-    return rows[0].data;
-  }
-
-  /**
-   *
    * @param {Request} request
    * @param {Response} response
    */
@@ -349,8 +263,7 @@ class DocuScopeWALTIService {
       return;
     }
     try {
-      const [rows] = await this.dbConn
-        .promise()
+      const [rows] = await pool
         .query(
           `SELECT BIN_TO_UUID(fileid) AS fileid FROM ${MYSQL_DB}.assignments WHERE id=?`,
           [course_id]
@@ -390,8 +303,7 @@ class DocuScopeWALTIService {
    * @param {*} aJSONObject
    */
   async storeFile(filename, date, aJSONObject) {
-    await this.dbConn
-      .promise()
+    await pool
       .query(`INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`, [
         filename,
         JSON.stringify(aJSONObject),
@@ -408,7 +320,7 @@ class DocuScopeWALTIService {
     const { course_id, id } = request.query;
     console.log("Assigning " + id + " to course: " + course_id);
     try {
-      this.dbConn.promise().query(
+      pool.query(
         `INSERT INTO ${MYSQL_DB}.assignments (id, fileid)
          VALUES (?, UUID_TO_BIN(?))
          ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
@@ -689,8 +601,7 @@ class DocuScopeWALTIService {
     const fileId = request.query.id;
     console.log(`processJSONDownload (${fileId})`);
     try {
-      const [result] = await this.dbConn
-        .promise()
+      const [result] = await pool
         .query(
           `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
           [fileId]
@@ -734,19 +645,15 @@ class DocuScopeWALTIService {
         if (this.verifyLTI(request) == true) {
           const settingsObject = this.generateSettingsObject(request);
 
-          //response.sendFile(__dirname + this.publicHome + request.path);
-
-          //console.log (settingsObject);
-
           const stringed = JSON.stringify(settingsObject);
 
           const raw = readFileSync(
             __dirname + this.publicHome + "/index.html",
             "utf8"
           );
-          var html = raw.replace(
+          const html = raw.replace(
             "/*SETTINGS*/",
-            `var serverContext=${stringed};`
+            `var serverContext=${stringed}; var applicationContext=${JSON.stringify({ version: VERSION })};`
           );
 
           //response.render('main', { html: html });
@@ -864,7 +771,7 @@ class DocuScopeWALTIService {
       if (!assignment) {
         throw new Error("No assignment for rule data fetch.");
       }
-      const [rows] = await this.dbConn.promise().query(
+      const [rows] = await pool.query(
         `SELECT
          JSON_EXTRACT(data, '$.rules.name') AS genre,
          JSON_EXTRACT(data, '$.prompt_templates.${prompt}') AS prompt 
@@ -894,15 +801,13 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  run() {
-    console.log("run ()");
-
+  async run() {
     console.log("Configuring endpoints ...");
 
     this.app.get("/configuration/:fileId", async (request, response) => {
       const fileId = request.params.fileId;
       try {
-        const data = await this.getFile(fileId);
+        const data = await getFile(fileId);
         if (data) {
           response.send(data);
         } else {
@@ -949,7 +854,7 @@ class DocuScopeWALTIService {
 
     this.app.post("/listfiles", async (_request, response) => {
       try {
-        const files = await this.getFiles();
+        const files = await getFiles();
         response.json(this.generateDataMessage(files));
       } catch (err) {
         console.error(err.message);
@@ -1037,7 +942,7 @@ class DocuScopeWALTIService {
       if (course_id && course_id.trim().toLowerCase() !== "global") {
         try {
           console.log(`loading rules for ${course_id}`);
-          const rules = await this.getFileForCourse(course_id);
+          const rules = await getFileForCourse(course_id);
           response.json(this.generateDataMessage(rules));
         } catch (err) {
           console.error(err.message);
@@ -1079,14 +984,13 @@ class DocuScopeWALTIService {
       this.processRequest(request, response);
     });
 
-    this.initDBService(() => {
-      console.log("Database service initialized, ok to start listening ...");
-      this.app.listen(port, () => {
-        console.log(`App running on port ${port}.`);
-      });
+    await initializeDatabase();
+    console.log("Database service initialized, ok to start listening ...");
+    this.app.listen(port, () => {
+      console.log(`App running on port ${port}.`);
     });
   }
 }
 
-var service = new DocuScopeWALTIService();
+const service = new DocuScopeWALTIService();
 service.run();

@@ -6,7 +6,7 @@ import { Form, Spinner } from "react-bootstrap";
 import { BehaviorSubject } from "rxjs";
 import "../../../css/main.css";
 import { launch } from "../../DocuScopeTools";
-import { config } from "../../global";
+import { VERSION } from "../../service/application.service";
 import { courseId } from "../../service/lti.service";
 import "./InstuctorView.css";
 
@@ -62,8 +62,6 @@ if (typeof window !== "undefined") {
 }
 
 const InstructorView = () => {
-  const { version } = config;
-
   const [selected, setSelected] = useState("");
   const files = useFiles();
 
@@ -178,7 +176,7 @@ const InstructorView = () => {
   return (
     <div tabIndex={0} className="ltiapp">
       <div className="versionlabel">
-        Eberly DocuScope Write & Audit version: {version}
+        Eberly DocuScope Write & Audit version: {VERSION}
       </div>
       <div className="logo">DocuScope Write & Audit</div>
       <div className="dswa-main">

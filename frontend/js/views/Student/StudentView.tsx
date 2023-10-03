@@ -83,7 +83,6 @@ import { serialize } from "../../service/editor-state.service";
 // import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { About } from "../../components/HelpDialogs/About";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
-import { config } from "../../global";
 import {
   SelectedNotesProse,
   notes,
@@ -91,6 +90,7 @@ import {
   useScribe,
 } from "../../service/scribe.service";
 import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
+import { VERSION } from "../../service/application.service";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -708,7 +708,7 @@ const StudentView = (props: {
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
         <div className="statusbar-version">
-          {`DSWA Version: ${config.version}`}
+          {`DSWA Version: ${VERSION}`}
         </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon

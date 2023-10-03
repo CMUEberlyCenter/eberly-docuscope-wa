@@ -6,44 +6,67 @@
 
 version: '3'
 services:
-
-  dswadb:
-    image: mysql:8.0.30
-    # We don't need an externally exposed port since docker-compose makes 3306 available 
-    # to it's own private network anyway. However it is very helpful for testing
-    #ports:
-    # - 13306:3306
+  db:
+    image: mysql:8
+    secrets:
+      - db_root_password
+      - db_user
+      - db_password
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD} 
-      MYSQL_DATABASE: ${MYSQL_DATABASE} 
-      MYSQL_USER: ${MYSQL_USER} 
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: dswa
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
+      MYSQL_USER_FILE: "/run/secrets/db_user"
+      MYSQL_PASSWORD_FILE: "/run/secrets/db_password"
     volumes:
-      - ./dswadb:/var/lib/mysql 
-    user: ${MYSQL_UID}
+      - db-data:/var/lib/mysql 
 
-  dswa-ontopic:
+  ontopic:
     build:    
       context: ./ontopic
       dockerfile: ./Dockerfile    
     restart: always      
     #ports:
     # - 5000:5000
-    tty: true
-    stdin_open: true
 
-  dswa-frontend:
+  frontend:
     build:    
       context: ./frontend
       dockerfile: ./Dockerfile
     ports:
      - 8888:8888
+    secrets:
+      - db_user
+      - db_password
+      - openai_api_key
+      - token
     environment:
-      DSWA_ONTOPIC_HOST: "dswa-ontopic"
+      DSWA_ONTOPIC_HOST: "ontopic"
       DSWA_ONTOPIC_PORT: 5000
-    tty: true
-    stdin_open: true
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_DATABASE: dswa
+      MYSQL_USER_FILE: /run/secrets/db_user
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      TOKEN_SECRET_FILE: /run/secrets/token
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      PORT: 8888
     restart: always
     depends_on:
-      - "dswadb"    
+      - "db"    
     
+volumes:
+  db-data:
+    labels:
+      edu.cmu.eberly.docuscope.description: "Database for DocuScope Write & Audit Scribe"
+
+secrets:
+  db_user:
+    file: secrets/db_user
+  db_password:
+    file: secrets/db_password
+  db_root_password:
+    file: secrets/db_root_password
+  openai_api_key:
+    file: secrets/openai_api_key
+  token:
+    file: secrets/token
