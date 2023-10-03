@@ -56,7 +56,7 @@ const config = {
         exclude: [/node_modules/, /\.test\.tsx?/i],
       },
       {
-        test: /\.(js|jsx)$/i,
+        test: /\.(jsx?)$/i,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
         options: {
@@ -123,8 +123,8 @@ const config = {
       //{ enforce: 'post', test: /fontkit[/\\]index.js$/, loader: "transform-loader?brfs" },
       //{ enforce: 'post', test: /unicode-properties[/\\]index.js$/, loader: "transform-loader?brfs" },
       //{ enforce: 'post', test: /linebreak[/\\]src[/\\]linebreaker.js/, loader: "transform-loader?brfs" },
-      { test: /src[/\\]assets/, loader: 'arraybuffer-loader'},
-      { test: /\.afm$/, type: 'asset/source'}
+      // { test: /src[/\\]assets/, loader: 'arraybuffer-loader'},
+      // { test: /\.afm$/, type: 'asset/source'}
     ]
   }
 };

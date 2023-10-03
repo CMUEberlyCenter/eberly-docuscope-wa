@@ -1,4 +1,4 @@
-import { uuidv4 } from "./DataTools";
+import { v4 as uuidv4 } from 'uuid';
 import DocuScopeRuleChild from "./DocuScopeRuleChild";
 
 /**

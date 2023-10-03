@@ -31,7 +31,6 @@ services:
     # - 5000:5000
     tty: true
     stdin_open: true
-    restart: always
 
   dswa-frontend:
     build:    

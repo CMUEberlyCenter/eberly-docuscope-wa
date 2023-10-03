@@ -1,16 +1,16 @@
 /**
- *
+ * unused
  */
-export function isEmptyString(str) {
-  return !str || 0 === str.length;
-}
+// export function isEmptyString(str) {
+//   return !str || 0 === str.length;
+// }
 
 /**
- *
+ * unused
  */
-export function isBlank(str) {
-  return !str || /^\s*$/.test(str);
-}
+// export function isBlank(str) {
+//   return !str || /^\s*$/.test(str);
+// }
 
 /**
  * We need to switch to using the immutable package. That way we
@@ -68,115 +68,107 @@ export function parameterArrayToJSON(anArray) {
 }
 
 /**
- *
+ * unused
  */
-export function jsonToTable(tablejson) {
-  return this.parameterJSONtoArray(tablejson);
-}
+// export function jsonToTable(tablejson) {
+//   return parameterJSONtoArray(tablejson);
+// }
 
 /**
- *
- */
-export function uuidv4() {
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
-    var r = (Math.random() * 16) | 0,
-      v = c == "x" ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
-
-/**
- *
+ * unused
  * @template A
  * @param {A[]} anArray
  * @param {A} aTarget
  */
-export function deleteElement(anArray, aTarget) {
-  return anArray.filter((a) => a !== aTarget);
-}
+// export function deleteElement(anArray, aTarget) {
+//   return anArray.filter((a) => a !== aTarget);
+// }
 
 /**
- *
+ * unused
  */
-export function popElement(anArray) {
-  console.log("popElement ()");
+// export function popElement(anArray) {
+//   console.log("popElement ()");
 
-  if (!anArray) {
-    return anArray;
-  }
+//   if (!anArray) {
+//     return anArray;
+//   }
 
-  if (anArray.length == 0) {
-    return anArray;
-  }
+//   if (anArray.length == 0) {
+//     return anArray;
+//   }
 
-  console.log("Before pop: " + anArray.length);
+//   console.log("Before pop: " + anArray.length);
 
-  anArray.splice(anArray.length - 1, 1);
+//   anArray.splice(anArray.length - 1, 1);
 
-  console.log("After pop: " + anArray.length);
+//   console.log("After pop: " + anArray.length);
 
-  return anArray;
-}
+//   return anArray;
+// }
 
 /**
  * https://www.mattzeunert.com/2016/01/28/javascript-deep-equal.html
  */
-export function jsonEqual(a, b) {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
+// unused
+// export function jsonEqual(a, b) {
+//   return JSON.stringify(a) === JSON.stringify(b);
+// }
 
 /**
- *
+ * unused
  */
-export function getDateString() {
-  var today = new Date();
-  return today.toLocaleString();
-}
+// export function getDateString() {
+//   var today = new Date();
+//   return today.toLocaleString();
+// }
 
 /**
- *
+ * unused
  */
-export function isString(aVar) {
-  if (typeof aVar === "string" || aVar instanceof String) return true;
+// export function isString(aVar) {
+//   if (typeof aVar === "string" || aVar instanceof String) return true;
 
-  return false;
-}
+//   return false;
+// }
 
 /**
- *
+ * unused
  */
-export function isNumber(n) {
-  return !isNaN(parseFloat(n)) && !isNaN(n - 0);
-}
+// export function isNumber(n) {
+//   return !isNaN(parseFloat(n)) && !isNaN(n - 0);
+// }
 
 /**
- *
+ * unused
  */
-export function capitalizeFLetter(string) {
-  return string[0].toUpperCase() + string.slice(1);
-}
+// export function capitalizeFLetter(string) {
+//   return string[0].toUpperCase() + string.slice(1);
+// }
 
 /**
  *
+ * @param {*} obj
+ * @returns {boolean}
  */
 export function isEmpty(obj) {
   return Object.keys(obj).length === 0;
 }
 
 /**
- *
+ * unused
  * @param {unknown[][]} aRow
  */
-export function isEmptyRow(aRow) {
-  return aRow.every((row) => row[0] === null);
-}
+// export function isEmptyRow(aRow) {
+//   return aRow.every((row) => row[0] === null);
+// }
 
 /**
- *
+ * unused
  */
-export function debugStringArray(anArray) {
-  anArray.forEach((i) => console.log(`'${i}'`));
-}
+// export function debugStringArray(anArray) {
+//   anArray.forEach((i) => console.log(`'${i}'`));
+// }
 
 /**
  *
@@ -195,33 +187,35 @@ export function topicsToArray(aTopicText) {
  * Note: make sure that the topics are unique
  * @param {string?} aTextBlock
  */
-export function textToOnTopicList(aTextBlock) {
-  if (aTextBlock === null) {
-    return "";
-  }
+// unused
+// export function textToOnTopicList(aTextBlock) {
+//   if (aTextBlock === null) {
+//     return "";
+//   }
 
-  if (aTextBlock === "") {
-    return "";
-  }
-  return aTextBlock.replace(/(?:\r\n|\r|\n)/g, ";");
-}
+//   if (aTextBlock === "") {
+//     return "";
+//   }
+//   return aTextBlock.replace(/(?:\r\n|\r|\n)/g, ";");
+// }
 
 /**
  * How much can this be optimized?
+ * unused
  */
-export function listContainsListElement(aListSource, aListTarget) {
-  for (let i = 0; i < aListSource.length; i++) {
-    let testA = aListSource[i];
-    for (let j = 0; j < aListTarget.length; j++) {
-      let testB = aListTarget[j];
-      if (testA.toLowerCase() == testB.toLowerCase()) {
-        return true;
-      }
-    }
-  }
+// export function listContainsListElement(aListSource, aListTarget) {
+//   for (let i = 0; i < aListSource.length; i++) {
+//     let testA = aListSource[i];
+//     for (let j = 0; j < aListTarget.length; j++) {
+//       let testB = aListTarget[j];
+//       if (testA.toLowerCase() == testB.toLowerCase()) {
+//         return true;
+//       }
+//     }
+//   }
 
-  return false;
-}
+//   return false;
+// }
 
 /**
  * How much can this be optimized?

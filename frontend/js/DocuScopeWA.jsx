@@ -3,7 +3,7 @@ import React from "react";
 import "../css/docuscope.css";
 import "../css/main.css";
 
-import { uuidv4 } from "./DataTools";
+import { v4 as uuidv4 } from 'uuid';
 import DocuScopeRules from "./DocuScopeRules";
 import {
   cleanAndRepairHTMLSentenceData,

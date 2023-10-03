@@ -22,6 +22,7 @@ import { OpenAI } from "openai";
 import path from "path";
 import format from "string-format";
 import { fileURLToPath } from "url";
+import { v4 as uuidv4 } from 'uuid';
 import info from "./package.json" assert { type: "json" };
 import PrometheusMetrics from "./prometheus.mjs";
 
@@ -35,7 +36,7 @@ program
     new Option("-p --port <number>", "Port to use for server.").env("PORT")
   )
   .addOption(
-    new Option("--db <string>", "Database").env("MYSQL_DB").default("dswa")
+    new Option("--db <string>", "Database").env("MYSQL_DATABASE").default("dswa")
   );
 // .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
 program.parse();
@@ -43,12 +44,34 @@ const options = program.opts();
 const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 const MYSQL_DB = options.db ?? "dswa";
 
+/**
+ * Retrieves value from environment variables.
+ * Checks for <base>_FILE first to support docker secrets.
+ * @param {string} base 
+ * @param {*} defaultValue 
+ * @returns 
+ */
+function fromEnvFile(base, defaultValue) {
+  if (process.env[`${base}_FILE`]) {
+    return readFileSync(process.env[`${base}_FILE`], 'utf-8');
+  }
+  if (process.env[base]) {
+    return process.env[base];
+  }
+  return defaultValue;
+}
+
+const MYSQL_USER = fromEnvFile('MYSQL_USER');
+const MYSQL_PASSWORD = fromEnvFile('MYSQL_PASSWORD');
+
 const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
 const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
   ? 5000
   : parseInt(process.env.DSWA_ONTOPIC_PORT);
 
-const openai = new OpenAI(); // by default uses env.OPENAI_API_KEY
+const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET', '');
+
+const openai = new OpenAI({apiKey: fromEnvFile('OPEN_API_KEY')});
 
 const VERSION = info.version;
 
@@ -107,8 +130,8 @@ class DocuScopeWALTIService {
       `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
     );
 
-    this.token = this.uuidv4();
-    this.session = this.uuidv4();
+    this.token = uuidv4();
+    this.session = uuidv4();
     this.standardHeader = {
       method: "GET",
       cache: "no-cache",
@@ -190,8 +213,8 @@ class DocuScopeWALTIService {
       connectionLimit: 100, //important
       host: process.env.DB_HOST,
       port: parseInt(process.env.DB_PORT),
-      user: process.env.MYSQL_USER,
-      password: process.env.MYSQL_PASSWORD,
+      user: MYSQL_USER,
+      password: MYSQL_PASSWORD,
       // database: MYSQL_DB,
       debug: false,
       timezone: "Z", // Makes TIMESTAMP work correctly
@@ -398,19 +421,6 @@ class DocuScopeWALTIService {
     }
   }
 
-  /**
-   *
-   */
-  uuidv4() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      function (c) {
-        var r = (Math.random() * 16) | 0,
-          v = c == "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      }
-    );
-  }
 
   /**
    *
@@ -434,13 +444,7 @@ class DocuScopeWALTIService {
    * Here’s an example of a function for signing tokens:
    */
   generateAccessToken(aString) {
-    let tSecret = "";
-
-    if (process.env.TOKEN_SECRET == "dummy" || process.env.TOKEN_SECRET == "") {
-      tSecret = this.uuidv4();
-    } else {
-      tSecret = process.env.TOKEN_SECRET;
-    }
+    const tSecret = (TOKEN_SECRET === "dummy" || TOKEN_SECRET === "") ? uuidv4() : TOKEN_SECRET;
     return jwt.sign({ payload: aString }, tSecret, { expiresIn: "1800s" });
   }
 
