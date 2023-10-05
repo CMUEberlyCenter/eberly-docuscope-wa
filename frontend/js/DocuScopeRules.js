@@ -16,6 +16,8 @@ export default class DocuScopeRules {
 
     this.context = "global";
 
+    this.name = "";
+    this.overview = "";
     this.original = null; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
     this.data = null; // The full dataset, not just the rules
     this.rules = []; // Only the rules section of the dataset
@@ -179,6 +181,9 @@ export default class DocuScopeRules {
   load(incomingData) {
     console.log("load ()");
 
+    // store this information as it is now needed but fixIncoming destroys it. #26
+    this.name = incomingData.rules.name;
+    this.overview = incomingData.rules.overview;
     incomingData = fixIncoming(incomingData);
 
     console.log(incomingData);

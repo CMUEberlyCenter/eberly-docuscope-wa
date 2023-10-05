@@ -4,7 +4,7 @@ declare const window: {
   applicationContext?: {
     version?: string;
     // builtOn?: string;
-  }
+  };
 } & Window;
 
 export const VERSION = window.applicationContext?.version ?? '0.0.0';

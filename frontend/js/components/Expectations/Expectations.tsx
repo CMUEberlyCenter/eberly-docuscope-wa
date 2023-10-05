@@ -245,7 +245,7 @@ const Expectations = ({
     const listElements = [];
 
     for (let i = 0; i < ruleManager.rules.length; i++) {
-      const aRule: any = ruleManager.rules[i];
+      const aRule = ruleManager.rules[i];
       const clusterList = [];
 
       for (let j = 0; j < aRule.children.length; j++) {
@@ -374,13 +374,18 @@ const Expectations = ({
       </Card.Header>
       <Card.Body className="overflow-auto">
         <Subscribe>
-          {/* <Card.Title>{ruleManager.name}</Card.Title> name is undefined */}
+          <Card.Title>{ruleManager.name}</Card.Title>
           <Card.Text>
-            Respond to the following questions to meet the readers&apos;
-            expectations. The sentences that you write to respond to each
-            question include a unique topic cluster that consists of a set of
-            words and phrases. DocuScope will automatically highlight sentences
-            in your draft that most likely match these expectations.
+            {ruleManager.overview ?? (
+              <>
+                Respond to the following questions to meet the readers&apos;
+                expectations. The sentences that you write to respond to each
+                question include a unique topic cluster that consists of a set
+                of words and phrases. DocuScope will automatically highlight
+                sentences in your draft that most likely match these
+                expectations.
+              </>
+            )}
           </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
             {ruleTree}

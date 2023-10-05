@@ -1,6 +1,7 @@
 {
     "rules": {
         "name": "User-Facing Statistics Reports",
+        "overview": "Respond to the following questions to meet the readers' expectations. The sentences that you write to respond to each question include a unique topic cluster that consists of a set of words and phrases. DocuScope will automatically highlight sentences in your draft that most likely match these expectations.",
         "rules": [
             {
                 "name": "Describing Real-World Importance",

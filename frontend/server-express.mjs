@@ -22,7 +22,7 @@ import { OpenAI } from "openai";
 import path from "path";
 import format from "string-format";
 import { fileURLToPath } from "url";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import info from "./package.json" assert { type: "json" };
 import PrometheusMetrics from "./prometheus.mjs";
 
@@ -36,7 +36,9 @@ program
     new Option("-p --port <number>", "Port to use for server.").env("PORT")
   )
   .addOption(
-    new Option("--db <string>", "Database").env("MYSQL_DATABASE").default("dswa")
+    new Option("--db <string>", "Database")
+      .env("MYSQL_DATABASE")
+      .default("dswa")
   );
 // .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
 program.parse();
@@ -47,13 +49,13 @@ const MYSQL_DB = options.db ?? "dswa";
 /**
  * Retrieves value from environment variables.
  * Checks for <base>_FILE first to support docker secrets.
- * @param {string} base 
- * @param {*} defaultValue 
- * @returns 
+ * @param {string} base
+ * @param {*} defaultValue
+ * @returns
  */
 function fromEnvFile(base, defaultValue) {
   if (process.env[`${base}_FILE`]) {
-    return readFileSync(process.env[`${base}_FILE`], 'utf-8').trim();
+    return readFileSync(process.env[`${base}_FILE`], "utf-8").trim();
   }
   if (process.env[base]) {
     return process.env[base];
@@ -61,17 +63,17 @@ function fromEnvFile(base, defaultValue) {
   return defaultValue;
 }
 
-const MYSQL_USER = fromEnvFile('MYSQL_USER');
-const MYSQL_PASSWORD = fromEnvFile('MYSQL_PASSWORD');
+const MYSQL_USER = fromEnvFile("MYSQL_USER");
+const MYSQL_PASSWORD = fromEnvFile("MYSQL_PASSWORD");
 
 const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
 const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
   ? 5000
   : parseInt(process.env.DSWA_ONTOPIC_PORT);
 
-const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET', '');
+const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET", "");
 
-const openai = new OpenAI({ apiKey: fromEnvFile('OPENAI_API_KEY') });
+const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
 
 const VERSION = info.version;
 
@@ -84,11 +86,12 @@ var onTopicResponseAvgCount = 0;
 const pool = createPool({
   host: process.env.DB_HOST,
   user: MYSQL_USER,
+  port: process.env.DB_PORT ?? 3306,
   password: MYSQL_PASSWORD,
   database: MYSQL_DB,
   waitForConnections: true,
   connectionLimit: 100,
-  timezone: 'Z', // Makes TIMESTAMP work correctly
+  timezone: "Z", // Makes TIMESTAMP work correctly
 });
 
 async function initializeDatabase() {
@@ -97,17 +100,20 @@ async function initializeDatabase() {
       id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) NOT NULL PRIMARY KEY,
       filename VARCHAR(100) NOT NULL,
       date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-      data JSON NOT NULL)`);
+      data JSON NOT NULL)`
+  );
 
   await pool.query(
     `CREATE TABLE IF NOT EXISTS assignments (
       id VARCHAR(40) NOT NULL PRIMARY KEY,
       fileid BINARY(16) NOT NULL,
-      FOREIGN KEY (fileid) REFERENCES files(id))`);
+      FOREIGN KEY (fileid) REFERENCES files(id))`
+  );
 }
 
 /**
  * Retrieve the list of configuration files and their meta-data
+ * @returns {{id: string, filename: string, date: string, info: {name: string, version: string, author: string, copyright: string, saved: string, filename: string}}}}
  */
 async function getFiles() {
   const [rows] = await pool.query(
@@ -121,6 +127,11 @@ async function getFiles() {
   return rows;
 }
 
+/**
+ *
+ * @param {string} fileId uuid of the configuration file to retrieve.
+ * @returns
+ */
 async function getFile(fileId) {
   const [rows] = await pool.query(
     `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
@@ -128,6 +139,20 @@ async function getFile(fileId) {
   );
   return rows ? rows[0].data : undefined;
 }
+
+/**
+ *
+ * @param {string} course_id
+ * @returns {{fileid: string}}
+ */
+async function getFileIdForCourse(course_id) {
+  const [rows] = await pool.query(
+    `SELECT BIN_TO_UUID(fileid) AS fileid FROM ${MYSQL_DB}.assignments WHERE id=?`,
+    [course_id]
+  );
+  return rows.at(0);
+}
+
 /**
  *
  * @param {string} course_id
@@ -142,6 +167,19 @@ async function getFileForCourse(course_id) {
     throw new Error("File data not found for assignment");
   }
   return rows[0].data;
+}
+/**
+ *
+ * @param {string} filename
+ * @param {string} aDate
+ * @param {*} aJSONObject
+ */
+async function storeFile(filename, date, aJSONObject) {
+  await pool.query(
+    `INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`,
+    [filename, JSON.stringify(aJSONObject)]
+  );
+  return { filename, date };
 }
 
 /**
@@ -263,12 +301,7 @@ class DocuScopeWALTIService {
       return;
     }
     try {
-      const [rows] = await pool
-        .query(
-          `SELECT BIN_TO_UUID(fileid) AS fileid FROM ${MYSQL_DB}.assignments WHERE id=?`,
-          [course_id]
-        );
-      const data = rows.at(0);
+      const data = await getFileIdForCourse(course_id);
       if (data) {
         response.json(this.generateDataMessage(data));
       } else {
@@ -298,21 +331,6 @@ class DocuScopeWALTIService {
 
   /**
    *
-   * @param {string} filename
-   * @param {string} aDate
-   * @param {*} aJSONObject
-   */
-  async storeFile(filename, date, aJSONObject) {
-    await pool
-      .query(`INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`, [
-        filename,
-        JSON.stringify(aJSONObject),
-      ]);
-    return { filename, date };
-  }
-
-  /**
-   *
    * @param {Request} request
    * @param {Response} response
    */
@@ -332,7 +350,6 @@ class DocuScopeWALTIService {
       response.sendStatus(500);
     }
   }
-
 
   /**
    *
@@ -356,7 +373,8 @@ class DocuScopeWALTIService {
    * Here’s an example of a function for signing tokens:
    */
   generateAccessToken(aString) {
-    const tSecret = (TOKEN_SECRET === "dummy" || TOKEN_SECRET === "") ? uuidv4() : TOKEN_SECRET;
+    const tSecret =
+      TOKEN_SECRET === "dummy" || TOKEN_SECRET === "" ? uuidv4() : TOKEN_SECRET;
     return jwt.sign({ payload: aString }, tSecret, { expiresIn: "1800s" });
   }
 
@@ -601,11 +619,10 @@ class DocuScopeWALTIService {
     const fileId = request.query.id;
     console.log(`processJSONDownload (${fileId})`);
     try {
-      const [result] = await pool
-        .query(
-          `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
-          [fileId]
-        );
+      const [result] = await pool.query(
+        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+        [fileId]
+      );
       if (result) {
         response.send(result[0].data);
       } else {
@@ -653,7 +670,9 @@ class DocuScopeWALTIService {
           );
           const html = raw.replace(
             "/*SETTINGS*/",
-            `var serverContext=${stringed}; var applicationContext=${JSON.stringify({ version: VERSION })};`
+            `var serverContext=${stringed}; var applicationContext=${JSON.stringify(
+              { version: VERSION }
+            )};`
           );
 
           //response.render('main', { html: html });
@@ -833,7 +852,7 @@ class DocuScopeWALTIService {
           const jsonObject = JSON.parse(jsonFile.data);
 
           console.log(`Storing: ${jsonFile.name} ("${request.body.date}) ...`);
-          const filedata = await this.storeFile(
+          const filedata = await storeFile(
             jsonFile.name,
             request.body.date,
             jsonObject

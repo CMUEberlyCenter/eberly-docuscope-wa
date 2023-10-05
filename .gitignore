@@ -34,3 +34,4 @@ deps.txt
 /env
 dswadb
 .env
+/secrets/
