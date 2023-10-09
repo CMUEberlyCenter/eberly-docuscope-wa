@@ -552,9 +552,10 @@ const StudentView = (props: {
   const convertNotes = useCallback(() => {
     setShowConvertNotes(true);
     if (editor.selection) {
-      const selectedText = Editor.string(editor, editor.selection);
-      if (selectedText) {
-        notes.next({ text: selectedText, range: editor.selection });
+      const text = Editor.string(editor, editor.selection);
+      const fragment = Editor.fragment(editor, editor.selection);
+      if (text) {
+        notes.next({ text, fragment, range: editor.selection });
       }
     }
   }, [editor]);

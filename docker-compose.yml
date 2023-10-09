@@ -18,18 +18,18 @@ services:
       MYSQL_USER_FILE: "/run/secrets/db_user"
       MYSQL_PASSWORD_FILE: "/run/secrets/db_password"
     volumes:
-      - db-data:/var/lib/mysql 
+      - db-data:/var/lib/mysql
 
   ontopic:
-    build:    
+    build:
       context: ./ontopic
-      dockerfile: ./Dockerfile    
-    restart: always      
+      dockerfile: ./Dockerfile
+    restart: always
     #ports:
     # - 5000:5000
 
   frontend:
-    build:    
+    build:
       context: ./frontend
       dockerfile: ./Dockerfile
     ports:
@@ -52,8 +52,8 @@ services:
       PORT: 8888
     restart: always
     depends_on:
-      - "db"    
-    
+      - "db"
+
 volumes:
   db-data:
     labels:

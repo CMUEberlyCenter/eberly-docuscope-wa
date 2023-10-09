@@ -15,7 +15,7 @@ import {
 import { fromFetch } from 'rxjs/fetch';
 import { courseId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
-import { type Range } from 'slate';
+import { Descendant, type Range } from 'slate';
 
 export const ScribeAvailable = true; // For future ability to conditionally make it available.
 
@@ -114,6 +114,7 @@ export function downloadHistory(): void {
 type ChatResponse = { error: boolean; message: string } | ChatCompletion;
 export interface SelectedNotesProse {
   text: string;
+  fragment?: Descendant[];
   range?: Range;
   prose?: string;
 }
@@ -139,11 +140,11 @@ export const [useProse, prose$] = bind<SUSPENSE | SelectedNotesProse>(
 );
 
 notes.subscribe(
-  (notes) => notes !== undefined && console.log(`TODO log notes: ${notes.text}`)
+  (notes) => notes !== undefined && console.log(`logging notes: ${notes.text}`)
 );
 prose$.subscribe(
   (prose) =>
-    typeof prose === 'string' && console.log(`TODO log prose: ${prose}`)
+    typeof prose === 'string' && console.log(`logging prose: ${prose}`)
 );
 
 /*** Fix Grammar ***/

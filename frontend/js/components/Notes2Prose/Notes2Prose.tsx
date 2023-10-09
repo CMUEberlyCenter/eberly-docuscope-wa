@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import React, { Suspense } from "react";
+import React, { ReactElement, Suspense } from "react";
 import {
   Alert,
   Button,
@@ -21,6 +21,44 @@ import {
   useProse,
   useScribe,
 } from "../../service/scribe.service";
+
+import { Descendant, Text } from "slate";
+
+/**
+ * Serialize editor fragment to html for rendering.
+ * @param node A fragment of selected text from the editor
+ * @returns html for selected text.
+ * 
+ * This implimentation invokes the need unique key warning.
+ */
+const serialize = (
+  node: Descendant | Descendant[] | undefined
+): ReactElement => {
+  if (!node) {
+    return <></>;
+  }
+  if (Array.isArray(node)) {
+    return <>{node.map(serialize)}</>;
+  }
+  if (Text.isText(node)) {
+    return <>{node.text}</>;
+  }
+
+  const children = serialize(node.children);
+
+  switch (node.type) {
+    case "quote":
+      return (
+        <blockquote>
+          <p><>{children}</></p>
+        </blockquote>
+      );
+    case "paragraph":
+      return <p><>{children}</></p>;
+    default:
+      return children;
+  }
+};
 
 export const Notes2Prose = ({
   show = false,
@@ -68,63 +106,70 @@ export const Notes2Prose = ({
       A.I. Scribe is currently disabled. See Help&gt;A.I. Scribe.
     </Alert>
   );
-  const noNotes = <Alert variant="warning">Please select some notes to submit in the text editor.</Alert>;
+  const noNotes = (
+    <Alert variant="warning">
+      Please select some notes to submit in the text editor.
+    </Alert>
+  );
 
   const body = (
     <ErrorBoundary
       fallback={<Alert variant="danger">Notes to Prose is unavailable.</Alert>}
     >
-      {notes?.text.trim() ? <>
-      <Card as="section">
-        <Card.Body>
+      {notes?.text.trim() ? (
+        <>
+          <Card as="section">
+            <Card.Body>
               <Card.Title>Notes</Card.Title>
-          <Card.Subtitle>Text selected in editor:</Card.Subtitle>
-          <Card.Text as="div">
-            <Subscribe source$={notes$} fallback={noNotes}>
-                <article
-                  className="m-2 border border-dark rounded p-1"
-                  style={{ minHeight: "3em" }}
-                >
-                  {notes.text}
-                </article>
-                noNotes
-            </Subscribe>
-          </Card.Text>
-        </Card.Body>
-      </Card>
-      <Card as="section">
-        <Card.Body>
-          <Card.Title>Prose</Card.Title>
-          <Card.Subtitle>A.I. Generated text:</Card.Subtitle>
-          <Card.Text as="div">
-            <Subscribe
-              source$={prose$}
-              fallback={<Alert variant="info">Preprocessing...</Alert>}
-            >
-              {notes?.text.trim() ? (
-                <Suspense
-                  fallback={<Alert variant="info">Processing...</Alert>}
-                >
+              <Card.Subtitle>Text selected in editor:</Card.Subtitle>
+              <Card.Text as="div">
+                <Subscribe source$={notes$} fallback={noNotes}>
                   <article
-                    className="border border-dark rounded m-2 p-1"
-                    style={{ minHeight: "5em" }}
+                    className="m-2 border border-dark rounded p-1"
+                    style={{ minHeight: "3em" }}
                   >
-                    {typeof response !== "object" ? (
-                      <Spinner
-                        animation="border"
-                        role="status"
-                        variant="info"
-                        className="mx-auto"
-                      >
-                        <span className="visually-hidden">Processing...</span>
-                      </Spinner>
-                    ) : (
-                      response.prose
-                    )}
+                    {serialize(notes.fragment)}
+                    {/* {notes.text} */}
                   </article>
-                  <div className="d-flex justify-content-end">
-                    <ButtonToolbar>
-                      {/* <ButtonGroup className="me-2">
+                </Subscribe>
+              </Card.Text>
+            </Card.Body>
+          </Card>
+          <Card as="section">
+            <Card.Body>
+              <Card.Title>Prose</Card.Title>
+              <Card.Subtitle>A.I. Generated text:</Card.Subtitle>
+              <Card.Text as="div">
+                <Subscribe
+                  source$={prose$}
+                  fallback={<Alert variant="info">Preprocessing...</Alert>}
+                >
+                  {notes?.text.trim() ? (
+                    <Suspense
+                      fallback={<Alert variant="info">Processing...</Alert>}
+                    >
+                      <article
+                        className="border border-dark rounded m-2 p-1"
+                        style={{ minHeight: "5em" }}
+                      >
+                        {typeof response !== "object" ? (
+                          <Spinner
+                            animation="border"
+                            role="status"
+                            variant="info"
+                            className="mx-auto"
+                          >
+                            <span className="visually-hidden">
+                              Processing...
+                            </span>
+                          </Spinner>
+                        ) : (
+                          response.prose
+                        )}
+                      </article>
+                      <div className="d-flex justify-content-end">
+                        <ButtonToolbar>
+                          {/* <ButtonGroup className="me-2">
                         <Button onClick={play} title="Play/Pause" disabled={!response.prose}>
                           <FontAwesomeIcon icon={pause ? faPause : faPlay}/>
                           <span className="sr-only">{pause ? 'Pause' : 'Play'}</span>
@@ -134,30 +179,33 @@ export const Notes2Prose = ({
                           <span className="sr-only">Stop</span>
                           </Button>
                       </ButtonGroup> */}
-                      <ButtonGroup>
-                        <Button disabled={!response.prose} onClick={copy}>
-                          <FontAwesomeIcon icon={faClipboard} />
-                          <span className="ms-1">Copy to Clipboard</span>
-                        </Button>
-                        <Button
-                          disabled={!response.prose}
-                          onClick={() => insert(response)}
-                        >
-                          <FontAwesomeIcon icon={faFileImport} />
-                          <span className="ms-1">Insert into Essay</span>
-                        </Button>
-                      </ButtonGroup>
-                    </ButtonToolbar>
-                  </div>
-                </Suspense>
-              ) : (
-                noNotes
-              )}
-            </Subscribe>
-          </Card.Text>
-        </Card.Body>
-      </Card>
-      </> : noNotes}
+                          <ButtonGroup>
+                            <Button disabled={!response.prose} onClick={copy}>
+                              <FontAwesomeIcon icon={faClipboard} />
+                              <span className="ms-1">Copy to Clipboard</span>
+                            </Button>
+                            <Button
+                              disabled={!response.prose}
+                              onClick={() => insert(response)}
+                            >
+                              <FontAwesomeIcon icon={faFileImport} />
+                              <span className="ms-1">Insert into Essay</span>
+                            </Button>
+                          </ButtonGroup>
+                        </ButtonToolbar>
+                      </div>
+                    </Suspense>
+                  ) : (
+                    noNotes
+                  )}
+                </Subscribe>
+              </Card.Text>
+            </Card.Body>
+          </Card>
+        </>
+      ) : (
+        noNotes
+      )}
     </ErrorBoundary>
   );
 
