@@ -16,7 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useState,
+  useState
 } from "react";
 import {
   Badge,
@@ -82,15 +82,15 @@ import { serialize } from "../../service/editor-state.service";
 
 // import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { About } from "../../components/HelpDialogs/About";
+import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
+import { VERSION } from "../../service/application.service";
 import {
   SelectedNotesProse,
   notes,
   showScribeOption,
   useScribe,
 } from "../../service/scribe.service";
-import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
-import { VERSION } from "../../service/application.service";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -727,18 +727,22 @@ const StudentView = (props: {
       </footer>
       <About />
       {about}
-      {/* <ScribeOption show={showScribeOption} onHide={() => setShowScribeOption(false)}/> */}
       <Notes2Prose
         show={showConvertNotes}
         onHide={() => setShowConvertNotes(false)}
         insert={(notes: SelectedNotesProse) => {
           if (notes.prose && notes.range) {
             setShowConvertNotes(false);
-            Transforms.insertText(editor, `\n${notes.prose}`, {
-              at: Range.end(notes.range),
-            });
             ReactEditor.focus(editor);
-            Transforms.select(editor, notes.range);
+            const start = Range.end(notes.range);
+            // Using insertNodes adds appropriate whitespace and has select flag
+            Transforms.insertNodes(editor, [{type: 'paragraph', children: [{text: notes.prose}]}], {
+              at: start,
+              select: true // does not seem to do anything.
+            });
+            // Select Prose
+            Transforms.select(editor, {anchor: {path: [start.path[0] + 1, 0], offset: 0}, focus: {path: [start.path[0]+1, 0], offset: notes.prose.length}});
+            // Transforms.select(editor, notes.range); // Select notes
           }
         }}
       />
