@@ -541,18 +541,21 @@ class DocuScopeWALTIService {
 
   /**
    *
+   * @param {string} aURL
+   * @param {*} aData
+   * @param {Response} aResponse
    */
   apiPOSTCall(aURL, aData, aResponse) {
     let url = "/api/v1/" + aURL;
 
-    console.log("apiPOSTCall (" + url + ")");
+    console.log(`apiPOSTCall (${ONTOPIC_HOST}${url})`);
 
-    let startDate = new Date();
+    const startDate = Date.now();
 
     const data = JSON.stringify(aData);
 
     const options = {
-      hostname: ONTOPIC_HOST,
+      host: ONTOPIC_HOST,
       path: url,
       port: ONTOPIC_PORT,
       method: "POST",
@@ -570,22 +573,22 @@ class DocuScopeWALTIService {
           body += chunk;
         });
 
-        res.on("end", () => {
+        res.on("end", async () => {
           try {
-            let json = JSON.parse(body);
+            const json = JSON.parse(body);
             console.log(
               "Retrieved valid data from backend, forwarding to frontend ..."
             );
-            console.log(json);
+            //console.log(json);
 
-            let endDate = new Date();
-            let millis = endDate.getTime() - startDate.getTime();
+            const endDate = Date.now();
+            const millis = endDate - startDate;
 
             this.updateResponseAvg(millis);
 
             //this.processBackendReply (json);
 
-            aResponse.json(this.generateDataMessage(json));
+            await aResponse.json(this.generateDataMessage(json));
           } catch (error) {
             console.error(error.message);
           }
@@ -598,7 +601,6 @@ class DocuScopeWALTIService {
     req.on("error", (error) => {
       console.error(error);
     });
-
     req.write(data);
     req.end();
   }
@@ -757,11 +759,11 @@ class DocuScopeWALTIService {
 
       this.updateMetrics();
 
-      let msg = request.body;
+      const msg = request.body;
 
-      console.log(msg);
+      // console.log(msg);
 
-      console.log("Forwarding request ...");
+      // console.log("Forwarding request ...");
 
       this.apiPOSTCall("ontopic", msg, response);
 
