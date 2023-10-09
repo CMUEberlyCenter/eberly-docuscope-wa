@@ -68,28 +68,26 @@ export const Notes2Prose = ({
       A.I. Scribe is currently disabled. See Help&gt;A.I. Scribe.
     </Alert>
   );
-  const noNotes = <Alert variant="warning">No selected notes.</Alert>;
+  const noNotes = <Alert variant="warning">Please select some notes to submit in the text editor.</Alert>;
 
   const body = (
     <ErrorBoundary
       fallback={<Alert variant="danger">Notes to Prose is unavailable.</Alert>}
     >
+      {notes?.text.trim() ? <>
       <Card as="section">
         <Card.Body>
-          <Card.Title>Notes</Card.Title>
+              <Card.Title>Notes</Card.Title>
           <Card.Subtitle>Text selected in editor:</Card.Subtitle>
           <Card.Text as="div">
             <Subscribe source$={notes$} fallback={noNotes}>
-              {notes?.text.trim() ? (
                 <article
                   className="m-2 border border-dark rounded p-1"
                   style={{ minHeight: "3em" }}
                 >
                   {notes.text}
                 </article>
-              ) : (
                 noNotes
-              )}
             </Subscribe>
           </Card.Text>
         </Card.Body>
@@ -159,6 +157,7 @@ export const Notes2Prose = ({
           </Card.Text>
         </Card.Body>
       </Card>
+      </> : noNotes}
     </ErrorBoundary>
   );
 
