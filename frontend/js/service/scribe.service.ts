@@ -17,6 +17,8 @@ import { courseId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
 import { type Range } from 'slate';
 
+export const ScribeAvailable = true; // For future ability to conditionally make it available.
+
 // Showing the A.I. Scribe warning and setting dialog.
 const showAtStartup = sessionStorage.getItem('show_scribe') !== 'false';
 const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);

@@ -4,6 +4,7 @@ import { Modal } from "react-bootstrap";
 import { VERSION } from "../../service/application.service";
 import { showAbout, useShowAbout } from "../../service/help.service";
 import { rule$, useRules } from "../../service/rules.service";
+import { ScribeAvailable } from "../../service/scribe.service";
 
 export const About = () => {
   const show = useShowAbout();
@@ -14,13 +15,28 @@ export const About = () => {
       <Modal.Header closeButton>About DocuScope Write &amp; Audit</Modal.Header>
       <Modal.Body>
         <p>
-          DocuScope is a text analysis environment with a suite of interactive
-          visualization tools for corpus-based rhetorical analysis. The
-          DocuScope Project began in 1998 as a result of collaboration between
-          David Kaufer and Suguru Ishizaki at Carnegie Mellon University. David
-          created what we call the generic (default) dictionary, consisting of
-          over 40 million linguistic patterns of English classified into over
-          100 categories of rhetorical effects.
+          {ScribeAvailable ? (
+            <>
+              <a href="https://www.cmu.edu/corecompetencies/communication/resources-and-tools/docuscope/index.html">
+                DocuScope Write & Audit
+              </a>{" "}
+              is an environment for structuring writing tasks through
+              visualization. It includes panels for visualizing reader
+              expectations and textual coherence. It has recently been updated
+              to accommodate generative AI through a notes-to-prose feature.
+            </>
+          ) : (
+            <>
+              DocuScope is a text analysis environment with a suite of
+              interactive visualization tools for corpus-based rhetorical
+              analysis. The DocuScope Project began in 1998 as a result of
+              collaboration between David Kaufer and Suguru Ishizaki at Carnegie
+              Mellon University. David created what we call the generic
+              (default) dictionary, consisting of over 40 million linguistic
+              patterns of English classified into over 100 categories of
+              rhetorical effects.
+            </>
+          )}
         </p>
 
         <hr />
