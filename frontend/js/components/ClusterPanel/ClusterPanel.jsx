@@ -10,7 +10,7 @@ import { setEditorState } from "../../service/editor-state.service";
 import "./ClusterPanel.scss";
 import "./ClusterTopics.scss";
 
-import clusterIcon from "../../../css/icons/topic_cluster_icon.png";
+// import clusterIcon from "../../../css/icons/topic_cluster_icon.png";
 
 /**
 	"topics": [
@@ -285,7 +285,7 @@ class ClusterPanel extends Component {
   createRuleDescription() {
     //console.log ("createRuleDescription ("+this.props.currentRule+","+this.props.currentCluster+")");
 
-    let rules = this.props.ruleManager.rules;
+    const rules = this.props.ruleManager.rules;
 
     if (!rules) {
       return "Internal error: no rule definitions available";
@@ -328,7 +328,7 @@ class ClusterPanel extends Component {
       textareaClassName = "cluster-topic-input cluster-textarea-disabled";
     }
 
-    if (this.state.duplicateFound == true) {
+    if (this.state.duplicateFound === true) {
       duplicateWarningClass = " cluster-duplicate";
       duplicatewarning = (
         <div className="cluster-warning">
@@ -375,7 +375,7 @@ class ClusterPanel extends Component {
    *
    */
   createExamplePanel() {
-    let rules = this.props.ruleManager.rules;
+    const rules = this.props.ruleManager.rules;
 
     if (!rules) {
       return (
@@ -385,15 +385,15 @@ class ClusterPanel extends Component {
       );
     }
 
-    if (this.props.currentRule == -1) {
+    if (this.props.currentRule === -1) {
       return <div className="cluster-examples"></div>;
     }
 
-    if (this.props.currentCluster == -1) {
+    if (this.props.currentCluster === -1) {
       return <div className="cluster-examples"></div>;
     }
 
-    let rule = rules[this.props.currentRule];
+    const rule = rules[this.props.currentRule];
 
     if (!rule) {
       return (
@@ -403,7 +403,7 @@ class ClusterPanel extends Component {
       );
     }
 
-    let cluster = rule.children[this.props.currentCluster];
+    const cluster = rule.children[this.props.currentCluster];
 
     if (!cluster) {
       return (
@@ -439,7 +439,7 @@ class ClusterPanel extends Component {
    *
    */
   createClusterDefinition() {
-    if (this.props.currentCluster != -1) {
+    if (this.props.currentCluster !== -1) {
       let cluster = this.props.ruleManager.getClusterByIndex(
         this.props.currentRule,
         this.props.currentCluster
@@ -467,19 +467,14 @@ class ClusterPanel extends Component {
    *
    */
   render() {
-    let ruledescription = "<div></div>";
-    let topiceditor;
-    let examples;
-    let clusterdefinition;
-
-    ruledescription = this.createRuleDescription();
-    topiceditor = this.createTopicEditor();
-    examples = this.createExamplePanel();
-    clusterdefinition = this.createClusterDefinition();
+    const ruledescription = this.createRuleDescription();
+    // const topiceditor = this.createTopicEditor();  // commented out for scribe focused version
+    // const examples = this.createExamplePanel(); // commented out for scribe focused version
+    // const clusterdefinition = this.createClusterDefinition();
 
     return (
       <div className="cluster-container">
-        <div className="cluster-title">
+        {/* <div className="cluster-title"> // commented out for scribe focused version
           <img src={clusterIcon} className="cluster-icon" />
           <div className="card-title h5">Topic Cluster</div>
         </div>
@@ -489,7 +484,7 @@ class ClusterPanel extends Component {
             dangerouslySetInnerHTML={{ __html: clusterdefinition }}
           ></div>
           {topiceditor}
-        </div>
+        </div> */}
         <Tabs className="mt-1 px-2" onSelect={(key) => this.switchTab(key)}>
           <Tab eventKey={"expectationabout"} title="About this Expectation">
             <div
@@ -497,9 +492,9 @@ class ClusterPanel extends Component {
               dangerouslySetInnerHTML={{ __html: ruledescription }}
             ></div>
           </Tab>
-          <Tab eventKey={"examples"} title="Sample Sentences">
+          {/* <Tab eventKey={"examples"} title="Sample Sentences">  // commented out for scribe focused version
             {examples}
-          </Tab>
+          </Tab> */}
         </Tabs>
       </div>
     );
