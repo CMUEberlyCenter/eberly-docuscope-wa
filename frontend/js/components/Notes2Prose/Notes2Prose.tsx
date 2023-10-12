@@ -12,6 +12,7 @@ import {
   Spinner,
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
+import { Descendant, Text } from "slate";
 import {
   SelectedNotesProse,
   downloadHistory,
@@ -22,13 +23,11 @@ import {
   useScribe,
 } from "../../service/scribe.service";
 
-import { Descendant, Text } from "slate";
-
 /**
  * Serialize editor fragment to html for rendering.
  * @param node A fragment of selected text from the editor
  * @returns html for selected text.
- * 
+ *
  * This implimentation invokes the need unique key warning.
  */
 const serialize = (
@@ -45,16 +44,15 @@ const serialize = (
   }
 
   const children = serialize(node.children);
-
   switch (node.type) {
     case "quote":
       return (
         <blockquote>
-          <p><>{children}</></p>
+          <p>{children}</p>
         </blockquote>
       );
     case "paragraph":
-      return <p><>{children}</></p>;
+      return <p>{children}</p>;
     default:
       return children;
   }
@@ -164,7 +162,13 @@ export const Notes2Prose = ({
                             </span>
                           </Spinner>
                         ) : (
-                          response.prose
+                          <>
+                            {response.prose
+                              ?.split("\n\n")
+                              .map((par, i) => (
+                                <p key={`prose-paragraph-${i}`}>{par}</p>
+                              ))}
+                          </>
                         )}
                       </article>
                       <div className="d-flex justify-content-end">
