@@ -1,10 +1,4 @@
-# Regular image
 FROM docker.io/python:3.7
-# Small footprint image
-#FROM python:3.7-alpine
-
-COPY . /app
-WORKDIR /app
 
 # Expose the ports we're interested in
 EXPOSE 5000
@@ -22,6 +16,9 @@ RUN pip install flask psutil pathlib python-docx nltk beautifulsoup4 ftfy PyQt5 
 
 RUN python -m spacy download en
 RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
+
+COPY . /app
+WORKDIR /app
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

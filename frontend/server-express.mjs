@@ -13,7 +13,6 @@ import "dotenv/config";
 import express from "express";
 import fileUpload from "express-fileupload";
 import { readFileSync } from "fs";
-import { request } from "http";
 import jwt from "jsonwebtoken";
 import { createPool } from "mysql2/promise";
 import { open } from "node:fs/promises";
@@ -73,13 +72,13 @@ const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
 
 const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET", "");
 
-const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
+const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY")});
 
 const VERSION = info.version;
 
 var onTopicRequests = 0;
 var onTopicRequestsAvg = 0;
-var onTopicUptime = 0;
+let onTopicUptime = 0;
 var onTopicResponseAvg = 0;
 var onTopicResponseAvgCount = 0;
 
@@ -113,7 +112,7 @@ async function initializeDatabase() {
 
 /**
  * Retrieve the list of configuration files and their meta-data
- * @returns {{id: string, filename: string, date: string, info: {name: string, version: string, author: string, copyright: string, saved: string, filename: string}}}}
+ * @returns {Promise<{id: string, filename: string, date: string, info: {name: string, version: string, author: string, copyright: string, saved: string, filename: string}}>}
  */
 async function getFiles() {
   const [rows] = await pool.query(
@@ -130,7 +129,7 @@ async function getFiles() {
 /**
  *
  * @param {string} fileId uuid of the configuration file to retrieve.
- * @returns
+ * @returns {Promise<{data: unknown, filename: string}|undefined>}
  */
 async function getFile(fileId) {
   const [rows] = await pool.query(
@@ -143,7 +142,7 @@ async function getFile(fileId) {
 /**
  *
  * @param {string} course_id
- * @returns {{fileid: string}}
+ * @returns {Promise<{fileid: string}>}
  */
 async function getFileIdForCourse(course_id) {
   const [rows] = await pool.query(
@@ -217,8 +216,8 @@ class DocuScopeWALTIService {
     );
 
     // Reset the avg values every 5 minutes
-    setInterval(this.updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
-    setInterval(this.updateUptime, 1000); // Every second
+    setInterval(this.updateMetricsAvg.bind(this), 5 * 60 * 1000); // Every 5 minutes
+    setInterval(this.updateUptime.bind(this), 1000); // Every second
 
     console.log(`DocuScope-WA front-end proxy version: ${VERSION}`);
 
@@ -259,8 +258,6 @@ class DocuScopeWALTIService {
         extended: true,
       })
     );
-
-    this.processBackendReply = this.processBackendReply.bind(this);
 
     console.log("Server ready");
   }
@@ -391,12 +388,10 @@ class DocuScopeWALTIService {
    *
    */
   generateErrorMessage(aMessage) {
-    var error = {
+    return {
       status: "error",
       message: aMessage,
     };
-
-    return error;
   }
 
   /**
@@ -512,15 +507,12 @@ class DocuScopeWALTIService {
    */
   updateUptime() {
     onTopicUptime += 1000;
-
-    if (this.metrics) {
-      this.metrics.setMetricObject(
-        "eberly_dswa_uptime_total",
-        onTopicUptime,
-        this.metrics.METRIC_TYPE_COUNTER,
-        "DSWA Server uptime"
-      );
-    }
+    this.metrics?.setMetricObject(
+      "eberly_dswa_uptime_total",
+      onTopicUptime,
+      this.metrics.METRIC_TYPE_COUNTER,
+      "DSWA Server uptime"
+    );
   }
 
   /**
@@ -542,74 +534,34 @@ class DocuScopeWALTIService {
   /**
    *
    * @param {string} aURL
-   * @param {*} aData
-   * @param {Response} aResponse
+   * @param {*} data
+   * @param {Response} response
    */
-  apiPOSTCall(aURL, aData, aResponse) {
-    let url = "/api/v1/" + aURL;
-
-    console.log(`apiPOSTCall (${ONTOPIC_HOST}${url})`);
+  async apiPOSTCall(aURL, data, response) {
+    const url = new URL(aURL, `http://${ONTOPIC_HOST}:${ONTOPIC_PORT}/api/v1/`);
+    console.log(`apiPOSTCall (${url})`);
 
     const startDate = Date.now();
 
-    const data = JSON.stringify(aData);
-
-    const options = {
-      host: ONTOPIC_HOST,
-      path: url,
-      port: ONTOPIC_PORT,
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Content-Length": data.length,
-      },
-    };
-
-    const req = request(options, (res) => {
-      if (res.statusCode === 200) {
-        let body = "";
-
-        res.on("data", (chunk) => {
-          body += chunk;
-        });
-
-        res.on("end", async () => {
-          try {
-            const json = JSON.parse(body);
-            console.log(
-              "Retrieved valid data from backend, forwarding to frontend ..."
-            );
-            //console.log(json);
-
-            const endDate = Date.now();
-            const millis = endDate - startDate;
-
-            this.updateResponseAvg(millis);
-
-            //this.processBackendReply (json);
-
-            await aResponse.json(this.generateDataMessage(json));
-          } catch (error) {
-            console.error(error.message);
-          }
-        });
-      } else {
-        console.log("Server responded with " + res.statusCode);
+    try {
+      const res = await fetch(url.toString(), {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+      if (!res.ok) {
+        throw new Error(`Bad response from ontopic: ${res.status} - ${res.statusText}`);
       }
-    });
+      const ret = await res.json();
+      this.updateResponseAvg(Date.now() - startDate);
 
-    req.on("error", (error) => {
-      console.error(error);
-    });
-    req.write(data);
-    req.end();
-  }
-
-  /**
-   *
-   */
-  processBackendReply(_json) {
-    console.log("processBackendReply ()");
+      response.json(this.generateDataMessage(ret));
+    } catch (err) {
+      console.error(err);
+      response.sendStatus(500);
+    }
   }
 
   /**
@@ -778,15 +730,16 @@ class DocuScopeWALTIService {
   /**
    *
    * @param {string} assignment
-   * @param {'note_to_prose_propmt'|'clarity_prompt'|'grammar'} prompt
-   * @returns {Promise<{genre: string, prompt: string}>}
+   * @param {'notes_to_prose'|'clarity'|'grammar'} tool
+   * @returns {Promise<{genre: string, prompt: string, role: string, temperature: number}>}
    */
-  async getPrompt(assignment, prompt) {
+  async getPrompt(assignment, tool) {
+    const defaultPrompt = { genre: '', prompt: '', role: 'You are a chatbot', temperature: 0.0 };
     if (
-      !["notes_to_prose_prompt", "clarity_prompt", "grammar"].includes(prompt)
+      !["notes_to_prose", "clarity", "grammar"].includes(tool)
     ) {
-      console.error("Not a valid prompt!");
-      return { genre: "", prompt: "" };
+      console.error("Not a valid scribe tool!");
+      return defaultPrompt;
     }
     try {
       if (!assignment) {
@@ -795,7 +748,7 @@ class DocuScopeWALTIService {
       const [rows] = await pool.query(
         `SELECT
          JSON_EXTRACT(data, '$.rules.name') AS genre,
-         JSON_EXTRACT(data, '$.prompt_templates.${prompt}') AS prompt 
+         JSON_EXTRACT(data, '$.prompt_templates.${tool}') AS service
          FROM ${MYSQL_DB}.files
          WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments
           WHERE id="${assignment}")`
@@ -803,19 +756,21 @@ class DocuScopeWALTIService {
       if (rows.length <= 0) {
         throw new Error("File lookup error!");
       }
-      return rows.at(0);
+      const { genre, service } = rows.at(0);
+      return { ...defaultPrompt, ...service, genre };
     } catch (err) {
       console.error(err);
       console.warn("Using default data.");
       try {
         const data = await this.getDefaultRuleData();
         return {
+          ...defaultPrompt,
+          ...data.prompt_templates[prompt],
           genre: data.rules.name,
-          prompt: data.prompt_templates[prompt],
         };
       } catch (err) {
         console.error(err.message);
-        return { genre: "", prompt: "" };
+        return defaultPrompt;
       }
     }
   }
@@ -897,38 +852,48 @@ class DocuScopeWALTIService {
 
     this.app.post("/api/v1/scribe/convert_notes", async (request, response) => {
       const { course_id, notes } = request.body;
-      const { genre, prompt } = await this.getPrompt(
+      const { genre, prompt, role, temperature } = await this.getPrompt(
         course_id,
-        "notes_to_prose_prompt"
+        "notes_to_prose"
       );
       if (!genre || !prompt) {
         response.json({});
         return;
       }
       const content = format(prompt, { genre, notes });
-      const prose = await openai.chat.completions.create({
+      const params = {
+        temperature: temperature ?? 0.0,
         messages: [
-          { role: "system", content: "You are a chatbot" },
+          { role: "system", content: role ?? "You are a chatbot" },
           {
             role: "user",
             content,
           },
         ],
         model: "gpt-4",
-      });
-      response.json(prose);
+      }
+      try {
+        const prose = await openai.chat.completions.create(params);
+        // TODO check for empty prose
+        response.json(prose);
+      } catch (err) {
+        console.error(err.message);
+        console.log(params);
+        response.sendStatus(500);
+      }
     });
     this.app.get("/api/v1/scribe/fix_grammar", async (request, response) => {
       const { course_id, text } = request.body;
-      const { prompt } = await this.getPrompt(course_id, "grammar");
+      const { prompt, role, temperature } = await this.getPrompt(course_id, "grammar");
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
       }
       const content = format(prompt, { text });
       const fixed = await openai.chat.completions.create({
+        temperature: temperature ?? 0.0,
         messages: [
-          { role: "system", content: "You are a chatbot" },
+          { role: "system", content: role ?? "You are a chatbot" },
           {
             role: "user",
             content,
@@ -940,15 +905,16 @@ class DocuScopeWALTIService {
     });
     this.app.post("/api/v1/scribe/clarify", async (request, response) => {
       const { course_id, text } = request.body;
-      const { prompt } = await this.getPrompt(course_id, "clarity_prompt");
+      const { prompt, role, temperature } = await this.getPrompt(course_id, "clarity");
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
       }
       const content = format(prompt, { text });
       const clarified = await openai.chat.completions.create({
+        temperature: temperature ?? 0.0,
         messages: [
-          { role: "system", content: "You are a chatbot" },
+          { role: "system", content: role ?? "You are a chatbot" },
           {
             role: "user",
             content,
