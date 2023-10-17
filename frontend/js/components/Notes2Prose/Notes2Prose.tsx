@@ -22,6 +22,7 @@ import {
   useProse,
   useScribe,
 } from "../../service/scribe.service";
+import { useEditorState } from "../../service/editor-state.service";
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -70,6 +71,7 @@ export const Notes2Prose = ({
   const scribe = useScribe();
   const notes = useNotes();
   const response = useProse();
+  const editing = useEditorState();
   // const [pause, setPause] = useState<boolean>(false);
 
   // TODO: manage state to show/disable correct buttons.
@@ -106,7 +108,8 @@ export const Notes2Prose = ({
   );
   const noNotes = (
     <Alert variant="warning">
-      Please select some notes to submit in the text editor.
+      { editing ? '' : <p>Set the Edit Mode to unlocked.</p>}
+      <p>Select some notes to submit in the text editor.</p>
     </Alert>
   );
 
