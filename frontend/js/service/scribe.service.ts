@@ -20,7 +20,7 @@ import { Descendant, type Range } from 'slate';
 export const ScribeAvailable = true; // For future ability to conditionally make it available.
 
 // Showing the A.I. Scribe warning and setting dialog.
-const showAtStartup = sessionStorage.getItem('show_scribe') !== 'false';
+const showAtStartup = sessionStorage.getItem('show_scribe') !== false.toString();
 const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
 export const hideScribeOption = () => show_scribe_option.next(false);
 export const showScribeOption = () => show_scribe_option.next(true);
@@ -29,10 +29,10 @@ export const [useShowScribeOption, showScribeOption$] = bind(
   showAtStartup
 );
 show_scribe_option.subscribe(
-  (show) => show && sessionStorage.setItem('show_scribe', 'false')
+  (save) => sessionStorage.setItem('show_scribe', save.toString())
 );
 
-// If scribe is currently enabled. // TODO: possibly set default from previous setting
+// If scribe is currently enabled by user.
 const optIn = sessionStorage.getItem('enable_scribe') === true.toString();
 const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
 export const enableScribe = (enable: boolean) => scribe.next(enable);
