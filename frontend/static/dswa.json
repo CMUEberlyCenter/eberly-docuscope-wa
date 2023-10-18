@@ -337,10 +337,10 @@
             "temperature": 0.0,
             "role": "Your are a writing assistant working for a content expert. Your primary task is to translate the expert's notes to a paragraph."
         },
-        "clarity": {
+        "copyedit": {
             "prompt": "Please improve the clarity of the following text: {text}"
         },
-        "grammar": {
+        "proofread": {
             "prompt": "Please fix the grammar of the following text: {text}\n\nReturn a corrected text with a separate explanation of corrections. If there are no grammatical errors, return the original text.\n\nUse the following JSON format without any additional texts: {{\"original\": \"this is the original text.\", \"correction\": \"this is a fixed text.\", \"explanattion\": \"this text provide the reasons for the corrections, if any.\"}}"
         }
     }

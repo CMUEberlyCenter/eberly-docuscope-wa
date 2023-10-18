@@ -72,7 +72,7 @@ const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
 
 const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET", "");
 
-const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY")});
+const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
 
 const VERSION = info.version;
 
@@ -258,8 +258,6 @@ class DocuScopeWALTIService {
         extended: true,
       })
     );
-
-    console.log("Server ready");
   }
 
   /**
@@ -378,11 +376,11 @@ class DocuScopeWALTIService {
   /**
    * https://expressjs.com/en/api.html#req
    */
-  debugRequest(request) {
-    console.log("req.baseUrl: " + request.baseUrl);
-    console.log("req.path: " + request.path);
-    console.log("oauth_consumer_key:" + request.body.oauth_consumer_key);
-  }
+  // debugRequest(request) {
+  //   console.log("req.baseUrl: " + request.baseUrl);
+  //   console.log("req.path: " + request.path);
+  //   console.log("oauth_consumer_key:" + request.body.oauth_consumer_key);
+  // }
 
   /**
    *
@@ -409,12 +407,7 @@ class DocuScopeWALTIService {
    */
   verifyLTI(request) {
     console.log("verifyLTI (" + request.body.oauth_consumer_key + ")");
-
-    if (request.body.oauth_consumer_key == "") {
-      return false;
-    }
-
-    return true;
+    return request.body.oauth_consumer_key !== "";
   }
 
   /**
@@ -545,14 +538,16 @@ class DocuScopeWALTIService {
 
     try {
       const res = await fetch(url.toString(), {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(data),
         headers: {
-          "Content-Type": "application/json"
-        }
+          "Content-Type": "application/json",
+        },
       });
       if (!res.ok) {
-        throw new Error(`Bad response from ontopic: ${res.status} - ${res.statusText}`);
+        throw new Error(
+          `Bad response from ontopic: ${res.status} - ${res.statusText}`
+        );
       }
       const ret = await res.json();
       this.updateResponseAvg(Date.now() - startDate);
@@ -571,7 +566,6 @@ class DocuScopeWALTIService {
    */
   async processJSONDownload(request, response) {
     const fileId = request.query.id;
-    console.log(`processJSONDownload (${fileId})`);
     try {
       const [result] = await pool.query(
         `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
@@ -594,26 +588,11 @@ class DocuScopeWALTIService {
    * @param {Response} response
    */
   processRequest(request, response) {
-    console.log("processRequest (" + request.path + ")");
-
     //>------------------------------------------------------------------
 
-    if (request.path == "/upload") {
-      console.log(
-        "Info: we've already processed this, need a better way of handling this situation"
-      );
-      return;
-    }
-
-    //>------------------------------------------------------------------
-
-    if (this.useLTI == true) {
-      if (
-        request.path == "/" ||
-        request.path == "/index.html" ||
-        request.path == "/index.htm"
-      ) {
-        if (this.verifyLTI(request) == true) {
+    if (this.useLTI === true) {
+      if (["/", "/index.html", "/index.htm"].includes(request.path)) {
+        if (this.verifyLTI(request) === true) {
           const settingsObject = this.generateSettingsObject(request);
 
           const stringed = JSON.stringify(settingsObject);
@@ -662,81 +641,25 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    //console.log (path);
-
     response.sendFile(__dirname + this.publicHome + path);
-  }
-
-  /**
-   * https://nodejs.dev/learn/making-http-requests-with-nodejs
-   */
-  processAPIRequest(type, request, response) {
-    console.log("processAPIRequest (" + type + ") => " + request.path);
-
-    //>------------------------------------------------------------------
-
-    if (request.path == "/upload") {
-      console.log(
-        "Info: we've already processed this, need a better way of handling this situation"
-      );
-      return;
-    }
-
-    //>------------------------------------------------------------------
-
-    /*
-     Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-     problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-     to 'ding'
-    */
-    if (request.path == "/api/v1/ding") {
-      const uptime = process.uptime();
-
-      console.log(this.format(uptime));
-
-      response.json(
-        this.generateDataMessage({
-          uptime: this.format(uptime),
-          version: VERSION,
-        })
-      );
-
-      return;
-    }
-
-    //>------------------------------------------------------------------
-
-    if (request.path == "/api/v1/ontopic") {
-      console.log("Processing ontopic request ...");
-
-      this.updateMetrics();
-
-      const msg = request.body;
-
-      // console.log(msg);
-
-      // console.log("Forwarding request ...");
-
-      this.apiPOSTCall("ontopic", msg, response);
-
-      return;
-    }
-
-    //>------------------------------------------------------------------
-
-    response.json(this.generateErrorMessage("Unknown API call made"));
   }
 
   /**
    *
    * @param {string} assignment
-   * @param {'notes_to_prose'|'clarity'|'grammar'} tool
-   * @returns {Promise<{genre: string, prompt: string, role: string, temperature: number}>}
+   * @param {'notes_to_prose'|'copyedit'|'proofread'|'expectation'} tool
+   * @returns {Promise<{genre: string, prompt: string, role: string, temperature: number, overview: string}>}
    */
   async getPrompt(assignment, tool) {
-    const defaultPrompt = { genre: '', prompt: '', role: 'You are a chatbot', temperature: 0.0 };
+    const defaultPrompt = {
+      genre: "",
+      overview: "",
+      prompt: "",
+      role: "You are a chatbot",
+      temperature: 0.0,
+    };
     if (
-      !["notes_to_prose", "clarity", "grammar"].includes(tool)
+      !["notes_to_prose", "copyedit", "proofread", "expectation"].includes(tool)
     ) {
       console.error("Not a valid scribe tool!");
       return defaultPrompt;
@@ -748,6 +671,7 @@ class DocuScopeWALTIService {
       const [rows] = await pool.query(
         `SELECT
          JSON_EXTRACT(data, '$.rules.name') AS genre,
+         JSON_EXTRACT(data, '$.rules.overview') AS overview,
          JSON_EXTRACT(data, '$.prompt_templates.${tool}') AS service
          FROM ${MYSQL_DB}.files
          WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments
@@ -756,8 +680,8 @@ class DocuScopeWALTIService {
       if (rows.length <= 0) {
         throw new Error("File lookup error!");
       }
-      const { genre, service } = rows.at(0);
-      return { ...defaultPrompt, ...service, genre };
+      const { genre, overview, service } = rows.at(0);
+      return { ...defaultPrompt, ...service, genre, overview };
     } catch (err) {
       console.error(err);
       console.warn("Using default data.");
@@ -767,6 +691,7 @@ class DocuScopeWALTIService {
           ...defaultPrompt,
           ...data.prompt_templates[prompt],
           genre: data.rules.name,
+          overview: data.rules.overview
         };
       } catch (err) {
         console.error(err.message);
@@ -803,6 +728,7 @@ class DocuScopeWALTIService {
         });
       } else {
         console.log("Processing file upload ...");
+        // TODO check verse schema
 
         try {
           const jsonFile = request.files.file;
@@ -852,26 +778,24 @@ class DocuScopeWALTIService {
 
     this.app.post("/api/v1/scribe/convert_notes", async (request, response) => {
       const { course_id, notes } = request.body;
-      const { genre, prompt, role, temperature } = await this.getPrompt(
-        course_id,
-        "notes_to_prose"
-      );
+      const { genre, overview, prompt, role, temperature } =
+        await this.getPrompt(course_id, "notes_to_prose");
       if (!genre || !prompt) {
         response.json({});
         return;
       }
-      const content = format(prompt, { genre, notes });
+      const content = format(prompt, { genre, notes, overview });
       const params = {
         temperature: temperature ?? 0.0,
         messages: [
-          { role: "system", content: role ?? "You are a chatbot" },
+          { role: "system", content: role },
           {
             role: "user",
             content,
           },
         ],
         model: "gpt-4",
-      }
+      };
       try {
         const prose = await openai.chat.completions.create(params);
         // TODO check for empty prose
@@ -882,9 +806,12 @@ class DocuScopeWALTIService {
         response.sendStatus(500);
       }
     });
-    this.app.get("/api/v1/scribe/fix_grammar", async (request, response) => {
+    this.app.get("/api/v1/scribe/proofread", async (request, response) => {
       const { course_id, text } = request.body;
-      const { prompt, role, temperature } = await this.getPrompt(course_id, "grammar");
+      const { prompt, role, temperature } = await this.getPrompt(
+        course_id,
+        "proofread"
+      );
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
@@ -893,7 +820,7 @@ class DocuScopeWALTIService {
       const fixed = await openai.chat.completions.create({
         temperature: temperature ?? 0.0,
         messages: [
-          { role: "system", content: role ?? "You are a chatbot" },
+          { role: "system", content: role },
           {
             role: "user",
             content,
@@ -903,9 +830,12 @@ class DocuScopeWALTIService {
       });
       response.json(fixed);
     });
-    this.app.post("/api/v1/scribe/clarify", async (request, response) => {
+    this.app.post("/api/v1/scribe/copyedit", async (request, response) => {
       const { course_id, text } = request.body;
-      const { prompt, role, temperature } = await this.getPrompt(course_id, "clarity");
+      const { prompt, role, temperature } = await this.getPrompt(
+        course_id,
+        "copyedit"
+      );
       if (!prompt) {
         response.json({}); // TODO send error.
         return;
@@ -955,12 +885,23 @@ class DocuScopeWALTIService {
       await getCourseConfig(response, course_id);
     });
 
-    this.app.get("/api/v1/*", (request, response) => {
-      this.processAPIRequest("GET", request, response);
+    /*
+     Originally named 'ping', we had to change this because a bunch of browser-addons have a big
+     problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
+     to 'ding'
+    */
+    // Unsure of utility of this as results are not used.
+    this.app.get("/api/v1/ding", (_request, response) => {
+      response.json(this.generateDataMessage({ uptime: this.format(process.uptime()), version: VERSION }))
     });
 
-    this.app.post("/api/v1/*", (request, response) => {
-      this.processAPIRequest("POST", request, response);
+    this.app.post("/api/v1/ontopic", (request, response) => {
+      this.updateMetrics();
+      this.apiPOSTCall("ontopic", request.body, response);
+    });
+
+    this.app.all("/api/v1/*", (_request, response) => {
+      response.json(this.generateErrorMessage("Unknown API call made"));
     });
 
     this.app.get("/*", (request, response) => {
