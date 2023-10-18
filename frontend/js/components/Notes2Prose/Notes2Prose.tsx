@@ -103,7 +103,7 @@ export const Notes2Prose = ({
 
   const alert = (
     <Alert variant="warning">
-      A.I. Scribe is currently disabled. See Help&gt;A.I. Scribe.
+      The A.I. Scribe feature is currently disabled. Click 'A.I. Scribe' in the 'Help' menu to enable it.
     </Alert>
   );
   const noNotes = (
