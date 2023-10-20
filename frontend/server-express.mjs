@@ -786,7 +786,7 @@ class DocuScopeWALTIService {
       }
       const content = format(prompt, { genre, notes, overview });
       const params = {
-        temperature: temperature ?? 0.0,
+        temperature: isNaN(temperature) ? 0.0 : Number(temperature),
         messages: [
           { role: "system", content: role },
           {
@@ -818,7 +818,7 @@ class DocuScopeWALTIService {
       }
       const content = format(prompt, { text });
       const fixed = await openai.chat.completions.create({
-        temperature: temperature ?? 0.0,
+        temperature: isNaN(temperature) ? 0.0 : Number(temperature),
         messages: [
           { role: "system", content: role },
           {
@@ -842,7 +842,7 @@ class DocuScopeWALTIService {
       }
       const content = format(prompt, { text });
       const clarified = await openai.chat.completions.create({
-        temperature: temperature ?? 0.0,
+        temperature: isNaN(temperature) ? 0.0 : Number(temperature),
         messages: [
           { role: "system", content: role ?? "You are a chatbot" },
           {
