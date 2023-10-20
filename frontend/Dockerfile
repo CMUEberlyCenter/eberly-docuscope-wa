@@ -1,4 +1,5 @@
-FROM docker.io/node:latest
+FROM docker.io/node:20
+# node:21 is problematic on compile.
 RUN mkdir -p /app
 # ci in /tmp to take advantage of layer caching
 WORKDIR /tmp
