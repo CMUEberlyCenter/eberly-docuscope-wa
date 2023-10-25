@@ -19,7 +19,7 @@ import { Descendant, type Range } from 'slate';
 
 export const ScribeAvailable = true; // For future ability to conditionally make it available.
 
-// Showing the A.I. Scribe warning and setting dialog.
+// Show the myScribe warning and setting dialog.
 const showAtStartup = sessionStorage.getItem('show_scribe') !== false.toString();
 const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
 export const hideScribeOption = () => show_scribe_option.next(false);
@@ -103,7 +103,7 @@ export function downloadHistory(): void {
   const element = document.createElement('a');
   element.href = URL.createObjectURL(file);
   element.style.display = 'none';
-  element.download = `AIScribeHistory-${courseId()}-${Date.now()}.json`;
+  element.download = `myScribeHistory-${courseId()}-${Date.now()}.json`;
 
   // simulate link click
   document.body.appendChild(element); // Required for this to work in FireFox

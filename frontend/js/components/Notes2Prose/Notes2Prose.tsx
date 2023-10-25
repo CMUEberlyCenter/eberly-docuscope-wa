@@ -103,12 +103,13 @@ export const Notes2Prose = ({
 
   const alert = (
     <Alert variant="warning">
-      The A.I. Scribe feature is currently disabled. Click 'A.I. Scribe' in the 'Help' menu to enable it.
+      The myScribe feature is currently disabled.
+      Click &apos;myScribe&apos; in the &apos;Help&apos; menu to enable it.
     </Alert>
   );
   const noNotes = (
     <Alert variant="warning">
-      { editing ? '' : <p>Set the Edit Mode to unlocked.</p>}
+      {editing ? "" : <p>Set the Edit Mode to unlocked.</p>}
       <p>Select some notes to submit in the text editor.</p>
     </Alert>
   );
@@ -218,7 +219,7 @@ export const Notes2Prose = ({
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
-      <Modal.Header closeButton>A.I. Scribe - Notes to Prose</Modal.Header>
+      <Modal.Header closeButton>myScribe - Notes to Prose</Modal.Header>
       <Modal.Body>{scribe ? body : alert}</Modal.Body>
       <Modal.Footer>
         <a

@@ -18,10 +18,10 @@ export const ScribeOption = () => {
 
   return (
     <Modal show={show} onHide={onHide} scrollable>
-      <Modal.Header closeButton>A.I. Scribe</Modal.Header>
+      <Modal.Header closeButton>myScribe</Modal.Header>
       <Modal.Body>
         <p>
-          The A.I. Scribe extension uses ChatGPT. If you use use any of the
+          The myScribe extension uses ChatGPT. If you use use any of the
           scribe tools then your text is sent to ChatGPT for analysis. There are
           two factors to consider before you use these extensions:
         </p>
@@ -57,7 +57,7 @@ export const ScribeOption = () => {
             onChange={handleChange}
             type="checkbox"
             checked={scribe}
-            label={"Enable A.I. Scribe and ChatGPT"}
+            label={"Enable myScribe"}
           ></Form.Check>
         </Form>
         <Button onClick={onHide} color="secondary">

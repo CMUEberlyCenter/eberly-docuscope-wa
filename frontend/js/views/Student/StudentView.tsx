@@ -597,7 +597,7 @@ const StudentView = (props: {
                     About
                   </NavDropdown.Item>
                   <NavDropdown.Item eventKey={"showScribeOption"}>
-                    A.I. Scribe: {scribe ? "Enabled" : "Disabled"}
+                    myScribe: {scribe ? "Enabled" : "Disabled"}
                   </NavDropdown.Item>
                 </NavDropdown>
               </Nav>

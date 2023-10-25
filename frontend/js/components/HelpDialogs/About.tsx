@@ -23,7 +23,7 @@ export const About = () => {
               is an environment for structuring writing tasks through
               visualization. It includes panels for visualizing reader
               expectations and textual coherence. It has recently been updated
-              to accommodate generative AI through a notes-to-prose feature.
+              to accommodate generative A.I. through a notes-to-prose feature.
             </>
           ) : (
             <>

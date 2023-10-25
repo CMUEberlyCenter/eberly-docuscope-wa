@@ -102,8 +102,8 @@ export default class DocuScopeWA extends EberlyLTIBase {
         this.apiCall("rules", null, "GET").then((result) => {
           this.ruleManager.load(result);
 
-          if (this.ruleManager.getReady() == true) {
-            if (this.pingEnabled == false) {
+          if (this.ruleManager.getReady() === true) {
+            if (this.pingEnabled === false) {
               this.ready();
             } else {
               this.setState({
@@ -197,7 +197,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
    *
    */
   evaluateResult(aMessage) {
-    if (aMessage.status != "success") {
+    if (aMessage.status !== "success") {
       return aMessage.message;
     }
 
@@ -231,7 +231,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
   /**
    *
    */
-  apiPOSTCall(aURL, aData) {
+  async apiPOSTCall(aURL, aData) {
     console.log("apiPOSTCall ()");
 
     let payload = this.createDataMessage(aData);
@@ -247,71 +247,64 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.progressTimer = setInterval(this.updateProgress, 1000);
 
-    return new Promise((resolve, reject) => {
-      fetch(aURL, {
+    try {
+      const resp = await fetch(aURL, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
         method: "POST",
         body: payload,
-      })
-        .then((resp) => resp.text())
-        .then((result) => {
-          that.ready();
+      });
+      const raw = await resp.json();
+      this.ready();
+      let evaluation = this.evaluateResult(raw);
+      if (evaluation !== null) {
+        throw new Error(evaluation);
+      }
+      if (raw.data.html) {
+        //let html=onTopic2DSWAHTML (window.atob (raw.data.html));
+        const html = onTopic2DSWAHTML(raw.data.html);
+        let html_sentences = null;
+        if (raw.data.html_sentences) {
+          html_sentences = cleanAndRepairHTMLSentenceData(
+            raw.data.html_sentences
+          );
+        }
 
-          let raw = JSON.parse(result);
-          let evaluation = this.evaluateResult(raw);
-          if (evaluation != null) {
-            reject(evaluation);
-          } else {
-            if (raw.data.html) {
-              //let html=onTopic2DSWAHTML (window.atob (raw.data.html));
-              let html = onTopic2DSWAHTML(raw.data.html);
-              let html_sentences = null;
-              if (raw.data.html_sentences) {
-                html_sentences = cleanAndRepairHTMLSentenceData(
-                  raw.data.html_sentences
-                );
-              }
-
-              that.setState({
-                html: html,
-                htmlSentences: html_sentences,
-              });
-            }
-
-            if (raw.data.coherence) {
-              //console.log (raw.data.coherence);
-
-              // If there really is a very small amount of data, like a one word phrase, then you might get this exclusively:
-              // {error: "ncols is 0"} Let's handle that in cleanCoherenceData so that the rest of the code goes through its
-              // usual paces instead of creating a global exception
-
-              // Clean and replace
-              raw.data.coherence = this.ruleManager.cleanCoherenceData(
-                raw.data.coherence
-              );
-              raw.data.local = this.ruleManager.cleanLocalCoherenceData(
-                raw.data.local
-              );
-              that.ruleManager.updateLemmaCounts(
-                coherenceToClusterCounts(raw.data.coherence, raw.data.local)
-              );
-            }
-
-            resolve(raw.data);
-          }
-        })
-        .catch((error) => {
-          this.setState({
-            state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
-            progress: 100,
-            progressTitle: "Error: unable to connect to server",
-          });
-          reject(error);
+        this.setState({
+          html: html,
+          htmlSentences: html_sentences,
         });
-    });
+      }
+
+      if (raw.data.coherence) {
+        //console.log (raw.data.coherence);
+
+        // If there really is a very small amount of data, like a one word phrase, then you might get this exclusively:
+        // {error: "ncols is 0"} Let's handle that in cleanCoherenceData so that the rest of the code goes through its
+        // usual paces instead of creating a global exception
+
+        // Clean and replace
+        raw.data.coherence = this.ruleManager.cleanCoherenceData(
+          raw.data.coherence
+        );
+        raw.data.local = this.ruleManager.cleanLocalCoherenceData(
+          raw.data.local
+        );
+        that.ruleManager.updateLemmaCounts(
+          coherenceToClusterCounts(raw.data.coherence, raw.data.local)
+        );
+      }
+      return raw.data;
+    } catch (error) {
+      this.setState({
+        state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
+        progress: 100,
+        progressTitle: "Error: unable to connect to server",
+      });
+      throw error;
+    }
   }
 
   /**
@@ -516,7 +509,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     if (this.isInstructor()) {
       return (
-          <InstructorView/>
+        <InstructorView />
       );
     }
 

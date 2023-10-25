@@ -691,7 +691,7 @@ class DocuScopeWALTIService {
           ...defaultPrompt,
           ...data.prompt_templates[prompt],
           genre: data.rules.name,
-          overview: data.rules.overview
+          overview: data.rules.overview,
         };
       } catch (err) {
         console.error(err.message);
@@ -892,7 +892,12 @@ class DocuScopeWALTIService {
     */
     // Unsure of utility of this as results are not used.
     this.app.get("/api/v1/ding", (_request, response) => {
-      response.json(this.generateDataMessage({ uptime: this.format(process.uptime()), version: VERSION }))
+      response.json(
+        this.generateDataMessage({
+          uptime: this.format(process.uptime()),
+          version: VERSION,
+        })
+      );
     });
 
     this.app.post("/api/v1/ontopic", (request, response) => {
