@@ -76,11 +76,10 @@ const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
 
 const VERSION = info.version;
 
-var onTopicRequests = 0;
-var onTopicRequestsAvg = 0;
-let onTopicUptime = 0;
-var onTopicResponseAvg = 0;
-var onTopicResponseAvgCount = 0;
+let onTopicRequests = 0;
+let onTopicRequestsAvg = 0;
+let onTopicResponseAvg = 0;
+let onTopicResponseAvgCount = 0;
 
 const pool = createPool({
   host: process.env.DB_HOST,
@@ -106,22 +105,27 @@ async function initializeDatabase() {
     `CREATE TABLE IF NOT EXISTS assignments (
       id VARCHAR(40) NOT NULL PRIMARY KEY,
       fileid BINARY(16) NOT NULL,
+      scribe BOOLEAN DEFAULT TRUE,
       FOREIGN KEY (fileid) REFERENCES files(id))`
   );
 }
 
 /**
  * Retrieve the list of configuration files and their meta-data
- * @returns {Promise<{id: string, filename: string, date: string, info: {name: string, version: string, author: string, copyright: string, saved: string, filename: string}}>}
+ * @returns {Promise<{id: string, filename: string, date: string, info: {name: string, version: string, author: string, copyright: string, saved: string, filename: string}, uses: number}[]>}
  */
 async function getFiles() {
   const [rows] = await pool.query(
     `SELECT
-        BIN_TO_UUID(id) AS id,
+        BIN_TO_UUID(files.id) AS id,
         filename,
         date,
-        JSON_EXTRACT(data, '$.info') AS info
-       FROM ${MYSQL_DB}.files`
+        JSON_EXTRACT(data, '$.info') AS info,
+        count(assignments.id) AS uses
+       FROM files
+       LEFT JOIN assignments ON fileid = files.id
+       GROUP BY id, filename, date, info
+       ORDER BY date DESC`
   );
   return rows;
 }
@@ -133,7 +137,7 @@ async function getFiles() {
  */
 async function getFile(fileId) {
   const [rows] = await pool.query(
-    `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
+    "SELECT data, filename FROM files WHERE id=UUID_TO_BIN(?)",
     [fileId]
   );
   return rows ? rows[0].data : undefined;
@@ -141,26 +145,26 @@ async function getFile(fileId) {
 
 /**
  *
- * @param {string} course_id
+ * @param {string} assignmentId
  * @returns {Promise<{fileid: string}>}
  */
-async function getFileIdForCourse(course_id) {
+async function getFileIdForAssignment(assignmentId) {
   const [rows] = await pool.query(
-    `SELECT BIN_TO_UUID(fileid) AS fileid FROM ${MYSQL_DB}.assignments WHERE id=?`,
-    [course_id]
+    "SELECT BIN_TO_UUID(fileid) AS fileid FROM assignments WHERE id=?",
+    [assignmentId]
   );
   return rows.at(0);
 }
 
 /**
  *
- * @param {string} course_id
+ * @param {string} assignmentId
+ * @returns {*} JSON contents of configuration file.
  */
-async function getFileForCourse(course_id) {
+async function getFileForAssignment(assignmentId) {
   const [rows] = await pool.query(
-    `SELECT data FROM ${MYSQL_DB}.files
-         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments WHERE id=?)`,
-    [course_id]
+    "SELECT data FROM files LEFT JOIN assignments ON fileid = files.id WHERE assignments.id = ?",
+    [assignmentId]
   );
   if (rows.length <= 0) {
     throw new Error("File data not found for assignment");
@@ -175,11 +179,116 @@ async function getFileForCourse(course_id) {
  */
 async function storeFile(filename, date, aJSONObject) {
   await pool.query(
-    `INSERT INTO ${MYSQL_DB}.files (filename, data) VALUES(?, ?)`,
+    "INSERT INTO files (filename, data) VALUES(?, ?)",
     [filename, JSON.stringify(aJSONObject)]
   );
   return { filename, date };
 }
+
+const metrics = new PrometheusMetrics();
+metrics.setMetricObject(
+  "eberly_dswa_requests_total",
+  onTopicRequests,
+  metrics.METRIC_TYPE_COUNTER,
+  "Number of requests made to the OnTopic backend"
+);
+metrics.setMetricObject(
+  "eberly_dswa_requests_avg",
+  onTopicRequestsAvg,
+  metrics.METRIC_TYPE_COUNTER,
+  "Average number of requests made to the OnTopic backend"
+);
+metrics.setMetricObject(
+  "eberly_dswa_uptime_total",
+  process.uptime(),
+  metrics.METRIC_TYPE_COUNTER,
+  "DSWA Server uptime"
+);
+metrics.setMetricObject(
+  "eberly_dswa_response_avg",
+  onTopicResponseAvg,
+  metrics.METRIC_TYPE_COUNTER,
+  "DSWA OnTopic average response time"
+);
+
+/**
+ * Reset the average counters every 5 minutes. That way the code can just keep adding and re-calculating without having
+ * to worry about moving averages and queu sizes. We should probably change this in the near future to be more
+ * representative
+ */
+function updateMetricsAvg() {
+  onTopicRequestsAvg = 0;
+  onTopicResponseAvg = 0;
+  onTopicResponseAvgCount = 0;
+
+  metrics.setMetricObject(
+    "eberly_dswa_requests_total",
+    onTopicRequests,
+    metrics.METRIC_TYPE_COUNTER,
+    "Number of requests made to the OnTopic backend"
+  );
+  metrics.setMetricObject(
+    "eberly_dswa_requests_avg",
+    onTopicRequestsAvg,
+    metrics.METRIC_TYPE_COUNTER,
+    "Average number of requests made to the OnTopic backend"
+  );
+  metrics.setMetricObject(
+    "eberly_dswa_response_avg",
+    0,
+    metrics.METRIC_TYPE_COUNTER,
+    "DSWA OnTopic average response time"
+  );
+}
+/**
+ *
+ */
+function updateUptime() {
+  metrics.setMetricObject(
+    "eberly_dswa_uptime_total",
+    process.uptime(),
+    metrics.METRIC_TYPE_COUNTER,
+    "DSWA Server uptime"
+  );
+}
+
+/**
+ *
+ */
+function updateMetrics() {
+  onTopicRequests++;
+  onTopicRequestsAvg++;
+
+  metrics.setMetricObject(
+    "eberly_dswa_requests_total",
+    onTopicRequests,
+    metrics.METRIC_TYPE_COUNTER,
+    "Number of requests made to the OnTopic backend"
+  );
+  metrics.setMetricObject(
+    "eberly_dswa_requests_avg",
+    onTopicRequestsAvg,
+    metrics.METRIC_TYPE_COUNTER,
+    "Average number of requests made to the OnTopic backend"
+  );
+}
+
+/**
+ *
+ */
+function updateResponseAvg(aValue) {
+  onTopicResponseAvg += aValue;
+  onTopicResponseAvgCount++;
+
+  const average = onTopicResponseAvg / onTopicResponseAvgCount;
+  metrics.setMetricObject(
+    "eberly_dswa_response_avg",
+    average,
+    metrics.METRIC_TYPE_COUNTER,
+    "DSWA OnTopic average response time"
+  );
+}
+
 
 /**
  *
@@ -189,35 +298,10 @@ class DocuScopeWALTIService {
    *
    */
   constructor() {
-    this.metrics = new PrometheusMetrics();
-    this.metrics.setMetricObject(
-      "eberly_dswa_requests_total",
-      onTopicRequests,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "Number of requests made to the OnTopic backend"
-    );
-    this.metrics.setMetricObject(
-      "eberly_dswa_requests_avg",
-      onTopicRequestsAvg,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "Average number of requests made to the OnTopic backend"
-    );
-    this.metrics.setMetricObject(
-      "eberly_dswa_uptime_total",
-      onTopicUptime,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "DSWA Server uptime"
-    );
-    this.metrics.setMetricObject(
-      "eberly_dswa_response_avg",
-      onTopicResponseAvg,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "DSWA OnTopic average response time"
-    );
 
     // Reset the avg values every 5 minutes
-    setInterval(this.updateMetricsAvg.bind(this), 5 * 60 * 1000); // Every 5 minutes
-    setInterval(this.updateUptime.bind(this), 1000); // Every second
+    setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
+    setInterval(updateUptime, 1000); // Every second
 
     console.log(`DocuScope-WA front-end proxy version: ${VERSION}`);
 
@@ -227,13 +311,9 @@ class DocuScopeWALTIService {
 
     this.token = uuidv4();
     this.session = uuidv4();
-    this.standardHeader = {
-      method: "GET",
-      cache: "no-cache",
-    };
 
     this.useLTI = true;
-    this.publicHome = "/public";
+    this.publicHome = "/dist";
     this.staticHome = "/static";
 
     this.defaultRules = null; // default rules file cache
@@ -243,15 +323,10 @@ class DocuScopeWALTIService {
 
     this.app = express();
 
-    // Turn off caching for now (detect developer mode!)
-    this.app.set("etag", false);
+    this.app.set("etag", "strong");
     this.app.use(express.json());
     this.app.use(cors({ origin: "*" }));
     this.app.use(fileUpload({ createParentPath: true }));
-    this.app.use((_req, res, next) => {
-      res.set("Cache-Control", "no-store");
-      next();
-    });
 
     this.app.use(
       express.urlencoded({
@@ -281,35 +356,6 @@ class DocuScopeWALTIService {
 
   /**
    *
-   * @param {Request} request
-   * @param {Response} response
-   */
-  async getFileIdFromCourse(request, response) {
-    const { course_id } = request.query;
-    if (!course_id) {
-      console.warn("No course id in request.");
-      response.sendStatus(404);
-      return;
-    }
-    if (course_id === "global") {
-      this.sendDefaultFile(request, response);
-      return;
-    }
-    try {
-      const data = await getFileIdForCourse(course_id);
-      if (data) {
-        response.json(this.generateDataMessage(data));
-      } else {
-        response.sendStatus(404);
-      }
-    } catch (err) {
-      console.error(err);
-      response.sendStatus(500);
-    }
-  }
-
-  /**
-   *
    * @param {Request} _request
    * @param {Response} response
    */
@@ -320,29 +366,6 @@ class DocuScopeWALTIService {
     } catch (err) {
       console.error(err.message);
       response.sendStatus(404);
-      // response.json(this.generateErrorMessage(err.message));
-    }
-  }
-
-  /**
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
-  processCourseFileAssignment(request, response) {
-    const { course_id, id } = request.query;
-    console.log("Assigning " + id + " to course: " + course_id);
-    try {
-      pool.query(
-        `INSERT INTO ${MYSQL_DB}.assignments (id, fileid)
-         VALUES (?, UUID_TO_BIN(?))
-         ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
-        [course_id, id, id]
-      );
-      response.sendStatus(201);
-    } catch (err) {
-      console.error(err.message);
-      response.sendStatus(500);
     }
   }
 
@@ -381,16 +404,6 @@ class DocuScopeWALTIService {
   //   console.log("req.path: " + request.path);
   //   console.log("oauth_consumer_key:" + request.body.oauth_consumer_key);
   // }
-
-  /**
-   *
-   */
-  generateErrorMessage(aMessage) {
-    return {
-      status: "error",
-      message: aMessage,
-    };
-  }
 
   /**
    *
@@ -436,92 +449,10 @@ class DocuScopeWALTIService {
    *
    */
   processMetrics(_request, response) {
-    const metricsString = this.metrics.build();
+    const metricsString = metrics.build();
 
     response.contentType("text/text");
     response.send(metricsString);
-  }
-
-  /**
-   *
-   */
-  updateMetrics() {
-    onTopicRequests++;
-    onTopicRequestsAvg++;
-
-    this.metrics.setMetricObject(
-      "eberly_dswa_requests_total",
-      onTopicRequests,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "Number of requests made to the OnTopic backend"
-    );
-    this.metrics.setMetricObject(
-      "eberly_dswa_requests_avg",
-      onTopicRequestsAvg,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "Average number of requests made to the OnTopic backend"
-    );
-  }
-
-  /**
-   * Reset the average counters every 5 minutes. That way the code can just keep adding and re-calculating without having
-   * to worry about moving averages and queu sizes. We should probably change this in the near future to be more
-   * representative
-   */
-  updateMetricsAvg() {
-    onTopicRequestsAvg = 0;
-    onTopicResponseAvg = 0;
-    onTopicResponseAvgCount = 0;
-
-    if (this.metrics) {
-      this.metrics.setMetricObject(
-        "eberly_dswa_requests_total",
-        onTopicRequests,
-        this.metrics.METRIC_TYPE_COUNTER,
-        "Number of requests made to the OnTopic backend"
-      );
-      this.metrics.setMetricObject(
-        "eberly_dswa_requests_avg",
-        onTopicRequestsAvg,
-        this.metrics.METRIC_TYPE_COUNTER,
-        "Average number of requests made to the OnTopic backend"
-      );
-      this.metrics.setMetricObject(
-        "eberly_dswa_response_avg",
-        0,
-        this.metrics.METRIC_TYPE_COUNTER,
-        "DSWA OnTopic average response time"
-      );
-    }
-  }
-
-  /**
-   *
-   */
-  updateUptime() {
-    onTopicUptime += 1000;
-    this.metrics?.setMetricObject(
-      "eberly_dswa_uptime_total",
-      onTopicUptime,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "DSWA Server uptime"
-    );
-  }
-
-  /**
-   *
-   */
-  updateResponseAvg(aValue) {
-    onTopicResponseAvg += aValue;
-    onTopicResponseAvgCount++;
-
-    let average = onTopicResponseAvg / onTopicResponseAvgCount;
-    this.metrics.setMetricObject(
-      "eberly_dswa_response_avg",
-      average,
-      this.metrics.METRIC_TYPE_COUNTER,
-      "DSWA OnTopic average response time"
-    );
   }
 
   /**
@@ -541,6 +472,7 @@ class DocuScopeWALTIService {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
+          Accept: "application/json",
           "Content-Type": "application/json",
         },
       });
@@ -550,34 +482,11 @@ class DocuScopeWALTIService {
         );
       }
       const ret = await res.json();
-      this.updateResponseAvg(Date.now() - startDate);
+      updateResponseAvg(Date.now() - startDate);
 
       response.json(this.generateDataMessage(ret));
     } catch (err) {
       console.error(err);
-      response.sendStatus(500);
-    }
-  }
-
-  /**
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
-  async processJSONDownload(request, response) {
-    const fileId = request.query.id;
-    try {
-      const [result] = await pool.query(
-        `SELECT data, filename FROM ${MYSQL_DB}.files WHERE id=UUID_TO_BIN(?)`,
-        [fileId]
-      );
-      if (result) {
-        response.send(result[0].data);
-      } else {
-        response.sendStatus(404);
-      }
-    } catch (err) {
-      console.error(err.message);
       response.sendStatus(500);
     }
   }
@@ -673,9 +582,9 @@ class DocuScopeWALTIService {
          JSON_EXTRACT(data, '$.rules.name') AS genre,
          JSON_EXTRACT(data, '$.rules.overview') AS overview,
          JSON_EXTRACT(data, '$.prompt_templates.${tool}') AS service
-         FROM ${MYSQL_DB}.files
-         WHERE id=(SELECT fileid FROM ${MYSQL_DB}.assignments
-          WHERE id="${assignment}")`
+         FROM files LEFT JOIN assignments ON fileid = files.id
+         WHERE assignments.id = ?`,
+        [assignment]
       );
       if (rows.length <= 0) {
         throw new Error("File lookup error!");
@@ -703,9 +612,7 @@ class DocuScopeWALTIService {
    *
    */
   async run() {
-    console.log("Configuring endpoints ...");
-
-    this.app.get("/configuration/:fileId", async (request, response) => {
+    this.app.get("/api/v1/configurations/:fileId", async (request, response) => {
       const fileId = request.params.fileId;
       try {
         const data = await getFile(fileId);
@@ -720,7 +627,8 @@ class DocuScopeWALTIService {
       }
     });
 
-    this.app.post("/configuration", async (request, response) => {
+    this.app.post("/api/v1/configurations", async (request, response) => {
+      // TODO limit to instructor/administrative roles.
       if (!request.files) {
         response.status(400).send({
           status: false,
@@ -745,7 +653,7 @@ class DocuScopeWALTIService {
           console.error(err.message);
           if (err instanceof SyntaxError) {
             // likely bad json
-            response.sendStatus(400);
+            response.status(400).send(err.message);
           } else {
             // likely bad db call
             response.sendStatus(500);
@@ -754,22 +662,50 @@ class DocuScopeWALTIService {
       }
     });
 
-    this.app.post("/listfiles", async (_request, response) => {
+    this.app.get("/api/v1/configurations", async (_request, response) => {
+      // TODO: check if accessable by LTI authentication/role
       try {
         const files = await getFiles();
-        response.json(this.generateDataMessage(files));
+        response.json(files);
       } catch (err) {
         console.error(err.message);
         response.sendStatus(500);
       }
     });
 
-    this.app.get("/assign", (request, response) => {
-      this.processCourseFileAssignment(request, response);
+    this.app.post("/api/v1/assignments/:assignment/assign", (request, response) => {
+      // TODO add role check to see if LTI user is authorized to change
+      // TODO get assignment from LTI parameters instead of reflected from interface
+      const { assignment } = request.params;
+      const { id } = request.body; // as {id: string}
+      console.log(`Assigning ${id} to assignment: ${assignment}`);
+      try {
+        pool.query(
+          `INSERT INTO assignments (id, fileid)
+           VALUES (?, UUID_TO_BIN(?))
+           ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
+          [assignment, id, id]
+        );
+        response.sendStatus(201);
+      } catch (err) {
+        console.error(err.message);
+        response.sendStatus(500);
+      }
     });
 
-    this.app.post("/getfileid", (request, response) => {
-      this.getFileIdFromCourse(request, response);
+    this.app.get("/api/v1/assignments/:assignment/file_id", async (request, response) => {
+      const { assignment } = request.params;
+      try {
+        const data = await getFileIdForAssignment(assignment);
+        if (data) {
+          response.json(data);
+        } else {
+          response.sendStatus(404);
+        }
+      } catch (err) {
+        console.error(err);
+        response.sendStatus(500);
+      }
     });
 
     this.app.get("/metrics", (request, response) => {
@@ -777,6 +713,7 @@ class DocuScopeWALTIService {
     });
 
     this.app.post("/api/v1/scribe/convert_notes", async (request, response) => {
+      // TODO get assignment id from LTI token
       const { course_id, notes } = request.body;
       const { genre, overview, prompt, role, temperature } =
         await this.getPrompt(course_id, "notes_to_prose");
@@ -806,7 +743,8 @@ class DocuScopeWALTIService {
         response.sendStatus(500);
       }
     });
-    this.app.get("/api/v1/scribe/proofread", async (request, response) => {
+    this.app.post("/api/v1/scribe/proofread", async (request, response) => {
+      // TODO get assignment id from token/
       const { course_id, text } = request.body;
       const { prompt, role, temperature } = await this.getPrompt(
         course_id,
@@ -855,11 +793,10 @@ class DocuScopeWALTIService {
       response.json(clarified);
     });
 
-    const getCourseConfig = async (response, course_id) => {
+    const getAssignmentConfig = async (response, course_id) => {
       if (course_id && course_id.trim().toLowerCase() !== "global") {
         try {
-          console.log(`loading rules for ${course_id}`);
-          const rules = await getFileForCourse(course_id);
+          const rules = await getFileForAssignment(course_id);
           response.json(this.generateDataMessage(rules));
         } catch (err) {
           console.error(err.message);
@@ -872,17 +809,17 @@ class DocuScopeWALTIService {
       }
     };
     this.app.get(
-      "/api/v1/assignments/:course_id/rules",
+      "/api/v1/assignments/:assignment/rules",
       async (request, response) => {
         // not currently used, but will be useful for deep-linking.
-        const { course_id } = request.params;
-        await getCourseConfig(response, course_id);
+        const { assignment } = request.params;
+        await getAssignmentConfig(response, assignment);
       }
     );
     this.app.get("/api/v1/rules", async (request, response) => {
+      // TODO get assignment from LTI token
       const { course_id } = request.query;
-      // TODO use sessions to store/retrieve course_id
-      await getCourseConfig(response, course_id);
+      await getAssignmentConfig(response, course_id);
     });
 
     /*
@@ -901,12 +838,12 @@ class DocuScopeWALTIService {
     });
 
     this.app.post("/api/v1/ontopic", (request, response) => {
-      this.updateMetrics();
+      updateMetrics();
       this.apiPOSTCall("ontopic", request.body, response);
     });
 
     this.app.all("/api/v1/*", (_request, response) => {
-      response.json(this.generateErrorMessage("Unknown API call made"));
+      response.sendStatus(404);
     });
 
     this.app.get("/*", (request, response) => {

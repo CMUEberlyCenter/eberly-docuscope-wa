@@ -1,11 +1,11 @@
 import { fromFetch } from 'rxjs/fetch';
-import { courseId } from './lti.service';
+import { assignmentId } from './lti.service';
 import { catchError, map, of, switchMap } from 'rxjs';
 import DocuScopeRules from '../DocuScopeRules';
 import { bind } from '@react-rxjs/core';
 
 const ruleUrl = new URL(`/api/v1/rules`, location.href);
-ruleUrl.searchParams.append('course_id', courseId());
+ruleUrl.searchParams.append('course_id', assignmentId());
 export const rules = fromFetch(ruleUrl.toString()).pipe(
   switchMap((response) => {
     if (response.ok) {
@@ -20,7 +20,7 @@ export const rules = fromFetch(ruleUrl.toString()).pipe(
   }),
   map((response) => {
     const dsrules = new DocuScopeRules();
-    dsrules.setContext(courseId());
+    dsrules.setContext(assignmentId());
     dsrules.load(response.data);
     return dsrules;
   })

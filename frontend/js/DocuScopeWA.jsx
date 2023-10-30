@@ -16,10 +16,7 @@ import EberlyLTIBase from "./EberlyLTIBase";
 import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
-import { courseId, isInstructor } from "./service/lti.service";
-
-// Replace with RxJS
-var badThat = null;
+import { assignmentId, isInstructor } from "./service/lti.service";
 
 /**
  *
@@ -38,16 +35,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
   constructor(props) {
     super(props);
 
-    badThat = this;
     this.progressTimer = -1;
 
-    console.log("DocuScopeWA ()");
-
-    let course_id = courseId();
-
     this.ruleManager = new DocuScopeRules();
-    this.ruleManager.updateNotice = this.updateNotice;
-    this.ruleManager.setContext(course_id);
+    this.ruleManager.updateNotice = this.updateNotice.bind(this);
+    this.ruleManager.setContext(assignmentId());
 
     this.pingEnabled = true;
     this.pingTimer = -1;
@@ -87,10 +79,6 @@ export default class DocuScopeWA extends EberlyLTIBase {
    *
    */
   componentDidMount() {
-    console.log("componentDidMount ()");
-
-    badThat = this;
-
     setTimeout((_e) => {
       this.setState({
         state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTED,
@@ -177,19 +165,16 @@ export default class DocuScopeWA extends EberlyLTIBase {
   updateNotice(resetState) {
     console.log("updateNotice (reset:" + resetState + ")");
 
-    // Really bad way to do this!
-    if (badThat != null) {
-      if (resetState) {
-        badThat.setState({
-          badUpdatecounter: Math.floor(Math.random() * 10000),
-          html: null,
-          htmlSentences: null,
-        });
-      } else {
-        badThat.setState({
-          badUpdatecounter: Math.floor(Math.random() * 10000),
-        });
-      }
+    if (resetState) {
+      this.setState({
+        badUpdatecounter: Math.floor(Math.random() * 10000),
+        html: null,
+        htmlSentences: null,
+      });
+    } else {
+      this.setState({
+        badUpdatecounter: Math.floor(Math.random() * 10000),
+      });
     }
   }
 
@@ -232,10 +217,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
    *
    */
   async apiPOSTCall(aURL, aData) {
-    console.log("apiPOSTCall ()");
-
-    let payload = this.createDataMessage(aData);
-    let that = this;
+    const payload = this.createDataMessage(aData);
 
     this.updateSerializedText(null);
 
@@ -292,7 +274,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
         raw.data.local = this.ruleManager.cleanLocalCoherenceData(
           raw.data.local
         );
-        that.ruleManager.updateLemmaCounts(
+        this.ruleManager.updateLemmaCounts(
           coherenceToClusterCounts(raw.data.coherence, raw.data.local)
         );
       }
@@ -311,17 +293,14 @@ export default class DocuScopeWA extends EberlyLTIBase {
    * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
    */
   apiGETCall(aURL, _aData) {
-    console.log("apiGETCall ()");
-
     this.updateSerializedText(null);
 
-    let that = this;
     return new Promise((resolve, reject) => {
       fetch(aURL, this.standardHeader)
         .then((resp) => resp.text())
         .then((result) => {
           let raw = JSON.parse(result);
-          let evaluation = that.evaluateResult(raw);
+          let evaluation = this.evaluateResult(raw);
           if (evaluation != null) {
             reject(evaluation);
           } else {
@@ -334,7 +313,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
                 );
               }
 
-              that.setState({
+              this.setState({
                 html: html,
                 htmlSentences: html_sentences,
               });
@@ -348,7 +327,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
               raw.data.local = this.ruleManager.cleanLocalCoherenceData(
                 raw.data.local
               );
-              that.ruleManager.updateLemmaCounts(
+              this.ruleManager.updateLemmaCounts(
                 coherenceToClusterCounts(raw.data.coherence, raw.data.local)
               );
             }
@@ -372,19 +351,9 @@ export default class DocuScopeWA extends EberlyLTIBase {
    * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
    */
   apiCall(aCall, aData, aType) {
-    console.log("apiCall (" + aCall + ")");
+    const course_id = assignmentId();
 
-    let course_id = courseId();
-
-    let aURL =
-      "/api/v1/" +
-      aCall +
-      "?token=" +
-      this.token +
-      "&session=" +
-      this.session +
-      "&course_id=" +
-      course_id;
+    const aURL = `/api/v1/${aCall}?token=${this.token}&session=${this.session}&course_id=${course_id}`;
 
     if (aType == "POST") {
       return this.apiPOSTCall(aURL, aData);

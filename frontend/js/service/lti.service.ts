@@ -48,7 +48,7 @@ export function isInstructor(): boolean {
  * Retrieve the course identifier.
  * @returns the assignment identifier.
  */
-export function courseId(): string {
+export function assignmentId(): string {
   return (
     window.serverContext?.lti?.ext_lti_assignment_id ??
     window.serverContext?.lti?.resource_link_id ??

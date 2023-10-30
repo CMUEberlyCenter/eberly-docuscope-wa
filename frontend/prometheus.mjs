@@ -22,9 +22,7 @@ class PrometheusMetrics {
     this.memory = null;
     this.memoryDriver = mem();
 
-    this.updateValues = this.updateValues.bind(this);
-
-    this.timeoutTracker = setInterval(this.updateValues, 1000);
+    this.timeoutTracker = setInterval(this.updateValues.bind(this), 1000);
   }
 
   /**
@@ -41,14 +39,7 @@ class PrometheusMetrics {
    * Let's switch to a hashtable soon!
    */
   getMetricObject(aMetric) {
-    for (let i = 0; i < this.metricTracker.length; i++) {
-      let testMetric = this.metricTracker[i];
-      if (testMetric.metric == aMetric) {
-        return testMetric;
-      }
-    }
-
-    return null;
+    return this.metricTracker.find(tracker => tracker.metric === aMetric);
   }
 
   /**
@@ -59,13 +50,7 @@ class PrometheusMetrics {
    * set to untyped.
    */
   addMetric(aMetric, aValue, aType, aHelp) {
-    let formatted = "";
-
-    formatted = formatted.concat("# HELP " + aHelp + "\n");
-    formatted = formatted.concat("# TYPE " + aMetric + " " + aType + "\n");
-    formatted = formatted.concat(aMetric + " " + aValue + "\n");
-
-    return formatted;
+    return `# HELP ${aHelp}\n# TYPE ${aMetric} ${aType}\n${aMetric} ${aValue}\n`;
   }
 
   /**
@@ -77,7 +62,7 @@ class PrometheusMetrics {
    */
   setMetricObject(aMetric, aValue, aType, aHelp) {
     let metricObject = this.getMetricObject(aMetric);
-    if (metricObject == null) {
+    if (!metricObject) {
       metricObject = {
         metric: aMetric,
         value: aValue,
@@ -98,19 +83,9 @@ class PrometheusMetrics {
   build() {
     let formatted = "";
 
-    let uptime = time();
+    const uptime = time();
 
-    for (let i = 0; i < this.metricTracker.length; i++) {
-      let tempMetric = this.metricTracker[i];
-      formatted = formatted.concat(
-        this.addMetric(
-          tempMetric.metric,
-          tempMetric.value,
-          tempMetric.type,
-          tempMetric.help
-        )
-      );
-    }
+    formatted = formatted.concat(...this.metricTracker.map(tracker => this.addMetric(tracker.metric, tracker.value, tracker.type, tracker.help)));
 
     formatted = formatted.concat(
       this.addMetric(

@@ -7,7 +7,7 @@ import { BehaviorSubject } from "rxjs";
 import "../../../css/main.css";
 import { launch } from "../../DocuScopeTools";
 import { VERSION } from "../../service/application.service";
-import { courseId } from "../../service/lti.service";
+import { assignmentId } from "../../service/lti.service";
 import "./InstuctorView.css";
 
 interface FileInfo {
@@ -22,84 +22,68 @@ interface FileInfo {
     saved?: string;
   };
 }
-interface FileData<T> {
-  status: "success";
-  data: T;
-}
-interface FileError {
-  status: "error";
-  message: string;
-}
-type GetFileResponse = FileData<FileInfo[]> | FileError;
-type SelectedFileResponse = FileData<{ fileid: string }> | FileError;
 
 const file_list = new BehaviorSubject<FileInfo[] | undefined>(undefined);
 const [useFiles, files$] = bind(file_list, null);
 
 async function getFileList(): Promise<void> {
-  console.log("getFileList");
-  const response = await fetch("/listfiles", {
+  const response = await fetch("/api/v1/configurations", {
     headers: {
       Accept: "application/json",
-      "Content-Type": "application/json",
     },
-    method: "POST",
+    method: "GET",
   });
-  const json = (await response.json()) as GetFileResponse;
-  switch (json.status) {
-    case "success":
-      file_list.next(json.data);
-      return;
-    case "error":
-      console.error(json.message);
-      throw new Error(json.message);
+  if (!response.ok) {
+    console.error(`Server error ${response.status} - ${response.statusText}`);
+    // TODO show error to user.
+  } else {
+    const files = (await response.json()) as FileInfo[];
+    file_list.next(files);
   }
 }
 
-if (typeof window !== "undefined") {
-  console.log("top");
-  getFileList();
-}
+// if (typeof window !== "undefined") {
+//   console.log("top");
+//   getFileList();
+// }
 
 const InstructorView = () => {
   const [selected, setSelected] = useState("");
   const files = useFiles();
 
   useEffect(() => {
-    const getfileid = new URL("/getfileid", window.origin);
-    getfileid.searchParams.append("course_id", courseId());
-    fetch(getfileid, {
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-    })
-      .then((response) => response.json())
-      .then((result: SelectedFileResponse) => {
-        switch (result.status) {
-          case "success":
-            setSelected(result.data.fileid);
-            return;
-          case "error":
-            console.error(result.message);
-            setSelected("");
-            return;
-        }
+    async function getCurrentFile() {
+      await getFileList();
+      const getfileid = new URL(`/api/v1/assignments/${assignmentId()}/file_id`, window.origin);
+      const response = await fetch(getfileid, {
+        headers: {
+          Accept: "application/json",
+        },
+        method: "GET",
       });
+      if (!response.ok) {
+        throw new Error(`Bad current_file request: ${response.status} - ${response.statusText}`);
+      }
+      const { fileid } = await response.json() as { fileid: string };
+      setSelected(fileid);
+    }
+
+    getCurrentFile().catch((err) => {
+      console.error(err);
+      setSelected("");
+    });
   }, []);
 
   function onFileSelect(id: string) {
     setSelected(id);
-    const url = new URL("/assign", window.origin);
-    url.searchParams.append("course_id", courseId());
-    url.searchParams.append("id", id);
+    const url = new URL(`/api/v1/assignments/${assignmentId()}/assign`, window.origin);
     fetch(url, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      method: "GET",
+      method: "POST",
+      body: JSON.stringify({id})
     });
   }
   async function uploadFile(file: File) {
@@ -111,7 +95,7 @@ const InstructorView = () => {
     const data = new FormData();
     data.append("file", file);
     try {
-      const response = await fetch("/configuration", {
+      const response = await fetch("/api/v1/configurations", {
         method: "POST",
         body: data,
       });
@@ -145,7 +129,7 @@ const InstructorView = () => {
           />
         </td>
         <td>
-          <a href={`/configuration/${file.id}`} download={`${file.filename}`}>
+          <a href={`/api/v1/configurations/${file.id}`} download={`${file.filename}`}>
             {file.filename}
           </a>
         </td>
@@ -164,7 +148,7 @@ const InstructorView = () => {
   }
 
   function launchStudent() {
-    if (selected === "" || selected === "global") return;
+    if (selected === "") return;
     launch(true);
   }
   const loading = (

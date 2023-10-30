@@ -13,7 +13,7 @@ import {
   concat,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { courseId } from './lti.service';
+import { assignmentId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
 import { Descendant, type Range } from 'slate';
 
@@ -48,7 +48,7 @@ scribe.subscribe((enable) =>
  * @returns
  */
 function requestConvertNotes(notes: SelectedNotesProse) {
-  const course_id = courseId();
+  const course_id = assignmentId();
   return fromFetch('/api/v1/scribe/convert_notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -103,7 +103,7 @@ export function downloadHistory(): void {
   const element = document.createElement('a');
   element.href = URL.createObjectURL(file);
   element.style.display = 'none';
-  element.download = `myScribeHistory-${courseId()}-${Date.now()}.json`;
+  element.download = `myScribeHistory-${assignmentId()}-${Date.now()}.json`;
 
   // simulate link click
   document.body.appendChild(element); // Required for this to work in FireFox
@@ -150,7 +150,7 @@ prose$.subscribe(
 /*** Fix Grammar ***/
 
 function requestFixGrammar(text: string) {
-  const course_id = courseId();
+  const course_id = assignmentId();
   return fromFetch('/api/v1/scribe/fix_grammar', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -184,7 +184,7 @@ export const [useFixedGrammar, fixedGrammar$] = bind(fixedGrammar);
 /*** Clarify selected text ***/
 
 function requestClarify(text: string) {
-  const course_id = courseId();
+  const course_id = assignmentId();
   return fromFetch('/api/v1/scribe/clarify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
