@@ -18,7 +18,7 @@ import { createPool } from "mysql2/promise";
 import { open } from "node:fs/promises";
 import process from "node:process";
 import { OpenAI } from "openai";
-import path from "path";
+import { dirname, join } from "path";
 import format from "string-format";
 import { fileURLToPath } from "url";
 import { v4 as uuidv4 } from "uuid";
@@ -26,7 +26,7 @@ import info from "./package.json" assert { type: "json" };
 import PrometheusMetrics from "./prometheus.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 const program = new Command();
 program
@@ -44,17 +44,23 @@ program.parse();
 const options = program.opts();
 const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 const MYSQL_DB = options.db ?? "dswa";
+const DB_HOST = process.env.DB_HOST ?? "localhost";
+const DB_PORT =
+  process.env.DB_PORT && !isNaN(Number(process.env.DB_PORT))
+    ? parseInt(process.env.DB_PORT)
+    : 3306;
 
 /**
  * Retrieves value from environment variables.
  * Checks for <base>_FILE first to support docker secrets.
  * @param {string} base
- * @param {*} defaultValue
- * @returns
+ * @param {string} defaultValue
+ * @returns {string|undefined}
  */
 function fromEnvFile(base, defaultValue) {
-  if (process.env[`${base}_FILE`]) {
-    return readFileSync(process.env[`${base}_FILE`], "utf-8").trim();
+  const file = process.env[`${base}_FILE`];
+  if (file) {
+    return readFileSync(file, "utf-8").trim();
   }
   if (process.env[base]) {
     return process.env[base];
@@ -66,9 +72,10 @@ const MYSQL_USER = fromEnvFile("MYSQL_USER");
 const MYSQL_PASSWORD = fromEnvFile("MYSQL_PASSWORD");
 
 const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
-const ONTOPIC_PORT = isNaN(process.env.DSWA_ONTOPIC_PORT)
-  ? 5000
-  : parseInt(process.env.DSWA_ONTOPIC_PORT);
+const ONTOPIC_PORT =
+  process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.DSWA_ONTOPIC_PORT))
+    ? parseInt(process.env.DSWA_ONTOPIC_PORT)
+    : 5000;
 
 const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET", "");
 
@@ -82,9 +89,9 @@ let onTopicResponseAvg = 0;
 let onTopicResponseAvgCount = 0;
 
 const pool = createPool({
-  host: process.env.DB_HOST,
+  host: DB_HOST,
   user: MYSQL_USER,
-  port: process.env.DB_PORT ?? 3306,
+  port: DB_PORT,
   password: MYSQL_PASSWORD,
   database: MYSQL_DB,
   waitForConnections: true,
@@ -174,14 +181,14 @@ async function getFileForAssignment(assignmentId) {
 /**
  *
  * @param {string} filename
- * @param {string} aDate
+ * @param {string} date
  * @param {*} aJSONObject
  */
 async function storeFile(filename, date, aJSONObject) {
-  await pool.query(
-    "INSERT INTO files (filename, data) VALUES(?, ?)",
-    [filename, JSON.stringify(aJSONObject)]
-  );
+  await pool.query("INSERT INTO files (filename, data) VALUES(?, ?)", [
+    filename,
+    JSON.stringify(aJSONObject),
+  ]);
   return { filename, date };
 }
 
@@ -289,7 +296,6 @@ function updateResponseAvg(aValue) {
   );
 }
 
-
 /**
  *
  */
@@ -298,7 +304,6 @@ class DocuScopeWALTIService {
    *
    */
   constructor() {
-
     // Reset the avg values every 5 minutes
     setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
     setInterval(updateUptime, 1000); // Every second
@@ -342,7 +347,7 @@ class DocuScopeWALTIService {
   async getDefaultRuleData() {
     if (!this.defaultRules) {
       try {
-        const filename = path.join(__dirname, this.staticHome, "dswa.json");
+        const filename = join(__dirname, this.staticHome, "dswa.json");
         const file = await open(filename);
         const ruleFile = await file.readFile({ encoding: "utf8" });
         await file.close();
@@ -364,7 +369,7 @@ class DocuScopeWALTIService {
       const ruleData = await this.getDefaultRuleData();
       response.json(this.generateDataMessage(ruleData));
     } catch (err) {
-      console.error(err.message);
+      console.error(err instanceof Error ? err.message : err);
       response.sendStatus(404);
     }
   }
@@ -372,19 +377,16 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  pad(s) {
-    return (s < 10 ? "0" : "") + s;
-  }
-
-  /**
-   *
-   */
   format(seconds) {
-    var hours = Math.floor(seconds / (60 * 60));
-    var minutes = Math.floor((seconds % (60 * 60)) / 60);
-    var second = Math.floor(seconds % 60);
+    const hours = Math.floor(seconds / (60 * 60)).toString();
+    const minutes = Math.floor((seconds % (60 * 60)) / 60)
+      .toString()
+      .padStart(2, "0");
+    const second = Math.floor(seconds % 60)
+      .toString()
+      .padStart(2, "0");
 
-    return this.pad(hours) + ":" + this.pad(minutes) + ":" + this.pad(second);
+    return [hours, minutes, second].join(":");
   }
 
   /**
@@ -486,7 +488,7 @@ class DocuScopeWALTIService {
 
       response.json(this.generateDataMessage(ret));
     } catch (err) {
-      console.error(err);
+      console.error(err instanceof Error ? err.message : err);
       response.sendStatus(500);
     }
   }
@@ -520,9 +522,7 @@ class DocuScopeWALTIService {
           //response.render('main', { html: html });
           response.send(html);
         } else {
-          response.sendFile(
-            path.join(__dirname, this.staticHome, "nolti.html")
-          );
+          response.sendFile(join(__dirname, this.staticHome, "nolti.html"));
         }
 
         return;
@@ -598,12 +598,12 @@ class DocuScopeWALTIService {
         const data = await this.getDefaultRuleData();
         return {
           ...defaultPrompt,
-          ...data.prompt_templates[prompt],
+          ...data.prompt_templates[tool],
           genre: data.rules.name,
           overview: data.rules.overview,
         };
       } catch (err) {
-        console.error(err.message);
+        console.error(err instanceof Error ? err.message : err);
         return defaultPrompt;
       }
     }
@@ -612,20 +612,23 @@ class DocuScopeWALTIService {
    *
    */
   async run() {
-    this.app.get("/api/v1/configurations/:fileId", async (request, response) => {
-      const fileId = request.params.fileId;
-      try {
-        const data = await getFile(fileId);
-        if (data) {
-          response.send(data);
-        } else {
-          response.sendStatus(404);
+    this.app.get(
+      "/api/v1/configurations/:fileId",
+      async (request, response) => {
+        const fileId = request.params.fileId;
+        try {
+          const data = await getFile(fileId);
+          if (data) {
+            response.send(data);
+          } else {
+            response.sendStatus(404);
+          }
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
         }
-      } catch (err) {
-        console.error(err.message);
-        response.sendStatus(500);
       }
-    });
+    );
 
     this.app.post("/api/v1/configurations", async (request, response) => {
       // TODO limit to instructor/administrative roles.
@@ -650,7 +653,7 @@ class DocuScopeWALTIService {
           );
           response.json(this.generateDataMessage(filedata));
         } catch (err) {
-          console.error(err.message);
+          console.error(err instanceof Error ? err.message : err);
           if (err instanceof SyntaxError) {
             // likely bad json
             response.status(400).send(err.message);
@@ -668,45 +671,51 @@ class DocuScopeWALTIService {
         const files = await getFiles();
         response.json(files);
       } catch (err) {
-        console.error(err.message);
+        console.error(err instanceof Error ? err.message : err);
         response.sendStatus(500);
       }
     });
 
-    this.app.post("/api/v1/assignments/:assignment/assign", (request, response) => {
-      // TODO add role check to see if LTI user is authorized to change
-      // TODO get assignment from LTI parameters instead of reflected from interface
-      const { assignment } = request.params;
-      const { id } = request.body; // as {id: string}
-      console.log(`Assigning ${id} to assignment: ${assignment}`);
-      try {
-        pool.query(
-          `INSERT INTO assignments (id, fileid)
+    this.app.post(
+      "/api/v1/assignments/:assignment/assign",
+      (request, response) => {
+        // TODO add role check to see if LTI user is authorized to change
+        // TODO get assignment from LTI parameters instead of reflected from interface
+        const { assignment } = request.params;
+        const { id } = request.body; // as {id: string}
+        console.log(`Assigning ${id} to assignment: ${assignment}`);
+        try {
+          pool.query(
+            `INSERT INTO assignments (id, fileid)
            VALUES (?, UUID_TO_BIN(?))
            ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
-          [assignment, id, id]
-        );
-        response.sendStatus(201);
-      } catch (err) {
-        console.error(err.message);
-        response.sendStatus(500);
-      }
-    });
-
-    this.app.get("/api/v1/assignments/:assignment/file_id", async (request, response) => {
-      const { assignment } = request.params;
-      try {
-        const data = await getFileIdForAssignment(assignment);
-        if (data) {
-          response.json(data);
-        } else {
-          response.sendStatus(404);
+            [assignment, id, id]
+          );
+          response.sendStatus(201);
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
         }
-      } catch (err) {
-        console.error(err);
-        response.sendStatus(500);
       }
-    });
+    );
+
+    this.app.get(
+      "/api/v1/assignments/:assignment/file_id",
+      async (request, response) => {
+        const { assignment } = request.params;
+        try {
+          const data = await getFileIdForAssignment(assignment);
+          if (data) {
+            response.json(data);
+          } else {
+            response.sendStatus(404);
+          }
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
+        }
+      }
+    );
 
     this.app.get("/metrics", (request, response) => {
       this.processMetrics(request, response);
@@ -738,7 +747,7 @@ class DocuScopeWALTIService {
         // TODO check for empty prose
         response.json(prose);
       } catch (err) {
-        console.error(err.message);
+        console.error(err instanceof Error ? err.message : err);
         console.log(params);
         response.sendStatus(500);
       }
@@ -799,7 +808,7 @@ class DocuScopeWALTIService {
           const rules = await getFileForAssignment(course_id);
           response.json(this.generateDataMessage(rules));
         } catch (err) {
-          console.error(err.message);
+          console.error(err instanceof Error ? err.message : err);
           response.sendStatus(404);
         }
       } else {
