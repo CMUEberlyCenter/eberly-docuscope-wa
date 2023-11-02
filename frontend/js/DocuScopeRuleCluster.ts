@@ -5,7 +5,7 @@ export interface Topic {
   user_defined: boolean;
   pre_defined_topics?: string[];
   custom_topics?: string[];
-  no_lexical_overlap: boolean; 
+  no_lexical_overlap: boolean;
 }
 export interface Rule {
   name: string;
@@ -20,13 +20,13 @@ export interface Rule {
   sentenceCount?: number;
 }
 /**
- * 
+ *
  */
 export class DocuScopeRuleCluster {
   id = uuidv4();
-  name = "";
-  description = "";
-  examples = "";
+  name = '';
+  description = '';
+  examples = '';
   sentenceCount = 0;
 
   raw?: Rule;

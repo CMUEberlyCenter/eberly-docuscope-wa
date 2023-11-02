@@ -1,22 +1,22 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DocuScopeRuleCluster, Rule } from "./DocuScopeRuleCluster";
+import { DocuScopeRuleCluster, Rule } from './DocuScopeRuleCluster';
 
 /**
  *
  */
 export default class DocuScopeRule {
   id = uuidv4();
-  name = "unassigned";
-  description = "unassigned";
-  type = "unassigned";
+  name = 'unassigned';
+  description = 'unassigned';
+  type = 'unassigned';
   is_group = false;
-  cv_description = "unassigned";
+  cv_description = 'unassigned';
   children: DocuScopeRuleCluster[] = [];
 
   raw?: Rule;
   /**
-     *
-     */
+   *
+   */
   constructor(rule?: Rule) {
     if (rule) {
       this.parse(rule);
@@ -50,7 +50,8 @@ export default class DocuScopeRule {
     this.is_group = anObject.is_group;
     this.cv_description = anObject.cv_description;
 
-    this.children = anObject.children.map(child =>
-      new DocuScopeRuleCluster(child));
+    this.children = anObject.children.map(
+      (child) => new DocuScopeRuleCluster(child)
+    );
   }
 }
