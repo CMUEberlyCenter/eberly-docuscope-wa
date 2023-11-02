@@ -74,8 +74,6 @@ class ClusterPanel extends Component {
    * Update with the latest from the actual data
    */
   componentDidUpdate(prevProps) {
-    //console.log ("componentDidUpdate ()");
-
     if (
       prevProps.currentRule != this.props.currentRule ||
       prevProps.currentCluster != this.props.currentCluster
@@ -94,8 +92,6 @@ class ClusterPanel extends Component {
    *
    */
   onTopiEditorFocusOut(e) {
-    console.log("onTopiEditorFocusOut ()");
-
     if (this.state.topicText == "") {
       if (this.props.disableTreeSelect) {
         this.props.disableTreeSelect(false);
@@ -113,7 +109,6 @@ class ClusterPanel extends Component {
    *
    */
   onTopiEditorFocusIn(e) {
-    console.log("onTopiEditorFocusIn ()");
     if (this.props.disableTreeSelect) {
       this.props.disableTreeSelect(true);
     }
@@ -123,8 +118,6 @@ class ClusterPanel extends Component {
    *
    */
   getTopicTextStatic() {
-    //console.log ("getTopicTextStatic ("+this.props.currentRule + "," + this.props.currentCluster+")");
-
     let topictextStatic = "";
     let cluster = this.props.ruleManager.getClusterByIndex(
       this.props.currentRule,
@@ -134,7 +127,7 @@ class ClusterPanel extends Component {
       topictextStatic =
         this.props.ruleManager.getClusterTopicTextStatic(cluster);
     } else {
-      console.log("Warning cluster not found");
+      console.warn("Warning cluster not found");
     }
 
     return topictextStatic;
@@ -144,8 +137,6 @@ class ClusterPanel extends Component {
    *
    */
   getTopicText() {
-    //console.log ("getTopicText ("+this.props.currentRule + "," + this.props.currentCluster+")");
-
     let topictext = "";
     let cluster = this.props.ruleManager.getClusterByIndex(
       this.props.currentRule,
@@ -154,7 +145,7 @@ class ClusterPanel extends Component {
     if (cluster != null) {
       topictext = this.props.ruleManager.getClusterTopicText(cluster);
     } else {
-      console.log("Warning cluster not found");
+      console.warn("Warning cluster not found");
     }
 
     return topictext;
@@ -164,8 +155,6 @@ class ClusterPanel extends Component {
    *
    */
   switchTab(key) {
-    //console.log ("switchTab ("+key+")");
-
     this.setState({
       currentTab: key,
     });
@@ -175,8 +164,6 @@ class ClusterPanel extends Component {
    *
    */
   onTopicsChange(e) {
-    console.log("onTopicsChange (" + e.target.value + ")");
-
     this.setState(
       {
         topicText: e.target.value,
@@ -215,8 +202,6 @@ class ClusterPanel extends Component {
    *
    */
   onCustomTopicUpdate(e) {
-    console.log("onCustomTopicUpdate ()");
-
     setEditorState(false);
 
     let topicArray = [];
@@ -283,8 +268,6 @@ class ClusterPanel extends Component {
    *
    */
   createRuleDescription() {
-    //console.log ("createRuleDescription ("+this.props.currentRule+","+this.props.currentCluster+")");
-
     const rules = this.props.ruleManager.rules;
 
     if (!rules) {
@@ -307,7 +290,6 @@ class ClusterPanel extends Component {
       if (description == "") {
         description = " ";
       }
-      //console.log ("Description: " + description);
       return description;
     }
 
@@ -412,8 +394,6 @@ class ClusterPanel extends Component {
         </div>
       );
     }
-
-    //console.log ("Example data: " + cluster.examples);
 
     return (
       <div

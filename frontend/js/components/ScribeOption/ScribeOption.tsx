@@ -21,9 +21,9 @@ export const ScribeOption = () => {
       <Modal.Header closeButton>myScribe</Modal.Header>
       <Modal.Body>
         <p>
-          The myScribe extension uses ChatGPT. If you use use any of the
-          scribe tools then your text is sent to ChatGPT for analysis. There are
-          two factors to consider before you use these extensions:
+          The myScribe extension uses ChatGPT. If you use use any of the scribe
+          tools then your text is sent to ChatGPT for analysis. There are two
+          factors to consider before you use these extensions:
         </p>
         <ol>
           <li>Any submitted text is collected by OpenAI.</li>

@@ -1,20 +1,43 @@
 import { v4 as uuidv4 } from 'uuid';
 
+export interface Topic {
+  lemma: string;
+  user_defined: boolean;
+  pre_defined_topics?: string[];
+  custom_topics?: string[];
+  no_lexical_overlap: boolean; 
+}
+export interface Rule {
+  name: string;
+  description: string;
+  topics: Topic[];
+  examples: string;
+  type: string;
+  is_group: boolean;
+  children: Rule[];
+  cv_description: string;
+  parent: string;
+  sentenceCount?: number;
+}
 /**
- * This needs to be refactored to: DocuScopeRuleCluster
+ * 
  */
-export default class DocuScopeRuleChild {
+export class DocuScopeRuleCluster {
+  id = uuidv4();
+  name = "";
+  description = "";
+  examples = "";
+  sentenceCount = 0;
+
+  raw?: Rule;
+
   /**
    *
    */
-  constructor() {
-    this.id = uuidv4();
-    this.name = "";
-    this.description = "";
-    this.examples = "";
-    this.sentenceCount = 0;
-
-    this.raw = {};
+  constructor(raw?: Rule) {
+    if (raw) {
+      this.parse(raw);
+    }
   }
 
   /**
@@ -28,9 +51,7 @@ export default class DocuScopeRuleChild {
   /**
    * Here we make sure that we have a custom_topics field
    */
-  parse(anObject) {
-    //console.log("parse ()");
-
+  parse(anObject: Rule) {
     this.raw = anObject; // We will need to make sure we can remove this since everything should be wrapped
 
     this.name = anObject.name;
@@ -41,7 +62,7 @@ export default class DocuScopeRuleChild {
       this.sentenceCount = anObject.sentenceCount;
     }
 
-    let topics = anObject.topics;
+    const topics = anObject.topics;
 
     if (topics) {
       if (topics.length > 0) {
@@ -54,7 +75,5 @@ export default class DocuScopeRuleChild {
         }
       }
     }
-
-    //console.log (this.raw);
   }
 }

@@ -10,9 +10,7 @@ class TopicHighlighter {
   /**
    *
    */
-  getParagraphFromId(anId) {
-    console.log("getParagraphFromId (" + anId + ")");
-
+  getParagraphFromId(_anId) {
     return -1;
   }
 
@@ -43,8 +41,6 @@ class TopicHighlighter {
    *
    */
   highlightParagraph(aParagraphIndex) {
-    console.log("highlightParagraph (" + aParagraphIndex + ")");
-
     this.clearAllHighlights();
 
     let pId = "p" + (aParagraphIndex + 1);
@@ -62,10 +58,6 @@ class TopicHighlighter {
    *
    */
   highlightSentence(aParagraphIndex, aSentenceIndex) {
-    console.log(
-      "highlightSentence (" + aParagraphIndex + "," + aSentenceIndex + ")"
-    );
-
     this.clearAllHighlights();
 
     let pId = "p" + (aParagraphIndex + 1);
@@ -92,11 +84,6 @@ class TopicHighlighter {
    *
    */
   highlightTopic(aParagraphIndex, aSentenceIndex, aTopicList) {
-    console.log(
-      "highlightTopic (" + aParagraphIndex + "," + aSentenceIndex + ")"
-    );
-    console.log(aTopicList);
-
     this.clearAllHighlights();
 
     let paragraphElement = document.getElementById("p" + (aParagraphIndex + 1));

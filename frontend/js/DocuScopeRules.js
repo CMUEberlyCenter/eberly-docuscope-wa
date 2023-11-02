@@ -61,14 +61,7 @@ export default class DocuScopeRules {
    *
    */
   getJSONObject() {
-    let constructed = [];
-
-    for (let i = 0; i < this.rules.length; i++) {
-      let aRule = this.rules[i];
-      constructed.push(aRule.getJSONObject());
-    }
-
-    return constructed;
+    return this.rules.map(rule => rule.getJSONObject());
   }
 
   /**
@@ -179,8 +172,6 @@ export default class DocuScopeRules {
    * might have already worked on
    */
   load(incomingData) {
-    console.log("load ()");
-
     // store this information as it is now needed but fixIncoming destroys it. #26
     this.name = incomingData.rules.name;
     this.overview = incomingData.rules.overview;
@@ -252,8 +243,6 @@ export default class DocuScopeRules {
    *
    */
   save() {
-    console.log("save ()");
-
     // Re-create the JSON structure
     let raw = this.getJSONObject();
 
@@ -272,7 +261,6 @@ export default class DocuScopeRules {
    */
   debugRules() {
     console.log("debugRules ()");
-
     console.log(this.getJSONObject());
   }
 
@@ -286,94 +274,57 @@ export default class DocuScopeRules {
 
   /**
    *
+   * @param {string} anId 
+   * @returns {DocuScopeRule | undefined}
    */
   getRule(anId) {
-    //console.log("getRule (" + anId + ")");
-
-    for (let i = 0; i < this.rules.length; i++) {
-      let aRule = this.rules[i];
-      if (aRule.id === anId) {
-        return aRule;
-      }
-    }
-
-    return null;
+    return this.rules.find(rule => rule.id === anId);
   }
 
   /**
    *
+   * @param {string} aRule 
+   * @param {string} aCluster
+   * @returns {DocuScopeRuleCluster | undefined}
    */
   getCluster(aRule, aCluster) {
-    //console.log ("getCluster ("+ aRule + "," + aCluster + ")");
-
-    for (let i = 0; i < this.rules.length; i++) {
-      let rule = this.rules[i];
-      if (rule.id == aRule) {
-        for (let j = 0; j < rule.children.length; j++) {
-          let cluster = rule.children[j];
-          if (cluster.id == aCluster) {
-            return aCluster;
-          }
-        }
-      }
-    }
-
-    //console.log ("No cluster found");
-
-    return null;
+    return this.getRule(aRule)?.children.find(cluster => cluster.id === aCluster);
   }
 
   /**
    *
+   * @param {number} aRule
+   * @param {number} aCluster
+   * @returns {DocuScopeRuleCluster | undefined}
    */
   getClusterByIndex(aRule, aCluster) {
-    //console.log ("getClusterByIndex ("+ aRule + "," + aCluster + ")");
-
-    if (aRule == -1 || aCluster == -1) {
-      //console.log ("Either rule or cluster is -1");
-      return null;
+    if (aRule === -1 || aCluster === -1) {
+      return undefined;
     }
-
-    let rule = this.rules[aRule];
-
-    if (rule != null) {
-      if (rule.children) {
-        return rule.children[aCluster];
-      }
-    }
-
-    return null;
+    return this.rules.at(aRule)?.children.at(aCluster);
   }
 
   /**
    *
+   * @param {number} aRule 
+   * @param {number} aCluster 
    */
   getClusterTopics(aRule, aCluster) {
-    //console.log ("getClusterTopics ()");
-
-    let cluster = this.getClusterByIndex(aRule, aCluster);
-    if (cluster == null) {
+    const cluster = this.getClusterByIndex(aRule, aCluster);
+    if (!cluster) {
       console.log("Error, no cluster found!");
       return [];
     }
 
-    let topicList = [];
+    const topicList = [];
+    const topic = cluster.raw.topics.at(0);
 
-    let clusterObject = cluster.raw;
-
-    let topics = clusterObject.topics;
-
-    if (topics) {
-      if (topics[0].pre_defined_topics) {
-        for (let i = 0; i < topics[0].pre_defined_topics.length; i++) {
-          topicList.push(topics[0].pre_defined_topics[i]);
-        }
+    if (topic) {
+      if (topic.pre_defined_topics) {
+        topicList.push(...topic.pre_defined_topics);
       }
-
-      if (topics[0].custom_topics) {
-        for (let i = 0; i < topics[0].custom_topics.length; i++) {
-          topicList.push(topics[0].custom_topics[i]);
-        }
+      if (topic.custom_topics) {
+        topicList.push(...topic.custom_topics);
       }
     }
 
@@ -382,22 +333,19 @@ export default class DocuScopeRules {
 
   /**
    *
+   * @param {number} aRule 
+   * @param {number} aCluster 
+   * @returns {string[]}
    */
   getClusterName(aRule, aCluster) {
-    //console.log ("getClusterTopics ()");
-
-    let cluster = this.getClusterByIndex(aRule, aCluster);
-    if (cluster == null) {
+    const cluster = this.getClusterByIndex(aRule, aCluster);
+    if (!cluster) {
       console.log("Error, no cluster found!");
       return [];
     }
 
-    let topicList = [];
-
-    let clusterObject = cluster.raw;
-
-    let topics = clusterObject.topics;
-
+    const topicList = [];
+    const topics = cluster.raw.topics;
     if (topics) {
       /*
       if (topics [0].pre_defined_topics) {
@@ -415,55 +363,46 @@ export default class DocuScopeRules {
 
       return [topics[0].lemma];
     }
-
     return topicList;
   }
 
   /**
    *
+   * @param {number} aClusterIndex 
+   * @returns {string[]}
    */
   getClusterTopicsByClusterIndex(aClusterIndex) {
     console.log("getClusterTopicsByClusterIndex (" + aClusterIndex + ")");
 
-    let topicList = [];
-    let index = 0;
+    const topicList = [];
     let cluster = null;
 
-    for (let i = 0; i < this.rules.length; i++) {
-      let rule = this.rules[i];
-      for (let j = 0; j < rule.children.length; j++) {
-        if (index == aClusterIndex) {
-          cluster = rule.children[j];
-          break;
-        }
-        index++;
+    for (const rule of this.rules) {
+      if (aClusterIndex > rule.children.length) {
+        aClusterIndex -= rule.children.length;
+      } else {
+        cluster = rule.children[aClusterIndex];
+        break;
       }
     }
 
-    if (cluster == null) {
+    if (cluster === null) {
       console.log("Error: unable to find cluster by global cluster index");
       return topicList;
     }
 
-    let clusterObject = cluster.raw;
+    const clusterObject = cluster.raw;
 
     console.log("We've got topics to inspect");
     console.log(clusterObject);
 
-    let topics = clusterObject.topics;
+    const topic = clusterObject.topics.at(0);
 
-    if (topics) {
-      if (topics[0].pre_defined_topics) {
-        for (let i = 0; i < topics[0].pre_defined_topics.length; i++) {
-          topicList.push(topics[0].pre_defined_topics[i]);
-        }
-      }
-
-      if (topics[0].custom_topics) {
-        for (let i = 0; i < topics[0].custom_topics.length; i++) {
-          topicList.push(topics[0].custom_topics[i]);
-        }
-      }
+    if (topic?.pre_defined_topics) {
+      topicList.push(...topic.pre_defined_topics);
+    }
+    if (topic?.custom_topics) {
+      topicList.push(...topic.custom_topics)
     }
 
     return topicList;
@@ -477,31 +416,12 @@ export default class DocuScopeRules {
   getClusterTopicCountPredefined(aRuleIndex, aClusterIndex) {
     //console.log ("getClusterTopicCountPredefined ("+ aRuleIndex + "," + aClusterIndex + ")");
 
-    if (aRuleIndex == -1 || aClusterIndex == -1) {
+    if (aRuleIndex === -1 || aClusterIndex === -1) {
       //console.log ("No valid rule or cluster provided");
       return 0;
     }
 
-    let rule = this.rules[aRuleIndex];
-
-    if (rule != null) {
-      if (rule.children) {
-        let aCluster = rule.children[aClusterIndex];
-
-        let clusterObject = aCluster.raw;
-
-        let topics = clusterObject.topics;
-
-        if (topics) {
-          if (topics[0].pre_defined_topics) {
-            let topicList = topics[0].pre_defined_topics;
-            return topicList.length;
-          }
-        }
-      }
-    }
-
-    return 0;
+    return this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw.topics?.at(0)?.pre_defined_topics?.length ?? 0;
   }
 
   /**
@@ -512,43 +432,18 @@ export default class DocuScopeRules {
   getClusterTopicCountCustom(aRuleIndex, aClusterIndex) {
     //console.log ("getClusterTopicCountCustom ("+ aRuleIndex + "," + aClusterIndex + ")");
 
-    if (aRuleIndex == -1 || aClusterIndex == -1) {
+    if (aRuleIndex === -1 || aClusterIndex === -1) {
       //console.log ("No valid rule or cluster provided");
       return 0;
     }
-
-    let rule = this.rules[aRuleIndex];
-
-    if (rule != null) {
-      if (rule.children) {
-        let aCluster = rule.children[aClusterIndex];
-
-        let clusterObject = aCluster.raw;
-
-        let topics = clusterObject.topics;
-
-        if (topics) {
-          if (topics[0].custom_topics) {
-            let topicList = topics[0].custom_topics;
-            return topicList.length;
-          }
-        }
-      }
-    }
-
-    return 0;
+    return this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw.topics?.at(0)?.custom_topics?.length ?? 0;
   }
 
   /**
    *
    */
   topicSentenceCount(aRuleIndex, aClusterIndex) {
-    let aCluster = this.getClusterByIndex(aRuleIndex, aClusterIndex);
-    if (aCluster) {
-      return aCluster.sentenceCount;
-    }
-
-    return 0;
+    return this.getClusterByIndex(aRuleIndex, aClusterIndex)?.sentenceCount ?? 0
   }
 
   /**
@@ -559,27 +454,16 @@ export default class DocuScopeRules {
 
     let topicText = "";
 
-    if (aCluster == null) {
+    if (!aCluster) {
       console.log("Warning: cluster is null");
       return topicText;
     }
 
-    let clusterObject = aCluster.raw;
-
-    let topics = clusterObject.topics;
-
-    if (topics) {
-      let topicList = topics[0].pre_defined_topics;
-      if (topicList) {
-        for (let j = 0; j < topicList.length; j++) {
-          if (j > 0) {
-            topicText += "\n";
-          }
-          topicText += topicList[j];
-        }
-      }
+    const topic = aCluster.raw.topics?.at(0);
+    if (topic.pre_defined_topics) {
+      topicText = topic.pre_defined_topics.join("\n");
+      topicText += "\n";
     }
-
     return topicText;
   }
 

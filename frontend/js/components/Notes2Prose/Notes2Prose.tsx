@@ -103,8 +103,8 @@ export const Notes2Prose = ({
 
   const alert = (
     <Alert variant="warning">
-      The myScribe feature is currently disabled.
-      Click &apos;myScribe&apos; in the &apos;Help&apos; menu to enable it.
+      The myScribe feature is currently disabled. Click &apos;myScribe&apos; in
+      the &apos;Help&apos; menu to enable it.
     </Alert>
   );
   const noNotes = (

@@ -39,7 +39,7 @@ class PrometheusMetrics {
    * Let's switch to a hashtable soon!
    */
   getMetricObject(aMetric) {
-    return this.metricTracker.find(tracker => tracker.metric === aMetric);
+    return this.metricTracker.find((tracker) => tracker.metric === aMetric);
   }
 
   /**
@@ -85,7 +85,16 @@ class PrometheusMetrics {
 
     const uptime = time();
 
-    formatted = formatted.concat(...this.metricTracker.map(tracker => this.addMetric(tracker.metric, tracker.value, tracker.type, tracker.help)));
+    formatted = formatted.concat(
+      ...this.metricTracker.map((tracker) =>
+        this.addMetric(
+          tracker.metric,
+          tracker.value,
+          tracker.type,
+          tracker.help
+        )
+      )
+    );
 
     formatted = formatted.concat(
       this.addMetric(
