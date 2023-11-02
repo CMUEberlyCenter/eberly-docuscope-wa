@@ -480,7 +480,7 @@ export default class DocuScopeRules {
       return "";
     }
 
-    const topics = aCluster.topics.at(0)?.custom_topics;
+    const topics = aCluster.raw.topics?.at(0)?.custom_topics?.join("\n");
 
     if (topics) {
       return topics.join("\n");
