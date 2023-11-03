@@ -29,15 +29,14 @@ export class DocuScopeRuleCluster {
   examples = '';
   sentenceCount = 0;
 
-  raw?: Rule;
+  raw: Rule;
 
   /**
    *
    */
-  constructor(raw?: Rule) {
-    if (raw) {
-      this.parse(raw);
-    }
+  constructor(raw: Rule) {
+    this.raw = raw;
+    this.parse(raw);
   }
 
   /**

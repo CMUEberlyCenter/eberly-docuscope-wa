@@ -3,7 +3,7 @@ import React from "react";
 import "../css/docuscope.css";
 import "../css/main.css";
 
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 import DocuScopeRules from "./DocuScopeRules";
 import {
   cleanAndRepairHTMLSentenceData,
@@ -39,9 +39,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     this.ruleManager = new DocuScopeRules();
     this.ruleManager.updateNotice = this.updateNotice.bind(this);
-    this.ruleManager.setContext(assignmentId());
 
-    this.pingEnabled = true;
     this.pingTimer = -1;
 
     this.token = uuidv4();
@@ -87,38 +85,36 @@ export default class DocuScopeWA extends EberlyLTIBase {
       });
 
       if (!this.isInstructor()) {
-        this.apiCall("rules", null, "GET").then((result) => {
-          this.ruleManager.load(result);
-
-          if (this.ruleManager.getReady() === true) {
-            if (this.pingEnabled === false) {
-              this.ready();
-            } else {
-              this.setState({
-                state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
-                progress: 75,
-                progressTitle: "Ruleset loaded, Initializing ...",
-              });
-
-              /*
-               Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-               problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-               to 'ding'
-              */
-              this.apiCall("ding", null, "GET").then((_result) => {
-                this.ready();
-              });
-
-              //this.ready();
+        const ruleUrl = new URL(
+          `/api/v1/assignments/${assignmentId()}/configuration`,
+          location.href
+        );
+        // TODO add lti token, session, etc.
+        fetch(ruleUrl)
+          .then((response) => {
+            if (response.ok) {
+              return response.json();
             }
-          } else {
+            throw new Error("Unable to retrieve configuration.");
+          })
+          .then((rules) => {
+            // initializing state unnecessary.
+            this.setState({
+              state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
+              progress: 75,
+              progressTitle: "Ruleset loaded, Initializing ...",
+            });
+            this.ruleManager.load(rules);
+            this.ready();
+          })
+          .catch((err) => {
+            console.error(err);
             this.setState({
               state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
               progress: 100,
               progressTitle: "Error: unable to process ruleset",
             });
-          }
-        });
+          });
       } else {
         console.log(
           "Operating in instructor mode, no need to fetch a rule file"
@@ -355,11 +351,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
 
     const aURL = `/api/v1/${aCall}?token=${this.token}&session=${this.session}&course_id=${course_id}`;
 
-    if (aType == "POST") {
+    if (aType === "POST") {
       return this.apiPOSTCall(aURL, aData);
     }
 
-    if (aType == "GET") {
+    if (aType === "GET") {
       return this.apiGETCall(aURL, aData);
     }
   }
@@ -477,9 +473,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     let scrimup = false;
 
     if (this.isInstructor()) {
-      return (
-        <InstructorView />
-      );
+      return <InstructorView />;
     }
 
     if (this.inIframe() == true) {

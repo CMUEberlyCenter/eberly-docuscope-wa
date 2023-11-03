@@ -1,7 +1,7 @@
 /**
  *
  */
-class DocuScopeSessionStorage {
+export class DocuScopeSessionStorage {
   /**
    *
    */
@@ -11,12 +11,8 @@ class DocuScopeSessionStorage {
     this.equalCharacter = "=";
     this.key = aKey;
 
-    if (this.key == undefined) {
+    if (!this.key) {
       this.key = "dswa";
-    } else {
-      if (this.key == null) {
-        this.key = "dswa";
-      }
     }
 
     this.reload();
@@ -174,7 +170,7 @@ class DocuScopeSessionStorage {
 
     for (let [key, value] of Object.entries(this.cookieJar)) {
       let separator = ";";
-      if (index == 0) {
+      if (index === 0) {
         separator = "";
       }
 
@@ -183,7 +179,7 @@ class DocuScopeSessionStorage {
       index++;
     }
 
-    window.localStorage.setItem(this.key, data);
+    window.sessionStorage.setItem(this.key, data);
 
     // Make sure that our internal model is the same as what's on disk
     this.reload();
@@ -195,8 +191,8 @@ class DocuScopeSessionStorage {
   reload() {
     //console.log ("reload ()");
 
-    let allCookies = window.localStorage.getItem(this.key);
-    if (allCookies != null) {
+    let allCookies = window.sessionStorage.getItem(this.key);
+    if (allCookies) {
       this.parse(allCookies);
     }
   }

@@ -54,7 +54,10 @@ const InstructorView = () => {
   useEffect(() => {
     async function getCurrentFile() {
       await getFileList();
-      const getfileid = new URL(`/api/v1/assignments/${assignmentId()}/file_id`, window.origin);
+      const getfileid = new URL(
+        `/api/v1/assignments/${assignmentId()}/file_id`,
+        window.origin
+      );
       const response = await fetch(getfileid, {
         headers: {
           Accept: "application/json",
@@ -62,9 +65,11 @@ const InstructorView = () => {
         method: "GET",
       });
       if (!response.ok) {
-        throw new Error(`Bad current_file request: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `Bad current_file request: ${response.status} - ${response.statusText}`
+        );
       }
-      const { fileid } = await response.json() as { fileid: string };
+      const { fileid } = (await response.json()) as { fileid: string };
       setSelected(fileid);
     }
 
@@ -76,14 +81,17 @@ const InstructorView = () => {
 
   function onFileSelect(id: string) {
     setSelected(id);
-    const url = new URL(`/api/v1/assignments/${assignmentId()}/assign`, window.origin);
+    const url = new URL(
+      `/api/v1/assignments/${assignmentId()}/assign`,
+      window.origin
+    );
     fetch(url, {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({id})
+      body: JSON.stringify({ id }),
     });
   }
   async function uploadFile(file: File) {
@@ -129,7 +137,10 @@ const InstructorView = () => {
           />
         </td>
         <td>
-          <a href={`/api/v1/configurations/${file.id}`} download={`${file.filename}`}>
+          <a
+            href={`/api/v1/configurations/${file.id}`}
+            download={`${file.filename}`}
+          >
             {file.filename}
           </a>
         </td>

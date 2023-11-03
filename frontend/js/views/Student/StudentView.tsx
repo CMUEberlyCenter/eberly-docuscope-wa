@@ -16,7 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useState
+  useState,
 } from "react";
 import {
   Badge,
@@ -708,9 +708,7 @@ const StudentView = (props: {
       </main>
       <footer className="bg-dark statusbar">
         <div className="statusbar-status">{status}</div>
-        <div className="statusbar-version">
-          {`DSWA Version: ${VERSION}`}
-        </div>
+        <div className="statusbar-version">{`DSWA Version: ${VERSION}`}</div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
             icon={faBook}
@@ -737,12 +735,22 @@ const StudentView = (props: {
             ReactEditor.focus(editor);
             const start = Range.end(notes.range);
             // Using insertNodes adds appropriate whitespace and has select flag
-            Transforms.insertNodes(editor, [{type: 'paragraph', children: [{text: notes.prose}]}], {
-              at: start,
-              select: true // does not seem to do anything.
-            });
+            Transforms.insertNodes(
+              editor,
+              [{ type: "paragraph", children: [{ text: notes.prose }] }],
+              {
+                at: start,
+                select: true, // does not seem to do anything.
+              }
+            );
             // Select Prose
-            Transforms.select(editor, {anchor: {path: [start.path[0] + 1, 0], offset: 0}, focus: {path: [start.path[0]+1, 0], offset: notes.prose.length}});
+            Transforms.select(editor, {
+              anchor: { path: [start.path[0] + 1, 0], offset: 0 },
+              focus: {
+                path: [start.path[0] + 1, 0],
+                offset: notes.prose.length,
+              },
+            });
             // Transforms.select(editor, notes.range); // Select notes
           }
         }}

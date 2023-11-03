@@ -20,7 +20,8 @@ import { Descendant, type Range } from 'slate';
 export const ScribeAvailable = true; // For future ability to conditionally make it available.
 
 // Show the myScribe warning and setting dialog.
-const showAtStartup = sessionStorage.getItem('show_scribe') !== false.toString();
+const showAtStartup =
+  sessionStorage.getItem('show_scribe') !== false.toString();
 const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
 export const hideScribeOption = () => show_scribe_option.next(false);
 export const showScribeOption = () => show_scribe_option.next(true);
@@ -28,8 +29,8 @@ export const [useShowScribeOption, showScribeOption$] = bind(
   show_scribe_option.pipe(distinctUntilChanged()),
   showAtStartup
 );
-show_scribe_option.subscribe(
-  (save) => sessionStorage.setItem('show_scribe', save.toString())
+show_scribe_option.subscribe((save) =>
+  sessionStorage.setItem('show_scribe', save.toString())
 );
 
 // If scribe is currently enabled by user.
@@ -143,8 +144,7 @@ notes.subscribe(
   (notes) => notes !== undefined && console.log(`logging notes: ${notes.text}`)
 );
 prose$.subscribe(
-  (prose) =>
-    typeof prose === 'string' && console.log(`logging prose: ${prose}`)
+  (prose) => typeof prose === 'string' && console.log(`logging prose: ${prose}`)
 );
 
 /*** Fix Grammar ***/

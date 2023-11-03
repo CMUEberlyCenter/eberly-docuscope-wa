@@ -4,8 +4,11 @@ import { catchError, map, of, switchMap } from 'rxjs';
 import DocuScopeRules from '../DocuScopeRules';
 import { bind } from '@react-rxjs/core';
 
-const ruleUrl = new URL(`/api/v1/rules`, location.href);
-ruleUrl.searchParams.append('course_id', assignmentId());
+const ruleUrl = new URL(
+  `/api/v1/assignments/${assignmentId()}/configuration`,
+  location.href
+);
+// TODO: add lti token/session
 export const rules = fromFetch(ruleUrl.toString()).pipe(
   switchMap((response) => {
     if (response.ok) {
@@ -20,8 +23,7 @@ export const rules = fromFetch(ruleUrl.toString()).pipe(
   }),
   map((response) => {
     const dsrules = new DocuScopeRules();
-    dsrules.setContext(assignmentId());
-    dsrules.load(response.data);
+    dsrules.load(response);
     return dsrules;
   })
 );

@@ -59,7 +59,7 @@ class DocuScopeOnTopic extends Component {
     var newData = this.dataTools.copyData(this.state.textdata);
     newData.plain = plain;
 
-    if (this.state.mode == "SENTENCE") {
+    if (this.state.mode === "SENTENCE") {
       newData.sentences = data;
 
       this.setState({
@@ -141,7 +141,10 @@ class DocuScopeOnTopic extends Component {
 
     //console.log (this.props.htmlSentences);
 
-    if (this.props.htmlSentences.length < aParagraphIndex) {
+    if (
+      this.props.htmlSentences &&
+      this.props.htmlSentences.length < aParagraphIndex
+    ) {
       console.log("Error: paragraphIndex out of range");
       return null;
     }

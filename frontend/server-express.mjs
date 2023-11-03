@@ -170,13 +170,13 @@ async function getFileIdForAssignment(assignmentId) {
  */
 async function getFileForAssignment(assignmentId) {
   const [rows] = await pool.query(
-    "SELECT data FROM files LEFT JOIN assignments ON fileid = files.id WHERE assignments.id = ?",
+    "SELECT BIN_TO_UUID(files.id) AS id, data FROM files LEFT JOIN assignments ON fileid = files.id WHERE assignments.id = ?",
     [assignmentId]
   );
   if (rows.length <= 0) {
     throw new Error("File data not found for assignment");
   }
-  return rows[0].data;
+  return {...rows[0].data, id: rows[0].id };
 }
 /**
  *
@@ -806,7 +806,7 @@ class DocuScopeWALTIService {
       if (course_id && course_id.trim().toLowerCase() !== "global") {
         try {
           const rules = await getFileForAssignment(course_id);
-          response.json(this.generateDataMessage(rules));
+          response.json(rules);
         } catch (err) {
           console.error(err instanceof Error ? err.message : err);
           response.sendStatus(404);
@@ -814,11 +814,11 @@ class DocuScopeWALTIService {
       } else {
         console.warn(`Invalid course id (${course_id}), sending default.`);
         const rules = await this.getDefaultRuleData();
-        response.json(this.generateDataMessage(rules));
+        response.json(rules);
       }
     };
     this.app.get(
-      "/api/v1/assignments/:assignment/rules",
+      "/api/v1/assignments/:assignment/configuration",
       async (request, response) => {
         // not currently used, but will be useful for deep-linking.
         const { assignment } = request.params;

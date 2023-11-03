@@ -51,8 +51,6 @@ const Clarity = ({
    *
    */
   useEffect(() => {
-    console.log("useEffect ()");
-
     if (text !== "") {
       setStatus("Retrieving results...");
 
@@ -82,15 +80,6 @@ const Clarity = ({
     }
   }, [text, api, ruleManager]);
 
-  const visualization = (
-    <DocuScopeOnTopic
-      setStatus={setStatus}
-      sentences={data}
-      text={text}
-      htmlSentences={htmlSentences}
-    />
-  );
-
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
       <Card.Header>
@@ -98,7 +87,14 @@ const Clarity = ({
       </Card.Header>
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-          <Suspense>{visualization}</Suspense>
+          <Suspense>
+            <DocuScopeOnTopic
+              setStatus={setStatus}
+              sentences={data}
+              text={text}
+              htmlSentences={htmlSentences}
+            />
+          </Suspense>
         </ErrorBoundary>
       </Card.Body>
       <Card.Footer>Status: {status}</Card.Footer>

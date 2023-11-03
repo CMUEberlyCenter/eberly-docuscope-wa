@@ -1,46 +1,104 @@
-import { deepCopy, isEmpty, listFindDuplucateInList } from "./DataTools";
-import DocuScopeRule from "./DocuScopeRule";
-import DocuScopeSessionStorage from "./DocuScopeSessionStorage";
-import { fixIncoming } from "./DocuScopeTools";
-import HashTable from "./HashTable";
+import { deepCopy, isEmpty, listFindDuplucateInList } from './DataTools';
+import DocuScopeRule from './DocuScopeRule';
+import { DocuScopeRuleCluster, Rule } from './DocuScopeRuleCluster';
+import { assignmentId } from './service/lti.service';
 
+interface ConfigurationInformation {
+  name: string;
+  version: string;
+  author: string;
+  copyright: string;
+  saved: string;
+  filename: string;
+}
+interface Configuration {
+  id: string; // unique identifier
+  rules: {
+    name: string;
+    overview: string;
+    rules: Rule[];
+  };
+  impressions: {
+    common_clusters: string[];
+    rare_clusters: string[];
+  };
+  values: unknown;
+  info: ConfigurationInformation;
+  prompt_templates: Map<
+    string,
+    { prompt: string; temperature?: string | number; role?: string }
+  >;
+}
+
+type TopicData = { data: { topic: string[] }[] };
+type CoherenceData = { error: string } | { data: { topic: string[] }[] };
+
+function sessionKey(key: string) {
+  return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
+}
+function configKey() {
+  return sessionKey('config');
+}
+function clustersKey() {
+  return sessionKey('clusters');
+}
 /**
  * This needs to be refactored to: DocuScopeRuleManager
  */
 export default class DocuScopeRules {
-  /**
-   *
-   */
-  constructor() {
-    //this.name = "unassigned";
+  original?: Configuration; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
+  data?: Configuration; // The full dataset, not just the rules
+  rules: DocuScopeRule[] = []; // Only the rules section of the dataset
+  clusters: { name: string; custom_topics: string[] }[] = [];
+  ready = false;
+  updateNotice?: (b: boolean) => void;
 
-    this.context = "global";
-
-    this.name = "";
-    this.overview = "";
-    this.original = null; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
-    this.data = null; // The full dataset, not just the rules
-    this.rules = []; // Only the rules section of the dataset
-    this.clusters = [];
-    this.info = null;
-
-    this.ready = false;
-
-    this.sessionStorage = null;
-
-    this.setContext("global");
-
-    this.updateNotice = null;
+  get info() {
+    return this.data?.info;
   }
-
+  get name() {
+    return this.data?.rules.name ?? '';
+  }
+  get overview() {
+    return this.data?.rules.overview ?? '';
+  }
   /**
    *
    */
-  setContext(aContext) {
-    console.log("setContext (" + aContext + ")");
+  constructor() {}
 
-    this.context = aContext;
-    this.sessionStorage = new DocuScopeSessionStorage("dswa-" + this.context);
+  saveConfig() {
+    const raw = this.getJSONRules();
+
+    const saveCopy = deepCopy(this.original);
+    saveCopy.rules.rules = raw;
+    sessionStorage.setItem(configKey(), JSON.stringify(saveCopy));
+  }
+  getSessionConfig() {
+    const stored = sessionStorage.getItem(configKey());
+    if (stored) {
+      try {
+        return JSON.parse(stored) as Configuration;
+      } catch (err) {
+        console.error(err);
+        return undefined;
+      }
+    }
+    return undefined;
+  }
+  saveClusters() {
+    sessionStorage.setItem(clustersKey(), JSON.stringify(this.clusters));
+  }
+  restoreClusters() {
+    this.clusters = [];
+    const stored = sessionStorage.getItem(clustersKey());
+    if (stored) {
+      try {
+        this.clusters = JSON.parse(stored);
+      } catch (err) {
+        console.error(err);
+      }
+    }
   }
 
   /**
@@ -54,13 +112,13 @@ export default class DocuScopeRules {
    *
    */
   getInfo() {
-    return this.info;
+    return this.data?.info;
   }
 
   /**
    *
    */
-  getJSONObject() {
+  getJSONRules() {
     return this.rules.map((rule) => rule.getJSONObject());
   }
 
@@ -68,47 +126,44 @@ export default class DocuScopeRules {
    *
    */
   getVersion() {
-    let version = "?.?.?";
-
-    if (this.ready == false) {
-      return version;
+    if (this.info) {
+      const { name, version } = this.info;
+      return `${name.substring(0, Math.min(30, name.length))}: (${version})`;
     }
-
-    if (!this.data) {
-      return version;
-    }
-
-    let formatted = this.data.info.name;
-
-    if (formatted.length > 30) {
-      formatted = this.data.info.name.substring(0, 30);
-    }
-
-    return formatted + ": (" + version + ")";
+    return '';
   }
 
   /**
    *
    */
-  isNewVersion(newInfo, existingInfo) {
-    console.log("isNewVersion ()");
-
-    if (typeof existingInfo === "undefined") {
-      console.log("Existing info is undefined, returning: true");
+  isNewVersion(
+    newInfo: ConfigurationInformation,
+    existingInfo?: ConfigurationInformation
+  ) {
+    if (!existingInfo) {
+      console.log('Existing info is undefined, returning: true');
       return true;
     }
 
     if (newInfo.version !== existingInfo.version) {
       return true;
     }
-
-    return false;
+    if (newInfo.saved !== existingInfo.saved) {
+      return true;
+    }
+    if (newInfo.name !== existingInfo.name) {
+      return true;
+    }
+    if (newInfo.filename !== existingInfo.filename) {
+      return true;
+    }
+    if (newInfo.filename) return false;
   }
 
   /**
    *
    */
-  parseString(aString) {
+  parseString(aString: string) {
     this.original = JSON.parse(aString);
     this.parse();
   }
@@ -117,8 +172,6 @@ export default class DocuScopeRules {
    *
    */
   reset() {
-    console.log("reset ()");
-
     this.data = deepCopy(this.original);
     this.rules = [];
     this.clusters = [];
@@ -135,35 +188,24 @@ export default class DocuScopeRules {
   /**
    *
    */
-  parse(newRules) {
-    console.log("parse ()");
-
-    const rulesRaw = this.data.rules;
+  parse(newRules?: boolean) {
+    const rulesRaw = this.data?.rules.rules;
 
     console.log(rulesRaw);
 
-    for (let i = 0; i < rulesRaw.length; i++) {
-      let ruleObject = rulesRaw[i];
-      let newRule = new DocuScopeRule();
-      newRule.parse(ruleObject);
-      this.rules.push(newRule);
-    }
+    this.rules =
+      rulesRaw
+        ?.filter((r: Rule | undefined): r is Rule => !!r)
+        .map((rule: Rule) => new DocuScopeRule(rule)) ?? [];
 
     // We don't have any clusters yet, we'll need to create them from
     // the rules file
-    if (newRules == true) {
-      this.clusters = [];
-      let rawClusters = this.listClusters();
-      for (let j = 0; j < rawClusters.length; j++) {
-        let clusterObject = {
-          name: rawClusters[j],
-          custom_topics: [],
-        };
-        this.clusters.push(clusterObject);
-      }
+    if (newRules) {
+      this.clusters = this.listClusters().map((name) => ({
+        name,
+        custom_topics: [],
+      }));
     }
-
-    console.log("parse () done");
   }
 
   /**
@@ -171,20 +213,11 @@ export default class DocuScopeRules {
    * rules as we got them from the server. However, we need to compare that to what the user
    * might have already worked on
    */
-  load(incomingData) {
+  load(incomingData: Configuration) {
     // store this information as it is now needed but fixIncoming destroys it. #26
-    this.name = incomingData.rules.name;
-    this.overview = incomingData.rules.overview;
-    incomingData = fixIncoming(incomingData);
+    // incomingData = fixIncoming(incomingData);
 
     console.log(incomingData);
-
-    if (this.sessionStorage == null) {
-      console.log("Info: no context set yet, defaulting to 'global'");
-      this.setContext("global");
-    }
-
-    this.info = incomingData.info;
 
     let newRules = true;
 
@@ -193,18 +226,19 @@ export default class DocuScopeRules {
     this.original = incomingData;
     this.data = deepCopy(incomingData);
     this.rules = [];
-    this.clusters = this.sessionStorage.getJSONObject("clusters");
+    this.restoreClusters();
 
+    const stored = this.getSessionConfig();
     //let stored=this.sessionStorage.getJSONObject("rules");
-    const stored = this.sessionStorage.getJSONObject("dswa");
+    // const stored = this.sessionStorage.getJSONObject("dswa");
 
     // First time use, we'll make the rules loaded from the server our place to start
-    if (stored !== null) {
-      if (isEmpty(stored) == false) {
-        console.log("We have stored rules, checking version ...");
-        if (this.isNewVersion(incomingData.info, stored.info) == true) {
+    if (stored) {
+      if (!isEmpty(stored)) {
+        console.log('We have stored rules, checking version ...');
+        if (incomingData.id !== stored.id) {
           console.log(
-            "The incoming version is newer than the stored version, using newer data"
+            'The incoming is different than the stored version, using newer data'
           );
           this.original = incomingData;
           this.data = deepCopy(incomingData);
@@ -221,15 +255,14 @@ export default class DocuScopeRules {
           newRules = false;
         }
       } else {
-        console.log("Nothing stored yet, defaulting to template version");
+        console.log('Nothing stored yet, defaulting to template version');
       }
     }
-    console.log(this.data);
     this.parse(newRules);
 
     // Make sure we have at least something stored in case this is the first time
     // we load the data from the template. Shouldn't hurt if we overwrite
-    if (newRules == true) {
+    if (newRules) {
       this.save();
     }
 
@@ -244,31 +277,23 @@ export default class DocuScopeRules {
    */
   save() {
     // Re-create the JSON structure
-    let raw = this.getJSONObject();
-
-    let saveCopy = deepCopy(this.original);
-    saveCopy.rules = raw;
-
-    console.log("Saving: ");
-    console.log(saveCopy);
-
-    this.sessionStorage.setJSONObject("dswa", saveCopy);
-    this.sessionStorage.setJSONObject("clusters", this.clusters);
+    this.saveConfig();
+    this.saveClusters();
   }
 
   /**
    *
    */
   debugRules() {
-    console.log("debugRules ()");
-    console.log(this.getJSONObject());
+    console.log('debugRules ()');
+    console.log(this.getJSONRules());
   }
 
   /**
    *
    */
   debugClusters() {
-    console.log("debugClusters ()");
+    console.log('debugClusters ()');
     console.log(this.clusters);
   }
 
@@ -277,7 +302,7 @@ export default class DocuScopeRules {
    * @param {string} anId
    * @returns {DocuScopeRule | undefined}
    */
-  getRule(anId) {
+  getRule(anId: string) {
     return this.rules.find((rule) => rule.id === anId);
   }
 
@@ -287,7 +312,7 @@ export default class DocuScopeRules {
    * @param {string} aCluster
    * @returns {DocuScopeRuleCluster | undefined}
    */
-  getCluster(aRule, aCluster) {
+  getCluster(aRule: string, aCluster: string) {
     return this.getRule(aRule)?.children.find(
       (cluster) => cluster.id === aCluster
     );
@@ -299,7 +324,7 @@ export default class DocuScopeRules {
    * @param {number} aCluster
    * @returns {DocuScopeRuleCluster | undefined}
    */
-  getClusterByIndex(aRule, aCluster) {
+  getClusterByIndex(aRule: number, aCluster: number) {
     if (aRule === -1 || aCluster === -1) {
       return undefined;
     }
@@ -311,15 +336,15 @@ export default class DocuScopeRules {
    * @param {number} aRule
    * @param {number} aCluster
    */
-  getClusterTopics(aRule, aCluster) {
+  getClusterTopics(aRule: number, aCluster: number) {
     const cluster = this.getClusterByIndex(aRule, aCluster);
     if (!cluster) {
-      console.log("Error, no cluster found!");
+      console.log('Error, no cluster found!');
       return [];
     }
 
     const topicList = [];
-    const topic = cluster.raw.topics.at(0);
+    const topic = cluster.raw?.topics.at(0);
 
     if (topic?.pre_defined_topics) {
       topicList.push(...topic.pre_defined_topics);
@@ -337,33 +362,15 @@ export default class DocuScopeRules {
    * @param {number} aCluster
    * @returns {string[]}
    */
-  getClusterName(aRule, aCluster) {
+  getClusterName(aRule: number, aCluster: number): string[] {
     const cluster = this.getClusterByIndex(aRule, aCluster);
     if (!cluster) {
-      console.log("Error, no cluster found!");
+      console.log('Error, no cluster found!');
       return [];
     }
 
-    const topicList = [];
-    const topics = cluster.raw.topics;
-    if (topics) {
-      /*
-      if (topics [0].pre_defined_topics) {
-        for (let i=0;i<topics [0].pre_defined_topics.length;i++) {
-          topicList.push(topics [0].pre_defined_topics[i]);
-        }
-      }
-
-      if (topics [0].custom_topics) {        
-        for (let i=0;i<topics [0].custom_topics.length;i++) {
-          topicList.push(topics [0].custom_topics[i]);
-        }        
-      }
-      */
-
-      return [topics[0].lemma];
-    }
-    return topicList;
+    const lemma = cluster.raw?.topics.at(0)?.lemma;
+    return lemma ? [lemma] : [];
   }
 
   /**
@@ -371,32 +378,27 @@ export default class DocuScopeRules {
    * @param {number} aClusterIndex
    * @returns {string[]}
    */
-  getClusterTopicsByClusterIndex(aClusterIndex) {
-    console.log("getClusterTopicsByClusterIndex (" + aClusterIndex + ")");
+  getClusterTopicsByClusterIndex(aClusterIndex: number): string[] {
+    console.log('getClusterTopicsByClusterIndex (' + aClusterIndex + ')');
 
-    const topicList = [];
+    const topicList: string[] = [];
     let cluster = null;
 
     for (const rule of this.rules) {
       if (aClusterIndex > rule.children.length) {
         aClusterIndex -= rule.children.length;
       } else {
-        cluster = rule.children[aClusterIndex];
+        cluster = rule.children.at(aClusterIndex);
         break;
       }
     }
 
-    if (cluster === null) {
-      console.log("Error: unable to find cluster by global cluster index");
-      return topicList;
+    if (!cluster) {
+      console.log('Error: unable to find cluster by global cluster index');
+      return [];
     }
 
-    const clusterObject = cluster.raw;
-
-    console.log("We've got topics to inspect");
-    console.log(clusterObject);
-
-    const topic = clusterObject.topics.at(0);
+    const topic = cluster.raw?.topics.at(0);
 
     if (topic?.pre_defined_topics) {
       topicList.push(...topic.pre_defined_topics);
@@ -404,7 +406,6 @@ export default class DocuScopeRules {
     if (topic?.custom_topics) {
       topicList.push(...topic.custom_topics);
     }
-
     return topicList;
   }
 
@@ -413,7 +414,7 @@ export default class DocuScopeRules {
    * tree to obtain the count but which is given a pointer to the cluster to
    * start with
    */
-  getClusterTopicCountPredefined(aRuleIndex, aClusterIndex) {
+  getClusterTopicCountPredefined(aRuleIndex: number, aClusterIndex: number) {
     //console.log ("getClusterTopicCountPredefined ("+ aRuleIndex + "," + aClusterIndex + ")");
 
     if (aRuleIndex === -1 || aClusterIndex === -1) {
@@ -422,7 +423,7 @@ export default class DocuScopeRules {
     }
 
     return (
-      this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw.topics?.at(0)
+      this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw?.topics?.at(0)
         ?.pre_defined_topics?.length ?? 0
     );
   }
@@ -432,7 +433,7 @@ export default class DocuScopeRules {
    * tree to obtain the count but which is given a pointer to the cluster to
    * start with
    */
-  getClusterTopicCountCustom(aRuleIndex, aClusterIndex) {
+  getClusterTopicCountCustom(aRuleIndex: number, aClusterIndex: number) {
     //console.log ("getClusterTopicCountCustom ("+ aRuleIndex + "," + aClusterIndex + ")");
 
     if (aRuleIndex === -1 || aClusterIndex === -1) {
@@ -440,7 +441,7 @@ export default class DocuScopeRules {
       return 0;
     }
     return (
-      this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw.topics?.at(0)
+      this.rules.at(aRuleIndex)?.children.at(aClusterIndex)?.raw?.topics?.at(0)
         ?.custom_topics?.length ?? 0
     );
   }
@@ -448,7 +449,7 @@ export default class DocuScopeRules {
   /**
    *
    */
-  topicSentenceCount(aRuleIndex, aClusterIndex) {
+  topicSentenceCount(aRuleIndex: number, aClusterIndex: number) {
     return (
       this.getClusterByIndex(aRuleIndex, aClusterIndex)?.sentenceCount ?? 0
     );
@@ -456,36 +457,24 @@ export default class DocuScopeRules {
 
   /**
    * Return the array of custom/pre-defined topics as a single newline separated string
-   * @param {Rule} aCluster
    */
-  getClusterTopicTextStatic(aCluster) {
+  getClusterTopicTextStatic(aCluster?: DocuScopeRuleCluster) {
     if (!aCluster) {
-      console.log("Warning: cluster is null");
-      return "";
+      console.log('Warning: cluster is null');
+      return '';
     }
-
-    const topics = aCluster.raw.topics?.at(0)?.pre_defined_topics;
-    if (topics) {
-      return topics.join("\n");
-    }
-    return "";
+    return aCluster.raw?.topics?.at(0)?.pre_defined_topics?.join('\n') ?? '';
   }
 
   /**
    * Return the array of custom/pre-defined topics as a single newline separated string
    */
-  getClusterTopicText(aCluster) {
+  getClusterTopicText(aCluster?: DocuScopeRuleCluster): string {
     if (!aCluster) {
-      console.log("Warning: cluster is null");
-      return "";
+      console.log('Warning: cluster is null');
+      return '';
     }
-
-    const topics = aCluster.raw.topics?.at(0)?.custom_topics?.join("\n");
-
-    if (topics) {
-      return topics.join("\n");
-    }
-    return "";
+    return aCluster.raw?.topics?.at(0)?.custom_topics?.join('\n') ?? '';
   }
 
   /**
@@ -505,41 +494,25 @@ export default class DocuScopeRules {
         }
       }
     }
-    return tempList.map((s) => s.trim()).join(";");
+    return tempList.map((s) => s.trim()).join(';');
   }
 
   /**
    *
    */
   getAllCustomTopicsStructured() {
-    let structuredTopics = [];
+    const structuredTopics = [];
 
-    for (let i = 0; i < this.rules.length; i++) {
-      let rule = this.rules[i];
-      for (let j = 0; j < rule.children.length; j++) {
-        let cluster = rule.children[j];
-        let clusterObject = cluster.raw;
-
-        let topics = clusterObject.topics;
-        if (topics) {
-          if (topics.length > 0) {
-            let topicObject = {
-              lemma: topics[0].lemma,
-              topics: [],
-            };
-
-            let rawTopicsStatic = topics[0].pre_defined_topics;
-            for (let k = 0; k < rawTopicsStatic.length; k++) {
-              topicObject.topics.push(rawTopicsStatic[k].trim());
-            }
-
-            let rawTopics = topics[0].custom_topics;
-            for (let k = 0; k < rawTopics.length; k++) {
-              topicObject.topics.push(rawTopics[k].trim());
-            }
-
-            structuredTopics.push(topicObject);
-          }
+    for (const rule of this.rules) {
+      for (const cluster of rule.children) {
+        const topic = cluster.raw?.topics.at(0);
+        if (topic) {
+          const pre = topic.pre_defined_topics ?? [];
+          const custom = topic.custom_topics ?? [];
+          structuredTopics.push({
+            lemma: topic.lemma,
+            topics: [...pre, ...custom].map((s) => s.trim()),
+          });
         }
       }
     }
@@ -550,27 +523,21 @@ export default class DocuScopeRules {
   /**
    * aCustomTopicSet needs to be an array if terms: ["Topic 1","Topic 2"]
    */
-  setClusterCustomTopics(aRule, aCluster, aCustomTopicSet) {
+  setClusterCustomTopics(
+    aRule: number,
+    aCluster: number,
+    aCustomTopicSet: string[]
+  ) {
     // This retrieves one of our own objects, not a raw JSON object
-    let cluster = this.getClusterByIndex(aRule, aCluster);
-    if (cluster == null) {
+    const cluster = this.getClusterByIndex(aRule, aCluster);
+    if (!cluster) {
       return false;
     }
 
     // Let's change in place for now
-    let clusterObject = cluster.raw;
-
-    let topics = clusterObject.topics;
-    if (topics) {
-      if (topics.length > 0) {
-        let defaulTopicObject = topics[0];
-
-        if (defaulTopicObject.custom_topics) {
-          defaulTopicObject.custom_topics = aCustomTopicSet;
-        }
-      } else {
-        return false;
-      }
+    const topic = cluster.raw?.topics.at(0);
+    if (topic) {
+      topic.custom_topics = aCustomTopicSet;
     } else {
       return false;
     }
@@ -587,7 +554,7 @@ export default class DocuScopeRules {
   /**
    *
    */
-  updateLemmaCounts(aCountList) {
+  updateLemmaCounts(aCountList: { lemma: string; count: number }[]) {
     for (const rule of this.rules) {
       for (const cluster of rule.children) {
         // Reset the count, we can do that because the count list has everything coming in from the back-end
@@ -595,28 +562,16 @@ export default class DocuScopeRules {
       }
     }
 
-    for (let i = 0; i < aCountList.length; i++) {
+    for (const { lemma, count } of aCountList) {
       // let aLemmaCount = aCountList[i];
 
       //console.log ("Updating lemma: " + aCountList [i].lemma + ", with count: " + aCountList [i].count);
 
-      for (let t = 0; t < this.rules.length; t++) {
-        let rule = this.rules[t];
-        for (let j = 0; j < rule.children.length; j++) {
-          let cluster = rule.children[j];
-
-          let clusterObject = cluster.raw;
-
-          let topics = clusterObject.topics;
-
-          if (topics) {
-            if (topics.length > 0) {
-              let targetTopic = topics[0];
-              //console.log ("Comparing " + targetTopic.lemma + " to: " + aCountList [i].lemma);
-              if (targetTopic.lemma == aCountList[i].lemma) {
-                cluster.sentenceCount = aCountList[i].count;
-              }
-            }
+      for (const rule of this.rules) {
+        for (const cluster of rule.children) {
+          const topic = cluster.raw?.topics.at(0);
+          if (topic?.lemma === lemma) {
+            cluster.sentenceCount = count;
           }
 
           /*
@@ -667,8 +622,6 @@ export default class DocuScopeRules {
       }
     }
 
-    console.log(this.rules);
-
     if (this.updateNotice) {
       this.updateNotice(false);
     }
@@ -678,32 +631,25 @@ export default class DocuScopeRules {
    *
    */
   listClusters() {
-    let hashTable = new HashTable();
-    let clusterList = [];
+    const lemmas = new Set<string>();
 
     for (let i = 0; i < this.rules.length; i++) {
-      let rule = this.rules[i];
-      for (let j = 0; j < rule.children.length; j++) {
-        let cluster = rule.children[j];
-        let clusterObject = cluster.raw;
-
-        let topics = clusterObject.topics;
-        if (topics) {
-          if (topics.length > 0) {
-            hashTable.setItem(topics[0].lemma, topics[0].lemma);
-          }
+      const rule = this.rules[i];
+      for (const cluster of rule.children) {
+        const topic = cluster.raw?.topics.at(0);
+        if (topic) {
+          lemmas.add(topic.lemma);
         }
       }
     }
 
-    clusterList.push(...hashTable.keys());
-    return clusterList;
+    return [...lemmas];
   }
 
   /**
    *
    */
-  listClustersForRule(aRuleIndex, aClusterIndex) {
+  listClustersForRule(aRuleIndex: number, aClusterIndex: number) {
     const lemma = this.rules
       .at(aRuleIndex)
       ?.children.at(aClusterIndex)
@@ -719,11 +665,11 @@ export default class DocuScopeRules {
    * Let's handle that in cleanCoherenceData so that the rest of the code goes through its
    * usual paces instead of creating a global exception
    */
-  cleanCoherenceData(aCoherenceData) {
-    const cleanedData = deepCopy(aCoherenceData);
+  cleanCoherenceData(aCoherenceData: CoherenceData): CoherenceData {
+    const cleanedData: CoherenceData = deepCopy(aCoherenceData);
 
-    if (aCoherenceData.error) {
-      console.error("Coherence generation error: " + aCoherenceData.error);
+    if ('error' in cleanedData) {
+      console.error('Coherence generation error: ' + cleanedData.error);
       return cleanedData;
     }
 
@@ -735,59 +681,36 @@ export default class DocuScopeRules {
     //  return (cleanedData);
     //}
 
-    let data = cleanedData.data;
-
-    let replacedCount = 0;
-
-    for (let i = 0; i < data.length; i++) {
-      let topicObject = data[i];
-      let topic = topicObject.topic;
-      for (let j = 0; j < topic.length; j++) {
-        if (topic[j].indexOf("_") != -1) {
-          topic[j] = topic[j].replaceAll("_", " ");
-          replacedCount++;
-        }
-      }
+    for (const topicObject of cleanedData.data) {
+      topicObject.topic = topicObject.topic.map((s) => s.replaceAll('_', ' '));
     }
-
-    console.log("Cleaned " + replacedCount + " multiword topics (global)");
-
     return cleanedData;
   }
 
   /**
    *
    */
-  cleanLocalCoherenceData(aCoherenceLocalData) {
-    const cleanedData = deepCopy(aCoherenceLocalData);
+  cleanLocalCoherenceData(aCoherenceLocalData: (TopicData | unknown)[]) {
+    const cleanedData = [...aCoherenceLocalData];
 
-    let replacedCount = 0;
-
-    for (let i = 0; i < cleanedData.length; i++) {
-      let topicObject = cleanedData[i];
-      if (Object.prototype.hasOwnProperty.call(topicObject, "data") === true) {
-        let topicData = topicObject.data;
-        for (let k = 0; k < topicData.length; k++) {
-          let topic = topicData[k].topic;
-          for (let j = 0; j < topic.length; j++) {
-            if (topic[j].indexOf("_") != -1) {
-              topic[j] = topic[j].replaceAll("_", " ");
-              replacedCount++;
-            }
-          }
-        }
+    for (const td of cleanedData) {
+      if (td && typeof td === 'object' && 'data' in td) {
+        (td as TopicData).data.forEach(
+          (top) => (top.topic = top.topic.map((s) => s.replaceAll('_', ' ')))
+        );
       }
     }
-
-    console.log("Cleaned " + replacedCount + " multiword topics (local)");
-
     return cleanedData;
   }
 
   /**
    *
    */
-  checkDuplicates(aRuleIndex, aClusterIndex, aTopicList) {
+  checkDuplicates(
+    aRuleIndex: number,
+    aClusterIndex: number,
+    aTopicList: string[]
+  ) {
     if (aTopicList.length === null) {
       return null;
     }
@@ -798,20 +721,19 @@ export default class DocuScopeRules {
       // if (i != aRuleIndex) {
       // }
 
-      let rule = this.rules[i];
+      const rule = this.rules[i];
       for (let j = 0; j < rule.children.length; j++) {
         // if (j != aClusterIndex) {
         // }
 
-        let cluster = rule.children[j];
-        let clusterObject = cluster.raw;
+        const cluster = rule.children[j];
 
-        let topics = clusterObject.topics;
+        const topics = cluster.raw?.topics;
         if (topics) {
           if (topics.length > 0) {
-            let rawTopicsStatic = topics[0].pre_defined_topics;
+            const rawTopicsStatic = topics[0].pre_defined_topics ?? [];
             for (let k = 0; k < rawTopicsStatic.length; k++) {
-              let duplicate = listFindDuplucateInList(
+              const duplicate = listFindDuplucateInList(
                 aTopicList,
                 rawTopicsStatic
               );
@@ -828,9 +750,9 @@ export default class DocuScopeRules {
               }
             }
 
-            const rawTopics = topics[0].custom_topics;
+            const rawTopics = topics[0].custom_topics ?? [];
             for (let k = 0; k < rawTopics.length; k++) {
-              let duplicate = listFindDuplucateInList(aTopicList, rawTopics);
+              const duplicate = listFindDuplucateInList(aTopicList, rawTopics);
               if (duplicate != null) {
                 duplicateObject = {
                   ruleIndex: i,

@@ -256,7 +256,7 @@ class ClusterPanel extends Component {
           },
           "POST"
         )
-        .then((incoming) => {});
+        .then((_incoming) => {});
     }
 
     if (this.props.disableTreeSelect) {
