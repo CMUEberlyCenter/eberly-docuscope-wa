@@ -10,7 +10,7 @@ export interface Topic {
 export interface Rule {
   name: string;
   description: string;
-  topics: Topic[];
+  topics?: Topic[];
   examples: string;
   type: string;
   is_group: boolean;

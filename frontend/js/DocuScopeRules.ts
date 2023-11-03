@@ -344,7 +344,7 @@ export default class DocuScopeRules {
     }
 
     const topicList = [];
-    const topic = cluster.raw?.topics.at(0);
+    const topic = cluster.raw?.topics?.at(0);
 
     if (topic?.pre_defined_topics) {
       topicList.push(...topic.pre_defined_topics);
@@ -369,7 +369,7 @@ export default class DocuScopeRules {
       return [];
     }
 
-    const lemma = cluster.raw?.topics.at(0)?.lemma;
+    const lemma = cluster.raw?.topics?.at(0)?.lemma;
     return lemma ? [lemma] : [];
   }
 
@@ -398,7 +398,7 @@ export default class DocuScopeRules {
       return [];
     }
 
-    const topic = cluster.raw?.topics.at(0);
+    const topic = cluster.raw?.topics?.at(0);
 
     if (topic?.pre_defined_topics) {
       topicList.push(...topic.pre_defined_topics);
@@ -505,7 +505,7 @@ export default class DocuScopeRules {
 
     for (const rule of this.rules) {
       for (const cluster of rule.children) {
-        const topic = cluster.raw?.topics.at(0);
+        const topic = cluster.raw?.topics?.at(0);
         if (topic) {
           const pre = topic.pre_defined_topics ?? [];
           const custom = topic.custom_topics ?? [];
@@ -535,7 +535,7 @@ export default class DocuScopeRules {
     }
 
     // Let's change in place for now
-    const topic = cluster.raw?.topics.at(0);
+    const topic = cluster.raw?.topics?.at(0);
     if (topic) {
       topic.custom_topics = aCustomTopicSet;
     } else {
@@ -569,7 +569,7 @@ export default class DocuScopeRules {
 
       for (const rule of this.rules) {
         for (const cluster of rule.children) {
-          const topic = cluster.raw?.topics.at(0);
+          const topic = cluster.raw?.topics?.at(0);
           if (topic?.lemma === lemma) {
             cluster.sentenceCount = count;
           }
@@ -633,10 +633,9 @@ export default class DocuScopeRules {
   listClusters() {
     const lemmas = new Set<string>();
 
-    for (let i = 0; i < this.rules.length; i++) {
-      const rule = this.rules[i];
+    for (const rule of this.rules) {
       for (const cluster of rule.children) {
-        const topic = cluster.raw?.topics.at(0);
+        const topic = cluster.raw?.topics?.at(0);
         if (topic) {
           lemmas.add(topic.lemma);
         }
