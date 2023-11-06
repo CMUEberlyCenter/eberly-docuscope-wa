@@ -8,6 +8,7 @@ version: '3'
 services:
   db:
     image: docker.io/mysql:8
+    restart: always
     secrets:
       - db_root_password
       - db_user
