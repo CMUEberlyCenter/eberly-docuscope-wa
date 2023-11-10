@@ -1,0 +1,13 @@
+{
+  "extends": "@tsconfig/recommended/tsconfig.json",
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+  },
+  "ts-node": {
+    "esm": true
+  },
+  "include": ["src/server/*.ts", "src/lib/*.ts"],
+}

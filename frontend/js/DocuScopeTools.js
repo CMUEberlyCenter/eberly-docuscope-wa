@@ -53,41 +53,6 @@ export function onTopic2DSWAHTML(anHTMLDataset) {
   return anHTMLDataset.replaceAll("_", " ");
 }
 
-/**
- *
- */
-export function launch(forceStudent) {
-  console.log("launch (" + window.location.href + "," + forceStudent + ")");
-
-  var ltiFields = window.serverContext.lti;
-
-  // Change the role to student if forceStudent is set
-  if (forceStudent == true) {
-    ltiFields["roles"] = "urn:lti:instrole:ims/lis/Student,Student";
-    ltiFields["ext_roles"] = "urn:lti:instrole:ims/lis/Student,Student";
-  }
-
-  var relayform = document.getElementById("ltirelayform");
-  relayform.innerHTML = "";
-
-  // Now transform the LTI fields into form elements
-
-  for (let key in ltiFields) {
-    if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
-      var ltiField = document.createElement("input");
-      ltiField.type = "hidden";
-      ltiField.id = key;
-      ltiField.name = key;
-      ltiField.value = ltiFields[key];
-
-      relayform.appendChild(ltiField);
-    }
-  }
-
-  relayform.setAttribute("action", window.location.href);
-  relayform.submit();
-  relayform.style.visibility = "hidden";
-}
 
 /**
  *
@@ -147,26 +112,6 @@ export function compareLemmas(aLemmaA, aLemmaB) {
 /**
  *
  */
-export function clusterListToSentence(aList) {
-  //console.log ("clusterListToSentence ()");
-  //console.log (aList);
-
-  let sentence = "";
-
-  if (aList.length === 0) {
-    return sentence;
-  }
-
-  if (aList.length === 1) {
-    sentence = aList[0];
-  }
-
-  if (aList.length === 2) {
-    sentence = aList[0] + " and " + aList[1];
-  }
-
-  return sentence;
-}
 
 /**
  *

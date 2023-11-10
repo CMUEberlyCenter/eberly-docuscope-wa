@@ -1,0 +1,25 @@
+$font-family-sans-serif: "Open Sans", "Segoe UI", Roboto, "Helvetica Neue",
+  Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+  "Segoe UI Symbol", "Noto Color Emoji" !default;
+//@import "custom";
+@import "bootstrap/scss/bootstrap";
+$fa-font-path: "@fortawesome/fontawesome-free/webfonts";
+@import "@fortawesome/fontawesome-free/scss/fontawesome.scss";
+@import "@fortawesome/fontawesome-free/scss/regular";
+@import "@fortawesome/fontawesome-free/scss/solid";
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.paragraph-highlight {
+  background: #0eed0e36;
+}
+.sentence-highlight {
+  background: #E2D2BB;
+}
+.word-highlight {
+  color: blue;
+  background: #f7f7f7;
+  font-weight: bold;  
+}

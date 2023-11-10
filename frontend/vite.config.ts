@@ -8,6 +8,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        dir: 'build/app',
         manualChunks(id: string) {
           if (id.includes('d3')) { return 'vendor-d3'; }
           if (id.includes('@fortawesome')) { return 'vendor-@fortawesome'; }
