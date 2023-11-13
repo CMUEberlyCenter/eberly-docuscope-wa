@@ -1,9 +1,9 @@
-import { deepCopy, isEmpty, listFindDuplucateInList } from './DataTools';
+import { assignmentId } from '../src/app/service/lti.service';
+import { deepCopy } from './DataTools';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster, Rule } from './DocuScopeRuleCluster';
-import { assignmentId } from './service/lti.service';
 
-interface ConfigurationInformation {
+type ConfigurationInformation = {
   name: string;
   version: string;
   author: string;
@@ -11,7 +11,7 @@ interface ConfigurationInformation {
   saved: string;
   filename: string;
 }
-interface Configuration {
+type Configuration = {
   id: string; // unique identifier
   rules: {
     name: string;
@@ -42,6 +42,18 @@ function configKey() {
 function clustersKey() {
   return sessionKey('clusters');
 }
+
+/**
+ * How much can this be optimized?
+ * Reduced from O(n^2) to O(n) or O(n lg n) depending on the Set implementation.
+ * @param {string[]} aListSource
+ * @param {string[]} aListTarget
+ */
+export function listFindDuplucateInList(aListSource: string[], aListTarget: string[]) {
+  const targets = new Set(aListTarget.map((t) => t.toLowerCase()));
+  return aListSource.find((a) => targets.has(a.toLowerCase())) ?? null;
+}
+
 /**
  * This needs to be refactored to: DocuScopeRuleManager
  */
@@ -65,14 +77,18 @@ export default class DocuScopeRules {
   /**
    *
    */
-  constructor() {}
+  constructor() { }
 
   saveConfig() {
     const raw = this.getJSONRules();
 
     const saveCopy = deepCopy(this.original);
-    saveCopy.rules.rules = raw;
-    sessionStorage.setItem(configKey(), JSON.stringify(saveCopy));
+    if (saveCopy) {
+      saveCopy.rules.rules = raw;
+      sessionStorage.setItem(configKey(), JSON.stringify(saveCopy));
+    } else {
+      sessionStorage.removeItem(configKey());
+    }
   }
   getSessionConfig() {
     const stored = sessionStorage.getItem(configKey());
@@ -234,30 +250,28 @@ export default class DocuScopeRules {
 
     // First time use, we'll make the rules loaded from the server our place to start
     if (stored) {
-      if (!isEmpty(stored)) {
-        console.log('We have stored rules, checking version ...');
-        if (incomingData.id !== stored.id) {
-          console.log(
-            'The incoming is different than the stored version, using newer data'
-          );
-          this.original = incomingData;
-          this.data = deepCopy(incomingData);
-          this.rules = [];
-          newRules = true;
-        } else {
-          console.log(
-            "The stored version is newer or equal to the incoming version, we'll use the stored data"
-          );
-          console.log(stored);
-          this.original = stored;
-          this.data = deepCopy(stored);
-          this.rules = [];
-          newRules = false;
-        }
+      console.log('We have stored rules, checking version ...');
+      if (incomingData.id !== stored.id) {
+        console.log(
+          'The incoming is different than the stored version, using newer data'
+        );
+        this.original = incomingData;
+        this.data = deepCopy(incomingData);
+        this.rules = [];
+        newRules = true;
       } else {
-        console.log('Nothing stored yet, defaulting to template version');
+        console.log(
+          "The stored version is newer or equal to the incoming version, we'll use the stored data"
+        );
+        this.original = stored;
+        this.data = deepCopy(stored);
+        this.rules = [];
+        newRules = false;
       }
+    } else {
+      console.log('Nothing stored yet, defaulting to template version');
     }
+
     this.parse(newRules);
 
     // Make sure we have at least something stored in case this is the first time

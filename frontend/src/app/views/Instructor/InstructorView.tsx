@@ -1,57 +1,20 @@
 import { faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Subscribe, bind } from "@react-rxjs/core";
-import React, { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
-import { BehaviorSubject } from "rxjs";
 import { VERSION } from "../../service/application.service";
+import { FileInfo, refreshConfigurations, useConfigurations } from "../../service/instructor.service";
 import { assignmentId, launch } from "../../service/lti.service";
 import "./InstuctorView.scss";
 
-interface FileInfo {
-  id: string;
-  filename: string;
-  date: string;
-  info?: {
-    name?: string;
-    version?: string;
-    author?: string;
-    copyright?: string;
-    saved?: string;
-  };
-}
-
-const file_list = new BehaviorSubject<FileInfo[] | undefined>(undefined);
-const [useFiles, files$] = bind(file_list, null);
-
-async function getFileList(): Promise<void> {
-  const response = await fetch("/api/v1/configurations", {
-    headers: {
-      Accept: "application/json",
-    },
-    method: "GET",
-  });
-  if (!response.ok) {
-    console.error(`Server error ${response.status} - ${response.statusText}`);
-    // TODO show error to user.
-  } else {
-    const files = (await response.json()) as FileInfo[];
-    file_list.next(files);
-  }
-}
-
-// if (typeof window !== "undefined") {
-//   console.log("top");
-//   getFileList();
-// }
 
 const InstructorView = () => {
   const [selected, setSelected] = useState("");
-  const files = useFiles();
+  const { files, isLoading } = useConfigurations();
 
   useEffect(() => {
     async function getCurrentFile() {
-      await getFileList();
+      // await getFileList();
       const getfileid = new URL(
         `/api/v1/assignments/${assignmentId()}/file_id`,
         window.origin
@@ -98,6 +61,7 @@ const InstructorView = () => {
       console.warn(`Error: ${file.name} is not a JSON file.`);
       return;
     }
+    // TODO validate file vs schema
     const data = new FormData();
     data.append("file", file);
     try {
@@ -105,13 +69,15 @@ const InstructorView = () => {
         method: "POST",
         body: data,
       });
-      if (response.ok) {
-        return getFileList();
-      } else {
+      if (!response.ok) {
         console.error(response);
+        await response.text();
+        throw new Error(`Server error: ${response.status}`);
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      refreshConfigurations();
     }
   }
   /**
@@ -157,7 +123,7 @@ const InstructorView = () => {
   }
 
   function launchStudent() {
-    if (selected === "") return;
+    if (!selected) return;
     launch(true);
   }
   const loading = (
@@ -202,7 +168,7 @@ const InstructorView = () => {
               onChange={onFileChange}
             />
           </div>
-          <Subscribe source$={files$} fallback={loading}>
+          {isLoading ? loading :
             <table className="dswa-table">
               <thead>
                 <tr>
@@ -210,7 +176,7 @@ const InstructorView = () => {
                     <button
                       className="btn btn-sm"
                       type="button"
-                      onClick={() => getFileList()}
+                      onClick={() => refreshConfigurations()}
                     >
                       <FontAwesomeIcon icon={faRotate} className="mx-2" />
                     </button>
@@ -222,7 +188,7 @@ const InstructorView = () => {
               </thead>
               <tbody>{files?.map(renderFile)}</tbody>
             </table>
-          </Subscribe>
+          }
         </div>
       </div>
     </div>

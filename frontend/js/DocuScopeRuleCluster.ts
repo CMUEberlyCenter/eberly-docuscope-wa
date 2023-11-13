@@ -11,12 +11,12 @@ export interface Rule {
   name: string;
   description: string;
   topics?: Topic[];
-  examples: string;
+  examples?: string;
   type: string;
   is_group: boolean;
   children: Rule[];
   cv_description: string;
-  parent: string;
+  parent?: string;
   sentenceCount?: number;
 }
 /**
@@ -26,7 +26,7 @@ export class DocuScopeRuleCluster {
   id = uuidv4();
   name = '';
   description = '';
-  examples = '';
+  examples?: string = '';
   sentenceCount = 0;
 
   raw: Rule;

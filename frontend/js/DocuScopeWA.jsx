@@ -8,15 +8,15 @@ import DocuScopeRules from "./DocuScopeRules";
 import {
   cleanAndRepairHTMLSentenceData,
   coherenceToClusterCounts,
-  launch,
   onTopic2DSWAHTML,
 } from "./DocuScopeTools";
 import DocuScopeWAScrim from "./DocuScopeWAScrim";
 import EberlyLTIBase from "./EberlyLTIBase";
-import DocuScopeProgressWindow from "./components/DocuScopeProgressWindow/DocuScopeProgressWindow";
+import DocuScopeProgressWindow from "../src/app/components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
 import { assignmentId, isInstructor } from "./service/lti.service";
+import { launch } from "../src/app/service/lti.service";
 
 /**
  *
@@ -201,8 +201,6 @@ export default class DocuScopeWA extends EberlyLTIBase {
    * serialized text version of the editor is set so that we can go into read-only- mode
    */
   updateSerializedText(_aText) {
-    //console.log ("updateSerializedText ()");
-
     this.setState({
       html: null,
       htmlSentences: null,
@@ -480,7 +478,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
       return this.showLoader();
     }
 
-    if (this.state.state != DocuScopeWA.DOCUSCOPE_STATE_READY) {
+    if (this.state.state !== DocuScopeWA.DOCUSCOPE_STATE_READY) {
       scrimup = true;
       progresswindow = (
         <DocuScopeProgressWindow

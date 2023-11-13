@@ -18,29 +18,25 @@
  * one below.
  * @param {any} anObject
  */
-export function deepCopy(anObject) {
+export function deepCopy<T>(anObject: T): T {
   return JSON.parse(JSON.stringify(anObject));
 }
 
+type ParameterValue = { parameter: string, value: string, path?: string };
 /**
  * This is a method that generates a shallow, non-editable version of a
  * parameter list
  */
-export function parameterJSONtoArray(anObjectMap) {
+export function parameterJSONtoArray(anObjectMap: Record<string, string>): ParameterValue[] {
   //console.log ("parameterJSONtoArray ()");
   //console.log ("Parameter object: " + JSON.stringify (anObjectMap));
 
-  var newArray = [];
+  const newArray: ParameterValue[] = [];
 
   for (const key in anObjectMap) {
     if (Object.prototype.hasOwnProperty.call(anObjectMap, key)) {
-      if (key != "dummy") {
-        //console.log(key + " -> " + JSON.stringify (anObjectMap[key]));
-        var parameterObject = new Object();
-        parameterObject.parameter = key;
-        parameterObject.value = anObjectMap[key];
-
-        newArray.push(parameterObject);
+      if (key !== "dummy") {
+        newArray.push({ parameter: key, value: anObjectMap[key] });
       }
     }
   }
@@ -51,18 +47,12 @@ export function parameterJSONtoArray(anObjectMap) {
 /**
  *
  */
-export function parameterArrayToJSON(anArray) {
-  var parameterObject = new Object();
+export function parameterArrayToJSON(anArray: ParameterValue[]): Record<string, string> {
+  const parameterObject: Record<string, string> = {};
 
-  for (var i = 0; i < anArray.length; i++) {
-    var testObject = anArray[i];
-
-    if (testObject.path) {
-      parameterObject[testObject.parameter] = testObject.path;
-    } else {
-      parameterObject[testObject.parameter] = testObject.value;
-    }
-  }
+  anArray.forEach(({ parameter, value, path }) => {
+    parameterObject[parameter] = path ?? value;
+  });
 
   return parameterObject;
 }
@@ -151,7 +141,7 @@ export function parameterArrayToJSON(anArray) {
  * @param {*} obj
  * @returns {boolean}
  */
-export function isEmpty(obj) {
+export function isEmpty(obj: Record<string, never>): boolean {
   return Object.keys(obj).length === 0;
 }
 
@@ -174,9 +164,9 @@ export function isEmpty(obj) {
  *
  * @param {string} aTopicText
  */
-export function topicsToArray(aTopicText) {
-  return aTopicText.split("\n");
-}
+// export function topicsToArray(aTopicText) {
+//   return aTopicText.split("\n");
+// }
 
 /**
  * Convert a list containing terms separated by newlines into a string with semicolons representing the newlines
@@ -216,14 +206,3 @@ export function topicsToArray(aTopicText) {
 
 //   return false;
 // }
-
-/**
- * How much can this be optimized?
- * Reduced from O(n^2) to O(n) or O(n lg n) depending on the Set implementation.
- * @param {string[]} aListSource
- * @param {string[]} aListTarget
- */
-export function listFindDuplucateInList(aListSource, aListTarget) {
-  const targets = new Set(aListTarget.map((t) => t.toLowerCase()));
-  return aListSource.find((a) => targets.has(a.toLowerCase())) ?? null;
-}

@@ -139,11 +139,13 @@ const StudentView = (props: {
   const navId = useId();
   const selectId = useId();
   //const [status, setStatus] = useState('');
-  const [currentTab, setCurrentTab] = useState<string | null>("expectations");
+  const defaultTab = "expectations";
+  const [currentTab, setCurrentTab] = useState<string>(defaultTab);
   // on tab switch update current and broadcast.
   const switchTab = (key: string | null) => {
-    setCurrentTab(key);
-    currentTool.next(key);
+    const tab = key || defaultTab;
+    setCurrentTab(tab);
+    currentTool.next(tab);
     clearAllHighlights();
   };
   const [editor] = useState(() => withReact(createEditor()));
@@ -172,7 +174,7 @@ const StudentView = (props: {
       editorText.next(JSON.parse(content));
       setEditorTextValue(serialize(JSON.parse(content)));
     }
-  }, []); // [] dependency means this runs only once.
+  }, []); // [] dependency means this runs only on initialization.
 
   // Resize panels
   const [toolWidth, setToolWidth] = useState<undefined | number>(undefined);
@@ -351,7 +353,7 @@ const StudentView = (props: {
 
   const tagging = useTaggerResults();
 
-  // should the special tagged text rendering be used? (Mike's panel)
+  // should the special tagged text rendering be used? (Impressions panel)
   const showDocuScopeTaggedText =
     currentTab === "impressions" && !editable && isTaggerResult(tagging);
 
@@ -422,7 +424,7 @@ const StudentView = (props: {
 
   const onCloseResetDialog = (afirm: boolean) => {
     setShowReset(false);
-    if (afirm == true) {
+    if (afirm) {
       // Reset the data from the template
       props.ruleManager.reset();
 
@@ -437,10 +439,8 @@ const StudentView = (props: {
   const [showParagraphSelector /*, setShowParagraphSelector*/] =
     useState(false);
 
-  let paragraphselector;
-
-  if (showParagraphSelector === true) {
-    paragraphselector = (
+  const paragraphselector = showParagraphSelector ?
+    (
       <Form.Group>
         <Form.Select>
           {[1, 2, 3].map((num) => (
@@ -450,10 +450,8 @@ const StudentView = (props: {
           ))}
         </Form.Select>
       </Form.Group>
-    );
-  } else {
-    paragraphselector = <div className="spacer"></div>;
-  }
+    )
+    : (<div className="spacer"></div>);
 
   //>--------------------------------------------------------
 
@@ -504,23 +502,6 @@ const StudentView = (props: {
   };
 
   //>--------------------------------------------------------
-
-  const lockAndUpdate = (checked: boolean, _editorTextValue: string) => {
-    console.log("lockAndUpdate (" + checked + ")");
-
-    setEditorState(checked);
-
-    if (checked == false) {
-      console.log("checked==false => update");
-      //globalUpdate(editorTextValue);
-    }
-  };
-
-  let reset;
-
-  //reset=<NavDropdown.Item eventKey={"resetView"} active={false}>Reset View</NavDropdown.Item>;
-
-  //>--------------------------------------------------------
   const [zoom, setZoom] = useState<number>(100);
 
   const [showConvertNotes, setShowConvertNotes] = useState<boolean>(false);
@@ -556,7 +537,6 @@ const StudentView = (props: {
                       value={zoom}
                     />
                   </Form>
-                  {reset}
                 </NavDropdown>
                 <NavDropdown title="Help" menuVariant="dark">
                   {/* <NavDropdown.Item eventKey={"showHelp"}>
@@ -643,7 +623,7 @@ const StudentView = (props: {
             <LockSwitch
               checked={editable}
               label="Edit Mode:"
-              onChange={(checked) => lockAndUpdate(checked, editorTextValue)}
+              onChange={(checked) => setEditorState(checked)}
             />
           </Card.Header>
           <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
