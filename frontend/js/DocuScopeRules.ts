@@ -1,37 +1,42 @@
 import { assignmentId } from '../src/app/service/lti.service';
+import { Configuration, ConfigurationInformation, Rule } from '../src/lib/Configuration';
 import { deepCopy } from './DataTools';
 import DocuScopeRule from './DocuScopeRule';
-import { DocuScopeRuleCluster, Rule } from './DocuScopeRuleCluster';
+import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
-type ConfigurationInformation = {
-  name: string;
-  version: string;
-  author: string;
-  copyright: string;
-  saved: string;
-  filename: string;
-}
-type Configuration = {
-  id: string; // unique identifier
-  rules: {
-    name: string;
-    overview: string;
-    rules: Rule[];
-  };
-  impressions: {
-    common_clusters: string[];
-    rare_clusters: string[];
-  };
-  values: unknown;
-  info: ConfigurationInformation;
-  prompt_templates: Map<
-    string,
-    { prompt: string; temperature?: string | number; role?: string }
-  >;
-}
 
-type TopicData = { data: { topic: string[] }[] };
-type CoherenceData = { error: string } | { data: { topic: string[] }[] };
+type ErrorData = { error: string }
+export type CoherenceData = {
+  data: {
+    is_non_local?: boolean
+    is_topic_cluster?: boolean
+    paragraphs: ({
+      first_left_sent_id: number
+      is_left: boolean
+      is_topic_sent: boolean
+      para_pos: number
+    } | null)[]
+    sent_count?: number
+    topic: string[]
+  }[]
+  num_paras: number
+  num_topics: number
+};
+export type LocalData = {
+  data: {
+    is_global: boolean
+    is_topic_cluster: boolean
+    num_sents: number
+    sentences: ({
+      is_left: boolean
+      is_topic_sent: boolean
+      para_pos: number
+      sent_pos: number
+    } | null)[]
+    topic: string[]
+  }[]
+  num_topics: number
+}
 
 function sessionKey(key: string) {
   return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
@@ -134,7 +139,7 @@ export default class DocuScopeRules {
   /**
    *
    */
-  getJSONRules() {
+  getJSONRules(): Rule[] {
     return this.rules.map((rule) => rule.getJSONObject());
   }
 
@@ -678,13 +683,12 @@ export default class DocuScopeRules {
    * Let's handle that in cleanCoherenceData so that the rest of the code goes through its
    * usual paces instead of creating a global exception
    */
-  cleanCoherenceData(aCoherenceData: CoherenceData): CoherenceData {
-    const cleanedData: CoherenceData = deepCopy(aCoherenceData);
-
-    if ('error' in cleanedData) {
-      console.error('Coherence generation error: ' + cleanedData.error);
-      return cleanedData;
+  cleanCoherenceData(aCoherenceData: CoherenceData | ErrorData): CoherenceData | ErrorData {
+    if ('error' in aCoherenceData) {
+      console.error('Coherence generation error: %s', aCoherenceData.error);
+      return {...aCoherenceData}; // shallow copy ok for error
     }
+    const cleanedData: CoherenceData = deepCopy(aCoherenceData);
 
     // https://stackoverflow.com/questions/767486/how-do-i-check-if-a-variable-is-an-array-in-javascript
 
@@ -703,12 +707,12 @@ export default class DocuScopeRules {
   /**
    *
    */
-  cleanLocalCoherenceData(aCoherenceLocalData: (TopicData | unknown)[]) {
+  cleanLocalCoherenceData(aCoherenceLocalData: LocalData[]) {
     const cleanedData = [...aCoherenceLocalData];
 
     for (const td of cleanedData) {
       if (td && typeof td === 'object' && 'data' in td) {
-        (td as TopicData).data.forEach(
+        td.data.forEach(
           (top) => (top.topic = top.topic.map((s) => s.replaceAll('_', ' ')))
         );
       }

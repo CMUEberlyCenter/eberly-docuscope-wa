@@ -1,14 +1,13 @@
-import { Subscribe } from "@react-rxjs/core";
 import * as React from "react";
 import { Modal } from "react-bootstrap";
 import { VERSION } from "../../service/application.service";
 import { showAbout, useShowAbout } from "../../service/help.service";
-import { rule$, useRules } from "../../service/rules.service";
+import { useConfiguration } from "../../service/rules.service";
 import { ScribeAvailable } from "../../service/scribe.service";
 
 export const About = () => {
   const show = useShowAbout();
-  const rules = useRules();
+  const { data, isLoading } = useConfiguration();
 
   return (
     <Modal show={show} onHide={() => showAbout(false)} scrollable>
@@ -50,15 +49,14 @@ export const About = () => {
         <hr />
 
         <h2>Expectations Details</h2>
-        <Subscribe source$={rule$} fallback={<p>Loading...</p>}>
+        {isLoading ? (<p>Loading...</p>) : (
           <ul>
-            <li>Name: {rules?.info.name ?? "unassigned"}</li>
-            <li>Version: {rules?.info.version ?? "0.0.0"}</li>
-            <li>Author: {rules?.info.author ?? "unassigned"}</li>
-            <li>Copyright: {rules?.info.copyright ?? ""}</li>
-            <li>Saved: {rules?.info.saved ?? "true"}</li>
-          </ul>
-        </Subscribe>
+            <li>Name: {data?.info.name ?? "unassigned"}</li>
+            <li>Version: {data?.info.version ?? "0.0.0"}</li>
+            <li>Author: {data?.info.author ?? "unassigned"}</li>
+            <li>Copyright: {data?.info.copyright ?? ""}</li>
+            <li>Saved: {data?.info.saved ?? "true"}</li>
+          </ul>)}
       </Modal.Body>
     </Modal>
   );

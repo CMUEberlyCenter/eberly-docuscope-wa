@@ -27,37 +27,37 @@ function clusterListToSentence(aList) {
 // import clusterIcon from "../../../css/icons/topic_cluster_icon.png";
 
 /**
-	"topics": [
-		{
-		    "lemma": "Data Descriptors",
-		    "user_defined": true,
-		    "pre_defined_topics": [
-		        "IQR",
-		        "bimodal",
-		        "inter-quartile range",
-		        "max",
-		        "maximum",
-		        "meadian ",
-		        "mean",
-		        "min ",
-		        "minimum",
-		        "mode ",
-		        "quartile",
-		        "sample",
-		        "sample size",
-		        "small sample",
-		        "spread",
-		        "standard deviation",
-		        "unimodal ",
-		        "variability",
-		        "variation ",
-		        "varied ",
-		        "vary"
-		    ],
+  "topics": [
+    {
+        "lemma": "Data Descriptors",
+        "user_defined": true,
+        "pre_defined_topics": [
+            "IQR",
+            "bimodal",
+            "inter-quartile range",
+            "max",
+            "maximum",
+            "meadian ",
+            "mean",
+            "min ",
+            "minimum",
+            "mode ",
+            "quartile",
+            "sample",
+            "sample size",
+            "small sample",
+            "spread",
+            "standard deviation",
+            "unimodal ",
+            "variability",
+            "variation ",
+            "varied ",
+            "vary"
+        ],
         "custom_topics": [],
-		    "no_lexical_overlap": false
-		}
-	]
+        "no_lexical_overlap": false
+    }
+  ]
  */
 class ClusterPanel extends Component {
   /**
@@ -104,13 +104,13 @@ class ClusterPanel extends Component {
    *
    */
   onTopiEditorFocusOut(e) {
-    if (this.state.topicText == "") {
+    if (this.state.topicText === "") {
       if (this.props.disableTreeSelect) {
         this.props.disableTreeSelect(false);
       }
     }
 
-    if (this.state.topicText == this.state.topicTextOriginal) {
+    if (this.state.topicText === this.state.topicTextOriginal) {
       if (this.props.disableTreeSelect) {
         this.props.disableTreeSelect(false);
       }
@@ -268,7 +268,7 @@ class ClusterPanel extends Component {
           },
           "POST"
         )
-        .then((_incoming) => {});
+        .then((_incoming) => { });
     }
 
     if (this.props.disableTreeSelect) {

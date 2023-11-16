@@ -13,9 +13,9 @@ import {
 import DocuScopeWAScrim from "./DocuScopeWAScrim";
 import EberlyLTIBase from "./EberlyLTIBase";
 import DocuScopeProgressWindow from "../src/app/components/DocuScopeProgressWindow/DocuScopeProgressWindow";
-import InstructorView from "./views/Instructor/InstructorView";
-import StudentView from "./views/Student/StudentView";
-import { assignmentId, isInstructor } from "./service/lti.service";
+import InstructorView from "../src/app/views/Instructor/InstructorView";
+import StudentView from "../src/app/views/Student/StudentView";
+import { assignmentId, isInstructor } from "../src/app/service/lti.service";
 import { launch } from "../src/app/service/lti.service";
 
 /**
@@ -92,10 +92,10 @@ export default class DocuScopeWA extends EberlyLTIBase {
         // TODO add lti token, session, etc.
         fetch(ruleUrl)
           .then((response) => {
-            if (response.ok) {
-              return response.json();
+            if (!response.ok) {
+              throw new Error("Unable to retrieve configuration.");
             }
-            throw new Error("Unable to retrieve configuration.");
+            return response.json();
           })
           .then((rules) => {
             // initializing state unnecessary.

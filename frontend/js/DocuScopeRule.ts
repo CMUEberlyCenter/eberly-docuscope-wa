@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
-import { DocuScopeRuleCluster, Rule } from './DocuScopeRuleCluster';
+import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
+import { Rule } from '../src/lib/Configuration';
 
 /**
  *
@@ -48,7 +49,7 @@ export default class DocuScopeRule {
     this.description = anObject.description;
     this.type = anObject.type;
     this.is_group = anObject.is_group;
-    this.cv_description = anObject.cv_description;
+    this.cv_description = anObject.cv_description ?? '';
 
     this.children = anObject.children.map(
       (child) => new DocuScopeRuleCluster(child)

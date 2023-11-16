@@ -1,16 +1,11 @@
 import useSWR, { mutate } from "swr";
+import { ConfigurationInformation } from "../../lib/Configuration";
 
-export interface FileInfo {
+export type FileInfo = {
   id: string;
   filename: string;
   date: string;
-  info?: {
-    name?: string;
-    version?: string;
-    author?: string;
-    copyright?: string;
-    saved?: string;
-  };
+  info?: ConfigurationInformation;
 }
 
 const fetcher = (input: RequestInfo | URL, init?: RequestInit|undefined) => fetch(input, {

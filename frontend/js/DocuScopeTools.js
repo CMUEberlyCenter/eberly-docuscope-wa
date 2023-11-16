@@ -58,9 +58,7 @@ export function onTopic2DSWAHTML(anHTMLDataset) {
  *
  */
 export function coherenceToClusterCounts(aCoherenceData, _aCoherenceDataLocal) {
-  console.log("coherenceToClusterCounts ()");
-
-  let counts = [];
+  const counts = [];
 
   if (!aCoherenceData.data) {
     return counts;
@@ -68,11 +66,11 @@ export function coherenceToClusterCounts(aCoherenceData, _aCoherenceDataLocal) {
 
   for (let i = 0; i < aCoherenceData.data.length; i++) {
     let testLemma = aCoherenceData.data[i];
-    if (testLemma.is_topic_cluster == true) {
+    if (testLemma.is_topic_cluster) {
       if (testLemma.sent_count) {
         //console.log ("Found sentence count: " + testLemma.sent_count);
 
-        let lemmaFound = {
+        const lemmaFound = {
           count: testLemma.sent_count,
           lemma: "",
         };
@@ -93,8 +91,6 @@ export function coherenceToClusterCounts(aCoherenceData, _aCoherenceDataLocal) {
       }
     }
   }
-
-  //console.log (counts);
 
   return counts;
 }
@@ -117,17 +113,14 @@ export function compareLemmas(aLemmaA, aLemmaB) {
  *
  */
 export function cleanAndRepairHTMLSentenceData(aData) {
-  console.log("cleanAndRepairHTMLSentenceData ()");
 
-  for (let i = 0; i < aData.length; i++) {
-    let aParagraph = aData[i];
-
+  for (const aParagraph of aData) {
     let clean = false;
-    while (clean == false) {
+    while (!clean) {
       clean = true;
 
       for (let j = 0; j < aParagraph.length; j++) {
-        if (aParagraph[j] == "") {
+        if (aParagraph[j] === "") {
           aParagraph.splice(j, 1);
           clean = false;
           break;

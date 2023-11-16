@@ -41,7 +41,7 @@ const Clarity = ({
 }: {
   api: apiCall;
   ruleManager: DocuScopeRules;
-  htmlSentences: string;
+  htmlSentences: string[][];
 }) => {
   const [status, setStatus] = useState("");
   const [data, setClarityData] = useState<unknown>(null);
@@ -89,7 +89,6 @@ const Clarity = ({
         <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
           <Suspense>
             <DocuScopeOnTopic
-              setStatus={setStatus}
               sentences={data}
               text={text}
               htmlSentences={htmlSentences}

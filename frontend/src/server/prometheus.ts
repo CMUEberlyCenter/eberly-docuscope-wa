@@ -1,10 +1,11 @@
 //https://www.npmjs.com/package/systeminformation
 import { mem, time } from "systeminformation";
 
-interface Metric {
+type MetricType = "counter" | "gauge" | "histogram" | "summary" | "untyped";
+type Metric = {
   metric: string;
   value: number;
-  type: string;
+  type: MetricType;
   help: string;
 }
 /**
@@ -43,7 +44,7 @@ class PrometheusMetrics {
    * first sample is reported for that metric name. If there is no TYPE line for a metric name, the type is
    * set to untyped.
    */
-  setMetricObject(aMetric: string, aValue: number, aType: string, aHelp: string) {
+  setMetricObject(aMetric: string, aValue: number, aType: MetricType, aHelp: string) {
     let metricObject = this.getMetricObject(aMetric);
     if (!metricObject) {
       metricObject = {
@@ -181,5 +182,4 @@ class PrometheusMetrics {
   }
 }
 
-//export default PrometheusMetrics;
 export default PrometheusMetrics;

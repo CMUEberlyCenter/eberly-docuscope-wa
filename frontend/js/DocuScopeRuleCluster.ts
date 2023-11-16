@@ -1,24 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
+import { Rule } from '../src/lib/Configuration';
 
-export interface Topic {
-  lemma: string;
-  user_defined: boolean;
-  pre_defined_topics?: string[];
-  custom_topics?: string[];
-  no_lexical_overlap: boolean;
-}
-export interface Rule {
-  name: string;
-  description: string;
-  topics?: Topic[];
-  examples?: string;
-  type: string;
-  is_group: boolean;
-  children: Rule[];
-  cv_description: string;
-  parent?: string;
-  sentenceCount?: number;
-}
 /**
  *
  */

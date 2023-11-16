@@ -51,9 +51,6 @@ const DB_PORT = process.env.DB_PORT && !isNaN(Number(process.env.DB_PORT)) ? par
 /**
  * Retrieves value from environment variables.
  * Checks for <base>_FILE first to support docker secrets.
- * @param {string} base
- * @param {*} defaultValue
- * @returns
  */
 function fromEnvFile(base: string, defaultValue?: string): string {
   const file = process.env[`${base}_FILE`];
@@ -75,13 +72,16 @@ const ONTOPIC_PORT = process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.
   ? parseInt(process.env.DSWA_ONTOPIC_PORT) : 5000;
 
 const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET");
+/**
+ * Here’s an example of a function for signing tokens:
+ */
+function generateAccessToken(aString: string) {
+  const tSecret =
+    TOKEN_SECRET === "dummy" || TOKEN_SECRET === "" ? uuidv4() : TOKEN_SECRET;
+  return jwt.sign({ payload: aString }, tSecret, { expiresIn: "1800s" });
+}
 
 const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
-
-let onTopicRequests = 0;
-let onTopicRequestsAvg = 0;
-let onTopicResponseAvg = 0;
-let onTopicResponseAvgCount = 0;
 
 const pool = createPool({
   host: DB_HOST,
@@ -243,28 +243,33 @@ async function getPrompt(assignment: string, tool: 'notes_to_prose' | 'copyedit'
 }
 
 const metrics = new PrometheusMetrics();
+let onTopicRequests = 0;
+let onTopicRequestsAvg = 0;
+let onTopicResponseAvg = 0;
+let onTopicResponseAvgCount = 0;
+
 metrics.setMetricObject(
   "eberly_dswa_requests_total",
   onTopicRequests,
-  metrics.METRIC_TYPE_COUNTER,
+  'counter',
   "Number of requests made to the OnTopic backend"
 );
 metrics.setMetricObject(
   "eberly_dswa_requests_avg",
   onTopicRequestsAvg,
-  metrics.METRIC_TYPE_COUNTER,
+  'counter',
   "Average number of requests made to the OnTopic backend"
 );
 metrics.setMetricObject(
   "eberly_dswa_uptime_total",
   process.uptime(),
-  metrics.METRIC_TYPE_COUNTER,
+  'counter',
   "DSWA Server uptime"
 );
 metrics.setMetricObject(
   "eberly_dswa_response_avg",
   onTopicResponseAvg,
-  metrics.METRIC_TYPE_COUNTER,
+  'counter',
   "DSWA OnTopic average response time"
 );
 
@@ -281,19 +286,19 @@ function updateMetricsAvg() {
   metrics.setMetricObject(
     "eberly_dswa_requests_total",
     onTopicRequests,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "Number of requests made to the OnTopic backend"
   );
   metrics.setMetricObject(
     "eberly_dswa_requests_avg",
     onTopicRequestsAvg,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "Average number of requests made to the OnTopic backend"
   );
   metrics.setMetricObject(
     "eberly_dswa_response_avg",
     0,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "DSWA OnTopic average response time"
   );
 }
@@ -304,7 +309,7 @@ function updateUptime() {
   metrics.setMetricObject(
     "eberly_dswa_uptime_total",
     process.uptime(),
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "DSWA Server uptime"
   );
 }
@@ -319,13 +324,13 @@ function updateMetrics() {
   metrics.setMetricObject(
     "eberly_dswa_requests_total",
     onTopicRequests,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "Number of requests made to the OnTopic backend"
   );
   metrics.setMetricObject(
     "eberly_dswa_requests_avg",
     onTopicRequestsAvg,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "Average number of requests made to the OnTopic backend"
   );
 }
@@ -341,22 +346,45 @@ function updateResponseAvg(aValue: number) {
   metrics.setMetricObject(
     "eberly_dswa_response_avg",
     average,
-    metrics.METRIC_TYPE_COUNTER,
+    'counter',
     "DSWA OnTopic average response time"
   );
 }
 
+const PUBLIC = "/app";
+const STATIC = "/static";
+
+let DEFAULT_RULES: ConfigurationFile | undefined = undefined;
+/**
+ *
+ */
+async function getDefaultRuleData(): Promise<ConfigurationFile | undefined> {
+  if (!DEFAULT_RULES) {
+    try {
+      const filename = join(__dirname, STATIC, "dswa.json");
+      const file = await open(filename);
+      const ruleFile = await file.readFile({ encoding: "utf8" });
+      await file.close();
+      DEFAULT_RULES = JSON.parse(ruleFile);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+    }
+  }
+  return DEFAULT_RULES;
+}
+
+function startup() {
+  // Reset the avg values every 5 minutes
+  setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
+  setInterval(updateUptime, 1000); // Every second
+
+}
 
 /**
  *
  */
 class DocuScopeWALTIService {
-  token = uuidv4();
-  session = uuidv4();
   useLTI = true;
-
-  publicHome = "/app";
-  staticHome = "/static";
 
   defaultRules?: ConfigurationFile; // default rules file cache
 
@@ -366,9 +394,6 @@ class DocuScopeWALTIService {
      */
   constructor() {
 
-    // Reset the avg values every 5 minutes
-    setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
-    setInterval(updateUptime, 1000); // Every second
 
     console.log(`DocuScope-WA front-end proxy version: ${version}`);
 
@@ -386,67 +411,9 @@ class DocuScopeWALTIService {
         extended: true,
       })
     );
+    startup();
   }
 
-  /**
-   *
-   */
-  async getDefaultRuleData(): Promise<ConfigurationFile | undefined> {
-    if (!this.defaultRules) {
-      try {
-        const filename = join(__dirname, this.staticHome, "dswa.json");
-        const file = await open(filename);
-        const ruleFile = await file.readFile({ encoding: "utf8" });
-        await file.close();
-        this.defaultRules = JSON.parse(ruleFile);
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-      }
-    }
-    return this.defaultRules;
-  }
-
-  /**
-   *
-   * @param {Request} _request
-   * @param {Response} response
-   */
-  async sendDefaultFile(_request: Request, response: Response) {
-    try {
-      const ruleData = await this.getDefaultRuleData();
-      response.json(this.generateDataMessage(ruleData));
-    } catch (err) {
-      console.error(err instanceof Error ? err.message : err);
-      response.sendStatus(404);
-    }
-  }
-
-  /**
-   *
-   */
-  pad(s: number) {
-    return (s < 10 ? "0" : "") + s;
-  }
-
-  /**
-   *
-   */
-  format(seconds: number) {
-    const hours = Math.floor(seconds / (60 * 60));
-    const minutes = Math.floor((seconds % (60 * 60)) / 60);
-    const second = Math.floor(seconds % 60);
-
-    return this.pad(hours) + ":" + this.pad(minutes) + ":" + this.pad(second);
-  }
-
-  /**
-   * Here’s an example of a function for signing tokens:
-   */
-  generateAccessToken(aString: string) {
-    const tSecret =
-      TOKEN_SECRET === "dummy" || TOKEN_SECRET === "" ? uuidv4() : TOKEN_SECRET;
-    return jwt.sign({ payload: aString }, tSecret, { expiresIn: "1800s" });
-  }
 
   /**
    * https://expressjs.com/en/api.html#req
@@ -480,7 +447,7 @@ class DocuScopeWALTIService {
    * @param {Request} request
    */
   generateSettingsObject(request: Request) {
-    const token = this.generateAccessToken("dummy");
+    const token = generateAccessToken("dummy");
     return {
       lti: { ...request.body, token },
     };
@@ -515,7 +482,6 @@ class DocuScopeWALTIService {
    */
   async apiPOSTCall(aURL: string, data: unknown, response: Response) {
     const url = new URL(aURL, `http://${ONTOPIC_HOST}:${ONTOPIC_PORT}/api/v1/`);
-    console.log(`apiPOSTCall (${url})`);
 
     const startDate = Date.now();
 
@@ -558,8 +524,7 @@ class DocuScopeWALTIService {
 
           const stringed = JSON.stringify(settingsObject);
 
-          const raw = readFileSync(
-            __dirname + this.publicHome + "/index.html",
+          const raw = readFileSync(join(__dirname, PUBLIC, 'index.html'),
             "utf8"
           );
           const html = raw.replace(
@@ -573,7 +538,7 @@ class DocuScopeWALTIService {
           response.send(html);
         } else {
           response.sendFile(
-            join(__dirname, this.staticHome, "nolti.html")
+            join(__dirname, STATIC, "nolti.html")
           );
         }
 
@@ -589,7 +554,7 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    if (request.path.indexOf("/lti/activity/docuscope") != -1) {
+    if (request.path.indexOf("/lti/activity/docuscope") !== -1) {
       console.log("We've got an LTI path, stripping ...");
       path = request.path.replace("/lti/activity/docuscope", "/");
     }
@@ -602,7 +567,7 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    response.sendFile(__dirname + this.publicHome + path);
+    response.sendFile(join(__dirname, PUBLIC, path));
   }
 
   /**
@@ -618,7 +583,7 @@ class DocuScopeWALTIService {
       console.error(err);
       console.warn("Using default data.");
       try {
-        const data = await this.getDefaultRuleData();
+        const data = await getDefaultRuleData();
         if (data) {
           return {
             ...defaultPrompt,
@@ -675,7 +640,7 @@ class DocuScopeWALTIService {
               request.body.date,
               jsonObject
             );
-            response.json(this.generateDataMessage(filedata));
+            response.json(filedata);
           } else {
             console.error('Multiple files uploaded, this only supports single file uploads.')
             response.sendStatus(400);
@@ -835,7 +800,7 @@ class DocuScopeWALTIService {
         }
       } else {
         console.warn(`Invalid assignment id (${assignment}), sending default.`);
-        const rules = await this.getDefaultRuleData();
+        const rules = await getDefaultRuleData();
         response.json(this.generateDataMessage(rules));
       }
     };
@@ -855,21 +820,6 @@ class DocuScopeWALTIService {
       else {
         response.sendStatus(400);
       }
-    });
-
-    /*
-     Originally named 'ping', we had to change this because a bunch of browser-addons have a big
-     problem with it. It trips up Adblock-Plus and Ghostery. So at least for now it's renamed
-     to 'ding'
-    */
-    // Unsure of utility of this as results are not used.
-    this.app.get("/api/v1/ding", (_request: Request, response: Response) => {
-      response.json(
-        this.generateDataMessage({
-          uptime: this.format(process.uptime()),
-          version,
-        })
-      );
     });
 
     this.app.post("/api/v1/ontopic", (request: Request, response: Response) => {

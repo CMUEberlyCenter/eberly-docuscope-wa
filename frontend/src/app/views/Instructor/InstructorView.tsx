@@ -74,6 +74,7 @@ const InstructorView = () => {
         await response.text();
         throw new Error(`Server error: ${response.status}`);
       }
+      await response.text();
     } catch (err) {
       console.error(err);
     } finally {

@@ -1,7 +1,7 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-// import DocuScopeWA from "../../js/DocuScopeWA";
-import DocuScopeWriteAndAudit from "./App";
+import DocuScopeWriteAndAudit from "../../js/DocuScopeWA";
+// import DocuScopeWriteAndAudit from "./App";
 import "./index.scss";
 
 const content = document.getElementById("content");
