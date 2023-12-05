@@ -49,14 +49,17 @@ export const About = () => {
         <hr />
 
         <h2>Expectations Details</h2>
-        {isLoading ? (<p>Loading...</p>) : (
+        {isLoading ? (
+          <p>Loading...</p>
+        ) : (
           <ul>
             <li>Name: {data?.info.name ?? "unassigned"}</li>
             <li>Version: {data?.info.version ?? "0.0.0"}</li>
             <li>Author: {data?.info.author ?? "unassigned"}</li>
             <li>Copyright: {data?.info.copyright ?? ""}</li>
             <li>Saved: {data?.info.saved ?? "true"}</li>
-          </ul>)}
+          </ul>
+        )}
       </Modal.Body>
     </Modal>
   );

@@ -3,10 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChangeEvent, useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
 import { VERSION } from "../../service/application.service";
-import { FileInfo, refreshConfigurations, useConfigurations } from "../../service/instructor.service";
+import {
+  FileInfo,
+  refreshConfigurations,
+  useConfigurations,
+} from "../../service/instructor.service";
 import { assignmentId, launch } from "../../service/lti.service";
 import "./InstuctorView.scss";
-
 
 const InstructorView = () => {
   const [selected, setSelected] = useState("");
@@ -134,11 +137,16 @@ const InstructorView = () => {
   );
 
   return (
-    <div tabIndex={0} className="instructor-view d-flex flex-column overflow-hidden h-100 w-100 p-1">
+    <div
+      tabIndex={0}
+      className="instructor-view d-flex flex-column overflow-hidden h-100 w-100 p-1"
+    >
       <div className="versionlabel">
         Eberly DocuScope Write & Audit with myScribe version: {VERSION}
       </div>
-      <h1 className="fw-bold flex-grow-0 text-muted">DocuScope Write & Audit with myScribe</h1>
+      <h1 className="fw-bold flex-grow-0 text-muted">
+        DocuScope Write & Audit with myScribe
+      </h1>
       <div className="d-flex flex-grow-1 flex-column overflow-hidden">
         <div className="px-1 d-flex flex-column align-items-start mb-2">
           <button
@@ -150,7 +158,9 @@ const InstructorView = () => {
             Open in new window as student
           </button>
           {selected === "" && (
-            <span className="alert alert-danger" role="alert">Please select a file below first</span>
+            <span className="alert alert-danger" role="alert">
+              Please select a file below first
+            </span>
           )}
           <div className="d-none">
             <form id="ltirelayform" target="docuscopewa" method="post"></form>
@@ -169,7 +179,9 @@ const InstructorView = () => {
               onChange={onFileChange}
             />
           </div>
-          {isLoading ? loading :
+          {isLoading ? (
+            loading
+          ) : (
             <table className="dswa-table">
               <thead>
                 <tr>
@@ -189,7 +201,7 @@ const InstructorView = () => {
               </thead>
               <tbody>{files?.map(renderFile)}</tbody>
             </table>
-          }
+          )}
         </div>
       </div>
     </div>

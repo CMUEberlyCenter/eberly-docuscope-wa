@@ -1,27 +1,39 @@
-import { bind } from '@react-rxjs/core';
-import { catchError, of, switchMap } from 'rxjs';
+// import { bind } from '@react-rxjs/core';
+// import { catchError, of, switchMap } from 'rxjs';
+// import { fromFetch } from 'rxjs/fetch';
 import { fromFetch } from 'rxjs/fetch';
 import { Configuration } from '../../lib/Configuration';
+import { fetcher } from './fetcher';
 import { assignmentId } from './lti.service';
+import useSWR from 'swr';
+import { catchError, of, switchMap } from 'rxjs';
+import { bind } from '@react-rxjs/core';
+import DocuScopeRules from '../../../js/DocuScopeRules';
 
 const ruleUrl = new URL(
   `/api/v1/assignments/${assignmentId()}/configuration`,
   location.href
 );
-// TODO: add lti token/session
+
+export function useConfiguration() {
+  return useSWR(ruleUrl, fetcher<Configuration>);
+}
+
 export const rules = fromFetch(ruleUrl.toString()).pipe(
   switchMap(async (response) => {
     if (!response.ok) {
       throw new Error(`Bad response: ${response.status}`);
     }
     const config: Configuration = await response.json();
-    return config;
+    const dsRules = new DocuScopeRules();
+    dsRules.load(config);
+    return dsRules;
   }),
   catchError((err) => {
     // Network or other error, handle appropriately
     console.error(err);
     return of(null);
-  }),
+  })
 );
 
-export const [useRules, rule$] = bind<Configuration | null>(rules, null);
+export const [useRules, rule$] = bind<DocuScopeRules | null>(rules, null);

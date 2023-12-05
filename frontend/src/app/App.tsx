@@ -3,7 +3,7 @@ import { Button } from "react-bootstrap";
 import { useIdleTimer } from "react-idle-timer";
 import { isInstructor, launch } from "./service/lti.service";
 import InstructorView from "./views/Instructor/InstructorView";
-import StudentView from './views/Student/StudentView';
+import StudentView from "./views/Student/StudentView";
 
 const Timeout = 5 * 60 * 1000;
 
@@ -33,7 +33,7 @@ const App = () => {
       tabIndex={-1}
       style={{ display: ["IDLE"].includes(state) ? "block" : "none" }}
     >
-      <div className="modal-backdrop show"></div>
+      <div className="modal-backdrop show" />
       <div className="modal show" style={{ display: "block" }}>
         <div className="modal-dialog">
           <div className="modal-content">
@@ -88,7 +88,7 @@ const App = () => {
 
   return (
     <div className="position-relative">
-      <StudentView/>
+      <StudentView />
       {lockout}
     </div>
   );

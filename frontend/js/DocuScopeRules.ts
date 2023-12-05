@@ -5,39 +5,6 @@ import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
 
-type ErrorData = { error: string }
-export type CoherenceData = {
-  data: {
-    is_non_local?: boolean
-    is_topic_cluster?: boolean
-    paragraphs: ({
-      first_left_sent_id: number
-      is_left: boolean
-      is_topic_sent: boolean
-      para_pos: number
-    } | null)[]
-    sent_count?: number
-    topic: string[]
-  }[]
-  num_paras: number
-  num_topics: number
-};
-export type LocalData = {
-  data: {
-    is_global: boolean
-    is_topic_cluster: boolean
-    num_sents: number
-    sentences: ({
-      is_left: boolean
-      is_topic_sent: boolean
-      para_pos: number
-      sent_pos: number
-    } | null)[]
-    topic: string[]
-  }[]
-  num_topics: number
-}
-
 function sessionKey(key: string) {
   return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
 }
@@ -54,7 +21,7 @@ function clustersKey() {
  * @param {string[]} aListSource
  * @param {string[]} aListTarget
  */
-export function listFindDuplucateInList(aListSource: string[], aListTarget: string[]) {
+function listFindDuplucateInList(aListSource: string[], aListTarget: string[]) {
   const targets = new Set(aListTarget.map((t) => t.toLowerCase()));
   return aListSource.find((a) => targets.has(a.toLowerCase())) ?? null;
 }
@@ -146,13 +113,13 @@ export default class DocuScopeRules {
   /**
    *
    */
-  getVersion() {
-    if (this.info) {
-      const { name, version } = this.info;
-      return `${name.substring(0, Math.min(30, name.length))}: (${version})`;
-    }
-    return '';
-  }
+  // getVersion() {
+  //   if (this.info) {
+  //     const { name, version } = this.info;
+  //     return `${name.substring(0, Math.min(30, name.length))}: (${version})`;
+  //   }
+  //   return '';
+  // }
 
   /**
    *
@@ -319,7 +286,6 @@ export default class DocuScopeRules {
   /**
    *
    * @param {string} anId
-   * @returns {DocuScopeRule | undefined}
    */
   getRule(anId: string) {
     return this.rules.find((rule) => rule.id === anId);
@@ -327,9 +293,8 @@ export default class DocuScopeRules {
 
   /**
    *
-   * @param {string} aRule
-   * @param {string} aCluster
-   * @returns {DocuScopeRuleCluster | undefined}
+   * @param {string} aRule rule identifier
+   * @param {string} aCluster cluster identifier
    */
   getCluster(aRule: string, aCluster: string) {
     return this.getRule(aRule)?.children.find(
@@ -339,9 +304,8 @@ export default class DocuScopeRules {
 
   /**
    *
-   * @param {number} aRule
-   * @param {number} aCluster
-   * @returns {DocuScopeRuleCluster | undefined}
+   * @param {number} aRule rule index
+   * @param {number} aCluster cluster index
    */
   getClusterByIndex(aRule: number, aCluster: number) {
     if (aRule === -1 || aCluster === -1) {
@@ -351,9 +315,9 @@ export default class DocuScopeRules {
   }
 
   /**
-   *
-   * @param {number} aRule
-   * @param {number} aCluster
+   * Retrieves list of topics for cluster in rule
+   * @param {number} aRule rule index
+   * @param {number} aCluster cluster index
    */
   getClusterTopics(aRule: number, aCluster: number) {
     const cluster = this.getClusterByIndex(aRule, aCluster);
@@ -455,7 +419,7 @@ export default class DocuScopeRules {
   getClusterTopicCountCustom(aRuleIndex: number, aClusterIndex: number) {
     //console.log ("getClusterTopicCountCustom ("+ aRuleIndex + "," + aClusterIndex + ")");
 
-    if (aRuleIndex === -1 || aClusterIndex === -1) {
+    if (aRuleIndex < 0 || aClusterIndex < 0) {
       //console.log ("No valid rule or cluster provided");
       return 0;
     }
@@ -501,42 +465,55 @@ export default class DocuScopeRules {
    * we started with in the rules as edited by the user in the interface
    */
   getAllCustomTopics() {
-    const tempList = [];
-    for (const rule of this.rules) {
-      for (const cluster of rule.children) {
-        const topic = cluster.raw?.topics?.at(0);
-        if (topic) {
-          const rawTopicsStatic = topic.pre_defined_topics ?? [];
-          tempList.push(...rawTopicsStatic);
-          const rawTopics = topic.custom_topics ?? [];
-          tempList.push(...rawTopics);
-        }
-      }
-    }
-    return tempList.map((s) => s.trim()).join(';');
+    return this.rules
+      .flatMap(rule => rule.children)
+      .map(cluster => cluster.raw?.topics?.at(0))
+      .filter(topic => !!topic)
+      .flatMap(topic =>
+        [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []])
+      .map(topic => topic.trim()).join(';');
+    //   const tempList = [];
+    //   for (const rule of this.rules) {
+    //   for (const cluster of rule.children) {
+    //     const topic = cluster.raw?.topics?.at(0);
+    //     if (topic) {
+    //       const rawTopicsStatic = topic.pre_defined_topics ?? [];
+    //       tempList.push(...rawTopicsStatic);
+    //       const rawTopics = topic.custom_topics ?? [];
+    //       tempList.push(...rawTopics);
+    //     }
+    //   }
+    // }
+    // return tempList.map((s) => s.trim()).join(';');
   }
 
   /**
    *
    */
   getAllCustomTopicsStructured() {
-    const structuredTopics = [];
+    return this.rules.flatMap(rule=>rule.children).map(cluster=>cluster.raw?.topics?.at(0))
+    .filter(topic => !!topic)
+    .map(topic=> ({
+      lemma: topic?.lemma,
+      topics: [...topic?.pre_defined_topics??[], ...topic?.custom_topics??[]].map(s => s.trim())
+    }))
+    // const structuredTopics = [];
 
-    for (const rule of this.rules) {
-      for (const cluster of rule.children) {
-        const topic = cluster.raw?.topics?.at(0);
-        if (topic) {
-          const pre = topic.pre_defined_topics ?? [];
-          const custom = topic.custom_topics ?? [];
-          structuredTopics.push({
-            lemma: topic.lemma,
-            topics: [...pre, ...custom].map((s) => s.trim()),
-          });
-        }
-      }
-    }
+    // for (const rule of this.rules) {
+    //   for (const cluster of rule.children) {
+    //     const topic = cluster.raw?.topics?.at(0);
+    //     if (topic) {
+    //       const pre = topic.pre_defined_topics ?? [];
+    //       const custom = topic.custom_topics ?? [];
+    //       structuredTopics.push({
+    //         lemma: topic.lemma,
+    //         topics: [...pre, ...custom].map((s) => s.trim()),
+    //       });
+    //     }
+    //   }
+    // }
 
-    return structuredTopics;
+    // return structuredTopics;
   }
 
   /**
@@ -683,42 +660,42 @@ export default class DocuScopeRules {
    * Let's handle that in cleanCoherenceData so that the rest of the code goes through its
    * usual paces instead of creating a global exception
    */
-  cleanCoherenceData(aCoherenceData: CoherenceData | ErrorData): CoherenceData | ErrorData {
-    if ('error' in aCoherenceData) {
-      console.error('Coherence generation error: %s', aCoherenceData.error);
-      return {...aCoherenceData}; // shallow copy ok for error
-    }
-    const cleanedData: CoherenceData = deepCopy(aCoherenceData);
+  // cleanCoherenceData(aCoherenceData: CoherenceData | ErrorData): CoherenceData | ErrorData {
+  //   if ('error' in aCoherenceData) {
+  //     console.error('Coherence generation error: %s', aCoherenceData.error);
+  //     return {...aCoherenceData}; // shallow copy ok for error
+  //   }
+  //   const cleanedData: CoherenceData = deepCopy(aCoherenceData);
 
-    // https://stackoverflow.com/questions/767486/how-do-i-check-if-a-variable-is-an-array-in-javascript
+  //   // https://stackoverflow.com/questions/767486/how-do-i-check-if-a-variable-is-an-array-in-javascript
 
-    //if ((typeof aCoherenceData === "object" && aCoherenceData !== null) == true) {
-    //if (aCoherenceData.constructor != Array) {
-    //  console.log ("Variable is indeed of type object and is therefore not eligible data");
-    //  return (cleanedData);
-    //}
+  //   //if ((typeof aCoherenceData === "object" && aCoherenceData !== null) == true) {
+  //   //if (aCoherenceData.constructor != Array) {
+  //   //  console.log ("Variable is indeed of type object and is therefore not eligible data");
+  //   //  return (cleanedData);
+  //   //}
 
-    for (const topicObject of cleanedData.data) {
-      topicObject.topic = topicObject.topic.map((s) => s.replaceAll('_', ' '));
-    }
-    return cleanedData;
-  }
+  //   for (const topicObject of cleanedData.data) {
+  //     topicObject.topic = topicObject.topic.map((s) => s.replaceAll('_', ' '));
+  //   }
+  //   return cleanedData;
+  // }
 
   /**
    *
    */
-  cleanLocalCoherenceData(aCoherenceLocalData: LocalData[]) {
-    const cleanedData = [...aCoherenceLocalData];
+  // cleanLocalCoherenceData(aCoherenceLocalData: LocalData[]) {
+  //   const cleanedData = [...aCoherenceLocalData];
 
-    for (const td of cleanedData) {
-      if (td && typeof td === 'object' && 'data' in td) {
-        td.data.forEach(
-          (top) => (top.topic = top.topic.map((s) => s.replaceAll('_', ' ')))
-        );
-      }
-    }
-    return cleanedData;
-  }
+  //   for (const td of cleanedData) {
+  //     if (td && typeof td === 'object' && 'data' in td) {
+  //       td.data.forEach(
+  //         (top) => (top.topic = top.topic.map((s) => s.replaceAll('_', ' ')))
+  //       );
+  //     }
+  //   }
+  //   return cleanedData;
+  // }
 
   /**
    *

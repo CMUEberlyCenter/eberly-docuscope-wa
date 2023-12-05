@@ -1,6 +1,6 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import TabTitle from "../TabTitle/TabTitle";
@@ -15,14 +15,9 @@ import clusterWarningIcon from "../../assets/icons/topic_cluster_warning_icon.pn
 import { highlightTopic } from "../../service/topic.service";
 import ClusterPanel from "../ClusterPanel/ClusterPanel";
 
-import { bind } from "@react-rxjs/core";
-import { combineLatest, filter, map } from "rxjs";
-
-import { currentTool$ } from "../../service/current-tool.service";
-import { lockedEditorText$ } from "../../service/editor-state.service";
-
-import DocuScopeRules from "../../../../js/DocuScopeRules";
 import DocuScopeRule from "../../../../js/DocuScopeRule";
+import DocuScopeRules from "../../../../js/DocuScopeRules";
+import { useConfiguration, useRules } from "../../service/rules.service";
 
 /*
 interface RuleProps {
@@ -72,13 +67,13 @@ const Rule = (props: RuleProps) => {
 // Using react-rxjs to get observable to act like hooks.
 // On locking text with some text present and the tool is clarity
 // emit the text.
-const [useCoherenceText /*coherenceText$*/] = bind(
-  combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
-    filter((data) => data.tool === "expectations"),
-    map((data) => data.text)
-  ),
-  ""
-);
+// const [useCoherenceText /*coherenceText$*/] = bind(
+//   combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
+//     filter((data) => data.tool === "expectations"),
+//     map((data) => data.text)
+//   ),
+//   ""
+// );
 
 /** Component specific error message. */
 const ErrorFallback = (props: { error?: Error }) => (
@@ -91,57 +86,46 @@ const ErrorFallback = (props: { error?: Error }) => (
 /**
  *
  */
-const Expectations = ({
-  api,
-  ruleManager,
-  editorValue,
-}: {
-  api: apiCall;
-  ruleManager: DocuScopeRules;
-  editorValue: string;
-}) => {
-  const text = useCoherenceText();
+const Expectations = () => {
+  // const text = useCoherenceText();
 
   //>---------------------------------------------
 
   const [disabled, setDisabled] = useState(false);
-
-  const disableTreeSelect = (doDisable: boolean) => {
-    setDisabled(doDisable);
-  };
-
+  const ruleManager = useRules();
+  const { data: configuration } = useConfiguration();
   //>---------------------------------------------
 
-  useEffect(() => {
-    if (text !== "") {
-      //setStatus("Retrieving results...");
+  // useEffect(() => {
+  //   if (text !== "") {
+  //     //setStatus("Retrieving results...");
 
-      const customTopics = ruleManager.getAllCustomTopics();
-      const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
+  //     const customTopics = ruleManager.getAllCustomTopics();
+  //     const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
 
-      //const escaped = encodeURIComponent(text);
-      //const encoded = window.btoa(escaped);
+  //     //const escaped = encodeURIComponent(text);
+  //     //const encoded = window.btoa(escaped);
 
-      const encoded = encodeURIComponent(text);
+  //     const encoded = encodeURIComponent(text);
 
-      api(
-        "ontopic",
-        {
-          custom: customTopics,
-          customStructured: customTopicsStructured,
-          base: encoded,
-        },
-        "POST"
-      );
-      // .then((incoming: any) => {
-      //   const coherence = incoming.coherence;
-      //   const local = incoming.local;
+  //     api(
+  //       "ontopic",
+  //       {
+  //         custom: customTopics,
+  //         customStructured: customTopicsStructured,
+  //         base: encoded,
+  //       },
+  //       "POST"
+  //     );
+  //     // .then((incoming: any) => {
+  //     //   const coherence = incoming.coherence;
+  //     //   const local = incoming.local;
 
-      //   //setCoherenceData(coherence);
-      //   //setLocalCoherenceData(local);
-      // });
-    }
-  }, [text, api, ruleManager]);
+  //     //   //setCoherenceData(coherence);
+  //     //   //setLocalCoherenceData(local);
+  //     // });
+  //   }
+  // }, [text, api, ruleManager]);
 
   // const ref = useId();
 
@@ -186,7 +170,8 @@ const Expectations = ({
 
     //disableEditor ();
 
-    const topicList = ruleManager.getClusterName(ruleIndex, clusterIndex);
+    const topicList =
+      ruleManager?.getClusterName(ruleIndex, clusterIndex) ?? [];
 
     /*
     // Don't change context if we've found a duplicate in the current edit window
@@ -225,12 +210,12 @@ const Expectations = ({
    *
    */
   const createRuleTree = (
-    ruleManager: DocuScopeRules,
+    ruleManager: DocuScopeRules | undefined | null,
     currentRule: number,
     currentCluster: number
   ) => (
     <ol type="a" className="expectations-list">
-      {ruleManager.rules.map((aRule: DocuScopeRule, i) => (
+      {ruleManager?.rules.map((aRule: DocuScopeRule, i) => (
         <li
           className="expectations-rule"
           key={"rule" + i}
@@ -322,9 +307,9 @@ const Expectations = ({
       </Card.Header>
       <Card.Body className="overflow-auto">
         <Subscribe>
-          <Card.Title>{ruleManager.name}</Card.Title>
+          <Card.Title>{configuration?.rules.name}</Card.Title>
           <Card.Text className="overflow-auto" style={{ maxHeight: "5em" }}>
-            {ruleManager.overview ?? (
+            {configuration?.rules.overview ?? (
               <>
                 Respond to the following questions to meet the readers&apos;
                 expectations. The sentences that you write to respond to each
@@ -346,12 +331,9 @@ const Expectations = ({
           </ErrorBoundary>
         </Subscribe>
         <ClusterPanel
-          api={api}
-          ruleManager={ruleManager}
           currentRule={ruleState.currentRule}
           currentCluster={ruleState.currentCluster}
-          editorValue={editorValue}
-          disableTreeSelect={disableTreeSelect}
+          disableTreeSelect={(val: boolean) => setDisabled(val)}
         />
       </Card.Body>
     </Card>

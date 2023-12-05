@@ -50,7 +50,7 @@ import Divider from "../../components/Divider/Divider";
 import Expectations from "../../components/Expectations/Expectations";
 import Impressions from "../../components/Impressions/Impressions";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
-import { currentTool } from "../../service/current-tool.service";
+import { Tool, currentTool } from "../../service/current-tool.service";
 import {
   editorText,
   setEditorState,
@@ -90,6 +90,8 @@ import {
   showScribeOption,
   useScribe,
 } from "../../service/scribe.service";
+import { useConfiguration } from "../../service/rules.service";
+import { rules$, useOnTopic } from "../../service/onTopic.service";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -119,19 +121,20 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
   }
 }
 
+function fixOnTopicHtml(topicData?: { html?: string } | null) {
+  return topicData?.html?.replaceAll("_", " ") ?? "";
+}
+
 /**
  * The student facing application interface.
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
 const StudentView = (props: {
-  api: apiCall;
+  //api: apiCall;
   ruleManager: DocuScopeRules;
-  html: string;
-  htmlSentences: string;
   update: (a: unknown) => void;
 }) => {
-
   // Status handlers
   const [status /*, setStatus*/] = useState("Application ready, rules loaded");
   const [language /*, setLanguage*/] = useState("ENG");
@@ -140,9 +143,9 @@ const StudentView = (props: {
   const selectId = useId();
   //const [status, setStatus] = useState('');
   const defaultTab = "expectations";
-  const [currentTab, setCurrentTab] = useState<string>(defaultTab);
+  const [currentTab, setCurrentTab] = useState<Tool>(defaultTab);
   // on tab switch update current and broadcast.
-  const switchTab = (key: string | null) => {
+  const switchTab = (key: Tool) => {
     const tab = key || defaultTab;
     setCurrentTab(tab);
     currentTool.next(tab);
@@ -351,6 +354,26 @@ const StudentView = (props: {
     // }
   };
 
+  const { data: configuration } = useConfiguration();
+  // const { data: onTopic, trigger } = useOnTopic();
+  const onTopic = useOnTopic();
+
+  // useEffect(() => {
+  //   const subscription = onTopicToolText$.subscribe(text => {
+  //     if (text) {
+  //       trigger({
+  //         base: encodeURIComponent(text),
+  //         custom: props.ruleManager.getAllCustomTopics(),
+  //         customStructured: props.ruleManager.getAllCustomTopicsStructured()
+  //       });
+  //     }
+  //   });
+  //   return () => subscription.unsubscribe();
+  // }, [trigger, props.ruleManager]);
+  useEffect(() => {
+    rules$.next(props.ruleManager);
+  }, [props.ruleManager]);
+
   const tagging = useTaggerResults();
 
   // should the special tagged text rendering be used? (Impressions panel)
@@ -363,19 +386,7 @@ const StudentView = (props: {
 
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
   const showOnTopicText =
-    currentTab !== "impressions" && !editable && Boolean(props.html);
-
-  //console.log ("showOnTopicText: " + showOnTopicText + ", currentTab: " + currentTab + ", editable: " + editable + ", props.html: " + (props.html!=null));
-
-  const topicTaggedContent = (
-    <React.Fragment>
-      {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
-      <div
-        className="tagged-text"
-        dangerouslySetInnerHTML={{ __html: props.html }}
-      ></div>
-    </React.Fragment>
-  );
+    currentTab !== "impressions" && !editable && Boolean(onTopic?.html);
 
   // Special rendering of tagger results.
   const taggedDocuScopeText = (
@@ -427,31 +438,31 @@ const StudentView = (props: {
     if (afirm) {
       // Reset the data from the template
       props.ruleManager.reset();
+      rules$.next(props.ruleManager);
 
       // Reset the interface
       switchTab("expectations");
     }
   };
 
-
   //>--------------------------------------------------------
 
   const [showParagraphSelector /*, setShowParagraphSelector*/] =
     useState(false);
 
-  const paragraphselector = showParagraphSelector ?
-    (
-      <Form.Group>
-        <Form.Select>
-          {[1, 2, 3].map((num) => (
-            <option key={`${selectId}-${num}`} value={num}>
-              {num}
-            </option>
-          ))}
-        </Form.Select>
-      </Form.Group>
-    )
-    : (<div className="spacer"></div>);
+  const paragraphselector = showParagraphSelector ? (
+    <Form.Group>
+      <Form.Select>
+        {[1, 2, 3].map((num) => (
+          <option key={`${selectId}-${num}`} value={num}>
+            {num}
+          </option>
+        ))}
+      </Form.Select>
+    </Form.Group>
+  ) : (
+    <div className="spacer"></div>
+  );
 
   //>--------------------------------------------------------
 
@@ -474,30 +485,26 @@ const StudentView = (props: {
     // 3. Get the latest from the server
     if (text !== "") {
       //setStatus("Retrieving results...");
-
-      const customTopics = props.ruleManager.getAllCustomTopics();
-      const customTopicsStructured =
-        props.ruleManager.getAllCustomTopicsStructured();
-
+      // const customTopics = props.ruleManager.getAllCustomTopics();
+      // const customTopicsStructured =
+      //   props.ruleManager.getAllCustomTopicsStructured();
       //const escaped = encodeURIComponent(text);
       //const encoded = window.btoa(escaped);
-
-      const encoded = encodeURIComponent(text);
-
-      props
-        .api(
-          "ontopic",
-          {
-            custom: customTopics,
-            customStructured: customTopicsStructured,
-            base: encoded,
-          },
-          "POST"
-        )
-        .then((/*incoming : any*/) => {
-          //let coherence=incoming.coherence;
-          //let local=incoming.local;
-        });
+      // const encoded = encodeURIComponent(text);
+      // props
+      //   .api(
+      //     "ontopic",
+      //     {
+      //       custom: customTopics,
+      //       customStructured: customTopicsStructured,
+      //       base: encoded,
+      //     },
+      //     "POST"
+      //   )
+      //   .then((/*incoming : any*/) => {
+      //     //let coherence=incoming.coherence;
+      //     //let local=incoming.local;
+      //   });
     }
   };
 
@@ -565,35 +572,30 @@ const StudentView = (props: {
           ref={toolRef}
           className="d-flex flex-column tools-pane h-100 overflow-hidden"
         >
-          <Tabs className="mt-1 px-2" onSelect={(key) => switchTab(key)}>
+          <Tabs
+            className="mt-1 px-2"
+            onSelect={(key) => switchTab(key as Tool)}
+          >
             <Tab
               eventKey={"expectations"}
               title="Expectations"
               className="overflow-hidden h-100"
             >
-              <Expectations
-                api={props.api}
-                ruleManager={props.ruleManager}
-                editorValue={editorTextValue}
-              />
+              <Expectations />
             </Tab>
             <Tab
               eventKey={"coherence"}
               title="Coherence"
               className="overflow-hidden h-100"
             >
-              <Coherence api={props.api} ruleManager={props.ruleManager} />
+              <Coherence />
             </Tab>
             <Tab
               eventKey={"clarity"}
               title="Clarity"
               className="overflow-hidden h-100"
             >
-              <Clarity
-                api={props.api}
-                ruleManager={props.ruleManager}
-                htmlSentences={props.htmlSentences}
-              />
+              <Clarity />
             </Tab>
             <Tab
               eventKey={"impressions"}
@@ -628,7 +630,17 @@ const StudentView = (props: {
           </Card.Header>
           <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
-            {showOnTopicText ? topicTaggedContent : ""}
+            {showOnTopicText ? (
+              <React.Fragment>
+                {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
+                <div
+                  className="tagged-text"
+                  dangerouslySetInnerHTML={{ __html: fixOnTopicHtml(onTopic) }}
+                ></div>
+              </React.Fragment>
+            ) : (
+              ""
+            )}
             <Slate
               editor={editor}
               initialValue={editorValue}
@@ -665,17 +677,20 @@ const StudentView = (props: {
         <div className="statusbar-status">{status}</div>
         <div className="statusbar-version">{`DSWA Version: ${VERSION}`}</div>
         <div className="statusbar-ruleversion">
-          <FontAwesomeIcon
-            icon={faBook}
-            style={{ marginLeft: "2px", marginRight: "2px" }}
-          />
-          {props.ruleManager.getVersion()}
+          <FontAwesomeIcon icon={faBook} className="mx-1" />
+          {configuration ? (
+            <>
+              <span className="text-truncate" style={{ maxWidth: "15rem" }}>
+                {configuration.info.name}
+              </span>
+              : {configuration.info.version}
+            </>
+          ) : (
+            ""
+          )}
         </div>
         <div className="statusbar-language">
-          <FontAwesomeIcon
-            icon={faGlobe}
-            style={{ marginLeft: "2px", marginRight: "2px" }}
-          />
+          <FontAwesomeIcon icon={faGlobe} className="mx-1" />
           {language}
         </div>
       </footer>

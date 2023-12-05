@@ -16,31 +16,6 @@ export function fixIncoming(incomingData) {
 }
 
 /**
- * The name of this method is unfortunately a misnomer. Originally the idea was to
- * only assign one docuscope instance to a course. It make more sense however to
- * equate a Canvas assignment to a DocuScope assignment
- */
-export function getCourseId() {
-  console.log("getCourseId ()");
-
-  let course_id = "global";
-
-  if (window.serverContext) {
-    if (window.serverContext.lti) {
-      //let testId=serverContext.lti.custom_canvas_course_id;
-      let testId = window.serverContext.lti.ext_lti_assignment_id;
-      if (testId) {
-        course_id = testId;
-      }
-    }
-  } else {
-    console.log("No serverContext available");
-  }
-
-  return course_id;
-}
-
-/**
  *
  */
 export function onTopic2DSWAHTML(anHTMLDataset) {

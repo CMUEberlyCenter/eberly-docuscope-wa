@@ -61,24 +61,24 @@ export function assignmentId(): string {
  *
  */
 export function launch(forceStudent?: boolean) {
-  const ltiFields: Record<string,string> = window.serverContext?.lti ?? {};
+  const ltiFields: Record<string, string> = window.serverContext?.lti ?? {};
 
   // Change the role to student if forceStudent is set
   if (forceStudent) {
-    ltiFields["roles"] = "urn:lti:instrole:ims/lis/Student,Student";
-    ltiFields["ext_roles"] = "urn:lti:instrole:ims/lis/Student,Student";
+    ltiFields['roles'] = 'urn:lti:instrole:ims/lis/Student,Student';
+    ltiFields['ext_roles'] = 'urn:lti:instrole:ims/lis/Student,Student';
   }
 
-  const element = document.getElementById("ltirelayform");
+  const element = document.getElementById('ltirelayform');
   if (!element) return;
   const relayform = element as HTMLFormElement;
-  relayform.innerHTML = "";
+  relayform.innerHTML = '';
 
   // Now transform the LTI fields into form elements
   for (const key in ltiFields) {
     if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
-      const ltiField = document.createElement("input");
-      ltiField.type = "hidden";
+      const ltiField = document.createElement('input');
+      ltiField.type = 'hidden';
       ltiField.id = key;
       ltiField.name = key;
       ltiField.value = ltiFields[key];
@@ -87,7 +87,7 @@ export function launch(forceStudent?: boolean) {
     }
   }
 
-  relayform.setAttribute("action", window.location.href);
+  relayform.setAttribute('action', window.location.href);
   relayform.submit();
-  relayform.style.visibility = "hidden";
+  relayform.style.visibility = 'hidden';
 }

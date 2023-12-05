@@ -7,46 +7,49 @@
   https://github.com/js-kyle/nodejs-lti-provider/blob/master/lti/index.js
   https://github.com/Cvmcosta/ltijs
 */
-import { Command, Option } from "commander";
-import cors from "cors";
-import "dotenv/config";
-import express, { Request, Response } from "express";
-import fileUpload from "express-fileupload";
-import { readFileSync } from "fs";
-import jwt from "jsonwebtoken";
-import { RowDataPacket, createPool } from "mysql2/promise";
-import { open } from "node:fs/promises";
-import process from "node:process";
-import { OpenAI } from "openai";
-import { join, dirname } from "path";
-import format from "string-format";
-import { fileURLToPath } from "url";
-import { v4 as uuidv4 } from "uuid";
-import { version } from "../../package.json";
-import PrometheusMetrics from "./prometheus.js";
-import { ConfigurationFile, Prompt } from "../lib/Configuration";
+import { Command, Option } from 'commander';
+import cors from 'cors';
+import 'dotenv/config';
+import express, { Request, Response } from 'express';
+import fileUpload from 'express-fileupload';
+import { readFileSync } from 'fs';
+import jwt from 'jsonwebtoken';
+import { RowDataPacket, createPool } from 'mysql2/promise';
+import { open } from 'node:fs/promises';
+import process from 'node:process';
+import { OpenAI } from 'openai';
+import { join, dirname } from 'path';
+import format from 'string-format';
+import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
+import { version } from '../../package.json';
+import PrometheusMetrics from './prometheus.js';
+import { ConfigurationFile, Prompt } from '../lib/Configuration';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const program = new Command();
 program
-  .description("Backend server for DocuScope Write and Audit.")
+  .description('Backend server for DocuScope Write and Audit.')
   .addOption(
-    new Option("-p --port <number>", "Port to use for server.").env("PORT")
+    new Option('-p --port <number>', 'Port to use for server.').env('PORT')
   )
   .addOption(
-    new Option("--db <string>", "Database")
-      .env("MYSQL_DATABASE")
-      .default("dswa")
+    new Option('--db <string>', 'Database')
+      .env('MYSQL_DATABASE')
+      .default('dswa')
   );
 // .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
 program.parse();
 const options = program.opts();
 const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
-const MYSQL_DB = options.db ?? "dswa";
-const DB_HOST = process.env.DB_HOST ?? "localhost";
-const DB_PORT = process.env.DB_PORT && !isNaN(Number(process.env.DB_PORT)) ? parseInt(process.env.DB_PORT) : 3306;
+const MYSQL_DB = options.db ?? 'dswa';
+const DB_HOST = process.env.DB_HOST ?? 'localhost';
+const DB_PORT =
+  process.env.DB_PORT && !isNaN(Number(process.env.DB_PORT))
+    ? parseInt(process.env.DB_PORT)
+    : 3306;
 
 /**
  * Retrieves value from environment variables.
@@ -55,7 +58,7 @@ const DB_PORT = process.env.DB_PORT && !isNaN(Number(process.env.DB_PORT)) ? par
 function fromEnvFile(base: string, defaultValue?: string): string {
   const file = process.env[`${base}_FILE`];
   if (file) {
-    return readFileSync(file, "utf-8").trim();
+    return readFileSync(file, 'utf-8').trim();
   }
   const env = process.env[base];
   if (env) {
@@ -64,24 +67,26 @@ function fromEnvFile(base: string, defaultValue?: string): string {
   return defaultValue ?? '';
 }
 
-const MYSQL_USER = fromEnvFile("MYSQL_USER");
-const MYSQL_PASSWORD = fromEnvFile("MYSQL_PASSWORD");
+const MYSQL_USER = fromEnvFile('MYSQL_USER');
+const MYSQL_PASSWORD = fromEnvFile('MYSQL_PASSWORD');
 
-const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? "localhost";
-const ONTOPIC_PORT = process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.DSWA_ONTOPIC_PORT))
-  ? parseInt(process.env.DSWA_ONTOPIC_PORT) : 5000;
+const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? 'localhost';
+const ONTOPIC_PORT =
+  process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.DSWA_ONTOPIC_PORT))
+    ? parseInt(process.env.DSWA_ONTOPIC_PORT)
+    : 5000;
 
-const TOKEN_SECRET = fromEnvFile("TOKEN_SECRET");
+const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
 /**
  * Here’s an example of a function for signing tokens:
  */
 function generateAccessToken(aString: string) {
   const tSecret =
-    TOKEN_SECRET === "dummy" || TOKEN_SECRET === "" ? uuidv4() : TOKEN_SECRET;
-  return jwt.sign({ payload: aString }, tSecret, { expiresIn: "1800s" });
+    TOKEN_SECRET === 'dummy' || TOKEN_SECRET === '' ? uuidv4() : TOKEN_SECRET;
+  return jwt.sign({ payload: aString }, tSecret, { expiresIn: '1800s' });
 }
 
-const openai = new OpenAI({ apiKey: fromEnvFile("OPENAI_API_KEY") });
+const openai = new OpenAI({ apiKey: fromEnvFile('OPENAI_API_KEY') });
 
 const pool = createPool({
   host: DB_HOST,
@@ -91,7 +96,7 @@ const pool = createPool({
   database: MYSQL_DB,
   waitForConnections: true,
   connectionLimit: 100,
-  timezone: "Z", // Makes TIMESTAMP work correctly
+  timezone: 'Z', // Makes TIMESTAMP work correctly
 });
 
 async function initializeDatabase() {
@@ -119,14 +124,14 @@ type Info = {
   copyright: string;
   saved: string;
   filename: string;
-}
+};
 type FileInfo = {
   id: string;
   filename: string;
   date: string;
-  info: Info,
+  info: Info;
   uses: number;
-}
+};
 /**
  * Retrieve the list of configuration files and their meta-data
  */
@@ -155,11 +160,11 @@ interface IFileData extends RowDataPacket {
  */
 async function getFile(fileId: string): Promise<ConfigurationFile> {
   const [rows] = await pool.query<IFileData[]>(
-    "SELECT data FROM files WHERE id=UUID_TO_BIN(?)",
+    'SELECT data FROM files WHERE id=UUID_TO_BIN(?)',
     [fileId]
   );
   if (rows.length <= 0) {
-    throw new Error("File data not found");
+    throw new Error('File data not found');
   }
   return rows[0].data;
 }
@@ -170,9 +175,11 @@ interface IFileId extends RowDataPacket {
 /**
  *
  */
-async function getFileIdForAssignment(assignmentId: string): Promise<{ fileid: string; } | undefined> {
+async function getFileIdForAssignment(
+  assignmentId: string
+): Promise<{ fileid: string } | undefined> {
   const [rows] = await pool.query<IFileId[]>(
-    "SELECT BIN_TO_UUID(fileid) AS fileid FROM assignments WHERE id=?",
+    'SELECT BIN_TO_UUID(fileid) AS fileid FROM assignments WHERE id=?',
     [assignmentId]
   );
   return rows.at(0);
@@ -181,13 +188,15 @@ async function getFileIdForAssignment(assignmentId: string): Promise<{ fileid: s
 /**
  *
  */
-async function getFileForAssignment(assignmentId: string): Promise<ConfigurationFile> {
+async function getFileForAssignment(
+  assignmentId: string
+): Promise<ConfigurationFile> {
   const [rows] = await pool.query<IFileData[]>(
-    "SELECT data FROM files LEFT JOIN assignments ON fileid = files.id WHERE assignments.id = ?",
+    'SELECT data FROM files LEFT JOIN assignments ON fileid = files.id WHERE assignments.id = ?',
     [assignmentId]
   );
   if (rows.length <= 0) {
-    throw new Error("File data not found for assignment");
+    throw new Error('File data not found for assignment');
   }
   return rows[0].data;
 }
@@ -195,36 +204,39 @@ async function getFileForAssignment(assignmentId: string): Promise<Configuration
  *
  */
 async function storeFile(filename: string, date: string, config: string) {
-  await pool.query(
-    "INSERT INTO files (filename, data) VALUES(?, ?)",
-    [filename, config]
-  );
+  await pool.query('INSERT INTO files (filename, data) VALUES(?, ?)', [
+    filename,
+    config,
+  ]);
   return { filename, date };
 }
 
 interface PromptQuery extends RowDataPacket {
   genre: string;
   overview: string;
-  service: Prompt
+  service: Prompt;
 }
-type PromptData = Prompt & { genre: string, overview: string }
+type PromptData = Prompt & { genre: string; overview: string };
 const defaultPrompt: PromptData = {
-  genre: "",
-  overview: "",
-  prompt: "",
-  role: "You are a chatbot",
+  genre: '',
+  overview: '',
+  prompt: '',
+  role: 'You are a chatbot',
   temperature: 0.0,
 };
 
-async function getPrompt(assignment: string, tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'): Promise<PromptData> {
+async function getPrompt(
+  assignment: string,
+  tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'
+): Promise<PromptData> {
   if (
-    !["notes_to_prose", "copyedit", "proofread", "expectation"].includes(tool)
+    !['notes_to_prose', 'copyedit', 'proofread', 'expectation'].includes(tool)
   ) {
-    console.error("Not a valid scribe tool!");
+    console.error('Not a valid scribe tool!');
     return defaultPrompt;
   }
   if (!assignment) {
-    throw new Error("No assignment for rule data fetch.");
+    throw new Error('No assignment for rule data fetch.');
   }
   const [rows] = await pool.query<PromptQuery[]>(
     `SELECT
@@ -236,7 +248,7 @@ async function getPrompt(assignment: string, tool: 'notes_to_prose' | 'copyedit'
     [assignment]
   );
   if (rows.length <= 0) {
-    throw new Error("File lookup error!");
+    throw new Error('File lookup error!');
   }
   const { genre, overview, service } = rows[0];
   return { ...defaultPrompt, ...service, genre, overview };
@@ -249,28 +261,28 @@ let onTopicResponseAvg = 0;
 let onTopicResponseAvgCount = 0;
 
 metrics.setMetricObject(
-  "eberly_dswa_requests_total",
+  'eberly_dswa_requests_total',
   onTopicRequests,
   'counter',
-  "Number of requests made to the OnTopic backend"
+  'Number of requests made to the OnTopic backend'
 );
 metrics.setMetricObject(
-  "eberly_dswa_requests_avg",
+  'eberly_dswa_requests_avg',
   onTopicRequestsAvg,
   'counter',
-  "Average number of requests made to the OnTopic backend"
+  'Average number of requests made to the OnTopic backend'
 );
 metrics.setMetricObject(
-  "eberly_dswa_uptime_total",
+  'eberly_dswa_uptime_total',
   process.uptime(),
   'counter',
-  "DSWA Server uptime"
+  'DSWA Server uptime'
 );
 metrics.setMetricObject(
-  "eberly_dswa_response_avg",
+  'eberly_dswa_response_avg',
   onTopicResponseAvg,
   'counter',
-  "DSWA OnTopic average response time"
+  'DSWA OnTopic average response time'
 );
 
 /**
@@ -284,22 +296,22 @@ function updateMetricsAvg() {
   onTopicResponseAvgCount = 0;
 
   metrics.setMetricObject(
-    "eberly_dswa_requests_total",
+    'eberly_dswa_requests_total',
     onTopicRequests,
     'counter',
-    "Number of requests made to the OnTopic backend"
+    'Number of requests made to the OnTopic backend'
   );
   metrics.setMetricObject(
-    "eberly_dswa_requests_avg",
+    'eberly_dswa_requests_avg',
     onTopicRequestsAvg,
     'counter',
-    "Average number of requests made to the OnTopic backend"
+    'Average number of requests made to the OnTopic backend'
   );
   metrics.setMetricObject(
-    "eberly_dswa_response_avg",
+    'eberly_dswa_response_avg',
     0,
     'counter',
-    "DSWA OnTopic average response time"
+    'DSWA OnTopic average response time'
   );
 }
 /**
@@ -307,10 +319,10 @@ function updateMetricsAvg() {
  */
 function updateUptime() {
   metrics.setMetricObject(
-    "eberly_dswa_uptime_total",
+    'eberly_dswa_uptime_total',
     process.uptime(),
     'counter',
-    "DSWA Server uptime"
+    'DSWA Server uptime'
   );
 }
 
@@ -322,16 +334,16 @@ function updateMetrics() {
   onTopicRequestsAvg++;
 
   metrics.setMetricObject(
-    "eberly_dswa_requests_total",
+    'eberly_dswa_requests_total',
     onTopicRequests,
     'counter',
-    "Number of requests made to the OnTopic backend"
+    'Number of requests made to the OnTopic backend'
   );
   metrics.setMetricObject(
-    "eberly_dswa_requests_avg",
+    'eberly_dswa_requests_avg',
     onTopicRequestsAvg,
     'counter',
-    "Average number of requests made to the OnTopic backend"
+    'Average number of requests made to the OnTopic backend'
   );
 }
 
@@ -344,15 +356,15 @@ function updateResponseAvg(aValue: number) {
 
   const average = onTopicResponseAvg / onTopicResponseAvgCount;
   metrics.setMetricObject(
-    "eberly_dswa_response_avg",
+    'eberly_dswa_response_avg',
     average,
     'counter',
-    "DSWA OnTopic average response time"
+    'DSWA OnTopic average response time'
   );
 }
 
-const PUBLIC = "/app";
-const STATIC = "/static";
+const PUBLIC = '/app';
+const STATIC = '/static';
 
 let DEFAULT_RULES: ConfigurationFile | undefined = undefined;
 /**
@@ -361,9 +373,9 @@ let DEFAULT_RULES: ConfigurationFile | undefined = undefined;
 async function getDefaultRuleData(): Promise<ConfigurationFile | undefined> {
   if (!DEFAULT_RULES) {
     try {
-      const filename = join(__dirname, STATIC, "dswa.json");
+      const filename = join(__dirname, STATIC, 'dswa.json');
       const file = await open(filename);
-      const ruleFile = await file.readFile({ encoding: "utf8" });
+      const ruleFile = await file.readFile({ encoding: 'utf8' });
       await file.close();
       DEFAULT_RULES = JSON.parse(ruleFile);
     } catch (err) {
@@ -377,7 +389,6 @@ function startup() {
   // Reset the avg values every 5 minutes
   setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
   setInterval(updateUptime, 1000); // Every second
-
 }
 
 /**
@@ -390,20 +401,18 @@ class DocuScopeWALTIService {
 
   app = express();
   /**
-     *
-     */
+   *
+   */
   constructor() {
-
-
     console.log(`DocuScope-WA front-end proxy version: ${version}`);
 
     console.log(
       `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
     );
 
-    this.app.set("etag", "strong");
+    this.app.set('etag', 'strong');
     this.app.use(express.json());
-    this.app.use(cors({ origin: "*" }));
+    this.app.use(cors({ origin: '*' }));
     this.app.use(fileUpload({ createParentPath: true }));
 
     this.app.use(
@@ -413,7 +422,6 @@ class DocuScopeWALTIService {
     );
     startup();
   }
-
 
   /**
    * https://expressjs.com/en/api.html#req
@@ -427,9 +435,9 @@ class DocuScopeWALTIService {
   /**
    *
    */
-  generateDataMessage(aDataset: unknown) {
+  generateDataMessage<T>(aDataset: T) {
     return {
-      status: "success",
+      status: 'success',
       data: aDataset,
     };
   }
@@ -439,7 +447,7 @@ class DocuScopeWALTIService {
    */
   verifyLTI(request: Request) {
     //console.log("verifyLTI (" + request.body.oauth_consumer_key + ")");
-    return request.body.oauth_consumer_key !== "";
+    return request.body.oauth_consumer_key !== '';
   }
 
   /**
@@ -447,7 +455,7 @@ class DocuScopeWALTIService {
    * @param {Request} request
    */
   generateSettingsObject(request: Request) {
-    const token = generateAccessToken("dummy");
+    const token = generateAccessToken('dummy');
     return {
       lti: { ...request.body, token },
     };
@@ -458,7 +466,7 @@ class DocuScopeWALTIService {
    */
   createDataMessage(aData: unknown) {
     const message = {
-      status: "request",
+      status: 'request',
       data: aData,
     };
     return JSON.stringify(message);
@@ -470,7 +478,7 @@ class DocuScopeWALTIService {
   processMetrics(_request: Request, response: Response) {
     const metricsString = metrics.build();
 
-    response.contentType("text/text");
+    response.contentType('text/text');
     response.send(metricsString);
   }
 
@@ -487,11 +495,11 @@ class DocuScopeWALTIService {
 
     try {
       const res = await fetch(url.toString(), {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify(data),
         headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
       });
       if (!res.ok) {
@@ -518,17 +526,18 @@ class DocuScopeWALTIService {
     //>------------------------------------------------------------------
 
     if (this.useLTI === true) {
-      if (["/", "/index.html", "/index.htm"].includes(request.path)) {
+      if (['/', '/index.html', '/index.htm'].includes(request.path)) {
         if (this.verifyLTI(request) === true) {
           const settingsObject = this.generateSettingsObject(request);
 
           const stringed = JSON.stringify(settingsObject);
 
-          const raw = readFileSync(join(__dirname, PUBLIC, 'index.html'),
-            "utf8"
+          const raw = readFileSync(
+            join(__dirname, PUBLIC, 'index.html'),
+            'utf8'
           );
           const html = raw.replace(
-            "/*SETTINGS*/",
+            '/*SETTINGS*/',
             `var serverContext=${stringed}; var applicationContext=${JSON.stringify(
               { version }
             )};`
@@ -537,9 +546,7 @@ class DocuScopeWALTIService {
           //response.render('main', { html: html });
           response.send(html);
         } else {
-          response.sendFile(
-            join(__dirname, STATIC, "nolti.html")
-          );
+          response.sendFile(join(__dirname, STATIC, 'nolti.html'));
         }
 
         return;
@@ -554,15 +561,15 @@ class DocuScopeWALTIService {
 
     //>------------------------------------------------------------------
 
-    if (request.path.indexOf("/lti/activity/docuscope") !== -1) {
+    if (request.path.indexOf('/lti/activity/docuscope') !== -1) {
       console.log("We've got an LTI path, stripping ...");
-      path = request.path.replace("/lti/activity/docuscope", "/");
+      path = request.path.replace('/lti/activity/docuscope', '/');
     }
 
     //>------------------------------------------------------------------
 
-    if (path === "/") {
-      path = "/index.html";
+    if (path === '/') {
+      path = '/index.html';
     }
 
     //>------------------------------------------------------------------
@@ -576,12 +583,15 @@ class DocuScopeWALTIService {
    * @param {'notes_to_prose'|'copyedit'|'proofread'|'expectation'} tool
    * @returns {Promise<{genre: string, prompt: string, role: string, temperature: number, overview: string}>}
    */
-  async getPrompt(assignment: string, tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'): Promise<PromptData> {
+  async getPrompt(
+    assignment: string,
+    tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'
+  ): Promise<PromptData> {
     try {
       return await getPrompt(assignment, tool);
     } catch (err) {
       console.error(err);
-      console.warn("Using default data.");
+      console.warn('Using default data.');
       try {
         const data = await getDefaultRuleData();
         if (data) {
@@ -603,197 +613,230 @@ class DocuScopeWALTIService {
    *
    */
   async run() {
-    this.app.get("/api/v1/configurations/:fileId", async (request: Request, response: Response) => {
-      const fileId = request.params.fileId;
-      try {
-        const data = await getFile(fileId);
-        if (data) {
-          response.send(data);
-        } else {
-          response.sendStatus(404);
-        }
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-        response.sendStatus(500);
-      }
-    });
-
-    this.app.post("/api/v1/configurations", async (request: Request, response: Response) => {
-      // TODO limit to instructor/administrative roles.
-      if (!request.files) {
-        response.status(400).send({
-          status: false,
-          message: "No file uploaded",
-        });
-      } else {
-        console.log("Processing file upload...");
-        // TODO check verse schema
-
+    this.app.get(
+      '/api/v1/configurations/:fileId',
+      async (request: Request, response: Response) => {
+        const fileId = request.params.fileId;
         try {
-          const jsonFile = request.files.file;
-          if (!(jsonFile instanceof Array)) {
-            const jsonObject = jsonFile.data.toString();
-
-            console.log(`Storing: ${jsonFile.name} (${request.body.date})...`);
-            const filedata = await storeFile(
-              jsonFile.name,
-              request.body.date,
-              jsonObject
-            );
-            response.json(filedata);
+          const data = await getFile(fileId);
+          if (data) {
+            response.send(data);
           } else {
-            console.error('Multiple files uploaded, this only supports single file uploads.')
-            response.sendStatus(400);
+            response.sendStatus(404);
           }
         } catch (err) {
           console.error(err instanceof Error ? err.message : err);
-          if (err instanceof SyntaxError) {
-            // likely bad json
-            response.status(400).send(err.message);
-          } else {
-            // likely bad db call
-            response.sendStatus(500);
+          response.sendStatus(500);
+        }
+      }
+    );
+
+    this.app.post(
+      '/api/v1/configurations',
+      async (request: Request, response: Response) => {
+        // TODO limit to instructor/administrative roles.
+        if (!request.files) {
+          response.status(400).send({
+            status: false,
+            message: 'No file uploaded',
+          });
+        } else {
+          console.log('Processing file upload...');
+          // TODO check verse schema
+
+          try {
+            const jsonFile = request.files.file;
+            if (!(jsonFile instanceof Array)) {
+              const jsonObject = jsonFile.data.toString();
+
+              console.log(
+                `Storing: ${jsonFile.name} (${request.body.date})...`
+              );
+              const filedata = await storeFile(
+                jsonFile.name,
+                request.body.date,
+                jsonObject
+              );
+              response.json(filedata);
+            } else {
+              console.error(
+                'Multiple files uploaded, this only supports single file uploads.'
+              );
+              response.sendStatus(400);
+            }
+          } catch (err) {
+            console.error(err instanceof Error ? err.message : err);
+            if (err instanceof SyntaxError) {
+              // likely bad json
+              response.status(400).send(err.message);
+            } else {
+              // likely bad db call
+              response.sendStatus(500);
+            }
           }
         }
       }
-    });
+    );
 
-    this.app.get("/api/v1/configurations", async (_request: Request, response: Response) => {
-      // TODO: check if accessable by LTI authentication/role
-      try {
-        const files = await getFiles();
-        response.json(files);
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-        response.sendStatus(500);
+    this.app.get(
+      '/api/v1/configurations',
+      async (_request: Request, response: Response) => {
+        // TODO: check if accessable by LTI authentication/role
+        try {
+          const files = await getFiles();
+          response.json(files);
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
+        }
       }
-    });
+    );
 
-    this.app.post("/api/v1/assignments/:assignment/assign", (request: Request, response: Response) => {
-      // TODO add role check to see if LTI user is authorized to change
-      // TODO get assignment from LTI parameters instead of reflected from interface
-      const { assignment } = request.params;
-      const { id } = request.body; // as {id: string}
-      console.log(`Assigning ${id} to assignment: ${assignment}`);
-      try {
-        pool.query(
-          `INSERT INTO assignments (id, fileid)
+    this.app.post(
+      '/api/v1/assignments/:assignment/assign',
+      (request: Request, response: Response) => {
+        // TODO add role check to see if LTI user is authorized to change
+        // TODO get assignment from LTI parameters instead of reflected from interface
+        const { assignment } = request.params;
+        const { id } = request.body; // as {id: string}
+        console.log(`Assigning ${id} to assignment: ${assignment}`);
+        try {
+          pool.query(
+            `INSERT INTO assignments (id, fileid)
            VALUES (?, UUID_TO_BIN(?))
            ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
-          [assignment, id, id]
-        );
-        response.sendStatus(201);
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-        response.sendStatus(500);
-      }
-    });
-
-    this.app.get("/api/v1/assignments/:assignment/file_id", async (request: Request, response: Response) => {
-      const { assignment } = request.params;
-      try {
-        const data = await getFileIdForAssignment(assignment);
-        if (data) {
-          response.json(data);
-        } else {
-          response.sendStatus(404);
+            [assignment, id, id]
+          );
+          response.sendStatus(201);
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
         }
-      } catch (err) {
-        console.error(err);
-        response.sendStatus(500);
       }
-    });
+    );
 
-    this.app.get("/metrics", (request: Request, response: Response) => {
+    this.app.get(
+      '/api/v1/assignments/:assignment/file_id',
+      async (request: Request, response: Response) => {
+        const { assignment } = request.params;
+        try {
+          const data = await getFileIdForAssignment(assignment);
+          if (data) {
+            response.json(data);
+          } else {
+            response.sendStatus(404);
+          }
+        } catch (err) {
+          console.error(err);
+          response.sendStatus(500);
+        }
+      }
+    );
+
+    this.app.get('/metrics', (request: Request, response: Response) => {
       this.processMetrics(request, response);
     });
 
-    this.app.post("/api/v1/scribe/convert_notes", async (request: Request, response: Response) => {
-      // TODO get assignment id from LTI token
-      const { course_id, notes } = request.body;
-      const { genre, overview, prompt, role, temperature } =
-        await this.getPrompt(course_id, "notes_to_prose");
-      if (!genre || !prompt || !role) { // runtime safety - should never happen
-        console.warn("Malformed notes prompt data.");
-        response.json({});
-        return;
+    this.app.post(
+      '/api/v1/scribe/convert_notes',
+      async (request: Request, response: Response) => {
+        // TODO get assignment id from LTI token
+        const { course_id, notes } = request.body;
+        const { genre, overview, prompt, role, temperature } =
+          await this.getPrompt(course_id, 'notes_to_prose');
+        if (!genre || !prompt || !role) {
+          // runtime safety - should never happen
+          console.warn('Malformed notes prompt data.');
+          response.json({});
+          return;
+        }
+        const content = format(prompt, { genre, notes, overview });
+        try {
+          const prose = await openai.chat.completions.create({
+            temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+            messages: [
+              { role: 'system', content: role },
+              {
+                role: 'user',
+                content,
+              },
+            ],
+            model: 'gpt-4',
+          });
+          // TODO check for empty prose
+          response.json(prose);
+        } catch (err) {
+          console.error(err instanceof Error ? err.message : err);
+          response.sendStatus(500);
+        }
       }
-      const content = format(prompt, { genre, notes, overview });
-      try {
-        const prose = await openai.chat.completions.create({
+    );
+    this.app.post(
+      '/api/v1/scribe/proofread',
+      async (request: Request, response: Response) => {
+        // TODO get assignment id from token/
+        const { course_id, text } = request.body;
+        const { prompt, role, temperature } = await this.getPrompt(
+          course_id,
+          'proofread'
+        );
+        if (!prompt || !role) {
+          // runtime safety
+          console.error('Bad proofread prompt data, sending empty!');
+          response.json({}); // TODO send error.
+          return;
+        }
+        const content = format(prompt, { text });
+        const fixed = await openai.chat.completions.create({
           temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
           messages: [
-            { role: "system", content: role },
+            { role: 'system', content: role },
             {
-              role: "user",
+              role: 'user',
               content,
             },
           ],
-          model: "gpt-4",
+          model: 'gpt-4',
         });
-        // TODO check for empty prose
-        response.json(prose);
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-        response.sendStatus(500);
+        response.json(fixed);
       }
-    });
-    this.app.post("/api/v1/scribe/proofread", async (request: Request, response: Response) => {
-      // TODO get assignment id from token/
-      const { course_id, text } = request.body;
-      const { prompt, role, temperature } = await this.getPrompt(
-        course_id,
-        "proofread"
-      );
-      if (!prompt || !role) { // runtime safety
-        console.error("Bad proofread prompt data, sending empty!");
-        response.json({}); // TODO send error.
-        return;
+    );
+    this.app.post(
+      '/api/v1/scribe/copyedit',
+      async (request: Request, response: Response) => {
+        const { course_id, text } = request.body;
+        const { prompt, role, temperature } = await this.getPrompt(
+          course_id,
+          'copyedit'
+        );
+        if (!prompt) {
+          response.json({}); // TODO send error.
+          return;
+        }
+        const content = format(prompt, { text });
+        const clarified = await openai.chat.completions.create({
+          temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+          messages: [
+            { role: 'system', content: role ?? 'You are a chatbot' },
+            {
+              role: 'user',
+              content,
+            },
+          ],
+          model: 'gpt-4',
+        });
+        response.json(clarified);
       }
-      const content = format(prompt, { text });
-      const fixed = await openai.chat.completions.create({
-        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-        messages: [
-          { role: "system", content: role },
-          {
-            role: "user",
-            content,
-          },
-        ],
-        model: "gpt-4",
-      });
-      response.json(fixed);
-    });
-    this.app.post("/api/v1/scribe/copyedit", async (request: Request, response: Response) => {
-      const { course_id, text } = request.body;
-      const { prompt, role, temperature } = await this.getPrompt(
-        course_id,
-        "copyedit"
-      );
-      if (!prompt) {
-        response.json({}); // TODO send error.
-        return;
-      }
-      const content = format(prompt, { text });
-      const clarified = await openai.chat.completions.create({
-        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-        messages: [
-          { role: "system", content: role ?? "You are a chatbot" },
-          {
-            role: "user",
-            content,
-          },
-        ],
-        model: "gpt-4",
-      });
-      response.json(clarified);
-    });
+    );
 
-    const getAssignmentConfig = async (response: Response, assignment: string) => {
-      if (assignment.trim().toLowerCase() !== "global") {
+    const getAssignmentConfig = async (
+      response: Response,
+      assignment: string
+    ) => {
+      if (assignment.trim().toLowerCase() !== 'global') {
         try {
           const rules = await getFileForAssignment(assignment);
-          response.json(this.generateDataMessage(rules));
+          response.json(rules);
         } catch (err) {
           console.error(err instanceof Error ? err.message : err);
           response.sendStatus(404);
@@ -801,46 +844,49 @@ class DocuScopeWALTIService {
       } else {
         console.warn(`Invalid assignment id (${assignment}), sending default.`);
         const rules = await getDefaultRuleData();
-        response.json(this.generateDataMessage(rules));
+        response.json(rules);
       }
     };
     this.app.get(
-      "/api/v1/assignments/:assignment/rules",
+      '/api/v1/assignments/:assignment/configuration',
       async (request: Request, response: Response) => {
         // not currently used, but will be useful for deep-linking.
         const { assignment } = request.params;
         await getAssignmentConfig(response, assignment);
       }
     );
-    this.app.get("/api/v1/rules", async (request: Request, response: Response) => {
-      // TODO get assignment from LTI token
-      const { course_id } = request.query;
-      if (typeof (course_id) === "string")
-        await getAssignmentConfig(response, course_id);
-      else {
-        response.sendStatus(400);
+    this.app.get(
+      '/api/v1/rules',
+      async (request: Request, response: Response) => {
+        // TODO get assignment from LTI token
+        const { course_id } = request.query;
+        if (typeof course_id === 'string')
+          await getAssignmentConfig(response, course_id);
+        else {
+          response.sendStatus(400);
+        }
       }
-    });
+    );
 
-    this.app.post("/api/v1/ontopic", (request: Request, response: Response) => {
+    this.app.post('/api/v1/ontopic', (request: Request, response: Response) => {
       updateMetrics();
-      this.apiPOSTCall("ontopic", request.body, response);
+      this.apiPOSTCall('ontopic', request.body, response);
     });
 
-    this.app.all("/api/v1/*", (_request: Request, response: Response) => {
+    this.app.all('/api/v1/*', (_request: Request, response: Response) => {
       response.sendStatus(404);
     });
 
-    this.app.get("/*", (request: Request, response: Response) => {
+    this.app.get('/*', (request: Request, response: Response) => {
       this.processRequest(request, response);
     });
 
-    this.app.post("/*", (request: Request, response: Response) => {
+    this.app.post('/*', (request: Request, response: Response) => {
       this.processRequest(request, response);
     });
 
     await initializeDatabase();
-    console.log("Database service initialized, ok to start listening ...");
+    console.log('Database service initialized, ok to start listening ...');
     this.app.listen(port, () => {
       console.log(`App running on port ${port}.`);
     });

@@ -1,3 +1,34 @@
 .text-legend {
   color: darkblue;
 }
+
+.coherence-item {
+  cursor: pointer;
+}
+
+.topic-separator {
+  /* height: 10px; */
+  background-color: rgba(0, 0, 0, 0.03);
+  padding: 3px;
+}
+.topic-type-default {
+  /*background-color: #f7f794;*/
+  /*border: 1px solid gray;*/
+  border-radius: 2px;
+  width: 24px;
+  height: 24px;
+  margin: 2px;
+  padding: 2px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.topic-icon-large {
+  width: 24px;
+  height: 24px;
+}
+
+.topic-icon-small {
+  width: 12px;
+  height: 12px;
+}
