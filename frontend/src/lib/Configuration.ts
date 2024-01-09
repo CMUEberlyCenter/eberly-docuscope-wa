@@ -19,6 +19,7 @@ export type Rule = {
   sentenceCount?: number;
 };
 
+/** Prompt data for formulating OpenAI requests. */
 export type Prompt = {
   prompt: string;
   role?: string;

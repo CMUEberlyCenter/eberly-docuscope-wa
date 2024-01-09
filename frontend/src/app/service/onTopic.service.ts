@@ -157,6 +157,7 @@ export const [useOnTopic, onTopic$] = bind(
           throw new Error(`Bad server status ${response.statusText}`);
       }
       const raw = await response.json();
+      // TODO: update rules.topicSentenceCount
       return raw.data as OnTopicData;
     }),
     catchError((err: Error) => {

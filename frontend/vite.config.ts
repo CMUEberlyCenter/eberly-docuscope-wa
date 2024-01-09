@@ -9,6 +9,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         dir: 'build/app',
+        sourcemap: 'inline',
         manualChunks(id: string) {
           if (id.includes('d3')) { return 'vendor-d3'; }
           if (id.includes('@fortawesome')) { return 'vendor-@fortawesome'; }

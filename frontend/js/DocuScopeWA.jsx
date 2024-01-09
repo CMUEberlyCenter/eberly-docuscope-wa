@@ -283,80 +283,80 @@ export default class DocuScopeWA extends EberlyLTIBase {
     }
   }
 
+  // /**
+  //  * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+  //  */
+  // apiGETCall(aURL, _aData) {
+  //   this.updateSerializedText(null);
+
+  //   return new Promise((resolve, reject) => {
+  //     fetch(aURL, this.standardHeader)
+  //       .then((resp) => resp.text())
+  //       .then((result) => {
+  //         let raw = JSON.parse(result);
+  //         let evaluation = this.evaluateResult(raw);
+  //         if (evaluation != null) {
+  //           reject(evaluation);
+  //         } else {
+  //           if (raw.data.html) {
+  //             let html = onTopic2DSWAHTML(window.atob(raw.data.html));
+  //             let html_sentences = null;
+  //             if (raw.data.html_sentences) {
+  //               html_sentences = cleanAndRepairHTMLSentenceData(
+  //                 raw.data.html_sentences
+  //               );
+  //             }
+
+  //             this.setState({
+  //               html: html,
+  //               htmlSentences: html_sentences,
+  //             });
+  //           }
+
+  //           if (raw.data.coherence) {
+  //             // Clean and replace
+  //             raw.data.coherence = this.ruleManager.cleanCoherenceData(
+  //               raw.data.coherence
+  //             );
+  //             raw.data.local = this.ruleManager.cleanLocalCoherenceData(
+  //               raw.data.local
+  //             );
+  //             this.ruleManager.updateLemmaCounts(
+  //               coherenceToClusterCounts(raw.data.coherence, raw.data.local)
+  //             );
+  //           }
+
+  //           resolve(raw.data);
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.log(error);
+  //         this.setState({
+  //           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
+  //           progress: 100,
+  //           progressTitle: "Error: unable to connect to server",
+  //         });
+  //         reject(error);
+  //       });
+  //   });
+  // }
+
   /**
    * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
    */
-  apiGETCall(aURL, _aData) {
-    this.updateSerializedText(null);
+  // apiCall(aCall, aData, aType) {
+  //   const course_id = assignmentId();
 
-    return new Promise((resolve, reject) => {
-      fetch(aURL, this.standardHeader)
-        .then((resp) => resp.text())
-        .then((result) => {
-          let raw = JSON.parse(result);
-          let evaluation = this.evaluateResult(raw);
-          if (evaluation != null) {
-            reject(evaluation);
-          } else {
-            if (raw.data.html) {
-              let html = onTopic2DSWAHTML(window.atob(raw.data.html));
-              let html_sentences = null;
-              if (raw.data.html_sentences) {
-                html_sentences = cleanAndRepairHTMLSentenceData(
-                  raw.data.html_sentences
-                );
-              }
+  //   const aURL = `/api/v1/${aCall}?token=${this.token}&session=${this.session}&course_id=${course_id}`;
 
-              this.setState({
-                html: html,
-                htmlSentences: html_sentences,
-              });
-            }
+  //   if (aType === "POST") {
+  //     return this.apiPOSTCall(aURL, aData);
+  //   }
 
-            if (raw.data.coherence) {
-              // Clean and replace
-              raw.data.coherence = this.ruleManager.cleanCoherenceData(
-                raw.data.coherence
-              );
-              raw.data.local = this.ruleManager.cleanLocalCoherenceData(
-                raw.data.local
-              );
-              this.ruleManager.updateLemmaCounts(
-                coherenceToClusterCounts(raw.data.coherence, raw.data.local)
-              );
-            }
-
-            resolve(raw.data);
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-          this.setState({
-            state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
-            progress: 100,
-            progressTitle: "Error: unable to connect to server",
-          });
-          reject(error);
-        });
-    });
-  }
-
-  /**
-   * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-   */
-  apiCall(aCall, aData, aType) {
-    const course_id = assignmentId();
-
-    const aURL = `/api/v1/${aCall}?token=${this.token}&session=${this.session}&course_id=${course_id}`;
-
-    if (aType === "POST") {
-      return this.apiPOSTCall(aURL, aData);
-    }
-
-    if (aType === "GET") {
-      return this.apiGETCall(aURL, aData);
-    }
-  }
+  //   if (aType === "GET") {
+  //     return this.apiGETCall(aURL, aData);
+  //   }
+  // }
 
   /**
    *

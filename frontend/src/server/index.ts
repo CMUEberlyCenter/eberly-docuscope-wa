@@ -14,17 +14,17 @@ import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import { readFileSync } from 'fs';
 import jwt from 'jsonwebtoken';
-import { RowDataPacket, createPool } from 'mysql2/promise';
+import { PoolConnection, RowDataPacket, createPool } from 'mysql2/promise';
 import { open } from 'node:fs/promises';
 import process from 'node:process';
 import { OpenAI } from 'openai';
-import { join, dirname } from 'path';
+import { dirname, join } from 'path';
 import format from 'string-format';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { version } from '../../package.json';
-import PrometheusMetrics from './prometheus.js';
 import { ConfigurationFile, Prompt } from '../lib/Configuration';
+import PrometheusMetrics from './prometheus.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,7 +36,7 @@ program
     new Option('-p --port <number>', 'Port to use for server.').env('PORT')
   )
   .addOption(
-    new Option('--db <string>', 'Database')
+    new Option('--db <string>', 'Database name')
       .env('MYSQL_DATABASE')
       .default('dswa')
   );
@@ -99,8 +99,24 @@ const pool = createPool({
   timezone: 'Z', // Makes TIMESTAMP work correctly
 });
 
+/**
+ * Wait for connection to database and ensure that the expected
+ * tables exist.
+ */
 async function initializeDatabase() {
-  await pool.query(
+  let connection: PoolConnection | null = null;
+  while (!connection) {
+    try {
+      connection = await pool.getConnection();
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error(err);
+        // timeout and try again.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
+  }
+  await connection.query(
     `CREATE TABLE IF NOT EXISTS files (
       id BINARY(16) DEFAULT (UUID_TO_BIN(UUID())) NOT NULL PRIMARY KEY,
       filename VARCHAR(100) NOT NULL,
@@ -108,7 +124,7 @@ async function initializeDatabase() {
       data JSON NOT NULL)`
   );
 
-  await pool.query(
+  await connection.query(
     `CREATE TABLE IF NOT EXISTS assignments (
       id VARCHAR(40) NOT NULL PRIMARY KEY,
       fileid BINARY(16) NOT NULL,
@@ -117,6 +133,7 @@ async function initializeDatabase() {
   );
 }
 
+/** Author supplied information about configuration. */
 type Info = {
   name: string;
   version: string;
@@ -125,6 +142,7 @@ type Info = {
   saved: string;
   filename: string;
 };
+/** Configuration file meta-data. */
 type FileInfo = {
   id: string;
   filename: string;
@@ -151,11 +169,12 @@ async function getFiles(): Promise<FileInfo[]> {
   return rows as FileInfo[];
 }
 
+/** Expected configuration file query shape. */
 interface IFileData extends RowDataPacket {
   data: ConfigurationFile;
 }
 /**
- *
+ * Retrieve the configuration file with the given id.
  * @param {string} fileId uuid of the configuration file to retrieve.
  */
 async function getFile(fileId: string): Promise<ConfigurationFile> {
@@ -169,11 +188,13 @@ async function getFile(fileId: string): Promise<ConfigurationFile> {
   return rows[0].data;
 }
 
+/** Expected file id query shape. */
 interface IFileId extends RowDataPacket {
   fileid: string;
 }
 /**
- *
+ * Retrieve the configuration file id for the given assignment.
+ * @param assignmentId identifier of the assignment (from LTI host).
  */
 async function getFileIdForAssignment(
   assignmentId: string
@@ -186,7 +207,8 @@ async function getFileIdForAssignment(
 }
 
 /**
- *
+ * Retrieve configuration file for the given assignment.
+ * @param assignmentId assignment identifier from LTI host.
  */
 async function getFileForAssignment(
   assignmentId: string
@@ -201,7 +223,10 @@ async function getFileForAssignment(
   return rows[0].data;
 }
 /**
- *
+ * Insert configuration file.
+ * @param filename name of file
+ * @param date uploaded date
+ * @param config strigified JSON
  */
 async function storeFile(filename: string, date: string, config: string) {
   await pool.query('INSERT INTO files (filename, data) VALUES(?, ?)', [
@@ -211,6 +236,7 @@ async function storeFile(filename: string, date: string, config: string) {
   return { filename, date };
 }
 
+/** Expected prompt query response shape. */
 interface PromptQuery extends RowDataPacket {
   genre: string;
   overview: string;
@@ -225,6 +251,11 @@ const defaultPrompt: PromptData = {
   temperature: 0.0,
 };
 
+/**
+ * Retrieve the OpenAI prompt template for the given tool and assignment.
+ * @param assignment provided by host
+ * @param tool identifier for the OpenAI enhanced tool.
+ */
 async function getPrompt(
   assignment: string,
   tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'

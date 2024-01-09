@@ -1,19 +1,19 @@
 /**
  *
  */
-export function fixIncoming(incomingData) {
-  console.log("fixIncoming");
+// export function fixIncoming(incomingData) {
+//   console.log("fixIncoming");
 
-  if (incomingData.rules) {
-    if (incomingData.rules.rules) {
-      console.log("Patching ...");
-      let rules = incomingData.rules.rules;
-      incomingData.rules = rules;
-    }
-  }
+//   if (incomingData.rules) {
+//     if (incomingData.rules.rules) {
+//       console.log("Patching ...");
+//       let rules = incomingData.rules.rules;
+//       incomingData.rules = rules;
+//     }
+//   }
 
-  return incomingData;
-}
+//   return incomingData;
+// }
 
 /**
  *
