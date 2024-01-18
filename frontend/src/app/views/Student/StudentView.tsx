@@ -75,7 +75,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // The imports below are purely to support the serialize function. Should probably import
 // from service
-import type DocuScopeRules from "../../../../js/DocuScopeRules";
+// import type DocuScopeRules from "../../../../js/DocuScopeRules";
 
 import { serialize } from "../../service/editor-state.service";
 
@@ -90,7 +90,7 @@ import {
   showScribeOption,
   useScribe,
 } from "../../service/scribe.service";
-import { useConfiguration } from "../../service/rules.service";
+import { useConfiguration, useRules } from "../../service/rules.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
 
 /**
@@ -130,11 +130,10 @@ function fixOnTopicHtml(topicData?: { html?: string } | null) {
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = (props: {
-  //api: apiCall;
+const StudentView = (/*props: {
   ruleManager: DocuScopeRules;
-  update: (a: unknown) => void;
-}) => {
+}*/) => {
+  const ruleManager = useRules();
   // Status handlers
   const [status /*, setStatus*/] = useState("Application ready, rules loaded");
   const [language /*, setLanguage*/] = useState("ENG");
@@ -355,24 +354,11 @@ const StudentView = (props: {
   };
 
   const { data: configuration } = useConfiguration();
-  // const { data: onTopic, trigger } = useOnTopic();
   const onTopic = useOnTopic();
 
-  // useEffect(() => {
-  //   const subscription = onTopicToolText$.subscribe(text => {
-  //     if (text) {
-  //       trigger({
-  //         base: encodeURIComponent(text),
-  //         custom: props.ruleManager.getAllCustomTopics(),
-  //         customStructured: props.ruleManager.getAllCustomTopicsStructured()
-  //       });
-  //     }
-  //   });
-  //   return () => subscription.unsubscribe();
-  // }, [trigger, props.ruleManager]);
   useEffect(() => {
-    rules$.next(props.ruleManager);
-  }, [props.ruleManager]);
+    rules$.next(ruleManager);
+  }, [ruleManager]);
 
   const tagging = useTaggerResults();
 
@@ -437,8 +423,8 @@ const StudentView = (props: {
     setShowReset(false);
     if (afirm) {
       // Reset the data from the template
-      props.ruleManager.reset();
-      rules$.next(props.ruleManager);
+      ruleManager?.reset();
+      rules$.next(ruleManager);
 
       // Reset the interface
       switchTab("expectations");
@@ -470,42 +456,13 @@ const StudentView = (props: {
    * Note: at this point the text is as-is, including whatever extended characters were included.
    * This also means any single and double quotes
    */
-  const globalUpdate = (text: string) => {
-    console.log("globalUpdate ()");
-
+  const globalUpdate = (_text: string) => {
     // For now if someone requests (or really, forces) an update, let's switch
     // the editor to read-only mode for now
 
     // 1. The edit toggle needs to be switched to off
     setEditorState(false);
-
-    // 2. The update method in the parent component needs to be called
-    props.update(null);
-
-    // 3. Get the latest from the server
-    if (text !== "") {
-      //setStatus("Retrieving results...");
-      // const customTopics = props.ruleManager.getAllCustomTopics();
-      // const customTopicsStructured =
-      //   props.ruleManager.getAllCustomTopicsStructured();
-      //const escaped = encodeURIComponent(text);
-      //const encoded = window.btoa(escaped);
-      // const encoded = encodeURIComponent(text);
-      // props
-      //   .api(
-      //     "ontopic",
-      //     {
-      //       custom: customTopics,
-      //       customStructured: customTopicsStructured,
-      //       base: encoded,
-      //     },
-      //     "POST"
-      //   )
-      //   .then((/*incoming : any*/) => {
-      //     //let coherence=incoming.coherence;
-      //     //let local=incoming.local;
-      //   });
-    }
+    // This should trigger the appropriate actions.
   };
 
   //>--------------------------------------------------------

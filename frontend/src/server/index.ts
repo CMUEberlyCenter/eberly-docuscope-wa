@@ -32,6 +32,7 @@ const __dirname = dirname(__filename);
 const program = new Command();
 program
   .description('Backend server for DocuScope Write and Audit.')
+  .version(version)
   .addOption(
     new Option('-p --port <number>', 'Port to use for server.').env('PORT')
   )
@@ -75,6 +76,10 @@ const ONTOPIC_PORT =
   process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.DSWA_ONTOPIC_PORT))
     ? parseInt(process.env.DSWA_ONTOPIC_PORT)
     : 5000;
+
+console.log(
+  `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
+);
 
 const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
 /**
@@ -422,507 +427,406 @@ function startup() {
   setInterval(updateUptime, 1000); // Every second
 }
 
-/**
- *
- */
-class DocuScopeWALTIService {
-  useLTI = true;
+const app = express();
+app.set('etag', 'strong');
+app.use(express.json());
+app.use(cors({ origin: '*' }));
+app.use(fileUpload({ createParentPath: true }));
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
 
-  defaultRules?: ConfigurationFile; // default rules file cache
-
-  app = express();
-  /**
-   *
-   */
-  constructor() {
-    console.log(`DocuScope-WA front-end proxy version: ${version}`);
-
-    console.log(
-      `Configured the OnTopic backend url to be: ${ONTOPIC_HOST}:${ONTOPIC_PORT}`
-    );
-
-    this.app.set('etag', 'strong');
-    this.app.use(express.json());
-    this.app.use(cors({ origin: '*' }));
-    this.app.use(fileUpload({ createParentPath: true }));
-
-    this.app.use(
-      express.urlencoded({
-        extended: true,
-      })
-    );
-    startup();
-  }
-
-  /**
-   * https://expressjs.com/en/api.html#req
-   */
-  // debugRequest(request) {
-  //   console.log("req.baseUrl: " + request.baseUrl);
-  //   console.log("req.path: " + request.path);
-  //   console.log("oauth_consumer_key:" + request.body.oauth_consumer_key);
-  // }
-
-  /**
-   *
-   */
-  generateDataMessage<T>(aDataset: T) {
-    return {
-      status: 'success',
-      data: aDataset,
-    };
-  }
-
-  /**
-   * http://www.passportjs.org/packages/passport-oauth2/
-   */
-  verifyLTI(request: Request) {
-    //console.log("verifyLTI (" + request.body.oauth_consumer_key + ")");
-    return request.body.oauth_consumer_key !== '';
-  }
-
-  /**
-   *
-   * @param {Request} request
-   */
-  generateSettingsObject(request: Request) {
-    const token = generateAccessToken('dummy');
-    return {
-      lti: { ...request.body, token },
-    };
-  }
-
-  /**
-   *
-   */
-  createDataMessage(aData: unknown) {
-    const message = {
-      status: 'request',
-      data: aData,
-    };
-    return JSON.stringify(message);
-  }
-
-  /**
-   *
-   */
-  processMetrics(_request: Request, response: Response) {
-    const metricsString = metrics.build();
-
-    response.contentType('text/text');
-    response.send(metricsString);
-  }
-
-  /**
-   *
-   * @param {string} aURL
-   * @param {*} data
-   * @param {Response} response
-   */
-  async apiPOSTCall(aURL: string, data: unknown, response: Response) {
-    const url = new URL(aURL, `http://${ONTOPIC_HOST}:${ONTOPIC_PORT}/api/v1/`);
-
-    const startDate = Date.now();
-
+/////////// Configuration Endpoints //////////////
+app.get(
+  '/api/v1/configurations/:fileId',
+  async (request: Request, response: Response) => {
+    const fileId = request.params.fileId;
     try {
-      const res = await fetch(url.toString(), {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) {
-        throw new Error(
-          `Bad response from ontopic: ${res.status} - ${res.statusText}`
-        );
+      const data = await getFile(fileId);
+      if (data) {
+        response.send(data);
+      } else {
+        response.sendStatus(404);
       }
-      const ret = await res.json();
-      updateResponseAvg(Date.now() - startDate);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+    }
+  }
+);
 
-      response.json(this.generateDataMessage(ret));
+app
+  .route('/api/v1/configurations')
+  .post(async (request: Request, response: Response) => {
+    // TODO limit to instructor/administrative roles.
+    if (!request.files) {
+      response.status(400).send({
+        status: false,
+        message: 'No file uploaded',
+      });
+    } else {
+      console.log('Processing file upload...');
+      // TODO check verse schema
+
+      try {
+        const jsonFile = request.files.file;
+        if (!(jsonFile instanceof Array)) {
+          const jsonObject = jsonFile.data.toString();
+
+          console.log(`Storing: ${jsonFile.name} (${request.body.date})...`);
+          const filedata = await storeFile(
+            jsonFile.name,
+            request.body.date,
+            jsonObject
+          );
+          response.json(filedata);
+        } else {
+          console.error(
+            'Multiple files uploaded, this only supports single file uploads.'
+          );
+          response.sendStatus(400);
+        }
+      } catch (err) {
+        console.error(err instanceof Error ? err.message : err);
+        if (err instanceof SyntaxError) {
+          // likely bad json
+          response.status(400).send(err.message);
+        } else {
+          // likely bad db call
+          response.sendStatus(500);
+        }
+      }
+    }
+  })
+  .get(async (_request: Request, response: Response) => {
+    // TODO: check if accessable by LTI authentication/role
+    try {
+      const files = await getFiles();
+      response.json(files);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+    }
+  });
+
+app.post(
+  '/api/v1/assignments/:assignment/assign',
+  (request: Request, response: Response) => {
+    // TODO add role check to see if LTI user is authorized to change
+    // TODO get assignment from LTI parameters instead of reflected from interface
+    const { assignment } = request.params;
+    const { id } = request.body; // as {id: string}
+    console.log(`Assigning ${id} to assignment: ${assignment}`);
+    try {
+      pool.query(
+        `INSERT INTO assignments (id, fileid)
+       VALUES (?, UUID_TO_BIN(?))
+       ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
+        [assignment, id, id]
+      );
+      response.sendStatus(201);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+    }
+  }
+);
+
+app.get(
+  '/api/v1/assignments/:assignment/file_id',
+  async (request: Request, response: Response) => {
+    const { assignment } = request.params;
+    try {
+      const data = await getFileIdForAssignment(assignment);
+      if (data) {
+        response.json(data);
+      } else {
+        response.sendStatus(404);
+      }
     } catch (err) {
       console.error(err);
       response.sendStatus(500);
     }
   }
+);
 
-  /**
-   *
-   * @param {Request} request
-   * @param {Response} response
-   */
-  processRequest(request: Request, response: Response) {
-    //>------------------------------------------------------------------
+////////// Metrics Endpoint /////////////
+startup();
+app.get('/metrics', (_request: Request, response: Response) => {
+  const metricsString = metrics.build();
+  response.contentType('text/text');
+  response.send(metricsString);
+});
 
-    if (this.useLTI === true) {
-      if (['/', '/index.html', '/index.htm'].includes(request.path)) {
-        if (this.verifyLTI(request) === true) {
-          const settingsObject = this.generateSettingsObject(request);
-
-          const stringed = JSON.stringify(settingsObject);
-
-          const raw = readFileSync(
-            join(__dirname, PUBLIC, 'index.html'),
-            'utf8'
-          );
-          const html = raw.replace(
-            '/*SETTINGS*/',
-            `var serverContext=${stringed}; var applicationContext=${JSON.stringify(
-              { version }
-            )};`
-          );
-
-          //response.render('main', { html: html });
-          response.send(html);
-        } else {
-          response.sendFile(join(__dirname, STATIC, 'nolti.html'));
-        }
-
-        return;
-      }
+/////////// Scribe Endpoints /////////////
+app.post(
+  '/api/v1/scribe/convert_notes',
+  async (request: Request, response: Response) => {
+    // TODO get assignment id from LTI token
+    const { course_id, notes } = request.body;
+    const { genre, overview, prompt, role, temperature } = await getPrompt(
+      course_id,
+      'notes_to_prose'
+    );
+    if (!genre || !prompt || !role) {
+      // runtime safety - should never happen
+      console.warn('Malformed notes prompt data.');
+      response.json({});
+      return;
     }
-
-    // Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
-    // exist on the server with other add-ons. Instead we should just configure the url to
-    // point to the root of the host
-
-    let path = request.path;
-
-    //>------------------------------------------------------------------
-
-    if (request.path.indexOf('/lti/activity/docuscope') !== -1) {
-      console.log("We've got an LTI path, stripping ...");
-      path = request.path.replace('/lti/activity/docuscope', '/');
-    }
-
-    //>------------------------------------------------------------------
-
-    if (path === '/') {
-      path = '/index.html';
-    }
-
-    //>------------------------------------------------------------------
-
-    response.sendFile(join(__dirname, PUBLIC, path));
-  }
-
-  /**
-   *
-   * @param {string} assignment
-   * @param {'notes_to_prose'|'copyedit'|'proofread'|'expectation'} tool
-   * @returns {Promise<{genre: string, prompt: string, role: string, temperature: number, overview: string}>}
-   */
-  async getPrompt(
-    assignment: string,
-    tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'
-  ): Promise<PromptData> {
+    const content = format(prompt, { genre, notes, overview });
     try {
-      return await getPrompt(assignment, tool);
+      const prose = await openai.chat.completions.create({
+        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+        messages: [
+          { role: 'system', content: role },
+          {
+            role: 'user',
+            content,
+          },
+        ],
+        model: 'gpt-4',
+      });
+      // TODO check for empty prose
+      response.json(prose);
     } catch (err) {
-      console.error(err);
-      console.warn('Using default data.');
-      try {
-        const data = await getDefaultRuleData();
-        if (data) {
-          return {
-            ...defaultPrompt,
-            ...data.prompt_templates[tool],
-            genre: data.rules.name,
-            overview: data.rules.overview,
-          };
-        }
-        return defaultPrompt;
-      } catch (err) {
-        console.error(err instanceof Error ? err.message : err);
-        return defaultPrompt;
-      }
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
     }
   }
-  /**
-   *
-   */
-  async run() {
-    this.app.get(
-      '/api/v1/configurations/:fileId',
-      async (request: Request, response: Response) => {
-        const fileId = request.params.fileId;
-        try {
-          const data = await getFile(fileId);
-          if (data) {
-            response.send(data);
-          } else {
-            response.sendStatus(404);
-          }
-        } catch (err) {
-          console.error(err instanceof Error ? err.message : err);
-          response.sendStatus(500);
-        }
-      }
+);
+app.post(
+  '/api/v1/scribe/proofread',
+  async (request: Request, response: Response) => {
+    // TODO get assignment id from token/
+    const { course_id, text } = request.body;
+    const { prompt, role, temperature } = await getPrompt(
+      course_id,
+      'proofread'
     );
-
-    this.app.post(
-      '/api/v1/configurations',
-      async (request: Request, response: Response) => {
-        // TODO limit to instructor/administrative roles.
-        if (!request.files) {
-          response.status(400).send({
-            status: false,
-            message: 'No file uploaded',
-          });
-        } else {
-          console.log('Processing file upload...');
-          // TODO check verse schema
-
-          try {
-            const jsonFile = request.files.file;
-            if (!(jsonFile instanceof Array)) {
-              const jsonObject = jsonFile.data.toString();
-
-              console.log(
-                `Storing: ${jsonFile.name} (${request.body.date})...`
-              );
-              const filedata = await storeFile(
-                jsonFile.name,
-                request.body.date,
-                jsonObject
-              );
-              response.json(filedata);
-            } else {
-              console.error(
-                'Multiple files uploaded, this only supports single file uploads.'
-              );
-              response.sendStatus(400);
-            }
-          } catch (err) {
-            console.error(err instanceof Error ? err.message : err);
-            if (err instanceof SyntaxError) {
-              // likely bad json
-              response.status(400).send(err.message);
-            } else {
-              // likely bad db call
-              response.sendStatus(500);
-            }
-          }
-        }
-      }
-    );
-
-    this.app.get(
-      '/api/v1/configurations',
-      async (_request: Request, response: Response) => {
-        // TODO: check if accessable by LTI authentication/role
-        try {
-          const files = await getFiles();
-          response.json(files);
-        } catch (err) {
-          console.error(err instanceof Error ? err.message : err);
-          response.sendStatus(500);
-        }
-      }
-    );
-
-    this.app.post(
-      '/api/v1/assignments/:assignment/assign',
-      (request: Request, response: Response) => {
-        // TODO add role check to see if LTI user is authorized to change
-        // TODO get assignment from LTI parameters instead of reflected from interface
-        const { assignment } = request.params;
-        const { id } = request.body; // as {id: string}
-        console.log(`Assigning ${id} to assignment: ${assignment}`);
-        try {
-          pool.query(
-            `INSERT INTO assignments (id, fileid)
-           VALUES (?, UUID_TO_BIN(?))
-           ON DUPLICATE KEY UPDATE fileid=UUID_TO_BIN(?)`,
-            [assignment, id, id]
-          );
-          response.sendStatus(201);
-        } catch (err) {
-          console.error(err instanceof Error ? err.message : err);
-          response.sendStatus(500);
-        }
-      }
-    );
-
-    this.app.get(
-      '/api/v1/assignments/:assignment/file_id',
-      async (request: Request, response: Response) => {
-        const { assignment } = request.params;
-        try {
-          const data = await getFileIdForAssignment(assignment);
-          if (data) {
-            response.json(data);
-          } else {
-            response.sendStatus(404);
-          }
-        } catch (err) {
-          console.error(err);
-          response.sendStatus(500);
-        }
-      }
-    );
-
-    this.app.get('/metrics', (request: Request, response: Response) => {
-      this.processMetrics(request, response);
+    if (!prompt || !role) {
+      // runtime safety
+      console.error('Bad proofread prompt data, sending empty!');
+      response.json({}); // TODO send error.
+      return;
+    }
+    const content = format(prompt, { text });
+    const fixed = await openai.chat.completions.create({
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      messages: [
+        { role: 'system', content: role },
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: 'gpt-4',
     });
-
-    this.app.post(
-      '/api/v1/scribe/convert_notes',
-      async (request: Request, response: Response) => {
-        // TODO get assignment id from LTI token
-        const { course_id, notes } = request.body;
-        const { genre, overview, prompt, role, temperature } =
-          await this.getPrompt(course_id, 'notes_to_prose');
-        if (!genre || !prompt || !role) {
-          // runtime safety - should never happen
-          console.warn('Malformed notes prompt data.');
-          response.json({});
-          return;
-        }
-        const content = format(prompt, { genre, notes, overview });
-        try {
-          const prose = await openai.chat.completions.create({
-            temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-            messages: [
-              { role: 'system', content: role },
-              {
-                role: 'user',
-                content,
-              },
-            ],
-            model: 'gpt-4',
-          });
-          // TODO check for empty prose
-          response.json(prose);
-        } catch (err) {
-          console.error(err instanceof Error ? err.message : err);
-          response.sendStatus(500);
-        }
-      }
-    );
-    this.app.post(
-      '/api/v1/scribe/proofread',
-      async (request: Request, response: Response) => {
-        // TODO get assignment id from token/
-        const { course_id, text } = request.body;
-        const { prompt, role, temperature } = await this.getPrompt(
-          course_id,
-          'proofread'
-        );
-        if (!prompt || !role) {
-          // runtime safety
-          console.error('Bad proofread prompt data, sending empty!');
-          response.json({}); // TODO send error.
-          return;
-        }
-        const content = format(prompt, { text });
-        const fixed = await openai.chat.completions.create({
-          temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-          messages: [
-            { role: 'system', content: role },
-            {
-              role: 'user',
-              content,
-            },
-          ],
-          model: 'gpt-4',
-        });
-        response.json(fixed);
-      }
-    );
-    this.app.post(
-      '/api/v1/scribe/copyedit',
-      async (request: Request, response: Response) => {
-        const { course_id, text } = request.body;
-        const { prompt, role, temperature } = await this.getPrompt(
-          course_id,
-          'copyedit'
-        );
-        if (!prompt) {
-          response.json({}); // TODO send error.
-          return;
-        }
-        const content = format(prompt, { text });
-        const clarified = await openai.chat.completions.create({
-          temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-          messages: [
-            { role: 'system', content: role ?? 'You are a chatbot' },
-            {
-              role: 'user',
-              content,
-            },
-          ],
-          model: 'gpt-4',
-        });
-        response.json(clarified);
-      }
-    );
-
-    const getAssignmentConfig = async (
-      response: Response,
-      assignment: string
-    ) => {
-      if (assignment.trim().toLowerCase() !== 'global') {
-        try {
-          const rules = await getFileForAssignment(assignment);
-          response.json(rules);
-        } catch (err) {
-          console.error(err instanceof Error ? err.message : err);
-          response.sendStatus(404);
-        }
-      } else {
-        console.warn(`Invalid assignment id (${assignment}), sending default.`);
-        const rules = await getDefaultRuleData();
-        response.json(rules);
-      }
-    };
-    this.app.get(
-      '/api/v1/assignments/:assignment/configuration',
-      async (request: Request, response: Response) => {
-        // not currently used, but will be useful for deep-linking.
-        const { assignment } = request.params;
-        await getAssignmentConfig(response, assignment);
-      }
-    );
-    this.app.get(
-      '/api/v1/rules',
-      async (request: Request, response: Response) => {
-        // TODO get assignment from LTI token
-        const { course_id } = request.query;
-        if (typeof course_id === 'string')
-          await getAssignmentConfig(response, course_id);
-        else {
-          response.sendStatus(400);
-        }
-      }
-    );
-
-    this.app.post('/api/v1/ontopic', (request: Request, response: Response) => {
-      updateMetrics();
-      this.apiPOSTCall('ontopic', request.body, response);
-    });
-
-    this.app.all('/api/v1/*', (_request: Request, response: Response) => {
-      response.sendStatus(404);
-    });
-
-    this.app.get('/*', (request: Request, response: Response) => {
-      this.processRequest(request, response);
-    });
-
-    this.app.post('/*', (request: Request, response: Response) => {
-      this.processRequest(request, response);
-    });
-
-    await initializeDatabase();
-    console.log('Database service initialized, ok to start listening ...');
-    this.app.listen(port, () => {
-      console.log(`App running on port ${port}.`);
-    });
+    response.json(fixed);
   }
+);
+app.post(
+  '/api/v1/scribe/copyedit',
+  async (request: Request, response: Response) => {
+    const { course_id, text } = request.body;
+    const { prompt, role, temperature } = await getPrompt(
+      course_id,
+      'copyedit'
+    );
+    if (!prompt) {
+      response.json({}); // TODO send error.
+      return;
+    }
+    const content = format(prompt, { text });
+    const clarified = await openai.chat.completions.create({
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      messages: [
+        { role: 'system', content: role ?? 'You are a chatbot' },
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: 'gpt-4',
+    });
+    response.json(clarified);
+  }
+);
+
+///// Assignment Endpoints /////
+const getAssignmentConfig = async (response: Response, assignment: string) => {
+  if (assignment.trim().toLowerCase() !== 'global') {
+    try {
+      const rules = await getFileForAssignment(assignment);
+      response.json(rules);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(404);
+    }
+  } else {
+    console.warn(`Invalid assignment id (${assignment}), sending default.`);
+    const rules = await getDefaultRuleData();
+    response.json(rules);
+  }
+};
+app.get(
+  '/api/v1/assignments/:assignment/configuration',
+  async (request: Request, response: Response) => {
+    // not currently used, but will be useful for deep-linking.
+    const { assignment } = request.params;
+    await getAssignmentConfig(response, assignment);
+  }
+);
+app.get('/api/v1/rules', async (request: Request, response: Response) => {
+  // TODO get assignment from LTI token
+  const { course_id } = request.query;
+  if (typeof course_id === 'string')
+    await getAssignmentConfig(response, course_id);
+  else {
+    response.sendStatus(400);
+  }
+});
+
+//// OnTopic Enpoint ////
+app.post('/api/v1/ontopic', async (request: Request, response: Response) => {
+  updateMetrics();
+  const url = new URL(
+    'ontopic',
+    `http://${ONTOPIC_HOST}:${ONTOPIC_PORT}/api/v1/`
+  );
+
+  const startDate = Date.now();
+
+  try {
+    const res = await fetch(url.toString(), {
+      method: 'POST',
+      body: JSON.stringify(request.body),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) {
+      throw new Error(
+        `Bad response from ontopic: ${res.status} - ${res.statusText}`
+      );
+    }
+    const ret = await res.json();
+    updateResponseAvg(Date.now() - startDate);
+
+    response.json({
+      status: 'success',
+      data: ret,
+    });
+  } catch (err) {
+    console.error(err);
+    response.sendStatus(500);
+  }
+});
+
+app.all('/api/v1/*', (_request: Request, response: Response) => {
+  response.sendStatus(404);
+});
+
+/**
+ *
+ */
+const useLTI = true;
+
+/**
+ * https://expressjs.com/en/api.html#req
+ */
+// debugRequest(request) {
+//   console.log("req.baseUrl: " + request.baseUrl);
+//   console.log("req.path: " + request.path);
+//   console.log("oauth_consumer_key:" + request.body.oauth_consumer_key);
+// }
+
+/**
+ * http://www.passportjs.org/packages/passport-oauth2/
+ */
+function verifyLTI(request: Request) {
+  //console.log("verifyLTI (" + request.body.oauth_consumer_key + ")");
+  return request.body.oauth_consumer_key !== '';
 }
 
-const service = new DocuScopeWALTIService();
-service.run();
+/**
+ *
+ * @param {Request} request
+ */
+function generateSettingsObject(request: Request) {
+  const token = generateAccessToken('dummy');
+  return {
+    lti: { ...request.body, token },
+  };
+}
+
+/**
+ *
+ * @param {Request} request
+ * @param {Response} response
+ */
+function processRequest(request: Request, response: Response) {
+  if (useLTI === true) {
+    if (['/', '/index.html', '/index.htm'].includes(request.path)) {
+      if (verifyLTI(request) === true) {
+        const settingsObject = generateSettingsObject(request);
+        const stringed = JSON.stringify(settingsObject);
+        const raw = readFileSync(join(__dirname, PUBLIC, 'index.html'), 'utf8');
+        const html = raw.replace(
+          '/*SETTINGS*/',
+          `var serverContext=${stringed}; var applicationContext=${JSON.stringify(
+            { version }
+          )};`
+        );
+
+        //response.render('main', { html: html });
+        response.send(html);
+      } else {
+        response.sendFile(join(__dirname, STATIC, 'nolti.html'));
+      }
+
+      return;
+    }
+  }
+
+  // Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
+  // exist on the server with other add-ons. Instead we should just configure the url to
+  // point to the root of the host
+
+  let path = request.path;
+
+  //>------------------------------------------------------------------
+
+  if (request.path.indexOf('/lti/activity/docuscope') !== -1) {
+    console.log("We've got an LTI path, stripping ...");
+    path = request.path.replace('/lti/activity/docuscope', '/');
+  }
+
+  //>------------------------------------------------------------------
+
+  if (path === '/') {
+    path = '/index.html';
+  }
+
+  //>------------------------------------------------------------------
+
+  response.sendFile(join(__dirname, PUBLIC, path));
+}
+
+app.get('/*', (request: Request, response: Response) => {
+  processRequest(request, response);
+});
+
+app.post('/*', (request: Request, response: Response) => {
+  processRequest(request, response);
+});
+
+initializeDatabase().then(() => {
+  console.log('Database service initialized, ok to start listening ...');
+  app.listen(port, () => {
+    console.log(`App running on port ${port}.`);
+  });
+});

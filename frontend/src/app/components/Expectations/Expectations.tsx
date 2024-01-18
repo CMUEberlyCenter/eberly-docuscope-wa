@@ -19,12 +19,6 @@ import DocuScopeRule from "../../../../js/DocuScopeRule";
 import DocuScopeRules from "../../../../js/DocuScopeRules";
 import { useConfiguration, useRules } from "../../service/rules.service";
 
-/*
-interface RuleProps {
-  rule: ExpectationRule;
-}
-*/
-
 /* A Rule instance. 
    MvV: I'll probably put this back after v1. For now I'm going to take in the old code I wrote
    because it lines up better with the current desktop interface
@@ -64,17 +58,6 @@ const Rule = (props: RuleProps) => {
 };
 */
 
-// Using react-rxjs to get observable to act like hooks.
-// On locking text with some text present and the tool is clarity
-// emit the text.
-// const [useCoherenceText /*coherenceText$*/] = bind(
-//   combineLatest({ text: lockedEditorText$, tool: currentTool$ }).pipe(
-//     filter((data) => data.tool === "expectations"),
-//     map((data) => data.text)
-//   ),
-//   ""
-// );
-
 /** Component specific error message. */
 const ErrorFallback = (props: { error?: Error }) => (
   <Alert variant="danger">
@@ -87,47 +70,9 @@ const ErrorFallback = (props: { error?: Error }) => (
  *
  */
 const Expectations = () => {
-  // const text = useCoherenceText();
-
-  //>---------------------------------------------
-
   const [disabled, setDisabled] = useState(false);
   const ruleManager = useRules();
   const { data: configuration } = useConfiguration();
-  //>---------------------------------------------
-
-  // useEffect(() => {
-  //   if (text !== "") {
-  //     //setStatus("Retrieving results...");
-
-  //     const customTopics = ruleManager.getAllCustomTopics();
-  //     const customTopicsStructured = ruleManager.getAllCustomTopicsStructured();
-
-  //     //const escaped = encodeURIComponent(text);
-  //     //const encoded = window.btoa(escaped);
-
-  //     const encoded = encodeURIComponent(text);
-
-  //     api(
-  //       "ontopic",
-  //       {
-  //         custom: customTopics,
-  //         customStructured: customTopicsStructured,
-  //         base: encoded,
-  //       },
-  //       "POST"
-  //     );
-  //     // .then((incoming: any) => {
-  //     //   const coherence = incoming.coherence;
-  //     //   const local = incoming.local;
-
-  //     //   //setCoherenceData(coherence);
-  //     //   //setLocalCoherenceData(local);
-  //     // });
-  //   }
-  // }, [text, api, ruleManager]);
-
-  // const ref = useId();
 
   const [ruleState, setCurrentRuleState] = useState({
     currentRule: -1,
@@ -148,8 +93,6 @@ const Expectations = () => {
       return;
     }
 
-    //disableEditor ();
-
     setCurrentRuleState({ currentRule: ruleIndex, currentCluster: -1 });
   };
 
@@ -167,8 +110,6 @@ const Expectations = () => {
     if (disabled) {
       return;
     }
-
-    //disableEditor ();
 
     const topicList =
       ruleManager?.getClusterName(ruleIndex, clusterIndex) ?? [];

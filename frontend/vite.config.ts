@@ -3,13 +3,14 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig, splitVendorChunkPlugin } from 'vite';
 
 // https://vitejs.dev/config/
-export default defineConfig({
+export default defineConfig(({mode}) => ({
   plugins: [react(), splitVendorChunkPlugin(), visualizer()],
   build: {
+    sourcemap: mode === 'development',
+    minify: mode !== 'development',
     rollupOptions: {
       output: {
         dir: 'build/app',
-        sourcemap: 'inline',
         manualChunks(id: string) {
           if (id.includes('d3')) { return 'vendor-d3'; }
           if (id.includes('@fortawesome')) { return 'vendor-@fortawesome'; }
@@ -18,4 +19,4 @@ export default defineConfig({
       }
     }
   }
-})
+}))

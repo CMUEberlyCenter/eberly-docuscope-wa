@@ -15,7 +15,7 @@ import EberlyLTIBase from "./EberlyLTIBase";
 import DocuScopeProgressWindow from "../src/app/components/DocuScopeProgressWindow/DocuScopeProgressWindow";
 import InstructorView from "../src/app/views/Instructor/InstructorView";
 import StudentView from "../src/app/views/Student/StudentView";
-import { assignmentId, isInstructor } from "../src/app/service/lti.service";
+import { isInstructor } from "../src/app/service/lti.service";
 import { launch } from "../src/app/service/lti.service";
 
 /**
@@ -68,7 +68,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     this.updateNotice = this.updateNotice.bind(this);
     this.updateSerializedText = this.updateSerializedText.bind(this);
     this.onLaunch = this.onLaunch.bind(this);
-    this.apiCall = this.apiCall.bind(this);
+    // this.apiCall = this.apiCall.bind(this);
     this.updateProgress = this.updateProgress.bind(this);
     this.ready = this.ready.bind(this);
   }
@@ -77,51 +77,12 @@ export default class DocuScopeWA extends EberlyLTIBase {
    *
    */
   componentDidMount() {
-    setTimeout((_e) => {
-      this.setState({
-        state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTED,
-        progress: 50,
-        progressTitle: "Backend connected, loading data ...",
-      });
-
-      if (!this.isInstructor()) {
-        const ruleUrl = new URL(
-          `/api/v1/assignments/${assignmentId()}/configuration`,
-          location.href
-        );
-        // TODO add lti token, session, etc.
-        fetch(ruleUrl)
-          .then((response) => {
-            if (!response.ok) {
-              throw new Error("Unable to retrieve configuration.");
-            }
-            return response.json();
-          })
-          .then((rules) => {
-            // initializing state unnecessary.
-            this.setState({
-              state: DocuScopeWA.DOCUSCOPE_STATE_LOADING,
-              progress: 75,
-              progressTitle: "Ruleset loaded, Initializing ...",
-            });
-            this.ruleManager.load(rules);
-            this.ready();
-          })
-          .catch((err) => {
-            console.error(err);
-            this.setState({
-              state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
-              progress: 100,
-              progressTitle: "Error: unable to process ruleset",
-            });
-          });
-      } else {
-        console.log(
-          "Operating in instructor mode, no need to fetch a rule file"
-        );
-        this.ready();
-      }
-    }, 1000);
+    this.setState({
+      state: DocuScopeWA.DOCUSCOPE_STATE_CONNECTED,
+      progress: 50,
+      progressTitle: "Backend connected, loading data ...",
+    });
+    this.ready();
   }
 
   /**
@@ -283,86 +244,11 @@ export default class DocuScopeWA extends EberlyLTIBase {
     }
   }
 
-  // /**
-  //  * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-  //  */
-  // apiGETCall(aURL, _aData) {
-  //   this.updateSerializedText(null);
-
-  //   return new Promise((resolve, reject) => {
-  //     fetch(aURL, this.standardHeader)
-  //       .then((resp) => resp.text())
-  //       .then((result) => {
-  //         let raw = JSON.parse(result);
-  //         let evaluation = this.evaluateResult(raw);
-  //         if (evaluation != null) {
-  //           reject(evaluation);
-  //         } else {
-  //           if (raw.data.html) {
-  //             let html = onTopic2DSWAHTML(window.atob(raw.data.html));
-  //             let html_sentences = null;
-  //             if (raw.data.html_sentences) {
-  //               html_sentences = cleanAndRepairHTMLSentenceData(
-  //                 raw.data.html_sentences
-  //               );
-  //             }
-
-  //             this.setState({
-  //               html: html,
-  //               htmlSentences: html_sentences,
-  //             });
-  //           }
-
-  //           if (raw.data.coherence) {
-  //             // Clean and replace
-  //             raw.data.coherence = this.ruleManager.cleanCoherenceData(
-  //               raw.data.coherence
-  //             );
-  //             raw.data.local = this.ruleManager.cleanLocalCoherenceData(
-  //               raw.data.local
-  //             );
-  //             this.ruleManager.updateLemmaCounts(
-  //               coherenceToClusterCounts(raw.data.coherence, raw.data.local)
-  //             );
-  //           }
-
-  //           resolve(raw.data);
-  //         }
-  //       })
-  //       .catch((error) => {
-  //         console.log(error);
-  //         this.setState({
-  //           state: DocuScopeWA.DOCUSCOPE_STATE_FATAL,
-  //           progress: 100,
-  //           progressTitle: "Error: unable to connect to server",
-  //         });
-  //         reject(error);
-  //       });
-  //   });
-  // }
-
-  /**
-   * https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-   */
-  // apiCall(aCall, aData, aType) {
-  //   const course_id = assignmentId();
-
-  //   const aURL = `/api/v1/${aCall}?token=${this.token}&session=${this.session}&course_id=${course_id}`;
-
-  //   if (aType === "POST") {
-  //     return this.apiPOSTCall(aURL, aData);
-  //   }
-
-  //   if (aType === "GET") {
-  //     return this.apiGETCall(aURL, aData);
-  //   }
-  // }
-
   /**
    *
    */
   isStudent() {
-    if (this.state.globallyDisabled == true) {
+    if (this.state.globallyDisabled === true) {
       return false;
     }
 
@@ -386,42 +272,6 @@ export default class DocuScopeWA extends EberlyLTIBase {
     }
 
     return false;
-  }
-
-  /**
-   *
-   */
-  isInstructor() {
-    if (this.state.globallyDisabled == true) {
-      return false;
-    }
-    return isInstructor();
-
-    // if (!window.serverContext) {
-    //   return false;
-    // }
-
-    // if (!window.serverContext.lti) {
-    //   return false;
-    // }
-
-    // if (!window.serverContext.lti.roles) {
-    //   return false;
-    // }
-
-    // var splitter = window.serverContext.lti.roles.split(",");
-
-    // for (var i = 0; i < splitter.length; i++) {
-    //   if (
-    //     splitter[i] == "urn:lti:instrole:ims/lis/Instructor" ||
-    //     splitter[i] == "urn:lti:instrole:ims/lis/Administrator" ||
-    //     splitter[i] == "Instructor"
-    //   ) {
-    //     return true;
-    //   }
-    // }
-
-    // return false;
   }
 
   /**
@@ -470,7 +320,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     let mainPage;
     let scrimup = false;
 
-    if (this.isInstructor()) {
+    if (isInstructor()) {
       return <InstructorView />;
     }
 
@@ -491,11 +341,7 @@ export default class DocuScopeWA extends EberlyLTIBase {
     mainPage = (
       <DocuScopeWAScrim enabled={scrimup} dialog={progresswindow}>
         <StudentView
-          api={this.apiCall}
           ruleManager={this.state.ruleManager}
-          html={this.state.html}
-          htmlSentences={this.state.htmlSentences}
-          update={this.updateSerializedText}
         ></StudentView>
       </DocuScopeWAScrim>
     );

@@ -398,10 +398,7 @@ export default class DocuScopeRules {
    * start with
    */
   getClusterTopicCountPredefined(aRuleIndex: number, aClusterIndex: number) {
-    //console.log ("getClusterTopicCountPredefined ("+ aRuleIndex + "," + aClusterIndex + ")");
-
-    if (aRuleIndex === -1 || aClusterIndex === -1) {
-      //console.log ("No valid rule or cluster provided");
+    if (aRuleIndex < 0 || aClusterIndex < 0) {
       return 0;
     }
 
