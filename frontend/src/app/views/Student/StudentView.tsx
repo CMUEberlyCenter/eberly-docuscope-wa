@@ -516,9 +516,11 @@ const StudentView = (/*props: {
                   <NavDropdown.Item eventKey={"showAbout"}>
                     About
                   </NavDropdown.Item>
-                  <NavDropdown.Item eventKey={"showScribeOption"}>
-                    myScribe: {scribe ? "Enabled" : "Disabled"}
-                  </NavDropdown.Item>
+                  {!ScribeAvailable ? undefined : (
+                    <NavDropdown.Item eventKey={"showScribeOption"}>
+                      myScribe: {scribe ? "Enabled" : "Disabled"}
+                    </NavDropdown.Item>
+                  )}
                 </NavDropdown>
               </Nav>
             </Navbar.Collapse>
@@ -574,10 +576,16 @@ const StudentView = (/*props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
-            <Button onClick={convertNotes} className="me-2">
-              Notes2Prose
-            </Button>
-            <Button onClick={(_e) => globalUpdate(editorTextValue)}>
+            {ScribeAvailable && (
+              <Button
+                onClick={convertNotes}
+                className="me-2"
+                disabled={!editable}
+              >
+                Notes2Prose
+              </Button>
+            )}
+            <Button onClick={() => globalUpdate(editorTextValue)}>
               Update
             </Button>
             <LockSwitch
@@ -654,36 +662,38 @@ const StudentView = (/*props: {
       </footer>
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      <Notes2Prose
-        show={showConvertNotes}
-        onHide={() => setShowConvertNotes(false)}
-        insert={(notes: SelectedNotesProse) => {
-          if (notes.prose && notes.range) {
-            setShowConvertNotes(false);
-            ReactEditor.focus(editor);
-            const start = Range.end(notes.range);
-            // Using insertNodes adds appropriate whitespace and has select flag
-            Transforms.insertNodes(
-              editor,
-              [{ type: "paragraph", children: [{ text: notes.prose }] }],
-              {
-                at: start,
-                select: true, // does not seem to do anything.
-              }
-            );
-            // Select Prose
-            Transforms.select(editor, {
-              anchor: { path: [start.path[0] + 1, 0], offset: 0 },
-              focus: {
-                path: [start.path[0] + 1, 0],
-                offset: notes.prose.length,
-              },
-            });
-            // Transforms.select(editor, notes.range); // Select notes
-          }
-        }}
-      />
-      <ScribeOption />
+      {ScribeAvailable && (
+        <Notes2Prose
+          show={showConvertNotes}
+          onHide={() => setShowConvertNotes(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowConvertNotes(false);
+              ReactEditor.focus(editor);
+              const start = Range.end(notes.range);
+              // Using insertNodes adds appropriate whitespace and has select flag
+              Transforms.insertNodes(
+                editor,
+                [{ type: "paragraph", children: [{ text: notes.prose }] }],
+                {
+                  at: start,
+                  select: true, // does not seem to do anything.
+                }
+              );
+              // Select Prose
+              Transforms.select(editor, {
+                anchor: { path: [start.path[0] + 1, 0], offset: 0 },
+                focus: {
+                  path: [start.path[0] + 1, 0],
+                  offset: notes.prose.length,
+                },
+              });
+              // Transforms.select(editor, notes.range); // Select notes
+            }
+          }}
+        />
+      )}
+      {ScribeAvailable && <ScribeOption />}
       {/* <HelpModal />
       <GettingStartedModal />
       <TroubleshootingModal /> */}

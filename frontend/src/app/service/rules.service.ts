@@ -36,4 +36,4 @@ export const rules = fromFetch(ruleUrl.toString()).pipe(
   })
 );
 
-export const [useRules, rule$] = bind<DocuScopeRules | null>(rules, null);
+export const [useRules, rules$] = bind<DocuScopeRules | null>(rules, null);

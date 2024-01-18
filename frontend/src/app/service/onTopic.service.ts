@@ -127,6 +127,7 @@ const onTopicToolText = combineLatest({
 
 export const [useOnTopicText, onTopicToolText$] = bind(onTopicToolText, null);
 
+// TODO: initialize and store rules$ from local storage.
 export const rules$ = new BehaviorSubject<DocuScopeRules | null>(null);
 export const [useOnTopic, onTopic$] = bind(
   combineLatest({
