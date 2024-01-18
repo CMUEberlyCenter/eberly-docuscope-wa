@@ -66,10 +66,13 @@ const ErrorFallback = (props: { error?: Error }) => (
   </Alert>
 );
 
+interface ExpectationProps {
+  enableTopicEditing?: boolean;
+}
 /**
  *
  */
-const Expectations = () => {
+const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
   const [disabled, setDisabled] = useState(false);
   const ruleManager = useRules();
   const { data: configuration } = useConfiguration();
@@ -275,6 +278,7 @@ const Expectations = () => {
           currentRule={ruleState.currentRule}
           currentCluster={ruleState.currentCluster}
           disableTreeSelect={(val: boolean) => setDisabled(val)}
+          enableTopicEditing={enableTopicEditing}
         />
       </Card.Body>
     </Card>

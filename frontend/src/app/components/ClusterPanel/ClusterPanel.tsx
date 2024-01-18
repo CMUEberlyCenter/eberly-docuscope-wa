@@ -54,12 +54,14 @@ type ClusterPanelProps = {
   currentRule: number;
   currentCluster: number;
   disableTreeSelect: (doDisable: boolean) => void;
+  enableTopicEditing?: boolean;
 };
 
 const ClusterPanel = ({
   currentRule,
   currentCluster,
   disableTreeSelect,
+  enableTopicEditing,
 }: ClusterPanelProps) => {
   const rules = useRules();
   const [cluster, setCluster] = useState<DocuScopeRuleCluster | null>(null);
@@ -86,35 +88,40 @@ const ClusterPanel = ({
     if (!rule) {
       setCluster(null);
       setAbout("Internal error: invalid rule provided.");
-      setExamples("Internal error: invalid rule provided")
+      setExamples("Internal error: invalid rule provided");
       return;
     }
     if (currentCluster >= 0) {
       const cluster = rule.children.at(currentCluster);
       setCluster(cluster ?? null);
       setAbout(cluster?.description ?? " ");
-      setExamples(cluster?.examples ?? "Internal error: invalid cluster provided.")
+      setExamples(
+        cluster?.examples ?? "Internal error: invalid cluster provided."
+      );
       return;
     }
     setCluster(null);
     setAbout(rule.description);
-    setExamples(`<p class="alert alert-warning m-2">Examples only available for clusters.</p>`);
+    setExamples(
+      `<p class="alert alert-warning m-2">Examples only available for clusters.</p>`
+    );
   }, [rules, currentCluster, currentRule]);
 
   useEffect(() => {
     setClusterSentences(cluster?.raw?.topics?.at(0)?.lemma ?? "");
-    const topics = cluster?.raw?.topics?.at(0)?.custom_topics?.join('\n') ?? '';
+    const topics = cluster?.raw?.topics?.at(0)?.custom_topics?.join("\n") ?? "";
     setTopicText(topics);
     setTopicTextOriginal(topics);
-    setTopicTextStatic(cluster?.raw?.topics?.at(0)?.pre_defined_topics?.join('\n') ?? '')
-  },
-    [cluster]);
+    setTopicTextStatic(
+      cluster?.raw?.topics?.at(0)?.pre_defined_topics?.join("\n") ?? ""
+    );
+  }, [cluster]);
 
   const [duplicate, setDuplicate] = useState<Duplicate | null>(null);
   useEffect(() => {
     const topics = topicText.trim().split("\n");
     const duplicate = rules?.checkDuplicates(topics) ?? null;
-    console.log('checking duplicates', duplicate);
+    console.log("checking duplicates", duplicate);
     setDuplicate(duplicate);
   }, [topicText, rules]);
 
@@ -129,9 +136,15 @@ const ClusterPanel = ({
       return;
     }
     const topics = topicText.trim().split("\n");
-    const success = rules?.setClusterCustomTopics(currentRule, currentCluster, topics);
+    const success = rules?.setClusterCustomTopics(
+      currentRule,
+      currentCluster,
+      topics
+    );
     if (!success) {
-      console.warn("Show an error dialog to the user about failed topic insertion.");
+      console.warn(
+        "Show an error dialog to the user about failed topic insertion."
+      );
     } else {
       rules$.next(rules);
     }
@@ -139,46 +152,59 @@ const ClusterPanel = ({
   }
   return (
     <div className="cluster-container">
-      {/* commented out for scribe focused version */}
-      <div className="cluster-title">
-        <img src={clusterIcon} className="cluster-icon" />
-        <div className="card-title h5">Topic Cluster</div>
-      </div>
-      <div className="cluster-content">
-        <div
-          className="cluster-content-left"
-          dangerouslySetInnerHTML={{ __html: clusterSentences }}
-        ></div>
-        <div className="cluster-topic-editor">
-          <div>Pre-defined Topics:</div>
-          <textarea
-            readOnly={true}
-            className={`cluster-topic-input ${enableEditor ? 'cluster-textarea-disabled' : ''}`}
-            defaultValue={topicTextStatic}
-          ></textarea>
-          <div>Custom Topics:</div>
-          <textarea tabIndex={1} readOnly={enableEditor}
-            className={`cluster-topic-input ${enableEditor ? 'cluster-textarea-disabled' : ''} ${duplicate ? 'cluster-duplicate' : ''}`}
-            value={topicText}
-            onChange={(e) => setTopicText(e.target.value)}
-            onFocus={() => disableTreeSelect(true)}
-            onBlur={() => {
-              if (topicText.trim() === "" || topicText === topicTextOriginal) {
-                disableTreeSelect(false);
-              }
-            }}
-          ></textarea>
-          <div className="cluster-topic-controls">
-            {duplicate ? <div className="cluster-warning">
-              Warning: duplicate topic &lsquo;{duplicate.topic}&rsquo; found in {duplicate.lemma}
-            </div> : undefined}
-            <Button
-              onClick={() => onCustomTopicUpdate()}
-              disabled={enableEditor}>Update</Button>
+      {enableTopicEditing === false ? undefined : (
+        <>
+          <div className="cluster-title">
+            <img src={clusterIcon} className="cluster-icon" />
+            <div className="card-title h5">Topic Cluster</div>
           </div>
-        </div>
-        {/*topiceditor*/}
-      </div>
+          <div className="cluster-content">
+            <div
+              className="cluster-content-left"
+              dangerouslySetInnerHTML={{ __html: clusterSentences }}
+            ></div>
+            <div className="cluster-topic-editor">
+              <div>Pre-defined Topics:</div>
+              <textarea
+                readOnly={true}
+                className={`cluster-topic-input ${enableEditor ? "cluster-textarea-disabled" : ""}`}
+                defaultValue={topicTextStatic}
+              ></textarea>
+              <div>Custom Topics:</div>
+              <textarea
+                tabIndex={1}
+                readOnly={enableEditor}
+                className={`cluster-topic-input ${enableEditor ? "cluster-textarea-disabled" : ""} ${duplicate ? "cluster-duplicate" : ""}`}
+                value={topicText}
+                onChange={(e) => setTopicText(e.target.value)}
+                onFocus={() => disableTreeSelect(true)}
+                onBlur={() => {
+                  if (
+                    topicText.trim() === "" ||
+                    topicText === topicTextOriginal
+                  ) {
+                    disableTreeSelect(false);
+                  }
+                }}
+              ></textarea>
+              <div className="cluster-topic-controls">
+                {duplicate ? (
+                  <div className="cluster-warning">
+                    Warning: duplicate topic &lsquo;{duplicate.topic}&rsquo;
+                    found in {duplicate.lemma}
+                  </div>
+                ) : undefined}
+                <Button
+                  onClick={() => onCustomTopicUpdate()}
+                  disabled={enableEditor}
+                >
+                  Update
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
       <Tabs className="mt-1 px-2">
         <Tab eventKey={"expectationabout"} title="About this Expectation">
           <div
@@ -186,11 +212,14 @@ const ClusterPanel = ({
             dangerouslySetInnerHTML={{ __html: about }}
           ></div>
         </Tab>
-        {/* commented out for scribe focused version */}
-        <Tab eventKey={"examples"} title="Sample Sentences">
-          <div className="cluster-examples" dangerouslySetInnerHTML={{ __html: examples }}>
-          </div>
-        </Tab>
+        {enableTopicEditing === false ? undefined : (
+          <Tab eventKey={"examples"} title="Sample Sentences">
+            <div
+              className="cluster-examples"
+              dangerouslySetInnerHTML={{ __html: examples }}
+            ></div>
+          </Tab>
+        )}
       </Tabs>
     </div>
   );

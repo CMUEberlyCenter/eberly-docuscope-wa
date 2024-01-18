@@ -85,6 +85,7 @@ import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { VERSION } from "../../service/application.service";
 import {
+  ScribeAvailable,
   SelectedNotesProse,
   notes,
   showScribeOption,
@@ -538,7 +539,7 @@ const StudentView = (/*props: {
               title="Expectations"
               className="overflow-hidden h-100"
             >
-              <Expectations />
+              <Expectations enableTopicEditing={!ScribeAvailable} />
             </Tab>
             <Tab
               eventKey={"coherence"}
