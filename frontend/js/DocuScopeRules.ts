@@ -4,6 +4,13 @@ import { deepCopy } from './DataTools';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
+export interface Duplicate {
+  ruleIndex: number,
+  clusterIndex: number,
+  lemma: string,
+  topic: string,
+  type: number,
+}
 
 function sessionKey(key: string) {
   return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
@@ -488,12 +495,12 @@ export default class DocuScopeRules {
    *
    */
   getAllCustomTopicsStructured() {
-    return this.rules.flatMap(rule=>rule.children).map(cluster=>cluster.raw?.topics?.at(0))
-    .filter(topic => !!topic)
-    .map(topic=> ({
-      lemma: topic?.lemma,
-      topics: [...topic?.pre_defined_topics??[], ...topic?.custom_topics??[]].map(s => s.trim())
-    }))
+    return this.rules.flatMap(rule => rule.children).map(cluster => cluster.raw?.topics?.at(0))
+      .filter(topic => !!topic)
+      .map(topic => ({
+        lemma: topic?.lemma,
+        topics: [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []].map(s => s.trim())
+      }))
     // const structuredTopics = [];
 
     // for (const rule of this.rules) {
@@ -698,69 +705,42 @@ export default class DocuScopeRules {
    *
    */
   checkDuplicates(
-    aRuleIndex: number,
-    aClusterIndex: number,
     aTopicList: string[]
-  ) {
-    if (aTopicList.length === null) {
+  ): Duplicate | null {
+    if (!aTopicList.length) {
       return null;
     }
 
-    let duplicateObject = null;
-
     for (let i = 0; i < this.rules.length; i++) {
-      // if (i != aRuleIndex) {
+      // if (i !== aRuleIndex) {
       // }
 
       const rule = this.rules[i];
       for (let j = 0; j < rule.children.length; j++) {
-        // if (j != aClusterIndex) {
+        // if (j !== aClusterIndex) {
         // }
 
-        const cluster = rule.children[j];
-
-        const topics = cluster.raw?.topics;
-        if (topics) {
-          if (topics.length > 0) {
-            const rawTopicsStatic = topics[0].pre_defined_topics ?? [];
-            for (let k = 0; k < rawTopicsStatic.length; k++) {
-              const duplicate = listFindDuplucateInList(
-                aTopicList,
-                rawTopicsStatic
-              );
-              if (duplicate != null) {
-                duplicateObject = {
-                  ruleIndex: i,
-                  clusterIndex: j,
-                  lemma: topics[0].lemma,
-                  topic: duplicate,
-                  type: 0,
-                };
-
-                return duplicateObject;
-              }
-            }
-
-            const rawTopics = topics[0].custom_topics ?? [];
-            for (let k = 0; k < rawTopics.length; k++) {
-              const duplicate = listFindDuplucateInList(aTopicList, rawTopics);
-              if (duplicate != null) {
-                duplicateObject = {
-                  ruleIndex: i,
-                  clusterIndex: j,
-                  lemma: topics[0].lemma,
-                  topic: duplicate,
-                  type: 1,
-                };
-
-                return duplicateObject;
-              }
-            }
+        const topics = rule.children[j].raw?.topics;
+        if (topics?.length) {
+          const rawTopicsStatic = topics[0].pre_defined_topics ?? [];
+          const rawTopics = topics[0].custom_topics ?? [];
+          const duplicate = listFindDuplucateInList(
+            aTopicList,
+            [...rawTopicsStatic, ...rawTopics]
+          );
+          if (duplicate) {
+            return {
+              ruleIndex: i,
+              clusterIndex: j,
+              lemma: topics[0].lemma,
+              topic: duplicate,
+              type: 0,
+            };
           }
         }
       }
     }
 
-    return duplicateObject;
+    return null;
   }
 }
