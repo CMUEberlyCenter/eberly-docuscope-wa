@@ -87,12 +87,14 @@ import { VERSION } from "../../service/application.service";
 import {
   ScribeAvailable,
   SelectedNotesProse,
+  assess,
   notes,
   showScribeOption,
   useScribe,
 } from "../../service/scribe.service";
 import { useConfiguration, useRules } from "../../service/rules.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
+import { AssessExpectations } from "../../components/AssessExpectations/AssessExpectations";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -480,6 +482,17 @@ const StudentView = (/*props: {
       }
     }
   }, [editor]);
+
+  const [showAssessExpectation, setShowAssessExpectation] = useState(false);
+  const assessExpectation = useCallback(() => {
+    setShowAssessExpectation(true);
+    if (editor.selection) {
+      const text = Editor.string(editor, editor.selection);
+      if (text) {
+        assess.next(text);
+      }
+    }
+  }, [editor]);
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -583,6 +596,15 @@ const StudentView = (/*props: {
                 disabled={!editable}
               >
                 Notes2Prose
+              </Button>
+            )}
+            {ScribeAvailable && currentTab === 'expectations' && (
+              <Button
+                onClick={() => assessExpectation()}
+                className="me-2"
+                disabled={!editable /* && !editorSelectedText && selected expectation */}
+              >
+                Assess Expectations
               </Button>
             )}
             <Button onClick={() => globalUpdate(editorTextValue)}>
@@ -693,6 +715,11 @@ const StudentView = (/*props: {
           }}
         />
       )}
+      {ScribeAvailable && 
+      <AssessExpectations
+      show={showAssessExpectation}
+      onHide={() => setShowAssessExpectation(false)}
+      />}
       {ScribeAvailable && <ScribeOption />}
       {/* <HelpModal />
       <GettingStartedModal />

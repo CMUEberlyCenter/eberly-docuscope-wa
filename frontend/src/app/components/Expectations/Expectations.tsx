@@ -1,6 +1,6 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import TabTitle from "../TabTitle/TabTitle";
@@ -18,6 +18,7 @@ import ClusterPanel from "../ClusterPanel/ClusterPanel";
 import DocuScopeRule from "../../../../js/DocuScopeRule";
 import DocuScopeRules from "../../../../js/DocuScopeRules";
 import { useConfiguration, useRules } from "../../service/rules.service";
+import { expectation } from "../../service/scribe.service";
 
 /* A Rule instance. 
    MvV: I'll probably put this back after v1. For now I'm going to take in the old code I wrote
@@ -81,6 +82,11 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
     currentRule: -1,
     currentCluster: -1,
   });
+
+  useEffect(() => {
+    const cluster = ruleManager?.getClusterByIndex(ruleState.currentRule, ruleState.currentCluster);
+    expectation.next(cluster);
+  }, [ruleManager, ruleState]);
 
   /**
    *

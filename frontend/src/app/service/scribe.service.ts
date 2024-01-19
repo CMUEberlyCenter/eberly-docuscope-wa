@@ -16,6 +16,7 @@ import { fromFetch } from 'rxjs/fetch';
 import { assignmentId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
 import { Descendant, type Range } from 'slate';
+import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
 
 export const ScribeAvailable = true; // For future ability to conditionally make it available.
 
@@ -49,11 +50,11 @@ scribe.subscribe((enable) =>
  * @returns
  */
 function requestConvertNotes(notes: SelectedNotesProse) {
-  const course_id = assignmentId();
+  const assignment = assignmentId();
   return fromFetch('/api/v1/scribe/convert_notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ course_id, notes: notes.text }),
+    body: JSON.stringify({ assignment, notes: notes.text }),
   })
     .pipe(
       switchMap((response) => {
@@ -70,7 +71,7 @@ function requestConvertNotes(notes: SelectedNotesProse) {
     .pipe(
       map((data: ChatResponse) => {
         if ('error' in data) {
-          console.log(data.message);
+          console.error(data.message);
           return 'An error occured while converting your notes to prose.';
         }
         if ('choices' in data) {
@@ -210,3 +211,76 @@ export const clarified = combineLatest({ text: clarify, scribe: scribe$ }).pipe(
   mergeMap((c) => requestClarify(c.text))
 );
 export const [useClarified, clarified$] = bind(clarified);
+
+/*** Assess Expectations ***/
+interface AssessmentData {
+  rating: number;
+  first_sentence: string;
+  explanation: string;
+}
+/**
+ * 
+ * @param text Selected essay text.
+ * @param expectation Rule name value.
+ * @returns 
+ */
+function requestAssess(text: string, expectation: string) {
+  const assignment = assignmentId();
+  return fromFetch('/api/v1/scribe/assess_expectation', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      assignment,
+      text,
+      expectation,
+    }),
+  })
+    .pipe(
+      switchMap((respose) => {
+        if (respose.ok) {
+          return respose.json();
+        }
+        return of({ error: true, message: `Error ${respose.status}` });
+      }),
+      catchError((err) => {
+        console.error(err);
+        return of({ error: true, message: err.message });
+      })
+    )
+    .pipe(
+      map((data: ChatResponse): string => {
+        if ('error' in data) {
+          console.error(data.message);
+          return 'An error occured while assessing the selected expectation for the selected text.';
+        }
+        if ('choices' in data) {
+          console.log(data);
+          console.log(data.choices[0].message.content);
+          return data.choices[0].message.content ?? '';
+        }
+        return '';
+      }),
+      map((assessment) => JSON.parse(assessment) as AssessmentData)
+    );
+    // Post processing
+}
+export const assess = new BehaviorSubject<string>("");
+export const expectation = new BehaviorSubject<DocuScopeRuleCluster|null|undefined>(null);
+export const [useExpectation, expectation$] = bind(expectation, null);
+export const [useAssessAvailable, assessAvailable$] = bind(combineLatest({text: assess, question: expectation}).pipe(
+  map(({text, question}) => text.trim() !== "" && !!question?.name)
+), false);
+export const [useAssess, assess$] = bind(assess, undefined);
+const assessed = combineLatest({ text: assess, scribe: scribe$, expectation: expectation}).pipe(
+  filter(({scribe}) => scribe),
+  filter(({text}) => text.trim().length > 0),
+  filter((({expectation}) => !!expectation?.name)),
+  distinctUntilKeyChanged('text', (a,b) => a===b),
+  switchMap(({text, expectation}) =>
+    concat<[SUSPENSE, AssessmentData]>(
+      of(SUSPENSE),
+      requestAssess(text, expectation?.raw.name ?? '')
+    )
+  )
+);
+export const [useAssessment, assessment$] = bind(assessed, SUSPENSE);

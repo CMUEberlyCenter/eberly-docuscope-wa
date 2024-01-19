@@ -121,7 +121,6 @@ const ClusterPanel = ({
   useEffect(() => {
     const topics = topicText.trim().split("\n");
     const duplicate = rules?.checkDuplicates(topics) ?? null;
-    console.log("checking duplicates", duplicate);
     setDuplicate(duplicate);
   }, [topicText, rules]);
 
