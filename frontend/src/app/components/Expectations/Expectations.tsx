@@ -84,7 +84,10 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
   });
 
   useEffect(() => {
-    const cluster = ruleManager?.getClusterByIndex(ruleState.currentRule, ruleState.currentCluster);
+    const cluster = ruleManager?.getClusterByIndex(
+      ruleState.currentRule,
+      ruleState.currentCluster
+    );
     expectation.next(cluster);
   }, [ruleManager, ruleState]);
 
@@ -103,6 +106,7 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
     }
 
     setCurrentRuleState({ currentRule: ruleIndex, currentCluster: -1 });
+    return false;
   };
 
   /**

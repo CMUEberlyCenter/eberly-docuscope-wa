@@ -598,11 +598,13 @@ const StudentView = (/*props: {
                 Notes2Prose
               </Button>
             )}
-            {ScribeAvailable && currentTab === 'expectations' && (
+            {ScribeAvailable && currentTab === "expectations" && (
               <Button
                 onClick={() => assessExpectation()}
                 className="me-2"
-                disabled={!editable /* && !editorSelectedText && selected expectation */}
+                disabled={
+                  !editable /* && !editorSelectedText && selected expectation */
+                }
               >
                 Assess Expectations
               </Button>
@@ -715,11 +717,12 @@ const StudentView = (/*props: {
           }}
         />
       )}
-      {ScribeAvailable && 
-      <AssessExpectations
-      show={showAssessExpectation}
-      onHide={() => setShowAssessExpectation(false)}
-      />}
+      {ScribeAvailable && (
+        <AssessExpectations
+          show={showAssessExpectation}
+          onHide={() => setShowAssessExpectation(false)}
+        />
+      )}
       {ScribeAvailable && <ScribeOption />}
       {/* <HelpModal />
       <GettingStartedModal />

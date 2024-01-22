@@ -659,45 +659,52 @@ interface ExpectationPrompt extends RowDataPacket {
   service: Prompt;
   prompt: string;
 }
-app.post('/api/v1/scribe/assess_expectation',
-async (request: Request, response: Response) => {
-  const {assignment, text, expectation} = request.body;
-  if (!assignment) {
-    throw new Error('No assignment for rule data fetch.');
-  }
-  const [rows] = await pool.query<ExpectationPrompt[]>(
-    `SELECT 
+app.post(
+  '/api/v1/scribe/assess_expectation',
+  async (request: Request, response: Response) => {
+    const { assignment, text, expectation } = request.body;
+    if (!assignment) {
+      throw new Error('No assignment for rule data fetch.');
+    }
+    const [rows] = await pool.query<ExpectationPrompt[]>(
+      `SELECT 
      data->'$.prompt_templates.expectation' AS service,
      JSON_EXTRACT(data, REPLACE(JSON_UNQUOTE(JSON_SEARCH(data, 'one',  ?)), "name", "prompt")) AS prompt
      FROM files LEFT JOIN assignments ON fileid = files.id
      WHERE assignments.id = ?`,
-    [expectation, assignment]
-  );
-  if (rows.length <= 0) {
-    throw new Error('File lookup error!');
+      [expectation, assignment]
+    );
+    if (rows.length <= 0) {
+      throw new Error('File lookup error!');
+    }
+    const { service, prompt } = rows[0];
+    if (!prompt) {
+      console.warn('Malformed expectation prompt.', prompt);
+      response.json({});
+      return;
+    }
+    const content = format(prompt, { text });
+    try {
+      const assessment = await openai.chat.completions.create({
+        temperature: isNaN(Number(service.temperature))
+          ? 0.0
+          : Number(service.temperature),
+        messages: [
+          {
+            role: 'system',
+            content: service.role ?? 'You are a writing analyst.',
+          },
+          { role: 'user', content },
+        ],
+        model: 'gpt-4',
+      });
+      response.json(assessment);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+    }
   }
-  const { service, prompt } = rows[0];
-  if (!prompt) {
-    console.warn('Malformed expectation prompt.', prompt);
-    response.json({});
-    return;
-  }
-  const content = format(prompt, {text})
-  try {
-    const assessment = await openai.chat.completions.create({
-      temperature: isNaN(Number(service.temperature)) ? 0.0 : Number(service.temperature),
-      messages: [
-        { role: 'system', content: service.role ?? 'You are a writing analyst.' },
-        { role: 'user', content },
-      ],
-      model: 'gpt-4',
-    });
-    response.json(assessment);
-  } catch (err) {
-    console.error(err instanceof Error ? err.message : err);
-    response.sendStatus(500);
-  }
-});
+);
 
 ///// Assignment Endpoints /////
 const getAssignmentConfig = async (response: Response, assignment: string) => {

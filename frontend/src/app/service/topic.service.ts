@@ -27,14 +27,14 @@ export function clearAllHighlights() {
 export function highlightParagraph(aParagraphIndex: number) {
   clearAllHighlights();
 
-  const pId = 'p' + (aParagraphIndex + 1);
+  const pId = `p${aParagraphIndex + 1}`;
 
   const pElement = document.getElementById(pId);
-  if (pElement != null) {
-    console.log('Paragraph element found');
+  if (pElement) {
+    // console.log('Paragraph element found');
     pElement.classList.add('paragraph-highlight');
-  } else {
-    console.log('Unable to find paragraph element');
+    // } else {
+    //   console.log('Unable to find paragraph element');
   }
 }
 

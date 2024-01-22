@@ -219,10 +219,10 @@ interface AssessmentData {
   explanation: string;
 }
 /**
- * 
+ *
  * @param text Selected essay text.
  * @param expectation Rule name value.
- * @returns 
+ * @returns
  */
 function requestAssess(text: string, expectation: string) {
   const assignment = assignmentId();
@@ -262,21 +262,30 @@ function requestAssess(text: string, expectation: string) {
       }),
       map((assessment) => JSON.parse(assessment) as AssessmentData)
     );
-    // Post processing
+  // Post processing
 }
-export const assess = new BehaviorSubject<string>("");
-export const expectation = new BehaviorSubject<DocuScopeRuleCluster|null|undefined>(null);
+export const assess = new BehaviorSubject<string>('');
+export const expectation = new BehaviorSubject<
+  DocuScopeRuleCluster | null | undefined
+>(null);
 export const [useExpectation, expectation$] = bind(expectation, null);
-export const [useAssessAvailable, assessAvailable$] = bind(combineLatest({text: assess, question: expectation}).pipe(
-  map(({text, question}) => text.trim() !== "" && !!question?.name)
-), false);
+export const [useAssessAvailable, assessAvailable$] = bind(
+  combineLatest({ text: assess, question: expectation }).pipe(
+    map(({ text, question }) => text.trim() !== '' && !!question?.name)
+  ),
+  false
+);
 export const [useAssess, assess$] = bind(assess, undefined);
-const assessed = combineLatest({ text: assess, scribe: scribe$, expectation: expectation}).pipe(
-  filter(({scribe}) => scribe),
-  filter(({text}) => text.trim().length > 0),
-  filter((({expectation}) => !!expectation?.name)),
-  distinctUntilKeyChanged('text', (a,b) => a===b),
-  switchMap(({text, expectation}) =>
+const assessed = combineLatest({
+  text: assess,
+  scribe: scribe$,
+  expectation: expectation,
+}).pipe(
+  filter(({ scribe }) => scribe),
+  filter(({ text }) => text.trim().length > 0),
+  filter(({ expectation }) => !!expectation?.name),
+  distinctUntilKeyChanged('text', (a, b) => a === b),
+  switchMap(({ text, expectation }) =>
     concat<[SUSPENSE, AssessmentData]>(
       of(SUSPENSE),
       requestAssess(text, expectation?.raw.name ?? '')
