@@ -248,19 +248,28 @@ function requestAssess(text: string, expectation: string) {
       })
     )
     .pipe(
-      map((data: ChatResponse): string => {
+      map((data: ChatResponse): AssessmentData => {
+        const errorData: AssessmentData = {
+          rating: 0.0,
+          first_sentence: '',
+          explanation: '',
+        };
         if ('error' in data) {
           console.error(data.message);
-          return 'An error occured while assessing the selected expectation for the selected text.';
+          return {
+            ...errorData,
+            explanation:
+              'An error occured while assessing the selected expectation for the selected text.',
+          };
         }
         if ('choices' in data) {
-          console.log(data);
-          console.log(data.choices[0].message.content);
-          return data.choices[0].message.content ?? '';
+          const content = data.choices.at(0).message.content;
+          if (content) {
+            return JSON.parse(content) as AssessmentData;
+          }
         }
-        return '';
-      }),
-      map((assessment) => JSON.parse(assessment) as AssessmentData)
+        return { ...errorData, explanation: 'Invalid response from myScribe.' };
+      })
     );
   // Post processing
 }

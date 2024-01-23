@@ -664,7 +664,9 @@ app.post(
   async (request: Request, response: Response) => {
     const { assignment, text, expectation } = request.body;
     if (!assignment) {
-      throw new Error('No assignment for rule data fetch.');
+      console.error('No assignment for rule data fetch.');
+      response.sendStatus(400);
+      return;
     }
     const [rows] = await pool.query<ExpectationPrompt[]>(
       `SELECT 
@@ -675,12 +677,17 @@ app.post(
       [expectation, assignment]
     );
     if (rows.length <= 0) {
-      throw new Error('File lookup error!');
+      console.error(`File lookup error for ${assignment}!`);
+      response.sendStatus(404);
+      return;
     }
     const { service, prompt } = rows[0];
     if (!prompt) {
       console.warn('Malformed expectation prompt.', prompt);
-      response.json({});
+      console.error(
+        'Configuration file does not support expectation analysis.'
+      );
+      response.sendStatus(502);
       return;
     }
     const content = format(prompt, { text });
