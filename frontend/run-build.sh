@@ -13,6 +13,4 @@ if [ ! -d "node_modules" ]; then
   exit
 fi
 
-sed -e "s/<now>/$(date)/g" < ./js/global.ts.template > ./js/global.ts
-
 npm run build

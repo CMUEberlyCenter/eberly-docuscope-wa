@@ -12,4 +12,4 @@ if [ ! -d "node_modules" ]; then
   exit
 fi
 
-node server-express.js
+npm dev:server

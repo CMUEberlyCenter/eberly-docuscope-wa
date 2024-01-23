@@ -6,7 +6,7 @@ import commonjs from '@rollup/plugin-commonjs';
 export default {
   input: './src/server/index.ts',
   output: {
-    dir: 'build',
+    dir: 'build/server',
   },
   plugins: [commonjs(), resolve({ preferBuiltins: true }), json(), typescript({ tsconfig: 'tsconfig.server.json' })]
 };

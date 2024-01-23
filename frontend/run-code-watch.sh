@@ -12,4 +12,4 @@ if [ ! -d "node_modules" ]; then
   exit
 fi
 
-npm run start
+npm run watch:client

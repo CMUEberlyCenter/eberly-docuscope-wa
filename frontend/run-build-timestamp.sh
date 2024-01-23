@@ -1,1 +1,0 @@
-sed -e "s/<now>/$(date)/g" < ./js/global.ts.template > ./js/global.ts

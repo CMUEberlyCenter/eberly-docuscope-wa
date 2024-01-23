@@ -399,7 +399,7 @@ function updateResponseAvg(aValue: number) {
   );
 }
 
-const PUBLIC = '/app';
+const PUBLIC = '../../build/app';
 const STATIC = '/static';
 
 let DEFAULT_RULES: ConfigurationFile | undefined = undefined;

@@ -1,5 +1,7 @@
-FROM docker.io/node:21
+FROM docker.io/node:21 AS base
 RUN mkdir -p /app
+
+FROM base AS build
 # ci in /tmp to take advantage of layer caching
 WORKDIR /tmp
 COPY ./package*.json /tmp/
@@ -7,9 +9,12 @@ RUN npm ci
 RUN cp -a /tmp/node_modules /app
 WORKDIR /app
 COPY . /app
-# TODO Setup workspaces to separate dependencies between server and application
-# alternately set up SSR.
 RUN npm run build
+
+FROM base
 EXPOSE 8888
 ENV PORT=8888
-CMD [ "node", "server-express.mjs"]
+WORKDIR /app
+COPY ./package.json .
+COPY --from=build /app/build /app/build
+CMD [ "node", "build/server/index.js"]
