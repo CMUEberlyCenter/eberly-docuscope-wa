@@ -554,8 +554,8 @@ app.get(
 
 ////////// Metrics Endpoint /////////////
 startup();
-app.get('/metrics', (_request: Request, response: Response) => {
-  const metricsString = metrics.build();
+app.get('/metrics', async (_request: Request, response: Response) => {
+  const metricsString = await metrics.build();
   response.contentType('text/text');
   response.send(metricsString);
 });
