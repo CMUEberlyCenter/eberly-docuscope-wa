@@ -12,18 +12,24 @@ import { catchError, map, of, shareReplay } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 
 // URL for settings.json, 'base' gets it to work with webpack.
-const SETTINGS_URL = new URL('../assets/settings.json', import.meta.url);
+const SETTINGS_URL = new URL('../settings/settings.json', import.meta.url);
 
 // Defines the form of the json settings.
 interface Settings {
   common_dictionary: string;
   tagger: string;
+  scribe?: boolean;
+  notes2prose?: boolean;
+  assess_expectations?: boolean;
 }
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
+  scribe: true,
+  notes2prose: true,
+  assess_expectations: true,
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable

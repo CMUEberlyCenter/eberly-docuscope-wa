@@ -85,12 +85,13 @@ import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { VERSION } from "../../service/application.service";
 import {
-  ScribeAvailable,
   SelectedNotesProse,
   assess,
   notes,
   showScribeOption,
+  useAssessFeature,
   useScribe,
+  useScribeAvailable,
 } from "../../service/scribe.service";
 import { useConfiguration, useRules } from "../../service/rules.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
@@ -169,6 +170,8 @@ const StudentView = (/*props: {
 
   const [editorTextValue, setEditorTextValue] = useState<string>("");
   const scribe = useScribe();
+  const ScribeAvailable = useScribeAvailable();
+  const assessExpectationFeature = useAssessFeature();
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
@@ -598,17 +601,19 @@ const StudentView = (/*props: {
                 Notes2Prose
               </Button>
             )}
-            {ScribeAvailable && currentTab === "expectations" && (
-              <Button
-                onClick={() => assessExpectation()}
-                className="me-2"
-                disabled={
-                  !editable /* && !editorSelectedText && selected expectation */
-                }
-              >
-                Assess Expectations
-              </Button>
-            )}
+            {ScribeAvailable &&
+              assessExpectationFeature &&
+              currentTab === "expectations" && (
+                <Button
+                  onClick={() => assessExpectation()}
+                  className="me-2"
+                  disabled={
+                    !editable /* && !editorSelectedText && selected expectation */
+                  }
+                >
+                  Assess Expectations
+                </Button>
+              )}
             <Button onClick={() => globalUpdate(editorTextValue)}>
               Update
             </Button>

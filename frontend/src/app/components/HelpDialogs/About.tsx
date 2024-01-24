@@ -3,11 +3,12 @@ import { Modal } from "react-bootstrap";
 import { VERSION } from "../../service/application.service";
 import { showAbout, useShowAbout } from "../../service/help.service";
 import { useConfiguration } from "../../service/rules.service";
-import { ScribeAvailable } from "../../service/scribe.service";
+import { useScribeAvailable } from "../../service/scribe.service";
 
 export const About = () => {
   const show = useShowAbout();
   const { data, isLoading } = useConfiguration();
+  const ScribeAvailable = useScribeAvailable();
 
   return (
     <Modal show={show} onHide={() => showAbout(false)} scrollable>

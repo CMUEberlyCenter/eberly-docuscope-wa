@@ -17,8 +17,12 @@ import { assignmentId } from './lti.service';
 import { type ChatCompletion } from 'openai/resources/chat';
 import { Descendant, type Range } from 'slate';
 import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
+import { settings$ } from './settings.service';
 
-export const ScribeAvailable = true; // For future ability to conditionally make it available.
+export const [useScribeAvailable, ScribeAvailable$] = bind(
+  settings$.pipe(map((settings) => settings.scribe)),
+  true
+);
 
 // Show the myScribe warning and setting dialog.
 const showAtStartup =
@@ -213,6 +217,10 @@ export const clarified = combineLatest({ text: clarify, scribe: scribe$ }).pipe(
 export const [useClarified, clarified$] = bind(clarified);
 
 /*** Assess Expectations ***/
+export const [useAssessFeature, assessFeature$] = bind(
+  settings$.pipe(map((settings) => settings.assess_expectations)),
+  false
+);
 interface AssessmentData {
   rating: number;
   first_sentence: string;
