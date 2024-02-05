@@ -21,6 +21,29 @@ export const ScribeOption = () => {
       <Modal.Header closeButton>myScribe</Modal.Header>
       <Modal.Body>
         <p>
+          Some of the tools included in myScribe use the OpenAI API to analyze
+          your text. If you utilize any of these tools, your text will be sent
+          to OpenAI for analysis. However, your text will not be used to train
+          OpenAI models or enhance OpenAI&apos;s service offerings.
+        </p>
+        <p>
+          You should also consider that texts generated using myScribe is
+          (debatably) not copyrightable.
+        </p>
+        <p>
+          See{" "}
+          <a href="https://openai.com/policies/business-terms">
+            OpenAI&apos;s Terms of Use
+          </a>{" "}
+          and <a href="https://openai.com/security">Security & Privacy</a> for
+          more information.
+        </p>
+        <p>
+          Use the toggle button below to enable or disable these tools that use
+          OpenAI API. If disabled, none of your text will be submitted to
+          OpenAI.
+        </p>
+        {/* <p>
           The myScribe extension uses ChatGPT. If you use use any of the scribe
           tools then your text is sent to ChatGPT for analysis. There are two
           factors to consider before you use these extensions:
@@ -39,7 +62,7 @@ export const ScribeOption = () => {
         <p>
           Use the toggle button below to enable or disable these extensions. If
           disabled, none of your text will be submitted to ChatGPT.
-        </p>
+        </p> */}
         <p>
           A log of interactions with this extension is stored in your
           browser&apos;s session cache. This information is not collected by
