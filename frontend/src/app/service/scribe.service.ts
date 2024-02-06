@@ -18,6 +18,8 @@ import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
 import { assignmentId } from './lti.service';
 import { settings$ } from './settings.service';
 
+// TODO: assignment feature settings.
+
 export const [useScribeAvailable, ScribeAvailable$] = bind(
   settings$.pipe(map((settings) => settings.scribe)),
   true

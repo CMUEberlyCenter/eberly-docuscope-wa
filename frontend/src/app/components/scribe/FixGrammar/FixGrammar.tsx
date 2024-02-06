@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import { ReactElement, Suspense, useEffect, useState } from "react";
+import React, { ReactElement, Suspense, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -23,6 +23,7 @@ import {
   useScribe,
 } from "../../../service/scribe.service";
 import { DisabledAlert } from "../DisabledAlert";
+import { TextToSpeech } from "../TextToSpeech";
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -59,19 +60,27 @@ const serialize = (
   }
 };
 
-type FixGrammarProps = {
-  show: boolean;
-  onHide: () => void;
-  insert: (notes: SelectedNotesProse) => void;
-};
-
+// Expected form of response from myScribe backend.
 type Fixes = {
   revision: string;
   "clean-revision": string;
   explanation: string;
 };
 
-export const FixGrammar = ({
+type FixGrammarProps = {
+  show: boolean;
+  onHide: () => void;
+  insert: (notes: SelectedNotesProse) => void;
+};
+
+/**
+ * myScribe component for proofreading selected text.
+ * @param show if true, then show modal.
+ * @param onHide function to call when modal is dismissed.
+ * @param insert function to call to export generated text.
+ * @example <FixGrammar show={showGrammar} onHide={() => setShowGrammar(false)} insert={insert}/>
+ */
+export const FixGrammar: React.FC<FixGrammarProps> = ({
   show = false,
   onHide,
   insert = () => undefined,
@@ -184,6 +193,7 @@ export const FixGrammar = ({
                             </article>
                             <div className="d-flex justify-content-end">
                               <ButtonToolbar>
+                                <TextToSpeech text={clean}/>
                                 <ButtonGroup>
                                   <Button
                                     disabled={!response.prose}

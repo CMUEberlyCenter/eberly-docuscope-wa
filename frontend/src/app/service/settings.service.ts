@@ -1,7 +1,9 @@
 /**
- * @fileoverview Runtime settings service.
+ * @fileoverview Global runtime settings service.  This is used
+ * to specify site wide settings including availability of features.
+ * @see service/scribe.service.ts for per assignment myScribe feature settings.
  *
- * Reads the "assets/settings.json" file which can be easily replaced in
+ * Reads the "settings/settings.json" file which can be easily replaced in
  * various environments.
  *
  * If new runtime settings are added, do not forget to modify the
@@ -23,6 +25,7 @@ interface Settings {
   grammar?: boolean;
   clarify?: boolean;
   assess_expectations?: boolean;
+  text2speech?: boolean;
 }
 
 // Default json settings, in case of network failure.
@@ -34,6 +37,7 @@ const DEFAULT: Settings = {
   grammar: true,
   clarify: true,
   assess_expectations: true,
+  text2speech: true,
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable

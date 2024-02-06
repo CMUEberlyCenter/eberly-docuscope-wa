@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import { ReactElement, Suspense } from "react";
+import React, { ReactElement, Suspense } from "react";
 import {
   Alert,
   Button,
@@ -24,6 +24,7 @@ import {
   useScribe,
 } from "../../../service/scribe.service";
 import { DisabledAlert } from "../DisabledAlert";
+import { TextToSpeech } from "../TextToSpeech";
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -60,48 +61,35 @@ const serialize = (
   }
 };
 
-export const Notes2Prose = ({
-  show = false,
-  onHide,
-  insert = () => undefined,
-}: {
+type Notes2ProseProps = {
   show: boolean;
   onHide: () => void;
   insert: (notes: SelectedNotesProse) => void;
-}) => {
+}
+/**
+ * myScribe component for converting notes to prose.
+ * @component
+ * @param show if true, then show the modal.
+ * @param onHide function to call when modal is dismissed.
+ * @param insert function to call to export generated text.
+ * @example <Notes2Promse show={showNotes} onHide={() => setShowNotes(false)} insert={insert}/>
+ */
+export const Notes2Prose: React.FC<Notes2ProseProps> = ({
+  show = false,
+  onHide,
+  insert = () => undefined,
+}: Notes2ProseProps) => {
   const scribe = useScribe();
   const notes = useNotes();
   const response = useProse();
   const editing = useEditorState();
-  // const [pause, setPause] = useState<boolean>(false);
 
-  // TODO: manage state to show/disable correct buttons.
-  // const play = useCallback(() => {
-  //   if (speechSynthesis.paused && speechSynthesis.pending) {
-  //     speechSynthesis.resume();
-  //     setPause(false);
-  //   } else if (speechSynthesis.speaking) {
-  //     speechSynthesis.pause();
-  //     setPause(true);
-  //   } else {
-  //     speechSynthesis.cancel();
-  //     const utterance = new SpeechSynthesisUtterance(response.prose);
-  //     speechSynthesis.speak(utterance);
-  //     setPause(false);
-  //   }
-  // }, [response.prose]);
-  // const stop = () => {
-  //   speechSynthesis.cancel();
-  //   setPause(false);
-  // }
-  // useEffect(() => {
-  //   return () => speechSynthesis.cancel();
-  // }, []);
-
+  // copy prose to clipboard.
   const copy = () => {
     navigator.clipboard.writeText(response.prose ?? "");
   };
 
+  // Warning message to display if no notes are selected or the editor is locked.
   const noNotes = (
     <Alert variant="warning">
       {editing ? "" : <p>Set the Edit Mode to unlocked.</p>}
@@ -172,16 +160,7 @@ export const Notes2Prose = ({
                       </article>
                       <div className="d-flex justify-content-end">
                         <ButtonToolbar>
-                          {/* <ButtonGroup className="me-2">
-                        <Button onClick={play} title="Play/Pause" disabled={!response.prose}>
-                          <FontAwesomeIcon icon={pause ? faPause : faPlay}/>
-                          <span className="sr-only">{pause ? 'Pause' : 'Play'}</span>
-                          </Button>
-                        <Button onClick={stop} title="Stop">
-                          <FontAwesomeIcon icon={faStop} />
-                          <span className="sr-only">Stop</span>
-                          </Button>
-                      </ButtonGroup> */}
+                          <TextToSpeech text={response.prose ?? ''}/>
                           <ButtonGroup>
                             <Button disabled={!response.prose} onClick={copy}>
                               <FontAwesomeIcon icon={faClipboard} />

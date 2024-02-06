@@ -8,7 +8,7 @@ It is not possible to zoom beyond the patterns level or the top level categories
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
-import React, {
+import {
   HTMLProps,
   Suspense,
   SVGProps,

@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import { ReactElement, Suspense, useEffect, useState } from "react";
+import React, { ReactElement, Suspense, useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -71,7 +71,14 @@ type ClarifyProps = {
   insert: (notes: SelectedNotesProse) => void;
 };
 
-export const Clarify = ({
+/**
+ * myScribe component for getting clarity suggestions.
+ * @param show if true, then show modal.
+ * @param onHide function to call when modal is dismissed.
+ * @param insert function to call to export generated text.
+ * @example <Clarify show={showClarify} onHide={() => setShowClarify(false)} insert={insert}/>
+ */
+export const Clarify: React.FC<ClarifyProps> = ({
   show = false,
   onHide,
   insert = () => undefined,
