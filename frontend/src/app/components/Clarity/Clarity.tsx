@@ -44,9 +44,9 @@ const cleanAndRepairSentenceData = (
   ); // sentence.trim()?
 };
 
-const Clarity = () => {
-  const dataTools = new OnTopicDataTools();
+const dataTools = new OnTopicDataTools();
 
+const Clarity = () => {
   const [textdata, setTextData] = useState(dataTools.getInitialData());
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);

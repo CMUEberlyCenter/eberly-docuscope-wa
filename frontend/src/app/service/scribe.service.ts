@@ -1,22 +1,21 @@
 import { SUSPENSE, bind } from '@react-rxjs/core';
+import { type ChatCompletion } from 'openai/resources/chat';
 import {
   BehaviorSubject,
   catchError,
   combineLatest,
+  concat,
+  distinctUntilChanged,
   distinctUntilKeyChanged,
   filter,
-  mergeMap,
-  of,
-  switchMap,
-  distinctUntilChanged,
   map,
-  concat,
+  of,
+  switchMap
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { assignmentId } from './lti.service';
-import { type ChatCompletion } from 'openai/resources/chat';
 import { Descendant, type Range } from 'slate';
 import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
+import { assignmentId } from './lti.service';
 import { settings$ } from './settings.service';
 
 export const [useScribeAvailable, ScribeAvailable$] = bind(
@@ -48,6 +47,11 @@ scribe.subscribe((enable) =>
 );
 
 /*** Notes to Prose ***/
+export const [useScribeFeatureNotes2Prose, featureNotes2Prose$] = bind(
+  settings$.pipe(map((settings) => settings.notes2prose)),
+  false
+);
+
 /**
  * Use LLM to convert notes to prose using backend relay.
  * @param notes text of selected notes from editor
@@ -153,13 +157,17 @@ prose$.subscribe(
 );
 
 /*** Fix Grammar ***/
+export const [useScribeFeatureGrammar, grammarFeature$] = bind(
+  settings$.pipe(map((settings) => settings.grammar)),
+  false
+);
 
-function requestFixGrammar(text: string) {
-  const course_id = assignmentId();
-  return fromFetch('/api/v1/scribe/fix_grammar', {
+function requestFixGrammar(selection: SelectedNotesProse) {
+  const assignment = assignmentId();
+  return fromFetch('/api/v1/scribe/proofread', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ course_id, text }),
+    body: JSON.stringify({ assignment, text: selection.text }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
@@ -171,29 +179,47 @@ function requestFixGrammar(text: string) {
       console.error(err);
       return of({ error: true, message: err.message });
     })
+  ).pipe(
+    map((data: ChatResponse) => {
+      if ('error' in data) {
+        console.error(data.message);
+        return 'An Error occured while proofreading you text.';
+      }
+      if ('choices' in data) {
+        return data.choices[0].message.content ?? '';
+      }
+      return '';
+    }),
+    map((prose) => ({ ...selection, prose }))
   );
 }
 
-export const grammar = new BehaviorSubject<string>('');
+export const grammar = new BehaviorSubject<SelectedNotesProse>({ text: '' });
+export const [useGrammar, grammar$] = bind(grammar, undefined);
 export const fixedGrammar = combineLatest({
-  text: grammar,
+  selection: grammar,
   scribe: scribe$,
 }).pipe(
   filter((c) => c.scribe),
-  filter((c) => c.text.trim().length !== 0),
-  distinctUntilKeyChanged('text'),
-  mergeMap((c) => requestFixGrammar(c.text))
+  filter((c) => c.selection.text.trim().length !== 0),
+  distinctUntilKeyChanged('selection'),
+  switchMap((c) => concat<[SUSPENSE, SelectedNotesProse]>(
+    of(SUSPENSE), requestFixGrammar(c.selection)))
 );
-export const [useFixedGrammar, fixedGrammar$] = bind(fixedGrammar);
+export const [useFixedGrammar, fixedGrammar$] = bind<SUSPENSE | SelectedNotesProse>(fixedGrammar, SUSPENSE);
 
 /*** Clarify selected text ***/
+export const [useScribeFeatureClarify, clarifyFeature$] = bind(
+  settings$.pipe(map((settings) => settings.grammar)),
+  false
+);
 
-function requestClarify(text: string) {
-  const course_id = assignmentId();
-  return fromFetch('/api/v1/scribe/clarify', {
+function requestClarify(selection: SelectedNotesProse) {
+  const assignment = assignmentId();
+  return fromFetch('/api/v1/scribe/copyedit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ course_id, text }),
+    body: JSON.stringify({ assignment, text: selection.text }),
   }).pipe(
     switchMap((response) => {
       if (response.ok) {
@@ -205,16 +231,30 @@ function requestClarify(text: string) {
       console.error(err);
       return of({ error: true, message: err.message });
     })
+  ).pipe(
+    map((data: ChatResponse) => {
+      if ('error' in data) {
+        console.error(data.message);
+        return 'An error occured while converting your notes to prose.';
+      }
+      if ('choices' in data) {
+        return data.choices[0].message.content ?? '';
+      }
+      return '';
+    }),
+    map((prose) => ({ ...selection, prose }))
   );
 }
-export const clarify = new BehaviorSubject<string>('');
-export const clarified = combineLatest({ text: clarify, scribe: scribe$ }).pipe(
+export const clarify = new BehaviorSubject<SelectedNotesProse>({ text: '' });
+export const [useClarify, clarify$] = bind(clarify, undefined);
+export const clarified = combineLatest({ selection: clarify, scribe: scribe$ }).pipe(
   filter((c) => c.scribe),
-  filter((c) => c.text.trim().length !== 0),
-  distinctUntilKeyChanged('text'),
-  mergeMap((c) => requestClarify(c.text))
+  filter((c) => c.selection.text.trim().length !== 0),
+  distinctUntilKeyChanged('selection'),
+  switchMap((c) => concat<[SUSPENSE, SelectedNotesProse]>(
+    of(SUSPENSE), requestClarify(c.selection)))
 );
-export const [useClarified, clarified$] = bind(clarified);
+export const [useClarified, clarified$] = bind<SUSPENSE | SelectedNotesProse>(clarified, SUSPENSE);
 
 /*** Assess Expectations ***/
 export const [useAssessFeature, assessFeature$] = bind(

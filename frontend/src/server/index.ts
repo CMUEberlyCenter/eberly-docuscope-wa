@@ -263,10 +263,10 @@ const defaultPrompt: PromptData = {
  */
 async function getPrompt(
   assignment: string,
-  tool: 'notes_to_prose' | 'copyedit' | 'proofread' | 'expectation'
+  tool: 'notes_to_prose' | 'copyedit' | 'grammar' | 'expectation'
 ): Promise<PromptData> {
   if (
-    !['notes_to_prose', 'copyedit', 'proofread', 'expectation'].includes(tool)
+    !['notes_to_prose', 'copyedit', 'grammar', 'expectation'].includes(tool)
   ) {
     console.error('Not a valid scribe tool!');
     return defaultPrompt;
@@ -604,7 +604,7 @@ app.post(
     const { assignment, text } = request.body;
     const { prompt, role, temperature } = await getPrompt(
       assignment,
-      'proofread'
+      'grammar'
     );
     if (!prompt || !role) {
       // runtime safety
@@ -613,18 +613,23 @@ app.post(
       return;
     }
     const content = format(prompt, { text });
-    const fixed = await openai.chat.completions.create({
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'system', content: role },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: 'gpt-4',
-    });
-    response.json(fixed);
+    try {
+      const fixed = await openai.chat.completions.create({
+        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+        messages: [
+          { role: 'system', content: role },
+          {
+            role: 'user',
+            content,
+          },
+        ],
+        model: 'gpt-4',
+      });
+      response.json(fixed);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+    }
   }
 );
 app.post(
@@ -640,18 +645,24 @@ app.post(
       return;
     }
     const content = format(prompt, { text });
-    const clarified = await openai.chat.completions.create({
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'system', content: role ?? 'You are a chatbot' },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: 'gpt-4',
-    });
-    response.json(clarified);
+    try {
+      const clarified = await openai.chat.completions.create({
+        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+        messages: [
+          { role: 'system', content: role ?? 'You are a chatbot' },
+          {
+            role: 'user',
+            content,
+          },
+        ],
+        model: 'gpt-4',
+      });
+      response.json(clarified);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      response.sendStatus(500);
+
+    }
   }
 );
 

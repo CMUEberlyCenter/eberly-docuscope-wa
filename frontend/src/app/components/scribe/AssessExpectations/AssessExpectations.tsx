@@ -2,7 +2,7 @@ import { Subscribe } from "@react-rxjs/core";
 import { Suspense } from "react";
 import { Alert, Card, ListGroup, Modal, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { useEditorState } from "../../service/editor-state.service";
+import { useEditorState } from "../../../service/editor-state.service";
 import {
   assessment$,
   expectation$,
@@ -11,20 +11,15 @@ import {
   useAssessment,
   useExpectation,
   useScribe,
-} from "../../service/scribe.service";
+} from "../../../service/scribe.service";
 import "./AssessExpectations.scss";
+import { DisabledAlert } from "../DisabledAlert";
 
 interface AssessExpectationsProps {
   show: boolean;
   onHide: () => void;
 }
 
-const DisabledAlert = () => (
-  <Alert variant="warning">
-    The myScribe feature is currently disabled. Click &apos;myScribe&apos; in
-    the &apos;Help&apos; menu to enable it.
-  </Alert>
-);
 const UnavailableAlert = () => (
   <Alert variant="danger">Assess Expectations is unavailable.</Alert>
 );

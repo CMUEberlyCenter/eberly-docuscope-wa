@@ -20,6 +20,8 @@ interface Settings {
   tagger: string;
   scribe?: boolean;
   notes2prose?: boolean;
+  grammar?: boolean;
+  clarify?: boolean;
   assess_expectations?: boolean;
 }
 
@@ -29,6 +31,8 @@ const DEFAULT: Settings = {
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   scribe: true,
   notes2prose: true,
+  grammar: true,
+  clarify: true,
   assess_expectations: true,
 };
 

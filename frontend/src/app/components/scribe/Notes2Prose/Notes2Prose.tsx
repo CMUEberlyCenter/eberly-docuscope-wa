@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import React, { ReactElement, Suspense } from "react";
+import { ReactElement, Suspense } from "react";
 import {
   Alert,
   Button,
@@ -13,6 +13,7 @@ import {
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Descendant, Text } from "slate";
+import { useEditorState } from "../../../service/editor-state.service";
 import {
   SelectedNotesProse,
   downloadHistory,
@@ -21,8 +22,8 @@ import {
   useNotes,
   useProse,
   useScribe,
-} from "../../service/scribe.service";
-import { useEditorState } from "../../service/editor-state.service";
+} from "../../../service/scribe.service";
+import { DisabledAlert } from "../DisabledAlert";
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -101,12 +102,6 @@ export const Notes2Prose = ({
     navigator.clipboard.writeText(response.prose ?? "");
   };
 
-  const alert = (
-    <Alert variant="warning">
-      The myScribe feature is currently disabled. Click &apos;myScribe&apos; in
-      the &apos;Help&apos; menu to enable it.
-    </Alert>
-  );
   const noNotes = (
     <Alert variant="warning">
       {editing ? "" : <p>Set the Edit Mode to unlocked.</p>}
@@ -220,7 +215,7 @@ export const Notes2Prose = ({
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
       <Modal.Header closeButton>myScribe - Notes to Prose</Modal.Header>
-      <Modal.Body>{scribe ? body : alert}</Modal.Body>
+      <Modal.Body>{scribe ? body : <DisabledAlert/>}</Modal.Body>
       <Modal.Footer>
         <a
           type="button"

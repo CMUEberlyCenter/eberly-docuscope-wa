@@ -1,5 +1,4 @@
 /* @fileoverview A modal for opting-in/out of scribe features */
-import React from "react";
 import { Button, Form, Modal } from "react-bootstrap";
 import {
   downloadHistory,
@@ -7,7 +6,7 @@ import {
   hideScribeOption,
   useScribe,
   useShowScribeOption,
-} from "../../service/scribe.service";
+} from "../../../service/scribe.service";
 
 // export const ScribeOption = ({show, onHide}: {show: boolean, onHide: () => void}) => {
 export const ScribeOption = () => {

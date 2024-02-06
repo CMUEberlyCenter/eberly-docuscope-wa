@@ -81,21 +81,28 @@ import { serialize } from "../../service/editor-state.service";
 
 // import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { About } from "../../components/HelpDialogs/About";
-import { Notes2Prose } from "../../components/Notes2Prose/Notes2Prose";
-import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
+import { Notes2Prose } from "../../components/scribe/Notes2Prose/Notes2Prose";
+import { ScribeOption } from "../../components/scribe/ScribeOption/ScribeOption";
 import { VERSION } from "../../service/application.service";
 import {
   SelectedNotesProse,
   assess,
+  clarify,
+  grammar,
   notes,
   showScribeOption,
   useAssessFeature,
   useScribe,
   useScribeAvailable,
+  useScribeFeatureClarify,
+  useScribeFeatureGrammar,
+  useScribeFeatureNotes2Prose,
 } from "../../service/scribe.service";
 import { useConfiguration, useRules } from "../../service/rules.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
-import { AssessExpectations } from "../../components/AssessExpectations/AssessExpectations";
+import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
+import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
+import { Clarify } from "../../components/scribe/Clarify/Clarify";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -171,7 +178,10 @@ const StudentView = (/*props: {
   const [editorTextValue, setEditorTextValue] = useState<string>("");
   const scribe = useScribe();
   const ScribeAvailable = useScribeAvailable();
+  const notesFeature = useScribeFeatureNotes2Prose();
   const assessExpectationFeature = useAssessFeature();
+  const grammarFeature = useScribeFeatureGrammar();
+  const clarifyFeature = useScribeFeatureClarify();
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
@@ -474,6 +484,30 @@ const StudentView = (/*props: {
   //>--------------------------------------------------------
   const [zoom, setZoom] = useState<number>(100);
 
+  const updateSelection = (notes: SelectedNotesProse) => {
+    if (notes.prose && notes.range) {
+      ReactEditor.focus(editor);
+      const start = Range.end(notes.range);
+      // Using insertNodes adds appropriate whitespace and has select flag
+      Transforms.insertNodes(
+        editor,
+        [{ type: "paragraph", children: [{ text: notes.prose }] }],
+        {
+          at: start,
+          select: true, // does not seem to do anything.
+        }
+      );
+      // Select Prose
+      Transforms.select(editor, {
+        anchor: { path: [start.path[0] + 1, 0], offset: 0 },
+        focus: {
+          path: [start.path[0] + 1, 0],
+          offset: notes.prose.length,
+        },
+      });
+      // Transforms.select(editor, notes.range); // Select notes
+    }
+  }
   const [showConvertNotes, setShowConvertNotes] = useState<boolean>(false);
   const convertNotes = useCallback(() => {
     setShowConvertNotes(true);
@@ -482,6 +516,30 @@ const StudentView = (/*props: {
       const fragment = Editor.fragment(editor, editor.selection);
       if (text) {
         notes.next({ text, fragment, range: editor.selection });
+      }
+    }
+  }, [editor]);
+
+  const [showFixGrammar, setShowFixGrammar] = useState<boolean>(false);
+  const fixGrammar = useCallback(() => {
+    setShowFixGrammar(true);
+    if (editor.selection) {
+      const text = Editor.string(editor, editor.selection);
+      const fragment = Editor.fragment(editor, editor.selection);
+      if (text) {
+        grammar.next({ text, fragment, range: editor.selection });
+      }
+    }
+  }, [editor]);
+
+  const [showClarify, setShowClarify] = useState<boolean>(false);
+  const clarifySelection = useCallback(() => {
+    setShowClarify(true);
+    if (editor.selection) {
+      const text = Editor.string(editor, editor.selection);
+      const fragment = Editor.fragment(editor, editor.selection);
+      if (text) {
+        clarify.next({ text, fragment, range: editor.selection });
       }
     }
   }, [editor]);
@@ -592,7 +650,7 @@ const StudentView = (/*props: {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
             {paragraphselector}
-            {ScribeAvailable && (
+            {ScribeAvailable && notesFeature && (
               <Button
                 onClick={convertNotes}
                 className="me-2"
@@ -601,6 +659,22 @@ const StudentView = (/*props: {
                 Notes2Prose
               </Button>
             )}
+            {ScribeAvailable && grammarFeature &&
+              <Button
+                onClick={fixGrammar}
+                className="me-2"
+                disabled={!editable}>
+                Review Grammar
+              </Button>
+            }
+            {ScribeAvailable && clarifyFeature &&
+              <Button
+                onClick={clarifySelection}
+                className="me-2"
+                disabled={!editable}>
+                Clarify Text
+              </Button>
+            }
             {ScribeAvailable &&
               assessExpectationFeature &&
               currentTab === "expectations" && (
@@ -691,38 +765,41 @@ const StudentView = (/*props: {
       </footer>
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {ScribeAvailable && (
+      {ScribeAvailable && notesFeature && (
         <Notes2Prose
           show={showConvertNotes}
           onHide={() => setShowConvertNotes(false)}
           insert={(notes: SelectedNotesProse) => {
             if (notes.prose && notes.range) {
               setShowConvertNotes(false);
-              ReactEditor.focus(editor);
-              const start = Range.end(notes.range);
-              // Using insertNodes adds appropriate whitespace and has select flag
-              Transforms.insertNodes(
-                editor,
-                [{ type: "paragraph", children: [{ text: notes.prose }] }],
-                {
-                  at: start,
-                  select: true, // does not seem to do anything.
-                }
-              );
-              // Select Prose
-              Transforms.select(editor, {
-                anchor: { path: [start.path[0] + 1, 0], offset: 0 },
-                focus: {
-                  path: [start.path[0] + 1, 0],
-                  offset: notes.prose.length,
-                },
-              });
-              // Transforms.select(editor, notes.range); // Select notes
+              updateSelection(notes);
             }
           }}
         />
       )}
-      {ScribeAvailable && (
+      {ScribeAvailable && grammarFeature && (
+        <FixGrammar show={showFixGrammar}
+          onHide={() => setShowFixGrammar(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowFixGrammar(false);
+              updateSelection(notes);
+            }
+          }}
+        />
+      )}
+      {ScribeAvailable && clarifyFeature && (
+        <Clarify show={showClarify}
+          onHide={() => setShowClarify(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowClarify(false);
+              updateSelection(notes);
+            }
+          }}
+        />
+      )}
+      {ScribeAvailable && assessExpectationFeature && (
         <AssessExpectations
           show={showAssessExpectation}
           onHide={() => setShowAssessExpectation(false)}

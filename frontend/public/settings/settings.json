@@ -3,5 +3,7 @@
   "tagger": "https://docuscope.eberly.cmu.edu/tagger/tag",
   "scribe": true,
   "notes2prose": true,
-  "assess_expectations": false
+  "assess_expectations": true,
+  "grammar": true,
+  "clarify": true
 }
