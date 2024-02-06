@@ -1,6 +1,5 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-//import DocuScopeWriteAndAudit from "../../js/DocuScopeWA";
 import DocuScopeWriteAndAudit from "./App";
 import "./index.scss";
 

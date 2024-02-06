@@ -21,6 +21,8 @@ import React, {
 import {
   Badge,
   Button,
+  ButtonGroup,
+  ButtonToolbar,
   Card,
   Container,
   Form,
@@ -463,7 +465,7 @@ const StudentView = (/*props: {
       </Form.Select>
     </Form.Group>
   ) : (
-    <div className="spacer"></div>
+    <></>
   );
 
   //>--------------------------------------------------------
@@ -507,7 +509,7 @@ const StudentView = (/*props: {
       });
       // Transforms.select(editor, notes.range); // Select notes
     }
-  }
+  };
   const [showConvertNotes, setShowConvertNotes] = useState<boolean>(false);
   const convertNotes = useCallback(() => {
     setShowConvertNotes(true);
@@ -649,53 +651,60 @@ const StudentView = (/*props: {
 
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
-            {paragraphselector}
-            {ScribeAvailable && notesFeature && (
-              <Button
-                onClick={convertNotes}
-                className="me-2"
-                disabled={!editable}
-              >
-                Notes2Prose
-              </Button>
-            )}
-            {ScribeAvailable && grammarFeature &&
-              <Button
-                onClick={fixGrammar}
-                className="me-2"
-                disabled={!editable}>
-                Review Grammar
-              </Button>
-            }
-            {ScribeAvailable && clarifyFeature &&
-              <Button
-                onClick={clarifySelection}
-                className="me-2"
-                disabled={!editable}>
-                Clarify Text
-              </Button>
-            }
-            {ScribeAvailable &&
-              assessExpectationFeature &&
-              currentTab === "expectations" && (
-                <Button
-                  onClick={() => assessExpectation()}
-                  className="me-2"
-                  disabled={
-                    !editable /* && !editorSelectedText && selected expectation */
-                  }
-                >
-                  Assess Expectations
-                </Button>
+            <ButtonToolbar>
+              {paragraphselector}
+              {ScribeAvailable && (
+                <ButtonGroup className="me-2">
+                  {notesFeature && (
+                    <Button
+                      onClick={convertNotes}
+                      disabled={!editable}
+                      title="Covert selected notes to prose"
+                    >
+                      Notes2Prose
+                    </Button>
+                  )}
+                  {grammarFeature && (
+                    <Button
+                      onClick={fixGrammar}
+                      disabled={!editable}
+                      title="Proofread selected text for grammatical errors"
+                    >
+                      Proofread
+                    </Button>
+                  )}
+                  {clarifyFeature && (
+                    <Button
+                      onClick={clarifySelection}
+                      disabled={!editable}
+                      title="Suggest revisions of selected text to improve clarity"
+                    >
+                      Clarify
+                    </Button>
+                  )}
+                  {assessExpectationFeature &&
+                    currentTab === "expectations" && (
+                      <Button
+                        onClick={() => assessExpectation()}
+                        disabled={
+                          !editable /* && !editorSelectedText && selected expectation */
+                        }
+                        title="Check if the selected text meets the selected expectation"
+                      >
+                        Assess
+                      </Button>
+                    )}
+                </ButtonGroup>
               )}
-            <Button onClick={() => globalUpdate(editorTextValue)}>
-              Update
-            </Button>
-            <LockSwitch
-              checked={editable}
-              label="Edit Mode:"
-              onChange={(checked) => setEditorState(checked)}
-            />
+              <Button onClick={() => globalUpdate(editorTextValue)}>
+                Update
+              </Button>
+              <LockSwitch
+                checked={editable}
+                label="Edit Mode:"
+                onChange={(checked) => setEditorState(checked)}
+              />
+            </ButtonToolbar>
           </Card.Header>
           <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
@@ -778,7 +787,8 @@ const StudentView = (/*props: {
         />
       )}
       {ScribeAvailable && grammarFeature && (
-        <FixGrammar show={showFixGrammar}
+        <FixGrammar
+          show={showFixGrammar}
           onHide={() => setShowFixGrammar(false)}
           insert={(notes: SelectedNotesProse) => {
             if (notes.prose && notes.range) {
@@ -789,7 +799,8 @@ const StudentView = (/*props: {
         />
       )}
       {ScribeAvailable && clarifyFeature && (
-        <Clarify show={showClarify}
+        <Clarify
+          show={showClarify}
           onHide={() => setShowClarify(false)}
           insert={(notes: SelectedNotesProse) => {
             if (notes.prose && notes.range) {

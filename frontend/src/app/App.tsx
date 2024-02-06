@@ -1,5 +1,4 @@
 // import React, { useState } from "react";
-import React from "react";
 // import { Button } from "react-bootstrap";
 // import { useIdleTimer } from "react-idle-timer";
 import { isInstructor, launch } from "./service/lti.service";

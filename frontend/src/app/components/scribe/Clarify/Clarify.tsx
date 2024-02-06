@@ -2,11 +2,26 @@ import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
 import { ReactElement, Suspense, useEffect, useState } from "react";
-import { Alert, Button, ButtonGroup, ButtonToolbar, Card, Modal, Spinner } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  ButtonToolbar,
+  Card,
+  Modal,
+  Spinner,
+} from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Descendant, Text } from "slate";
 import { useEditorState } from "../../../service/editor-state.service";
-import { SelectedNotesProse, clarified$, clarify$, useClarified, useClarify, useScribe } from "../../../service/scribe.service";
+import {
+  SelectedNotesProse,
+  clarified$,
+  clarify$,
+  useClarified,
+  useClarify,
+  useScribe,
+} from "../../../service/scribe.service";
 import { DisabledAlert } from "../DisabledAlert";
 
 /**
@@ -48,27 +63,27 @@ type Fixes = {
   revision: string;
   "clean-revision": string;
   explanation: string;
-}
+};
 
 type ClarifyProps = {
   show: boolean;
   onHide: () => void;
   insert: (notes: SelectedNotesProse) => void;
-}
+};
 
 export const Clarify = ({
   show = false,
   onHide,
-  insert = () => undefined
+  insert = () => undefined,
 }: ClarifyProps) => {
   const scribe = useScribe();
   const editing = useEditorState();
   const selection = useClarify();
   const response = useClarified();
 
-  const [edits, setEdits] = useState('');
-  const [clean, setClean] = useState('');
-  const [explanation, setExplanation] = useState('');
+  const [edits, setEdits] = useState("");
+  const [clean, setClean] = useState("");
+  const [explanation, setExplanation] = useState("");
 
   const copy = () => {
     navigator.clipboard.writeText(clean);
@@ -76,9 +91,9 @@ export const Clarify = ({
 
   useEffect(() => {
     if (!response || !response.prose) {
-      setEdits('');
-      setClean('');
-      setExplanation('');
+      setEdits("");
+      setClean("");
+      setExplanation("");
     } else {
       const fixes: Fixes = JSON.parse(response.prose);
       setEdits(fixes.revision);
@@ -96,84 +111,123 @@ export const Clarify = ({
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
-      <Modal.Header closeButton>
-        myScribe - Clarify Text
-      </Modal.Header>
+      <Modal.Header closeButton>myScribe - Clarify Text</Modal.Header>
       <Modal.Body>
-        {scribe ?
-         (<ErrorBoundary fallback={<Alert variant="danger">Clarify Tool is unavailable</Alert>}>
-          {selection?.text.trim() ? (
-            <>
-              <Card as="section">
-                <Card.Title>Selected Text</Card.Title>
-                <Card.Text as="div">
-                  <Subscribe source$={clarify$} fallback={noNotes}>
-                    <article className="m-2 border border-dark rounded p-1"
-                      style={{ minHeight: "3rem" }}>
-                      {serialize(selection.fragment)}
-                    </article>
-                  </Subscribe>
-                </Card.Text>
-              </Card>
-              <Card as="section">
-                <Card.Body>
-                  <Card.Title>Results</Card.Title>
-                  <Card.Subtitle>myScribe&apos;s suggested revisions.</Card.Subtitle>
+        {scribe ? (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">Clarify Tool is unavailable</Alert>
+            }
+          >
+            {selection?.text.trim() ? (
+              <>
+                <Card as="section">
+                  <Card.Title>Selected Text</Card.Title>
                   <Card.Text as="div">
-                    <Subscribe source$={clarified$}
-                      fallback={<Alert variant="info">Preprocessing...</Alert>}>
-                      {selection?.text.trim() ? (
-                        <Suspense fallback={<Alert variant="info">Processing...</Alert>}>
-                          <article className="border border-dark rounded m-2 p-1" style={{ minHeight: "3rem" }}>
-                            {typeof response !== "object" ? (
-                              <Spinner
-                                animation="border"
-                                role="status"
-                                variant="info"
-                                className="mx-auto"
-                              >
-                                <span className="visually-hidden">
-                                  Processing...
-                                </span>
-                              </Spinner>
-                            ) : (
-                              <>
-                              <h4>Edits</h4>
-                              <div dangerouslySetInnerHTML={{ __html: edits }}></div>
-                              <h4>Results</h4>
-                              <div>{clean}</div>
-                              <h4>Explanation</h4>
-                              <div dangerouslySetInnerHTML={{ __html: explanation }}></div>
-                            </>
-                        )}
-                          </article>
-                          <div className="d-flex justify-content-end">
-                            <ButtonToolbar>
-                              <ButtonGroup>
-                                <Button disabled={!response.prose} onClick={copy}>
-                                  <FontAwesomeIcon icon={faClipboard} />
-                                  <span className="ms-1">Copy to Clipboard</span>
-                                </Button>
-                                <Button
-                                  disabled={!response.prose}
-                                  onClick={() => insert({...response, prose: clean})}
-                                >
-                                  <FontAwesomeIcon icon={faFileImport} />
-                                  <span className="ms-1">Insert into Essay</span>
-                                </Button>
-                              </ButtonGroup>
-                            </ButtonToolbar>
-                          </div>
-                        </Suspense>
-                      ) : noNotes }
+                    <Subscribe source$={clarify$} fallback={noNotes}>
+                      <article
+                        className="m-2 border border-dark rounded p-1"
+                        style={{ minHeight: "3rem" }}
+                      >
+                        {serialize(selection.fragment)}
+                      </article>
                     </Subscribe>
                   </Card.Text>
-                </Card.Body>
-              </Card>
-            </>
-          ) : (noNotes)}
-        </ErrorBoundary>) : <DisabledAlert />}
+                </Card>
+                <Card as="section">
+                  <Card.Body>
+                    <Card.Title>Results</Card.Title>
+                    <Card.Subtitle>
+                      myScribe&apos;s suggested revisions.
+                    </Card.Subtitle>
+                    <Card.Text as="div">
+                      <Subscribe
+                        source$={clarified$}
+                        fallback={
+                          <Alert variant="info">Preprocessing...</Alert>
+                        }
+                      >
+                        {selection?.text.trim() ? (
+                          <Suspense
+                            fallback={
+                              <Alert variant="info">Processing...</Alert>
+                            }
+                          >
+                            <article
+                              className="border border-dark rounded m-2 p-1"
+                              style={{ minHeight: "3rem" }}
+                            >
+                              {typeof response !== "object" ? (
+                                <Spinner
+                                  animation="border"
+                                  role="status"
+                                  variant="info"
+                                  className="mx-auto"
+                                >
+                                  <span className="visually-hidden">
+                                    Processing...
+                                  </span>
+                                </Spinner>
+                              ) : (
+                                <>
+                                  <h4>Edits</h4>
+                                  <div
+                                    dangerouslySetInnerHTML={{ __html: edits }}
+                                  ></div>
+                                  <h4>Results</h4>
+                                  <div>{clean}</div>
+                                  <h4>Explanation</h4>
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: explanation,
+                                    }}
+                                  ></div>
+                                </>
+                              )}
+                            </article>
+                            <div className="d-flex justify-content-end">
+                              <ButtonToolbar>
+                                <ButtonGroup>
+                                  <Button
+                                    disabled={!response.prose}
+                                    onClick={copy}
+                                  >
+                                    <FontAwesomeIcon icon={faClipboard} />
+                                    <span className="ms-1">
+                                      Copy to Clipboard
+                                    </span>
+                                  </Button>
+                                  <Button
+                                    disabled={!response.prose}
+                                    onClick={() =>
+                                      insert({ ...response, prose: clean })
+                                    }
+                                  >
+                                    <FontAwesomeIcon icon={faFileImport} />
+                                    <span className="ms-1">
+                                      Insert into Essay
+                                    </span>
+                                  </Button>
+                                </ButtonGroup>
+                              </ButtonToolbar>
+                            </div>
+                          </Suspense>
+                        ) : (
+                          noNotes
+                        )}
+                      </Subscribe>
+                    </Card.Text>
+                  </Card.Body>
+                </Card>
+              </>
+            ) : (
+              noNotes
+            )}
+          </ErrorBoundary>
+        ) : (
+          <DisabledAlert />
+        )}
       </Modal.Body>
     </Modal>
-  )
-}
+  );
+};

@@ -1,13 +1,28 @@
-import { Alert, Button, ButtonGroup, ButtonToolbar, Card, Modal, Spinner } from "react-bootstrap";
-import { SelectedNotesProse, fixedGrammar$, grammar$, useFixedGrammar, useGrammar, useScribe } from "../../../service/scribe.service"
-import { DisabledAlert } from "../DisabledAlert";
-import { ErrorBoundary } from "react-error-boundary";
-import { useEditorState } from "../../../service/editor-state.service";
-import { Subscribe } from "@react-rxjs/core";
-import { Descendant, Text } from "slate";
-import { ReactElement, Suspense, useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Subscribe } from "@react-rxjs/core";
+import { ReactElement, Suspense, useEffect, useState } from "react";
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  ButtonToolbar,
+  Card,
+  Modal,
+  Spinner,
+} from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
+import { Descendant, Text } from "slate";
+import { useEditorState } from "../../../service/editor-state.service";
+import {
+  SelectedNotesProse,
+  fixedGrammar$,
+  grammar$,
+  useFixedGrammar,
+  useGrammar,
+  useScribe,
+} from "../../../service/scribe.service";
+import { DisabledAlert } from "../DisabledAlert";
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -48,24 +63,23 @@ type FixGrammarProps = {
   show: boolean;
   onHide: () => void;
   insert: (notes: SelectedNotesProse) => void;
-}
+};
 
 type Fixes = {
   revision: string;
   "clean-revision": string;
   explanation: string;
-}
+};
 
 export const FixGrammar = ({
   show = false,
   onHide,
-  insert = () => undefined
+  insert = () => undefined,
 }: FixGrammarProps) => {
   const scribe = useScribe();
   const editing = useEditorState();
   const selection = useGrammar();
   const response = useFixedGrammar();
-
 
   const noNotes = (
     <Alert variant="warning">
@@ -74,9 +88,9 @@ export const FixGrammar = ({
     </Alert>
   );
 
-  const [edits, setEdits] = useState('');
-  const [clean, setClean] = useState('');
-  const [explanation, setExplanation] = useState('');
+  const [edits, setEdits] = useState("");
+  const [clean, setClean] = useState("");
+  const [explanation, setExplanation] = useState("");
 
   const copy = () => {
     navigator.clipboard.writeText(clean);
@@ -84,9 +98,9 @@ export const FixGrammar = ({
 
   useEffect(() => {
     if (!response || !response.prose) {
-      setEdits('');
-      setClean('');
-      setExplanation('');
+      setEdits("");
+      setClean("");
+      setExplanation("");
     } else {
       const fixes: Fixes = JSON.parse(response.prose);
       setEdits(fixes.revision);
@@ -97,20 +111,24 @@ export const FixGrammar = ({
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
-      <Modal.Header closeButton>
-        myScribe - Review Grammar
-      </Modal.Header>
+      <Modal.Header closeButton>myScribe - Review Grammar</Modal.Header>
       <Modal.Body>
-        {scribe ?
-          (<ErrorBoundary fallback={<Alert variant="danger">Grammar Review is unavailable</Alert>}>
+        {scribe ? (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">Grammar Review is unavailable</Alert>
+            }
+          >
             {selection?.text.trim() ? (
               <>
                 <Card as="section">
                   <Card.Title>Selected Text</Card.Title>
                   <Card.Text as="div">
                     <Subscribe source$={grammar$} fallback={noNotes}>
-                      <article className="m-2 border border-dark rounded p-1"
-                        style={{ minHeight: "3rem" }}>
+                      <article
+                        className="m-2 border border-dark rounded p-1"
+                        style={{ minHeight: "3rem" }}
+                      >
                         {serialize(selection.fragment)}
                       </article>
                     </Subscribe>
@@ -120,11 +138,22 @@ export const FixGrammar = ({
                   <Card.Body>
                     <Card.Title>Review</Card.Title>
                     <Card.Text as="div">
-                      <Subscribe source$={fixedGrammar$}
-                        fallback={<Alert variant="info">Preprocessing...</Alert>}>
+                      <Subscribe
+                        source$={fixedGrammar$}
+                        fallback={
+                          <Alert variant="info">Preprocessing...</Alert>
+                        }
+                      >
                         {selection?.text.trim() ? (
-                          <Suspense fallback={<Alert variant="info">Processing...</Alert>}>
-                            <article className="border border-dark rounded m-2 p-1" style={{ minHeight: "3rem" }}>
+                          <Suspense
+                            fallback={
+                              <Alert variant="info">Processing...</Alert>
+                            }
+                          >
+                            <article
+                              className="border border-dark rounded m-2 p-1"
+                              style={{ minHeight: "3rem" }}
+                            >
                               {typeof response !== "object" ? (
                                 <Spinner
                                   animation="border"
@@ -139,41 +168,63 @@ export const FixGrammar = ({
                               ) : (
                                 <>
                                   <h4>Edits</h4>
-                                  <div dangerouslySetInnerHTML={{ __html: edits }}></div>
+                                  <div
+                                    dangerouslySetInnerHTML={{ __html: edits }}
+                                  ></div>
                                   <h4>Results</h4>
                                   <div>{clean}</div>
                                   <h4>Explanation</h4>
-                                  <div dangerouslySetInnerHTML={{ __html: explanation }}></div>
+                                  <div
+                                    dangerouslySetInnerHTML={{
+                                      __html: explanation,
+                                    }}
+                                  ></div>
                                 </>
                               )}
                             </article>
                             <div className="d-flex justify-content-end">
                               <ButtonToolbar>
                                 <ButtonGroup>
-                                  <Button disabled={!response.prose} onClick={copy}>
+                                  <Button
+                                    disabled={!response.prose}
+                                    onClick={copy}
+                                  >
                                     <FontAwesomeIcon icon={faClipboard} />
-                                    <span className="ms-1">Copy to Clipboard</span>
+                                    <span className="ms-1">
+                                      Copy to Clipboard
+                                    </span>
                                   </Button>
                                   <Button
                                     disabled={!clean}
-                                    onClick={() => insert({...response, prose: clean})}
+                                    onClick={() =>
+                                      insert({ ...response, prose: clean })
+                                    }
                                   >
                                     <FontAwesomeIcon icon={faFileImport} />
-                                    <span className="ms-1">Insert into Essay</span>
+                                    <span className="ms-1">
+                                      Insert into Essay
+                                    </span>
                                   </Button>
                                 </ButtonGroup>
                               </ButtonToolbar>
                             </div>
                           </Suspense>
-                        ) : noNotes}
+                        ) : (
+                          noNotes
+                        )}
                       </Subscribe>
                     </Card.Text>
                   </Card.Body>
                 </Card>
               </>
-            ) : (noNotes)}
-          </ErrorBoundary>) : <DisabledAlert />}
+            ) : (
+              noNotes
+            )}
+          </ErrorBoundary>
+        ) : (
+          <DisabledAlert />
+        )}
       </Modal.Body>
     </Modal>
-  )
-}
+  );
+};

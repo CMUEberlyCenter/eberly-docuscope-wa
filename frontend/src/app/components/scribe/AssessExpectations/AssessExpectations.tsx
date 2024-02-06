@@ -12,8 +12,8 @@ import {
   useExpectation,
   useScribe,
 } from "../../../service/scribe.service";
-import "./AssessExpectations.scss";
 import { DisabledAlert } from "../DisabledAlert";
+import "./AssessExpectations.scss";
 
 interface AssessExpectationsProps {
   show: boolean;

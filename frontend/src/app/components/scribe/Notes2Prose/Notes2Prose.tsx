@@ -215,7 +215,7 @@ export const Notes2Prose = ({
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
       <Modal.Header closeButton>myScribe - Notes to Prose</Modal.Header>
-      <Modal.Body>{scribe ? body : <DisabledAlert/>}</Modal.Body>
+      <Modal.Body>{scribe ? body : <DisabledAlert />}</Modal.Body>
       <Modal.Footer>
         <a
           type="button"

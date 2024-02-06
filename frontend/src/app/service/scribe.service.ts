@@ -10,7 +10,7 @@ import {
   filter,
   map,
   of,
-  switchMap
+  switchMap,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { Descendant, type Range } from 'slate';
@@ -168,30 +168,32 @@ function requestFixGrammar(selection: SelectedNotesProse) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ assignment, text: selection.text }),
-  }).pipe(
-    switchMap((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      return of({ error: true, message: `Error ${response.status}` });
-    }),
-    catchError((err) => {
-      console.error(err);
-      return of({ error: true, message: err.message });
-    })
-  ).pipe(
-    map((data: ChatResponse) => {
-      if ('error' in data) {
-        console.error(data.message);
-        return 'An Error occured while proofreading you text.';
-      }
-      if ('choices' in data) {
-        return data.choices[0].message.content ?? '';
-      }
-      return '';
-    }),
-    map((prose) => ({ ...selection, prose }))
-  );
+  })
+    .pipe(
+      switchMap((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        return of({ error: true, message: `Error ${response.status}` });
+      }),
+      catchError((err) => {
+        console.error(err);
+        return of({ error: true, message: err.message });
+      })
+    )
+    .pipe(
+      map((data: ChatResponse) => {
+        if ('error' in data) {
+          console.error(data.message);
+          return 'An Error occured while proofreading you text.';
+        }
+        if ('choices' in data) {
+          return data.choices[0].message.content ?? '';
+        }
+        return '';
+      }),
+      map((prose) => ({ ...selection, prose }))
+    );
 }
 
 export const grammar = new BehaviorSubject<SelectedNotesProse>({ text: '' });
@@ -203,10 +205,16 @@ export const fixedGrammar = combineLatest({
   filter((c) => c.scribe),
   filter((c) => c.selection.text.trim().length !== 0),
   distinctUntilKeyChanged('selection'),
-  switchMap((c) => concat<[SUSPENSE, SelectedNotesProse]>(
-    of(SUSPENSE), requestFixGrammar(c.selection)))
+  switchMap((c) =>
+    concat<[SUSPENSE, SelectedNotesProse]>(
+      of(SUSPENSE),
+      requestFixGrammar(c.selection)
+    )
+  )
 );
-export const [useFixedGrammar, fixedGrammar$] = bind<SUSPENSE | SelectedNotesProse>(fixedGrammar, SUSPENSE);
+export const [useFixedGrammar, fixedGrammar$] = bind<
+  SUSPENSE | SelectedNotesProse
+>(fixedGrammar, SUSPENSE);
 
 /*** Clarify selected text ***/
 export const [useScribeFeatureClarify, clarifyFeature$] = bind(
@@ -220,41 +228,53 @@ function requestClarify(selection: SelectedNotesProse) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ assignment, text: selection.text }),
-  }).pipe(
-    switchMap((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      return of({ error: true, message: `Error ${response.status}` });
-    }),
-    catchError((err) => {
-      console.error(err);
-      return of({ error: true, message: err.message });
-    })
-  ).pipe(
-    map((data: ChatResponse) => {
-      if ('error' in data) {
-        console.error(data.message);
-        return 'An error occured while converting your notes to prose.';
-      }
-      if ('choices' in data) {
-        return data.choices[0].message.content ?? '';
-      }
-      return '';
-    }),
-    map((prose) => ({ ...selection, prose }))
-  );
+  })
+    .pipe(
+      switchMap((response) => {
+        if (response.ok) {
+          return response.json();
+        }
+        return of({ error: true, message: `Error ${response.status}` });
+      }),
+      catchError((err) => {
+        console.error(err);
+        return of({ error: true, message: err.message });
+      })
+    )
+    .pipe(
+      map((data: ChatResponse) => {
+        if ('error' in data) {
+          console.error(data.message);
+          return 'An error occured while converting your notes to prose.';
+        }
+        if ('choices' in data) {
+          return data.choices[0].message.content ?? '';
+        }
+        return '';
+      }),
+      map((prose) => ({ ...selection, prose }))
+    );
 }
 export const clarify = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useClarify, clarify$] = bind(clarify, undefined);
-export const clarified = combineLatest({ selection: clarify, scribe: scribe$ }).pipe(
+export const clarified = combineLatest({
+  selection: clarify,
+  scribe: scribe$,
+}).pipe(
   filter((c) => c.scribe),
   filter((c) => c.selection.text.trim().length !== 0),
   distinctUntilKeyChanged('selection'),
-  switchMap((c) => concat<[SUSPENSE, SelectedNotesProse]>(
-    of(SUSPENSE), requestClarify(c.selection)))
+  switchMap((c) =>
+    concat<[SUSPENSE, SelectedNotesProse]>(
+      of(SUSPENSE),
+      requestClarify(c.selection)
+    )
+  )
 );
-export const [useClarified, clarified$] = bind<SUSPENSE | SelectedNotesProse>(clarified, SUSPENSE);
+export const [useClarified, clarified$] = bind<SUSPENSE | SelectedNotesProse>(
+  clarified,
+  SUSPENSE
+);
 
 /*** Assess Expectations ***/
 export const [useAssessFeature, assessFeature$] = bind(

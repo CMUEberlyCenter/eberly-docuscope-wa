@@ -661,7 +661,6 @@ app.post(
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(500);
-
     }
   }
 );
