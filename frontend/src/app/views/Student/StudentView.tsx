@@ -91,20 +91,26 @@ import {
   assess,
   clarify,
   grammar,
+  logicalFlowText,
   notes,
   showScribeOption,
+  topicsAuditText,
   useAssessFeature,
   useScribe,
   useScribeAvailable,
   useScribeFeatureClarify,
   useScribeFeatureGrammar,
+  useScribeFeatureLogicalFlow,
   useScribeFeatureNotes2Prose,
+  useScribeFeatureTopics,
 } from "../../service/scribe.service";
 import { useConfiguration, useRules } from "../../service/rules.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
 import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
 import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
 import { Clarify } from "../../components/scribe/Clarify/Clarify";
+import { LogicalFlowAudit } from "../../components/scribe/LogicalFlow/LogicalFlow";
+import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -184,6 +190,8 @@ const StudentView = (/*props: {
   const assessExpectationFeature = useAssessFeature();
   const grammarFeature = useScribeFeatureGrammar();
   const clarifyFeature = useScribeFeatureClarify();
+  const logicalFlowFeature = useScribeFeatureLogicalFlow();
+  const topicsFeature = useScribeFeatureTopics();
 
   useEffect(() => {
     // Set editor text if initializing from session storage.
@@ -556,6 +564,22 @@ const StudentView = (/*props: {
       }
     }
   }, [editor]);
+
+  const [showLogicalFlow, setShowLogicalFlow] = useState(false);
+  const auditLogicalFlow = useCallback(() => {
+    setShowLogicalFlow(true);
+    if (editorTextValue) {
+      logicalFlowText.next(editorTextValue);
+    }
+  }, [editorTextValue]);
+  const [showAuditTopics, setShowAuditTopics] = useState(false);
+  const auditTopics = useCallback(() => {
+    setShowAuditTopics(true);
+    if (editorTextValue) {
+      topicsAuditText.next(editorTextValue);
+    }
+  }, [editorTextValue]);
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -653,49 +677,72 @@ const StudentView = (/*props: {
           <Card.Header className="d-flex justify-content-between align-items-center">
             <ButtonToolbar>
               {paragraphselector}
-              {ScribeAvailable && (
-                <ButtonGroup className="me-2">
-                  {notesFeature && (
-                    <Button
-                      onClick={convertNotes}
-                      disabled={!editable}
-                      title="Covert selected notes to prose"
-                    >
-                      Notes2Prose
-                    </Button>
-                  )}
-                  {grammarFeature && (
-                    <Button
-                      onClick={fixGrammar}
-                      disabled={!editable}
-                      title="Proofread selected text for grammatical errors"
-                    >
-                      Proofread
-                    </Button>
-                  )}
-                  {clarifyFeature && (
-                    <Button
-                      onClick={clarifySelection}
-                      disabled={!editable}
-                      title="Suggest revisions of selected text to improve clarity"
-                    >
-                      Clarify
-                    </Button>
-                  )}
-                  {assessExpectationFeature &&
-                    currentTab === "expectations" && (
-                      <Button
-                        onClick={() => assessExpectation()}
-                        disabled={
-                          !editable /* && !editorSelectedText && selected expectation */
-                        }
-                        title="Check if the selected text meets the selected expectation"
-                      >
-                        Assess
-                      </Button>
-                    )}
-                </ButtonGroup>
-              )}
+              {ScribeAvailable &&
+                configuration &&
+                Object.keys(configuration.prompt_templates).length > 0 && (
+                  <ButtonGroup className="me-2">
+                    {notesFeature &&
+                      "notes_to_prose" in configuration.prompt_templates && (
+                        <Button
+                          onClick={convertNotes}
+                          disabled={!editable}
+                          title="Covert selected notes to prose"
+                        >
+                          Notes2Prose
+                        </Button>
+                      )}
+                    {grammarFeature &&
+                      "grammar" in configuration.prompt_templates && (
+                        <Button
+                          onClick={fixGrammar}
+                          disabled={!editable}
+                          title="Proofread selected text for grammatical errors"
+                        >
+                          Proofread
+                        </Button>
+                      )}
+                    {clarifyFeature &&
+                      "copyedit" in configuration.prompt_templates && (
+                        <Button
+                          onClick={clarifySelection}
+                          disabled={!editable}
+                          title="Suggest revisions of selected text to improve clarity"
+                        >
+                          Clarify
+                        </Button>
+                      )}
+                    {assessExpectationFeature &&
+                      currentTab === "expectations" && (
+                        <Button
+                          onClick={() => assessExpectation()}
+                          disabled={
+                            !editable /* && !editorSelectedText && selected expectation */
+                          }
+                          title="Check if the selected text meets the selected expectation"
+                        >
+                          Assess
+                        </Button>
+                      )}
+                    {logicalFlowFeature &&
+                      "logical_flow" in configuration.prompt_templates && (
+                        <Button
+                          onClick={() => auditLogicalFlow()}
+                          title="Audit Logical Flow of the Document"
+                        >
+                          Flow
+                        </Button>
+                      )}
+                    {topicsFeature &&
+                      "topics" in configuration.prompt_templates && (
+                        <Button
+                          onClick={() => auditTopics()}
+                          title="Analyze covered topics."
+                        >
+                          Topics
+                        </Button>
+                      )}
+                  </ButtonGroup>
+                )}
               <Button onClick={() => globalUpdate(editorTextValue)}>
                 Update
               </Button>
@@ -774,48 +821,75 @@ const StudentView = (/*props: {
       </footer>
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {ScribeAvailable && notesFeature && (
-        <Notes2Prose
-          show={showConvertNotes}
-          onHide={() => setShowConvertNotes(false)}
-          insert={(notes: SelectedNotesProse) => {
-            if (notes.prose && notes.range) {
-              setShowConvertNotes(false);
-              updateSelection(notes);
-            }
-          }}
-        />
-      )}
-      {ScribeAvailable && grammarFeature && (
-        <FixGrammar
-          show={showFixGrammar}
-          onHide={() => setShowFixGrammar(false)}
-          insert={(notes: SelectedNotesProse) => {
-            if (notes.prose && notes.range) {
-              setShowFixGrammar(false);
-              updateSelection(notes);
-            }
-          }}
-        />
-      )}
-      {ScribeAvailable && clarifyFeature && (
-        <Clarify
-          show={showClarify}
-          onHide={() => setShowClarify(false)}
-          insert={(notes: SelectedNotesProse) => {
-            if (notes.prose && notes.range) {
-              setShowClarify(false);
-              updateSelection(notes);
-            }
-          }}
-        />
-      )}
-      {ScribeAvailable && assessExpectationFeature && (
+      {ScribeAvailable &&
+        notesFeature &&
+        configuration &&
+        "notes_to_prose" in configuration.prompt_templates && (
+          <Notes2Prose
+            show={showConvertNotes}
+            onHide={() => setShowConvertNotes(false)}
+            insert={(notes: SelectedNotesProse) => {
+              if (notes.prose && notes.range) {
+                setShowConvertNotes(false);
+                updateSelection(notes);
+              }
+            }}
+          />
+        )}
+      {ScribeAvailable &&
+        grammarFeature &&
+        configuration &&
+        "grammar" in configuration.prompt_templates && (
+          <FixGrammar
+            show={showFixGrammar}
+            onHide={() => setShowFixGrammar(false)}
+            insert={(notes: SelectedNotesProse) => {
+              if (notes.prose && notes.range) {
+                setShowFixGrammar(false);
+                updateSelection(notes);
+              }
+            }}
+          />
+        )}
+      {ScribeAvailable &&
+        clarifyFeature &&
+        configuration &&
+        "copyedit" in configuration.prompt_templates && (
+          <Clarify
+            show={showClarify}
+            onHide={() => setShowClarify(false)}
+            insert={(notes: SelectedNotesProse) => {
+              if (notes.prose && notes.range) {
+                setShowClarify(false);
+                updateSelection(notes);
+              }
+            }}
+          />
+        )}
+      {ScribeAvailable && assessExpectationFeature && configuration && (
         <AssessExpectations
           show={showAssessExpectation}
           onHide={() => setShowAssessExpectation(false)}
         />
       )}
+      {ScribeAvailable &&
+        logicalFlowFeature &&
+        configuration &&
+        "logical_flow" in configuration.prompt_templates && (
+          <LogicalFlowAudit
+            show={showLogicalFlow}
+            onHide={() => setShowLogicalFlow(false)}
+          />
+        )}
+      {ScribeAvailable &&
+        topicsFeature &&
+        configuration &&
+        "topics" in configuration.prompt_templates && (
+          <TopicsAudit
+            show={showAuditTopics}
+            onHide={() => setShowAuditTopics(false)}
+          />
+        )}
       {ScribeAvailable && <ScribeOption />}
       {/* <HelpModal />
       <GettingStartedModal />

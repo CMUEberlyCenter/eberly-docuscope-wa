@@ -125,7 +125,7 @@ export const FixGrammar: React.FC<FixGrammarProps> = ({
         {scribe ? (
           <ErrorBoundary
             fallback={
-              <Alert variant="danger">Grammar Review is unavailable</Alert>
+              <Alert variant="danger">Grammar Review is unavailable.</Alert>
             }
           >
             {selection?.text.trim() ? (
@@ -193,7 +193,7 @@ export const FixGrammar: React.FC<FixGrammarProps> = ({
                             </article>
                             <div className="d-flex justify-content-end">
                               <ButtonToolbar>
-                                <TextToSpeech text={clean}/>
+                                <TextToSpeech text={clean} />
                                 <ButtonGroup>
                                   <Button
                                     disabled={!response.prose}

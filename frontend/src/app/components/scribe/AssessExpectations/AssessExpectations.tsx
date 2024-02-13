@@ -14,6 +14,7 @@ import {
 } from "../../../service/scribe.service";
 import { DisabledAlert } from "../DisabledAlert";
 import "./AssessExpectations.scss";
+import { Rating } from "../../Rating/Rating";
 
 interface AssessExpectationsProps {
   show: boolean;
@@ -24,42 +25,6 @@ const UnavailableAlert = () => (
   <Alert variant="danger">Assess Expectations is unavailable.</Alert>
 );
 
-const Rating = ({ value }: { value: number }) => {
-  const scale = 5;
-  const rating = value * scale;
-  const fullSymbols = Math.floor(rating);
-  return (
-    <div className="assess-rating" title={`${rating.toFixed(1)}`}>
-      <div className={`d-flex rating-${fullSymbols}`}>
-        {new Array(scale).fill(0).map((_v, i) => {
-          let percent = 0;
-          if (i - fullSymbols < 0) {
-            percent = 100;
-          } else if (i - fullSymbols === 0) {
-            percent = (rating - i) * 100;
-          } else {
-            percent = 0;
-          }
-          return (
-            <span
-              key={`assess-expectations-rating-${i}`}
-              className="position-relative"
-            >
-              <i
-                className={`fa-regular fa-star ${percent < 100 ? "visible" : "invisible"}`}
-              ></i>
-              <i
-                className="fa-solid fa-star d-inline-block position-absolute overflow-hidden"
-                style={{ top: 0, left: 0, width: `${percent}%` }}
-              ></i>
-            </span>
-          );
-        })}
-      </div>
-      <span className="visually-hidden ms-2">{rating}</span>
-    </div>
-  );
-};
 export const AssessExpectations = ({
   show = false,
   onHide,
@@ -171,21 +136,6 @@ export const AssessExpectations = ({
                             ) : (
                               <>
                                 <Rating value={assessment.rating} />
-                                {/* <div
-                                  className="assess-rating"
-                                  title={`${(assessment.rating * 5).toFixed(1)}`}
-                                >
-                                  <Rating
-                                    readOnly={true}
-                                    initialRating={assessment.rating * 5}
-                                    emptySymbol="fa-star fa-regular"
-                                    fullSymbol="fa-star fa-solid"
-                                    className={`rating-${Math.floor(assessment.rating * 5)}`}
-                                  />
-                                  <span className="visually-hidden ms-2">
-                                    {assessment.rating * 5}
-                                  </span>
-                                </div> */}
                                 {assessment.explanation}
                               </>
                             )}

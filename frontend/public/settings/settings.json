@@ -4,7 +4,7 @@
   "scribe": true,
   "notes2prose": true,
   "assess_expectations": true,
-  "grammar": true,
-  "clarify": true,
+  "grammar": false,
+  "copyedit": true,
   "text2speech": true
 }

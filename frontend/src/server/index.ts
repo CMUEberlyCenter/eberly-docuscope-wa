@@ -263,10 +263,23 @@ const defaultPrompt: PromptData = {
  */
 async function getPrompt(
   assignment: string,
-  tool: 'notes_to_prose' | 'copyedit' | 'grammar' | 'expectation'
+  tool:
+    | 'notes_to_prose'
+    | 'copyedit'
+    | 'grammar'
+    | 'expectation'
+    | 'logical_flow'
+    | 'topics'
 ): Promise<PromptData> {
   if (
-    !['notes_to_prose', 'copyedit', 'grammar', 'expectation'].includes(tool)
+    ![
+      'notes_to_prose',
+      'copyedit',
+      'grammar',
+      'expectation',
+      'logical_flow',
+      'topics',
+    ].includes(tool)
   ) {
     console.error('Not a valid scribe tool!');
     return defaultPrompt;
@@ -597,56 +610,21 @@ app.post(
     }
   }
 );
-app.post(
-  '/api/v1/scribe/proofread',
-  async (request: Request, response: Response) => {
-    // TODO get assignment id from token/
+
+type TextPrompt = 'copyedit' | 'grammar' | 'logical_flow' | 'topics';
+const scribeText =
+  (key: TextPrompt) => async (request: Request, response: Response) => {
+    // TODO get assignment id from token
     const { assignment, text } = request.body;
-    const { prompt, role, temperature } = await getPrompt(
-      assignment,
-      'grammar'
-    );
-    if (!prompt || !role) {
-      // runtime safety
-      console.error('Bad proofread prompt data, sending empty!');
-      response.json({}); // TODO send error.
-      return;
-    }
-    const content = format(prompt, { text });
-    try {
-      const fixed = await openai.chat.completions.create({
-        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-        messages: [
-          { role: 'system', content: role },
-          {
-            role: 'user',
-            content,
-          },
-        ],
-        model: 'gpt-4',
-      });
-      response.json(fixed);
-    } catch (err) {
-      console.error(err instanceof Error ? err.message : err);
-      response.sendStatus(500);
-    }
-  }
-);
-app.post(
-  '/api/v1/scribe/copyedit',
-  async (request: Request, response: Response) => {
-    const { assignment, text } = request.body;
-    const { prompt, role, temperature } = await getPrompt(
-      assignment,
-      'copyedit'
-    );
+    const { prompt, role, temperature } = await getPrompt(assignment, key);
     if (!prompt) {
-      response.json({}); // TODO send error.
+      console.error(`No valid prompt for ${key} in ${assignment}`);
+      response.sendStatus(404);
       return;
     }
     const content = format(prompt, { text });
     try {
-      const clarified = await openai.chat.completions.create({
+      const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         messages: [
           { role: 'system', content: role ?? 'You are a chatbot' },
@@ -657,13 +635,14 @@ app.post(
         ],
         model: 'gpt-4',
       });
-      response.json(clarified);
+      response.json(chat);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(500);
     }
-  }
-);
+  };
+app.post('/api/v1/scribe/proofread', scribeText('grammar'));
+app.post('/api/v1/scribe/copyedit', scribeText('copyedit'));
 
 interface ExpectationPrompt extends RowDataPacket {
   service: Prompt;
@@ -722,6 +701,8 @@ app.post(
     }
   }
 );
+app.post('/api/v1/scribe/logical_flow', scribeText('logical_flow'));
+app.post('/api/v1/scribe/topics', scribeText('topics'));
 
 ///// Assignment Endpoints /////
 const getAssignmentConfig = async (response: Response, assignment: string) => {

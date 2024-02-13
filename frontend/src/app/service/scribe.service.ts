@@ -18,7 +18,7 @@ import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
 import { assignmentId } from './lti.service';
 import { settings$ } from './settings.service';
 
-// TODO: assignment feature settings.
+// TODO: per assignment feature settings.
 
 export const [useScribeAvailable, ScribeAvailable$] = bind(
   settings$.pipe(map((settings) => settings.scribe)),
@@ -82,7 +82,7 @@ function requestConvertNotes(notes: SelectedNotesProse) {
       map((data: ChatResponse) => {
         if ('error' in data) {
           console.error(data.message);
-          return 'An error occured while converting your notes to prose.';
+          return;
         }
         if ('choices' in data) {
           logCovertNotes(notes.text, data);
@@ -124,12 +124,16 @@ export function downloadHistory(): void {
 }
 
 type ChatResponse = { error: boolean; message: string } | ChatCompletion;
-export interface SelectedNotesProse {
+
+interface SelectedText {
   text: string;
   fragment?: Descendant[];
   range?: Range;
+}
+export interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
+
 export const notes = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useNotes, notes$] = bind(notes, undefined);
 export const convertedNotes = combineLatest({
@@ -200,7 +204,7 @@ function requestFixGrammar(selection: SelectedNotesProse) {
 
 export const grammar = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useGrammar, grammar$] = bind(grammar, undefined);
-export const fixedGrammar = combineLatest({
+const fixedGrammar = combineLatest({
   selection: grammar,
   scribe: scribe$,
 }).pipe(
@@ -259,7 +263,7 @@ function requestClarify(selection: SelectedNotesProse) {
 }
 export const clarify = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useClarify, clarify$] = bind(clarify, undefined);
-export const clarified = combineLatest({
+const clarified = combineLatest({
   selection: clarify,
   scribe: scribe$,
 }).pipe(
@@ -289,10 +293,11 @@ interface AssessmentData {
   explanation: string;
 }
 /**
- *
+ * Fetch expectation audit results from backend.
  * @param text Selected essay text.
  * @param expectation Rule name value.
- * @returns
+ * @returns Results of llm processing with the expectation's
+ *  associated prompt and the given text.
  */
 function requestAssess(text: string, expectation: string) {
   const assignment = assignmentId();
@@ -332,6 +337,7 @@ function requestAssess(text: string, expectation: string) {
               'An error occured while assessing the selected expectation for the selected text.',
           };
         }
+        // if it is the expected format for results:
         if ('choices' in data) {
           const content = data.choices.at(0).message.content;
           if (content) {
@@ -343,18 +349,25 @@ function requestAssess(text: string, expectation: string) {
     );
   // Post processing
 }
+// Text to assess for expectations
 export const assess = new BehaviorSubject<string>('');
+// Currently selected expectation
 export const expectation = new BehaviorSubject<
   DocuScopeRuleCluster | null | undefined
 >(null);
 export const [useExpectation, expectation$] = bind(expectation, null);
+// emit when true when there is text and an expectation to process.
 export const [useAssessAvailable, assessAvailable$] = bind(
   combineLatest({ text: assess, question: expectation }).pipe(
     map(({ text, question }) => text.trim() !== '' && !!question?.name)
   ),
   false
 );
+// bind to use assess in react components.
 export const [useAssess, assess$] = bind(assess, undefined);
+// if scribe is available and have new text and expectation,
+// then fetch results while emiting SUSPENSE while waiting
+// for the results.
 const assessed = combineLatest({
   text: assess,
   scribe: scribe$,
@@ -372,3 +385,120 @@ const assessed = combineLatest({
   )
 );
 export const [useAssessment, assessment$] = bind(assessed, SUSPENSE);
+
+/****** Logical Flow Audit ******/
+export const [useScribeFeatureLogicalFlow, featureLogicalFlow] = bind(
+  settings$.pipe(map((settings) => !!settings.logical_flow)),
+  false
+);
+
+type TextAudit = {
+  text: string;
+  comment: AuditData | string;
+};
+type AuditData = {
+  rating: number;
+  explanation: string;
+};
+
+function requestAudit<T>(
+  text: string,
+  endpoint: 'logical_flow' | 'topics',
+  feedback: string = 'An error occurred.'
+) {
+  const assignment = assignmentId();
+  return fromFetch(`/api/v1/scribe/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ assignment, text }),
+  }).pipe(
+    switchMap((response) => {
+      if (!response.ok) {
+        return of({ error: true, message: `Error ${response.status}` });
+      }
+      return response.json();
+    }),
+    catchError((err) => {
+      console.error(err);
+      return of({ error: true, message: err.message });
+    }),
+    map((data: ChatResponse) => {
+      if ('error' in data) {
+        console.error(data.message);
+        return feedback;
+      }
+      if ('choices' in data) {
+        const content = data.choices.at(0)?.message.content;
+        if (typeof content === 'string') {
+          try {
+            // attempt to parse as json
+            return JSON.parse(content);
+          } catch {
+            // assume that parsing failed therefor it should be a string
+            return content;
+          }
+        }
+      }
+      return '';
+    }),
+    map((comment) => ({ text, comment }) as T)
+  );
+}
+
+export const logicalFlowText = new BehaviorSubject<string>('');
+export const [useLogicalFlow, logicalFlow$] = bind(logicalFlowText, '');
+const logicalFlowAnalysis = combineLatest({
+  text: logicalFlowText,
+  scribe: scribe$,
+}).pipe(
+  filter((c) => c.scribe),
+  filter((c) => c.text.trim().length > 0),
+  distinctUntilKeyChanged('text'),
+  switchMap((c) =>
+    concat<[SUSPENSE, TextAudit]>(
+      of(SUSPENSE),
+      requestAudit<TextAudit>(
+        c.text,
+        'logical_flow',
+        'An error occurred while auditing your text.'
+      )
+    )
+  )
+);
+export const [useLogicalFlowAudit, logicalFlowAudit$] = bind<
+  SUSPENSE | TextAudit
+>(logicalFlowAnalysis, SUSPENSE);
+
+/***** Topics *****/
+export const [useScribeFeatureTopics, featureTopics$] = bind(
+  settings$.pipe(map((settings) => !!settings.topics)),
+  false
+);
+
+type TextList = {
+  text: string;
+  comment: string;
+};
+export const topicsAuditText = new BehaviorSubject<string>('');
+export const [useTopicsAuditText, topicsAuditText$] = bind(topicsAuditText, '');
+export const [useTopicsAudit, topicsAudit$] = bind<SUSPENSE | TextList>(
+  combineLatest({
+    text: topicsAuditText,
+    scribe: scribe$,
+  }).pipe(
+    filter((c) => c.scribe),
+    filter((c) => c.text.trim().length > 0),
+    distinctUntilKeyChanged('text'),
+    switchMap((c) =>
+      concat<[SUSPENSE, TextList]>(
+        of(SUSPENSE),
+        requestAudit<TextList>(
+          c.text,
+          'topics',
+          'An error occurred while scanning for topics.'
+        )
+      )
+    )
+  ),
+  SUSPENSE
+);

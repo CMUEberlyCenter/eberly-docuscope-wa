@@ -65,7 +65,7 @@ type Notes2ProseProps = {
   show: boolean;
   onHide: () => void;
   insert: (notes: SelectedNotesProse) => void;
-}
+};
 /**
  * myScribe component for converting notes to prose.
  * @component
@@ -160,7 +160,7 @@ export const Notes2Prose: React.FC<Notes2ProseProps> = ({
                       </article>
                       <div className="d-flex justify-content-end">
                         <ButtonToolbar>
-                          <TextToSpeech text={response.prose ?? ''}/>
+                          <TextToSpeech text={response.prose ?? ""} />
                           <ButtonGroup>
                             <Button disabled={!response.prose} onClick={copy}>
                               <FontAwesomeIcon icon={faClipboard} />

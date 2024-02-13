@@ -15,9 +15,11 @@ import { useSettings } from "../../service/settings.service";
  * @example
  *   (<TextToSpeech text={"Some text to read aloud."}/>)
  */
-export const TextToSpeech = ({text}: {text: string}) => {
+export const TextToSpeech = ({ text }: { text: string }) => {
   const [isPaused, setIsPaused] = useState(false);
-  const [utterance, setUtterance] = useState<null|SpeechSynthesisUtterance>(null);
+  const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
+    null
+  );
   const settings = useSettings();
 
   /** Update utterance on change of text. */
@@ -39,34 +41,36 @@ export const TextToSpeech = ({text}: {text: string}) => {
       synth.speak(utterance);
     }
     setIsPaused(false);
-  }
+  };
   /** Pause the current utterance. */
   const handlePause = () => {
     const synth = window.speechSynthesis;
     synth.pause();
     setIsPaused(true);
-  }
+  };
   /** Stop playing and reset speech. */
   const handleStop = () => {
     const synth = window.speechSynthesis;
     synth.cancel();
     setIsPaused(false);
-  }
+  };
 
   return settings.text2speech ? (
-      <ButtonGroup>
-        <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
-          <FontAwesomeIcon icon={faPlay}/>
-          <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
-        </Button>
-        <Button onClick={handlePause} title="Pause">
-          <FontAwesomeIcon icon={faPause}/>
-          <span className="sr-only">Pause</span>
-        </Button>
-        <Button onClick={handleStop} title="Stop">
-          <FontAwesomeIcon icon={faStop}/>
-          <span className="sr-only">Stop</span>
-        </Button>
-      </ButtonGroup>
-  ) : <></>
-}
+    <ButtonGroup>
+      <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
+        <FontAwesomeIcon icon={faPlay} />
+        <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
+      </Button>
+      <Button onClick={handlePause} title="Pause">
+        <FontAwesomeIcon icon={faPause} />
+        <span className="sr-only">Pause</span>
+      </Button>
+      <Button onClick={handleStop} title="Stop">
+        <FontAwesomeIcon icon={faStop} />
+        <span className="sr-only">Stop</span>
+      </Button>
+    </ButtonGroup>
+  ) : (
+    <></>
+  );
+};

@@ -23,9 +23,11 @@ interface Settings {
   scribe?: boolean;
   notes2prose?: boolean;
   grammar?: boolean;
-  clarify?: boolean;
+  copyedit?: boolean;
   assess_expectations?: boolean;
   text2speech?: boolean;
+  logical_flow?: boolean;
+  topics?: boolean;
 }
 
 // Default json settings, in case of network failure.
@@ -34,10 +36,10 @@ const DEFAULT: Settings = {
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   scribe: true,
   notes2prose: true,
-  grammar: true,
-  clarify: true,
   assess_expectations: true,
   text2speech: true,
+  logical_flow: true,
+  topics: true,
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable
