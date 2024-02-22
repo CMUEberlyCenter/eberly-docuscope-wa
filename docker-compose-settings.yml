@@ -1,0 +1,76 @@
+###################################################################################
+#
+# A copy of docker-compose.yml with added mounting of the `settings` directory
+# so that features and options can be changed without needing to recompile.
+#
+###################################################################################
+
+version: '3'
+services:
+  db:
+    image: docker.io/mysql:8
+    restart: always
+    secrets:
+      - db_root_password
+      - db_user
+      - db_password
+    environment:
+      MYSQL_DATABASE: dswa
+      MYSQL_ROOT_PASSWORD_FILE: "/run/secrets/db_root_password"
+      MYSQL_USER_FILE: "/run/secrets/db_user"
+      MYSQL_PASSWORD_FILE: "/run/secrets/db_password"
+    volumes:
+      - db-data:/var/lib/mysql
+
+  ontopic:
+    build:
+      context: ./ontopic
+      dockerfile: ./Dockerfile
+    restart: always
+    #ports:
+    # - 5000:5000
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+     - 8888:8888
+    secrets:
+      - db_user
+      - db_password
+      - openai_api_key
+      - token
+    environment:
+      DSWA_ONTOPIC_HOST: "ontopic"
+      DSWA_ONTOPIC_PORT: 5000
+      DB_HOST: db
+      DB_PORT: 3306
+      MYSQL_DATABASE: dswa
+      MYSQL_USER_FILE: /run/secrets/db_user
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      TOKEN_SECRET_FILE: /run/secrets/token
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      PORT: 8888
+    restart: always
+    depends_on:
+      - "db"
+    volumes:
+      - "./settings:/app/build/app/settings:ro"
+
+volumes:
+  db-data:
+    labels:
+      edu.cmu.eberly.docuscope.description: "Database for DocuScope Write & Audit Scribe"
+
+secrets:
+  db_user:
+    file: secrets/db_user
+  db_password:
+    file: secrets/db_password
+  db_root_password:
+    file: secrets/db_root_password
+  openai_api_key:
+    file: secrets/openai_api_key
+  token:
+    file: secrets/token
