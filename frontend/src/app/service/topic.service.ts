@@ -51,7 +51,7 @@ export function highlightSentence(
 
   const pElement = document.getElementById(pId);
   if (!pElement) {
-    console.warn('Unable to find paragraph element %s', pId);
+    // console.warn('Unable to find paragraph element %s', pId);
     return;
   }
   pElement.classList.add('paragraph-highlight');
@@ -61,8 +61,8 @@ export function highlightSentence(
   const sElement = document.getElementById(sId);
   if (sElement) {
     sElement.classList.add('sentence-highlight');
-  } else {
-    console.log('Unable to find sentence element');
+  // } else {
+    // console.warn('Unable to find sentence element %s', sId);
   }
 }
 

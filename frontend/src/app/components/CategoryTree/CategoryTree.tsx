@@ -10,8 +10,7 @@
  */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
-import * as React from "react";
-import {
+import React, {
   ChangeEvent,
   Suspense,
   useEffect,
@@ -117,6 +116,7 @@ enum CheckboxState {
   Checked,
 }
 
+type PatternsProps = { data: PatternData[] };
 /**
  * Displays the pattern count table.
  * Two columns: the pattern and a count of instances of that pattern.
@@ -124,7 +124,7 @@ enum CheckboxState {
  *
  * TODO: add sorting by pattern or count.
  */
-const Patterns = (props: { data: PatternData[] }) => {
+const Patterns: React.FC<PatternsProps> = ({ data } : PatternsProps ) => {
   const key = useId();
   return (
     <div className="table-responsive patterns-container ms-5">
@@ -138,8 +138,8 @@ const Patterns = (props: { data: PatternData[] }) => {
           </tr>
         </thead>
         <tbody>
-          {props.data &&
-            props.data.map((pat, i) => (
+          {data &&
+            data.map((pat, i) => (
               <tr key={`${key}-row-${i}`}>
                 <td>{pat.pattern}</td>
                 <td className="text-end pe-3">{pat.count}</td>
@@ -167,6 +167,11 @@ function fade(state: string) {
   return { transition: `opacity ${DURATION}ms ease-in-out`, opacity: opacity };
 }
 
+type CategoryNodeProps = {
+  data: TreeNode;
+  ancestors: string[];
+  onChange: (target: TreeNode, state: CheckboxState) => void;
+}
 /**
  * A node in the CategoryTree
  * Has a subnode expansion button if required.
@@ -182,10 +187,10 @@ function fade(state: string) {
  *    onChange - callback for when checkbox is toggled.
  * @returns a component representing a single node in the tree
  */
-const CategoryNode = (props: {
-  data: TreeNode;
-  ancestors: string[];
-  onChange: (target: TreeNode, state: CheckboxState) => void;
+const CategoryNode: React.FC<CategoryNodeProps> = ({
+  data,
+  ancestors,
+  onChange
 }) => {
   const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
@@ -195,7 +200,7 @@ const CategoryNode = (props: {
 
   // when checked status changes, update checkbox.
   useEffect(() => {
-    const state = props.data.checked;
+    const state = data.checked;
     if (checkRef.current) {
       const cb = checkRef.current as HTMLInputElement;
       if (state === CheckboxState.Checked) {
@@ -209,7 +214,7 @@ const CategoryNode = (props: {
         cb.indeterminate = true;
       }
     }
-  }, [props.data.checked]);
+  }, [data.checked]);
 
   // When editing state changes.
   useEffect(() => {
@@ -230,20 +235,20 @@ const CategoryNode = (props: {
     const state = e.currentTarget.checked
       ? CheckboxState.Checked
       : CheckboxState.Empty;
-    props.onChange(props.data, state);
+    onChange(data, state);
   };
 
-  const pattern_count = count_patterns(props.data);
+  const pattern_count = count_patterns(data);
   // To get cluster highlighting to work properly, the ancestor class
   // ids need to be added.
-  const myCategoryClasses = [...props.ancestors, props.data.id];
+  const myCategoryClasses = [...ancestors, data.id];
   return (
-    <li data-docuscope-category={props.data.id} className="list-group-item">
+    <li data-docuscope-category={data.id} className="list-group-item">
       <div className="d-flex align-items-baseline">
         <button
           type="button"
           className="btn btn-light me-1"
-          disabled={!has_child_data(props.data)}
+          disabled={!has_child_data(data)}
           onClick={() => setExpanded(!expanded)}
           aria-controls={childrenId}
         >
@@ -265,7 +270,7 @@ const CategoryNode = (props: {
             id={checkId}
             type="checkbox"
             role="checkbox"
-            value={props.data.id}
+            value={data.id}
             onChange={change}
             disabled={editing || pattern_count === 0}
           />
@@ -275,17 +280,17 @@ const CategoryNode = (props: {
             )}`}
             htmlFor={checkId}
           >
-            {props.data.label}
+            {data.label}
           </label>
         </div>
         {/* Additional category information tooltip. */}
-        <OverlayTrigger overlay={<Tooltip>{props.data.help}</Tooltip>}>
+        <OverlayTrigger overlay={<Tooltip>{data.help}</Tooltip>}>
           <span className="material-icons comment mx-1 align-self-start">
             comment
           </span>
         </OverlayTrigger>
         <Transition
-          in={props.data.patterns.length > 0 || !expanded}
+          in={data.patterns.length > 0 || !expanded}
           timeout={DURATION}
         >
           {/* Animate count fading on expansion. */}
@@ -306,23 +311,23 @@ const CategoryNode = (props: {
         {/* Animate expansion */}
         <div id={childrenId}>
           {/* if there are child nodes, generate those, else show patterns */}
-          {props.data.children.length > 0 ? (
+          {data.children.length > 0 ? (
             <ul className="list-group">
-              {props.data.children.map((sub) => (
+              {data.children.map((sub) => (
                 <CategoryNode
                   key={sub.id}
                   data={sub}
                   ancestors={myCategoryClasses}
-                  onChange={props.onChange}
+                  onChange={onChange}
                 />
               ))}
             </ul>
           ) : (
             ""
           )}
-          {props.data.children.length === 0 &&
-          props.data.patterns.length > 0 ? (
-            <Patterns data={props.data.patterns} />
+          {data.children.length === 0 &&
+          data.patterns.length > 0 ? (
+            <Patterns data={data.patterns} />
           ) : (
             ""
           )}
@@ -371,7 +376,7 @@ function highlighSelection(data: TreeNode[]): void {
 }
 
 /** Top level node in the CategoryTree */
-const CategoryTreeTop = () => {
+const CategoryTreeTop: React.FC = () => {
   const [refresh, setRefresh] = useState(false); // Hack to force refresh.
   const data: TreeNode[] | null = useCategoryData();
 
@@ -425,24 +430,24 @@ const CategoryTreeTop = () => {
 };
 
 // What to display if there is an error in this component.
-const ErrorFallback = (props: { error?: Error }) => (
+const ErrorFallback: React.FC<{error?: Error}> = ({error}: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading category information:</p>
-    <pre>{props.error?.message}</pre>
+    <pre>{error?.message}</pre>
   </div>
 );
 
 // Spinner to display on loading.
 // Not often seen as there should be some data available by the
 // time a user sees this component.
-const MySpinner = () => (
+const MySpinner: React.FC = () => (
   <Spinner animation={"border"} role={"status"} variant={"primary"}>
     <span className="visually-hidden">Loading...</span>
   </Spinner>
 );
 
 /** Category Tree for displaying the category hierarchy data. */
-const CategoryTree = () => (
+const CategoryTree: React.FC = () => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     <Suspense fallback={<MySpinner />}>
       <Subscribe source$={categoryData$} fallback={<MySpinner />}>

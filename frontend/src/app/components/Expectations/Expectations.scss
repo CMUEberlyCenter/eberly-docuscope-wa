@@ -1,78 +1,103 @@
+.expectations {
+  [aria-expanded="true"] {
+    .expanded {
+      display: block;
+    }
+  }
+  [aria-expanded="false"] {
+    .expand-toggle {
+      i {
+        transform: rotate(-90deg);
+      }
+    }
+    .expanded {
+      display: none;
+    }
+  }
+  .pointer {
+    cursor: pointer;
+  }
+  .cluster-line-icon {
+    flex: 0;
+    width: 18px;
+  }
+  
+  .cluster-mini-icon {
+    flex: 0;
+    width: 18px;
+    padding-top: 3px;
+    padding-right: 3px;
+    margin-right: 2px;
+  }
+  
+  .cluster-mini-label {
+    flex: 0;
+    font-size: 10pt;
+    padding-top: 2px;
+  }
+  
+  .cluster-up-arrow {
+    flex: 0;
+    width: 18px;
+    padding-top: 0px;
+    padding-right: 3px;
+    margin-right: 2px;
+  }
+  
+}
+
 /* 
   MvV: We will go full-on SCSS but for now the top priority is to match everything with the DSWA desktop
   version and that's styled internally in a more linear way
 */
 
-.expectations-list {
-  font-weight: bold;
-  // font-size: 12pt;
-}
+// .expectations-list {
+//   font-weight: bold;
+//   // font-size: 12pt;
+//   li {
+//     list-style-type: none;
+//   }
+// }
 
-.expectations-rule {
-  // font-size: 12pt;
-  cursor: pointer;
-}
+// .expectations-rule {
+//   // font-size: 12pt;
+//   cursor: pointer;
+// }
 
-.expectations-rule-selected:hover {
-  color: grey;
-}
+// .expectations-rule-selected:hover {
+//   color: grey;
+// }
 
-/*
-.expectations-rule:hover {
-  color: grey;
-}
-*/
+// /*
+// .expectations-rule:hover {
+//   color: grey;
+// }
+// */
 
-.expectations-clusters {
-  // font-size: 11pt;
-  font-weight: normal;
-}
+// .expectations-clusters {
+//   // font-size: 11pt;
+//   font-weight: normal;
+// }
 
-.expectations-cluster {
-  // font-size: 12pt;
-  cursor: pointer;
-}
+// .expectations-cluster {
+//   // font-size: 12pt;
+//   cursor: pointer;
+// }
 
-.cluster-line {
-  display: flex;
-  flex-direction: row;
-}
+// .cluster-line {
+//   display: flex;
+//   flex-direction: row;
+// }
 
-.cluster-line-label {
-  flex: 1;
-}
+// .cluster-line-label {
+//   flex: 1;
+// }
 
-.cluster-line-label:hover {
-  color: grey;
-}
+// .cluster-line-label:hover {
+//   color: grey;
+// }
 
-.cluster-selected {
-  background: #87bbff;
-}
+// .cluster-selected {
+//   background: #87bbff;
+// }
 
-.cluster-line-icon {
-  flex: 0;
-  width: 18px;
-}
-
-.cluster-mini-icon {
-  flex: 0;
-  width: 18px;
-  padding-top: 3px;
-  padding-right: 3px;
-  margin-right: 2px;
-}
-
-.cluster-mini-label {
-  flex: 0;
-  font-size: 10pt;
-  padding-top: 2px;
-}
-
-.cluster-up-arrow {
-  flex: 0;
-  width: 18px;
-  padding-top: 0px;
-  padding-right: 3px;
-  margin-right: 2px;
-}

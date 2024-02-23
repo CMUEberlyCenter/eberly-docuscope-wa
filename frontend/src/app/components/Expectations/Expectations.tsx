@@ -1,7 +1,7 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
 import React, { useEffect, useState } from "react";
-import { Alert, Card } from "react-bootstrap";
+import { Alert, Button, Card, ListGroup } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import TabTitle from "../TabTitle/TabTitle";
 
@@ -15,8 +15,6 @@ import clusterWarningIcon from "../../assets/icons/topic_cluster_warning_icon.pn
 import { highlightTopic } from "../../service/topic.service";
 import ClusterPanel from "../ClusterPanel/ClusterPanel";
 
-import DocuScopeRule from "../../../../js/DocuScopeRule";
-import DocuScopeRules from "../../../../js/DocuScopeRules";
 import { useConfiguration, useRules } from "../../service/rules.service";
 import { expectation } from "../../service/scribe.service";
 
@@ -95,7 +93,7 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
    *
    */
   const onRuleClick = (
-    e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
     ruleIndex: number
   ) => {
     e.preventDefault();
@@ -113,7 +111,7 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
    *
    */
   const onClusterClick = (
-    e: React.MouseEvent<HTMLLIElement, MouseEvent>,
+    e: React.MouseEvent<Element, MouseEvent>,
     ruleIndex: number,
     clusterIndex: number
   ) => {
@@ -163,96 +161,6 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
    *   If an expectation is in state #3, the user is reminded that the expectation’s topic cluster has been customized by them.
    *
    */
-  const createRuleTree = (
-    ruleManager: DocuScopeRules | undefined | null,
-    currentRule: number,
-    currentCluster: number
-  ) => (
-    <ol type="a" className="expectations-list">
-      {ruleManager?.rules.map((aRule: DocuScopeRule, i) => (
-        <li
-          className="expectations-rule"
-          key={"rule" + i}
-          id={"rule-" + i}
-          onClick={(e) => onRuleClick(e, i)}
-        >
-          <div className="expectations-rule-selected">{aRule.name}</div>
-          <ol type="1" className="expectations-clusters">
-            {aRule.children.map((aCluster, j: number) => {
-              const predefCount = ruleManager.getClusterTopicCountPredefined(
-                i,
-                j
-              );
-              const customCount = ruleManager.getClusterTopicCountCustom(i, j);
-              let clustercount = (
-                <img className="cluster-mini-icon" src={clusterWarningIcon} />
-              );
-              if (predefCount > 0) {
-                clustercount = <div className="cluster-mini-icon" />;
-              }
-
-              if (customCount > 0) {
-                clustercount = (
-                  <img className="cluster-mini-icon" src={clusterEditedIcon} />
-                );
-              }
-
-              const count: number = ruleManager.topicSentenceCount(i, j);
-              return (
-                <li
-                  className="expectations-cluster"
-                  key={`cluster-${i}-${j}`}
-                  id={`rule-${i}-${j}`}
-                  onClick={(e) => onClusterClick(e, i, j)}
-                >
-                  <div
-                    className={`cluster-line ${
-                      i === currentRule && j === currentCluster
-                        ? " cluster-selected"
-                        : ""
-                    }`}
-                  >
-                    <div className="cluster-line-label">{aCluster.name}</div>
-                    <div
-                      className="cluster-line-icon"
-                      title="Custom topics not defined here"
-                    >
-                      {clustercount}
-                    </div>
-                    <div
-                      className="cluster-line-icon"
-                      title="Current expectation value"
-                    >
-                      <img
-                        className="cluster-mini-icon"
-                        src={clusterActiveIcon}
-                      />
-                    </div>
-                    <div className="cluster-mini-label">Expected</div>
-                    <div className="cluster-line-icon">
-                      <img
-                        className={`cluster-up-arrow ${
-                          count > 0 ? "invisible" : "visible"
-                        }`}
-                        style={{ visibility: "hidden" }}
-                        src={clusterUpIcon}
-                      />
-                    </div>
-                    <div
-                      className="cluster-mini-label"
-                      title="Nr. sentences matching topics"
-                    >
-                      {count.toString().padStart(2, "0")}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
-          </ol>
-        </li>
-      ))}
-    </ol>
-  );
 
   return (
     <Card as="section" className="overflow-hidden m-1 mh-100">
@@ -275,12 +183,67 @@ const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
             )}
           </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <div className="overflow-auto" style={{ maxHeight: "50vh" }}>
-              {createRuleTree(
-                ruleManager,
-                ruleState.currentRule,
-                ruleState.currentCluster
-              )}
+            <div className="overflow-auto expectations" style={{ maxHeight: "50vh", fontSize: '75%' }}>
+              <ListGroup>
+                {ruleManager?.rules.map((rule, i) => (
+                  <ListGroup.Item action as="div" key={rule.id + i} aria-expanded="true" active={ruleState.currentRule === i && ruleState.currentCluster < 0}>
+                    <div className="d-flex">
+                    <Button size="sm" variant="none" className="expand-toggle" onClick={e => {
+                      const p = e.currentTarget.closest('[aria-expanded]');
+                      p?.setAttribute('aria-expanded', p.getAttribute('aria-expanded') === 'true' ? 'false' : 'true');
+                    }}>
+                      <i className="fa-solid fa-caret-down flex-shrink-0"></i>
+                    </Button>
+                    <div className="fw-bold flex-grow-1 pointer" onClick={e => onRuleClick(e, i)}>{rule.name}</div>
+                    </div>
+                    <div className="expanded" id={rule.id}>
+                      <ListGroup>
+                        {rule.children.map((cluster, j) => {
+                          const predefCount = ruleManager.getClusterTopicCountPredefined(
+                            i,
+                            j
+                          );
+                          const customCount = ruleManager.getClusterTopicCountCustom(i, j);
+                          let clustercount = (
+                            <img className="cluster-mini-icon" src={clusterWarningIcon} />
+                          );
+                          if (predefCount > 0) {
+                            clustercount = <div className="cluster-mini-icon" />;
+                          }
+
+                          if (customCount > 0) {
+                            clustercount = (
+                              <img className="cluster-mini-icon" src={clusterEditedIcon} />
+                            );
+                          }
+
+                          const count = ruleManager.topicSentenceCount(i, j);
+                          return (
+                            <ListGroup.Item action key={cluster.id} onClick={e => onClusterClick(e, i, j)} active={ruleState.currentRule === i && ruleState.currentCluster === j} className="d-flex flex-row pointer">
+                              <div className="flex-grow-1">{cluster.name}</div>
+                              <div className="cluster-line-icon" title="Custom topics not defined here">
+                                {clustercount}
+                              </div>
+                              <div className="cluster-line-icon" title="Current expectation value">
+                                <img className="cluster-mini-icon" src={clusterActiveIcon} />
+                              </div>
+                              <div className="cluster-mini-label">Expected</div>
+                              <div className="cluster-line-icon">
+                                <img className={`cluster-up-arrow ${count > 0 ? "invisible" : "visible"}`}
+                                  style={{ visibility: "hidden" }}
+                                  src={clusterUpIcon}
+                                />
+                              </div>
+                              <div className="cluster-mini-label" title="Number of sentences matchin topics">
+                                {count.toString().padStart(2, "0")}
+                              </div>
+                            </ListGroup.Item>)
+                        })}
+                      </ListGroup>
+                    </div>
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
             </div>
           </ErrorBoundary>
         </Subscribe>
