@@ -61,7 +61,7 @@ export function highlightSentence(
   const sElement = document.getElementById(sId);
   if (sElement) {
     sElement.classList.add('sentence-highlight');
-  // } else {
+    // } else {
     // console.warn('Unable to find sentence element %s', sId);
   }
 }

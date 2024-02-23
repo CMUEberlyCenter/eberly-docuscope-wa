@@ -124,7 +124,7 @@ type PatternsProps = { data: PatternData[] };
  *
  * TODO: add sorting by pattern or count.
  */
-const Patterns: React.FC<PatternsProps> = ({ data } : PatternsProps ) => {
+const Patterns: React.FC<PatternsProps> = ({ data }: PatternsProps) => {
   const key = useId();
   return (
     <div className="table-responsive patterns-container ms-5">
@@ -171,7 +171,7 @@ type CategoryNodeProps = {
   data: TreeNode;
   ancestors: string[];
   onChange: (target: TreeNode, state: CheckboxState) => void;
-}
+};
 /**
  * A node in the CategoryTree
  * Has a subnode expansion button if required.
@@ -190,7 +190,7 @@ type CategoryNodeProps = {
 const CategoryNode: React.FC<CategoryNodeProps> = ({
   data,
   ancestors,
-  onChange
+  onChange,
 }) => {
   const checkRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
@@ -325,8 +325,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
           ) : (
             ""
           )}
-          {data.children.length === 0 &&
-          data.patterns.length > 0 ? (
+          {data.children.length === 0 && data.patterns.length > 0 ? (
             <Patterns data={data.patterns} />
           ) : (
             ""
@@ -430,7 +429,11 @@ const CategoryTreeTop: React.FC = () => {
 };
 
 // What to display if there is an error in this component.
-const ErrorFallback: React.FC<{error?: Error}> = ({error}: { error?: Error }) => (
+const ErrorFallback: React.FC<{ error?: Error }> = ({
+  error,
+}: {
+  error?: Error;
+}) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading category information:</p>
     <pre>{error?.message}</pre>
