@@ -1,4 +1,5 @@
 {
+  "brand": "myScribe",
   "common_dictionary": "https://docuscope.eberly.cmu.edu/common_dictionary",
   "tagger": "https://docuscope.eberly.cmu.edu/tagger/tag",
   "scribe": true,
@@ -6,5 +7,7 @@
   "assess_expectations": true,
   "grammar": false,
   "copyedit": true,
-  "text2speech": true
+  "text2speech": true,
+
+  "docuscope": false
 }

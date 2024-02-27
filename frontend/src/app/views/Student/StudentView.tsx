@@ -62,8 +62,9 @@ import { showAbout } from "../../service/help.service";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
 import "./StudentView.scss";
 
-import { faBook, faGlobe } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// Commented out for Spring 2024 beta #46
+// import { faBook, faGlobe } from "@fortawesome/free-solid-svg-icons";
+// import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Disable this doumentation to resolve #13 #14 #15
 // import GettingStartedModal from "../../components/HelpDialogs/GettingStartedModal";
@@ -85,7 +86,7 @@ import { serialize } from "../../service/editor-state.service";
 import { About } from "../../components/HelpDialogs/About";
 import { Notes2Prose } from "../../components/scribe/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/scribe/ScribeOption/ScribeOption";
-import { VERSION } from "../../service/application.service";
+// import { VERSION } from "../../service/application.service"; // #46
 import {
   SelectedNotesProse,
   assess,
@@ -111,6 +112,7 @@ import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
 import { Clarify } from "../../components/scribe/Clarify/Clarify";
 import { LogicalFlowAudit } from "../../components/scribe/LogicalFlow/LogicalFlow";
 import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
+import { useSettings } from "../../service/settings.service";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -149,17 +151,16 @@ function fixOnTopicHtml(topicData?: { html?: string } | null) {
  * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = (/*props: {
-  ruleManager: DocuScopeRules;
-}*/) => {
+const StudentView = () => {
   const ruleManager = useRules();
-  // Status handlers
-  const [status /*, setStatus*/] = useState("Application ready, rules loaded");
-  const [language /*, setLanguage*/] = useState("ENG");
+  // Status handlers #46
+  // const [status /*, setStatus*/] = useState("Application ready, rules loaded");
+  // const [language /*, setLanguage*/] = useState("ENG");
 
+  const settings = useSettings();
+  const brand = <>{settings.brand}</>; // <>DocuScope Write &amp; Audit</>; // For #46
   const navId = useId();
   const selectId = useId();
-  //const [status, setStatus] = useState('');
   const defaultTab = "expectations";
   const [currentTab, setCurrentTab] = useState<Tool>(defaultTab);
   // on tab switch update current and broadcast.
@@ -586,7 +587,7 @@ const StudentView = (/*props: {
       <header className="d-flex bg-dark">
         <Navbar variant="dark">
           <Container>
-            <Navbar.Brand href="#">DocuScope Write &amp; Audit</Navbar.Brand>
+            <Navbar.Brand href="#">{brand}</Navbar.Brand>
             <Navbar.Toggle aria-controls={navId}></Navbar.Toggle>
             <Navbar.Collapse id={navId}>
               <Nav className="me-auto" onSelect={onNavSelect}>
@@ -643,27 +644,33 @@ const StudentView = (/*props: {
             >
               <Expectations enableTopicEditing={!ScribeAvailable} />
             </Tab>
-            <Tab
-              eventKey={"coherence"}
-              title="Coherence"
-              className="overflow-hidden h-100"
-            >
-              <Coherence />
-            </Tab>
-            <Tab
-              eventKey={"clarity"}
-              title="Clarity"
-              className="overflow-hidden h-100"
-            >
-              <Clarity />
-            </Tab>
-            <Tab
-              eventKey={"impressions"}
-              title="Impressions"
-              className="overflow-hidden h-100"
-            >
-              <Impressions />
-            </Tab>
+            {settings.docuscope && settings.coherence && (
+              <Tab
+                eventKey={"coherence"}
+                title="Coherence"
+                className="overflow-hidden h-100"
+              >
+                <Coherence />
+              </Tab>
+            )}
+            {settings.docuscope && settings.clarity && (
+              <Tab
+                eventKey={"clarity"}
+                title="Clarity"
+                className="overflow-hidden h-100"
+              >
+                <Clarity />
+              </Tab>
+            )}
+            {settings.docuscope && settings.impressions && (
+              <Tab
+                eventKey={"impressions"}
+                title="Impressions"
+                className="overflow-hidden h-100"
+              >
+                <Impressions />
+              </Tab>
+            )}
           </Tabs>
         </aside>
 
@@ -743,14 +750,18 @@ const StudentView = (/*props: {
                       )}
                   </ButtonGroup>
                 )}
-              <Button onClick={() => globalUpdate(editorTextValue)}>
-                Update
-              </Button>
-              <LockSwitch
-                checked={editable}
-                label="Edit Mode:"
-                onChange={(checked) => setEditorState(checked)}
-              />
+              {settings.docuscope && (
+                <>
+                  <Button onClick={() => globalUpdate(editorTextValue)}>
+                    Update
+                  </Button>
+                  <LockSwitch
+                    checked={editable}
+                    label="Edit Mode:"
+                    onChange={(checked) => setEditorState(checked)}
+                  />
+                </>
+              )}
             </ButtonToolbar>
           </Card.Header>
           <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
@@ -798,7 +809,7 @@ const StudentView = (/*props: {
           </Card.Body>
         </Card>
       </main>
-      <footer className="bg-dark statusbar">
+      {/* <footer className="bg-dark statusbar"> // removed for #46
         <div className="statusbar-status">{status}</div>
         <div className="statusbar-version">{`DSWA Version: ${VERSION}`}</div>
         <div className="statusbar-ruleversion">
@@ -818,7 +829,7 @@ const StudentView = (/*props: {
           <FontAwesomeIcon icon={faGlobe} className="mx-1" />
           {language}
         </div>
-      </footer>
+      </footer> */}
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
       {ScribeAvailable &&

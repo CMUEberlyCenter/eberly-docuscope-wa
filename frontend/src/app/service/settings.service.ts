@@ -18,9 +18,13 @@ const SETTINGS_URL = new URL('../settings/settings.json', import.meta.url);
 
 // Defines the form of the json settings.
 interface Settings {
-  common_dictionary: string;
-  tagger: string;
-  scribe?: boolean;
+  brand?: string;
+
+  common_dictionary: string; // needed for impressions
+  tagger: string; // needed for impressions
+
+  scribe?: boolean; // global scribe availability
+  // scribe features
   notes2prose?: boolean;
   grammar?: boolean;
   copyedit?: boolean;
@@ -28,10 +32,17 @@ interface Settings {
   text2speech?: boolean;
   logical_flow?: boolean;
   topics?: boolean;
+
+  docuscope?: boolean; // global docuscope availability
+  // docuscope features
+  coherence?: boolean;
+  clarity?: boolean;
+  impressions?: boolean;
 }
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
+  brand: 'myScribe',
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   scribe: true,
@@ -40,6 +51,11 @@ const DEFAULT: Settings = {
   text2speech: true,
   logical_flow: true,
   topics: true,
+
+  docuscope: true,
+  coherence: true,
+  clarity: true,
+  impressions: true,
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable
@@ -55,5 +71,6 @@ export const [useSettings, settings$] = bind(
       );
       return of(DEFAULT);
     })
-  )
+  ),
+  DEFAULT
 );
