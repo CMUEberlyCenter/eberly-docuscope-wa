@@ -84,7 +84,7 @@ const Clarity = () => {
   };
 
   return (
-    <Card as="section" className="overflow-hidden m-1 mh-100">
+    <Card as="section" className="clarity overflow-hidden m-1 mh-100">
       <Card.Header>
         <TabTitle>Polish Your Sentences for Clarity</TabTitle>
       </Card.Header>
