@@ -685,7 +685,7 @@ const StudentView = () => {
             <ButtonToolbar>
               {paragraphselector}
               {ScribeAvailable &&
-                configuration &&
+                configuration && "prompt_templates" in configuration &&
                 Object.keys(configuration.prompt_templates).length > 0 && (
                   <ButtonGroup className="me-2">
                     {notesFeature &&
@@ -834,7 +834,7 @@ const StudentView = () => {
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
       {ScribeAvailable &&
         notesFeature &&
-        configuration &&
+        configuration && "prompt_templates" in configuration &&
         "notes_to_prose" in configuration.prompt_templates && (
           <Notes2Prose
             show={showConvertNotes}
@@ -849,7 +849,7 @@ const StudentView = () => {
         )}
       {ScribeAvailable &&
         grammarFeature &&
-        configuration &&
+        configuration && "prompt_templates" in configuration &&
         "grammar" in configuration.prompt_templates && (
           <FixGrammar
             show={showFixGrammar}
@@ -864,7 +864,7 @@ const StudentView = () => {
         )}
       {ScribeAvailable &&
         clarifyFeature &&
-        configuration &&
+        configuration && "prompt_templates" in configuration &&
         "copyedit" in configuration.prompt_templates && (
           <Clarify
             show={showClarify}
@@ -885,7 +885,7 @@ const StudentView = () => {
       )}
       {ScribeAvailable &&
         logicalFlowFeature &&
-        configuration &&
+        configuration && "prompt_templates" in configuration &&
         "logical_flow" in configuration.prompt_templates && (
           <LogicalFlowAudit
             show={showLogicalFlow}
@@ -894,7 +894,7 @@ const StudentView = () => {
         )}
       {ScribeAvailable &&
         topicsFeature &&
-        configuration &&
+        configuration && "prompt_templates" in configuration &&
         "topics" in configuration.prompt_templates && (
           <TopicsAudit
             show={showAuditTopics}

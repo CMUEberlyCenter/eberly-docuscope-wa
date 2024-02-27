@@ -3,12 +3,9 @@
  *
  * The top has a legend for interpreting this tool's symbols.
  */
-import { useCallback, useEffect, useId, useState } from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
-// import topic_left_icon from "../../assets/icons/topic_left_icon.png";
-// import topic_right_icon from "../../assets/icons/topic_right_icon.png";
-// import topic_sent_icon_left from "../../assets/icons/topic_sent_icon_left.png";
-// import topic_sent_icon_right from "../../assets/icons/topic_sent_icon_right.png";
+import { FC, useCallback, useEffect, useId, useState } from "react";
+import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { useOnTopic } from "../../service/onTopic.service";
 import {
   highlightParagraph,
@@ -44,11 +41,16 @@ import "./Coherence.scss";
 
  */
 
-const IndicatorIcon = ({
+type IndicatorIconProps = {
+  unit: {
+    is_left: boolean;
+    is_topic_sent: boolean;
+  } | null;
+};
+/** Component for rendering the appropriate icon. */
+const IndicatorIcon: FC<IndicatorIconProps> = ({
   unit,
-}: {
-  unit: { is_left: boolean; is_topic_sent: boolean } | null;
-}) => {
+}: IndicatorIconProps) => {
   if (unit === null) return undefined;
   if (unit.is_left) {
     return unit.is_topic_sent ? <DotSolidCircle /> : <SolidCircle />;
@@ -56,7 +58,8 @@ const IndicatorIcon = ({
   return unit.is_topic_sent ? <DotOutlineCircle /> : <OutlineCircle />;
 };
 
-const SolidCircle = () => (
+/** Solid circle icon component. */
+const SolidCircle: FC = () => (
   <i
     className="fa-solid fa-circle text-legend"
     title="Topic before the main verb"
@@ -64,7 +67,8 @@ const SolidCircle = () => (
   ></i>
 );
 
-const DotSolidCircle = () => (
+/** Solid cirle with annotation dot icon component. */
+const DotSolidCircle: FC = () => (
   <span
     className="text-nowrap"
     title="Topic before the main verb of a topic sentence"
@@ -78,7 +82,8 @@ const DotSolidCircle = () => (
   </span>
 );
 
-const OutlineCircle = () => (
+/** Circle outline icon component. */
+const OutlineCircle: FC = () => (
   <i
     className="fa-regular fa-circle text-legend"
     title="Topic after the main verb"
@@ -86,7 +91,8 @@ const OutlineCircle = () => (
   ></i>
 );
 
-const DotOutlineCircle = () => (
+/** Circle outline with annotation dot icon component. */
+const DotOutlineCircle: FC = () => (
   <span
     className="text-nowrap"
     title="Topic after the main verb of a topic sentence"
@@ -101,7 +107,7 @@ const DotOutlineCircle = () => (
 );
 
 /** Legend for data representation for these tools. */
-const Legend = () => (
+const Legend: FC = () => (
   <Container className="border p-2">
     <Row xs={"auto"} md={"auto"} lg={2}>
       <Col>
@@ -124,9 +130,10 @@ const Legend = () => (
 );
 
 /**
- *
+ * Coherence tool component
+ * @component
  */
-const Coherence = () => {
+const Coherence: FC = () => {
   const toggleId = useId();
   const [showToggle, setShowToggle] = useState(true);
   const data = useOnTopic();
@@ -191,7 +198,7 @@ const Coherence = () => {
               </label>
               <div className="form-check form-switch">
                 <input
-                  onChange={() => {}}
+                  onChange={() => { }}
                   className="form-check-input"
                   type="checkbox"
                   role="switch"
@@ -209,7 +216,7 @@ const Coherence = () => {
                   <td>
                     <div className="d-flex flex-row">
                       {paragraphRange.map((i) => (
-                        <Button
+                        <Button size="sm"
                           variant="outline-secondary"
                           key={`key-paragraph-${i}`}
                           active={i === selectedParagraph}
@@ -230,14 +237,15 @@ const Coherence = () => {
                   </td>
                 </tr>
                 {/* Visualization Topics */}
-                {data?.coherence?.error
-                  ? null
-                  : data?.coherence?.data
+                <ErrorBoundary fallback={<tr><td><Alert color="warning">Error loading coherence data!</Alert></td></tr>}>
+                  {data?.coherence?.error
+                    ? null
+                    : data?.coherence?.data
                       .filter(
                         ({ is_topic_cluster }) =>
                           is_topic_cluster || !showToggle
                       )
-                      .flatMap(({ topic, is_non_local, paragraphs }, i) => {
+                      .map(({ topic, is_non_local, paragraphs }, i) => {
                         const topi = topic.at(2) ?? "";
                         const [left, right] = ["l", "r"].map((lr) =>
                           is_non_local ? lr : lr.toUpperCase()
@@ -261,9 +269,8 @@ const Coherence = () => {
                             <td>
                               <div className="d-flex flex-row">
                                 {paragraphs.map((paraType, j) => {
-                                  const paraContent = `${
-                                    paraType?.is_left ? left : right
-                                  }${paraType?.is_topic_sent ? "" : "*"}`;
+                                  const paraContent = `${paraType?.is_left ? left : right
+                                    }${paraType?.is_topic_sent ? "" : "*"}`;
                                   return (
                                     <div
                                       key={`topic-key-${i}-${j}`}
@@ -288,100 +295,100 @@ const Coherence = () => {
                           </tr>
                         );
                       })}
-                {/* {visualizationGlobal} */}
-                {selectedParagraph < 0 ? null : (
-                  <>
-                    <tr>
-                      <td colSpan={2} className="topic-separator">
-                        Coherence across sentences in paragraph:{" "}
-                        {selectedParagraph + 1}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Sentences:</td>
-                      <td>
-                        <div className="d-flex flex-row">
-                          {data?.local
-                            ?.at(selectedParagraph)
-                            ?.data.at(0)
-                            ?.sentences.map((sentence, i) => (
-                              <Button
-                                key={`key-sentence-${i}`}
-                                variant="outline-secondary"
-                                active={selectedSentence === i}
-                                data-sentence={i}
-                                onClick={() =>
-                                  setSelectedSentence(
-                                    selectedSentence === i ? -1 : i
-                                  )
-                                }
-                              >
-                                {i + 1}
-                              </Button>
-                            ))}
-                          <div
-                            key="key-sentence-padding"
-                            className="flex-grow-1"
-                          ></div>
-                        </div>
-                      </td>
-                    </tr>
-                    {data?.local
-                      ?.at(selectedParagraph)
-                      ?.data.filter((topic) => !!topic)
-                      .map(({ topic, is_non_local, sentences }, i) => {
-                        const topi = topic.at(2) ?? "";
-                        const [left, right] = ["l", "r"].map((lr) =>
-                          is_non_local ? lr : lr.toUpperCase()
-                        );
-                        const iconClass = is_non_local
-                          ? "topic-icon-small"
-                          : "topic-icon-large";
-                        return (
-                          <tr key={`topic-sentence-key-${i}`}>
-                            <td style={{ width: "150px" }}>
-                              <Button
-                                className="w-100"
-                                variant="outline-secondary"
-                                onClick={() =>
-                                  onTopicClick(selectedParagraph, i)
-                                }
-                              >
-                                {topi.replaceAll("_", " ")}
-                              </Button>
-                            </td>
-                            <td>
-                              <div className="d-flex flex-row">
-                                {sentences.map((sentence, j) => {
-                                  const content = `${
-                                    sentence?.is_left ? left : right
-                                  }${sentence?.is_topic_sent ? "" : "*"}`;
-                                  return (
-                                    <div
-                                      key={`topic-sentence-key-${i}-${j}`}
-                                      className="topic-type-default"
-                                      onClick={() =>
-                                        onTopicParagraphClick(i, j, topi)
-                                      }
-                                    >
-                                      {sentence ? (
-                                        <span
-                                          title={content}
-                                          className={iconClass}
-                                        >
-                                          <IndicatorIcon unit={sentence} />
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                  </>
-                )}
+                  {/* {visualizationGlobal} */}
+                  {selectedParagraph < 0 ? null : (
+                    <>
+                      <tr>
+                        <td colSpan={2} className="topic-separator">
+                          Coherence across sentences in paragraph:{" "}
+                          {selectedParagraph + 1}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Sentences:</td>
+                        <td>
+                          <div className="d-flex flex-row">
+                            {data?.local
+                              ?.at(selectedParagraph)
+                              ?.data.at(0)
+                              ?.sentences.map((sentence, i) => (
+                                <Button
+                                  key={`key-sentence-${i}`}
+                                  variant="outline-secondary"
+                                  active={selectedSentence === i}
+                                  data-sentence={i}
+                                  onClick={() =>
+                                    setSelectedSentence(
+                                      selectedSentence === i ? -1 : i
+                                    )
+                                  }
+                                >
+                                  {i + 1}
+                                </Button>
+                              ))}
+                            <div
+                              key="key-sentence-padding"
+                              className="flex-grow-1"
+                            ></div>
+                          </div>
+                        </td>
+                      </tr>
+                      {data?.local
+                        ?.at(selectedParagraph)
+                        ?.data.filter((topic) => !!topic)
+                        .map(({ topic, is_non_local, sentences }, i) => {
+                          const topi = topic.at(2) ?? "";
+                          const [left, right] = ["l", "r"].map((lr) =>
+                            is_non_local ? lr : lr.toUpperCase()
+                          );
+                          const iconClass = is_non_local
+                            ? "topic-icon-small"
+                            : "topic-icon-large";
+                          return (
+                            <tr key={`topic-sentence-key-${i}`}>
+                              <td style={{ width: "150px" }}>
+                                <Button
+                                  className="w-100"
+                                  variant="outline-secondary"
+                                  onClick={() =>
+                                    onTopicClick(selectedParagraph, i)
+                                  }
+                                >
+                                  {topi.replaceAll("_", " ")}
+                                </Button>
+                              </td>
+                              <td>
+                                <div className="d-flex flex-row">
+                                  {sentences.map((sentence, j) => {
+                                    const content = `${sentence?.is_left ? left : right
+                                      }${sentence?.is_topic_sent ? "" : "*"}`;
+                                    return (
+                                      <div
+                                        key={`topic-sentence-key-${i}-${j}`}
+                                        className="topic-type-default"
+                                        onClick={() =>
+                                          onTopicParagraphClick(i, j, topi)
+                                        }
+                                      >
+                                        {sentence ? (
+                                          <span
+                                            title={content}
+                                            className={iconClass}
+                                          >
+                                            <IndicatorIcon unit={sentence} />
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </>
+                  )}
+                </ErrorBoundary>
               </tbody>
             </table>
           </Card.Body>
