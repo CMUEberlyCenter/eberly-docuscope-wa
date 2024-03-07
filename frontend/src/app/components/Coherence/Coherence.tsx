@@ -198,7 +198,7 @@ const Coherence: FC = () => {
               </label>
               <div className="form-check form-switch">
                 <input
-                  onChange={() => { }}
+                  onChange={() => {}}
                   className="form-check-input"
                   type="checkbox"
                   role="switch"
@@ -216,7 +216,8 @@ const Coherence: FC = () => {
                   <td>
                     <div className="d-flex flex-row">
                       {paragraphRange.map((i) => (
-                        <Button size="sm"
+                        <Button
+                          size="sm"
                           variant="outline-secondary"
                           key={`key-paragraph-${i}`}
                           active={i === selectedParagraph}
@@ -237,64 +238,75 @@ const Coherence: FC = () => {
                   </td>
                 </tr>
                 {/* Visualization Topics */}
-                <ErrorBoundary fallback={<tr><td><Alert color="warning">Error loading coherence data!</Alert></td></tr>}>
+                <ErrorBoundary
+                  fallback={
+                    <tr>
+                      <td>
+                        <Alert color="warning">
+                          Error loading coherence data!
+                        </Alert>
+                      </td>
+                    </tr>
+                  }
+                >
                   {data?.coherence?.error
                     ? null
                     : data?.coherence?.data
-                      .filter(
-                        ({ is_topic_cluster }) =>
-                          is_topic_cluster || !showToggle
-                      )
-                      .map(({ topic, is_non_local, paragraphs }, i) => {
-                        const topi = topic.at(2) ?? "";
-                        const [left, right] = ["l", "r"].map((lr) =>
-                          is_non_local ? lr : lr.toUpperCase()
-                        );
-                        const paraIconClass = is_non_local
-                          ? "topic-icon-small"
-                          : "topic-icon-large";
-                        return (
-                          <tr key={`topic-paragraph-key-${i}`}>
-                            <td style={{ width: "150px" }}>
-                              <Button
-                                className="w-100"
-                                variant="outline-secondary"
-                                onClick={() =>
-                                  highlightTopic(selectedParagraph, i, topic)
-                                }
-                              >
-                                {topi.replaceAll("_", " ")}
-                              </Button>
-                            </td>
-                            <td>
-                              <div className="d-flex flex-row">
-                                {paragraphs.map((paraType, j) => {
-                                  const paraContent = `${paraType?.is_left ? left : right
+                        .filter(
+                          ({ is_topic_cluster }) =>
+                            is_topic_cluster || !showToggle
+                        )
+                        .map(({ topic, is_non_local, paragraphs }, i) => {
+                          const topi = topic.at(2) ?? "";
+                          const [left, right] = ["l", "r"].map((lr) =>
+                            is_non_local ? lr : lr.toUpperCase()
+                          );
+                          const paraIconClass = is_non_local
+                            ? "topic-icon-small"
+                            : "topic-icon-large";
+                          return (
+                            <tr key={`topic-paragraph-key-${i}`}>
+                              <td style={{ width: "150px" }}>
+                                <Button
+                                  className="w-100"
+                                  variant="outline-secondary"
+                                  onClick={() =>
+                                    highlightTopic(selectedParagraph, i, topic)
+                                  }
+                                >
+                                  {topi.replaceAll("_", " ")}
+                                </Button>
+                              </td>
+                              <td>
+                                <div className="d-flex flex-row">
+                                  {paragraphs.map((paraType, j) => {
+                                    const paraContent = `${
+                                      paraType?.is_left ? left : right
                                     }${paraType?.is_topic_sent ? "" : "*"}`;
-                                  return (
-                                    <div
-                                      key={`topic-key-${i}-${j}`}
-                                      className="topic-type-default"
-                                      onClick={() =>
-                                        onTopicParagraphClick(i, j, topi)
-                                      }
-                                    >
-                                      {paraType ? (
-                                        <span
-                                          title={paraContent}
-                                          className={paraIconClass}
-                                        >
-                                          <IndicatorIcon unit={paraType} />
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
+                                    return (
+                                      <div
+                                        key={`topic-key-${i}-${j}`}
+                                        className="topic-type-default"
+                                        onClick={() =>
+                                          onTopicParagraphClick(i, j, topi)
+                                        }
+                                      >
+                                        {paraType ? (
+                                          <span
+                                            title={paraContent}
+                                            className={paraIconClass}
+                                          >
+                                            <IndicatorIcon unit={paraType} />
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
                   {/* {visualizationGlobal} */}
                   {selectedParagraph < 0 ? null : (
                     <>
@@ -360,8 +372,9 @@ const Coherence: FC = () => {
                               <td>
                                 <div className="d-flex flex-row">
                                   {sentences.map((sentence, j) => {
-                                    const content = `${sentence?.is_left ? left : right
-                                      }${sentence?.is_topic_sent ? "" : "*"}`;
+                                    const content = `${
+                                      sentence?.is_left ? left : right
+                                    }${sentence?.is_topic_sent ? "" : "*"}`;
                                     return (
                                       <div
                                         key={`topic-sentence-key-${i}-${j}`}

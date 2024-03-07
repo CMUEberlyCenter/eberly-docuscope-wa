@@ -1,7 +1,7 @@
 /**
  * @fileoverview Contents of the Clarity tools.
  */
-import { Suspense } from "react";
+import { FC, Suspense } from "react";
 import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -46,7 +46,7 @@ const cleanAndRepairSentenceData = (
 
 const dataTools = new OnTopicDataTools();
 
-const Clarity = () => {
+const Clarity: FC = () => {
   const [textdata, setTextData] = useState(dataTools.getInitialData());
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
@@ -61,6 +61,7 @@ const Clarity = () => {
     setSentenceIndex(-1);
     setTextData({ plain: text, sentences: data?.clarity });
   }, [data, text]);
+
   useEffect(() => {
     if (paragraphIndex < 0 || sentenceIndex < 0) {
       setSentenceDetails(null);
