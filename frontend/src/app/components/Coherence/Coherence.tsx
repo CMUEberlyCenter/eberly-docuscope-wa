@@ -323,7 +323,7 @@ const Coherence: FC = () => {
                             {data?.local
                               ?.at(selectedParagraph)
                               ?.data.at(0)
-                              ?.sentences.map((sentence, i) => (
+                              ?.sentences.map((_sentence, i) => (
                                 <Button
                                   key={`key-sentence-${i}`}
                                   variant="outline-secondary"

@@ -76,7 +76,7 @@ describe('tagger.service', () => {
       .subscribe((tagged) => {
         expect((tagged as TaggerResults)?.isError).toBeTruthy();
       });
-    await lastValueFrom(taggerResults$.pipe(take(3)));
+    await lastValueFrom(taggerResults$.pipe(take(2)));
   });
   test('isTaggedResult', () => {
     expect(isTaggerResult(null)).toBeFalsy();
