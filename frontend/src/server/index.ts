@@ -24,7 +24,7 @@ import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { version } from '../../package.json';
 import { ConfigurationFile, Prompt } from '../lib/Configuration';
-import PrometheusMetrics from './prometheus.js';
+import PrometheusMetrics from './prometheus';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
