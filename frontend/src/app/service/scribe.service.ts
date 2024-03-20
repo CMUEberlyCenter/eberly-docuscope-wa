@@ -1,5 +1,5 @@
 import { SUSPENSE, bind } from '@react-rxjs/core';
-import { type ChatCompletion } from 'openai/resources/chat';
+import { type ChatCompletion } from 'openai/resources/chat/completions';
 import {
   BehaviorSubject,
   catchError,
@@ -339,7 +339,7 @@ function requestAssess(text: string, expectation: string) {
         }
         // if it is the expected format for results:
         if ('choices' in data) {
-          const content = data.choices.at(0).message.content;
+          const content = data.choices.at(0)?.message.content;
           if (content) {
             return JSON.parse(content) as AssessmentData;
           }
@@ -375,8 +375,10 @@ const assessed = combineLatest({
 }).pipe(
   filter(({ scribe }) => scribe),
   filter(({ text }) => text.trim().length > 0),
-  filter(({ expectation }) => !!expectation?.name),
-  distinctUntilKeyChanged('text', (a, b) => a === b),
+  filter(({ expectation }) => !!expectation && 'name' in expectation),
+  distinctUntilChanged(
+    (a, b) => a.text === b.text && a.expectation?.name === b.expectation?.name
+  ),
   switchMap(({ text, expectation }) =>
     concat<[SUSPENSE, AssessmentData]>(
       of(SUSPENSE),

@@ -12,6 +12,7 @@
 
 import * as d3 from "d3";
 import React, {
+  FC,
   createRef,
   useCallback,
   useEffect,
@@ -148,10 +149,9 @@ function fixOnTopicHtml(topicData?: { html?: string } | null) {
 
 /**
  * The student facing application interface.
- * @param props `api` is for passing down the function that makes "api" calls.
  * @returns
  */
-const StudentView = () => {
+const StudentView: FC = () => {
   const ruleManager = useRules();
   // Status handlers #46
   // const [status /*, setStatus*/] = useState("Application ready, rules loaded");
