@@ -1,5 +1,7 @@
-//https://www.npmjs.com/package/systeminformation
-import { mem, time } from 'systeminformation';
+import { Router, Request, Response } from 'express';
+import { mem, time } from 'systeminformation'; // https://www.npmjs.com/package/systeminformation
+
+export const router = Router();
 
 type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary' | 'untyped';
 type Metric = {
@@ -196,4 +198,129 @@ class PrometheusMetrics {
   }
 }
 
-export default PrometheusMetrics;
+// export default PrometheusMetrics;
+
+const metrics = new PrometheusMetrics();
+let onTopicRequests = 0;
+let onTopicRequestsAvg = 0;
+let onTopicResponseAvg = 0;
+let onTopicResponseAvgCount = 0;
+
+metrics.setMetricObject(
+  'eberly_dswa_requests_total',
+  onTopicRequests,
+  'counter',
+  'Number of requests made to the OnTopic backend'
+);
+metrics.setMetricObject(
+  'eberly_dswa_requests_avg',
+  onTopicRequestsAvg,
+  'counter',
+  'Average number of requests made to the OnTopic backend'
+);
+metrics.setMetricObject(
+  'eberly_dswa_uptime_total',
+  process.uptime(),
+  'counter',
+  'DSWA Server uptime'
+);
+metrics.setMetricObject(
+  'eberly_dswa_response_avg',
+  onTopicResponseAvg,
+  'counter',
+  'DSWA OnTopic average response time'
+);
+
+
+/**
+ * Reset the average counters every 5 minutes. That way the code can just keep adding and re-calculating without having
+ * to worry about moving averages and queue sizes. We should probably change this in the near future to be more
+ * representative
+ */
+function updateMetricsAvg() {
+  onTopicRequestsAvg = 0;
+  onTopicResponseAvg = 0;
+  onTopicResponseAvgCount = 0;
+
+  metrics.setMetricObject(
+    'eberly_dswa_requests_total',
+    onTopicRequests,
+    'counter',
+    'Number of requests made to the OnTopic backend'
+  );
+  metrics.setMetricObject(
+    'eberly_dswa_requests_avg',
+    onTopicRequestsAvg,
+    'counter',
+    'Average number of requests made to the OnTopic backend'
+  );
+  metrics.setMetricObject(
+    'eberly_dswa_response_avg',
+    0,
+    'counter',
+    'DSWA OnTopic average response time'
+  );
+}
+/**
+ *
+ */
+function updateUptime() {
+  metrics.setMetricObject(
+    'eberly_dswa_uptime_total',
+    process.uptime(),
+    'counter',
+    'DSWA Server uptime'
+  );
+}
+/**
+ *
+ */
+export function updateMetrics() {
+  onTopicRequests++;
+  onTopicRequestsAvg++;
+
+  metrics.setMetricObject(
+    'eberly_dswa_requests_total',
+    onTopicRequests,
+    'counter',
+    'Number of requests made to the OnTopic backend'
+  );
+  metrics.setMetricObject(
+    'eberly_dswa_requests_avg',
+    onTopicRequestsAvg,
+    'counter',
+    'Average number of requests made to the OnTopic backend'
+  );
+}
+
+/**
+ *
+ */
+export function updateResponseAvg(aValue: number) {
+  onTopicResponseAvg += aValue;
+  onTopicResponseAvgCount++;
+
+  const average = onTopicResponseAvg / onTopicResponseAvgCount;
+  metrics.setMetricObject(
+    'eberly_dswa_response_avg',
+    average,
+    'counter',
+    'DSWA OnTopic average response time'
+  );
+}
+
+
+////////// Metrics Endpoint /////////////
+router.get('/metrics', async (_request: Request, response: Response) => {
+  updateUptime();
+  const metricsString = await metrics.build();
+  response.contentType('text/text').send(metricsString);
+});
+
+/** Setup periodic updates. */
+function startup() {
+  // Reset the avg values every 5 minutes
+  setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
+  // setInterval(updateUptime, 1000); // Every second // Change to update only on request.
+}
+startup();

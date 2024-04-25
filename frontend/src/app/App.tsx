@@ -1,6 +1,7 @@
 // import React, { useState } from "react";
 // import { Button } from "react-bootstrap";
 // import { useIdleTimer } from "react-idle-timer";
+import { FC } from "react";
 import { isInstructor, launch } from "./service/lti.service";
 import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
@@ -18,7 +19,7 @@ function inIframe(): boolean {
 // Idle timer does not make sense for this as it does not
 // depend on active session management with host.
 // type State = "ACTIVE" | "IDLE" | "PROMPT";
-const App = () => {
+const App: FC = () => {
   // const [state, setState] = useState<State>("ACTIVE");
   // useIdleTimer({
   //   timeout: Timeout,
