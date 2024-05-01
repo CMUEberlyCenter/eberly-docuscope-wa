@@ -1,6 +1,3 @@
-// import { bind } from '@react-rxjs/core';
-// import { catchError, of, switchMap } from 'rxjs';
-// import { fromFetch } from 'rxjs/fetch';
 import { fromFetch } from 'rxjs/fetch';
 import { Configuration } from '../../lib/Configuration';
 import { fetcher } from './fetcher';

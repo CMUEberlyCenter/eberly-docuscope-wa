@@ -12,9 +12,9 @@ const program = new Command();
 program
   .description('Backend server for DocuScope Write and Audit.')
   .version(version)
-  .addOption(
-    new Option('-p --port <number>', 'Port to use for server.').env('PORT')
-  )
+  // .addOption(
+  //   new Option('-p --port <number>', 'Port to use for server.').env('PORT')
+  // )
   .addOption(
     new Option('--db <string>', 'Database name')
       .env('MYSQL_DATABASE')
@@ -44,7 +44,7 @@ function fromEnvFile(base: string, defaultValue?: string): string {
 }
 
 export const LTI_KEY = fromEnvFile('LTI_KEY');
-export const LTI_HOSTNAME = new URL(process.env.LTI_HOSTNAME ?? 'http://localhost:8877/');
+export const LTI_HOSTNAME = new URL(process.env.LTI_HOSTNAME ?? 'http://localhost:8888/');
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
 const MONGO_DB = process.env.MONGO_DB ?? 'docuscope';
 const MONGO_USER = fromEnvFile('MONGO_USER');
@@ -83,12 +83,9 @@ export const MYSQL_POOL = {
   waitForConnections: true,
   timezone: 'Z', // makes TIMESTAMP work correctly
 }
-export const ONTOPIC_HOST = process.env.DSWA_ONTOPIC_HOST ?? 'localhost';
-export const ONTOPIC_PORT =
-  process.env.DSWA_ONTOPIC_PORT && !isNaN(Number(process.env.DSWA_ONTOPIC_PORT))
-    ? parseInt(process.env.DSWA_ONTOPIC_PORT)
-    : 5000;
+const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
+export const ONTOPIC_URL = new URL('api/v1', ONTOPIC_SERVER);
 
-// const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
+export const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
