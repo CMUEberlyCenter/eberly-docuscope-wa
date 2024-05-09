@@ -84,8 +84,9 @@ export const MYSQL_POOL = {
   timezone: 'Z', // makes TIMESTAMP work correctly
 }
 const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
-export const ONTOPIC_URL = new URL('api/v1', ONTOPIC_SERVER);
+export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
+export const SCRIBE_TEMPLATES = fromEnvFile('SCRIBE_TEMPLATES', "/app/build/app/settings/templates.json");

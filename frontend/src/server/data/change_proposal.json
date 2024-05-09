@@ -1,0 +1,202 @@
+{
+  "rules": {
+      "name": "Change Proposal",
+      "overview": "A change proposal is a written document advocating for social or institutional modifications. It presents a case for necessary changes, supported by research and analysis, outlining benefits and a strategic implementation plan. This persuasive genre aims to influence decision-makers and stakeholders for positive transformations in a given system or community",
+      "rules": [
+          {
+              "name": "Introduction",
+              "description": "<body><p>Provide an overview of the problems and your proposed solution.</p></body>",
+              "examples": "",
+              "type": "bounded_optional",
+              "is_group": true,
+              "children": [
+                  {
+                      "name": "What is the purpose of this document?",
+                      "description": "<body><p>The purpose of the introduction is to provide a clear overview of what the document is about. It helps the reader understand that they are about to delve into a proposal for change.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Introduction"
+                  },
+                  {
+                      "name": "What are the current conditions you propose to change? (briefly)",
+                      "description": "<body>\n<p>This question sets the stage by summarizing the existing issues or conditions that you intend to address through your proposal. It provides context for the reader. These existing issues and conditions can also be thought of as \u201climitations\u201d or \u201cproblems\u201d in the state of the world. However, do not confuse the problem or limitations appropriate for an introduction with the limitations in the proposal you will later announce to mitigate these problems. A different section of your proposal, closer to the conclusion, is devoted to discussing limitations in your proposal.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Introduction"
+                  },
+                  {
+                      "name": "What is the general approach you are taking to solve the problems? (briefly)",
+                      "description": "<body><p>This question outlines the high-level approach you plan to take to address the problems. It gives the reader a glimpse of your strategy without going into specific details.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Introduction"
+                  },
+                  {
+                      "name": "What is the structure of this document?",
+                      "description": "<body>\n<p>Describing the document's structure informs the reader about the roadmap you will be following. It helps the reader navigate the proposal and know what to expect in each section.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Introduction"
+                  }
+              ],
+              "parent": null
+          },
+          {
+              "name": "Problems",
+              "description": "<body><p>Explain the nature of the problems.</p></body>",
+              "examples": "",
+              "type": "bounded_optional",
+              "is_group": true,
+              "children": [
+                  {
+                      "name": "What are the specific problems you propose to address?",
+                      "description": "<body>\n<p>In this section, you specify the precise issues that your proposal aims to resolve. It's about defining the problems clearly and concisely that you propose are in need of change.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Problems"
+                  },
+                  {
+                      "name": "Who are the key stakeholders of the problems?",
+                      "description": "<body>\n<p>Identifying key stakeholders is a crucial step in both understanding who is affected by a problem and determining who should be involved in the solution. This process is not only fundamental for building support and fostering collaboration but also essential when proposing any change. Stakeholders include a diverse group of people or entities, such as employees, customers, suppliers, or members of the local community, all of whom might be affected by the change. Understanding their different perspectives is vital, as stakeholders have varied views and needs. This understanding helps in assessing the impact of the change, ensuring that benefits and potential negative effects are carefully weighed. Stakeholder support is often key to the success of a change. When stakeholders feel involved and their concerns are considered, they are more likely to support and endorse the change. Moreover, stakeholders can be instrumental in identifying potential problems early on, which can save significant time and resources. By taking stakeholders' concerns into account, trust is built, fostering stronger relationships and leading to a smoother implementation of the change. Additionally, from a legal and ethical standpoint, considering the needs and opinions of stakeholders is sometimes a requirement, not just a matter of good practice. </p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Problems"
+                  }
+              ],
+              "parent": null
+          },
+          {
+              "name": "Solution",
+              "description": "<body><p>Explain how you propose to solve the problems.</p></body>",
+              "examples": "",
+              "type": "bounded_optional",
+              "is_group": true,
+              "children": [
+                  {
+                      "name": "What are the specific changes you are proposing?",
+                      "description": "<body><p>This question gets to the heart of your proposal by describing the specific alterations or actions you want to implement to address the identified problems.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Solution"
+                  },
+                  {
+                      "name": "How will the changes you are proposing solve the problems?",
+                      "description": "<body>\n<p>Here, you explain the direct connection between your proposed changes and the resolution of the problems. This is crucial for demonstrating the effectiveness of your solution. Many proposals for change fail to achieve their intended goals because there is a misalignment between the changes they suggest and the actual problems they aim to address. Essentially, this means that the solutions proposed are not effectively tailored to solve the specific issues at hand. For instance, if a proposal outlines a solution that is too broad or doesn't directly tackle the root causes of the problem, it won't be effective. This misalignment can occur for various reasons, such as a lack of understanding of the problem, insufficient research, or failing to consider the perspectives of those affected by the issue. When the proposed changes don't directly address the specific needs, challenges, or nuances of the problem, the likelihood of successful resolution decreases significantly. It's like trying to fit a square peg into a round hole; no matter how well-crafted the peg is, it simply won't fit properly. Therefore, for a proposal to be successful, it's crucial that the suggested changes are directly and thoughtfully aligned with the nature and specifics of the problems they are meant to solve.</p>\n<p></p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Solution"
+                  },
+                  {
+                      "name": "How do your proposed changes align with the values of your target audience?",
+                      "description": "<body>\n<p>Ensuring that your solution aligns with the values and priorities of your audience, including key stakeholders, is a critical aspect of successful persuasion and implementation. When proposing a solution, it's not just about addressing the problem effectively; it's also about resonating with the beliefs, values, and priorities of those you're trying to persuade. This alignment is essential because people are more receptive to ideas that reflect their own values and meet their specific needs. For instance, a solution that aligns with a company's culture of innovation will likely be more appealing to its employees. Similarly, a community project that respects local traditions and values will gain more support from residents. Ignoring these factors can lead to resistance or indifference, even if the solution is technically sound. By understanding and acknowledging the values and priorities of your audience, you can tailor your proposal in a way that not only solves the problem but also appeals to the deeper motivations of those involved.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Solution"
+                  }
+              ],
+              "parent": null
+          },
+          {
+              "name": "Limitations",
+              "description": "<body><p>Address potential limitations of your solution.</p></body>",
+              "examples": "",
+              "type": "bounded_optional",
+              "is_group": true,
+              "children": [
+                  {
+                      "name": "What are the potential limitations of your proposal?",
+                      "description": "<body>\n<p>In satisfying this expectation, it is essential you distinguish between two types of limitations. First, there are limitations (or problems) in the world you are trying to change. These problems are highlighted in the Introduction under the expectation \u201cWhat are the current conditions you propose to change?\u201d Secondly, there are limitations (or problems) in your proposal that could stand in the way of bringing about the substantive change to the current conditions you are seeking. The present expectation is concerned only with the second understanding of limitations. All proposals are imperfect, superficially if not substantively, and have prima facie, if not substantive, limitations in the positive change they can bring about. By directly addressing the limitations in your proposal, you establish transparency with skeptical readers by acknowledging that your proposal may, for various reasons, appear limited in the change it can bring about. </p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Limitations"
+                  },
+                  {
+                      "name": "How do you plan to address the potential limitations?",
+                      "description": "<body>\n<p>This question focuses on your contingency plan for mitigating if not nullifying the limitations in your proposal. To satisfy this expectation, you may argue that the limitations of your proposal are only superficial and not substantive. Or you may concede that the limitations of your proposal are substantive on some grounds but that these lmiitations are overriden by more important strengths on other grounds.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Limitations"
+                  }
+              ],
+              "parent": null
+          },
+          {
+              "name": "Conclusion",
+              "description": "<body><p>Recap the problems and solutions, and request for an action.</p></body>",
+              "examples": "",
+              "type": "bounded_optional",
+              "is_group": true,
+              "children": [
+                  {
+                      "name": "Recap the problems (current conditions) briefly.",
+                      "description": "<body>\n<p>In the conclusion, you provide a concise summary of the problems in the status quo (the current conditions) you initially introduced in the introduction of your change proposal under the expectation \u201cWhat are the current conditions you propose to change\u201d? This move allows you to reinforce the reader's understanding of the problems and issue at hand that are forcing the need for change.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Conclusion"
+                  },
+                  {
+                      "name": "Recap the solution (changes) briefly.",
+                      "description": "<body><p>This part summarizes the proposed changes, reminding the reader of the core of your proposal. It brings the focus back to your solution.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Conclusion"
+                  },
+                  {
+                      "name": "What are you asking the audience of this proposal to do?",
+                      "description": "<body>\n<p>In a proposal, the call to action is the moment where you crystallize your request to the audience, making it the linchpin of your entire argument. It's where you clearly and compellingly specify what you want your audience to do \u2013 be it to give approval, lend their support, or take concrete steps in relation to your proposal. This is not just a formal requirement; it's the climax of your persuasive effort, where you aim to convert understanding and agreement into actual commitment and action. A well-crafted call to action speaks directly to your audience's interests and values, harnessing the momentum you've built throughout your proposal. It should be clear, concise, and focused, leaving no doubt about what is being asked. Whether you\u2019re seeking investment, approval for a project, or rallying support for an initiative, your call to action is your opportunity to transform interest into action, making it an indispensable and powerful tool in achieving your proposal's ultimate goal.</p></body>",
+                      "examples": "",
+                      "type": "active",
+                      "is_group": false,
+                      "children": [],
+                      "parent": "Conclusion"
+                  }
+              ],
+              "parent": null
+          }
+      ]
+  },
+  "impressions": {
+      "common_clusters": [],
+      "rare_clusters": []
+  },
+  "values": {},
+  "info": {
+      "saved": "2024-04-05-100904",
+      "name": "Change Proposal",
+      "version": "2024.04.05",
+      "author": "David Kaufer & Suguru Ishizaki",
+      "copyright": "2023 David Kaufer & Suguru Ishizaki",
+      "filename": "Change Proposal (2024.04.05)",
+      "dict_path": "",
+      "multi_lang": false
+  },
+  "extra_instructions": "",
+  "wtd_version": "2.0.0"
+}
+

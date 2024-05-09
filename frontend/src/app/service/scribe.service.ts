@@ -295,19 +295,19 @@ interface AssessmentData {
 /**
  * Fetch expectation audit results from backend.
  * @param text Selected essay text.
- * @param expectation Rule name value.
+ * @param expectation expectation text.
+ * @param description expectation description.
  * @returns Results of llm processing with the expectation's
  *  associated prompt and the given text.
  */
-function requestAssess(text: string, expectation: string) {
-  const assignment = assignmentId();
+function requestAssess(text: string, expectation: string, description: string) {
   return fromFetch('/api/v1/scribe/assess_expectation', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      assignment,
       text,
       expectation,
+      description
     }),
   })
     .pipe(
@@ -382,7 +382,8 @@ const assessed = combineLatest({
   switchMap(({ text, expectation }) =>
     concat<[SUSPENSE, AssessmentData]>(
       of(SUSPENSE),
-      requestAssess(text, expectation?.raw.name ?? '')
+      // TODO use straight expectation.  need to filter on is_group === false
+      requestAssess(text, expectation?.raw.name ?? '', expectation?.raw.description ?? '')
     )
   )
 );

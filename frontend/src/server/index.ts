@@ -10,177 +10,192 @@
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
-import { readFileSync } from 'fs';
-import jwt from 'jsonwebtoken';
+import session from 'express-session';
+import { Provider } from 'ltijs';
+import { MongoClient, ObjectId } from 'mongodb';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { v4 as uuidv4 } from 'uuid';
-import { version } from '../../package.json';
 import { assignments } from './api/assignments';
 import { configurations } from './api/configurations';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
+import changeProposal from './data/change_proposal.json';
 import { initializeDatabase } from './data/data';
-import { router as MetricsRouter } from './prometheus';
-import { LTI_HOSTNAME, ONTOPIC_URL, TOKEN_SECRET } from './settings';
-import session from 'express-session';
+import { Assignment } from './model/assignment';
+import { Rules } from './model/rules';
+import { metrics } from './prometheus';
+import { LTI_DB, LTI_HOSTNAME, LTI_KEY, LTI_OPTIONS, ONTOPIC_URL } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-
-
-/**
- * Here’s an example of a function for signing tokens:
- */
-function generateAccessToken(aString: string) {
-  const tSecret =
-    TOKEN_SECRET === 'dummy' || TOKEN_SECRET === '' ? uuidv4() : TOKEN_SECRET;
-  return jwt.sign({ payload: aString }, tSecret, { expiresIn: '1800s' });
-}
-
-const PUBLIC = '../../build/app';
+const PUBLIC = join(__dirname, '../../build/app');
 const STATIC = '/static';
 
-const app = express();
-app.set('etag', 'strong');
-app.use(express.json());
-app.use(cors({ origin: '*' }));
-app.use(fileUpload({ createParentPath: true }));
-app.use(
-  express.urlencoded({
-    extended: true,
-  })
-);
-app.use(session());
+const client = new MongoClient('mongodb://localhost:27017');
 
-/////////// Configuration Endpoints //////////////
-app.use('/api/v1/configurations', configurations);
-
-///// Assignment Endpoints /////
-app.use('/ap1/v1/assignments', assignments);
-
-/////////// Scribe Endpoints /////////////
-app.use('/api/v1/scribe', scribe);
-
-//// OnTopic Enpoint ////
-app.use('/api/v1/ontopic', ontopic);
-
-app.all('/api/v1/*', (_request: Request, response: Response) => {
-  response.sendStatus(404);
-});
-
-/**
- *
- */
-const useLTI = true;
-
-
-/**
- * http://www.passportjs.org/packages/passport-oauth2/
- */
-function verifyLTI(request: Request) {
-  //console.log("verifyLTI (" + request.body.oauth_consumer_key + ")");
-  return request.body.oauth_consumer_key !== '';
-}
-
-/**
- *
- */
-function generateSettingsObject(request: Request) {
-  const token = generateAccessToken('dummy');
-  return {
-    lti: { ...request.body, token },
+type ContextToken = {
+  contextId: string;
+  user: string;
+  roles: string[];
+  path: string;
+  targetLinkUri: string;
+  context: {
+    id: string;
+    label?: string;
+    title?: string;
+    type?: string[]; // ContextType
   };
-}
-
-/**
- *
- */
-function processRequest(request: Request, response: Response) {
-  if (useLTI === true) {
-    if (['/', '/index.html', '/index.htm'].includes(request.path)) {
-      if (verifyLTI(request) === true) {
-        const settingsObject = generateSettingsObject(request);
-        const stringed = JSON.stringify(settingsObject);
-        const raw = readFileSync(join(__dirname, PUBLIC, 'index.html'), 'utf8');
-        const html = raw.replace(
-          '/*SETTINGS*/',
-          `var serverContext=${stringed}; var applicationContext=${JSON.stringify(
-            { version }
-          )};`
-        );
-
-        //response.render('main', { html: html });
-        response.send(html);
-      } else {
-        response.sendFile(join(__dirname, STATIC, 'nolti.html'));
-      }
-
-      return;
-    }
+  resource: {
+    title?: string;
+    description?: string;
+    id: string;
   }
-
-
-  let path = request.path;
-
-
-  //>------------------------------------------------------------------
-
-  if (path === '/') {
-    path = '/index.html';
+}
+type IdToken = {
+  iss: string;
+  user: string;
+  userInfo?: {
+    given_name?: string;
+    family_name?: string;
+    name?: string;
+    email?: string;
   }
-
-  //>------------------------------------------------------------------
-
-  response.sendFile(join(__dirname, PUBLIC, path));
+  platformInfo?: {
+    product_family_code: string;
+    version: string;
+    guid: string;
+    name: string;
+    description: string;
+  };
+  clientId: string;
+  platformId: string;
+  deploymentId: string;
+  platformContext: ContextToken;
 }
 
-// Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
-// exist on the server with other add-ons. Instead we should just configure the url to
-// point to the root of the host
-app.all('/lti/activity/docuscope', (_req, res) => res.redirect('/'));
-
-app.use(MetricsRouter);
-
-type LTIContext = {
-  user_id: string;
-  roles: string;
-  ext_roles?: string;
-  cutom_canvas_course_id?: string;
-  ext_lti_assignment_id?: string;
-  resource_link_id?: string;
-  lti_version: 'LTI_1p0';
-}
-function isLtiRequest(body: LTIContext | unknown): body is LTIContext {
-  return typeof body === 'object' && !!body && 'lti_version' in body && body.lti_version === 'LTI-1p0';
+function isInstructor(token: ContextToken): boolean {
+  return [
+    'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'
+  ].some(role => token.roles.includes(role));
 }
 
-app.use('/', (request: Request, _response: Response, next) => {
-  const lti = request.body;
-  if (request.body.oauth_consumer_key !== '' && isLtiRequest(lti)) {
-    console.log(lti);
-    request.session['lti'] = lti;
+function isStudent(token: ContextToken): boolean {
+  return [
+    "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
+  ].some(role => token.roles.includes(role));
+}
+
+async function findAssignmentById(id: string): Promise<Assignment> {
+  const collection = client.db('docuscope').collection('assignments');
+  const assignment: Assignment | null = await collection.findOne<Assignment>({assignment: id});
+  if (!assignment) {
+    throw new ReferenceError(`Assignment ${id} no found.`)
   }
-  return next();
-});
+  return assignment;
+}
 
-app.get('/*', (request: Request, response: Response) => {
-  processRequest(request, response);
-});
+async function findRulesById(id: string): Promise<Rules> {
+  const collection = client.db('docuscope').collection('configurations');
+  const rules: Rules | null = await collection.findOne<Rules>({_id: new ObjectId(id)});
+  if (!rules) { throw new ReferenceError(`Configuration ${id} not found.`)}
+  return rules;
+}
+declare module "express-session" {
+  interface SessionData {
+    assignment: Assignment;
+    rules: Rules;
+  }
+}
 
-app.post('/*', (request: Request, response: Response) => {
-  processRequest(request, response);
-});
+async function initDatabase(): Promise<void> {
+  await client.connect();
+  const db = client.db('docuscope');
+  const configs = db.collection('configurations');
+  const config = await configs.updateOne({"info.name": "Change Proposal"}, {$set: changeProposal}, {upsert: true});
+  console.log(config);
+  const rules = config.upsertedId;
+  const assignments = db.collection('assignments');
+  const assignment = await assignments.updateOne({assignment: '5'}, {$set: {
+    assignment: '5',
+    rules,
+    docuscope: false,
+    scribe: true,
+    notes_to_prose: true,
+    logical_flow: true,
+    grammar: true,
+    copyedit: true,
+    expectation: true,
+    topics: true,
+    text2speech: true,
+  } as Assignment}, {upsert: true});
+  console.log(assignment);
+}
 
 async function __main__() {
   console.log(
     `Configured the OnTopic backend url to be: ${ONTOPIC_URL.toString()}`
   );
   await initializeDatabase();
+  await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
-  app.listen(LTI_HOSTNAME.port, () => {
-    console.log(`App running on port ${LTI_HOSTNAME.toString()}.`);
+  Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
+  Provider.app.set('etag', 'strong');
+  Provider.app.use(express.json());
+  Provider.app.use(cors({ origin: '*' }));
+  Provider.app.use(fileUpload({ createParentPath: true }));
+  Provider.app.use(
+    express.urlencoded({
+      extended: true,
+    })
+  );
+  Provider.app.use(session({secret: 'a good secret'}));
+
+  /////////// Configuration Endpoints //////////////
+  Provider.app.use('/api/v1/configurations', configurations);
+  ///// Assignment Endpoints /////
+  Provider.app.use('/api/v1/assignments', assignments);
+  /////////// Scribe Endpoints /////////////
+  Provider.app.use('/api/v1/scribe', scribe);
+  //// OnTopic Enpoint ////
+  Provider.app.use('/api/v1/ontopic', ontopic);
+  console.log(`OnTopic: ${ONTOPIC_URL}`);
+
+  Provider.app.all('/api/v1/*', (_request: Request, response: Response) => {
+    response.sendStatus(404);
   });
+
+  // Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
+  // exist on the server with other add-ons. Instead we should just configure the url to
+  // point to the root of the host
+  Provider.app.all('/lti/activity/docuscope', (_req: Request, res: Response) => res.redirect('/'));
+
+  Provider.app.use(metrics);
+
+  // console.log(PUBLIC);
+  Provider.app.use(express.static(PUBLIC));
+  Provider.whitelist(/assets/, /\.ico$/, /settings/, /api\/v1/, /metrics/, /\//);
+  Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
+    // console.log(token);
+    // const assignment = await findAssignmentById(token.platformContext.resource.id);
+    // const rules = await findRulesById(assignment.rules.toString());
+    // console.log(assignment, rules);
+    //req.session.assignment = assignment;
+    //req.session.rules = rules;
+    // req.session['assignment'] = assignment;
+    // req.session['rules'] = rules;
+    if (token && token.platformContext && isInstructor(token.platformContext)) {
+      console.log('isInstructor');
+      return res.sendFile(join(PUBLIC, 'deeplink.html'))
+    }
+    return res.sendFile(join(PUBLIC, 'index.html'))
+  });
+  Provider.onDeepLinking(async (_token, _req: Request, res: Response) =>
+    Provider.redirect(res, '/deeplink.html', { newResource: true }));
+  try {
+    await Provider.deploy({ port: LTI_HOSTNAME.port });
+    console.log(` > Ready on ${LTI_HOSTNAME.toString()}`);
+  } catch (err) {
+    console.error(err);
+  }
 }
 __main__();

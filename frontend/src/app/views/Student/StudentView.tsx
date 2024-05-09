@@ -684,13 +684,9 @@ const StudentView: FC = () => {
           <Card.Header className="d-flex justify-content-between align-items-center">
             <ButtonToolbar>
               {paragraphselector}
-              {ScribeAvailable &&
-                configuration &&
-                "prompt_templates" in configuration &&
-                Object.keys(configuration.prompt_templates).length > 0 && (
+              {ScribeAvailable && (
                   <ButtonGroup className="me-2">
-                    {notesFeature &&
-                      "notes_to_prose" in configuration.prompt_templates && (
+                    {notesFeature && (
                         <Button
                           onClick={convertNotes}
                           disabled={!editable}
@@ -699,8 +695,7 @@ const StudentView: FC = () => {
                           Notes2Prose
                         </Button>
                       )}
-                    {grammarFeature &&
-                      "grammar" in configuration.prompt_templates && (
+                    {grammarFeature && (
                         <Button
                           onClick={fixGrammar}
                           disabled={!editable}
@@ -709,8 +704,7 @@ const StudentView: FC = () => {
                           Proofread
                         </Button>
                       )}
-                    {clarifyFeature &&
-                      "copyedit" in configuration.prompt_templates && (
+                    {clarifyFeature && (
                         <Button
                           onClick={clarifySelection}
                           disabled={!editable}
@@ -731,8 +725,7 @@ const StudentView: FC = () => {
                           Assess
                         </Button>
                       )}
-                    {logicalFlowFeature &&
-                      "logical_flow" in configuration.prompt_templates && (
+                    {logicalFlowFeature && (
                         <Button
                           onClick={() => auditLogicalFlow()}
                           title="Audit Logical Flow of the Document"
@@ -740,8 +733,7 @@ const StudentView: FC = () => {
                           Flow
                         </Button>
                       )}
-                    {topicsFeature &&
-                      "topics" in configuration.prompt_templates && (
+                    {topicsFeature && (
                         <Button
                           onClick={() => auditTopics()}
                           title="Analyze covered topics."
@@ -834,10 +826,7 @@ const StudentView: FC = () => {
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
       {ScribeAvailable &&
-        notesFeature &&
-        configuration &&
-        "prompt_templates" in configuration &&
-        "notes_to_prose" in configuration.prompt_templates && (
+        notesFeature && configuration && (
           <Notes2Prose
             show={showConvertNotes}
             onHide={() => setShowConvertNotes(false)}
@@ -850,10 +839,7 @@ const StudentView: FC = () => {
           />
         )}
       {ScribeAvailable &&
-        grammarFeature &&
-        configuration &&
-        "prompt_templates" in configuration &&
-        "grammar" in configuration.prompt_templates && (
+        grammarFeature && (
           <FixGrammar
             show={showFixGrammar}
             onHide={() => setShowFixGrammar(false)}
@@ -866,10 +852,7 @@ const StudentView: FC = () => {
           />
         )}
       {ScribeAvailable &&
-        clarifyFeature &&
-        configuration &&
-        "prompt_templates" in configuration &&
-        "copyedit" in configuration.prompt_templates && (
+        clarifyFeature && (
           <Clarify
             show={showClarify}
             onHide={() => setShowClarify(false)}
@@ -888,20 +871,14 @@ const StudentView: FC = () => {
         />
       )}
       {ScribeAvailable &&
-        logicalFlowFeature &&
-        configuration &&
-        "prompt_templates" in configuration &&
-        "logical_flow" in configuration.prompt_templates && (
+        logicalFlowFeature && (
           <LogicalFlowAudit
             show={showLogicalFlow}
             onHide={() => setShowLogicalFlow(false)}
           />
         )}
       {ScribeAvailable &&
-        topicsFeature &&
-        configuration &&
-        "prompt_templates" in configuration &&
-        "topics" in configuration.prompt_templates && (
+        topicsFeature && (
           <TopicsAudit
             show={showAuditTopics}
             onHide={() => setShowAuditTopics(false)}

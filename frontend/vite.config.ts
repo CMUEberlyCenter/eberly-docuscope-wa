@@ -1,14 +1,19 @@
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 import { visualizer } from "rollup-plugin-visualizer";
-import { defineConfig, splitVendorChunkPlugin } from 'vite';
+import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => ({
-  plugins: [react(), splitVendorChunkPlugin(), visualizer()],
+  plugins: [react(),  visualizer()],
   build: {
     sourcemap: mode === 'development',
     minify: mode !== 'development',
     rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        deeplink: resolve(__dirname, 'deeplink.html'),
+      },
       output: {
         dir: 'build/app',
         manualChunks(id: string) {

@@ -1,7 +1,11 @@
-import { Router, Request, Response } from "express";
-import { findFileByAssignment, findFileIdByAssignment, updateAssignment } from "../data/data";
+import { Request, Response, Router } from "express";
+import change_proposal from '../data/change_proposal.json'; // FIXME Temp load from file.
+import { findFileIdByAssignment, updateAssignment } from "../data/data";
+import { ConfigurationData } from "../../lib/Configuration";
 
 export const assignments = Router();
+
+const changeProposal = change_proposal as ConfigurationData;
 
 assignments.post('/:assignment/assign',
   async (request: Request, response: Response) => {
@@ -44,8 +48,11 @@ assignments.get(
     // not currently used, but will be useful for deep-linking.
     const { assignment } = request.params;
     try {
-      const rules = await findFileByAssignment(assignment);
-      response.json(rules);
+      // const rules = await findFileByAssignment(assignment);
+      // response.json(rules);
+      // FIXME temp using static
+      if (assignment === 'global')
+        return response.json(changeProposal);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(404);

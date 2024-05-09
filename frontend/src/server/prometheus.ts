@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { mem, time } from 'systeminformation'; // https://www.npmjs.com/package/systeminformation
 
-export const router = Router();
+export const metrics = Router();
 
 type MetricType = 'counter' | 'gauge' | 'histogram' | 'summary' | 'untyped';
 type Metric = {
@@ -200,31 +200,31 @@ class PrometheusMetrics {
 
 // export default PrometheusMetrics;
 
-const metrics = new PrometheusMetrics();
+const prometheus = new PrometheusMetrics();
 let onTopicRequests = 0;
 let onTopicRequestsAvg = 0;
 let onTopicResponseAvg = 0;
 let onTopicResponseAvgCount = 0;
 
-metrics.setMetricObject(
+prometheus.setMetricObject(
   'eberly_dswa_requests_total',
   onTopicRequests,
   'counter',
   'Number of requests made to the OnTopic backend'
 );
-metrics.setMetricObject(
+prometheus.setMetricObject(
   'eberly_dswa_requests_avg',
   onTopicRequestsAvg,
   'counter',
   'Average number of requests made to the OnTopic backend'
 );
-metrics.setMetricObject(
+prometheus.setMetricObject(
   'eberly_dswa_uptime_total',
   process.uptime(),
   'counter',
   'DSWA Server uptime'
 );
-metrics.setMetricObject(
+prometheus.setMetricObject(
   'eberly_dswa_response_avg',
   onTopicResponseAvg,
   'counter',
@@ -242,19 +242,19 @@ function updateMetricsAvg() {
   onTopicResponseAvg = 0;
   onTopicResponseAvgCount = 0;
 
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_requests_total',
     onTopicRequests,
     'counter',
     'Number of requests made to the OnTopic backend'
   );
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_requests_avg',
     onTopicRequestsAvg,
     'counter',
     'Average number of requests made to the OnTopic backend'
   );
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_response_avg',
     0,
     'counter',
@@ -265,7 +265,7 @@ function updateMetricsAvg() {
  *
  */
 function updateUptime() {
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_uptime_total',
     process.uptime(),
     'counter',
@@ -279,13 +279,13 @@ export function updateMetrics() {
   onTopicRequests++;
   onTopicRequestsAvg++;
 
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_requests_total',
     onTopicRequests,
     'counter',
     'Number of requests made to the OnTopic backend'
   );
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_requests_avg',
     onTopicRequestsAvg,
     'counter',
@@ -301,7 +301,7 @@ export function updateResponseAvg(aValue: number) {
   onTopicResponseAvgCount++;
 
   const average = onTopicResponseAvg / onTopicResponseAvgCount;
-  metrics.setMetricObject(
+  prometheus.setMetricObject(
     'eberly_dswa_response_avg',
     average,
     'counter',
@@ -311,9 +311,9 @@ export function updateResponseAvg(aValue: number) {
 
 
 ////////// Metrics Endpoint /////////////
-router.get('/metrics', async (_request: Request, response: Response) => {
+metrics.get('/metrics', async (_request: Request, response: Response) => {
   updateUptime();
-  const metricsString = await metrics.build();
+  const metricsString = await prometheus.build();
   response.contentType('text/text').send(metricsString);
 });
 
@@ -321,6 +321,5 @@ router.get('/metrics', async (_request: Request, response: Response) => {
 function startup() {
   // Reset the avg values every 5 minutes
   setInterval(updateMetricsAvg, 5 * 60 * 1000); // Every 5 minutes
-  // setInterval(updateUptime, 1000); // Every second // Change to update only on request.
 }
 startup();

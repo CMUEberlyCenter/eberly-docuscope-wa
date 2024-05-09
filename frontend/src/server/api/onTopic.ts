@@ -6,15 +6,9 @@ export const ontopic = Router();
 
 ontopic.post('/', async (request: Request, response: Response) => {
   updateMetrics();
-  const url = new URL(
-    'api/v1/ontopic',
-    ONTOPIC_URL
-  );
-
   const startDate = Date.now();
-
   try {
-    const res = await fetch(url, {
+    const res = await fetch(ONTOPIC_URL, {
       method: 'POST',
       body: JSON.stringify(request.body),
       headers: {

@@ -19,23 +19,20 @@ export type Rule = {
   sentenceCount?: number;
 };
 
-/** Prompt data for formulating OpenAI requests. */
-export type Prompt = {
-  prompt: string;
-  role?: string;
-  temperature?: number | string;
-};
 
 export type ConfigurationInformation = {
   name: string;
   version: string;
   author: string;
   copyright: string;
-  saved: string;
+  saved: string; // DateTime
   filename: string;
+  dict_path?: string;
+  multi_lang?: boolean;
 };
 
-export type ConfigurationFile = {
+/** Configuration file json data. */
+export type ConfigurationData = {
   rules: {
     name: string;
     overview: string;
@@ -47,7 +44,26 @@ export type ConfigurationFile = {
   };
   values: unknown;
   info: ConfigurationInformation;
-  prompt_templates: Record<string, Prompt>;
+  extra_instructions?: string;
+  wtd_version?: string;
 };
 
-export type Configuration = ConfigurationFile & { id: string };
+export type Configuration = ConfigurationData & { id: string };
+
+/** Prompt data for formulating OpenAI requests. */
+export type Prompt = {
+  prompt: string;
+  role?: string;
+  temperature?: number | string;
+};
+
+type PromptType = "notes_to_prose" | "logical_flow" | "grammar" | "copyedit" | "expectation" | "topics"
+
+/** Prompt templates file json data. */
+export type PromptData = {
+  templates: Record<PromptType, Prompt>;
+  info: {
+    saved_at: string; // DateTime
+  }
+}
+
