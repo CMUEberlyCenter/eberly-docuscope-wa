@@ -70,6 +70,7 @@ services:
       MONGO_DB: doscuscope
       MONGO_USER_FILE: /run/secrets/mongo_user
       MONGO_PASSWORD_FILE: /run/secrets/mongo_pass
+      NODE_ENV: production
     restart: always
     depends_on:
       - "db"

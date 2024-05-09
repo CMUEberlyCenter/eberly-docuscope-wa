@@ -12,14 +12,14 @@ import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import session from 'express-session';
 import { Provider } from 'ltijs';
-import { MongoClient, ObjectId } from 'mongodb';
+// import { MongoClient, ObjectId } from 'mongodb';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { assignments } from './api/assignments';
 import { configurations } from './api/configurations';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
-import changeProposal from './data/change_proposal.json';
+// import changeProposal from './data/change_proposal.json';
 import { initializeDatabase } from './data/data';
 import { Assignment } from './model/assignment';
 import { Rules } from './model/rules';
@@ -29,9 +29,9 @@ import { LTI_DB, LTI_HOSTNAME, LTI_KEY, LTI_OPTIONS, ONTOPIC_URL, PORT } from '.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
-const STATIC = '/static';
+// const STATIC = '/static';
 
-const client = new MongoClient('mongodb://localhost:27017');
+//const client = new MongoClient('mongodb://localhost:27017');
 
 type ContextToken = {
   contextId: string;
@@ -79,27 +79,28 @@ function isInstructor(token: ContextToken): boolean {
   ].some(role => token.roles.includes(role));
 }
 
-function isStudent(token: ContextToken): boolean {
-  return [
-    "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
-  ].some(role => token.roles.includes(role));
-}
+// function isStudent(token: ContextToken): boolean {
+//   return [
+//     "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
+//   ].some(role => token.roles.includes(role));
+// }
 
-async function findAssignmentById(id: string): Promise<Assignment> {
-  const collection = client.db('docuscope').collection('assignments');
-  const assignment: Assignment | null = await collection.findOne<Assignment>({assignment: id});
-  if (!assignment) {
-    throw new ReferenceError(`Assignment ${id} no found.`)
-  }
-  return assignment;
-}
+// async function findAssignmentById(id: string): Promise<Assignment> {
+//   const collection = client.db('docuscope').collection('assignments');
+//   const assignment: Assignment | null = await collection.findOne<Assignment>({assignment: id});
+//   if (!assignment) {
+//     throw new ReferenceError(`Assignment ${id} no found.`)
+//   }
+//   return assignment;
+// }
 
-async function findRulesById(id: string): Promise<Rules> {
-  const collection = client.db('docuscope').collection('configurations');
-  const rules: Rules | null = await collection.findOne<Rules>({_id: new ObjectId(id)});
-  if (!rules) { throw new ReferenceError(`Configuration ${id} not found.`)}
-  return rules;
-}
+// async function findRulesById(id: string): Promise<Rules> {
+//   const collection = client.db('docuscope').collection('configurations');
+//   const rules: Rules | null = await collection.findOne<Rules>({_id: new ObjectId(id)});
+//   if (!rules) { throw new ReferenceError(`Configuration ${id} not found.`)}
+//   return rules;
+// }
+
 declare module "express-session" {
   interface SessionData {
     assignment: Assignment;
@@ -107,36 +108,36 @@ declare module "express-session" {
   }
 }
 
-async function initDatabase(): Promise<void> {
-  await client.connect();
-  const db = client.db('docuscope');
-  const configs = db.collection('configurations');
-  const config = await configs.updateOne({"info.name": "Change Proposal"}, {$set: changeProposal}, {upsert: true});
-  console.log(config);
-  const rules = config.upsertedId;
-  const assignments = db.collection('assignments');
-  const assignment = await assignments.updateOne({assignment: '5'}, {$set: {
-    assignment: '5',
-    rules,
-    docuscope: false,
-    scribe: true,
-    notes_to_prose: true,
-    logical_flow: true,
-    grammar: true,
-    copyedit: true,
-    expectation: true,
-    topics: true,
-    text2speech: true,
-  } as Assignment}, {upsert: true});
-  console.log(assignment);
-}
+// async function initDatabase(): Promise<void> {
+//   await client.connect();
+//   const db = client.db('docuscope');
+//   const configs = db.collection('configurations');
+//   const config = await configs.updateOne({"info.name": "Change Proposal"}, {$set: changeProposal}, {upsert: true});
+//   console.log(config);
+//   const rules = config.upsertedId;
+//   const assignments = db.collection('assignments');
+//   const assignment = await assignments.updateOne({assignment: '5'}, {$set: {
+//     assignment: '5',
+//     rules,
+//     docuscope: false,
+//     scribe: true,
+//     notes_to_prose: true,
+//     logical_flow: true,
+//     grammar: true,
+//     copyedit: true,
+//     expectation: true,
+//     topics: true,
+//     text2speech: true,
+//   } as Assignment}, {upsert: true});
+//   console.log(assignment);
+// }
 
 async function __main__() {
   console.log(
     `Configured the OnTopic backend url to be: ${ONTOPIC_URL.toString()}`
   );
   await initializeDatabase();
-  await initDatabase();
+  // await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.set('etag', 'strong');
