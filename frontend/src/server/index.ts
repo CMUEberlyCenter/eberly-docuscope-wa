@@ -24,7 +24,7 @@ import { initializeDatabase } from './data/data';
 import { Assignment } from './model/assignment';
 import { Rules } from './model/rules';
 import { metrics } from './prometheus';
-import { LTI_DB, LTI_HOSTNAME, LTI_KEY, LTI_OPTIONS, ONTOPIC_URL } from './settings';
+import { LTI_DB, LTI_HOSTNAME, LTI_KEY, LTI_OPTIONS, ONTOPIC_URL, PORT } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -192,7 +192,7 @@ async function __main__() {
   Provider.onDeepLinking(async (_token, _req: Request, res: Response) =>
     Provider.redirect(res, '/deeplink.html', { newResource: true }));
   try {
-    await Provider.deploy({ port: LTI_HOSTNAME.port });
+    await Provider.deploy({ port: PORT });
     console.log(` > Ready on ${LTI_HOSTNAME.toString()}`);
   } catch (err) {
     console.error(err);
