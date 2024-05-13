@@ -134,7 +134,7 @@ export const [useOnTopic, onTopic$] = bind(
     text: onTopicToolText,
     rules: rules$,
   }).pipe(
-    filter((c) => !!c.rules),
+    filter((c) => !!c.rules && !!c.text),
     switchMap((c) =>
       fromFetch(onTopicUrl, {
         method: 'POST',
@@ -154,8 +154,7 @@ export const [useOnTopic, onTopic$] = bind(
     ),
     switchMap(async (response) => {
       if (!response.ok) {
-        if (!response.ok)
-          throw new Error(`Bad server status ${response.statusText}`);
+        throw new Error(`Bad server status ${response.statusText}`);
       }
       const raw = await response.json();
       // TODO: update rules.topicSentenceCount
