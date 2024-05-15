@@ -2,7 +2,7 @@
  * @fileoverview Service for retrieving the common dictionary data.
  */
 import { bind } from '@react-rxjs/core';
-import { catchError, map, of, switchMap } from 'rxjs';
+import { catchError, filter, map, of, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { settings$ } from './settings.service';
 
@@ -117,6 +117,7 @@ export class CommonDictionary implements ICommonDictionary {
 export const [useCommonDictionary, commonDictionary$] = bind(
   // get url from settings.
   settings$.pipe(
+    filter((settings) => !!settings.docuscope && !!settings.impressions),
     switchMap((settings) =>
       fromFetch<ICommonDictionary>(settings.common_dictionary, {
         selector: (res) => res.json(),

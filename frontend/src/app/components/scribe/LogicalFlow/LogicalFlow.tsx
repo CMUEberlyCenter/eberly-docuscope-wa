@@ -1,4 +1,7 @@
-import React, { Suspense } from "react";
+import { Subscribe } from "@react-rxjs/core";
+import { FC, Suspense } from "react";
+import { Alert, Card, Modal, Spinner } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import {
   logicalFlow$,
   logicalFlowAudit$,
@@ -6,13 +9,11 @@ import {
   useLogicalFlowAudit,
   useScribe,
 } from "../../../service/scribe.service";
-import { Alert, Card, Modal, Spinner } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
-import { DisabledAlert } from "../DisabledAlert";
-import { Subscribe } from "@react-rxjs/core";
 import { Rating } from "../../Rating/Rating";
+import { DisabledAlert } from "../DisabledAlert";
 
-const NoText = () => (
+/** Simple no selected text warning. */
+const NoText: FC = () => (
   <Alert variant="warning">There is no text to audit.</Alert>
 );
 
@@ -20,7 +21,11 @@ type Props = {
   show: boolean;
   onHide: () => void;
 };
-export const LogicalFlowAudit: React.FC<Props> = ({
+/**
+ * Scribe's logical flow tool dialog component.
+ * Used to analyse the logical flow of the selected text.
+ */
+export const LogicalFlowAudit: FC<Props> = ({
   show = false,
   onHide,
 }: Props) => {

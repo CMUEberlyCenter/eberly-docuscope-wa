@@ -7,7 +7,7 @@
  * checkbox will initiate highlighting in the tagged text view.
  */
 import { Subscribe } from "@react-rxjs/core";
-import * as React from "react";
+import { FC, Suspense } from "react";
 import { Accordion, Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -34,7 +34,7 @@ const ImpressionsErrorFallback = (props: { error?: Error }) => (
  * Shows the interactive Sunburst chart and category tree for the
  * results returned by the tagger.
  */
-const Impressions = () => {
+const Impressions: FC = () => {
   const editing = useEditorState();
   const text = useEditorText();
   const tagging = useTaggerResults();
@@ -84,7 +84,7 @@ const Impressions = () => {
       </Card.Header>
       <Card.Body className="overflow-auto">
         <ErrorBoundary FallbackComponent={ImpressionsErrorFallback}>
-          <React.Suspense fallback={<Spinner animation={"border"} />}>
+          <Suspense fallback={<Spinner animation={"border"} />}>
             <Subscribe>
               <div className="impressions-content flex-grow-1 p-1">
                 {content}
@@ -119,7 +119,7 @@ const Impressions = () => {
                 </Accordion>
               </div>
             </Subscribe>
-          </React.Suspense>
+          </Suspense>
         </ErrorBoundary>
       </Card.Body>
     </Card>

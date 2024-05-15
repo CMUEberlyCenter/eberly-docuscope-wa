@@ -2,6 +2,8 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from 'vite';
+import { version } from './package.json';
+
 
 // https://vitejs.dev/config/
 export default defineConfig(({mode}) => ({
@@ -23,5 +25,9 @@ export default defineConfig(({mode}) => ({
         }
       }
     }
+  },
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString())
   }
 }))

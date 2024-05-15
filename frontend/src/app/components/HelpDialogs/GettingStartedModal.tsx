@@ -1,5 +1,5 @@
 /* @fileoverview A Modal dialog for displaying getting started help. */
-import * as React from "react";
+import { FC } from "react";
 import { Modal } from "react-bootstrap";
 import {
   showGettingStarted,
@@ -7,7 +7,8 @@ import {
   useShowGettingStarted,
 } from "../../service/help.service";
 
-export const GettingStartedModal = () => {
+/** Modal dialog for displaying getting started information. */
+export const GettingStartedModal: FC = () => {
   const content = useGettingStarted();
   const show = useShowGettingStarted();
   return (

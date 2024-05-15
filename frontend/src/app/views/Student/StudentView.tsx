@@ -87,7 +87,6 @@ import { serialize } from "../../service/editor-state.service";
 import { About } from "../../components/HelpDialogs/About";
 import { Notes2Prose } from "../../components/scribe/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/scribe/ScribeOption/ScribeOption";
-// import { VERSION } from "../../service/application.service"; // #46
 import {
   SelectedNotesProse,
   assess,

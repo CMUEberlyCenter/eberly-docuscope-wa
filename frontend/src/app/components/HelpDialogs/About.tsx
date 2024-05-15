@@ -1,11 +1,12 @@
-import * as React from "react";
+import { FC } from "react";
 import { Modal } from "react-bootstrap";
-import { VERSION } from "../../service/application.service";
 import { showAbout, useShowAbout } from "../../service/help.service";
 import { useConfiguration } from "../../service/rules.service";
 import { useScribeAvailable } from "../../service/scribe.service";
 
-export const About = () => {
+
+/** Modal for displaying information about the application. */
+export const About: FC = () => {
   const show = useShowAbout();
   const { data, isLoading } = useConfiguration();
   const ScribeAvailable = useScribeAvailable();
@@ -43,8 +44,8 @@ export const About = () => {
 
         <h2>Application Information</h2>
         <ul>
-          <li>Application version: {VERSION}</li>
-          {/* <li>Build date: {new Date(BUILT_ON).toLocaleString()}</li> */}
+          <li>Application version: {__APP_VERSION__}</li>
+          <li>Build date: {new Date(__BUILD_DATE__).toLocaleString()}</li>
         </ul>
 
         <hr />

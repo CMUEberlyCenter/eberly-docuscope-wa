@@ -9,6 +9,7 @@ import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import { HierarchyRectangularNode } from "d3";
 import {
+  FC,
   HTMLProps,
   Suspense,
   SVGProps,
@@ -138,7 +139,7 @@ interface ArcProps {
   node: HierarchyNode; // this arc's node data.
   onClick: (d: HierarchyNode) => void; // callback for clicks
 }
-const Arc = (props: ArcProps) => {
+const Arc: FC<ArcProps> = (props: ArcProps) => {
   const { arc, root, node, onClick } = props;
   const ref = useRef(null);
   const [current, setCurrent] = useState(relativeArc(node, root));
@@ -198,7 +199,7 @@ interface ArcLabelProps extends SVGProps<SVGTextElement> {
   radius: number;
 }
 // Component for rendering arc labels.
-const ArcLabel = (props: ArcLabelProps) => {
+const ArcLabel: FC<ArcLabelProps> = (props: ArcLabelProps) => {
   const { root, node, radius } = props;
   const [current, setCurrent] = useState(relativeArc(node, root));
   const ref = useRef(null);
@@ -244,7 +245,7 @@ interface SunburstChartProps extends HTMLProps<HTMLDivElement> {
   width?: number; // default 300, optional width attribute.
 }
 // Component for rendering figure and svg used in chart.
-const SunburstFigure = (props: SunburstChartProps) => {
+const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
   const root = useSunbrustData(); // changes on new tagging data
   const editing = useEditorState(); // changes on editor state
   const [parent, setParent] = useState(root);
@@ -356,7 +357,7 @@ const SunburstFigure = (props: SunburstChartProps) => {
 };
 
 /** Custom error feedback. */
-const ErrorFallback = (props: { error?: Error }) => (
+const ErrorFallback: FC<{error?: Error}> = (props: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading chart data:</p>
     <pre>{props.error?.message}</pre>
@@ -369,7 +370,7 @@ const ErrorFallback = (props: { error?: Error }) => (
  * @param props
  * @returns
  */
-const SunburstChart = (props: SunburstChartProps) => (
+const SunburstChart: FC<SunburstChartProps> = (props: SunburstChartProps) => (
   <ErrorBoundary FallbackComponent={ErrorFallback}>
     {/* contain component errors to component! */}
     <Suspense fallback={<Spinner animation={"border"} />}>

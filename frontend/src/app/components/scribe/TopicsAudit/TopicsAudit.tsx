@@ -1,5 +1,5 @@
 import { Subscribe } from "@react-rxjs/core";
-import React, { Suspense } from "react";
+import { FC, Suspense } from "react";
 import { Alert, Card, Modal, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -11,7 +11,8 @@ import {
 } from "../../../service/scribe.service";
 import { DisabledAlert } from "../DisabledAlert";
 
-const NoText = () => (
+/** Simple no available text warning. */
+const NoText: FC = () => (
   <Alert variant="warning">There is no text to analyze.</Alert>
 );
 
@@ -19,7 +20,12 @@ type AuditProps = {
   show: boolean;
   onHide: () => void;
 };
-export const TopicsAudit: React.FC<AuditProps> = ({
+/**
+ * The Scribe topic audit tool modal dialog component.
+ * @param param0 
+ * @returns 
+ */
+export const TopicsAudit: FC<AuditProps> = ({
   show = false,
   onHide,
 }: AuditProps) => {

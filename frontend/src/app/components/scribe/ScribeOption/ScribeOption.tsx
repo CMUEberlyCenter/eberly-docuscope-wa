@@ -7,9 +7,10 @@ import {
   useScribe,
   useShowScribeOption,
 } from "../../../service/scribe.service";
+import { FC } from "react";
 
-// export const ScribeOption = ({show, onHide}: {show: boolean, onHide: () => void}) => {
-export const ScribeOption = () => {
+/** Scribe general warning and opt-in checkbox. */
+export const ScribeOption: FC = () => {
   const scribe = useScribe();
   const show = useShowScribeOption();
   const onHide = () => hideScribeOption();

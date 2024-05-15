@@ -1,7 +1,7 @@
 import { faClipboard, faFileImport } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Subscribe } from "@react-rxjs/core";
-import React, { ReactElement, Suspense } from "react";
+import { FC, ReactElement, Suspense } from "react";
 import {
   Alert,
   Button,
@@ -74,7 +74,7 @@ type Notes2ProseProps = {
  * @param insert function to call to export generated text.
  * @example <Notes2Promse show={showNotes} onHide={() => setShowNotes(false)} insert={insert}/>
  */
-export const Notes2Prose: React.FC<Notes2ProseProps> = ({
+export const Notes2Prose: FC<Notes2ProseProps> = ({
   show = false,
   onHide,
   insert = () => undefined,

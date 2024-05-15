@@ -1,9 +1,10 @@
 /* @fileoverview A Modal dialog for displaying basic help. */
-import * as React from "react";
+import { FC } from "react";
 import { Modal } from "react-bootstrap";
 import { showHelp, useHelp, useShowHelp } from "../../service/help.service";
 
-export const HelpModal = () => {
+/** Modal dialog for displaying basic help. */
+export const HelpModal: FC = () => {
   const content = useHelp();
   const show = useShowHelp();
   return (

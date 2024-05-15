@@ -8,8 +8,5 @@ declare module '*.txt' {
   export default content;
 }
 
-type apiCall = (
-  call: string,
-  data: unknown,
-  method: 'POST' | 'GET'
-) => Promise<unknown>;
+declare const __APP_VERSION__: string;
+declare const __BUILD_DATE__: string;

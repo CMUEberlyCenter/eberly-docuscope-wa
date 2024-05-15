@@ -19,8 +19,9 @@ import TabTitle from "../TabTitle/TabTitle";
 
 import "./Clarity.scss";
 
+
 /** Error feedback component for clarity tool. */
-const ClarityErrorFallback = (props: { error?: Error }) => (
+const ClarityErrorFallback: FC<{error?: Error}> = (props: { error?: Error }) => (
   <Alert variant="danger">
     <p>Error loading Clarity data:</p>
     <pre>{props.error?.message}</pre>
@@ -46,6 +47,7 @@ const cleanAndRepairSentenceData = (
 
 const dataTools = new OnTopicDataTools();
 
+/** DocuScope Clarity tool component. */
 const Clarity: FC = () => {
   const [textdata, setTextData] = useState(dataTools.getInitialData());
   const [paragraphIndex, setParagraphIndex] = useState(-1);

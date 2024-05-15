@@ -15,10 +15,15 @@
  *  - mousemove
  *  - touchmove
  */
-import React, { HTMLProps } from "react";
+import { FC, HTMLProps } from "react";
 import "./Divider.scss";
 
-const Divider = (props: HTMLProps<HTMLDivElement>) => (
+/**
+ * 
+ * @param props any valid properties on a div element.
+ * @returns 
+ */
+const Divider: FC<HTMLProps<HTMLDivElement>> = (props: HTMLProps<HTMLDivElement>) => (
   <div
     className="divider d-flex flex-column justify-content-center bg-light border mx-1"
     {...props}

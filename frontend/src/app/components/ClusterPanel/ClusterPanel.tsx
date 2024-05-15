@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Button, Tab, Tabs } from "react-bootstrap";
 
 import { useRules } from "../../service/rules.service";
@@ -57,7 +57,16 @@ type ClusterPanelProps = {
   enableTopicEditing?: boolean;
 };
 
-const ClusterPanel = ({
+/**
+ * 
+ * @param params Parameters object
+ * @param params.currentRule the index of the currently selected rule.
+ * @param params.currentCluster the index of hte currently selected cluster.
+ * @param params.disableTreeSelect callback to disable selection.
+ * @param params.enableTopicEditing true if topic editing is enabled.
+ * @returns 
+ */
+const ClusterPanel: FC<ClusterPanelProps> = ({
   currentRule,
   currentCluster,
   disableTreeSelect,

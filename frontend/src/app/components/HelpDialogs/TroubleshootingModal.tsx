@@ -1,5 +1,5 @@
 /* @fileoverview A Modal dialog for displaying troublshooting help. */
-import * as React from "react";
+import { FC } from "react";
 import { Modal } from "react-bootstrap";
 import {
   showTroubleshooting,
@@ -7,7 +7,8 @@ import {
   useTroubleshooting,
 } from "../../service/help.service";
 
-export const TroubleshootingModal = () => {
+/** Modal dialog for displaying troubleshooting information. */
+export const TroubleshootingModal: FC = () => {
   const content = useTroubleshooting();
   const show = useShowTroubeshooting();
   return (

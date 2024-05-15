@@ -1,4 +1,4 @@
-import React from "react";
+import { FC } from "react";
 import { Button } from "react-bootstrap";
 
 import "./Reset.scss";
@@ -7,9 +7,11 @@ type ResetProps = {
   onCloseResetDialog?: (reset: boolean) => void;
 };
 /**
- *
+ * Reset confirmation dialog component.
+ * @param params
+ * @param params.onCloseResetDialg function to call when reset is closed that takes a boolean true if reset is confirmed.
  */
-const Reset = ({ onCloseResetDialog }: ResetProps) => {
+const Reset: FC<ResetProps> = ({ onCloseResetDialog }: ResetProps) => {
   const onReset = (reset: boolean) =>
     onCloseResetDialog && onCloseResetDialog(reset);
   return (

@@ -1,8 +1,7 @@
 import { faRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, Spinner } from "react-bootstrap";
-import { VERSION } from "../../service/application.service";
 import {
   FileInfo,
   refreshConfigurations,
@@ -11,7 +10,7 @@ import {
 import { assignmentId, launch } from "../../service/lti.service";
 import "./InstuctorView.scss";
 
-const InstructorView = () => {
+const InstructorView: FC = () => {
   const [selected, setSelected] = useState("");
   const { files, isLoading } = useConfigurations();
 
@@ -142,7 +141,7 @@ const InstructorView = () => {
       className="instructor-view d-flex flex-column overflow-hidden h-100 w-100 p-1"
     >
       <div className="versionlabel">
-        Eberly DocuScope Write & Audit with myScribe version: {VERSION}
+        Eberly DocuScope Write & Audit with myScribe version: {__APP_VERSION__}
       </div>
       <h1 className="fw-bold flex-grow-0 text-muted">
         DocuScope Write & Audit with myScribe

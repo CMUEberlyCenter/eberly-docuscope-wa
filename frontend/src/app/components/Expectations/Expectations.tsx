@@ -1,6 +1,6 @@
 /* Contents of the Expectations tab of the tools widget. */
 import { Subscribe } from "@react-rxjs/core";
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { Alert, Button, Card, ListGroup } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import TabTitle from "../TabTitle/TabTitle";
@@ -58,7 +58,7 @@ const Rule = (props: RuleProps) => {
 */
 
 /** Component specific error message. */
-const ErrorFallback = (props: { error?: Error }) => (
+const ErrorFallback: FC<{ error?: Error }> = (props: { error?: Error }) => (
   <Alert variant="danger">
     <p>Error loading expectations:</p>
     <pre>{props.error?.message}</pre>
@@ -69,9 +69,9 @@ interface ExpectationProps {
   enableTopicEditing?: boolean;
 }
 /**
- *
+ * DocuScope expectations analysis tool.
  */
-const Expectations = ({ enableTopicEditing }: ExpectationProps) => {
+const Expectations: FC<ExpectationProps> = ({ enableTopicEditing }: ExpectationProps) => {
   const [disabled, setDisabled] = useState(false);
   const ruleManager = useRules();
   const { data: configuration } = useConfiguration();

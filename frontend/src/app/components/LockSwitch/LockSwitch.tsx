@@ -1,9 +1,9 @@
 /*
 A simple two state button for showing and changing locked state.
 
-Shows a pa
+Shows a closed padlock if locked and an open padlog if unlocked.
 */
-import React, { useEffect, useId, useState } from "react";
+import { FC, useEffect, useId, useState } from "react";
 import "./LockSwitch.scss";
 
 interface LockSwitchProps {
@@ -17,21 +17,24 @@ interface LockSwitchProps {
  * locked status.
  * Shows closed lock if false, open lock on true.
  * @param props
+ * @param props.label Label text content, prepended to button.
+ * @param props.checked locked if true.
+ * @param props.onChange Function to handle new lock state.
  * @returns
  */
-const LockSwitch = (props: LockSwitchProps) => {
+const LockSwitch: FC<LockSwitchProps> = ({label, checked, onChange}: LockSwitchProps) => {
   const labelId = useId();
-  const [toggle, setToggle] = useState(props.checked);
+  const [toggle, setToggle] = useState(checked);
 
   // handler for clicks on the button.
   const handleClick = () => {
-    if (props.onChange) {
-      props.onChange(!toggle);
+    if (onChange) {
+      onChange(!toggle);
     }
     setToggle(!toggle);
   };
 
-  useEffect(() => setToggle(props.checked), [props.checked]);
+  useEffect(() => setToggle(checked), [checked]);
 
   return (
     <div
@@ -40,12 +43,11 @@ const LockSwitch = (props: LockSwitchProps) => {
       role="button"
     >
       <label className="text-nowrap px-2" id={labelId}>
-        {props.label}
+        {label}
       </label>
       <button
-        className={`btn btn-outline-${
-          toggle ? "success" : "secondary"
-        } lock-button rounded-pill me-2`}
+        className={`btn btn-outline-${toggle ? "success" : "secondary"
+          } lock-button rounded-pill me-2`}
         role="switch"
         aria-checked={toggle}
         aria-labelledby={labelId}

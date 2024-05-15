@@ -1,5 +1,5 @@
 import { Subscribe } from "@react-rxjs/core";
-import { Suspense } from "react";
+import { FC, Suspense } from "react";
 import { Alert, Card, ListGroup, Modal, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useEditorState } from "../../../service/editor-state.service";
@@ -12,9 +12,9 @@ import {
   useExpectation,
   useScribe,
 } from "../../../service/scribe.service";
+import { Rating } from "../../Rating/Rating";
 import { DisabledAlert } from "../DisabledAlert";
 import "./AssessExpectations.scss";
-import { Rating } from "../../Rating/Rating";
 
 interface AssessExpectationsProps {
   show: boolean;
@@ -25,7 +25,8 @@ const UnavailableAlert = () => (
   <Alert variant="danger">Assess Expectations is unavailable.</Alert>
 );
 
-export const AssessExpectations = ({
+/** Modal dialog for handling Scribe's assess expectations tool. */
+export const AssessExpectations: FC<AssessExpectationsProps> = ({
   show = false,
   onHide,
 }: AssessExpectationsProps) => {

@@ -55,8 +55,10 @@ type LocalData = {
   num_topics: number;
 };
 
+type ClarityData = [number, number, Record<string, unknown>, string][];
+
 type OnTopicData = {
-  clarity?: unknown[];
+  clarity?: ClarityData;
   //   clarity?: (string | (number | {
   //     BE_VERB: boolean
   //     HNOUNS: number
