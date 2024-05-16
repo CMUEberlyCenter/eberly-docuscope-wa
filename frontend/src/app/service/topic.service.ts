@@ -48,7 +48,6 @@ export function highlightSentence(
   clearAllHighlights();
 
   const pId = `p${aParagraphIndex + 1}`;
-
   const pElement = document.getElementById(pId);
   if (!pElement) {
     // console.warn('Unable to find paragraph element %s', pId);
@@ -57,13 +56,7 @@ export function highlightSentence(
   pElement.classList.add('paragraph-highlight');
 
   const sId = `p${aParagraphIndex + 1}s${aSentenceIndex + 1}`;
-
-  const sElement = document.getElementById(sId);
-  if (sElement) {
-    sElement.classList.add('sentence-highlight');
-    // } else {
-    // console.warn('Unable to find sentence element %s', sId);
-  }
+  document.getElementById(sId)?.classList.add('sentence-highlight');
 }
 
 /**
@@ -81,41 +74,22 @@ export function highlightTopic(
   const topicElements = paragraphElement
     ? paragraphElement.getElementsByClassName('word')
     : document.getElementsByClassName('word');
-
-  // const testElements = [...topicElements].map(el => el.innerHTML);
+  const tElements = [...topicElements].map(e => e as HTMLElement);
+  const topics = aTopicList.map(li => li.toLowerCase());
 
   if (aParagraphIndex >= 0 && aSentenceIndex >= 0) {
-    for (const anElement of topicElements) {
-      const topic =
-        (anElement as HTMLElement).dataset.topic?.toLowerCase() ?? '';
-      if (aTopicList.some((li) => li.toLowerCase() === topic)) {
-        anElement.classList.add('word-highlight');
-        anElement.parentElement?.classList.add('sentence-highlight');
-      }
-    }
+    tElements.filter(element => topics.includes(element.dataset.topic?.toLowerCase() ?? ''))
+      .forEach(element => {
+        element.classList.add('word-highlight');
+        element.parentElement?.classList.add('sentence-highlight');
+      });
   } else {
-    // This is a really bad and slow way of doing this!
-    for (let i = 0; i < topicElements.length; i++) {
-      const anElement = topicElements[i] as HTMLElement;
-      const topic = anElement.dataset.topic?.toLowerCase();
-
-      for (let j = 0; j < aTopicList.length; j++) {
-        if (aSentenceIndex === -1) {
-          //if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
-          if (topic === aTopicList[j].toLowerCase()) {
-            anElement.classList.add('word-highlight');
-            anElement.parentElement?.classList.add('sentence-highlight');
-          }
-        } else {
-          if (j === aSentenceIndex) {
-            //if (anElement.innerHTML.toLowerCase ()==aTopicList [j].toLowerCase()) {
-            if (topic === aTopicList[j].toLowerCase()) {
-              anElement.classList.add('word-highlight');
-              anElement.parentElement?.classList.add('sentence-highlight');
-            }
-          }
-        }
+    tElements.forEach((element) => {
+      const topic = element.dataset.topic?.toLowerCase() ?? '';
+      if ((aSentenceIndex === -1 && topics.includes(topic)) || (topics.at(aSentenceIndex) === topic)) {
+        element.classList.add('word-highlight');
+        element.parentElement?.classList.add('sentence-highlight');
       }
-    }
+    });
   }
 }

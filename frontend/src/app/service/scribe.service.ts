@@ -14,7 +14,7 @@ import {
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { Descendant, type Range } from 'slate';
-import { DocuScopeRuleCluster } from '../../../js/DocuScopeRuleCluster';
+import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
 import { assignmentId } from './lti.service';
 import { settings$ } from './settings.service';
 

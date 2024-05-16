@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
-import { Rule } from '../src/lib/Configuration';
+import { Rule } from '../../lib/Configuration';
 
 /**
  *

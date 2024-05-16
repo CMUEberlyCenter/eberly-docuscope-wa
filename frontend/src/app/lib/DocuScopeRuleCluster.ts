@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Rule } from '../src/lib/Configuration';
+import { Rule } from '../../lib/Configuration';
 
 /**
  *
@@ -45,15 +45,12 @@ export class DocuScopeRuleCluster {
 
     const topics = anObject.topics;
 
-    if (topics) {
-      if (topics.length > 0) {
-        if (!topics[0].pre_defined_topics) {
-          topics[0].pre_defined_topics = [];
-        }
-
-        if (!topics[0].custom_topics) {
-          topics[0].custom_topics = [];
-        }
+    if (topics && topics.length > 0) {
+      if (!topics[0].pre_defined_topics) {
+        topics[0].pre_defined_topics = [];
+      }
+      if (!topics[0].custom_topics) {
+        topics[0].custom_topics = [];
       }
     }
   }

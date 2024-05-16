@@ -5,6 +5,7 @@ import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, combineLatest, filter, map } from 'rxjs';
 import { lockedEditorText$ } from './editor-state.service';
 
+// Enumeration of DocuScope tools plus null.
 export type Tool =
   | 'expectations'
   | 'coherence'
@@ -12,6 +13,7 @@ export type Tool =
   | 'impressions'
   | null;
 
+// Currently active DocuScope tool.
 export const currentTool = new BehaviorSubject<Tool>('expectations');
 export const [useCurrentTool, currentTool$] = bind(currentTool, 'expectations');
 

@@ -5,7 +5,7 @@ import { assignmentId } from './lti.service';
 import useSWR from 'swr';
 import { catchError, of, switchMap } from 'rxjs';
 import { bind } from '@react-rxjs/core';
-import DocuScopeRules from '../../../js/DocuScopeRules';
+import DocuScopeRules from '../lib/DocuScopeRules';
 
 const ruleUrl = new URL(
   `/api/v1/assignments/${assignmentId()}/configuration`,

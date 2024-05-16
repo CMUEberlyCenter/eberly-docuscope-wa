@@ -5,9 +5,9 @@ import { useRules } from "../../service/rules.service";
 import "./ClusterPanel.scss";
 import "./ClusterTopics.scss";
 
-import clusterIcon from "../../../../css/icons/topic_cluster_icon.png";
-import { DocuScopeRuleCluster } from "../../../../js/DocuScopeRuleCluster";
-import { type Duplicate } from "../../../../js/DocuScopeRules";
+import clusterIcon from "../../assets/icons/topic_cluster_icon.png";
+import { DocuScopeRuleCluster } from "../../lib/DocuScopeRuleCluster";
+import { type Duplicate } from "../../lib/DocuScopeRules";
 import { setEditorState } from "../../service/editor-state.service";
 import { rules$ } from "../../service/onTopic.service";
 

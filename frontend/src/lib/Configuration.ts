@@ -31,6 +31,15 @@ export type ConfigurationInformation = {
   multi_lang?: boolean;
 };
 
+export const ERROR_INFORMATION: ConfigurationInformation = {
+  name: 'NOT SET ERROR',
+  version: 'ERROR',
+  author: '',
+  copyright: 'NONE',
+  saved: 'UNKNOWN',
+  filename: ''
+};
+
 /** Configuration file json data. */
 export type ConfigurationData = {
   rules: {

@@ -1,6 +1,5 @@
-import { assignmentId } from '../src/app/service/lti.service';
-import { Configuration, ConfigurationInformation, Rule } from '../src/lib/Configuration';
-import { deepCopy } from './DataTools';
+import { assignmentId } from '../service/lti.service';
+import { Configuration, ConfigurationInformation, Rule } from '../../lib/Configuration';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
@@ -12,12 +11,24 @@ export interface Duplicate {
   type: number,
 }
 
+/**
+ * We need to switch to using the immutable package. That way we
+ * avoid really expensive deep copies through bad tricks like the
+ * one below.
+ * @param {any} anObject
+ */
+function deepCopy<T>(anObject: T): T {
+  return JSON.parse(JSON.stringify(anObject));
+}
+
 function sessionKey(key: string) {
   return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
 }
+
 function configKey() {
   return sessionKey('config');
 }
+
 function clustersKey() {
   return sessionKey('clusters');
 }
@@ -212,7 +223,7 @@ export default class DocuScopeRules {
     // store this information as it is now needed but fixIncoming destroys it. #26
     // incomingData = fixIncoming(incomingData);
 
-    console.log(incomingData);
+    // console.log(incomingData);
 
     let newRules = true;
 
@@ -476,19 +487,6 @@ export default class DocuScopeRules {
       .flatMap(topic =>
         [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []])
       .map(topic => topic.trim()).join(';');
-    //   const tempList = [];
-    //   for (const rule of this.rules) {
-    //   for (const cluster of rule.children) {
-    //     const topic = cluster.raw?.topics?.at(0);
-    //     if (topic) {
-    //       const rawTopicsStatic = topic.pre_defined_topics ?? [];
-    //       tempList.push(...rawTopicsStatic);
-    //       const rawTopics = topic.custom_topics ?? [];
-    //       tempList.push(...rawTopics);
-    //     }
-    //   }
-    // }
-    // return tempList.map((s) => s.trim()).join(';');
   }
 
   /**
@@ -501,23 +499,6 @@ export default class DocuScopeRules {
         lemma: topic?.lemma,
         topics: [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []].map(s => s.trim())
       }))
-    // const structuredTopics = [];
-
-    // for (const rule of this.rules) {
-    //   for (const cluster of rule.children) {
-    //     const topic = cluster.raw?.topics?.at(0);
-    //     if (topic) {
-    //       const pre = topic.pre_defined_topics ?? [];
-    //       const custom = topic.custom_topics ?? [];
-    //       structuredTopics.push({
-    //         lemma: topic.lemma,
-    //         topics: [...pre, ...custom].map((s) => s.trim()),
-    //       });
-    //     }
-    //   }
-    // }
-
-    // return structuredTopics;
   }
 
   /**
@@ -712,14 +693,8 @@ export default class DocuScopeRules {
     }
 
     for (let i = 0; i < this.rules.length; i++) {
-      // if (i !== aRuleIndex) {
-      // }
-
       const rule = this.rules[i];
       for (let j = 0; j < rule.children.length; j++) {
-        // if (j !== aClusterIndex) {
-        // }
-
         const topics = rule.children[j].raw?.topics;
         if (topics?.length) {
           const rawTopicsStatic = topics[0].pre_defined_topics ?? [];

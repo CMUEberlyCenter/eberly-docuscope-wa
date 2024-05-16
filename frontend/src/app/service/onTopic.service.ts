@@ -9,7 +9,7 @@ import {
   switchMap,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import DocuScopeRules from '../../../js/DocuScopeRules';
+import DocuScopeRules from '../lib/DocuScopeRules';
 import { currentTool$ } from './current-tool.service';
 import { lockedEditorText$ } from './editor-state.service';
 
@@ -55,6 +55,7 @@ type LocalData = {
   num_topics: number;
 };
 
+// Best guess as to what this is supposed to be.
 type ClarityData = [number, number, Record<string, unknown>, string][];
 
 type OnTopicData = {
@@ -71,13 +72,14 @@ type OnTopicData = {
   local?: LocalData[];
 };
 
+// Shape of json sent to onTopic.
 type onTopicRequest = {
   custom: string;
   customStructured: { lemma: string; topics: string[] }[];
   base: string;
 };
 
-const onTopicUrl = '/api/v1/ontopic';
+const onTopicUrl = '/api/v1/ontopic'; // This should be in settings.
 //export function useOnTopic(options?: SWRMutationConfiguration<OnTopicData, string, "/api/v1/ontopic", onTopicRequest, OnTopicData>) {
 //  return useSWRMutation(onTopicUrl, onTopic, options);
 //}
@@ -116,6 +118,7 @@ const onTopicUrl = '/api/v1/ontopic';
 //   return raw.data as OnTopicData;
 // }
 
+// Tools that use onTopic data.
 const OnTopicTools = ['expectations', 'coherence', 'clarity'];
 
 const onTopicToolText = combineLatest({
@@ -136,7 +139,7 @@ export const [useOnTopic, onTopic$] = bind(
     text: onTopicToolText,
     rules: rules$,
   }).pipe(
-    filter((c) => !!c.rules && !!c.text),
+    filter((c) => !!c.rules && !!c.text), // only if there are rules and text to process.
     switchMap((c) =>
       fromFetch(onTopicUrl, {
         method: 'POST',
