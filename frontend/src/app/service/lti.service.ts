@@ -1,8 +1,8 @@
 /** @fileoverview Accessing LTI 1.0 settings from injected global variable. */
 
-import { bind } from "@react-rxjs/core";
-import { catchError, of } from "rxjs";
-import { fromFetch } from "rxjs/fetch";
+import { bind } from '@react-rxjs/core';
+import { catchError, of } from 'rxjs';
+import { fromFetch } from 'rxjs/fetch';
 
 // Typing for injected variable.
 declare const window: {
@@ -54,10 +54,10 @@ export function isInstructor(): boolean {
  * @returns LTI token string.
  */
 const getLtik = (): string => {
-  const searchParams = new URLSearchParams(window.location.search)
-  const ltik = searchParams.get('ltik')
-  if (!ltik) throw new Error('Missing lti key.')
-  return ltik
+  const searchParams = new URLSearchParams(window.location.search);
+  const ltik = searchParams.get('ltik');
+  if (!ltik) throw new Error('Missing lti key.');
+  return ltik;
 };
 
 /**
@@ -69,10 +69,12 @@ const getLtiRequest = (): RequestInit => {
     return {
       credentials: 'include',
       headers: {
-        Authorization: `Bearer ${getLtik()}`
-      }
-    }
-  } catch { return {} };
+        Authorization: `Bearer ${getLtik()}`,
+      },
+    };
+  } catch {
+    return {};
+  }
 };
 
 const urlParams = new URLSearchParams(window.location.search);
@@ -80,11 +82,11 @@ console.log(`Assignment: ${urlParams.get('assignment')}`);
 export const [useAssignment, assignment$] = bind(
   fromFetch('/lti/info', {
     ...getLtiRequest(),
-    selector: (r => r.json())
+    selector: (r) => r.json(),
   }).pipe(catchError(() => of('not-found'))),
   null
 );
-assignment$.subscribe(ass => console.log(`Assignment fetch: ${ass}`))
+assignment$.subscribe((ass) => console.log(`Assignment fetch: ${ass}`));
 /**
  * Retrieve the course identifier.
  * @returns the assignment identifier.

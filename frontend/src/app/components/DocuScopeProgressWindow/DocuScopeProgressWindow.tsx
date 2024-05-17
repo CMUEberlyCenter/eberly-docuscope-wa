@@ -1,5 +1,5 @@
 /* Progress tracker in a modal like dialog. */
-import { FC } from 'react';
+import { FC } from "react";
 import "./DocuScopeProgressWindow.scss";
 
 type DocuScopeProgressProps = {

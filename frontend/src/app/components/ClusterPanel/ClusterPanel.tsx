@@ -58,13 +58,13 @@ type ClusterPanelProps = {
 };
 
 /**
- * 
+ *
  * @param params Parameters object
  * @param params.currentRule the index of the currently selected rule.
  * @param params.currentCluster the index of hte currently selected cluster.
  * @param params.disableTreeSelect callback to disable selection.
  * @param params.enableTopicEditing true if topic editing is enabled.
- * @returns 
+ * @returns
  */
 const ClusterPanel: FC<ClusterPanelProps> = ({
   currentRule,

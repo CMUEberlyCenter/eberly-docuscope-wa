@@ -74,19 +74,25 @@ export function highlightTopic(
   const topicElements = paragraphElement
     ? paragraphElement.getElementsByClassName('word')
     : document.getElementsByClassName('word');
-  const tElements = [...topicElements].map(e => e as HTMLElement);
-  const topics = aTopicList.map(li => li.toLowerCase());
+  const tElements = [...topicElements].map((e) => e as HTMLElement);
+  const topics = aTopicList.map((li) => li.toLowerCase());
 
   if (aParagraphIndex >= 0 && aSentenceIndex >= 0) {
-    tElements.filter(element => topics.includes(element.dataset.topic?.toLowerCase() ?? ''))
-      .forEach(element => {
+    tElements
+      .filter((element) =>
+        topics.includes(element.dataset.topic?.toLowerCase() ?? '')
+      )
+      .forEach((element) => {
         element.classList.add('word-highlight');
         element.parentElement?.classList.add('sentence-highlight');
       });
   } else {
     tElements.forEach((element) => {
       const topic = element.dataset.topic?.toLowerCase() ?? '';
-      if ((aSentenceIndex === -1 && topics.includes(topic)) || (topics.at(aSentenceIndex) === topic)) {
+      if (
+        (aSentenceIndex === -1 && topics.includes(topic)) ||
+        topics.at(aSentenceIndex) === topic
+      ) {
         element.classList.add('word-highlight');
         element.parentElement?.classList.add('sentence-highlight');
       }

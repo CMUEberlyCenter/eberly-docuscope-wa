@@ -19,11 +19,13 @@ import { FC, HTMLProps } from "react";
 import "./Divider.scss";
 
 /**
- * 
+ *
  * @param props any valid properties on a div element.
- * @returns 
+ * @returns
  */
-const Divider: FC<HTMLProps<HTMLDivElement>> = (props: HTMLProps<HTMLDivElement>) => (
+const Divider: FC<HTMLProps<HTMLDivElement>> = (
+  props: HTMLProps<HTMLDivElement>
+) => (
   <div
     className="divider d-flex flex-column justify-content-center bg-light border mx-1"
     {...props}

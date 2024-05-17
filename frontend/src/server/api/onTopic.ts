@@ -1,6 +1,6 @@
-import { Request, Response, Router } from "express";
-import { updateMetrics, updateResponseAvg } from "../prometheus";
-import { ONTOPIC_URL } from "../settings";
+import { Request, Response, Router } from 'express';
+import { updateMetrics, updateResponseAvg } from '../prometheus';
+import { ONTOPIC_URL } from '../settings';
 
 export const ontopic = Router();
 

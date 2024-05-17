@@ -1,11 +1,11 @@
-import { Request, Response, Router } from "express";
-import OpenAI from "openai";
+import { Request, Response, Router } from 'express';
+import OpenAI from 'openai';
 import format from 'string-format';
 // import templates from '../../../static/templates.json';
-import { PromptData } from "../../lib/Configuration";
+import { PromptData } from '../../lib/Configuration';
 // import { findPromptByAssignmentAndTool, findPromptByAssignmentExpectation } from "../data/data";
-import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from "../settings";
-import { readFile } from "fs/promises";
+import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from '../settings';
+import { readFile } from 'fs/promises';
 
 let prompts: PromptData;
 
@@ -20,49 +20,53 @@ async function readTemplates(): Promise<PromptData> {
   return prompts;
 }
 
-scribe.post(
-  '/convert_notes',
-  async (request: Request, response: Response) => {
-    // TODO get assignment id from LTI token
-    const { notes } = request.body;
-    try {
-      const { prompt, role, temperature } = (await readTemplates()).templates.notes_to_prose;
-      // const { genre, overview, prompt, role, temperature } = await findPromptByAssignmentAndTool(
-      //   assignment,
-      //   'notes_to_prose'
-      // );
-      if (!prompt || !role) {
-        // runtime safety - should never happen
-        console.warn('Malformed notes prompt data.');
-        return response.sendStatus(404);
-      }
-      const content = format(prompt, { notes, target_lang: 'english', user_lang: 'english' });
-      const prose = await openai.chat.completions.create({
-        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-        messages: [
-          { role: 'system', content: role },
-          {
-            role: 'user',
-            content,
-          },
-        ],
-        model: 'gpt-4',
-      });
-      // TODO check for empty prose
-      response.json(prose);
-    } catch (err) {
-      console.error(err instanceof Error ? err.message : err);
-      response.sendStatus(500);
+scribe.post('/convert_notes', async (request: Request, response: Response) => {
+  // TODO get assignment id from LTI token
+  const { notes } = request.body;
+  try {
+    const { prompt, role, temperature } = (await readTemplates()).templates
+      .notes_to_prose;
+    // const { genre, overview, prompt, role, temperature } = await findPromptByAssignmentAndTool(
+    //   assignment,
+    //   'notes_to_prose'
+    // );
+    if (!prompt || !role) {
+      // runtime safety - should never happen
+      console.warn('Malformed notes prompt data.');
+      return response.sendStatus(404);
     }
+    const content = format(prompt, {
+      notes,
+      target_lang: 'english',
+      user_lang: 'english',
+    });
+    const prose = await openai.chat.completions.create({
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      messages: [
+        { role: 'system', content: role },
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: 'gpt-4',
+    });
+    // TODO check for empty prose
+    response.json(prose);
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err);
+    response.sendStatus(500);
   }
-);
+});
 
 type TextPrompt = 'copyedit' | 'grammar' | 'logical_flow' | 'topics';
 const scribeText =
   (key: TextPrompt) => async (request: Request, response: Response) => {
     const { text } = request.body;
     try {
-      const { prompt, role, temperature } = (await readTemplates()).templates[key];
+      const { prompt, role, temperature } = (await readTemplates()).templates[
+        key
+      ];
       // const { prompt, role, temperature } = await findPromptByAssignmentAndTool(assignment, key);
       if (!prompt) {
         console.error(`No valid prompt for ${key}`);
@@ -107,7 +111,8 @@ scribe.post(
     //   return response.sendStatus(400);
     // }
     try {
-      const { prompt, role, temperature } = (await readTemplates()).templates.expectation
+      const { prompt, role, temperature } = (await readTemplates()).templates
+        .expectation;
       // const { service, prompt } = await findPromptByAssignmentExpectation(assignment, expectation);
       if (!prompt) {
         console.warn('Malformed expectation prompt.', prompt);
@@ -116,11 +121,14 @@ scribe.post(
         );
         return response.sendStatus(502);
       }
-      const content = format(prompt, { text, user_lang, expectation, description });
+      const content = format(prompt, {
+        text,
+        user_lang,
+        expectation,
+        description,
+      });
       const assessment = await openai.chat.completions.create({
-        temperature: isNaN(Number(temperature))
-          ? 0.0
-          : Number(temperature),
+        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         messages: [
           {
             role: 'system',

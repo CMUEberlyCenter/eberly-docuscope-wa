@@ -22,8 +22,10 @@ type AuditProps = {
 };
 /**
  * The Scribe topic audit tool modal dialog component.
- * @param param0 
- * @returns 
+ * @param param parameters object
+ * @param param.show Show modal dialog if true.
+ * @param param.onHide function to call when dialog is closed.
+ * @returns Component
  */
 export const TopicsAudit: FC<AuditProps> = ({
   show = false,

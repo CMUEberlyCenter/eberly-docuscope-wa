@@ -357,7 +357,7 @@ const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
 };
 
 /** Custom error feedback. */
-const ErrorFallback: FC<{error?: Error}> = (props: { error?: Error }) => (
+const ErrorFallback: FC<{ error?: Error }> = (props: { error?: Error }) => (
   <div role="alert" className="alert alert-danger">
     <p>Error loading chart data:</p>
     <pre>{props.error?.message}</pre>

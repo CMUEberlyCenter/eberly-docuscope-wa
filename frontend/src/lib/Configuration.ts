@@ -19,7 +19,6 @@ export type Rule = {
   sentenceCount?: number;
 };
 
-
 export type ConfigurationInformation = {
   name: string;
   version: string;
@@ -37,7 +36,7 @@ export const ERROR_INFORMATION: ConfigurationInformation = {
   author: '',
   copyright: 'NONE',
   saved: 'UNKNOWN',
-  filename: ''
+  filename: '',
 };
 
 /** Configuration file json data. */
@@ -66,13 +65,18 @@ export type Prompt = {
   temperature?: number | string;
 };
 
-type PromptType = "notes_to_prose" | "logical_flow" | "grammar" | "copyedit" | "expectation" | "topics"
+type PromptType =
+  | 'notes_to_prose'
+  | 'logical_flow'
+  | 'grammar'
+  | 'copyedit'
+  | 'expectation'
+  | 'topics';
 
 /** Prompt templates file json data. */
 export type PromptData = {
   templates: Record<PromptType, Prompt>;
   info: {
     saved_at: string; // DateTime
-  }
-}
-
+  };
+};

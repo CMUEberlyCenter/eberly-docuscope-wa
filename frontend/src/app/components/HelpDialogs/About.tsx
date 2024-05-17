@@ -4,7 +4,6 @@ import { showAbout, useShowAbout } from "../../service/help.service";
 import { useConfiguration } from "../../service/rules.service";
 import { useScribeAvailable } from "../../service/scribe.service";
 
-
 /** Modal for displaying information about the application. */
 export const About: FC = () => {
   const show = useShowAbout();

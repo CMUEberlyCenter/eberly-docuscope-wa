@@ -22,7 +22,11 @@ interface LockSwitchProps {
  * @param props.onChange Function to handle new lock state.
  * @returns
  */
-const LockSwitch: FC<LockSwitchProps> = ({label, checked, onChange}: LockSwitchProps) => {
+const LockSwitch: FC<LockSwitchProps> = ({
+  label,
+  checked,
+  onChange,
+}: LockSwitchProps) => {
   const labelId = useId();
   const [toggle, setToggle] = useState(checked);
 
@@ -46,8 +50,9 @@ const LockSwitch: FC<LockSwitchProps> = ({label, checked, onChange}: LockSwitchP
         {label}
       </label>
       <button
-        className={`btn btn-outline-${toggle ? "success" : "secondary"
-          } lock-button rounded-pill me-2`}
+        className={`btn btn-outline-${
+          toggle ? "success" : "secondary"
+        } lock-button rounded-pill me-2`}
         role="switch"
         aria-checked={toggle}
         aria-labelledby={labelId}

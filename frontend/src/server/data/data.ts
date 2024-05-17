@@ -1,6 +1,6 @@
-import { PoolConnection, RowDataPacket, createPool } from "mysql2/promise";
-import { MYSQL_POOL } from "../settings";
-import { ConfigurationData, Prompt } from "../../lib/Configuration";
+import { PoolConnection, RowDataPacket, createPool } from 'mysql2/promise';
+import { MYSQL_POOL } from '../settings';
+import { ConfigurationData, Prompt } from '../../lib/Configuration';
 
 const pool = createPool(MYSQL_POOL);
 
@@ -132,7 +132,11 @@ export async function findFileByAssignment(
  * @param date uploaded date
  * @param config strigified JSON
  */
-export async function storeFile(filename: string, date: string, config: string) {
+export async function storeFile(
+  filename: string,
+  date: string,
+  config: string
+) {
   await pool.query('INSERT INTO files (filename, data) VALUES(?, ?)', [
     filename,
     config,
@@ -144,7 +148,7 @@ export async function storeFile(filename: string, date: string, config: string) 
  * Sets or updates an assignments configutation file association.
  * @param assignment id of the assignment.
  * @param id id of the configuration file.
- * @returns 
+ * @returns
  */
 export async function updateAssignment(assignment: string, id: string) {
   return pool.query(
@@ -222,7 +226,10 @@ interface ExpectationPrompt extends RowDataPacket {
   prompt: string;
 }
 
-export async function findPromptByAssignmentExpectation(assignment: string, expectation: string) {
+export async function findPromptByAssignmentExpectation(
+  assignment: string,
+  expectation: string
+) {
   const [rows] = await pool.query<ExpectationPrompt[]>(
     `SELECT 
    data->'$.prompt_templates.expectation' AS service,
@@ -234,6 +241,6 @@ export async function findPromptByAssignmentExpectation(assignment: string, expe
   if (rows.length <= 0) {
     throw new ReferenceError(`File lookup error for ${assignment}!`);
   }
-  const {service, prompt} = rows[0];
-  return {service, prompt};
+  const { service, prompt } = rows[0];
+  return { service, prompt };
 }

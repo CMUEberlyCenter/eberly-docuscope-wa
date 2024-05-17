@@ -684,64 +684,64 @@ const StudentView: FC = () => {
             <ButtonToolbar>
               {paragraphselector}
               {ScribeAvailable && (
-                  <ButtonGroup className="me-2">
-                    {notesFeature && (
-                        <Button
-                          onClick={convertNotes}
-                          disabled={!editable}
-                          title="Covert selected notes to prose"
-                        >
-                          Notes2Prose
-                        </Button>
-                      )}
-                    {grammarFeature && (
-                        <Button
-                          onClick={fixGrammar}
-                          disabled={!editable}
-                          title="Proofread selected text for grammatical errors"
-                        >
-                          Proofread
-                        </Button>
-                      )}
-                    {clarifyFeature && (
-                        <Button
-                          onClick={clarifySelection}
-                          disabled={!editable}
-                          title="Suggest revisions of selected text to improve clarity"
-                        >
-                          Clarify
-                        </Button>
-                      )}
-                    {assessExpectationFeature &&
-                      currentTab === "expectations" && (
-                        <Button
-                          onClick={() => assessExpectation()}
-                          disabled={
-                            !editable /* && !editorSelectedText && selected expectation */
-                          }
-                          title="Check if the selected text meets the selected expectation"
-                        >
-                          Assess
-                        </Button>
-                      )}
-                    {logicalFlowFeature && (
-                        <Button
-                          onClick={() => auditLogicalFlow()}
-                          title="Audit Logical Flow of the Document"
-                        >
-                          Flow
-                        </Button>
-                      )}
-                    {topicsFeature && (
-                        <Button
-                          onClick={() => auditTopics()}
-                          title="Analyze covered topics."
-                        >
-                          Topics
-                        </Button>
-                      )}
-                  </ButtonGroup>
-                )}
+                <ButtonGroup className="me-2">
+                  {notesFeature && (
+                    <Button
+                      onClick={convertNotes}
+                      disabled={!editable}
+                      title="Covert selected notes to prose"
+                    >
+                      Notes2Prose
+                    </Button>
+                  )}
+                  {grammarFeature && (
+                    <Button
+                      onClick={fixGrammar}
+                      disabled={!editable}
+                      title="Proofread selected text for grammatical errors"
+                    >
+                      Proofread
+                    </Button>
+                  )}
+                  {clarifyFeature && (
+                    <Button
+                      onClick={clarifySelection}
+                      disabled={!editable}
+                      title="Suggest revisions of selected text to improve clarity"
+                    >
+                      Clarify
+                    </Button>
+                  )}
+                  {assessExpectationFeature &&
+                    currentTab === "expectations" && (
+                      <Button
+                        onClick={() => assessExpectation()}
+                        disabled={
+                          !editable /* && !editorSelectedText && selected expectation */
+                        }
+                        title="Check if the selected text meets the selected expectation"
+                      >
+                        Assess
+                      </Button>
+                    )}
+                  {logicalFlowFeature && (
+                    <Button
+                      onClick={() => auditLogicalFlow()}
+                      title="Audit Logical Flow of the Document"
+                    >
+                      Flow
+                    </Button>
+                  )}
+                  {topicsFeature && (
+                    <Button
+                      onClick={() => auditTopics()}
+                      title="Analyze covered topics."
+                    >
+                      Topics
+                    </Button>
+                  )}
+                </ButtonGroup>
+              )}
               {settings.docuscope && (
                 <>
                   <Button onClick={() => globalUpdate(editorTextValue)}>
@@ -824,65 +824,60 @@ const StudentView: FC = () => {
       </footer> */}
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {ScribeAvailable &&
-        notesFeature && configuration && (
-          <Notes2Prose
-            show={showConvertNotes}
-            onHide={() => setShowConvertNotes(false)}
-            insert={(notes: SelectedNotesProse) => {
-              if (notes.prose && notes.range) {
-                setShowConvertNotes(false);
-                updateSelection(notes);
-              }
-            }}
-          />
-        )}
-      {ScribeAvailable &&
-        grammarFeature && (
-          <FixGrammar
-            show={showFixGrammar}
-            onHide={() => setShowFixGrammar(false)}
-            insert={(notes: SelectedNotesProse) => {
-              if (notes.prose && notes.range) {
-                setShowFixGrammar(false);
-                updateSelection(notes);
-              }
-            }}
-          />
-        )}
-      {ScribeAvailable &&
-        clarifyFeature && (
-          <Clarify
-            show={showClarify}
-            onHide={() => setShowClarify(false)}
-            insert={(notes: SelectedNotesProse) => {
-              if (notes.prose && notes.range) {
-                setShowClarify(false);
-                updateSelection(notes);
-              }
-            }}
-          />
-        )}
+      {ScribeAvailable && notesFeature && configuration && (
+        <Notes2Prose
+          show={showConvertNotes}
+          onHide={() => setShowConvertNotes(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowConvertNotes(false);
+              updateSelection(notes);
+            }
+          }}
+        />
+      )}
+      {ScribeAvailable && grammarFeature && (
+        <FixGrammar
+          show={showFixGrammar}
+          onHide={() => setShowFixGrammar(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowFixGrammar(false);
+              updateSelection(notes);
+            }
+          }}
+        />
+      )}
+      {ScribeAvailable && clarifyFeature && (
+        <Clarify
+          show={showClarify}
+          onHide={() => setShowClarify(false)}
+          insert={(notes: SelectedNotesProse) => {
+            if (notes.prose && notes.range) {
+              setShowClarify(false);
+              updateSelection(notes);
+            }
+          }}
+        />
+      )}
       {ScribeAvailable && assessExpectationFeature && configuration && (
         <AssessExpectations
           show={showAssessExpectation}
           onHide={() => setShowAssessExpectation(false)}
         />
       )}
-      {ScribeAvailable &&
-        logicalFlowFeature && (
-          <LogicalFlowAudit
-            show={showLogicalFlow}
-            onHide={() => setShowLogicalFlow(false)}
-          />
-        )}
-      {ScribeAvailable &&
-        topicsFeature && (
-          <TopicsAudit
-            show={showAuditTopics}
-            onHide={() => setShowAuditTopics(false)}
-          />
-        )}
+      {ScribeAvailable && logicalFlowFeature && (
+        <LogicalFlowAudit
+          show={showLogicalFlow}
+          onHide={() => setShowLogicalFlow(false)}
+        />
+      )}
+      {ScribeAvailable && topicsFeature && (
+        <TopicsAudit
+          show={showAuditTopics}
+          onHide={() => setShowAuditTopics(false)}
+        />
+      )}
       {ScribeAvailable && <ScribeOption />}
       {/* <HelpModal />
       <GettingStartedModal />

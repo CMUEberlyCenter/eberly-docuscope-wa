@@ -1,5 +1,5 @@
-import { Router, Request, Response } from "express";
-import { findAllFiles, findFileById, storeFile } from "../data/data";
+import { Router, Request, Response } from 'express';
+import { findAllFiles, findFileById, storeFile } from '../data/data';
 
 export const configurations = Router();
 
@@ -16,9 +16,10 @@ configurations.get('/:fileId', async (request: Request, response: Response) => {
     console.error(err instanceof Error ? err.message : err);
     response.sendStatus(500);
   }
-})
+});
 
-configurations.route('')
+configurations
+  .route('')
   .post(async (request: Request, response: Response) => {
     // TODO limit to instructor/administrative roles.
     if (!request.files) {
@@ -68,4 +69,4 @@ configurations.route('')
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(500);
     }
-  })
+  });

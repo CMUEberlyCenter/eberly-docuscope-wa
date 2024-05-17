@@ -19,9 +19,10 @@ import TabTitle from "../TabTitle/TabTitle";
 
 import "./Clarity.scss";
 
-
 /** Error feedback component for clarity tool. */
-const ClarityErrorFallback: FC<{error?: Error}> = (props: { error?: Error }) => (
+const ClarityErrorFallback: FC<{ error?: Error }> = (props: {
+  error?: Error;
+}) => (
   <Alert variant="danger">
     <p>Error loading Clarity data:</p>
     <pre>{props.error?.message}</pre>

@@ -231,7 +231,6 @@ prometheus.setMetricObject(
   'DSWA OnTopic average response time'
 );
 
-
 /**
  * Reset the average counters every 5 minutes. That way the code can just keep adding and re-calculating without having
  * to worry about moving averages and queue sizes. We should probably change this in the near future to be more
@@ -308,7 +307,6 @@ export function updateResponseAvg(aValue: number) {
     'DSWA OnTopic average response time'
   );
 }
-
 
 ////////// Metrics Endpoint /////////////
 metrics.get('/metrics', async (_request: Request, response: Response) => {

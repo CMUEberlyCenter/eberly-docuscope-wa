@@ -15,7 +15,11 @@ import { useSettings } from "../../service/settings.service";
  * @example
  *   (<TextToSpeech text={"Some text to read aloud."}/>)
  */
-export const TextToSpeech: FC<{ text: string }> = ({ text }: { text: string }) => {
+export const TextToSpeech: FC<{ text: string }> = ({
+  text,
+}: {
+  text: string;
+}) => {
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null

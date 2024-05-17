@@ -9,8 +9,8 @@ type RatingProps = {
 /**
  * Render rating stars.
  * @param params
- * @param params.value the raw [0-1] rating value supplied by Scribe. 
- * @returns 
+ * @param params.value the raw [0-1] rating value supplied by Scribe.
+ * @returns
  */
 export const Rating: React.FC<RatingProps> = ({ value }: RatingProps) => {
   const scale = 5;

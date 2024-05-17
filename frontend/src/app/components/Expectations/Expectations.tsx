@@ -71,7 +71,9 @@ interface ExpectationProps {
 /**
  * DocuScope expectations analysis tool.
  */
-const Expectations: FC<ExpectationProps> = ({ enableTopicEditing }: ExpectationProps) => {
+const Expectations: FC<ExpectationProps> = ({
+  enableTopicEditing,
+}: ExpectationProps) => {
   const [disabled, setDisabled] = useState(false);
   const ruleManager = useRules();
   const { data: configuration } = useConfiguration();

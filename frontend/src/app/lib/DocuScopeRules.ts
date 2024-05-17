@@ -1,14 +1,18 @@
 import { assignmentId } from '../service/lti.service';
-import { Configuration, ConfigurationInformation, Rule } from '../../lib/Configuration';
+import {
+  Configuration,
+  ConfigurationInformation,
+  Rule,
+} from '../../lib/Configuration';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
 export interface Duplicate {
-  ruleIndex: number,
-  clusterIndex: number,
-  lemma: string,
-  topic: string,
-  type: number,
+  ruleIndex: number;
+  clusterIndex: number;
+  lemma: string;
+  topic: string;
+  type: number;
 }
 
 /**
@@ -67,7 +71,7 @@ export default class DocuScopeRules {
   /**
    *
    */
-  constructor() { }
+  constructor() {}
 
   saveConfig() {
     const raw = this.getJSONRules();
@@ -481,24 +485,32 @@ export default class DocuScopeRules {
    */
   getAllCustomTopics() {
     return this.rules
-      .flatMap(rule => rule.children)
-      .map(cluster => cluster.raw?.topics?.at(0))
-      .filter(topic => !!topic)
-      .flatMap(topic =>
-        [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []])
-      .map(topic => topic.trim()).join(';');
+      .flatMap((rule) => rule.children)
+      .map((cluster) => cluster.raw?.topics?.at(0))
+      .filter((topic) => !!topic)
+      .flatMap((topic) => [
+        ...(topic?.pre_defined_topics ?? []),
+        ...(topic?.custom_topics ?? []),
+      ])
+      .map((topic) => topic.trim())
+      .join(';');
   }
 
   /**
    *
    */
   getAllCustomTopicsStructured() {
-    return this.rules.flatMap(rule => rule.children).map(cluster => cluster.raw?.topics?.at(0))
-      .filter(topic => !!topic)
-      .map(topic => ({
+    return this.rules
+      .flatMap((rule) => rule.children)
+      .map((cluster) => cluster.raw?.topics?.at(0))
+      .filter((topic) => !!topic)
+      .map((topic) => ({
         lemma: topic?.lemma,
-        topics: [...topic?.pre_defined_topics ?? [], ...topic?.custom_topics ?? []].map(s => s.trim())
-      }))
+        topics: [
+          ...(topic?.pre_defined_topics ?? []),
+          ...(topic?.custom_topics ?? []),
+        ].map((s) => s.trim()),
+      }));
   }
 
   /**
@@ -685,9 +697,7 @@ export default class DocuScopeRules {
   /**
    *
    */
-  checkDuplicates(
-    aTopicList: string[]
-  ): Duplicate | null {
+  checkDuplicates(aTopicList: string[]): Duplicate | null {
     if (!aTopicList.length) {
       return null;
     }
@@ -699,10 +709,10 @@ export default class DocuScopeRules {
         if (topics?.length) {
           const rawTopicsStatic = topics[0].pre_defined_topics ?? [];
           const rawTopics = topics[0].custom_topics ?? [];
-          const duplicate = listFindDuplucateInList(
-            aTopicList,
-            [...rawTopicsStatic, ...rawTopics]
-          );
+          const duplicate = listFindDuplucateInList(aTopicList, [
+            ...rawTopicsStatic,
+            ...rawTopics,
+          ]);
           if (duplicate) {
             return {
               ruleIndex: i,

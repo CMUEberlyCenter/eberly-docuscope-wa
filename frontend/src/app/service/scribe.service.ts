@@ -307,7 +307,7 @@ function requestAssess(text: string, expectation: string, description: string) {
     body: JSON.stringify({
       text,
       expectation,
-      description
+      description,
     }),
   })
     .pipe(
@@ -383,7 +383,11 @@ const assessed = combineLatest({
     concat<[SUSPENSE, AssessmentData]>(
       of(SUSPENSE),
       // TODO use straight expectation.  need to filter on is_group === false
-      requestAssess(text, expectation?.raw.name ?? '', expectation?.raw.description ?? '')
+      requestAssess(
+        text,
+        expectation?.raw.name ?? '',
+        expectation?.raw.description ?? ''
+      )
     )
   )
 );

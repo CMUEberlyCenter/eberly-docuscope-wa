@@ -4,7 +4,6 @@ import { readFileSync } from 'fs';
 import { version } from '../../package.json';
 import 'dotenv/config';
 
-
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
 
@@ -23,7 +22,7 @@ program
 // .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
 program.parse();
 const options = program.opts();
-export const DEV = process.env.NODE_ENV !== 'production'
+export const DEV = process.env.NODE_ENV !== 'production';
 export const PRODUCT = process.env.PRODUCT ?? 'myScribe Provider';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 export const PORT = process.env.PORT ?? 8888;
@@ -45,15 +44,19 @@ function fromEnvFile(base: string, defaultValue?: string): string {
 }
 
 export const LTI_KEY = fromEnvFile('LTI_KEY');
-export const LTI_HOSTNAME = new URL(process.env.LTI_HOSTNAME ?? 'http://localhost:8888/');
+export const LTI_HOSTNAME = new URL(
+  process.env.LTI_HOSTNAME ?? 'http://localhost:8888/'
+);
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
 const MONGO_DB = process.env.MONGO_DB ?? 'docuscope';
 const MONGO_USER = fromEnvFile('MONGO_USER');
 const MONGO_PASSWORD = fromEnvFile('MONGO_PASSWORD');
 export const LTI_DB = {
   url: `mongodb://${MONGO_HOST}/${MONGO_DB}?authSource=admin`,
-  connection: { user: MONGO_USER, pass: MONGO_PASSWORD}
-}
+  connection: { user: MONGO_USER, pass: MONGO_PASSWORD },
+};
+
+export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
 export const LTI_OPTIONS = {
   devMode: DEV,
   dynReg: {
@@ -63,9 +66,9 @@ export const LTI_OPTIONS = {
     description: 'myScribe LTI 1.3', // Tool Provider description.
     redirectUris: [new URL('/launch', LTI_HOSTNAME).toString()], // Additional redirection URLs. The main URL is added by default.
     customParameters: { key: 'value' }, // Custom parameters.
-    autoActivate: true // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
-  }
-}
+    autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
+  },
+};
 
 const MYSQL_USER = fromEnvFile('MYSQL_USER');
 const MYSQL_PASSWORD = fromEnvFile('MYSQL_PASSWORD');
@@ -83,11 +86,17 @@ export const MYSQL_POOL = {
   database: MYSQL_DB,
   waitForConnections: true,
   timezone: 'Z', // makes TIMESTAMP work correctly
-}
+};
 const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
 export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const TOKEN_SECRET = fromEnvFile('TOKEN_SECRET');
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
-export const SCRIBE_TEMPLATES = fromEnvFile('SCRIBE_TEMPLATES', "/app/build/app/settings/templates.json");
+export const SCRIBE_TEMPLATES = fromEnvFile(
+  'SCRIBE_TEMPLATES',
+  '/app/build/app/settings/templates.json'
+);
+
+export const EXPECTATIONS =
+  process.env['EXPECTATIONS'] ?? './public/expectations';
