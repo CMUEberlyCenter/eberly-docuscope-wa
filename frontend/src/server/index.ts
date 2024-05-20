@@ -6,7 +6,6 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import { ERROR_INFORMATION } from '../lib/WritingTask';
 import { assignments } from './api/assignments';
-// import { configurations } from './api/configurations';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
 import { findAllPublicWritingTasks, findAssignmentById, findWritingTaskById, initDatabase, updatePublicWritingTasks } from './data/mongo';
@@ -26,16 +25,8 @@ const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
 // const STATIC = '/static';
 
-
-// declare module "express-session" {
-//   interface SessionData {
-//     assignment: Assignment;
-//     rules: Rules;
-//   }
-// }
-
-const configurations = Router();
-configurations.get('/:fileId', async (request: Request, response: Response) => {
+const writingTasks = Router();
+writingTasks.get('/:fileId', async (request: Request, response: Response) => {
   const fileId = request.params.fileId;
   try {
     return response.send(await findWritingTaskById(fileId));
@@ -47,7 +38,7 @@ configurations.get('/:fileId', async (request: Request, response: Response) => {
     return response.sendStatus(500);
   }
 });
-configurations.get('/update', async (request: Request, response: Response) => {
+writingTasks.get('/update', async (request: Request, response: Response) => {
   try {
     await updatePublicWritingTasks();
     return response.sendStatus(200);
@@ -56,7 +47,7 @@ configurations.get('/update', async (request: Request, response: Response) => {
     return response.sendStatus(500);
   }
 });
-configurations.get('', async (request: Request, response: Response) => {
+writingTasks.get('', async (request: Request, response: Response) => {
   try {
     const rules = await findAllPublicWritingTasks();
     return response.send(rules); // need everything for preview.
@@ -109,18 +100,14 @@ async function __main__() {
   );
 
   // Configuration Endpoints
-  Provider.app.use('/api/v1/configurations', configurations);
+  Provider.app.use('/api/v2/writing_tasks', writingTasks);
   // Assignment Endpoints
   Provider.app.use('/api/v1/assignments', assignments);
   // Scribe Endpoints
-  Provider.app.use('/api/v1/scribe', scribe);
+  Provider.app.use('/api/v2/scribe', scribe);
   // OnTopic Enpoint
-  Provider.app.use('/api/v1/ontopic', ontopic);
+  Provider.app.use('/api/v2/ontopic', ontopic);
   console.log(`OnTopic: ${ONTOPIC_URL}`);
-
-  Provider.app.all('/api/v1/*', (_request: Request, response: Response) => {
-    response.sendStatus(404);
-  });
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {
     const token: IdToken = res.locals.token;
@@ -133,8 +120,8 @@ async function __main__() {
       const expectations = writing_task
         ? await findWritingTaskById(writing_task.oid.toString())
         : {
-            info: ERROR_INFORMATION,
-          };
+          info: ERROR_INFORMATION,
+        };
 
       const ret = {
         instructor: isInstructor(token.platformContext),
@@ -152,13 +139,6 @@ async function __main__() {
     return res.send({});
   });
 
-  // Strip possible LTI path from file path. We shouldn't need this unless this LTI needs to
-  // exist on the server with other add-ons. Instead we should just configure the url to
-  // point to the root of the host
-  Provider.app.all('/lti/activity/docuscope', (_req: Request, res: Response) =>
-    res.redirect('/')
-  );
-
   Provider.app.use(metrics);
 
   // console.log(PUBLIC);
@@ -169,6 +149,7 @@ async function __main__() {
     /\.ico$/,
     /settings/,
     /api\/v1/,
+    /api\/v2/,
     /metrics/,
     /index\.html$/
   );

@@ -24,8 +24,6 @@ async function readTemplates(): Promise<PromptData> {
 }
 
 scribe.post('/convert_notes', async (request: Request, response: Response) => {
-  // TODO get assignment id from LTI token
-  // Not necessary as assignment data is no longer needed.
   const { notes } = request.body;
   try {
     const { prompt, role, temperature } = (await readTemplates()).templates

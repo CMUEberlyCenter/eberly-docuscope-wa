@@ -60,11 +60,10 @@ export const [useScribeFeatureNotes2Prose, featureNotes2Prose$] = bind(
  * @returns
  */
 function requestConvertNotes(notes: SelectedNotesProse) {
-  const assignment = assignmentId();
-  return fromFetch('/api/v1/scribe/convert_notes', {
+  return fromFetch('/api/v2/scribe/convert_notes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ assignment, notes: notes.text }),
+    body: JSON.stringify({ notes: notes.text }),
   })
     .pipe(
       switchMap((response) => {
@@ -169,11 +168,10 @@ export const [useScribeFeatureGrammar, grammarFeature$] = bind(
 );
 
 function requestFixGrammar(selection: SelectedNotesProse) {
-  const assignment = assignmentId();
-  return fromFetch('/api/v1/scribe/proofread', {
+  return fromFetch('/api/v2/scribe/proofread', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ assignment, text: selection.text }),
+    body: JSON.stringify({ text: selection.text }),
   })
     .pipe(
       switchMap((response) => {
@@ -229,11 +227,10 @@ export const [useScribeFeatureClarify, clarifyFeature$] = bind(
 );
 
 function requestClarify(selection: SelectedNotesProse) {
-  const assignment = assignmentId();
-  return fromFetch('/api/v1/scribe/copyedit', {
+  return fromFetch('/api/v2/scribe/copyedit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ assignment, text: selection.text }),
+    body: JSON.stringify({ text: selection.text }),
   })
     .pipe(
       switchMap((response) => {
@@ -301,7 +298,7 @@ interface AssessmentData {
  *  associated prompt and the given text.
  */
 function requestAssess(text: string, expectation: string, description: string) {
-  return fromFetch('/api/v1/scribe/assess_expectation', {
+  return fromFetch('/api/v2/scribe/assess_expectation', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -413,11 +410,10 @@ function requestAudit<T>(
   endpoint: 'logical_flow' | 'topics',
   feedback: string = 'An error occurred.'
 ) {
-  const assignment = assignmentId();
-  return fromFetch(`/api/v1/scribe/${endpoint}`, {
+  return fromFetch(`/api/v2/scribe/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ assignment, text }),
+    body: JSON.stringify({ text }),
   }).pipe(
     switchMap((response) => {
       if (!response.ok) {
