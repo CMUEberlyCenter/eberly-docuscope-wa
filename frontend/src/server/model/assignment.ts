@@ -1,8 +1,7 @@
-import { ObjectId } from 'mongodb';
+import { DBRef } from 'mongodb';
 
 export type Assignment = {
-  _id?: ObjectId;
-  rules: ObjectId; // which rules file to use.
+  writing_task: DBRef; // which writing task file to use.
   assignment: string; // assignment id from LMS
   // docuscope options
   docuscope?: boolean; // global: if false, none of the rest matter.

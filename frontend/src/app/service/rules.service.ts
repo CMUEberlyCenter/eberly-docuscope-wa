@@ -1,5 +1,5 @@
 import { fromFetch } from 'rxjs/fetch';
-import { Configuration } from '../../lib/Configuration';
+import { WritingTask } from '../../lib/WritingTask';
 import { fetcher } from './fetcher';
 import { assignmentId } from './lti.service';
 import useSWR from 'swr';
@@ -13,7 +13,7 @@ const ruleUrl = new URL(
 );
 
 export function useConfiguration() {
-  return useSWR(ruleUrl, fetcher<Configuration>);
+  return useSWR(ruleUrl, fetcher<WritingTask>);
 }
 
 export const rules = fromFetch(ruleUrl.toString()).pipe(
@@ -21,7 +21,7 @@ export const rules = fromFetch(ruleUrl.toString()).pipe(
     if (!response.ok) {
       throw new Error(`Bad response: ${response.status}`);
     }
-    const config: Configuration = await response.json();
+    const config: WritingTask = await response.json();
     const dsRules = new DocuScopeRules();
     dsRules.load(config);
     return dsRules;

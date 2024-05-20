@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { Rule } from '../../lib/Configuration';
+import { Rule } from '../../lib/WritingTask';
 
 /**
  *

@@ -2,30 +2,23 @@ import cors from 'cors';
 import express, { Request, Response, Router } from 'express';
 import fileUpload from 'express-fileupload';
 import { Provider } from 'ltijs';
-import { MongoClient, ObjectId } from 'mongodb';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { ConfigurationData, ERROR_INFORMATION } from '../lib/Configuration';
+import { ERROR_INFORMATION } from '../lib/WritingTask';
 import { assignments } from './api/assignments';
 // import { configurations } from './api/configurations';
-import { PathLike } from 'fs';
-import { readFile, readdir, stat } from 'fs/promises';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
-import { initializeDatabase } from './data/data';
-import { Assignment } from './model/assignment';
+import { findAllPublicWritingTasks, findAssignmentById, findWritingTaskById, initDatabase, updatePublicWritingTasks } from './data/mongo';
 import { IdToken, isInstructor } from './model/lti';
-import { Rules } from './model/rules';
 import { metrics } from './prometheus';
 import {
-  EXPECTATIONS,
   LTI_DB,
   LTI_HOSTNAME,
   LTI_KEY,
   LTI_OPTIONS,
-  MONGO_CLIENT,
   ONTOPIC_URL,
-  PORT,
+  PORT
 } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -33,27 +26,6 @@ const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
 // const STATIC = '/static';
 
-const client = new MongoClient(MONGO_CLIENT);
-
-async function findAssignmentById(id: string): Promise<Assignment> {
-  const collection = client.db('docuscope').collection('assignments');
-  const assignment: Assignment | null = await collection.findOne<Assignment>({
-    assignment: id,
-  });
-  if (!assignment) {
-    throw new ReferenceError(`Assignment ${id} no found.`);
-  }
-  return assignment;
-}
-
-async function findRulesById(id: ObjectId): Promise<Rules> {
-  const collection = client.db('docuscope').collection('expectations');
-  const rules: Rules | null = await collection.findOne<Rules>({ _id: id });
-  if (!rules) {
-    throw new ReferenceError(`Expectation file ${id} not found.`);
-  }
-  return rules;
-}
 
 // declare module "express-session" {
 //   interface SessionData {
@@ -62,83 +34,11 @@ async function findRulesById(id: ObjectId): Promise<Rules> {
 //   }
 // }
 
-async function initDatabase(): Promise<void> {
-  await client.connect();
-  await updatePublicConfigurations(); // Maybe not best to regenerate public records on startup for production.
-  // const db = client.db('docuscope');
-  // const configs = db.collection('configurations');
-  // const config = await configs.updateOne({"info.name": "Change Proposal"}, {$set: changeProposal}, {upsert: true});
-  // console.log(config);
-  // const rules = config.upsertedId;
-  // const assignments = db.collection('assignments');
-  // const assignment = await assignments.updateOne({assignment: '5'}, {$set: {
-  //   assignment: '5',
-  //   rules,
-  //   docuscope: false,
-  //   scribe: true,
-  //   notes_to_prose: true,
-  //   logical_flow: true,
-  //   grammar: true,
-  //   copyedit: true,
-  //   expectation: true,
-  //   topics: true,
-  //   text2speech: true,
-  // } as Assignment}, {upsert: true});
-  // console.log(assignment);
-}
-
-async function readPublicExpectations(
-  dir: PathLike
-): Promise<ConfigurationData[]> {
-  try {
-    const ret: ConfigurationData[] = [];
-    const files = await readdir(dir);
-    for (const file of files) {
-      const path = join(dir.toString(), file);
-      const stats = await stat(path);
-      if (stats.isFile() && file.endsWith('.json')) {
-        const content = await readFile(path, { encoding: 'utf8' });
-        const json = JSON.parse(content) as ConfigurationData;
-        ret.push(json);
-      } else if (stats.isDirectory()) {
-        const subdir = await readPublicExpectations(path);
-        ret.push(...subdir);
-      }
-    }
-    return ret;
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
-}
-
-async function findAllPublicFiles() {
-  const collection = client.db('docuscope').collection<Rules>('expectations');
-  const cursor = collection.find<Rules>({ public: true });
-  const ret: Rules[] = [];
-  for await (const doc of cursor) {
-    ret.push(doc);
-  }
-  return ret;
-}
-
-async function updatePublicConfigurations() {
-  const collection = client.db('docuscope').collection<Rules>('expectations');
-  const expectations = (await readPublicExpectations(EXPECTATIONS)).map(
-    (e) => ({ ...e, public: true })
-  );
-  expectations.forEach((data) =>
-    collection.replaceOne({ public: true, 'info.name': data.info.name }, data, {
-      upsert: true,
-    })
-  );
-}
-
 const configurations = Router();
 configurations.get('/:fileId', async (request: Request, response: Response) => {
   const fileId = request.params.fileId;
   try {
-    return response.send(await findRulesById(new ObjectId(fileId)));
+    return response.send(await findWritingTaskById(fileId));
   } catch (err) {
     console.error(err);
     if (err instanceof ReferenceError) {
@@ -149,7 +49,7 @@ configurations.get('/:fileId', async (request: Request, response: Response) => {
 });
 configurations.get('/update', async (request: Request, response: Response) => {
   try {
-    await updatePublicConfigurations();
+    await updatePublicWritingTasks();
     return response.sendStatus(200);
   } catch (err) {
     console.error(err);
@@ -158,7 +58,7 @@ configurations.get('/update', async (request: Request, response: Response) => {
 });
 configurations.get('', async (request: Request, response: Response) => {
   try {
-    const rules = await findAllPublicFiles();
+    const rules = await findAllPublicWritingTasks();
     return response.send(rules); // need everything for preview.
   } catch (err) {
     console.error(err);
@@ -170,7 +70,6 @@ async function __main__() {
   console.log(
     `Configured the OnTopic backend url to be: ${ONTOPIC_URL.toString()}`
   );
-  await initializeDatabase();
   await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
@@ -230,9 +129,9 @@ async function __main__() {
         token.platformContext.resource.id
       );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { _id, rules, assignment, ...tools } = assignmentData;
-      const expectations = rules
-        ? await findRulesById(rules)
+      const { writing_task, assignment, ...tools } = assignmentData;
+      const expectations = writing_task
+        ? await findWritingTaskById(writing_task.oid.toString())
         : {
             info: ERROR_INFORMATION,
           };

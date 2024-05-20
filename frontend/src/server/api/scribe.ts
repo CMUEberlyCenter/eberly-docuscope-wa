@@ -1,17 +1,20 @@
 import { Request, Response, Router } from 'express';
+import { readFile } from 'fs/promises';
 import OpenAI from 'openai';
 import format from 'string-format';
-// import templates from '../../../static/templates.json';
-import { PromptData } from '../../lib/Configuration';
-// import { findPromptByAssignmentAndTool, findPromptByAssignmentExpectation } from "../data/data";
+import { PromptData } from '../model/prompt';
 import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from '../settings';
-import { readFile } from 'fs/promises';
+import { ProblemDetails } from '../../lib/ProblemDetails';
 
 let prompts: PromptData;
 
 export const scribe = Router();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
+/**
+ * Read the prompts from a file with content caching.
+ * @returns The contents of the prompts json file.
+ */
 async function readTemplates(): Promise<PromptData> {
   if (!prompts) {
     const file = await readFile(SCRIBE_TEMPLATES, 'utf8');
@@ -22,18 +25,20 @@ async function readTemplates(): Promise<PromptData> {
 
 scribe.post('/convert_notes', async (request: Request, response: Response) => {
   // TODO get assignment id from LTI token
+  // Not necessary as assignment data is no longer needed.
   const { notes } = request.body;
   try {
     const { prompt, role, temperature } = (await readTemplates()).templates
       .notes_to_prose;
-    // const { genre, overview, prompt, role, temperature } = await findPromptByAssignmentAndTool(
-    //   assignment,
-    //   'notes_to_prose'
-    // );
     if (!prompt || !role) {
       // runtime safety - should never happen
       console.warn('Malformed notes prompt data.');
-      return response.sendStatus(404);
+      return response.status(404).send({
+        type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+        title: 'Not Found',
+        detail: 'Convert Notes template not found.',
+        status: 404,
+      } as ProblemDetails);
     }
     const content = format(prompt, {
       notes,
@@ -55,7 +60,16 @@ scribe.post('/convert_notes', async (request: Request, response: Response) => {
     response.json(prose);
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);
-    response.sendStatus(500);
+    if (err instanceof Error) {
+      return response.status(500).send({
+        type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+        title: 'Internal Srver Error',
+        status: 500,
+        detail: err.message,
+        error: err,
+      } as ProblemDetails);
+    }
+    return response.sendStatus(500);
   }
 });
 
@@ -70,9 +84,14 @@ const scribeText =
       // const { prompt, role, temperature } = await findPromptByAssignmentAndTool(assignment, key);
       if (!prompt) {
         console.error(`No valid prompt for ${key}`);
-        return response.sendStatus(404);
+        return response.status(404).send({
+          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+          title: 'Not Found',
+          detail: `${key} template not found.`,
+          status: 404,
+        } as ProblemDetails);
       }
-      const content = format(prompt, { text, user_lang: 'english' });
+      const content = format(prompt, { text, user_lang: 'english', target_lang: 'english' });
       const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         messages: [
@@ -87,6 +106,15 @@ const scribeText =
       return response.json(chat);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
+      if (err instanceof Error) {
+        return response.status(500).send({
+          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+          title: 'Internal Srver Error',
+          status: 500,
+          detail: err.message,
+          error: err,
+        } as ProblemDetails);
+      }
       return response.sendStatus(500);
     }
   };
@@ -98,28 +126,19 @@ scribe.post('/topics', scribeText('topics'));
 scribe.post(
   '/assess_expectation',
   async (request: Request, response: Response) => {
-    // if (!("expectation" in prompts.templates)) {
-    //   console.error('expectation prompt not available.');
-    //   return response.sendStatus(404);
-    // }
-    // const { prompt, role, temperature } = prompts.templates.expectation;
     const { text, expectation, description } = request.body;
     const user_lang = 'English';
-    // const { assignment, text, expectation } = request.body;
-    // if (!assignment) {
-    //   console.error('No assignment for rule data fetch.');
-    //   return response.sendStatus(400);
-    // }
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates
         .expectation;
-      // const { service, prompt } = await findPromptByAssignmentExpectation(assignment, expectation);
       if (!prompt) {
-        console.warn('Malformed expectation prompt.', prompt);
-        console.error(
-          'Configuration file does not support expectation analysis.'
-        );
-        return response.sendStatus(502);
+        console.error('Missing expectation analysis prompt.');
+        return response.status(404).send({
+          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+          title: 'Not Found',
+          detail: `expectation template not found.`,
+          status: 404,
+        } as ProblemDetails);
       }
       const content = format(prompt, {
         text,
@@ -140,13 +159,17 @@ scribe.post(
       });
       response.json(assessment);
     } catch (err) {
+      console.error(err);
       if (err instanceof ReferenceError) {
-        console.error(err.message);
         return response.sendStatus(404);
       } else if (err instanceof Error) {
-        console.error(err.message);
-      } else {
-        console.error(err);
+        return response.status(500).send({
+          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+          title: 'Internal Srver Error',
+          status: 500,
+          detail: err.message,
+          error: err,
+        } as ProblemDetails);
       }
       return response.sendStatus(500);
     }

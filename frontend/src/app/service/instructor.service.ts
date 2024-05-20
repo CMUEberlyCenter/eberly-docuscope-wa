@@ -1,12 +1,12 @@
 import useSWR, { mutate } from 'swr';
-import { ConfigurationInformation } from '../../lib/Configuration';
+import { WritingTaskMetaData } from '../../lib/WritingTask';
 import { fetcher } from './fetcher';
 
 export type FileInfo = {
   id: string;
   filename: string;
   date: string;
-  info?: ConfigurationInformation;
+  info?: WritingTaskMetaData;
 };
 
 export function useConfigurations() {

@@ -19,7 +19,7 @@ export type Rule = {
   sentenceCount?: number;
 };
 
-export type ConfigurationInformation = {
+export type WritingTaskMetaData = {
   name: string;
   version: string;
   author: string;
@@ -30,7 +30,7 @@ export type ConfigurationInformation = {
   multi_lang?: boolean;
 };
 
-export const ERROR_INFORMATION: ConfigurationInformation = {
+export const ERROR_INFORMATION: WritingTaskMetaData = {
   name: 'NOT SET ERROR',
   version: 'ERROR',
   author: '',
@@ -40,7 +40,7 @@ export const ERROR_INFORMATION: ConfigurationInformation = {
 };
 
 /** Configuration file json data. */
-export type ConfigurationData = {
+export type WritingTask = {
   rules: {
     name: string;
     overview: string;
@@ -51,32 +51,8 @@ export type ConfigurationData = {
     rare_clusters: string[];
   };
   values: unknown;
-  info: ConfigurationInformation;
+  info: WritingTaskMetaData;
   extra_instructions?: string;
   wtd_version?: string;
-};
-
-export type Configuration = ConfigurationData & { id: string };
-
-/** Prompt data for formulating OpenAI requests. */
-export type Prompt = {
-  prompt: string;
-  role?: string;
-  temperature?: number | string;
-};
-
-type PromptType =
-  | 'notes_to_prose'
-  | 'logical_flow'
-  | 'grammar'
-  | 'copyedit'
-  | 'expectation'
-  | 'topics';
-
-/** Prompt templates file json data. */
-export type PromptData = {
-  templates: Record<PromptType, Prompt>;
-  info: {
-    saved_at: string; // DateTime
-  };
+  public?: boolean;
 };

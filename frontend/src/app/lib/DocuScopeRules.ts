@@ -1,9 +1,9 @@
 import { assignmentId } from '../service/lti.service';
 import {
-  Configuration,
-  ConfigurationInformation,
+  WritingTaskMetaData,
   Rule,
-} from '../../lib/Configuration';
+  WritingTask,
+} from '../../lib/WritingTask';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
@@ -52,8 +52,8 @@ function listFindDuplucateInList(aListSource: string[], aListTarget: string[]) {
  * This needs to be refactored to: DocuScopeRuleManager
  */
 export default class DocuScopeRules {
-  original?: Configuration; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
-  data?: Configuration; // The full dataset, not just the rules
+  original?: WritingTask; // We use this for reset purposes. It's the unmodified data set as either loaded from disk or from the network
+  data?: WritingTask; // The full dataset, not just the rules
   rules: DocuScopeRule[] = []; // Only the rules section of the dataset
   clusters: { name: string; custom_topics: string[] }[] = [];
   ready = false;
@@ -88,7 +88,7 @@ export default class DocuScopeRules {
     const stored = sessionStorage.getItem(configKey());
     if (stored) {
       try {
-        return JSON.parse(stored) as Configuration;
+        return JSON.parse(stored) as WritingTask;
       } catch (err) {
         console.error(err);
         return undefined;
@@ -147,8 +147,8 @@ export default class DocuScopeRules {
    *
    */
   isNewVersion(
-    newInfo: ConfigurationInformation,
-    existingInfo?: ConfigurationInformation
+    newInfo: WritingTaskMetaData,
+    existingInfo?: WritingTaskMetaData
   ) {
     if (!existingInfo) {
       console.log('Existing info is undefined, returning: true');
@@ -223,13 +223,13 @@ export default class DocuScopeRules {
    * rules as we got them from the server. However, we need to compare that to what the user
    * might have already worked on
    */
-  load(incomingData: Configuration) {
+  load(incomingData: WritingTask) {
     // store this information as it is now needed but fixIncoming destroys it. #26
     // incomingData = fixIncoming(incomingData);
 
     // console.log(incomingData);
 
-    let newRules = true;
+    // let newRules = true;
 
     // We have to make a small accomodation for rules coming in as part of a JSON HTTP message
     // This will be smoothed out soon after v1.
@@ -238,41 +238,42 @@ export default class DocuScopeRules {
     this.rules = [];
     this.restoreClusters();
 
-    const stored = this.getSessionConfig();
+    // No session storage as modification is not required for Scribe
+    // const stored = this.getSessionConfig();
     //let stored=this.sessionStorage.getJSONObject("rules");
     // const stored = this.sessionStorage.getJSONObject("dswa");
 
     // First time use, we'll make the rules loaded from the server our place to start
-    if (stored) {
-      console.log('We have stored rules, checking version ...');
-      if (incomingData.id !== stored.id) {
-        console.log(
-          'The incoming is different than the stored version, using newer data'
-        );
-        this.original = incomingData;
-        this.data = deepCopy(incomingData);
-        this.rules = [];
-        newRules = true;
-      } else {
-        console.log(
-          "The stored version is newer or equal to the incoming version, we'll use the stored data"
-        );
-        this.original = stored;
-        this.data = deepCopy(stored);
-        this.rules = [];
-        newRules = false;
-      }
-    } else {
-      console.log('Nothing stored yet, defaulting to template version');
-    }
+    // if (stored) {
+    //   console.log('We have stored rules, checking version ...');
+    //   if (incomingData.id !== stored.id) {
+    //     console.log(
+    //       'The incoming is different than the stored version, using newer data'
+    //     );
+    //     this.original = incomingData;
+    //     this.data = deepCopy(incomingData);
+    //     this.rules = [];
+    //     newRules = true;
+    //   } else {
+    //     console.log(
+    //       "The stored version is newer or equal to the incoming version, we'll use the stored data"
+    //     );
+    //     this.original = stored;
+    //     this.data = deepCopy(stored);
+    //     this.rules = [];
+    //     newRules = false;
+    //   }
+    // } else {
+    //   console.log('Nothing stored yet, defaulting to template version');
+    // }
 
-    this.parse(newRules);
+    this.parse(true);
 
     // Make sure we have at least something stored in case this is the first time
     // we load the data from the template. Shouldn't hurt if we overwrite
-    if (newRules) {
-      this.save();
-    }
+    // if (newRules) {
+    //   this.save();
+    // }
 
     this.ready = true;
 
