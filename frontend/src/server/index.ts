@@ -4,7 +4,6 @@ import fileUpload from 'express-fileupload';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { ERROR_INFORMATION } from '../lib/WritingTask';
 import { assignments } from './api/assignments';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
@@ -117,17 +116,11 @@ async function __main__() {
       );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { writing_task, assignment, ...tools } = assignmentData;
-      const expectations = writing_task
-        ? await findWritingTaskById(writing_task.oid.toString())
-        : {
-          info: ERROR_INFORMATION,
-        };
-
       const ret = {
         instructor: isInstructor(token.platformContext),
         resource: token.platformContext.resource,
         tools,
-        expectations,
+        writing_task
       };
       console.log(ret);
       return res.send(ret);
@@ -145,12 +138,11 @@ async function __main__() {
   Provider.app.use(express.static(PUBLIC));
   Provider.whitelist(
     Provider.appRoute(),
-    /assets/,
+    /assets\//,
     /\.ico$/,
     /settings/,
-    /api\/v1/,
-    /api\/v2/,
-    /metrics/,
+    /api\/v.\//,
+    /metrics\//,
     /index\.html$/
   );
   try {

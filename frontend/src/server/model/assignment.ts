@@ -1,7 +1,8 @@
 import { DBRef } from 'mongodb';
+import { WritingTask } from '../../lib/WritingTask';
 
 export type Assignment = {
-  writing_task: DBRef; // which writing task file to use.
+  writing_task: WritingTask | DBRef; // which writing task file to use.
   assignment: string; // assignment id from LMS
   // docuscope options
   docuscope?: boolean; // global: if false, none of the rest matter.

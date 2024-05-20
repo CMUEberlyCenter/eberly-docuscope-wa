@@ -9,5 +9,8 @@
   "copyedit": true,
   "text2speech": true,
 
-  "docuscope": false
+  "docuscope": false,
+  "coherence": true,
+  "clarity": true,
+  "impressions": true
 }

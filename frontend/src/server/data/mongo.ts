@@ -3,7 +3,7 @@ import { EXPECTATIONS, MONGO_CLIENT } from "../settings";
 import { Assignment } from "../model/assignment";
 import { PathLike } from 'fs';
 import { readFile, readdir, stat } from 'fs/promises';
-import { WritingTask } from "../../lib/WritingTask";
+import { WritingTask, isWritingTask } from "../../lib/WritingTask";
 import { join } from "path";
 
 const client = new MongoClient(MONGO_CLIENT);
@@ -20,19 +20,27 @@ const WRITING_TASKS = 'writing_tasks';
  */
 export async function findAssignmentById(id: string): Promise<Assignment> {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
-  // TODO dereference writing_task in query using $lookup
   const assignment: Assignment | null = await collection.findOne<Assignment>({
     assignment: id,
   });
   if (!assignment) {
     throw new ReferenceError(`Assignment ${id} no found.`);
   }
+  const { writing_task } = assignment;
+  if (!isWritingTask(writing_task)) { // replace with $lookup
+    const task = await findWritingTaskById(writing_task.oid.toString());
+    assignment.writing_task = task;
+  }
   return assignment;
 }
 
-export async function findWritingTaskIdByAssignment(id: string): Promise<ObjectId> {
-  return (await findAssignmentById(id)).writing_task.oid;
-}
+// export async function findWritingTaskIdByAssignment(id: string): Promise<ObjectId> {
+//   const { writing_task } = await findAssignmentById(id);
+//   if (isWritingTask(writing_task)) {
+//     return writing_task;
+//   }
+//   return ().writing_task.oid;
+// }
 
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   const _id = new ObjectId(id);

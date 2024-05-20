@@ -56,3 +56,7 @@ export type WritingTask = {
   wtd_version?: string;
   public?: boolean;
 };
+
+export function isWritingTask(task: WritingTask | unknown): task is WritingTask {
+  return !!task && typeof (task) === 'object' && 'rules' in task && 'impressions' in task && 'info' in task;
+}

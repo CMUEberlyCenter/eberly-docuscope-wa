@@ -1,8 +1,6 @@
 import { Request, Response, Router } from 'express';
 import change_proposal from '../../../public/expectations/change_proposal.json'; // FIXME Temp load from file.
-import { ProblemDetails } from '../../lib/ProblemDetails';
 import { WritingTask } from '../../lib/WritingTask';
-import { findWritingTaskIdByAssignment } from '../data/mongo';
 import { updateAssignment } from '../data/mysql';
 
 export const assignments = Router();
@@ -27,28 +25,28 @@ assignments.post(
   }
 );
 
-assignments.get(
-  '/:assignment/file_id',
-  async (request: Request, response: Response) => {
-    const { assignment } = request.params;
-    try {
-      const data = await findWritingTaskIdByAssignment(assignment);
-      if (data) {
-        response.json(data);
-      } else {
-        return response.status(404).send({
-          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
-          title: 'Not Found',
-          detail: '.',
-          status: 404,
-        } as ProblemDetails);
-        }
-    } catch (err) {
-      console.error(err);
-      response.sendStatus(500);
-    }
-  }
-);
+// assignments.get(
+//   '/:assignment/file_id',
+//   async (request: Request, response: Response) => {
+//     const { assignment } = request.params;
+//     try {
+//       const data = await findWritingTaskIdByAssignment(assignment);
+//       if (data) {
+//         response.json(data);
+//       } else {
+//         return response.status(404).send({
+//           type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+//           title: 'Not Found',
+//           detail: '.',
+//           status: 404,
+//         } as ProblemDetails);
+//         }
+//     } catch (err) {
+//       console.error(err);
+//       response.sendStatus(500);
+//     }
+//   }
+// );
 
 assignments.get(
   '/:assignment/configuration',
