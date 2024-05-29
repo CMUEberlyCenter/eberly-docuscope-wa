@@ -1,6 +1,6 @@
 clear
 cat ../banner.txt
-cat ../.version
+node -e "console.log(require('./package.json').version);"
 rm -rfv ./dist/*
 rm -rfv ./build
 rm -rfv ./node_modules

@@ -1,4 +1,4 @@
 clear
 cat ../banner.txt
-cat ../.version
+node -e "console.log(require('./package.json').version);"
 docker run  --network="host" -i dswa-frontend

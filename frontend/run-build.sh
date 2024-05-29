@@ -1,15 +1,10 @@
 clear
 cat ../banner.txt
-cat ../.version
+node -e "console.log(require('./package.json').version);"
 rm -rf ./public/*
 
-if [ ! -f ".env" ]; then
-  echo "Error: .env file found, please configure the environment first"
-  exit
-fi
-
 if [ ! -d "node_modules" ]; then
-  echo "Error: no node_modules folder found, please execute 'run-prep.sh first"
+  echo "Error: no node_modules folder found, please execute 'npm ci'"
   exit
 fi
 
