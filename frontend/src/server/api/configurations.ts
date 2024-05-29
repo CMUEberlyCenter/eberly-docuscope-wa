@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express';
-import { findAllFiles, findFileById, storeFile } from '../data/data';
+import { findAllFiles, findWritingTaskById, storeFile } from '../data/mysql';
 
 export const configurations = Router();
 
 configurations.get('/:fileId', async (request: Request, response: Response) => {
   const fileId = request.params.fileId;
   try {
-    const data = await findFileById(fileId);
+    const data = await findWritingTaskById(fileId);
     if (data) {
       response.send(data);
     } else {

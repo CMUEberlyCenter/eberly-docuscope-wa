@@ -11,7 +11,7 @@ ontopic.use('/', async (request: Request, response: Response, next) => {
   updateMetrics();
   next();
   updateResponseAvg(Date.now() - start);
-})
+});
 
 // TODO replace with express-proxy
 ontopic.post('/', async (request: Request, response: Response) => {
@@ -25,7 +25,9 @@ ontopic.post('/', async (request: Request, response: Response) => {
       },
     });
     if (!res.ok) {
-      console.error(`Bad response from ontopic: ${res.status} - ${res.statusText}`);
+      console.error(
+        `Bad response from ontopic: ${res.status} - ${res.statusText}`
+      );
       // forward bad response.
       return response.status(res.status).send(res.statusText);
     }

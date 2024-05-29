@@ -2,19 +2,19 @@
 // import { Button } from "react-bootstrap";
 // import { useIdleTimer } from "react-idle-timer";
 import { FC } from "react";
-import { isInstructor, launch } from "./service/lti.service";
-import InstructorView from "./views/Instructor/InstructorView";
+// import { isInstructor, launch, useAssignment } from "./service/lti.service";
+// import InstructorView from "./views/Instructor/InstructorView";
 import StudentView from "./views/Student/StudentView";
 
 // const Timeout = 10000; //5 * 60 * 1000;
 
-function inIframe(): boolean {
-  try {
-    return window.self !== window.top;
-  } catch (_e) {
-    return true;
-  }
-}
+// function inIframe(): boolean {
+//   try {
+//     return window.self !== window.top;
+//   } catch (_e) {
+//     return true;
+//   }
+// }
 
 // Idle timer does not make sense for this as it does not
 // depend on active session management with host.
@@ -64,30 +64,30 @@ const App: FC = () => {
   //   </div>
   // );
 
-  if (isInstructor()) {
-    return (
-      <div className="position-relative">
-        <InstructorView />
-      </div>
-    );
-  }
+  // if (isInstructor()) {
+  //   return (
+  //     <div className="position-relative">
+  //       <InstructorView />
+  //     </div>
+  //   );
+  // }
 
-  if (inIframe()) {
-    return (
-      <div className="loader">
-        <button
-          id="launcher"
-          className="center_button"
-          onClick={() => launch(false)}
-        >
-          Open in new Window
-        </button>
-        <div className="iframe">
-          <form id="ltirelayform" target="docuscopewa" method="post"></form>
-        </div>
-      </div>
-    );
-  }
+  // if (inIframe()) {
+  //   return (
+  //     <div className="loader">
+  //       <button
+  //         id="launcher"
+  //         className="center_button"
+  //         onClick={() => launch(false)}
+  //       >
+  //         Open in new Window
+  //       </button>
+  //       <div className="iframe">
+  //         <form id="ltirelayform" target="docuscopewa" method="post"></form>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="position-relative">

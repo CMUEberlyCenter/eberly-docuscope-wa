@@ -45,14 +45,13 @@ import {
   Slate,
   withReact,
 } from "slate-react";
-import ResetModal from "../../components/Reset/Reset";
-import { clearAllHighlights } from "../../service/topic.service";
 import Clarity from "../../components/Clarity/Clarity";
 import Coherence from "../../components/Coherence/Coherence";
 import Divider from "../../components/Divider/Divider";
 import Expectations from "../../components/Expectations/Expectations";
 import Impressions from "../../components/Impressions/Impressions";
 import LockSwitch from "../../components/LockSwitch/LockSwitch";
+import ResetModal from "../../components/Reset/Reset";
 import { Tool, currentTool } from "../../service/current-tool.service";
 import {
   editorText,
@@ -61,6 +60,7 @@ import {
 } from "../../service/editor-state.service";
 import { showAbout } from "../../service/help.service";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
+import { clearAllHighlights } from "../../service/topic.service";
 import "./StudentView.scss";
 
 // Commented out for Spring 2024 beta #46
@@ -77,16 +77,17 @@ import "./StudentView.scss";
 //   showTroubleshooting,
 // } from "../../service/help.service";
 
-// The imports below are purely to support the serialize function. Should probably import
-// from service
-// import type DocuScopeRules from "../../../../js/DocuScopeRules";
-
 import { serialize } from "../../service/editor-state.service";
 
-// import { ScribeOption } from "../../components/ScribeOption/ScribeOption";
 import { About } from "../../components/HelpDialogs/About";
+import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
+import { Clarify } from "../../components/scribe/Clarify/Clarify";
+import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
+import { LogicalFlowAudit } from "../../components/scribe/LogicalFlow/LogicalFlow";
 import { Notes2Prose } from "../../components/scribe/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/scribe/ScribeOption/ScribeOption";
+import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
+import { rules$, useOnTopic } from "../../service/onTopic.service";
 import {
   SelectedNotesProse,
   assess,
@@ -105,14 +106,13 @@ import {
   useScribeFeatureNotes2Prose,
   useScribeFeatureTopics,
 } from "../../service/scribe.service";
-import { useConfiguration, useRules } from "../../service/rules.service";
-import { rules$, useOnTopic } from "../../service/onTopic.service";
-import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
-import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
-import { Clarify } from "../../components/scribe/Clarify/Clarify";
-import { LogicalFlowAudit } from "../../components/scribe/LogicalFlow/LogicalFlow";
-import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
 import { useSettings } from "../../service/settings.service";
+import {
+  useRules,
+  useWritingTask,
+  writingTask,
+} from "../../service/writing-task.service";
+import SelectWritingTask from "../../components/SelectWritingTask/SelectWritingTask";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -379,7 +379,7 @@ const StudentView: FC = () => {
     // }
   };
 
-  const { data: configuration } = useConfiguration();
+  // const { data: configuration } = useWritingTask();
   const onTopic = useOnTopic();
 
   useEffect(() => {
@@ -448,9 +448,11 @@ const StudentView: FC = () => {
   const onCloseResetDialog = (afirm: boolean) => {
     setShowReset(false);
     if (afirm) {
+      writingTask.next(null);
       // Reset the data from the template
-      ruleManager?.reset();
-      rules$.next(ruleManager);
+      // ruleManager?.reset();
+
+      // rules$.next(ruleManager);
 
       // Reset the interface
       switchTab("expectations");
@@ -580,6 +582,9 @@ const StudentView: FC = () => {
     }
   }, [editorTextValue]);
 
+  const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
+  const currentTask = useWritingTask();
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -622,6 +627,12 @@ const StudentView: FC = () => {
                     </NavDropdown.Item>
                   )}
                 </NavDropdown>
+                <Nav.Link
+                  eventKey={"writing-task"}
+                  onClick={() => setShowSelectWritingTasks(true)}
+                >
+                  Writing Task{currentTask && `: ${currentTask.info.name}`}
+                </Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -717,11 +728,12 @@ const StudentView: FC = () => {
                       <Button
                         onClick={() => assessExpectation()}
                         disabled={
-                          !editable /* && !editorSelectedText && selected expectation */
+                          !editable ||
+                          !currentTask /* || !editorSelectedText || !{selected expectation} */
                         }
-                        title="Check if the selected text meets the selected expectation"
+                        title="Checks if the selected text satisfies a given writing task expectation"
                       >
-                        Assess
+                        Satisfies
                       </Button>
                     )}
                   {logicalFlowFeature && (
@@ -824,7 +836,12 @@ const StudentView: FC = () => {
       </footer> */}
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {ScribeAvailable && notesFeature && configuration && (
+      {/* TODO: only if not in LTI activity */}
+      <SelectWritingTask
+        show={showSelectWritingTasks}
+        onHide={() => setShowSelectWritingTasks(false)}
+      />
+      {ScribeAvailable && notesFeature && (
         <Notes2Prose
           show={showConvertNotes}
           onHide={() => setShowConvertNotes(false)}
@@ -860,7 +877,7 @@ const StudentView: FC = () => {
           }}
         />
       )}
-      {ScribeAvailable && assessExpectationFeature && configuration && (
+      {ScribeAvailable && assessExpectationFeature && (
         <AssessExpectations
           show={showAssessExpectation}
           onHide={() => setShowAssessExpectation(false)}

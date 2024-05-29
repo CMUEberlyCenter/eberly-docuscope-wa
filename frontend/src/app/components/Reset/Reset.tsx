@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Button } from "react-bootstrap";
 
 import "./Reset.scss";
+import { useSettings } from "../../service/settings.service";
 
 type ResetProps = {
   onCloseResetDialog?: (reset: boolean) => void;
@@ -14,6 +15,7 @@ type ResetProps = {
 const Reset: FC<ResetProps> = ({ onCloseResetDialog }: ResetProps) => {
   const onReset = (reset: boolean) =>
     onCloseResetDialog && onCloseResetDialog(reset);
+  const settings = useSettings();
   return (
     <div className="reset-modal">
       <div className="reset-modal-content">
@@ -21,11 +23,10 @@ const Reset: FC<ResetProps> = ({ onCloseResetDialog }: ResetProps) => {
           <span className="reset-close-button" onClick={() => onReset(true)}>
             &times;
           </span>
-          <h1>Reset DocuScope Write & Audit?</h1>
+          <h1>Reset {settings.brand}?</h1>
           <p>
-            This will reset your application to the default state. That means
-            your save data will be replaced by the template expectations and
-            clusters. Custom topics will be lost.
+            This will reset the application to the default state. You will
+            likely loose any changes that you have made.
           </p>
           <div className="reset-controls">
             <div className="reset-padding" />

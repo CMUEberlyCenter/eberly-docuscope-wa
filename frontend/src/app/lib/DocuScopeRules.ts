@@ -1,9 +1,4 @@
-import { assignmentId } from '../service/lti.service';
-import {
-  WritingTaskMetaData,
-  Rule,
-  WritingTask,
-} from '../../lib/WritingTask';
+import { Rule, WritingTask, WritingTaskMetaData } from '../../lib/WritingTask';
 import DocuScopeRule from './DocuScopeRule';
 import { DocuScopeRuleCluster } from './DocuScopeRuleCluster';
 
@@ -26,7 +21,7 @@ function deepCopy<T>(anObject: T): T {
 }
 
 function sessionKey(key: string) {
-  return `edu.cmu.eberly.docuscope-scribe_${assignmentId()}_${key}`;
+  return `edu.cmu.eberly.docuscope-scribe_${key}`;
 }
 
 function configKey() {

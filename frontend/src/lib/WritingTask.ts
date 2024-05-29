@@ -57,6 +57,14 @@ export type WritingTask = {
   public?: boolean;
 };
 
-export function isWritingTask(task: WritingTask | unknown): task is WritingTask {
-  return !!task && typeof (task) === 'object' && 'rules' in task && 'impressions' in task && 'info' in task;
+export function isWritingTask(
+  task: WritingTask | unknown
+): task is WritingTask {
+  return (
+    !!task &&
+    typeof task === 'object' &&
+    'rules' in task &&
+    'impressions' in task &&
+    'info' in task
+  );
 }

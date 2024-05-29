@@ -7,7 +7,7 @@ import {
   refreshConfigurations,
   useConfigurations,
 } from "../../service/instructor.service";
-import { assignmentId, launch } from "../../service/lti.service";
+// import { assignmentId, launch } from "../../service/lti.service";
 import "./InstuctorView.scss";
 
 const InstructorView: FC = () => {
@@ -18,7 +18,7 @@ const InstructorView: FC = () => {
     async function getCurrentFile() {
       // await getFileList();
       const getfileid = new URL(
-        `/api/v1/assignments/${assignmentId()}/file_id`,
+        `/api/v1/assignments/${"global"}/file_id`,
         window.origin
       );
       const response = await fetch(getfileid, {
@@ -45,7 +45,7 @@ const InstructorView: FC = () => {
   function onFileSelect(id: string) {
     setSelected(id);
     const url = new URL(
-      `/api/v1/assignments/${assignmentId()}/assign`,
+      `/api/v1/assignments/${"global"}/assign`,
       window.origin
     );
     fetch(url, {
@@ -127,7 +127,7 @@ const InstructorView: FC = () => {
 
   function launchStudent() {
     if (!selected) return;
-    launch(true);
+    //launch(true);
   }
   const loading = (
     <Spinner animation="border" role="status">

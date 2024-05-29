@@ -1,10 +1,10 @@
-import { MongoClient, ObjectId } from "mongodb";
-import { EXPECTATIONS, MONGO_CLIENT } from "../settings";
-import { Assignment } from "../model/assignment";
+import { MongoClient, ObjectId } from 'mongodb';
+import { EXPECTATIONS, MONGO_CLIENT } from '../settings';
+import { Assignment } from '../model/assignment';
 import { PathLike } from 'fs';
 import { readFile, readdir, stat } from 'fs/promises';
-import { WritingTask, isWritingTask } from "../../lib/WritingTask";
-import { join } from "path";
+import { WritingTask, isWritingTask } from '../../lib/WritingTask';
+import { join } from 'path';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -27,7 +27,8 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
     throw new ReferenceError(`Assignment ${id} no found.`);
   }
   const { writing_task } = assignment;
-  if (!isWritingTask(writing_task)) { // replace with $lookup
+  if (!isWritingTask(writing_task)) {
+    // replace with $lookup
     const task = await findWritingTaskById(writing_task.oid.toString());
     assignment.writing_task = task;
   }
@@ -53,7 +54,9 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
 }
 
 export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
-  const collection = client.db('docuscope').collection<WritingTask>(WRITING_TASKS);
+  const collection = client
+    .db('docuscope')
+    .collection<WritingTask>(WRITING_TASKS);
   const cursor = collection.find<WritingTask>({ public: true });
   const ret: WritingTask[] = [];
   for await (const doc of cursor) {
@@ -65,13 +68,19 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
 export async function updateAssignment(assignment: string, task: string) {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
   const writing_task = new ObjectId(task);
-  collection.updateOne({
-    assignment: assignment,
-  }, { $set: {"writing_task.$ref": writing_task }}, { upsert: true })
+  collection.updateOne(
+    {
+      assignment: assignment,
+    },
+    { $set: { 'writing_task.$ref': writing_task } },
+    { upsert: true }
+  );
 }
 
 export async function updatePublicWritingTasks() {
-  const collection = client.db('docuscope').collection<WritingTask>(WRITING_TASKS);
+  const collection = client
+    .db('docuscope')
+    .collection<WritingTask>(WRITING_TASKS);
   const expectations = (await readPublicExpectations(EXPECTATIONS)).map(
     (e) => ({ ...e, public: true })
   );
@@ -107,9 +116,7 @@ export async function initDatabase(): Promise<void> {
   // console.log(assignment);
 }
 
-async function readPublicExpectations(
-  dir: PathLike
-): Promise<WritingTask[]> {
+async function readPublicExpectations(dir: PathLike): Promise<WritingTask[]> {
   const ret: WritingTask[] = [];
   try {
     const files = await readdir(dir);

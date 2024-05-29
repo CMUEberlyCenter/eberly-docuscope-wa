@@ -1,29 +1,33 @@
 import { FC } from "react";
-import { Modal } from "react-bootstrap";
+import { Card, ListGroup, Modal } from "react-bootstrap";
 import { showAbout, useShowAbout } from "../../service/help.service";
-import { useConfiguration } from "../../service/rules.service";
 import { useScribeAvailable } from "../../service/scribe.service";
+import { useSettings } from "../../service/settings.service";
+import {
+  useWritingTask,
+  useWritingTasks,
+} from "../../service/writing-task.service";
 
 /** Modal for displaying information about the application. */
 export const About: FC = () => {
   const show = useShowAbout();
-  const { data, isLoading } = useConfiguration();
+  const { isLoading } = useWritingTasks();
+  const writingTask = useWritingTask();
   const ScribeAvailable = useScribeAvailable();
+  const settings = useSettings();
 
   return (
     <Modal show={show} onHide={() => showAbout(false)} scrollable>
-      <Modal.Header closeButton>About DocuScope Write &amp; Audit</Modal.Header>
+      <Modal.Header closeButton>About {settings.brand}</Modal.Header>
       <Modal.Body>
         <p>
           {ScribeAvailable ? (
             <>
               <a href="https://www.cmu.edu/corecompetencies/communication/resources-and-tools/docuscope/index.html">
-                DocuScope Write & Audit
+                {settings.brand}
               </a>{" "}
-              is an environment for structuring writing tasks through
-              visualization. It includes panels for visualizing reader
-              expectations and textual coherence. It has recently been updated
-              to accommodate generative A.I. through a notes-to-prose feature.
+              is an environment for structuring writing tasks with the help of
+              generative artificial intelligence.
             </>
           ) : (
             <>
@@ -41,26 +45,46 @@ export const About: FC = () => {
 
         <hr />
 
-        <h2>Application Information</h2>
-        <ul>
-          <li>Application version: {__APP_VERSION__}</li>
-          <li>Build date: {new Date(__BUILD_DATE__).toLocaleString()}</li>
-        </ul>
+        <Card>
+          <Card.Header>Application Information</Card.Header>
+          <ListGroup variant="flush">
+            <ListGroup.Item>Version: {__APP_VERSION__}</ListGroup.Item>
+            <ListGroup.Item>
+              Date: {new Date(__BUILD_DATE__).toLocaleString()}
+            </ListGroup.Item>
+          </ListGroup>
+        </Card>
 
         <hr />
 
-        <h2>Expectations Details</h2>
-        {isLoading ? (
-          <p>Loading...</p>
-        ) : (
-          <ul>
-            <li>Name: {data?.info.name ?? "unassigned"}</li>
-            <li>Version: {data?.info.version ?? "0.0.0"}</li>
-            <li>Author: {data?.info.author ?? "unassigned"}</li>
-            <li>Copyright: {data?.info.copyright ?? ""}</li>
-            <li>Saved: {data?.info.saved ?? "true"}</li>
-          </ul>
-        )}
+        <Card>
+          <Card.Header>Expectations Details</Card.Header>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <ListGroup variant="flush">
+              <ListGroup.Item>
+                Name: {writingTask?.info.name ?? "unassigned"}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                Version: {writingTask?.info.version ?? "0.0.0"}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                Author: {writingTask?.info.author ?? "unassigned"}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                Copyright:{" "}
+                {writingTask && <>&copy; {writingTask?.info.copyright}</>}
+              </ListGroup.Item>
+              <ListGroup.Item>
+                Saved:{" "}
+                {writingTask?.info.saved
+                  ? new Date(writingTask.info.saved).toLocaleDateString()
+                  : "true"}
+              </ListGroup.Item>
+            </ListGroup>
+          )}
+        </Card>
       </Modal.Body>
     </Modal>
   );

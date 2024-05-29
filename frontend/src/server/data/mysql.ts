@@ -81,7 +81,9 @@ interface IFileData extends RowDataPacket {
  * Retrieve the configuration file with the given id.
  * @param {string} fileId uuid of the configuration file to retrieve.
  */
-export async function findWritingTaskById(fileId: string): Promise<WritingTask> {
+export async function findWritingTaskById(
+  fileId: string
+): Promise<WritingTask> {
   const [rows] = await pool.query<IFileData[]>(
     'SELECT data FROM files WHERE id=UUID_TO_BIN(?)',
     [fileId]
@@ -232,7 +234,7 @@ export async function updateAssignment(assignment: string, id: string) {
 //   expectation: string
 // ) {
 //   const [rows] = await pool.query<ExpectationPrompt[]>(
-//     `SELECT 
+//     `SELECT
 //    data->'$.prompt_templates.expectation' AS service,
 //    JSON_EXTRACT(data, REPLACE(JSON_UNQUOTE(JSON_SEARCH(data, 'one',  ?)), "name", "prompt")) AS prompt
 //    FROM files LEFT JOIN assignments ON fileid = files.id

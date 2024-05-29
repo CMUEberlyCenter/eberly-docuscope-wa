@@ -15,7 +15,7 @@ import clusterWarningIcon from "../../assets/icons/topic_cluster_warning_icon.pn
 import { highlightTopic } from "../../service/topic.service";
 import ClusterPanel from "../ClusterPanel/ClusterPanel";
 
-import { useConfiguration, useRules } from "../../service/rules.service";
+import { useWritingTask, useRules } from "../../service/writing-task.service";
 import { expectation } from "../../service/scribe.service";
 
 /* A Rule instance. 
@@ -76,7 +76,7 @@ const Expectations: FC<ExpectationProps> = ({
 }: ExpectationProps) => {
   const [disabled, setDisabled] = useState(false);
   const ruleManager = useRules();
-  const { data: configuration } = useConfiguration();
+  const configuration = useWritingTask();
 
   const [ruleState, setCurrentRuleState] = useState({
     currentRule: -1,
@@ -174,14 +174,7 @@ const Expectations: FC<ExpectationProps> = ({
           <Card.Title>{configuration?.rules.name}</Card.Title>
           <Card.Text className="overflow-auto" style={{ maxHeight: "5em" }}>
             {configuration?.rules.overview ?? (
-              <>
-                Respond to the following questions to meet the readers&apos;
-                expectations. The sentences that you write to respond to each
-                question include a unique topic cluster that consists of a set
-                of words and phrases. DocuScope will automatically highlight
-                sentences in your draft that most likely match these
-                expectations.
-              </>
+              <>Please select a writing task.</>
             )}
           </Card.Text>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
@@ -306,12 +299,14 @@ const Expectations: FC<ExpectationProps> = ({
             </div>
           </ErrorBoundary>
         </Subscribe>
-        <ClusterPanel
-          currentRule={ruleState.currentRule}
-          currentCluster={ruleState.currentCluster}
-          disableTreeSelect={(val: boolean) => setDisabled(val)}
-          enableTopicEditing={enableTopicEditing}
-        />
+        {configuration && (
+          <ClusterPanel
+            currentRule={ruleState.currentRule}
+            currentCluster={ruleState.currentCluster}
+            disableTreeSelect={(val: boolean) => setDisabled(val)}
+            enableTopicEditing={enableTopicEditing}
+          />
+        )}
       </Card.Body>
     </Card>
   );

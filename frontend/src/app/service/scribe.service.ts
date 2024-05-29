@@ -15,7 +15,6 @@ import {
 import { fromFetch } from 'rxjs/fetch';
 import { Descendant, type Range } from 'slate';
 import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
-import { assignmentId } from './lti.service';
 import { settings$ } from './settings.service';
 
 // TODO: per assignment feature settings.
@@ -114,7 +113,7 @@ export function downloadHistory(): void {
   const element = document.createElement('a');
   element.href = URL.createObjectURL(file);
   element.style.display = 'none';
-  element.download = `myScribeHistory-${assignmentId()}-${Date.now()}.json`;
+  element.download = `myScribeHistory-${Date.now()}.json`;
 
   // simulate link click
   document.body.appendChild(element); // Required for this to work in FireFox

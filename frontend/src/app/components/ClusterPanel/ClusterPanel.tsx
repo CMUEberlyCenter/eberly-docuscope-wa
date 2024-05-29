@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react";
 import { Button, Tab, Tabs } from "react-bootstrap";
 
-import { useRules } from "../../service/rules.service";
+import { useRules } from "../../service/writing-task.service";
 import "./ClusterPanel.scss";
 import "./ClusterTopics.scss";
 

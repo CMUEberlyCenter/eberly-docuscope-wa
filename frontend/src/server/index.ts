@@ -7,7 +7,13 @@ import { fileURLToPath } from 'url';
 import { assignments } from './api/assignments';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
-import { findAllPublicWritingTasks, findAssignmentById, findWritingTaskById, initDatabase, updatePublicWritingTasks } from './data/mongo';
+import {
+  findAllPublicWritingTasks,
+  findAssignmentById,
+  findWritingTaskById,
+  initDatabase,
+  updatePublicWritingTasks,
+} from './data/mongo';
 import { IdToken, isInstructor } from './model/lti';
 import { metrics } from './prometheus';
 import {
@@ -16,7 +22,7 @@ import {
   LTI_KEY,
   LTI_OPTIONS,
   ONTOPIC_URL,
-  PORT
+  PORT,
 } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -120,7 +126,7 @@ async function __main__() {
         instructor: isInstructor(token.platformContext),
         resource: token.platformContext.resource,
         tools,
-        writing_task
+        writing_task,
       };
       console.log(ret);
       return res.send(ret);

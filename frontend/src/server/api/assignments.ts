@@ -1,5 +1,5 @@
 import { Request, Response, Router } from 'express';
-import change_proposal from '../../../public/expectations/change_proposal.json'; // FIXME Temp load from file.
+import change_proposal from '../../../public/expectations/Change Proposal (2024.05.19).json'; // FIXME Temp load from file.
 import { WritingTask } from '../../lib/WritingTask';
 import { updateAssignment } from '../data/mysql';
 

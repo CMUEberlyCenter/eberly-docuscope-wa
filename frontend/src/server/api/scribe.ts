@@ -89,7 +89,11 @@ const scribeText =
           status: 404,
         } as ProblemDetails);
       }
-      const content = format(prompt, { text, user_lang: 'english', target_lang: 'english' });
+      const content = format(prompt, {
+        text,
+        user_lang: 'english',
+        target_lang: 'english',
+      });
       const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         messages: [
