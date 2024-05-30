@@ -93,7 +93,7 @@ async function __main__() {
     if (token) {
       return res.sendFile(join(PUBLIC, 'index.html'));
     }
-    return Provider.redirect(res, '/');
+    return Provider.redirect(res, '/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
