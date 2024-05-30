@@ -1,11 +1,11 @@
 import { Request, Response, Router } from 'express';
-import change_proposal from '../../../public/expectations/Change Proposal (2024.05.19).json'; // FIXME Temp load from file.
-import { WritingTask } from '../../lib/WritingTask';
+//import change_proposal from '../../../private/writing_tasks/Change Proposal (2024.05.19).json'; // FIXME Temp load from file.
+// import { WritingTask } from '../../lib/WritingTask';
 import { updateAssignment } from '../data/mysql';
 
 export const assignments = Router();
 
-const changeProposal = change_proposal as WritingTask;
+//const changeProposal = change_proposal as WritingTask;
 
 assignments.post(
   '/:assignment/assign',
@@ -52,12 +52,13 @@ assignments.get(
   '/:assignment/configuration',
   async (request: Request, response: Response) => {
     // not currently used, but will be useful for deep-linking.
-    const { assignment } = request.params;
+    // const { assignment } = request.params;
     try {
       // const rules = await findFileByAssignment(assignment);
       // response.json(rules);
       // FIXME temp using static
-      if (assignment === 'global') return response.json(changeProposal);
+      //if (assignment === 'global') return response.json({});
+      response.sendStatus(410)
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(404);
