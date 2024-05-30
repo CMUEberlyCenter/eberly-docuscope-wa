@@ -1,0 +1,1 @@
+Place the scribe prompt templates file (templates.json) in this directory.

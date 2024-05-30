@@ -1,5 +1,5 @@
 import { MongoClient, ObjectId } from 'mongodb';
-import { EXPECTATIONS, MONGO_CLIENT } from '../settings';
+import { WRITING_TASKS_PATH, MONGO_CLIENT } from '../settings';
 import { Assignment } from '../model/assignment';
 import { PathLike } from 'fs';
 import { readFile, readdir, stat } from 'fs/promises';
@@ -81,7 +81,7 @@ export async function updatePublicWritingTasks() {
   const collection = client
     .db('docuscope')
     .collection<WritingTask>(WRITING_TASKS);
-  const expectations = (await readPublicExpectations(EXPECTATIONS)).map(
+  const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
     (e) => ({ ...e, public: true })
   );
   expectations.forEach((data) =>
@@ -116,7 +116,7 @@ export async function initDatabase(): Promise<void> {
   // console.log(assignment);
 }
 
-async function readPublicExpectations(dir: PathLike): Promise<WritingTask[]> {
+async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
   const ret: WritingTask[] = [];
   try {
     const files = await readdir(dir);
@@ -128,7 +128,7 @@ async function readPublicExpectations(dir: PathLike): Promise<WritingTask[]> {
         const json = JSON.parse(content) as WritingTask;
         ret.push(json);
       } else if (stats.isDirectory()) {
-        const subdir = await readPublicExpectations(path);
+        const subdir = await readPublicWritingTasks(path);
         ret.push(...subdir);
       }
       // if not a directory or a json file, skip.

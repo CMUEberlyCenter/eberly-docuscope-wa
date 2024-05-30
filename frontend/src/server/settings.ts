@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 // import { fileURLToPath } from 'url';
 import { version } from '../../package.json';
 import 'dotenv/config';
+import { join } from 'path';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
@@ -92,6 +93,6 @@ export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
 export const SCRIBE_TEMPLATES =
-  process.env['SCRIBE_TEMPLATES'] ?? '/app/build/app/settings/templates.json';
-export const EXPECTATIONS =
-  process.env['EXPECTATIONS'] ?? './public/expectations';
+  process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
+export const WRITING_TASKS_PATH =
+  process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
