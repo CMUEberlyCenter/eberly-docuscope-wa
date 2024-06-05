@@ -1,10 +1,11 @@
-import { FC } from "react";
-import { Card, ListGroup, Modal, Stack } from "react-bootstrap";
+import { FC, useEffect, useState } from "react";
+import { Button, Card, ListGroup, Modal, Stack } from "react-bootstrap";
 import {
   useWritingTask,
   useWritingTasks,
-  writingTask,
+  writingTask
 } from "../../service/writing-task.service";
+import { WritingTask } from "../../../lib/WritingTask";
 
 type SelectWritingTaskProps = {
   show: boolean;
@@ -16,6 +17,9 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
 }: SelectWritingTaskProps) => {
   const { data: writingTasks } = useWritingTasks();
   const writing_task = useWritingTask();
+  const [selected, setSelected] = useState<WritingTask|null>(writing_task);
+  useEffect(() => setSelected(writing_task), [writing_task]);
+
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
       <Modal.Header closeButton>Select Writing Task</Modal.Header>
@@ -24,9 +28,10 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           <ListGroup>
             {writingTasks?.map((task) => (
               <ListGroup.Item
-                active={writing_task === task}
+                key={task.info.name}
+                active={selected === task}
                 action
-                onClick={() => writingTask.next(task)}
+                onClick={() => setSelected(task)}
               >
                 {task.info.name}
               </ListGroup.Item>
@@ -34,36 +39,40 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
             <ListGroup.Item
               action
               variant="warning"
-              onClick={() => writingTask.next(null)}
+              onClick={() => setSelected(null)}
             >
               No Writing Task
             </ListGroup.Item>
           </ListGroup>
           <Card className="w-50 h-100">
             <Card.Header>
-              {writing_task?.info.name ?? "No Writing Task"}
+              {selected?.info.name ?? "No Writing Task"}
             </Card.Header>
             <ListGroup variant="flush">
               <ListGroup.Item>
-                Version: {writing_task?.info.version ?? "-"}
+                Version: {selected?.info.version ?? "-"}
               </ListGroup.Item>
               <ListGroup.Item>
-                Author: {writing_task?.info.author ?? "-"}
+                Author: {selected?.info.author ?? "-"}
               </ListGroup.Item>
               <ListGroup.Item>
                 Copyright:{" "}
-                {writing_task && <>&copy; {writing_task?.info.copyright}</>}
+                {selected && <>&copy; {selected?.info.copyright}</>}
               </ListGroup.Item>
               <ListGroup.Item>
                 Date:{" "}
-                {writing_task
-                  ? new Date(writing_task.info.saved).toLocaleString()
+                {selected
+                  ? new Date(selected.info.saved).toLocaleString()
                   : "-"}
               </ListGroup.Item>
             </ListGroup>
           </Card>
         </Stack>
       </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={() => {writingTask.next(selected); onHide(); }}>Select</Button>
+        <Button onClick={onHide}>Cancel</Button>
+      </Modal.Footer>
     </Modal>
   );
 };

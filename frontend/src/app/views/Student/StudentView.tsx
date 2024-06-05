@@ -17,7 +17,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useState,
+  useState
 } from "react";
 import {
   Badge,
@@ -80,6 +80,7 @@ import "./StudentView.scss";
 import { serialize } from "../../service/editor-state.service";
 
 import { About } from "../../components/HelpDialogs/About";
+import SelectWritingTask from "../../components/SelectWritingTask/SelectWritingTask";
 import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
 import { Clarify } from "../../components/scribe/Clarify/Clarify";
 import { FixGrammar } from "../../components/scribe/FixGrammar/FixGrammar";
@@ -112,7 +113,6 @@ import {
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
-import SelectWritingTask from "../../components/SelectWritingTask/SelectWritingTask";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -733,7 +733,7 @@ const StudentView: FC = () => {
                         }
                         title="Checks if the selected text satisfies a given writing task expectation"
                       >
-                        Satisfies
+                        Expectation
                       </Button>
                     )}
                   {logicalFlowFeature && (
@@ -768,7 +768,7 @@ const StudentView: FC = () => {
               )}
             </ButtonToolbar>
           </Card.Header>
-          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }}>
+          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); ReactEditor.focus(editor);}}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
             {showOnTopicText ? (
               <React.Fragment>
@@ -805,8 +805,8 @@ const StudentView: FC = () => {
                 renderLeaf={renderLeaf}
                 placeholder={
                   editable
-                    ? "Enter some text..."
-                    : "Unlock and enter some text..."
+                    ? "Click here to start writing..."
+                    : "Unlock the editor and click here to start writing..."
                 }
               />
             </Slate>
