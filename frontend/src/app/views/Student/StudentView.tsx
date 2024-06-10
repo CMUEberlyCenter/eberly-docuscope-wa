@@ -113,6 +113,7 @@ import {
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
+import { useLti, useLtiInfo } from "../../service/lti.service";
 
 /**
  * For handling clicks on the tagged text for the impressions tool.
@@ -585,6 +586,9 @@ const StudentView: FC = () => {
   const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
   const currentTask = useWritingTask();
 
+  const inLti = useLti();
+  const ltiInfo = useLtiInfo();
+
   return (
     <div className="d-flex flex-column vh-100 vw-100 m-0 p-0">
       {/* Whole page application */}
@@ -627,12 +631,14 @@ const StudentView: FC = () => {
                     </NavDropdown.Item>
                   )}
                 </NavDropdown>
-                <Nav.Link
-                  eventKey={"writing-task"}
-                  onClick={() => setShowSelectWritingTasks(true)}
-                >
-                  Writing Task{currentTask && `: ${currentTask.info.name}`}
-                </Nav.Link>
+                {(!inLti || ltiInfo?.instructor) &&
+                  <Nav.Link
+                    eventKey={"writing-task"}
+                    onClick={() => setShowSelectWritingTasks(true)}
+                  >
+                    Writing Task{currentTask && `: ${currentTask.info.name}`}
+                  </Nav.Link>
+                }
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -768,7 +774,7 @@ const StudentView: FC = () => {
               )}
             </ButtonToolbar>
           </Card.Header>
-          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); ReactEditor.focus(editor);}}>
+          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); ReactEditor.focus(editor); }}>
             {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
             {showOnTopicText ? (
               <React.Fragment>
@@ -836,11 +842,12 @@ const StudentView: FC = () => {
       </footer> */}
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {/* TODO: only if not in LTI activity */}
-      <SelectWritingTask
-        show={showSelectWritingTasks}
-        onHide={() => setShowSelectWritingTasks(false)}
-      />
+      {(!inLti || ltiInfo?.instructor) &&
+        <SelectWritingTask
+          show={showSelectWritingTasks}
+          onHide={() => setShowSelectWritingTasks(false)}
+        />
+      }
       {ScribeAvailable && notesFeature && (
         <Notes2Prose
           show={showConvertNotes}

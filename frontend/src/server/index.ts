@@ -116,26 +116,31 @@ async function __main__() {
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {
     const token: IdToken = res.locals.token;
+    const context = {
+      instructor: isInstructor(token.platformContext),
+      resource: token.platformContext.resource
+    };
     try {
       const assignmentData = await findAssignmentById(
         token.platformContext.resource.id
       );
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { writing_task, assignment, ...tools } = assignmentData;
+      // TODO: remove _id fields.
       const ret = {
-        instructor: isInstructor(token.platformContext),
-        resource: token.platformContext.resource,
+        ...context,
         tools,
         writing_task,
       };
       console.log(ret);
       return res.send(ret);
     } catch (err) {
+      console.log(err);
       if (err instanceof ReferenceError) {
         return res.sendStatus(400);
       }
     }
-    return res.send({});
+    return res.send(context);
   });
 
   Provider.app.use(metrics);

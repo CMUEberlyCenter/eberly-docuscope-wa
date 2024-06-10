@@ -24,6 +24,7 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
     assignment: id,
   });
   if (!assignment) {
+    console.error(`Assignment ${id} not found!`);
     throw new ReferenceError(`Assignment ${id} no found.`);
   }
   const { writing_task } = assignment;
