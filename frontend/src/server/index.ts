@@ -4,7 +4,7 @@ import fileUpload from 'express-fileupload';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { assignments } from './api/assignments';
+// import { assignments } from './api/assignments';
 import { ontopic } from './api/onTopic';
 import { scribe } from './api/scribe';
 import {
@@ -12,6 +12,7 @@ import {
   findAssignmentById,
   findWritingTaskById,
   initDatabase,
+  updateAssignmentWritingTask,
   updatePublicWritingTasks,
 } from './data/mongo';
 import { IdToken, isInstructor } from './model/lti';
@@ -24,11 +25,51 @@ import {
   ONTOPIC_URL,
   PORT,
 } from './settings';
+import { isWritingTask } from '../lib/WritingTask';
+import { ProblemDetails } from '../lib/ProblemDetails';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
-// const STATIC = '/static';
+
+const assignments = Router();
+assignments.post('/', async (request: Request, response: Response) => {
+  const token: IdToken = response.locals.token;
+  if (!token || !isInstructor(token.platformContext)) { // TODO: add other admin roles
+    return response.sendStatus(401); // Unauthorized
+  }
+  if (!request.files) {
+    return response.sendStatus(400); // Bad Request
+  }
+  try {
+    const file = request.files.file;
+    if (file instanceof Array) {
+      return response.sendStatus(400).send({
+        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
+        title: 'Bad Request',
+        detail: 'Multiple files unsupported.',
+        status: 400
+      } as ProblemDetails);
+    }
+    const json = JSON.parse(file.data.toString('utf-8'));
+    if (!isWritingTask(json)) {
+      return response.sendStatus(400).send('Not a valid writing task specification.'); // TODO: format
+    }
+    await updateAssignmentWritingTask(token.platformContext.resource.id, json);
+  } catch (err) {
+    console.error(err);
+    if (err instanceof SyntaxError) {
+      return response.sendStatus(400).send({
+        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
+        title: 'Bad Request',
+        detail: err.message,
+        status: 400
+      } as ProblemDetails);
+    }
+    return response.sendStatus(500);
+  }
+  return response.sendStatus(200);
+});
 
 const writingTasks = Router();
 writingTasks.get('/:fileId', async (request: Request, response: Response) => {
@@ -107,7 +148,7 @@ async function __main__() {
   // Configuration Endpoints
   Provider.app.use('/api/v2/writing_tasks', writingTasks);
   // Assignment Endpoints
-  Provider.app.use('/api/v1/assignments', assignments);
+  Provider.app.use('/api/v2/assignments', assignments);
   // Scribe Endpoints
   Provider.app.use('/api/v2/scribe', scribe);
   // OnTopic Enpoint

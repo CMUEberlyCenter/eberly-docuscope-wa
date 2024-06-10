@@ -33,7 +33,15 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
         if (isWritingTask(json)) {
           setValid(true);
           setSelected(json);
-          // TODO: update server
+          const data = new FormData();
+          data.append("file", files[0]);
+          const response = await fetch("/api/v2/assignments", {
+            method: 'POST',
+            body: data,
+          });
+          if (!response.ok) {
+            throw new Error(await response.json());
+          }
         } else {
           setValid(false);
         }
@@ -107,10 +115,10 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           <Form noValidate>
             <Form.Group>
               <Form.FloatingLabel label="Custom Writing Task">
-              <Form.Control type="file" onChange={onFileChange} isInvalid={!valid}/>
-              <Form.Control.Feedback type="invalid">
-                Uploaded file is not a valid writing task specificaton!
-              </Form.Control.Feedback>
+                <Form.Control type="file" onChange={onFileChange} isInvalid={!valid} />
+                <Form.Control.Feedback type="invalid">
+                  Uploaded file is not a valid writing task specificaton!
+                </Form.Control.Feedback>
               </Form.FloatingLabel>
             </Form.Group>
           </Form>

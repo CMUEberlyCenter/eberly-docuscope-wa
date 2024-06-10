@@ -32,7 +32,7 @@ scribe.post('/convert_notes', async (request: Request, response: Response) => {
       // runtime safety - should never happen
       console.warn('Malformed notes prompt data.');
       return response.status(404).send({
-        type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
         title: 'Not Found',
         detail: 'Convert Notes template not found.',
         status: 404,
@@ -60,7 +60,7 @@ scribe.post('/convert_notes', async (request: Request, response: Response) => {
     console.error(err instanceof Error ? err.message : err);
     if (err instanceof Error) {
       return response.status(500).send({
-        type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
         title: 'Internal Srver Error',
         status: 500,
         detail: err.message,
@@ -83,7 +83,7 @@ const scribeText =
       if (!prompt) {
         console.error(`No valid prompt for ${key}`);
         return response.status(404).send({
-          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
           title: 'Not Found',
           detail: `${key} template not found.`,
           status: 404,
@@ -110,7 +110,7 @@ const scribeText =
       console.error(err instanceof Error ? err.message : err);
       if (err instanceof Error) {
         return response.status(500).send({
-          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
           title: 'Internal Srver Error',
           status: 500,
           detail: err.message,
@@ -136,7 +136,7 @@ scribe.post(
       if (!prompt) {
         console.error('Missing expectation analysis prompt.');
         return response.status(404).send({
-          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404',
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
           title: 'Not Found',
           detail: `expectation template not found.`,
           status: 404,
@@ -166,7 +166,7 @@ scribe.post(
         return response.sendStatus(404);
       } else if (err instanceof Error) {
         return response.status(500).send({
-          type: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500',
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
           title: 'Internal Srver Error',
           status: 500,
           detail: err.message,
