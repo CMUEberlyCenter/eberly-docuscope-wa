@@ -389,19 +389,6 @@ const StudentView: FC = () => {
   const [showParagraphSelector /*, setShowParagraphSelector*/] =
     useState(false);
 
-  const paragraphselector = showParagraphSelector ? (
-    <Form.Group>
-      <Form.Select>
-        {[1, 2, 3].map((num) => (
-          <option key={`${selectId}-${num}`} value={num}>
-            {num}
-          </option>
-        ))}
-      </Form.Select>
-    </Form.Group>
-  ) : (
-    <></>
-  );
 
   //>--------------------------------------------------------
 
@@ -623,7 +610,17 @@ const StudentView: FC = () => {
         <Card as="article" className="editor-pane overflow-hidden flex-grow-1">
           <Card.Header className="d-flex justify-content-between align-items-center">
             <ButtonToolbar>
-              {paragraphselector}
+              {showParagraphSelector && (
+                    <Form.Group>
+                    <Form.Select>
+                      {[1, 2, 3].map((num) => (
+                        <option key={`${selectId}-${num}`} value={num}>
+                          {num}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+              )}
               {ScribeAvailable && (
                 <ButtonGroup className="me-2">
                   {notesFeature && (
@@ -698,7 +695,7 @@ const StudentView: FC = () => {
               )}
             </ButtonToolbar>
           </Card.Header>
-          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); ReactEditor.focus(editor); }}>
+          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); ReactEditor.focus(editor); }}>
             {showDocuScopeTaggedText ? <ImpressionsTaggedText/> : ""}
             {showOnTopicText ? (
               <React.Fragment>
