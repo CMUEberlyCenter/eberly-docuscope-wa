@@ -10,7 +10,6 @@
  * Editor text is also cached in sessionStorage.
  */
 
-import * as d3 from "d3";
 import React, {
   FC,
   createRef,
@@ -20,7 +19,6 @@ import React, {
   useState
 } from "react";
 import {
-  Badge,
   Button,
   ButtonGroup,
   ButtonToolbar,
@@ -30,10 +28,8 @@ import {
   Nav,
   NavDropdown,
   Navbar,
-  OverlayTrigger,
-  Popover,
   Tab,
-  Tabs,
+  Tabs
 } from "react-bootstrap";
 import { Descendant, Editor, Range, Transforms, createEditor } from "slate";
 import {
@@ -80,6 +76,7 @@ import "./StudentView.scss";
 import { serialize } from "../../service/editor-state.service";
 
 import { About } from "../../components/HelpDialogs/About";
+import { ImpressionsTaggedText } from "../../components/Impressions/ImpressionsTaggedText";
 import SelectWritingTask from "../../components/SelectWritingTask/SelectWritingTask";
 import { AssessExpectations } from "../../components/scribe/AssessExpectations/AssessExpectations";
 import { Clarify } from "../../components/scribe/Clarify/Clarify";
@@ -88,6 +85,7 @@ import { LogicalFlowAudit } from "../../components/scribe/LogicalFlow/LogicalFlo
 import { Notes2Prose } from "../../components/scribe/Notes2Prose/Notes2Prose";
 import { ScribeOption } from "../../components/scribe/ScribeOption/ScribeOption";
 import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
+import { useLti, useLtiInfo } from "../../service/lti.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
 import {
   SelectedNotesProse,
@@ -113,35 +111,7 @@ import {
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
-import { useLti, useLtiInfo } from "../../service/lti.service";
 
-/**
- * For handling clicks on the tagged text for the impressions tool.
- * It will reveal the tag for the clicked on pattern while hiding
- * all other tags.
- * @param evt mouse event that triggers this handler
- */
-function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
-  let target: HTMLElement | null = evt.target as HTMLElement;
-  while (target && !target.getAttribute("data-key")) {
-    // check ancestors until one with a data-key is found.
-    target = target.parentElement;
-  }
-  const key = target?.getAttribute("data-key");
-  if (target && key && key.trim()) {
-    // see if it is already selected.
-    const isSelected = d3.select(target).classed("selected_text");
-    // clear all selected text.
-    d3.selectAll(".selected_text").classed("selected_text", false);
-    d3.selectAll(".cluster_id").classed("d_none", true);
-    // if it was not previously selected, select it.
-    // otherwise leave it as unselected.
-    if (!isSelected) {
-      d3.select(target).classed("selected_text", true);
-      d3.select(target).select("sup.cluster_id").classed("d_none", false);
-    }
-  }
-}
 
 function fixOnTopicHtml(topicData?: { html?: string } | null) {
   return topicData?.html?.replaceAll("_", " ") ?? "";
@@ -380,7 +350,6 @@ const StudentView: FC = () => {
     // }
   };
 
-  // const { data: configuration } = useWritingTask();
   const onTopic = useOnTopic();
 
   useEffect(() => {
@@ -393,54 +362,9 @@ const StudentView: FC = () => {
   const showDocuScopeTaggedText =
     currentTab === "impressions" && !editable && isTaggerResult(tagging);
 
-  const taggedDocuScopeTextContent = isTaggerResult(tagging)
-    ? tagging.html_content
-    : "";
-
   // Every other panel that needs it. We'll clean up the logic later because the currentTab clause doesn't make any difference anymore
   const showOnTopicText =
     currentTab !== "impressions" && !editable && Boolean(onTopic?.html);
-
-  // Special rendering of tagger results.
-  const taggedDocuScopeText = (
-    <React.Fragment>
-      <div className="d-flex align-items-start">
-        <h4>Tagged Text:&nbsp;</h4>
-        <OverlayTrigger
-          placement="right"
-          overlay={
-            <Popover>
-              <Popover.Header as="h3">Notes on Usage</Popover.Header>
-              <Popover.Body>
-                <p>
-                  Please note that this is how DocuScope sees your text and it
-                  might appear slightly different than your text, toggle the
-                  &quot;Edit Mode&quot; to see your original text.
-                </p>
-                <p>
-                  In the tagged text, you can click on words and phrases to see
-                  its category tag. Not all words or phrases have tags.
-                  Selecting a category from the Dictionary Categories tree will
-                  highlight all of the instances of the selected categories in
-                  the tagged text.
-                </p>
-              </Popover.Body>
-            </Popover>
-          }
-        >
-          <Badge bg="info">
-            <i className="fa-solid fa-info" />
-          </Badge>
-        </OverlayTrigger>
-      </div>
-      <hr />
-      <div
-        className="tagged-text"
-        onClick={(evt) => click_select(evt)}
-        dangerouslySetInnerHTML={{ __html: taggedDocuScopeTextContent }}
-      ></div>
-    </React.Fragment>
-  );
 
   //>--------------------------------------------------------
 
@@ -775,7 +699,7 @@ const StudentView: FC = () => {
             </ButtonToolbar>
           </Card.Header>
           <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); ReactEditor.focus(editor); }}>
-            {showDocuScopeTaggedText ? taggedDocuScopeText : ""}
+            {showDocuScopeTaggedText ? <ImpressionsTaggedText/> : ""}
             {showOnTopicText ? (
               <React.Fragment>
                 {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
