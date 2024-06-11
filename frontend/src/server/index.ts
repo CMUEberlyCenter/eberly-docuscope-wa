@@ -72,6 +72,15 @@ assignments.post('/', async (request: Request, response: Response) => {
 });
 
 const writingTasks = Router();
+writingTasks.patch('/update', async (request: Request, response: Response) => {
+  try {
+    await updatePublicWritingTasks();
+    return response.sendStatus(204);
+  } catch (err) {
+    console.error(err);
+    return response.sendStatus(500);
+  }
+});
 writingTasks.get('/:fileId', async (request: Request, response: Response) => {
   const fileId = request.params.fileId;
   try {
@@ -81,15 +90,6 @@ writingTasks.get('/:fileId', async (request: Request, response: Response) => {
     if (err instanceof ReferenceError) {
       return response.sendStatus(404);
     }
-    return response.sendStatus(500);
-  }
-});
-writingTasks.get('/update', async (request: Request, response: Response) => {
-  try {
-    await updatePublicWritingTasks();
-    return response.sendStatus(200);
-  } catch (err) {
-    console.error(err);
     return response.sendStatus(500);
   }
 });

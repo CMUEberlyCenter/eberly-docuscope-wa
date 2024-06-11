@@ -36,14 +36,6 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
   return assignment;
 }
 
-// export async function findWritingTaskIdByAssignment(id: string): Promise<ObjectId> {
-//   const { writing_task } = await findAssignmentById(id);
-//   if (isWritingTask(writing_task)) {
-//     return writing_task;
-//   }
-//   return ().writing_task.oid;
-// }
-
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   const _id = new ObjectId(id);
   const collection = client.db('docuscope').collection(WRITING_TASKS);
@@ -100,26 +92,6 @@ export async function updatePublicWritingTasks() {
 export async function initDatabase(): Promise<void> {
   await client.connect();
   await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
-  // const db = client.db('docuscope');
-  // const configs = db.collection(WRITING_TASKS);
-  // const config = await configs.updateOne({"info.name": "Change Proposal"}, {$set: changeProposal}, {upsert: true});
-  // console.log(config);
-  // const rules = config.upsertedId;
-  // const assignments = db.collection('assignments');
-  // const assignment = await assignments.updateOne({assignment: '5'}, {$set: {
-  //   assignment: '5',
-  //   rules,
-  //   docuscope: false,
-  //   scribe: true,
-  //   notes_to_prose: true,
-  //   logical_flow: true,
-  //   grammar: true,
-  //   copyedit: true,
-  //   expectation: true,
-  //   topics: true,
-  //   text2speech: true,
-  // } as Assignment}, {upsert: true});
-  // console.log(assignment);
 }
 
 async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
