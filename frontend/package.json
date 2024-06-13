@@ -32,9 +32,9 @@
     "english",
     "writing"
   ],
-  "author": "Martin van Velsen",
+  "author": "Michael Ringenberg <Ringenberg@users.noreply.github.com>",
   "contributors": [
-    "Michael Ringenberg <Ringenberg@users.noreply.github.com>"
+    "Martin van Velsen"
   ],
   "license": "CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL 4.0 INTERNATIONAL LICENSE",
   "bugs": {
