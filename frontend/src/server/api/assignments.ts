@@ -58,7 +58,7 @@ assignments.get(
       // response.json(rules);
       // FIXME temp using static
       //if (assignment === 'global') return response.json({});
-      response.sendStatus(410)
+      response.sendStatus(410);
     } catch (err) {
       console.error(err instanceof Error ? err.message : err);
       response.sendStatus(404);

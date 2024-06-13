@@ -16,7 +16,7 @@ import React, {
   useCallback,
   useEffect,
   useId,
-  useState
+  useState,
 } from "react";
 import {
   Button,
@@ -29,7 +29,7 @@ import {
   NavDropdown,
   Navbar,
   Tab,
-  Tabs
+  Tabs,
 } from "react-bootstrap";
 import { Descendant, Editor, Range, Transforms, createEditor } from "slate";
 import {
@@ -111,7 +111,6 @@ import {
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
-
 
 function fixOnTopicHtml(topicData?: { html?: string } | null) {
   return topicData?.html?.replaceAll("_", " ") ?? "";
@@ -389,7 +388,6 @@ const StudentView: FC = () => {
   const [showParagraphSelector /*, setShowParagraphSelector*/] =
     useState(false);
 
-
   //>--------------------------------------------------------
 
   /**
@@ -542,14 +540,14 @@ const StudentView: FC = () => {
                     </NavDropdown.Item>
                   )}
                 </NavDropdown>
-                {(!inLti || ltiInfo?.instructor) &&
+                {(!inLti || ltiInfo?.instructor) && (
                   <Nav.Link
                     eventKey={"writing-task"}
                     onClick={() => setShowSelectWritingTasks(true)}
                   >
                     Writing Task{currentTask && `: ${currentTask.info.name}`}
                   </Nav.Link>
-                }
+                )}
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -611,15 +609,15 @@ const StudentView: FC = () => {
           <Card.Header className="d-flex justify-content-between align-items-center">
             <ButtonToolbar>
               {showParagraphSelector && (
-                    <Form.Group>
-                    <Form.Select>
-                      {[1, 2, 3].map((num) => (
-                        <option key={`${selectId}-${num}`} value={num}>
-                          {num}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
+                <Form.Group>
+                  <Form.Select>
+                    {[1, 2, 3].map((num) => (
+                      <option key={`${selectId}-${num}`} value={num}>
+                        {num}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
               )}
               {ScribeAvailable && (
                 <ButtonGroup className="me-2">
@@ -695,8 +693,16 @@ const StudentView: FC = () => {
               )}
             </ButtonToolbar>
           </Card.Header>
-          <Card.Body className="overflow-auto" style={{ fontSize: `${zoom}%` }} onClick={(e) => { e.preventDefault(); e.stopPropagation(); ReactEditor.focus(editor); }}>
-            {showDocuScopeTaggedText ? <ImpressionsTaggedText/> : ""}
+          <Card.Body
+            className="overflow-auto"
+            style={{ fontSize: `${zoom}%` }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              ReactEditor.focus(editor);
+            }}
+          >
+            {showDocuScopeTaggedText ? <ImpressionsTaggedText /> : ""}
             {showOnTopicText ? (
               <React.Fragment>
                 {/* TODO: Add appropriate header/warning here.  See taggedDocuScopeText for an example. */}
@@ -763,12 +769,12 @@ const StudentView: FC = () => {
       </footer> */}
       <About />
       {showReset && <ResetModal onCloseResetDialog={onCloseResetDialog} />}
-      {(!inLti || ltiInfo?.instructor) &&
+      {(!inLti || ltiInfo?.instructor) && (
         <SelectWritingTask
           show={showSelectWritingTasks}
           onHide={() => setShowSelectWritingTasks(false)}
         />
-      }
+      )}
       {ScribeAvailable && notesFeature && (
         <Notes2Prose
           show={showConvertNotes}

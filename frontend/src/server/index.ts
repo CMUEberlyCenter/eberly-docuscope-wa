@@ -35,7 +35,8 @@ const PUBLIC = join(__dirname, '../../build/app');
 const assignments = Router();
 assignments.post('/', async (request: Request, response: Response) => {
   const token: IdToken = response.locals.token;
-  if (!token || !isInstructor(token.platformContext)) { // TODO: add other admin roles
+  if (!token || !isInstructor(token.platformContext)) {
+    // TODO: add other admin roles
     return response.sendStatus(401); // Unauthorized
   }
   if (!request.files) {
@@ -48,12 +49,14 @@ assignments.post('/', async (request: Request, response: Response) => {
         type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
         title: 'Bad Request',
         detail: 'Multiple files unsupported.',
-        status: 400
+        status: 400,
       } as ProblemDetails);
     }
     const json = JSON.parse(file.data.toString('utf-8'));
     if (!isWritingTask(json)) {
-      return response.sendStatus(400).send('Not a valid writing task specification.'); // TODO: format
+      return response
+        .sendStatus(400)
+        .send('Not a valid writing task specification.'); // TODO: format
     }
     await updateAssignmentWritingTask(token.platformContext.resource.id, json);
   } catch (err) {
@@ -63,7 +66,7 @@ assignments.post('/', async (request: Request, response: Response) => {
         type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
         title: 'Bad Request',
         detail: err.message,
-        status: 400
+        status: 400,
       } as ProblemDetails);
     }
     return response.sendStatus(500);
@@ -159,7 +162,7 @@ async function __main__() {
     const token: IdToken = res.locals.token;
     const context = {
       instructor: isInstructor(token.platformContext),
-      resource: token.platformContext.resource
+      resource: token.platformContext.resource,
     };
     try {
       const assignmentData = await findAssignmentById(

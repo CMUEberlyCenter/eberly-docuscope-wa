@@ -34,8 +34,11 @@ function click_select(evt: React.MouseEvent<HTMLDivElement, MouseEvent>): void {
 export const ImpressionsTaggedText: FC = () => {
   const tagging = useTaggerResults();
 
-  const [text, setText] = useState('');
-  useEffect(() => setText(isTaggerResult(tagging) ? tagging.html_content : ''), [tagging]);
+  const [text, setText] = useState("");
+  useEffect(
+    () => setText(isTaggerResult(tagging) ? tagging.html_content : ""),
+    [tagging]
+  );
 
   return (
     <>

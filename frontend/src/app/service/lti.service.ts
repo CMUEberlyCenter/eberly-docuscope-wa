@@ -1,11 +1,10 @@
 /** @fileoverview Accessing LTI 1.3 information. */
 
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, catchError, of } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, of } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { WritingTask } from '../../lib/WritingTask';
 import { writingTask } from './writing-task.service';
-
 
 type LtiInfo = {
   instructor: boolean;
@@ -15,7 +14,7 @@ type LtiInfo = {
     id: string;
   };
   writing_task?: WritingTask;
-}
+};
 
 /**
  * Retrieves the LTI authentication token.
@@ -28,6 +27,10 @@ const getLtik = (): string => {
   return ltik;
 };
 
+/**
+ * Test if this is a LTI context.
+ * @returns true if a LTI token exists.
+ */
 const isLti = (): boolean => {
   try {
     const key = getLtik();
@@ -38,6 +41,7 @@ const isLti = (): boolean => {
 };
 
 const lti = new BehaviorSubject<boolean>(isLti());
+/** True if detected that this is a LTI context. */
 export const [useLti, lti$] = bind(lti, isLti());
 
 /**
@@ -70,39 +74,26 @@ assignment$.subscribe((lti_info) => {
   }
 });
 
-
-
-// /**
-//  *
-//  */
-// export function launch(forceStudent?: boolean) {
-//   const ltiFields: Record<string, string> = window.serverContext?.lti ?? {};
-
-//   // Change the role to student if forceStudent is set
-//   if (forceStudent) {
-//     ltiFields['roles'] = 'urn:lti:instrole:ims/lis/Student,Student';
-//     ltiFields['ext_roles'] = 'urn:lti:instrole:ims/lis/Student,Student';
-//   }
-
-//   const element = document.getElementById('ltirelayform');
-//   if (!element) return;
-//   const relayform = element as HTMLFormElement;
-//   relayform.innerHTML = '';
-
-//   // Now transform the LTI fields into form elements
-//   for (const key in ltiFields) {
-//     if (Object.prototype.hasOwnProperty.call(ltiFields, key)) {
-//       const ltiField = document.createElement('input');
-//       ltiField.type = 'hidden';
-//       ltiField.id = key;
-//       ltiField.name = key;
-//       ltiField.value = ltiFields[key];
-
-//       relayform.appendChild(ltiField);
-//     }
-//   }
-
-//   relayform.setAttribute('action', window.location.href);
-//   relayform.submit();
-//   relayform.style.visibility = 'hidden';
-// }
+// When in LTI context and the user has modification rights, set
+// the writing task for the assignment.
+combineLatest({
+  task: writingTask,
+  lti_info: assignment$,
+})
+  .pipe(filter(({ lti_info }) => lti_info !== null && lti_info.instructor))
+  .subscribe(async ({ task }) => {
+    try {
+      const data = new FormData();
+      data.append('file', JSON.stringify(task));
+      const response = await fetch('/api/v2/assignments', {
+        method: 'POST',
+        body: data,
+      });
+      if (!response.ok) {
+        throw new Error(await response.json());
+      }
+    } catch (error) {
+      console.error(error);
+      // TODO report error.
+    }
+  });

@@ -1,45 +1,38 @@
 /**
- *
+ * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
  */
 export function clearAllHighlights() {
   // Select all paragraphs
-  const pElements = document.querySelectorAll('.paragraph');
-  for (let i = 0; i < pElements.length; i++) {
-    pElements[i].classList.remove('paragraph-highlight');
-  }
+  document
+    .querySelectorAll('.paragraph')
+    .forEach((para) => para.classList.remove('paragraph-highlight'));
 
   // Select all sentences
-  const sElements = document.querySelectorAll('.sentence');
-  for (let i = 0; i < sElements.length; i++) {
-    sElements[i].classList.remove('sentence-highlight');
-  }
+  document
+    .querySelectorAll('.sentence')
+    .forEach((sentence) => sentence.classList.remove('sentence-highlight'));
 
   // Select all topics
-  const tElements = document.querySelectorAll('.word');
-  for (let i = 0; i < tElements.length; i++) {
-    tElements[i].classList.remove('word-highlight');
-  }
+  document
+    .querySelectorAll('.word')
+    .forEach((word) => word.classList.remove('word-highlight'));
 }
 
 /**
- *
+ * Add highlight to the specified paragraph.
+ * @param aParagraphIndex 0 based index
  */
 export function highlightParagraph(aParagraphIndex: number) {
   clearAllHighlights();
 
   const pId = `p${aParagraphIndex + 1}`;
-
-  const pElement = document.getElementById(pId);
-  if (pElement) {
-    // console.log('Paragraph element found');
-    pElement.classList.add('paragraph-highlight');
-    // } else {
-    //   console.log('Unable to find paragraph element');
-  }
+  document.getElementById(pId)?.classList.add('paragraph-highlight');
 }
 
 /**
- *
+ * Add highlight to the specified sentence in a given paragraph.
+ * @param aParagraphIndex 0 based index.
+ * @param aSentenceIndex 0 based index.
  */
 export function highlightSentence(
   aParagraphIndex: number,
@@ -48,13 +41,7 @@ export function highlightSentence(
   clearAllHighlights();
 
   const pId = `p${aParagraphIndex + 1}`;
-  const pElement = document.getElementById(pId);
-  if (!pElement) {
-    // console.warn('Unable to find paragraph element %s', pId);
-    return;
-  }
-  pElement.classList.add('paragraph-highlight');
-
+  document.getElementById(pId)?.classList.add('paragraph-highlight');
   const sId = `p${aParagraphIndex + 1}s${aSentenceIndex + 1}`;
   document.getElementById(sId)?.classList.add('sentence-highlight');
 }

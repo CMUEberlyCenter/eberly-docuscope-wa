@@ -1,28 +1,45 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
-import { Button, Card, Form, ListGroup, Modal, Stack } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Form,
+  ListGroup,
+  Modal,
+  OverlayTrigger,
+  Popover,
+  Stack,
+} from "react-bootstrap";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   useWritingTask,
   useWritingTasks,
-  writingTask
+  writingTask,
 } from "../../service/writing-task.service";
 
 type SelectWritingTaskProps = {
   show: boolean;
   onHide: () => void;
 };
+/**
+ * A modal dialog for selecting and displaying meta information about a writing task.
+ * @param param0.show if true, show the modal.
+ * @param param0.onHide callback to execute when modal is closed.
+ * @returns
+ */
 const SelectWritingTask: FC<SelectWritingTaskProps> = ({
   show,
   onHide,
 }: SelectWritingTaskProps) => {
-  const { data: writingTasks } = useWritingTasks();
-  const writing_task = useWritingTask();
-  const inLti = useLti();
-  const ltiInfo = useLtiInfo();
+  const { data: writingTasks } = useWritingTasks(); // all public tasks
+  const writing_task = useWritingTask(); // current task
+  const inLti = useLti(); // in LTI context
+  const ltiInfo = useLtiInfo(); // Information from LTI
   const [selected, setSelected] = useState<WritingTask | null>(writing_task);
   useEffect(() => setSelected(writing_task), [writing_task]);
-  const [valid, setValid] = useState(true);
+  const [valid, setValid] = useState(true); // Uploaded file validity
+  const [custom, setCustom] = useState<WritingTask | null>(null);
+  useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -32,25 +49,19 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
         const json = JSON.parse(content);
         if (isWritingTask(json)) {
           setValid(true);
+          setCustom(json);
           setSelected(json);
-          const data = new FormData();
-          data.append("file", files[0]);
-          const response = await fetch("/api/v2/assignments", {
-            method: 'POST',
-            body: data,
-          });
-          if (!response.ok) {
-            throw new Error(await response.json());
-          }
         } else {
           setValid(false);
         }
       } catch (err) {
+        // expecting JSON parser error.
+        // TODO provide error message to invalid text.
         setValid(false);
         console.error(err);
       }
     }
-  }
+  };
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
@@ -68,13 +79,13 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
                 {task.info.name}
               </ListGroup.Item>
             ))}
-            {inLti && ltiInfo?.writing_task && (
+            {custom && (
               <ListGroup.Item
                 action
-                active={selected === ltiInfo.writing_task}
-                onClick={() => setSelected(ltiInfo.writing_task ?? null)}
+                active={selected === custom}
+                onClick={() => setSelected(custom)}
               >
-                {ltiInfo.writing_task.info.name}
+                {custom.info.name}
               </ListGroup.Item>
             )}
             <ListGroup.Item
@@ -97,8 +108,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
                 Author: {selected?.info.author ?? "-"}
               </ListGroup.Item>
               <ListGroup.Item>
-                Copyright:{" "}
-                {selected && <>&copy; {selected?.info.copyright}</>}
+                Copyright: {selected && <>&copy; {selected?.info.copyright}</>}
               </ListGroup.Item>
               <ListGroup.Item>
                 Date:{" "}
@@ -111,19 +121,41 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
         </Stack>
       </Modal.Body>
       <Modal.Footer>
-        {inLti && ltiInfo?.instructor && (
-          <Form noValidate>
-            <Form.Group>
-              <Form.FloatingLabel label="Custom Writing Task">
-                <Form.Control type="file" onChange={onFileChange} isInvalid={!valid} />
-                <Form.Control.Feedback type="invalid">
-                  Uploaded file is not a valid writing task specificaton!
-                </Form.Control.Feedback>
-              </Form.FloatingLabel>
-            </Form.Group>
-          </Form>
+        {(!inLti || ltiInfo?.instructor) && (
+          <OverlayTrigger
+            trigger="click"
+            placement="top"
+            overlay={
+              <Popover>
+                <Popover.Header>Upload Custom Writing Task</Popover.Header>
+                <Popover.Body>
+                  <Form noValidate>
+                    <Form.Group>
+                      <Form.Control
+                        type="file"
+                        onChange={onFileChange}
+                        isInvalid={!valid}
+                      />
+                      <Form.Control.Feedback type="invalid">
+                        Uploaded file is not a valid writing task specificaton!
+                      </Form.Control.Feedback>
+                    </Form.Group>
+                  </Form>
+                </Popover.Body>
+              </Popover>
+            }
+          >
+            <Button className="me-auto">+</Button>
+          </OverlayTrigger>
         )}
-        <Button onClick={() => { writingTask.next(selected); onHide(); }}>Select</Button>
+        <Button
+          onClick={() => {
+            writingTask.next(selected);
+            onHide();
+          }}
+        >
+          Select
+        </Button>
         <Button onClick={onHide}>Cancel</Button>
       </Modal.Footer>
     </Modal>

@@ -58,9 +58,16 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   return ret;
 }
 
-export async function updateAssignmentWritingTask(assignment: string, writing_task: WritingTask) {
+export async function updateAssignmentWritingTask(
+  assignment: string,
+  writing_task: WritingTask
+) {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
-  collection.updateOne({assignment}, { $set: {writing_task}}, { upsert: true });
+  collection.updateOne(
+    { assignment },
+    { $set: { writing_task } },
+    { upsert: true }
+  );
 }
 
 export async function updateAssignment(assignment: string, task: string) {
