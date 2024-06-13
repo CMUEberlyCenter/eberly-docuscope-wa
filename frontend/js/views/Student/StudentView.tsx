@@ -25,14 +25,14 @@ import {
   Container,
   Form,
   Nav,
-  Navbar,
   NavDropdown,
+  Navbar,
   OverlayTrigger,
   Popover,
   Tab,
   Tabs,
 } from 'react-bootstrap';
-import { createEditor, Descendant } from 'slate';
+import { Descendant, createEditor } from 'slate';
 import {
   Editable,
   RenderElementProps,
@@ -40,14 +40,15 @@ import {
   Slate,
   withReact,
 } from 'slate-react';
+import DocuScopeAbout from '../../DocuScopeAbout';
+import DocuScopeReset from '../../DocuScopeReset';
+import TopicHighlighter from '../../TopicHighlighter';
 import Clarity from '../../components/Clarity/Clarity';
 import Coherence from '../../components/Coherence/Coherence';
 import Divider from '../../components/Divider/Divider';
 import Expectations from '../../components/Expectations/Expectations';
 import Impressions from '../../components/Impressions/Impressions';
 import LockSwitch from '../../components/LockSwitch/LockSwitch';
-import DocuScopeAbout from '../../DocuScopeAbout';
-import DocuScopeReset from '../../DocuScopeReset';
 import { currentTool } from '../../service/current-tool.service';
 import {
   editorText,
@@ -55,12 +56,10 @@ import {
   useEditorState,
 } from '../../service/editor-state.service';
 import { isTaggerResult, useTaggerResults } from '../../service/tagger.service';
-import TopicHighlighter from '../../TopicHighlighter';
 
 import '../../../css/topics.css';
 import './StudentView.scss';
 
-import { faBook, faGlobe } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 // Disable this doumentation to resolve #13 #14 #15
@@ -679,14 +678,14 @@ const StudentView = (props: {
         </div>
         <div className="statusbar-ruleversion">
           <FontAwesomeIcon
-            icon={faBook}
+            icon="book"
             style={{ marginLeft: '2px', marginRight: '2px' }}
           />
           {props.ruleManager.getVersion()}
         </div>
         <div className="statusbar-language">
           <FontAwesomeIcon
-            icon={faGlobe}
+            icon="globe"
             style={{ marginLeft: '2px', marginRight: '2px' }}
           />
           {language}
