@@ -27,7 +27,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract metadata (tags, labels) for frontend Docker
       id: meta
-      uses: docker/metadata-action@5
+      uses: docker/metadata-action@v5
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
     - name: Build and push frontend Docker image
@@ -47,7 +47,7 @@ jobs:
         
     - name: Extract metadata (tags, labels) for ontopic Docker
       id: meta_ontopic
-      uses: docker/metadata-action@5
+      uses: docker/metadata-action@v5
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/ontopic
     - name: Build and push frontend Docker image
