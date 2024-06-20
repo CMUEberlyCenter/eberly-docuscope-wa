@@ -1,7 +1,7 @@
 /** @fileoverview Accessing LTI 1.3 information. */
 
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, catchError, combineLatest, filter, of } from 'rxjs';
+import { BehaviorSubject, catchError, combineLatest, filter, map, of, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { WritingTask } from '../../lib/WritingTask';
 import { writingTask } from './writing-task.service';
@@ -62,10 +62,18 @@ const getLtiRequest = (): RequestInit => {
 };
 
 export const [useLtiInfo, assignment$] = bind(
-  fromFetch<LtiInfo>('/lti/info', {
+  fromFetch('/lti/info', {
     ...getLtiRequest(),
-    selector: (r) => r.json(),
-  }).pipe(catchError(() => of(null))),
+    // selector: (r) => r.json(),
+  }).pipe(
+    switchMap(async (response: Response) => {
+      if (!response.ok) {
+        throw new Error(response.statusText);
+      }
+      // check for form
+      return (await response.json()) as LtiInfo
+    }),
+    catchError(() => of(null))),
   null
 );
 assignment$.subscribe((lti_info) => {
@@ -73,6 +81,10 @@ assignment$.subscribe((lti_info) => {
     writingTask.next(lti_info.writing_task);
   }
 });
+
+export const [useSelectTaskAvailable, selectTaskAvailable$] = bind(
+  assignment$.pipe(map(info => !info || info?.instructor === true)), false
+)
 
 // When in LTI context and the user has modification rights, set
 // the writing task for the assignment.
