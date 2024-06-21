@@ -8,5 +8,9 @@ declare module '*.txt' {
   export default content;
 }
 
+declare module '*.svg' {
+  const content: Element<SVGElement>;
+  export default content;
+}
 declare const __APP_VERSION__: string;
 declare const __BUILD_DATE__: string;

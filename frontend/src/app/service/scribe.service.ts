@@ -39,7 +39,7 @@ show_scribe_option.subscribe((save) =>
 );
 
 // If scribe is currently enabled by user.
-const optIn = sessionStorage.getItem('enable_scribe') === true.toString();
+const optIn = true; // sessionStorage.getItem('enable_scribe') === true.toString();
 const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
 export const enableScribe = (enable: boolean) => scribe.next(enable);
 export const [useScribe, scribe$] = bind(scribe, optIn);

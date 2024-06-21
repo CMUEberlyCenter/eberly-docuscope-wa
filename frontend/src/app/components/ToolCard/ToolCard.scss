@@ -1,4 +1,27 @@
-// .tool-card {
-//   min-width: 320px;
-//   max-width: 80vw;
-// }
+.tool-card {
+
+  // min-width: 320px;
+  // max-width: 80vw;
+  .icon-lg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .tools {
+    button {
+      width: 64px;
+      height: 64px;
+
+      img {
+        width: 24px;
+        height: 24px;
+        margin-right: auto;
+        margin-left: auto;
+      }
+      span {
+        font-size: x-small;
+        font-weight: 500;
+      }
+    }
+  }
+}

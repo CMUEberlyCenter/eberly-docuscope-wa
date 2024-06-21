@@ -18,22 +18,23 @@ const Editor: FC = () => {
     <main className="h-100 overflow-hidden flex-grow-1">
       <ButtonToolbar aria-label="Editor Tools">
         <ButtonGroup>
-          <DropdownButton as={ButtonGroup} title="File">
-            <Dropdown.Item eventKey="open">Open...</Dropdown.Item>
+          <DropdownButton as={ButtonGroup} title="File" variant="light">
+            <Dropdown.Item eventKey="open">New Writing Task</Dropdown.Item>
+            <Dropdown.Item eventKey="save">Save Notes</Dropdown.Item>
           </DropdownButton>
-          <DropdownButton as={ButtonGroup} title="View">
-            <Dropdown.Item eventKey="open">Open...</Dropdown.Item>
+          <DropdownButton as={ButtonGroup} title="View" variant="light">
+            <Dropdown.Item eventKey="open">???</Dropdown.Item>
           </DropdownButton>
-          <DropdownButton as={ButtonGroup} title="Paragraph">
-            <Dropdown.Item eventKey="open">Paragraph</Dropdown.Item>
-            <Dropdown.Item eventKey="open">H1</Dropdown.Item>
-            <Dropdown.Item eventKey="open">H2</Dropdown.Item>
-            <Dropdown.Item eventKey="open">H3</Dropdown.Item>
+          <DropdownButton as={ButtonGroup} title="Paragraph" variant="light">
+            <Dropdown.Item eventKey="paragraph">Paragraph</Dropdown.Item>
+            <Dropdown.Item eventKey="h1">H1</Dropdown.Item>
+            <Dropdown.Item eventKey="h2">H2</Dropdown.Item>
+            <Dropdown.Item eventKey="h3">H3</Dropdown.Item>
           </DropdownButton>
-          <Button><FontAwesomeIcon icon={faBold} /></Button>
-          <Button><FontAwesomeIcon icon={faItalic} /></Button>
-          <Button><FontAwesomeIcon icon={faUnderline} /></Button>
-          <Button><FontAwesomeIcon icon={faStrikethrough} /></Button>
+          <Button variant="light"><FontAwesomeIcon icon={faBold} /></Button>
+          <Button variant="light"><FontAwesomeIcon icon={faItalic} /></Button>
+          <Button variant="light"><FontAwesomeIcon icon={faUnderline} /></Button>
+          <Button variant="light"><FontAwesomeIcon icon={faStrikethrough} /></Button>
         </ButtonGroup>
         <div className="ms-3">
           <h6 className="mb-0 text-muted">Writing Task:</h6>

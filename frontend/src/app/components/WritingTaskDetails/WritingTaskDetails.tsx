@@ -75,6 +75,10 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
           </Row>
         </Container>
       </Modal.Body>
+      <Modal.Footer>
+        <Button color="secondary">Copy to Clipboard</Button>
+        <Button color="primary">Insert Outline</Button>
+      </Modal.Footer>
     </Modal>
   );
 };
