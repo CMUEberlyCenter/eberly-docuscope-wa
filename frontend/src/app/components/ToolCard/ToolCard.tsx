@@ -15,6 +15,14 @@ import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import './ToolCard.scss';
 
+type ToolResults = {
+  tool: string;
+  datetime: Date;
+  input: string;
+  result: string;
+  bookmarked?: boolean;
+}
+
 const ToolCard = forwardRef<HTMLDivElement, object>((props, ref) => {
   const selectAvailable = useSelectTaskAvailable();
   const writingTask = useWritingTask();
@@ -25,6 +33,9 @@ const ToolCard = forwardRef<HTMLDivElement, object>((props, ref) => {
   const clarifyFeature = useScribeFeatureClarify();
   const grammarFeature = useScribeFeatureGrammar();
   const scribeFeature = useScribe();
+  const [currentTool, setCurrentTool] = useState<ToolResults | null>(null);
+  const [history, setHistory] = useState<ToolResults[]>([]);
+  const addHistory = (tool: ToolResults) => setHistory([...history, tool]);
 
   return (
     <Card {...props} as="section" className="overflow-hidden tool-card h-100 bg-light" ref={ref}>
@@ -52,7 +63,7 @@ const ToolCard = forwardRef<HTMLDivElement, object>((props, ref) => {
               <ListGroup>
                 <ListGroup.Item>Assess Expectation</ListGroup.Item>
                 <ListGroup.Item>Logical Flow</ListGroup.Item>
-                <ListGroup.Item>Topics</ListGroup.Item>
+                <ListGroup.Item>List Main/Sub Topics</ListGroup.Item>
               </ListGroup>
             </Popover>)}>
             <Button variant="outline-dark" disabled={!scribeFeature}>
@@ -77,10 +88,12 @@ const ToolCard = forwardRef<HTMLDivElement, object>((props, ref) => {
         </ButtonGroup>
       </ButtonToolbar>
       <article className="h-100 position-relative">
-        <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
-          <img className="icon-lg mx-auto" src={highlightIcon} alt="Highlight and write" />
-          <span className="mx-auto text-center">Write & highlight text for further actions</span>
-        </Stack>
+        {!currentTool &&
+          <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
+            <img className="icon-lg mx-auto" src={highlightIcon} alt="Highlight and write" />
+            <span className="mx-auto text-center">Write & highlight text for further actions</span>
+          </Stack>
+        }
       </article>
       <Card.Footer>
         {writingTask && <Button variant="outline-dark" onClick={() => setShowWritingTask(true)}>View Outline</Button>}

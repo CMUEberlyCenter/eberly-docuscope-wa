@@ -1,10 +1,10 @@
+import { faBold, faItalic, faStrikethrough, faUnderline } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useState } from "react";
+import { ButtonGroup, ButtonToolbar, Dropdown, DropdownButton, ToggleButton } from "react-bootstrap";
 import { Descendant, createEditor } from "slate";
 import { Editable, ReactEditor, Slate, withReact } from "slate-react";
 import { editorText } from "../../service/editor-state.service";
-import { Button, ButtonGroup, ButtonToolbar, Dropdown, DropdownButton } from "react-bootstrap";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBold, faItalic, faStrikethrough, faUnderline } from "@fortawesome/free-solid-svg-icons";
 import { useWritingTask } from "../../service/writing-task.service";
 
 const Editor: FC = () => {
@@ -13,7 +13,12 @@ const Editor: FC = () => {
     // get from sessno storage
     JSON.parse(sessionStorage.getItem("content") ?? "null") ||
     [{ type: "paragraph", children: [{ text: "" }] }]);
-    const writingTask = useWritingTask();
+  const writingTask = useWritingTask();
+  const [bold, setBold] = useState(false);
+  const [italic, setItalic] = useState(false);
+  const [underline, setUnderline] = useState(false);
+  const [strikethrough, setStrikethrough] = useState(false);
+
   return (
     <main className="h-100 overflow-hidden flex-grow-1">
       <ButtonToolbar aria-label="Editor Tools">
@@ -31,10 +36,10 @@ const Editor: FC = () => {
             <Dropdown.Item eventKey="h2">H2</Dropdown.Item>
             <Dropdown.Item eventKey="h3">H3</Dropdown.Item>
           </DropdownButton>
-          <Button variant="light"><FontAwesomeIcon icon={faBold} /></Button>
-          <Button variant="light"><FontAwesomeIcon icon={faItalic} /></Button>
-          <Button variant="light"><FontAwesomeIcon icon={faUnderline} /></Button>
-          <Button variant="light"><FontAwesomeIcon icon={faStrikethrough} /></Button>
+          <ToggleButton variant="light" checked={bold} onChange={(e) => setBold(e.currentTarget.checked)} id={"toggle-bold"} value={"bold"} type="checkbox"><FontAwesomeIcon icon={faBold} /></ToggleButton>
+          <ToggleButton variant="light" checked={italic} onChange={(e) => setItalic(e.currentTarget.checked)} id={"toggle-italic"} value={"italic"} type="checkbox"><FontAwesomeIcon icon={faItalic} /></ToggleButton>
+          <ToggleButton variant="light" checked={underline} onChange={(e) => setUnderline(e.currentTarget.checked)} id="toggle-underline" value={"underline"} type="checkbox"><FontAwesomeIcon icon={faUnderline} /></ToggleButton>
+          <ToggleButton variant="light" checked={strikethrough} onChange={(e) => setStrikethrough(e.currentTarget.checked)} id="toggle-strikethrough" value={"strikethrough"} type="checkbox"><FontAwesomeIcon icon={faStrikethrough} /></ToggleButton>
         </ButtonGroup>
         <div className="ms-3">
           <h6 className="mb-0 text-muted">Writing Task:</h6>
