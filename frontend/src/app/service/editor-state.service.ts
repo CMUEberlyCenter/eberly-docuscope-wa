@@ -26,6 +26,7 @@ export const serialize = (nodes: Descendant[]): string => {
 
 // For tracking the Editor text content.
 export const editorText = new BehaviorSubject<Descendant[]>([]);
+export const [useEditorContent, editorContent$] = bind(editorText, []);
 export const [useEditorText, editorText$] = bind(
   editorText.pipe(
     distinctUntilChanged((prev, next) => serialize(prev) === serialize(next)),
