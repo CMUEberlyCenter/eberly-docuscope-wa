@@ -1,8 +1,17 @@
 import { FC, useState } from "react";
-import { Button, Card, Col, Container, ListGroup, Modal, Row, Stack } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  ListGroup,
+  Modal,
+  Row,
+  Stack,
+} from "react-bootstrap";
 import { Rule } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
-import './WritingTaskDetails.scss';
+import "./WritingTaskDetails.scss";
 
 type ModalProps = {
   show: boolean;
@@ -15,9 +24,7 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
       <Modal.Header closeButton>
-        <Modal.Title>
-          {writingTask?.info.name}
-        </Modal.Title>
+        <Modal.Title>{writingTask?.info.name}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Container>
@@ -25,28 +32,51 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
             <Col>
               <ListGroup className="writing-task-tree">
                 {writingTask?.rules.rules.map((rule) => (
-                  <ListGroup.Item action as="div" key={`${rule.name}`}
+                  <ListGroup.Item
+                    action
+                    as="div"
+                    key={`${rule.name}`}
                     aria-expanded="true"
-                    active={selected === rule}>
+                    active={selected === rule}
+                  >
                     <div className="d-flex">
-                      <Button size="sm" variant="none" className="expand-toggle"
+                      <Button
+                        size="sm"
+                        variant="none"
+                        className="expand-toggle"
                         onClick={(e) => {
                           const p = e.currentTarget.closest("[aria-expanded]");
-                          p?.setAttribute("aria-expanded", p.getAttribute("aria-expanded") === "true" ? "false" : "true");
-                        }}>
+                          p?.setAttribute(
+                            "aria-expanded",
+                            p.getAttribute("aria-expanded") === "true"
+                              ? "false"
+                              : "true"
+                          );
+                        }}
+                      >
                         <i className="fa-solid fa-caret-down flex-shrink-0"></i>
                       </Button>
-                      <div className="fw-bold flex-grow-1 pointer" onClick={() => setSelected(rule === selected ? null : rule)}>
+                      <div
+                        className="fw-bold flex-grow-1 pointer"
+                        onClick={() =>
+                          setSelected(rule === selected ? null : rule)
+                        }
+                      >
                         {rule.name}
                       </div>
                     </div>
                     <div className="expanded">
                       <ListGroup>
                         {rule.children.map((cluster) => (
-                          <ListGroup.Item action key={cluster.name}
+                          <ListGroup.Item
+                            action
+                            key={cluster.name}
                             className="pointer"
                             active={cluster === selected}
-                            onClick={() => setSelected(cluster === selected ? null : cluster)}>
+                            onClick={() =>
+                              setSelected(cluster === selected ? null : cluster)
+                            }
+                          >
                             {cluster.name}
                           </ListGroup.Item>
                         ))}
@@ -64,20 +94,30 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
                     <Card.Text>{writingTask?.rules.overview}</Card.Text>
                   </Card.Body>
                 </Card>
-                {selected && <Card>
-                  <Card.Body>
-                    <Card.Title>{selected.name}</Card.Title>
-                    <Card.Text dangerouslySetInnerHTML={{ __html: selected.description }} />
-                  </Card.Body>
-                </Card>}
+                {selected && (
+                  <Card>
+                    <Card.Body>
+                      <Card.Title>{selected.name}</Card.Title>
+                      <Card.Text
+                        dangerouslySetInnerHTML={{
+                          __html: selected.description,
+                        }}
+                      />
+                    </Card.Body>
+                  </Card>
+                )}
               </Stack>
             </Col>
           </Row>
         </Container>
       </Modal.Body>
       <Modal.Footer>
-        <Button color="secondary">Copy to Clipboard</Button>
-        <Button color="primary">Insert Outline</Button>
+        <Button color="secondary" onClick={() => console.log("TODO")}>
+          Copy to Clipboard
+        </Button>
+        <Button color="primary" onClick={() => console.log("TODO")}>
+          Insert Outline
+        </Button>
       </Modal.Footer>
     </Modal>
   );

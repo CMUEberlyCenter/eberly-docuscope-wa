@@ -1,13 +1,13 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<rect x="11.1" y="2.95" width="1.8" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="4.79999" y="9.25" width="4.5" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="19.2" y="13.75" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 13.75)" fill="#2445F0"/>
-<rect x="1.20001" y="9.25" width="1.8" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="22.8" y="13.75" width="1.8" height="4.5" rx="0.9" transform="rotate(180 22.8 13.75)" fill="#2445F0"/>
-<rect x="4.79999" y="2.95" width="4.5" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="19.2" y="20.05" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 20.05)" fill="#2445F0"/>
-<rect x="4.79999" y="15.55" width="4.5" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="19.2" y="7.45" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 7.45)" fill="#2445F0"/>
-<rect x="11.1" y="9.25" width="1.8" height="4.5" rx="0.9" fill="#2445F0"/>
-<rect x="11.1" y="15.55" width="1.8" height="4.5" rx="0.9" fill="#2445F0"/>
+<rect x="11.1" y="2.95" width="1.8" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="4.79999" y="9.25" width="4.5" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="19.2" y="13.75" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 13.75)" fill="currentColor"/>
+<rect x="1.20001" y="9.25" width="1.8" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="22.8" y="13.75" width="1.8" height="4.5" rx="0.9" transform="rotate(180 22.8 13.75)" fill="currentColor"/>
+<rect x="4.79999" y="2.95" width="4.5" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="19.2" y="20.05" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 20.05)" fill="currentColor"/>
+<rect x="4.79999" y="15.55" width="4.5" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="19.2" y="7.45" width="4.5" height="4.5" rx="0.9" transform="rotate(180 19.2 7.45)" fill="currentColor"/>
+<rect x="11.1" y="9.25" width="1.8" height="4.5" rx="0.9" fill="currentColor"/>
+<rect x="11.1" y="15.55" width="1.8" height="4.5" rx="0.9" fill="currentColor"/>
 </svg>

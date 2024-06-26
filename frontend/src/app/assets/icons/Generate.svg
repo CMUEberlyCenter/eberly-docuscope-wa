@@ -1,7 +1,7 @@
 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M16.9606 19.0119C16.2462 17.0214 14.7513 15.4347 12.8511 14.6998C14.7513 13.9651 16.2462 12.3785 16.9606 10.3881C17.6754 12.3785 19.1702 13.9651 21.0705 14.6998C19.1702 15.4348 17.6753 17.0214 16.9606 19.0119Z" fill="#2445F0" stroke="#2445F0" stroke-width="1.35"/>
-<rect x="1.20001" y="3" width="18" height="1.8" rx="0.9" fill="#2445F0"/>
-<rect x="1.20001" y="8.39999" width="10.8" height="1.8" rx="0.9" fill="#2445F0"/>
-<rect x="1.20001" y="13.8" width="7.2" height="1.8" rx="0.9" fill="#2445F0"/>
-<rect x="1.20001" y="19.2" width="10.8" height="1.8" rx="0.9" fill="#2445F0"/>
+<path d="M16.9606 19.0119C16.2462 17.0214 14.7513 15.4347 12.8511 14.6998C14.7513 13.9651 16.2462 12.3785 16.9606 10.3881C17.6754 12.3785 19.1702 13.9651 21.0705 14.6998C19.1702 15.4348 17.6753 17.0214 16.9606 19.0119Z" fill="currentColor" stroke="currentColor" stroke-width="1.35"/>
+<rect x="1.20001" y="3" width="18" height="1.8" rx="0.9" fill="currentColor"/>
+<rect x="1.20001" y="8.39999" width="10.8" height="1.8" rx="0.9" fill="currentColor"/>
+<rect x="1.20001" y="13.8" width="7.2" height="1.8" rx="0.9" fill="currentColor"/>
+<rect x="1.20001" y="19.2" width="10.8" height="1.8" rx="0.9" fill="currentColor"/>
 </svg>
