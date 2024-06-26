@@ -1,4 +1,4 @@
-import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { forwardRef, useCallback, useState } from "react";
 import {
@@ -17,6 +17,8 @@ import ContentIcon from "../../assets/icons/Content.svg?react";
 import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
+import YourInputIcon from '../../assets/icons/YourInput.svg?react';
+import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
 import logo from "../../assets/logo.svg";
 import { useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
@@ -34,6 +36,8 @@ import { useWritingTask } from "../../service/writing-task.service";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
+import { useSlate } from "slate-react";
+import { TextToSpeech } from "../scribe/TextToSpeech";
 
 type ToolResults = {
   tool: string;
@@ -43,10 +47,10 @@ type ToolResults = {
   document: Descendant[];
   bookmarked?: boolean;
 };
-type ToolCardProps = JSX.IntrinsicAttributes & { editor: Editor };
+type ToolCardProps = JSX.IntrinsicAttributes;
 
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
-  ({ editor, ...props }, ref) => {
+  ({ ...props }, ref) => {
     const selectAvailable = useSelectTaskAvailable();
     const writingTask = useWritingTask();
     const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
@@ -64,14 +68,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const topicsFeature = useScribeFeatureTopics();
     const editorContent = useEditorContent();
 
+    const editor = useSlate();
     const onTool = useCallback(
       (tool: string) => {
         const input = editor.selection
           ? {
-              text: Editor.string(editor, editor.selection),
-              fragment: Editor.fragment(editor, editor.selection),
-              range: editor.selection,
-            }
+            text: Editor.string(editor, editor.selection),
+            fragment: Editor.fragment(editor, editor.selection),
+            range: editor.selection,
+          }
           : { text: "" };
         const res: ToolResults = {
           tool,
@@ -100,7 +105,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             alt={settings.brand ?? "myScribe"}
           />
         </Card.Title>
-        <ButtonToolbar className="mx-auto">
+        <ButtonToolbar className="mx-auto mb-3">
           <ButtonGroup className="bg-white shadow tools" size="sm">
             <OverlayTrigger
               rootClose
@@ -142,7 +147,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             >
               <Button variant="outline-dark" disabled={!scribe}>
                 <Stack>
-                  <GenerateIcon/>
+                  <GenerateIcon />
                   <span>Generate</span>
                 </Stack>
               </Button>
@@ -175,20 +180,20 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             >
               <Button variant="outline-dark" disabled={!scribe}>
                 <Stack>
-                  <ContentIcon/>
+                  <ContentIcon />
                   <span>Content</span>
                 </Stack>
               </Button>
             </OverlayTrigger>
             <Button variant="outline-dark">
               <Stack>
-                <FlowIcon/>
+                <FlowIcon />
                 <span>Flow</span>
               </Stack>
             </Button>
             <Button variant="outline-dark">
               <Stack>
-                <ClarityIcon/>
+                <ClarityIcon />
                 <span>Clarity</span>
               </Stack>
             </Button>
@@ -197,11 +202,49 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         <article className="h-100 position-relative">
           {!currentTool && (
             <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
-              <HighlightIcon className="icon-lg mx-auto"/>
+              <HighlightIcon className="icon-lg mx-auto" />
               <span className="mx-auto text-center">
                 Write & highlight text for further actions
               </span>
             </Stack>
+          )}
+          {currentTool?.tool === 'notes2prose' && (
+            <Card>
+              <Card.Body>
+                <Card.Title>Prose Generation</Card.Title>
+                <Card.Subtitle>{currentTool.datetime.toLocaleString()}</Card.Subtitle>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <YourInputIcon className="me-2"/>
+                      Your Input
+                    </Card.Title>
+                    <Card.Text>{currentTool.input.text}</Card.Text>
+                  </Card.Body>
+                </Card>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <AIResponseIcon className="me-2"/>
+                      AI Response
+                      <TextToSpeech text={currentTool.result}/>
+                      <Button>
+                        <FontAwesomeIcon icon={faArrowsRotate}/>
+                        <span className="visually-hidden sr-only">Regenerate</span>
+                      </Button>
+                    </Card.Title>
+                    <Card.Text>{currentTool.result}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Card.Body>
+              <Card.Footer>
+                <Button>Paste Text</Button>
+                <Button>
+                  <FontAwesomeIcon icon={faClipboard} />
+                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
+                </Button>
+              </Card.Footer>
+            </Card>
           )}
         </article>
         <Card.Footer>

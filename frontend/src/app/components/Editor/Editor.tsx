@@ -32,6 +32,8 @@ import {
 import { editorText } from "../../service/editor-state.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
+import Split from "react-split";
+import ToolCard from "../ToolCard/ToolCard";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -61,9 +63,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-        "strikethrough" in leaf &&
-        leaf.underline &&
-        leaf.strikethrough
+          "strikethrough" in leaf &&
+          leaf.underline &&
+          leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -173,34 +175,40 @@ const CustomEditor: FC = () => {
         }
       }}
     >
-      <main className="d-flex overflow-none h-100 flex-column">
-        <ButtonToolbar aria-label="Editor Tools">
-          <ButtonGroup>
-            <DropdownButton as={ButtonGroup} title="File" variant="light">
-              <Dropdown.Item eventKey="open">New Writing Task</Dropdown.Item>
-              <Dropdown.Item eventKey="save">Save Notes</Dropdown.Item>
-            </DropdownButton>
-            <DropdownButton as={ButtonGroup} title="View" variant="light">
-              <Dropdown.Item eventKey="open">???</Dropdown.Item>
-            </DropdownButton>
-            <Form.Select
-              aria-lable="Block format"
-              size="sm"
-              defaultValue={"paragraph"}
-              onChange={(e) => {
-                const format = e.target.value;
-                toggleBlock(editor, format);
-              }}
-            >
-              <option value={"paragraph"}>Paragraph</option>
-              <option value={"heading-one"}>Heading 1</option>
-              <option value={"heading-two"}>Heading 2</option>
-              <option value={"heading-three"}>Heading 3</option>
-              <option value={"heading-one"}>Heading 1</option>
-              <option value={"bulleted-list"}>List</option>
-              <option value={"numbered-list"}>Numbered List</option>
-            </Form.Select>
-            {/* <DropdownButton as={ButtonGroup} title="Paragraph" variant="light">
+      <Split
+        className="container-fluid h-100 v-100 d-flex flex-row"
+        sizes={[80, 20]}
+        minSize={[400, 320]}
+        expandToMin={true}
+      >
+        <main className="d-flex overflow-none h-100 flex-column">
+          <ButtonToolbar aria-label="Editor Tools">
+            <ButtonGroup>
+              <DropdownButton as={ButtonGroup} title="File" variant="light">
+                <Dropdown.Item eventKey="open">New Writing Task</Dropdown.Item>
+                <Dropdown.Item eventKey="save">Save Notes</Dropdown.Item>
+              </DropdownButton>
+              <DropdownButton as={ButtonGroup} title="View" variant="light">
+                <Dropdown.Item eventKey="open">???</Dropdown.Item>
+              </DropdownButton>
+              <Form.Select
+                aria-lable="Block format"
+                size="sm"
+                defaultValue={"paragraph"}
+                onChange={(e) => {
+                  const format = e.target.value;
+                  toggleBlock(editor, format);
+                }}
+              >
+                <option value={"paragraph"}>Paragraph</option>
+                <option value={"heading-one"}>Heading 1</option>
+                <option value={"heading-two"}>Heading 2</option>
+                <option value={"heading-three"}>Heading 3</option>
+                <option value={"heading-one"}>Heading 1</option>
+                <option value={"bulleted-list"}>List</option>
+                <option value={"numbered-list"}>Numbered List</option>
+              </Form.Select>
+              {/* <DropdownButton as={ButtonGroup} title="Paragraph" variant="light">
               <Dropdown.Item eventKey="paragraph">Paragraph</Dropdown.Item>
               <Dropdown.Item eventKey="h1">Heading 1</Dropdown.Item>
               <Dropdown.Item eventKey="h2">Heading 2</Dropdown.Item>
@@ -208,32 +216,34 @@ const CustomEditor: FC = () => {
               <Dropdown.Item eventKey="ol">Numbered List</Dropdown.Item>
               <Dropdown.Item eventKey="ul">List</Dropdown.Item>
             </DropdownButton> */}
-            <MarkButton format="bold">
-              <FontAwesomeIcon icon={faBold} />
-            </MarkButton>
-            <MarkButton format="italic">
-              <FontAwesomeIcon icon={faItalic} />
-            </MarkButton>
-            <MarkButton format="underline">
-              <FontAwesomeIcon icon={faUnderline} />
-            </MarkButton>
-            <MarkButton format="strikethrough">
-              <FontAwesomeIcon icon={faStrikethrough} />
-            </MarkButton>
-          </ButtonGroup>
-          <div className="ms-3">
-            <h6 className="mb-0 text-muted">Writing Task:</h6>
-            <h5>{writingTask?.info.name ?? "None Selected"}</h5>
-          </div>
-        </ButtonToolbar>
-        <Editable
-          className="p-2 flex-grow-1 overflow-auto"
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          spellCheck
-          autoFocus
-        />
-      </main>
+              <MarkButton format="bold">
+                <FontAwesomeIcon icon={faBold} />
+              </MarkButton>
+              <MarkButton format="italic">
+                <FontAwesomeIcon icon={faItalic} />
+              </MarkButton>
+              <MarkButton format="underline">
+                <FontAwesomeIcon icon={faUnderline} />
+              </MarkButton>
+              <MarkButton format="strikethrough">
+                <FontAwesomeIcon icon={faStrikethrough} />
+              </MarkButton>
+            </ButtonGroup>
+            <div className="ms-3">
+              <h6 className="mb-0 text-muted">Writing Task:</h6>
+              <h5>{writingTask?.info.name ?? "None Selected"}</h5>
+            </div>
+          </ButtonToolbar>
+          <Editable
+            className="p-2 flex-grow-1 overflow-auto"
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            spellCheck
+            autoFocus
+          />
+        </main>
+        <ToolCard />
+      </Split>
     </Slate>
   );
 };
