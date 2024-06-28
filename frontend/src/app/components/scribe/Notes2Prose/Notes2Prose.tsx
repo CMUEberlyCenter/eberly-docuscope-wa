@@ -23,8 +23,11 @@ import {
   useProse,
   useScribe,
 } from "../../../service/scribe.service";
+import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
+import YourInputIcon from '../../assets/icons/YourInput.svg?react';
 import { DisabledAlert } from "../DisabledAlert";
 import { TextToSpeech } from "../TextToSpeech";
+
 
 /**
  * Serialize editor fragment to html for rendering.
@@ -105,8 +108,10 @@ export const Notes2Prose: FC<Notes2ProseProps> = ({
         <>
           <Card as="section">
             <Card.Body>
-              <Card.Title>Notes</Card.Title>
-              <Card.Subtitle>Text selected in editor:</Card.Subtitle>
+              <Card.Title>
+                <YourInputIcon className="me-2" />
+                Your Input
+              </Card.Title>
               <Card.Text as="div">
                 <Subscribe source$={notes$} fallback={noNotes}>
                   <article
@@ -122,8 +127,10 @@ export const Notes2Prose: FC<Notes2ProseProps> = ({
           </Card>
           <Card as="section">
             <Card.Body>
-              <Card.Title>Prose</Card.Title>
-              <Card.Subtitle>A.I. Generated text:</Card.Subtitle>
+              <Card.Title>
+                <AIResponseIcon className="me-2" />
+                A.I. Response
+              </Card.Title>
               <Card.Text as="div">
                 <Subscribe
                   source$={prose$}

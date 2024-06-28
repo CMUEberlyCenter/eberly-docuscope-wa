@@ -9,44 +9,39 @@ import {
   ListGroup,
   OverlayTrigger,
   Popover,
+  Spinner,
   Stack,
 } from "react-bootstrap";
-import { Descendant, Editor, Range } from "slate";
+import { Editor, Transforms, Range } from "slate";
+import { useSlate } from "slate-react";
+import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
 import ClarityIcon from "../../assets/icons/Clarity.svg?react";
 import ContentIcon from "../../assets/icons/Content.svg?react";
 import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import YourInputIcon from '../../assets/icons/YourInput.svg?react';
-import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
 import logo from "../../assets/logo.svg";
 import { useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
+  getConvertNotes,
   useAssessFeature,
   useScribe,
   useScribeFeatureClarify,
   useScribeFeatureGrammar,
   useScribeFeatureLogicalFlow,
   useScribeFeatureNotes2Prose,
-  useScribeFeatureTopics,
+  useScribeFeatureTopics
 } from "../../service/scribe.service";
 import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import { TextToSpeech } from "../scribe/TextToSpeech";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
-import { useSlate } from "slate-react";
-import { TextToSpeech } from "../scribe/TextToSpeech";
+import { ToolResults } from "./ToolResults";
 
-type ToolResults = {
-  tool: string;
-  datetime: Date;
-  input: { text: string; fragment?: Descendant[]; range?: Range };
-  result: string;
-  document: Descendant[];
-  bookmarked?: boolean;
-};
 type ToolCardProps = JSX.IntrinsicAttributes;
 
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
@@ -70,7 +65,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
 
     const editor = useSlate();
     const onTool = useCallback(
-      (tool: string) => {
+      async (tool: string) => {
         const input = editor.selection
           ? {
             text: Editor.string(editor, editor.selection),
@@ -85,12 +80,39 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           result: "",
           document: editorContent,
         };
-        addHistory(res);
         setCurrentTool(res);
+        switch (tool) {
+          case 'notes2prose': {
+            const result = await getConvertNotes(input);
+            setCurrentTool({ ...res, result });
+            addHistory({ ...res, result });
+            break;
+          }
+          default:
+            console.warn(`Unhandled tool: ${tool}`);
+        }
       },
       [editor]
     ); // Does this need to be wrapped in useCallback?
 
+    const paste = useCallback(() => {
+      if (currentTool?.result && editor.selection) {
+        // FIXME this is only adding to end.
+        const start = Range.end(editor.selection);
+        Transforms.insertNodes(
+          editor,
+          [{ type: "paragraph", children: [{ text: currentTool.result }] }],
+          {
+            at: start,
+            select: true,
+          }
+        );
+        Transforms.select(editor, {
+          anchor: { path: [start.path[0] + 1, 0], offset: 0 },
+          focus: { path: [start.path[0] + 1, 0], offset: currentTool.result.length, }
+        });
+      }
+    }, [editor, currentTool]);
     return (
       <Card
         {...props}
@@ -216,7 +238,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <Card>
                   <Card.Body>
                     <Card.Title>
-                      <YourInputIcon className="me-2"/>
+                      <YourInputIcon className="me-2" />
                       Your Input
                     </Card.Title>
                     <Card.Text>{currentTool.input.text}</Card.Text>
@@ -225,21 +247,21 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <Card>
                   <Card.Body>
                     <Card.Title>
-                      <AIResponseIcon className="me-2"/>
+                      <AIResponseIcon className="me-2" />
                       AI Response
-                      <TextToSpeech text={currentTool.result}/>
-                      <Button>
-                        <FontAwesomeIcon icon={faArrowsRotate}/>
-                        <span className="visually-hidden sr-only">Regenerate</span>
-                      </Button>
+                      {currentTool.result && (<><TextToSpeech text={currentTool.result} />
+                        <Button>
+                          <FontAwesomeIcon icon={faArrowsRotate} />
+                          <span className="visually-hidden sr-only">Regenerate</span>
+                        </Button></>)}
                     </Card.Title>
-                    <Card.Text>{currentTool.result}</Card.Text>
+                    <Card.Text>{currentTool.result || <Spinner />}</Card.Text>
                   </Card.Body>
                 </Card>
               </Card.Body>
               <Card.Footer>
-                <Button>Paste Text</Button>
-                <Button>
+                <Button onClick={paste}>Paste Text</Button>
+                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
                   <FontAwesomeIcon icon={faClipboard} />
                   <span className="visually-hidden sr-only">Copy to Clipboard</span>
                 </Button>

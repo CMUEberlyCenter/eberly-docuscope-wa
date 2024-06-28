@@ -132,6 +132,28 @@ export interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
 
+export async function getConvertNotes({ text }: SelectedText) {
+  const response = await fetch('/api/v2/scribe/convert_notes',
+    {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ notes: text })
+    });
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`${response.status}: ${err}`);
+  }
+  const data: ChatResponse = await response.json();
+  if ('error' in data) {
+    console.error(data.message);
+    return '';
+  }
+  if ('choices' in data) {
+    logCovertNotes(text, data);
+    return data.choices[0].message.content ?? '';
+  }
+  return '';
+}
+
 export const notes = new BehaviorSubject<SelectedNotesProse>({ text: '' });
 export const [useNotes, notes$] = bind(notes, undefined);
 export const convertedNotes = combineLatest({
