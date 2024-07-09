@@ -192,7 +192,7 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="open">???</Dropdown.Item>
               </DropdownButton>
               <Form.Select
-                aria-lable="Block format"
+                aria-label="Block format"
                 size="sm"
                 defaultValue={"paragraph"}
                 onChange={(e) => {
@@ -208,14 +208,6 @@ const CustomEditor: FC = () => {
                 <option value={"bulleted-list"}>List</option>
                 <option value={"numbered-list"}>Numbered List</option>
               </Form.Select>
-              {/* <DropdownButton as={ButtonGroup} title="Paragraph" variant="light">
-              <Dropdown.Item eventKey="paragraph">Paragraph</Dropdown.Item>
-              <Dropdown.Item eventKey="h1">Heading 1</Dropdown.Item>
-              <Dropdown.Item eventKey="h2">Heading 2</Dropdown.Item>
-              <Dropdown.Item eventKey="h3">Heading 3</Dropdown.Item>
-              <Dropdown.Item eventKey="ol">Numbered List</Dropdown.Item>
-              <Dropdown.Item eventKey="ul">List</Dropdown.Item>
-            </DropdownButton> */}
               <MarkButton format="bold">
                 <FontAwesomeIcon icon={faBold} />
               </MarkButton>

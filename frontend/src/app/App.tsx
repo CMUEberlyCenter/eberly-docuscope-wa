@@ -1,9 +1,9 @@
 import { FC } from "react";
-import Editor from "./components/Editor/Editor";
+import CustomEditor from "./components/Editor/CustomEditor";
 
 const App: FC = () => {
   return (
-    <Editor/>
+    <CustomEditor/>
   );
 };
 

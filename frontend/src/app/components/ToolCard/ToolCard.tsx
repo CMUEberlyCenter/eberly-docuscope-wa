@@ -1,22 +1,22 @@
 import { faArrowsRotate, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { forwardRef, useCallback, useState } from "react";
+import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
   Button,
   ButtonGroup,
   ButtonToolbar,
   Card,
-  ListGroup,
-  OverlayTrigger,
-  Popover,
+  Container,
+  Nav,
+  Navbar,
   Spinner,
   Stack,
+  Tab
 } from "react-bootstrap";
-import { Editor, Transforms, Range } from "slate";
+import { Editor, Range, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
 import ClarityIcon from "../../assets/icons/Clarity.svg?react";
-import ContentIcon from "../../assets/icons/Content.svg?react";
 import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
@@ -26,13 +26,10 @@ import { useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
   getConvertNotes,
-  useAssessFeature,
   useScribe,
   useScribeFeatureClarify,
   useScribeFeatureGrammar,
-  useScribeFeatureLogicalFlow,
-  useScribeFeatureNotes2Prose,
-  useScribeFeatureTopics
+  useScribeFeatureNotes2Prose
 } from "../../service/scribe.service";
 import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
@@ -44,6 +41,9 @@ import { ToolResults } from "./ToolResults";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
+/**
+ * Top level framework for writing tools display.
+ */
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ ...props }, ref) => {
     const selectAvailable = useSelectTaskAvailable();
@@ -58,9 +58,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const [history, setHistory] = useState<ToolResults[]>([]);
     const addHistory = (tool: ToolResults) => setHistory([...history, tool]);
     const scribe = useScribe();
-    const assessFeature = useAssessFeature();
-    const logicalflowFeature = useScribeFeatureLogicalFlow();
-    const topicsFeature = useScribeFeatureTopics();
+    // const assessFeature = useAssessFeature();
+    // const logicalflowFeature = useScribeFeatureLogicalFlow();
+    // const topicsFeature = useScribeFeatureTopics();
     const editorContent = useEditorContent();
 
     const editor = useSlate();
@@ -113,6 +113,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         });
       }
     }, [editor, currentTool]);
+    const tabId = useId();
+    const [tab, setTab] = useState('generate');
+
+    // If writing task is changed, show its details.
+    useEffect(() => {
+      if (writingTask) {
+        setShowWritingTask(true);
+      }
+    }, [writingTask]);
     return (
       <Card
         {...props}
@@ -120,14 +129,87 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         className="overflow-hidden tool-card h-100 bg-light"
         ref={ref}
       >
-        <Card.Title as="h4" className="text-dark ms-auto mt-1">
+        <div>
+        <Tab.Container id={tabId} defaultActiveKey="generate" activeKey={tab}>
+          <Navbar>
+            <Container>
+              <Nav variant="tabs">
+                <Nav.Item>
+                  <Nav.Link eventKey="generate" onClick={() => setTab('generate')}>Generate</Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="refine" onClick={() => setTab('refine')}>Refine</Nav.Link>
+                </Nav.Item>
+                {/* <Nav.Link>Review</Nav.Link> */}
+              </Nav>
+              <Navbar.Brand>
+                <img
+                  style={{ height: "1.75em" }}
+                  src={logo}
+                  alt={settings.brand ?? "myScribe"}
+                />
+              </Navbar.Brand>
+            </Container>
+          </Navbar>
+          {/* <Card.Title as="h4" className="text-dark ms-auto mt-1">
           <img
             style={{ height: "1.75em" }}
             src={logo}
             alt={settings.brand ?? "myScribe"}
           />
-        </Card.Title>
-        <ButtonToolbar className="mx-auto mb-3">
+        </Card.Title> */}
+          <Tab.Content>
+            <Tab.Pane eventKey="generate">
+              <ButtonToolbar className="ms-5 mb-3">
+                <ButtonGroup className="bg-white shadow tools" size="sm">
+                  {notes2proseFeature && (
+                    <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("notes2prose")}>
+                      <Stack>
+                        <GenerateIcon />
+                        <span>Prose</span>
+                      </Stack>
+                    </Button>
+                  )}
+                  {clarifyFeature && (
+                    <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("clarify")}>
+                      <Stack>
+                        <GenerateIcon />
+                        <span>Clarify</span>
+                      </Stack>
+                    </Button>
+                  )}
+                  {grammarFeature && (
+                    <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("grammar")}>
+                      <Stack>
+                        <GenerateIcon />
+                        <span>Grammar</span>
+                      </Stack>
+                    </Button>
+                  )}
+                </ButtonGroup>
+              </ButtonToolbar>
+            </Tab.Pane>
+            <Tab.Pane eventKey="refine">
+              <ButtonToolbar className="ms-5 mb-3">
+                <ButtonGroup className="bg-white shadow tools" size="sm">
+                  <Button variant="outline-dark">
+                    <Stack>
+                      <FlowIcon />
+                      <span>Flow</span>
+                    </Stack>
+                  </Button>
+                  <Button variant="outline-dark">
+                    <Stack>
+                      <ClarityIcon />
+                      <span>Clarity</span>
+                    </Stack>
+                  </Button>
+                </ButtonGroup>
+              </ButtonToolbar>
+            </Tab.Pane>
+          </Tab.Content>
+        </Tab.Container></div>
+        {/* <ButtonToolbar className="mx-auto mb-3">
           <ButtonGroup className="bg-white shadow tools" size="sm">
             <OverlayTrigger
               rootClose
@@ -220,7 +302,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </Stack>
             </Button>
           </ButtonGroup>
-        </ButtonToolbar>
+        </ButtonToolbar> */}
         <article className="h-100 position-relative">
           {!currentTool && (
             <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
@@ -255,7 +337,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           <span className="visually-hidden sr-only">Regenerate</span>
                         </Button></>)}
                     </Card.Title>
-                    <Card.Text>{currentTool.result || <Spinner />}</Card.Text>
+                    <Card.Text as="div">{currentTool.result || <Spinner />}</Card.Text>
                   </Card.Body>
                 </Card>
               </Card.Body>
