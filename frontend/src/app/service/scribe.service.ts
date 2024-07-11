@@ -59,7 +59,7 @@ export const [useScribeFeatureNotes2Prose, featureNotes2Prose$] = bind(
  * @returns
  */
 function requestConvertNotes(notes: SelectedNotesProse) {
-  return fromFetch('/api/v2/scribe/convert_notes', {
+  return fromFetch('/api/v2/scribe/convert_to_prose', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ notes: notes.text }),
@@ -133,7 +133,7 @@ export interface SelectedNotesProse extends SelectedText {
 }
 
 export async function getConvertNotes({ text }: SelectedText) {
-  const response = await fetch('/api/v2/scribe/convert_notes',
+  const response = await fetch('/api/v2/scribe/convert_to_prose',
     {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ notes: text })

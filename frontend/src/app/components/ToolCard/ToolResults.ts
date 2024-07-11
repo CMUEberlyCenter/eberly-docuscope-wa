@@ -8,4 +8,5 @@ export type ToolResults = {
   result: string;
   document: Descendant[];
   bookmarked?: boolean;
+  rating?: number;
 };

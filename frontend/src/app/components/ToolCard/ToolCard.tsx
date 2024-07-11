@@ -1,4 +1,5 @@
-import { faArrowsRotate, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faBookmark, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
@@ -70,6 +71,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const editorContent = useEditorContent();
 
     const editor = useSlate();
+    const doTool = useCallback(
+      async (data: ToolResults) => {
+        setCurrentTool(data);
+        switch (data.tool) {
+          case 'notes2prose': {
+            const result = await getConvertNotes(data.input);
+            const toolResult = { ...data, result };
+            setCurrentTool(toolResult);
+            addHistory(toolResult);
+            break;
+          }
+          default:
+            console.warn(`Unhandled tool: ${data.tool}`);
+        }
+      }, []
+    )
     const onTool = useCallback(
       async (tool: string) => {
         const input = editor.selection
@@ -79,27 +96,24 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             range: editor.selection,
           }
           : { text: "" };
-        const res: ToolResults = {
+        doTool({
           tool,
           datetime: new Date(),
           input,
           result: "",
           document: editorContent,
-        };
-        setCurrentTool(res);
-        switch (tool) {
-          case 'notes2prose': {
-            const result = await getConvertNotes(input);
-            setCurrentTool({ ...res, result });
-            addHistory({ ...res, result });
-            break;
-          }
-          default:
-            console.warn(`Unhandled tool: ${tool}`);
-        }
+        });
       },
-      [editor]
+      [editor, doTool]
     ); // Does this need to be wrapped in useCallback?
+    const retry = useCallback(
+      async (previous: ToolResults) =>
+        doTool({
+          ...previous,
+          datetime: new Date(),
+          result: "",
+        }), [doTool]
+    )
 
     const paste = useCallback(() => {
       if (currentTool?.result && editor.selection) {
@@ -255,7 +269,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             <Card>
               <Card.Body>
                 <Card.Title>Prose Generation</Card.Title>
-                <Card.Subtitle>{currentTool.datetime.toLocaleString()}</Card.Subtitle>
+                <Card.Subtitle>
+                  {currentTool.datetime.toLocaleString()}
+                  <Button variant="icon" onClick={() => setCurrentTool({ ...currentTool, bookmarked: !currentTool.bookmarked })}>
+                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
+                  </Button>
+                </Card.Subtitle>
                 <Card>
                   <Card.Body>
                     <Card.Title>
@@ -270,8 +289,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     <Card.Title>
                       <AIResponseIcon className="me-2" />
                       AI Response
-                      {currentTool.result && (<><TextToSpeech text={currentTool.result} />
-                        <Button>
+                      {currentTool.result && (<>
+                        <TextToSpeech text={currentTool.result} />
+                        <Button onClick={() => retry(currentTool)}>
                           <FontAwesomeIcon icon={faArrowsRotate} />
                           <span className="visually-hidden sr-only">Regenerate</span>
                         </Button></>)}

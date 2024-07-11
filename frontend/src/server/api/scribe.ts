@@ -23,18 +23,17 @@ async function readTemplates(): Promise<PromptData> {
   return prompts;
 }
 
-scribe.post('/convert_notes', async (request: Request, response: Response) => {
+const scribeNotes = (key: 'notes_to_prose' | 'notes_to_bullets') => async (request: Request, response: Response) => {
   const { notes } = request.body;
   try {
-    const { prompt, role, temperature } = (await readTemplates()).templates
-      .notes_to_prose;
+    const { prompt, role, temperature } = (await readTemplates()).templates[key];
     if (!prompt || !role) {
       // runtime safety - should never happen
       console.warn('Malformed notes prompt data.');
       return response.status(404).send({
         type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
         title: 'Not Found',
-        detail: 'Convert Notes template not found.',
+        detail: `${key} template not found.`,
         status: 404,
       } as ProblemDetails);
     }
@@ -69,7 +68,9 @@ scribe.post('/convert_notes', async (request: Request, response: Response) => {
     }
     return response.sendStatus(500);
   }
-});
+};
+scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
+scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 
 type TextPrompt = 'copyedit' | 'grammar' | 'logical_flow' | 'topics';
 const scribeText =
