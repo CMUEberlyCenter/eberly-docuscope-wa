@@ -1,5 +1,5 @@
-import { faArrowsRotate, faBookmark, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
+import { faArrowsRotate, faBookmark, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
@@ -16,7 +16,7 @@ import {
   Tab,
   Tooltip
 } from "react-bootstrap";
-import { Editor, Range, Transforms } from "slate";
+import { Editor, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
 import ClarityIcon from "../../assets/icons/Clarity.svg?react";
@@ -29,7 +29,8 @@ import logo from "../../assets/logo.svg";
 import { useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
-  getConvertNotes,
+  postConvertNotes,
+  useAssessFeature,
   useScribe,
   useScribeFeatureNotes2Prose
 } from "../../service/scribe.service";
@@ -39,7 +40,8 @@ import { TextToSpeech } from "../scribe/TextToSpeech";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
-import { ToolResults } from "./ToolResults";
+import { Tool, ToolResults } from "./ToolResults";
+import { slateToHtml } from '@slate-serializers/html';
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -55,7 +57,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const settings = useSettings();
     const notes2proseFeature = useScribeFeatureNotes2Prose();
     const bulletsFeature = true; // TODO use settings
-    const contentFeature = true; // TODO use settings
     const flowFeature = true; // TODO use settings
     const copyEditFeature = true; // TODO use settings
     const sentencesFeature = true; // TODO use settings
@@ -65,7 +66,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const [history, setHistory] = useState<ToolResults[]>([]);
     const addHistory = (tool: ToolResults) => setHistory([...history, tool]);
     const scribe = useScribe();
-    // const assessFeature = useAssessFeature();
+    const assessFeature = useAssessFeature();
     // const logicalflowFeature = useScribeFeatureLogicalFlow();
     // const topicsFeature = useScribeFeatureTopics();
     const editorContent = useEditorContent();
@@ -75,8 +76,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       async (data: ToolResults) => {
         setCurrentTool(data);
         switch (data.tool) {
-          case 'notes2prose': {
-            const result = await getConvertNotes(data.input);
+          case 'prose': {
+            const result = await postConvertNotes(data.input, 'prose');
+            const toolResult = { ...data, result };
+            setCurrentTool(toolResult);
+            addHistory(toolResult);
+            break;
+          }
+          case 'bullets': {
+            const result = await postConvertNotes(data.input, 'bullets');
             const toolResult = { ...data, result };
             setCurrentTool(toolResult);
             addHistory(toolResult);
@@ -88,10 +96,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       }, []
     )
     const onTool = useCallback(
-      async (tool: string) => {
+      async (tool: Tool) => {
         const input = editor.selection
           ? {
-            text: Editor.string(editor, editor.selection),
+            text: Editor.string(editor, editor.selection, {voids: true}),
+            html: slateToHtml(Editor.fragment(editor, editor.selection)), // FIXME loosing formatting
             fragment: Editor.fragment(editor, editor.selection),
             range: editor.selection,
           }
@@ -117,20 +126,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
 
     const paste = useCallback(() => {
       if (currentTool?.result && editor.selection) {
-        // FIXME this is only adding to end.
-        const start = Range.end(editor.selection);
         Transforms.insertNodes(
           editor,
           [{ type: "paragraph", children: [{ text: currentTool.result }] }],
-          {
-            at: start,
-            select: true,
-          }
         );
-        Transforms.select(editor, {
-          anchor: { path: [start.path[0] + 1, 0], offset: 0 },
-          focus: { path: [start.path[0] + 1, 0], offset: currentTool.result.length, }
-        });
       }
     }, [editor, currentTool]);
 
@@ -180,7 +179,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {notes2proseFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Generate Prose from Notes</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("notes2prose")}>
+                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("prose")}>
                           <Stack>
                             <GenerateIcon />
                             <span>Prose</span>
@@ -191,7 +190,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {bulletsFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Generate Bulleted List from Notes</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("clarify")}>
+                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("bullets")}>
                           <Stack>
                             <GenerateIcon />
                             <span>Bullets</span>
@@ -201,10 +200,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     )}
                   </ButtonGroup>
                   <ButtonGroup className="bg-white shadow tools ms-2" size="sm">
-                    {contentFeature && (
+                    {assessFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Check Content Expectations</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("grammar")}>
+                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("expectation")}>
                           <Stack>
                             <ContentIcon />
                             <span>Content</span>
@@ -221,7 +220,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {flowFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Check Flow Between Sentences</Tooltip>}>
-                        <Button variant="outline-dark">
+                        <Button variant="outline-dark" onClick={() => onTool('flow')}>
                           <Stack>
                             <FlowIcon />
                             <span>Flow</span>
@@ -232,7 +231,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {copyEditFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Copy Edit</Tooltip>}>
-                        <Button variant="outline-dark">
+                        <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
                           <Stack>
                             <span>Copy Edit</span>
                           </Stack>
@@ -242,7 +241,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {sentencesFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Show Sentence Density Chart</Tooltip>}>
-                        <Button variant="outline-dark">
+                        <Button variant="outline-dark" onClick={() => onTool('sentences')}>
                           <Stack>
                             <ClarityIcon />
                             <span>Sentences</span>
@@ -265,12 +264,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </span>
             </Stack>
           )}
-          {currentTool?.tool === 'notes2prose' && (
+          {currentTool?.tool && (
             <Card>
               <Card.Body>
                 <Card.Title>Prose Generation</Card.Title>
                 <Card.Subtitle>
                   {currentTool.datetime.toLocaleString()}
+                  {/* TODO update history on bookmark. */}
                   <Button variant="icon" onClick={() => setCurrentTool({ ...currentTool, bookmarked: !currentTool.bookmarked })}>
                     <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
                   </Button>
@@ -281,7 +281,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       <YourInputIcon className="me-2" />
                       Your Input
                     </Card.Title>
-                    <Card.Text>{currentTool.input.text}</Card.Text>
+                    <Card.Text dangerouslySetInnerHTML={{__html: currentTool.input.html ?? ''}}></Card.Text>
                   </Card.Body>
                 </Card>
                 <Card>

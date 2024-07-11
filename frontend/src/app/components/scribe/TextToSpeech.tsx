@@ -3,10 +3,10 @@
  * a given text.
  * @module components/scribe/TextToSpeach
  */
-import { faPause, faPlay, faStop } from "@fortawesome/free-solid-svg-icons";
+import { faEarListen, faPause, faPlay, faStop } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useEffect, useState } from "react";
-import { Button, ButtonGroup } from "react-bootstrap";
+import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useSettings } from "../../service/settings.service";
 
 /**
@@ -20,6 +20,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
 }: {
   text: string;
 }) => {
+  const [open, setOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
@@ -35,6 +36,14 @@ export const TextToSpeech: FC<{ text: string }> = ({
       synth.cancel();
     };
   }, [text]);
+
+  /** Cancel on close tools */
+  useEffect(() => {
+    if (!open) {
+      const synth = window.speechSynthesis;
+      synth.cancel()
+    }
+  }, [open])
 
   /** Start utterance when play is pressed or resume if paused. */
   const handlePlay = () => {
@@ -61,18 +70,25 @@ export const TextToSpeech: FC<{ text: string }> = ({
 
   return settings.text2speech ? (
     <ButtonGroup>
-      <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
-        <FontAwesomeIcon icon={faPlay} />
-        <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
+      <Button onClick={() => setOpen(!open)} variant="icon">
+        <FontAwesomeIcon icon={faEarListen} />
       </Button>
-      <Button onClick={handlePause} title="Pause">
-        <FontAwesomeIcon icon={faPause} />
-        <span className="sr-only">Pause</span>
-      </Button>
-      <Button onClick={handleStop} title="Stop">
-        <FontAwesomeIcon icon={faStop} />
-        <span className="sr-only">Stop</span>
-      </Button>
+      <Collapse in={open} dimension={'width'}>
+        <ButtonGroup>
+          <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
+            <FontAwesomeIcon icon={faPlay} />
+            <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
+          </Button>
+          <Button onClick={handlePause} title="Pause">
+            <FontAwesomeIcon icon={faPause} />
+            <span className="sr-only">Pause</span>
+          </Button>
+          <Button onClick={handleStop} title="Stop">
+            <FontAwesomeIcon icon={faStop} />
+            <span className="sr-only">Stop</span>
+          </Button>
+        </ButtonGroup>
+      </Collapse>
     </ButtonGroup>
   ) : (
     <></>

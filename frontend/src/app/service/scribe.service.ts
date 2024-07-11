@@ -127,25 +127,29 @@ interface SelectedText {
   text: string;
   fragment?: Descendant[];
   range?: Range;
+  html?: string;
 }
 export interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
 
-export async function getConvertNotes({ text }: SelectedText) {
-  const response = await fetch('/api/v2/scribe/convert_to_prose',
+export async function postConvertNotes({text}: SelectedText, output: 'prose'|'bullets' = 'prose') {
+  const endpoint = output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
+  const response = await fetch(`/api/v2/scribe/${endpoint}`,
     {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ notes: text })
     });
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`${response.status}: ${err}`);
+    //throw new Error(`${response.status}: ${err}`);
+    // TODO improve error reporting.
+    return err;
   }
   const data: ChatResponse = await response.json();
   if ('error' in data) {
     console.error(data.message);
-    return '';
+    return data.message;
   }
   if ('choices' in data) {
     logCovertNotes(text, data);
