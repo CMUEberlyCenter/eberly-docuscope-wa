@@ -264,6 +264,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </span>
             </Stack>
           )}
+          {/* Maybe use Carousel for history? */}
           {currentTool?.tool && (
             <Card>
               <Card.Body>

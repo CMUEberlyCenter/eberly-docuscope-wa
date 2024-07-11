@@ -5,7 +5,7 @@
  */
 import { faEarListen, faPause, faPlay, faStop } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useSettings } from "../../service/settings.service";
 
@@ -46,15 +46,16 @@ export const TextToSpeech: FC<{ text: string }> = ({
   }, [open])
 
   /** Start utterance when play is pressed or resume if paused. */
-  const handlePlay = () => {
+  const handlePlay = useCallback(() => {
     const synth = window.speechSynthesis;
+    console.log(isPaused, utterance?.text);
     if (isPaused) {
       synth.resume();
     } else if (utterance !== null) {
       synth.speak(utterance);
     }
     setIsPaused(false);
-  };
+  }, [utterance, isPaused]);
   /** Pause the current utterance. */
   const handlePause = () => {
     const synth = window.speechSynthesis;
@@ -72,6 +73,9 @@ export const TextToSpeech: FC<{ text: string }> = ({
     <ButtonGroup>
       <Button onClick={() => setOpen(!open)} variant="icon">
         <FontAwesomeIcon icon={faEarListen} />
+        <span className="sr-only visually-hidden">
+          {!open ? "Show text to speech controls." : "Hide text to speech controls."}
+        </span>
       </Button>
       <Collapse in={open} dimension={'width'}>
         <ButtonGroup>
