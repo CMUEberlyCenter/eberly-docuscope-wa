@@ -1,17 +1,40 @@
-import { FC, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import {
   Button,
   Card,
   Col,
   Container,
+  Form,
   ListGroup,
   Modal,
   Row,
   Stack,
 } from "react-bootstrap";
-import { Rule } from "../../../lib/WritingTask";
+import { Rule, WritingTask } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
 import "./WritingTaskDetails.scss";
+import { Node, Transforms } from "slate";
+import { useSlate } from "slate-react";
+import sanitizeHtml from 'sanitize-html';
+
+const descriptionToSlate = (description: string): string => {
+  // TODO add markings.
+  return sanitizeHtml(description, { allowedTags: [] });
+}
+/** Transform writing task json to Slate editor content. */
+const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
+  { type: "heading-one", children: [{ text: task.info.name }] },
+  ...details ? [{ type: "paragraph", children: [{ text: task.rules.overview }] }] : [],
+  ...task.rules.rules.flatMap(rule => [{
+    type: 'heading-two', children: [{ text: rule.name },]
+  },
+  ...details ? [{ type: "paragraph", children: [{ text: descriptionToSlate(rule.description) }] }] : [],
+  ...rule.children.flatMap(child => [
+    { type: 'heading-three', children: [{ text: child.name }] },
+    ...details ? [{ type: "paragraph", children: [{ text: descriptionToSlate(child.description) }] }] : [],
+  ])
+  ]),
+];
 
 type ModalProps = {
   show: boolean;
@@ -20,6 +43,17 @@ type ModalProps = {
 const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
   const writingTask = useWritingTask();
   const [selected, setSelected] = useState<Rule | null>(null);
+  const [includeDetails, setIncludeDetails] = useState(false);
+  const editor = useSlate();
+  const insert = useCallback(() => {
+    if (writingTask) {
+      Transforms.insertNodes(
+        editor,
+        taskToEditor(writingTask, includeDetails)
+      );
+      onHide();
+    }
+  }, [editor, writingTask, includeDetails]);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
@@ -112,10 +146,14 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
         </Container>
       </Modal.Body>
       <Modal.Footer>
-        <Button color="secondary" onClick={() => console.log("TODO")}>
+        <Form.Check type="checkbox" label={"Include Details"}
+          disabled={!writingTask}
+          checked={includeDetails} onChange={() => setIncludeDetails(!includeDetails)}
+        />
+        <Button color="secondary" disabled={!writingTask} onClick={() => console.log("TODO")}>
           Copy to Clipboard
         </Button>
-        <Button color="primary" onClick={() => console.log("TODO")}>
+        <Button color="primary" disabled={!writingTask} onClick={insert}>
           Insert Outline
         </Button>
       </Modal.Footer>

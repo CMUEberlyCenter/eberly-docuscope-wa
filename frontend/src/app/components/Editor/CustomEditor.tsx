@@ -29,6 +29,7 @@ import {
   useSlate,
   withReact,
 } from "slate-react";
+import { withHistory } from 'slate-history';
 import { editorText } from "../../service/editor-state.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
@@ -144,7 +145,7 @@ const MarkButton: FC<{ format: Markings; children: ReactNode }> = ({
 };
 
 const CustomEditor: FC = () => {
-  const [editor] = useState(() => withReact(createEditor()));
+  const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
     // get from sessno storage
     JSON.parse(sessionStorage.getItem("content") ?? "null") || [
@@ -177,7 +178,7 @@ const CustomEditor: FC = () => {
     >
       <Split
         className="container-fluid h-100 v-100 d-flex flex-row"
-        sizes={[80, 20]}
+        sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
       >
@@ -186,7 +187,7 @@ const CustomEditor: FC = () => {
             <ButtonGroup>
               <DropdownButton as={ButtonGroup} title="File" variant="light">
                 <Dropdown.Item eventKey="open">New Writing Task</Dropdown.Item>
-                <Dropdown.Item eventKey="save">Save Notes</Dropdown.Item>
+                <Dropdown.Item eventKey="save" onClick={() => console.log(content)}>Save Notes</Dropdown.Item>
               </DropdownButton>
               <DropdownButton as={ButtonGroup} title="View" variant="light">
                 <Dropdown.Item eventKey="open">???</Dropdown.Item>
