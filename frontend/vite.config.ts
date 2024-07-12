@@ -16,6 +16,7 @@ export default defineConfig(({ mode }) => ({
       input: {
         main: resolve(__dirname, 'index.html'),
         deeplink: resolve(__dirname, 'deeplink.html'),
+        review: resolve(__dirname, 'review.html'),
       },
       output: {
         dir: 'build/app',

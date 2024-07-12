@@ -198,7 +198,8 @@ async function __main__() {
     /settings/,
     /api\/v.\//,
     /metrics\//,
-    /index\.html$/
+    /index\.html$/,
+    /review\.html$/,
   );
   try {
     await Provider.deploy({ port: PORT });

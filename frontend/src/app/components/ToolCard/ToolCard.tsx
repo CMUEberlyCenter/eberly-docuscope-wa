@@ -161,7 +161,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <Nav.Item>
                     <Nav.Link eventKey="refine" onClick={() => setTab('refine')}>Polish</Nav.Link>
                   </Nav.Item>
-                  <Nav.Link>Review</Nav.Link>
+                  <Nav.Link onClick={() => window.open("review.html", '_blank')}>Review</Nav.Link>
                 </Nav>
                 <Navbar.Brand>
                   <img
