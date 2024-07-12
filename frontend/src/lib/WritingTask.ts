@@ -27,7 +27,8 @@ export type WritingTaskMetaData = {
   saved: string; // DateTime
   filename: string;
   dict_path?: string;
-  multi_lang?: boolean;
+  user_lang?: string;
+  target_lang?: string;
 };
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {

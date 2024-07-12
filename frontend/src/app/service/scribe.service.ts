@@ -16,6 +16,7 @@ import { fromFetch } from 'rxjs/fetch';
 import { Descendant, type Range } from 'slate';
 import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
 import { settings$ } from './settings.service';
+import { WritingTask } from '../../lib/WritingTask';
 
 // TODO: per assignment feature settings.
 
@@ -133,12 +134,13 @@ export interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
 
-export async function postConvertNotes({text}: SelectedText, output: 'prose'|'bullets' = 'prose') {
+export async function postConvertNotes({text}: SelectedText, output: 'prose'|'bullets' = 'prose', writing_task?: WritingTask|null) {
   const endpoint = output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
+  const {user_lang, target_lang} = writing_task?.info ?? {};
   const response = await fetch(`/api/v2/scribe/${endpoint}`,
     {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: text })
+      body: JSON.stringify({ notes: text, user_lang, target_lang })
     });
   if (!response.ok) {
     const err = await response.text();

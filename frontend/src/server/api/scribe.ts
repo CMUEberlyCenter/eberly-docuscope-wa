@@ -26,7 +26,17 @@ async function readTemplates(): Promise<PromptData> {
 const scribeNotes = (key: 'notes_to_prose' | 'notes_to_bullets') => async (request: Request, response: Response) => {
   const { notes } = request.body;
   try {
-    const { prompt, role, temperature } = (await readTemplates()).templates[key];
+    const templates = (await readTemplates()).templates;
+    if (! (key in templates)) {
+      console.warn(`${key} is not a valid template.`)
+      return response.status(404).send({
+        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
+        title: 'Not Found',
+        detail: `${key} template not found.`,
+        status: 404,
+      } as ProblemDetails);
+    }
+    const { prompt, role, temperature } = templates[key];
     if (!prompt || !role) {
       // runtime safety - should never happen
       console.warn('Malformed notes prompt data.');
@@ -39,8 +49,8 @@ const scribeNotes = (key: 'notes_to_prose' | 'notes_to_bullets') => async (reque
     }
     const content = format(prompt, {
       notes,
-      target_lang: 'english',
-      user_lang: 'english',
+      target_lang: request.body.target_lang ?? 'English',
+      user_lang: request.body.user_lang ?? 'English',
     });
     const prose = await openai.chat.completions.create({
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -92,8 +102,8 @@ const scribeText =
       }
       const content = format(prompt, {
         text,
-        user_lang: 'english',
-        target_lang: 'english',
+        user_lang: request.body.user_lang ?? 'English',
+        target_lang: request.body.target_lang ?? 'English',
       });
       const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -130,7 +140,7 @@ scribe.post(
   '/assess_expectation',
   async (request: Request, response: Response) => {
     const { text, expectation, description } = request.body;
-    const user_lang = 'English';
+    const user_lang = request.body.user_lang ?? 'English';
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates
         .expectation;

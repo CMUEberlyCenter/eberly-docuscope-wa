@@ -26,7 +26,7 @@ import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import YourInputIcon from '../../assets/icons/YourInput.svg?react';
 import logo from "../../assets/logo.svg";
-import { useEditorContent } from "../../service/editor-state.service";
+import { serialize, useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
   postConvertNotes,
@@ -76,15 +76,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       async (data: ToolResults) => {
         setCurrentTool(data);
         switch (data.tool) {
+          case 'bullets':
           case 'prose': {
-            const result = await postConvertNotes(data.input, 'prose');
-            const toolResult = { ...data, result };
-            setCurrentTool(toolResult);
-            addHistory(toolResult);
-            break;
-          }
-          case 'bullets': {
-            const result = await postConvertNotes(data.input, 'bullets');
+            const result = await postConvertNotes(data.input, data.tool, writingTask);
             const toolResult = { ...data, result };
             setCurrentTool(toolResult);
             addHistory(toolResult);
@@ -93,14 +87,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           default:
             console.warn(`Unhandled tool: ${data.tool}`);
         }
-      }, []
+      }, [writingTask]
     )
     const onTool = useCallback(
       async (tool: Tool) => {
         const input = editor.selection
           ? {
-            text: Editor.string(editor, editor.selection, {voids: true}),
-            html: slateToHtml(Editor.fragment(editor, editor.selection)), // FIXME loosing formatting
+            text: serialize(Editor.fragment(editor, editor.selection)),
+            html: slateToHtml(Editor.fragment(editor, editor.selection)), // FIXME loosing formatting, need custom serializer
             fragment: Editor.fragment(editor, editor.selection),
             range: editor.selection,
           }
@@ -143,6 +137,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         setShowWritingTask(true);
       }
     }, [writingTask]);
+
+    const onBookmark = useCallback(() => {
+      if (currentTool) {
+        const updated = { ...currentTool, bookmarked: !currentTool?.bookmarked }
+        setCurrentTool(updated);
+        setHistory(history.map(h => h.datetime === currentTool.datetime ? updated : h))
+      }
+    }, [history, currentTool])
     return (
       <Card
         {...props}
@@ -265,14 +267,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Stack>
           )}
           {/* Maybe use Carousel for history? */}
-          {currentTool?.tool && (
+          {currentTool?.tool === 'prose' && (
             <Card>
               <Card.Body>
                 <Card.Title>Prose Generation</Card.Title>
                 <Card.Subtitle>
                   {currentTool.datetime.toLocaleString()}
-                  {/* TODO update history on bookmark. */}
-                  <Button variant="icon" onClick={() => setCurrentTool({ ...currentTool, bookmarked: !currentTool.bookmarked })}>
+                  <Button variant="icon" onClick={() => onBookmark()}>
                     <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
                   </Button>
                 </Card.Subtitle>
@@ -282,7 +283,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       <YourInputIcon className="me-2" />
                       Your Input
                     </Card.Title>
-                    <Card.Text dangerouslySetInnerHTML={{__html: currentTool.input.html ?? ''}}></Card.Text>
+                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
                   </Card.Body>
                 </Card>
                 <Card>
@@ -299,6 +300,55 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     </Card.Title>
                     {/* TODO add error reporting */}
                     <Card.Text as="div">{currentTool.result || <Spinner />}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Card.Body>
+              <Card.Footer>
+                <Button onClick={paste}>Paste Text</Button>
+                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
+                  <FontAwesomeIcon icon={faClipboard} />
+                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
+                </Button>
+              </Card.Footer>
+            </Card>
+          )}
+          {currentTool?.tool === 'bullets' && (
+            <Card>
+              <Card.Body>
+                <Card.Title>Prose Generation</Card.Title>
+                <Card.Subtitle>
+                  {currentTool.datetime.toLocaleString()}
+                  <Button variant="icon" onClick={() => onBookmark()}>
+                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
+                  </Button>
+                </Card.Subtitle>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <YourInputIcon className="me-2" />
+                      Your Input
+                    </Card.Title>
+                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
+                  </Card.Body>
+                </Card>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <AIResponseIcon className="me-2" />
+                      AI Response
+                      {currentTool.result && (<>
+                        <TextToSpeech text={currentTool.result} />
+                        <Button onClick={() => retry(currentTool)}>
+                          <FontAwesomeIcon icon={faArrowsRotate} />
+                          <span className="visually-hidden sr-only">Regenerate</span>
+                        </Button></>)}
+                    </Card.Title>
+                    {/* TODO add error reporting */}
+                    <Card.Text as="div">{currentTool.result ?
+                      <ul>
+                        {currentTool.result.split(/\s*-\s+/).filter(b=> b.trim() !== '').map(b => <li>{b}</li>)}
+                      </ul>
+                      : <Spinner />}</Card.Text>
                   </Card.Body>
                 </Card>
               </Card.Body>

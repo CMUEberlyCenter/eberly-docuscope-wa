@@ -7,7 +7,8 @@ export type ToolResults = {
   datetime: Date;
   input: SelectedNotesProse ;
   result: string;
-  document: Descendant[];
+  document: Descendant[]; // likely unnecessary given separate review
   bookmarked?: boolean;
   rating?: number;
+  // TODO add writing task?
 };
