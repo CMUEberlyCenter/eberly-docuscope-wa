@@ -29,6 +29,7 @@ import logo from "../../assets/logo.svg";
 import { serialize, useEditorContent } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
+  postClarifyText,
   postConvertNotes,
   useAssessFeature,
   useScribe,
@@ -84,13 +85,20 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             addHistory(toolResult);
             break;
           }
+          case 'copyedit': {
+            const result = await postClarifyText(data.input, writingTask);
+            const toolResult = { ...data, result };
+            setCurrentTool(toolResult);
+            addHistory(toolResult);
+            break;
+          }
           default:
             console.warn(`Unhandled tool: ${data.tool}`);
         }
       }, [writingTask]
     )
     const onTool = useCallback(
-      async (tool: Tool) => {
+      (tool: Tool) => {
         const input = editor.selection
           ? {
             text: serialize(Editor.fragment(editor, editor.selection)),
@@ -205,7 +213,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {assessFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Check Content Expectations</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("expectation")}>
+                        <Button variant="outline-dark" disabled={!scribe || true} onClick={() => onTool("expectation")}>
                           <Stack>
                             <ContentIcon />
                             <span>Content</span>
@@ -222,7 +230,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {flowFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Check Flow Between Sentences</Tooltip>}>
-                        <Button variant="outline-dark" onClick={() => onTool('flow')}>
+                        <Button disabled variant="outline-dark" onClick={() => onTool('flow')}>
                           <Stack>
                             <FlowIcon />
                             <span>Flow</span>
@@ -243,7 +251,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {sentencesFeature && (
                       <OverlayTrigger placement="bottom"
                         overlay={<Tooltip>Show Sentence Density Chart</Tooltip>}>
-                        <Button variant="outline-dark" onClick={() => onTool('sentences')}>
+                        <Button disabled variant="outline-dark" onClick={() => onTool('sentences')}>
                           <Stack>
                             <ClarityIcon />
                             <span>Sentences</span>
@@ -257,7 +265,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Tab.Content>
           </Tab.Container>
         </Card.Header>
-        <article className="h-100 position-relative">
+        <article className="h-100 position-relative overflow-auto">
           {!currentTool && (
             <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
               <HighlightIcon className="icon-lg mx-auto" />
@@ -315,7 +323,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           {currentTool?.tool === 'bullets' && (
             <Card>
               <Card.Body>
-                <Card.Title>Prose Generation</Card.Title>
+                <Card.Title>Bullets Generation</Card.Title>
                 <Card.Subtitle>
                   {currentTool.datetime.toLocaleString()}
                   <Button variant="icon" onClick={() => onBookmark()}>
@@ -346,8 +354,60 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     {/* TODO add error reporting */}
                     <Card.Text as="div">{currentTool.result ?
                       <ul>
-                        {currentTool.result.split(/\s*-\s+/).filter(b=> b.trim() !== '').map(b => <li>{b}</li>)}
+                        {currentTool.result.split(/\s*-\s+/).filter(b => b.trim() !== '').map(b => <li>{b}</li>)}
                       </ul>
+                      : <Spinner />}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Card.Body>
+              <Card.Footer>
+                <Button onClick={paste}>Paste Text</Button>
+                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
+                  <FontAwesomeIcon icon={faClipboard} />
+                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
+                </Button>
+              </Card.Footer>
+            </Card>
+          )}
+          {currentTool?.tool === 'copyedit' && (
+            <Card>
+              <Card.Body>
+                <Card.Title>Copy Edit</Card.Title>
+                <Card.Subtitle>
+                  {currentTool.datetime.toLocaleString()}
+                  <Button variant="icon" onClick={() => onBookmark()}>
+                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
+                  </Button>
+                </Card.Subtitle>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <YourInputIcon className="me-2" />
+                      Your Input
+                    </Card.Title>
+                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
+                  </Card.Body>
+                </Card>
+                <Card>
+                  <Card.Body>
+                    <Card.Title>
+                      <AIResponseIcon className="me-2" />
+                      AI Response
+                      {currentTool.result && (<>
+                        <TextToSpeech text={currentTool.result} />
+                        <Button onClick={() => retry(currentTool)}>
+                          <FontAwesomeIcon icon={faArrowsRotate} />
+                          <span className="visually-hidden sr-only">Regenerate</span>
+                        </Button></>)}
+                    </Card.Title>
+                    {/* TODO add error reporting */}
+                    <Card.Text as="div">{currentTool.result ?
+                      <>
+                        <h3>Suggested Revisions:</h3>
+                        <div dangerouslySetInnerHTML={{ __html: JSON.parse(currentTool.result).revision }}></div>
+                        <h3>Explanation:</h3>
+                        <div dangerouslySetInnerHTML={{ __html: JSON.parse(currentTool.result).explanation }}></div>
+                      </>
                       : <Spinner />}</Card.Text>
                   </Card.Body>
                 </Card>

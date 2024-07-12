@@ -248,6 +248,28 @@ export const [useFixedGrammar, fixedGrammar$] = bind<
 >(fixedGrammar, SUSPENSE);
 
 /*** Clarify selected text ***/
+export async function postClarifyText({text}: SelectedText, writing_task?: WritingTask|null) {
+  const {user_lang, target_lang} = writing_task?.info ?? {};
+  const response = await fetch(`/api/v2/scribe/copyedit`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({text, user_lang, target_lang}),
+  })
+  if (!response.ok) {
+    const err = await response.text();
+    return err;
+  }
+  const data: ChatResponse = await response.json();
+  if ('error' in data) {
+    console.error(data.message);
+    return data.message;
+  }
+  if ('choices' in data) {
+    return data.choices[0].message.content ?? '';
+  }
+  return '';
+}
+
 export const [useScribeFeatureClarify, clarifyFeature$] = bind(
   settings$.pipe(map((settings) => settings.grammar)),
   false
