@@ -1,0 +1,23 @@
+.expectation-tree {
+  [aria-expanded="true"] {
+    .expanded {
+      display: block;
+    }
+  }
+
+  [aria-expanded="false"] {
+    .expand-toggle {
+      i {
+        transform: rotate(-90deg);
+      }
+    }
+
+    .expanded {
+      display: none;
+    }
+  }
+
+  .pointer {
+    cursor: pointer;
+  }
+}

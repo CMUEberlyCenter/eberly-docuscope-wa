@@ -16,7 +16,7 @@ import { fromFetch } from 'rxjs/fetch';
 import { Descendant, type Range } from 'slate';
 import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
 import { settings$ } from './settings.service';
-import { WritingTask } from '../../lib/WritingTask';
+import { Rule, WritingTask } from '../../lib/WritingTask';
 
 // TODO: per assignment feature settings.
 
@@ -337,6 +337,27 @@ interface AssessmentData {
   rating: number;
   first_sentence: string;
   explanation: string;
+}
+
+export async function postExpectation(text: string, {name, description}: Rule, writing_task?: WritingTask | null) {
+  const {user_lang, target_lang} = writing_task?.info ?? {};
+  const response = await fetch('/api/v2/scribe/assess_expectation', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({text, user_lang, target_lang, expectation: name, description})
+  });
+  if (!response.ok) {
+    const err = await response.text();
+    return err;
+  }
+  const data: ChatResponse = await response.json();
+  if ('error' in data) {
+    console.error(data.message);
+    return data.message;
+  }
+  if ('choices' in data) {
+    return data.choices[0].message.content ?? '';
+  }
+  return '';
 }
 /**
  * Fetch expectation audit results from backend.

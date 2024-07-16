@@ -141,6 +141,7 @@ scribe.post(
   async (request: Request, response: Response) => {
     const { text, expectation, description } = request.body;
     const user_lang = request.body.user_lang ?? 'English';
+    const target_lang = request.body.target_lang ?? 'English';
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates
         .expectation;
@@ -156,6 +157,7 @@ scribe.post(
       const content = format(prompt, {
         text,
         user_lang,
+        target_lang,
         expectation,
         description,
       });
