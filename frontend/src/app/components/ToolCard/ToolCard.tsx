@@ -1,10 +1,8 @@
-import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
-import { faArrowsRotate, faBookmark, faClipboard, faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from '@slate-serializers/html';
-import { FC, forwardRef, useCallback, useEffect, useId, useState } from "react";
+import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
-  Alert,
   Button,
   ButtonGroup,
   ButtonToolbar,
@@ -13,20 +11,17 @@ import {
   Nav,
   Navbar,
   OverlayTrigger,
-  Spinner,
   Stack,
   Tab,
   Tooltip
 } from "react-bootstrap";
-import { Editor, Transforms } from "slate";
+import { Editor } from "slate";
 import { useSlate } from "slate-react";
-import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
-import ClarityIcon from "../../assets/icons/Clarity.svg?react";
+import { Rule } from "../../../lib/WritingTask";
 import ContentIcon from '../../assets/icons/Content.svg?react';
 import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
-import YourInputIcon from '../../assets/icons/YourInput.svg?react';
 import logo from "../../assets/logo.svg";
 import { serialize } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
@@ -36,26 +31,21 @@ import {
   postExpectation,
   useAssessFeature,
   useScribe,
+  useScribeFeatureGrammar,
   useScribeFeatureNotes2Prose
 } from "../../service/scribe.service";
 import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Rating } from "../Rating/Rating";
-import { TextToSpeech } from "../scribe/TextToSpeech";
+import SelectExpectation from "../SelectExpectation/SelectExpectation";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
-import { Tool, ToolResults } from "./ToolResults";
-import SelectExpectation from "../SelectExpectation/SelectExpectation";
-import { Rule } from "../../../lib/WritingTask";
+import { ToolDisplay } from "./ToolDisplay";
+import { Tool, ToolResult } from "./ToolResults";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
-const MySpinner: FC = () => (
-  <Spinner animation="border" role="status" variant="info" className="mx-auto">
-    <span className="visually-hidden sr-only">Processing...</span>
-  </Spinner>
-)
 /**
  * Top level framework for writing tools display.
  */
@@ -67,15 +57,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const [showWritingTask, setShowWritingTask] = useState(false);
     const settings = useSettings();
     const notes2proseFeature = useScribeFeatureNotes2Prose();
-    const bulletsFeature = true; // TODO use settings
-    const flowFeature = true; // TODO use settings
-    const copyEditFeature = true; // TODO use settings
-    const sentencesFeature = true; // TODO use settings
+    const bulletsFeature = true; // TODO use settings and writing task
+    const flowFeature = true; // TODO use settings and writing task
+    const copyEditFeature = true; // TODO use settings and writing task
     // const clarifyFeature = useScribeFeatureClarify();
-    // const grammarFeature = useScribeFeatureGrammar();
-    const [currentTool, setCurrentTool] = useState<ToolResults | null>(null);
-    const [history, setHistory] = useState<ToolResults[]>([]);
-    const addHistory = (tool: ToolResults) => setHistory([...history, tool]);
+    const grammarFeature = useScribeFeatureGrammar();
+    const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
+    const [history, setHistory] = useState<ToolResult[]>([]);
+    const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
     const assessFeature = useAssessFeature();
     // const logicalflowFeature = useScribeFeatureLogicalFlow();
@@ -85,7 +74,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
 
     const editor = useSlate();
     const doTool = useCallback(
-      async (data: ToolResults) => {
+      async (data: ToolResult) => {
         setCurrentTool(data);
         switch (data.tool) {
           case 'bullets':
@@ -114,6 +103,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             addHistory(toolResult);
             break;
           }
+          case 'flow':
           default:
             console.warn(`Unhandled tool: ${data.tool}`);
         }
@@ -131,7 +121,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               fragment: Editor.fragment(editor, editor.selection),
               range: editor.selection,
             },
-            result: "",
+            result: null,
             // document: editorContent,
           });
         } else {
@@ -142,7 +132,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             input: {
               text: '',
             },
-            result: '', // TODO indicate no text.
+            result: null,
             // document: editorContent,
           });
         }
@@ -150,22 +140,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       [editor, doTool]
     ); // Does this need to be wrapped in useCallback?
     const retry = useCallback(
-      async (previous: ToolResults) =>
+      async (previous: ToolResult) =>
         doTool({
           ...previous,
           datetime: new Date(),
-          result: "",
+          result: null,
         }), [doTool]
     )
-
-    const paste = useCallback(() => {
-      if (currentTool?.result && editor.selection) {
-        Transforms.insertNodes(
-          editor,
-          [{ type: "paragraph", children: [{ text: currentTool.result }] }],
-        );
-      }
-    }, [editor, currentTool]);
 
     // Tab control stuff
     const tabId = useId();
@@ -244,7 +225,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <ButtonGroup className="bg-white shadow tools ms-2" size="sm">
                     {assessFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Check Content Expectations, requires selecting a writing task.</Tooltip>}>
+                        overlay={<Tooltip>Check Content Expectations</Tooltip>}>
                         <Button variant="outline-dark" disabled={!scribe || !writingTask} onClick={() => onTool("expectation")}>
                           <Stack>
                             <ContentIcon />
@@ -280,14 +261,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         </Button>
                       </OverlayTrigger>
                     )}
-                    {sentencesFeature && (
+                    {grammarFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Show Sentence Density Chart</Tooltip>}>
-                        <Button disabled variant="outline-dark" onClick={() => onTool('sentences')}>
+                        overlay={<Tooltip>Fix Grammar</Tooltip>}>
+                        <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
                           <Stack>
-                            <ClarityIcon />
-                            <span>Sentences</span>
-                            {/* Clarity */}
+                            <span>Grammar</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -309,220 +288,97 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {/* Maybe use Carousel for history? */}
           {currentTool?.tool === 'prose' && (
-            <Card>
-              <Card.Body>
-                <Card.Title>Prose Generation</Card.Title>
-                <Card.Subtitle>
-                  {currentTool.datetime.toLocaleString()}
-                  <Button variant="icon" onClick={() => onBookmark()}>
-                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
-                  </Button>
-                </Card.Subtitle>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      <YourInputIcon className="me-2" />
-                      Your Input
-                    </Card.Title>
-                    {currentTool.input.text.trim() ?
-                      <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
-                      : <Card.Text><Alert variant="warning">Please select some text before launching this tool.</Alert></Card.Text>}
-                  </Card.Body>
-                </Card>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      <AIResponseIcon className="me-2" />
-                      AI Response
-                      {currentTool.result && (<>
-                        <TextToSpeech text={currentTool.result} />
-                        <Button onClick={() => retry(currentTool)}>
-                          <FontAwesomeIcon icon={faArrowsRotate} />
-                          <span className="visually-hidden sr-only">Regenerate</span>
-                        </Button></>)}
-                    </Card.Title>
-                    {/* TODO add error reporting */}
-                    <Card.Text as="div">{currentTool.result || <MySpinner />}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Card.Body>
-              <Card.Footer>
-                <Button onClick={paste}>Paste Text</Button>
-                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
-                  <FontAwesomeIcon icon={faClipboard} />
-                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
-                </Button>
-              </Card.Footer>
-            </Card>
+            <ToolDisplay.Root title="Prose Generation" tool={currentTool} onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result} />}>
+              <ToolDisplay.Input tool={currentTool} />
+              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result ?? ''}>
+                {/* TODO add error reporting */}
+                <Card.Text as="div">{currentTool.result}</Card.Text>
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
           )}
           {currentTool?.tool === 'bullets' && (
-            <Card>
-              <Card.Body>
-                <Card.Title>Bullets Generation</Card.Title>
-                <Card.Subtitle>
-                  {currentTool.datetime.toLocaleString()}
-                  <Button variant="icon" onClick={() => onBookmark()}>
-                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
-                  </Button>
-                </Card.Subtitle>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      <YourInputIcon className="me-2" />
-                      Your Input
-                    </Card.Title>
-                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
-                  </Card.Body>
-                </Card>
-                <Card>
-                  <Card.Body>
-                    <Card.Title>
-                      <AIResponseIcon className="me-2" />
-                      AI Response
-                      {currentTool.result && (<>
-                        <TextToSpeech text={currentTool.result} />
-                        <Button onClick={() => retry(currentTool)}>
-                          <FontAwesomeIcon icon={faArrowsRotate} />
-                          <span className="visually-hidden sr-only">Regenerate</span>
-                        </Button></>)}
-                    </Card.Title>
-                    {/* TODO add error reporting */}
-                    <Card.Text as="div">{currentTool.result ?
-                      <ul>
-                        {currentTool.result.split(/\s*-\s+/).filter(b => b.trim() !== '').map(b => <li>{b}</li>)}
-                      </ul>
-                      : <MySpinner />}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Card.Body>
-              <Card.Footer>
-                <Button onClick={paste}>Paste Text</Button>
-                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
-                  <FontAwesomeIcon icon={faClipboard} />
-                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
-                </Button>
-              </Card.Footer>
-            </Card>
+            <ToolDisplay.Root title="Bullets Generation" tool={currentTool} onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result} />}>
+              <ToolDisplay.Input tool={currentTool} />
+              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result ?? ''}>
+                {currentTool.result &&
+                  <ul>
+                    {currentTool.result.split(/\s*-\s+/).filter(b => b.trim() !== '').map(b => <li>{b}</li>)}
+                  </ul>
+                }
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
           )}
           {currentTool?.tool === 'expectation' && (
-            <Card>
-              <Card.Body>
-                <Card.Title>Content</Card.Title>
-                <Card.Subtitle>
-                  {currentTool.datetime.toLocaleString()}
-                  <Button variant="icon" onClick={() => onBookmark()}>
-                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
-                  </Button>
-                </Card.Subtitle>
-                <Card as="section">
-                  <Card.Body>
-                    <Card.Title>
-                      <YourInputIcon className="me-2" />
-                      Your Input
-                    </Card.Title>
-                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
-                  </Card.Body>
-                </Card>
-                <Card as="section">
+            <ToolDisplay.Root title={'Content'} tool={currentTool} onBookmark={onBookmark}>
+              <ToolDisplay.Input tool={currentTool} />
+              <Card as="section">
+                <Card.Body>
                   <Card.Title>
                     Expectation
                   </Card.Title>
-                  <Card.Text as="div">
+                  <div>
                     {currentTool.expectation
-                      ? (
-                        <Card>
-                          <Card.Body>
-                            <Card.Title>{currentTool.expectation.name}</Card.Title>
-                            <Card.Text
-                              dangerouslySetInnerHTML={{
-                                __html: currentTool.expectation.description,
-                              }}
-                            />
-                          </Card.Body>
-                        </Card>)
+                      ? (<>
+                        <h4>{currentTool.expectation.name}</h4>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: currentTool.expectation.description,
+                          }}
+                        />
+                      </>)
                       : (
                         <Button onClick={() => setShowSelectExpectation(true)}>
                           Select an Expectation
                         </Button>
                       )}
-                  </Card.Text>
-                </Card>
-                <Card as="section">
-                  <Card.Body>
-                    <Card.Title>
-                      <AIResponseIcon className="me-2" />
-                      AI Response
-                      {currentTool.result && (<>
-                        <TextToSpeech text={currentTool.result} />
-                        <Button onClick={() => retry(currentTool)}>
-                          <FontAwesomeIcon icon={faArrowsRotate} />
-                          <span className="visually-hidden sr-only">Regenerate</span>
-                        </Button></>)}
-                    </Card.Title>
-                    {/* TODO add error reporting */}
-                    <Card.Text as="div">{currentTool.result ?
-                      <>
-                        {currentTool.result && <Rating value={JSON.parse(currentTool.result).rating} />}
-                        <div>{JSON.parse(currentTool.result).explanation}</div>
-                      </>
-                      : <MySpinner />}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Card.Body>
-            </Card>
+                  </div>
+                </Card.Body>
+              </Card>
+
+              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result?.explanation ?? ''}>
+                {currentTool.result && (<>
+                  {currentTool.result && <Rating value={currentTool.result.rating} />}
+                  <div>{currentTool.result.explanation}</div>
+                </>
+                )}
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
           )}
           {currentTool?.tool === 'copyedit' && (
-            <Card>
-              <Card.Body>
-                <Card.Title>Copy Edit</Card.Title>
-                <Card.Subtitle>
-                  {currentTool.datetime.toLocaleString()}
-                  <Button variant="icon" onClick={() => onBookmark()}>
-                    <FontAwesomeIcon icon={currentTool.bookmarked ? faBookmark : faRegularBookmark} />
-                  </Button>
-                </Card.Subtitle>
-                <Card as="section">
-                  <Card.Body>
-                    <Card.Title>
-                      <YourInputIcon className="me-2" />
-                      Your Input
-                    </Card.Title>
-                    <Card.Text dangerouslySetInnerHTML={{ __html: currentTool.input.html ?? '' }}></Card.Text>
-                  </Card.Body>
-                </Card>
-                <Card as="section">
-                  <Card.Body>
-                    <Card.Title>
-                      <AIResponseIcon className="me-2" />
-                      AI Response
-                      {currentTool.result && (<>
-                        <TextToSpeech text={currentTool.result} />
-                        <Button onClick={() => retry(currentTool)}>
-                          <FontAwesomeIcon icon={faArrowsRotate} />
-                          <span className="visually-hidden sr-only">Regenerate</span>
-                        </Button></>)}
-                    </Card.Title>
-                    {/* TODO add error reporting */}
-                    <Card.Text as="div">{currentTool.result ?
-                      <>
-                        <h3>Suggested Revisions:</h3>
-                        <div dangerouslySetInnerHTML={{ __html: JSON.parse(currentTool.result).revision }}></div>
-                        <h3>Explanation:</h3>
-                        <div dangerouslySetInnerHTML={{ __html: JSON.parse(currentTool.result).explanation }}></div>
-                      </>
-                      : <MySpinner />}</Card.Text>
-                  </Card.Body>
-                </Card>
-              </Card.Body>
-              <Card.Footer>
-                <Button onClick={paste}>Paste Text</Button>
-                <Button onClick={() => navigator.clipboard.writeText(currentTool.result)}>
-                  <FontAwesomeIcon icon={faClipboard} />
-                  <span className="visually-hidden sr-only">Copy to Clipboard</span>
-                </Button>
-              </Card.Footer>
-            </Card>
+            <ToolDisplay.Root title="Copy Edit" tool={currentTool} onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result?.["clear-revision"]} />}>
+              <ToolDisplay.Input tool={currentTool} />
+              <ToolDisplay.Response tool={currentTool} text={currentTool.result?.explanation}>
+                {currentTool.result &&
+                  <>
+                    <h3>Suggested Revisions:</h3>
+                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.revision }}></div>
+                    <h3>Explanation:</h3>
+                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.explanation }}></div>
+                  </>
+                }
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
           )}
+          {currentTool?.tool === 'grammar' && (
+            <ToolDisplay.Root title="Grammar" tool={currentTool} onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result?.["clear-revision"]} />}>
+              <ToolDisplay.Input tool={currentTool} />
+              <ToolDisplay.Response tool={currentTool} text={currentTool.result?.explanation}>
+                {currentTool.result &&
+                  <>
+                    <h3>Suggested Revisions:</h3>
+                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.revision }}></div>
+                    <h3>Explanation:</h3>
+                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.explanation }}></div>
+                  </>
+                }
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
+          )}
+
         </article>
         <Card.Footer>
           {writingTask && (
@@ -558,10 +414,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         )}
         <SelectExpectation show={showSelectExpectation} onHide={() => setShowSelectExpectation(false)}
           select={(expectation: Rule) => {
-            console.log(currentTool);
-            if (currentTool) {
-              console.log(expectation)
-              doTool({...currentTool, expectation});
+            if (currentTool?.tool === 'expectation') {
+              doTool({ ...currentTool, expectation });
             }
           }} />
       </Card>
