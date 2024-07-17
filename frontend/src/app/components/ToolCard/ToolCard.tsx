@@ -43,6 +43,7 @@ import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolDisplay } from "./ToolDisplay";
 import { Tool, ToolResult } from "./ToolResults";
+import { useTranslation } from "react-i18next";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -51,6 +52,7 @@ type ToolCardProps = JSX.IntrinsicAttributes;
  */
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ ...props }, ref) => {
+    const { t } = useTranslation();
     const selectAvailable = useSelectTaskAvailable();
     const writingTask = useWritingTask();
     const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
@@ -179,12 +181,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Container>
                 <Nav variant="tabs">
                   <Nav.Item>
-                    <Nav.Link eventKey="generate" onClick={() => setTab('generate')}>Draft</Nav.Link>
+                    <Nav.Link eventKey="generate" onClick={() => setTab('generate')}>{t('tool.tab.generate')}</Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
-                    <Nav.Link eventKey="refine" onClick={() => setTab('refine')}>Polish</Nav.Link>
+                    <Nav.Link eventKey="refine" onClick={() => setTab('refine')}>{t('tool.tab.refine')}</Nav.Link>
                   </Nav.Item>
-                  <Nav.Link onClick={() => window.open("review.html", '_blank')}>Review</Nav.Link>
+                  <Nav.Link onClick={() => window.open("review.html", '_blank')}>{t('tool.tab.review')}</Nav.Link>
                 </Nav>
                 <Navbar.Brand>
                   <img
@@ -201,22 +203,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <ButtonGroup className="bg-white shadow tools" size="sm">
                     {notes2proseFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Generate Prose from Notes</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.prose.tooltip')}</Tooltip>}>
                         <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("prose")}>
                           <Stack>
                             <GenerateIcon />
-                            <span>Prose</span>
+                            <span>{t('tool.button.prose.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {bulletsFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Generate Bulleted List from Notes</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.bullets.tooltip')}</Tooltip>}>
                         <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("bullets")}>
                           <Stack>
                             <GenerateIcon />
-                            <span>Bullets</span>
+                            <span>{t('tool.button.bullets.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -225,11 +227,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <ButtonGroup className="bg-white shadow tools ms-2" size="sm">
                     {assessFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Check Content Expectations</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.expectation.tooltip')}</Tooltip>}>
                         <Button variant="outline-dark" disabled={!scribe || !writingTask} onClick={() => onTool("expectation")}>
                           <Stack>
                             <ContentIcon />
-                            <span>Content</span>
+                            <span>{t('tool.button.expectation.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -242,31 +244,31 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <ButtonGroup className="bg-white shadow tools" size="sm">
                     {flowFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Check Flow Between Sentences</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.flow.tooltip')}</Tooltip>}>
                         <Button disabled variant="outline-dark" onClick={() => onTool('flow')}>
                           <Stack>
                             <FlowIcon />
-                            <span>Flow</span>
+                            <span>{t('tool.button.flow.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {copyEditFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Copy Edit</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.copyedit.tooltip')}</Tooltip>}>
                         <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
                           <Stack>
-                            <span>Copy Edit</span>
+                            <span>{t('tool.button.copyedit.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {grammarFeature && (
                       <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>Fix Grammar</Tooltip>}>
+                        overlay={<Tooltip>{t('tool.button.grammar.tooltip')}</Tooltip>}>
                         <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
                           <Stack>
-                            <span>Grammar</span>
+                            <span>{t('tool.button.grammar.title')}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -282,7 +284,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
               <HighlightIcon className="icon-lg mx-auto" />
               <span className="mx-auto text-center">
-                Write & highlight text for further actions
+                {t('tool.initial')}
               </span>
             </Stack>
           )}
@@ -386,7 +388,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               variant="outline-dark"
               onClick={() => setShowWritingTask(true)}
             >
-              View Outline
+              {t('tool.button.view.title')}
             </Button>
           )}
           {selectAvailable && (
@@ -394,10 +396,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               variant={writingTask ? "none" : "dark"}
               onClick={() => setShowSelectWritingTasks(true)}
             >
-              {writingTask ? (
+              {writingTask ? (<>
                 <FontAwesomeIcon icon={faEllipsis} />
+                <span className="visually-hidden sr-only">{t('tool.button.select.title')}</span>
+                </>
               ) : (
-                "Select Writing Task"
+                t('tool.button.select.title')
               )}
             </Button>
           )}

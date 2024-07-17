@@ -194,6 +194,7 @@ async function __main__() {
   Provider.whitelist(
     Provider.appRoute(),
     /assets\//,
+    /locales\//,
     /\.ico$/,
     /settings/,
     /api\/v.\//,

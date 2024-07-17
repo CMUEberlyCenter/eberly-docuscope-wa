@@ -13,6 +13,8 @@ import {
   Dropdown,
   DropdownButton,
   Form,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 import {
   Descendant,
@@ -35,6 +37,7 @@ import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
 import Split from "react-split";
 import ToolCard from "../ToolCard/ToolCard";
+import { useTranslation } from "react-i18next";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -125,26 +128,32 @@ const toggleBlock = (editor: Editor, format: string) => {
     Transforms.wrapNodes(editor, block);
   }
 };
-const MarkButton: FC<{ format: Markings; children: ReactNode }> = ({
+const MarkButton: FC<{ format: Markings; children: ReactNode; tooltip: string }> = ({
   format,
   children,
+  tooltip,
 }) => {
   const editor = useSlate();
   return (
-    <Button
-      active={isMarkActive(editor, format)}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        toggleMark(editor, format);
-      }}
-      variant="light"
-    >
-      {children}
-    </Button>
+    <OverlayTrigger placement="bottom"
+      overlay={<Tooltip>{tooltip}</Tooltip>}>
+      <Button
+        active={isMarkActive(editor, format)}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          toggleMark(editor, format);
+        }}
+        variant="light"
+      >
+        {children}
+        <span className="visually-hidden sr-only">{tooltip}</span>
+      </Button>
+    </OverlayTrigger>
   );
 };
 
 const CustomEditor: FC = () => {
+  const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
     // get from sessno storage
@@ -185,11 +194,11 @@ const CustomEditor: FC = () => {
         <main className="d-flex overflow-none h-100 flex-column">
           <ButtonToolbar aria-label="Editor Tools">
             <ButtonGroup>
-              <DropdownButton as={ButtonGroup} title="File" variant="light">
-                <Dropdown.Item eventKey="open">New Writing Task</Dropdown.Item>
-                <Dropdown.Item eventKey="save" onClick={() => console.log(content)}>Save Notes</Dropdown.Item>
+              <DropdownButton as={ButtonGroup} title={t("editor.menu.file")} variant="light">
+                <Dropdown.Item eventKey="open">{t("editor.menu.open")}</Dropdown.Item>
+                <Dropdown.Item eventKey="save" onClick={() => console.log(content)}>{t("editor.menu.save")}</Dropdown.Item>
               </DropdownButton>
-              <DropdownButton as={ButtonGroup} title="View" variant="light">
+              <DropdownButton as={ButtonGroup} title={t("editor.menu.view")} variant="light">
                 <Dropdown.Item eventKey="open">???</Dropdown.Item>
               </DropdownButton>
               <Form.Select
@@ -201,30 +210,30 @@ const CustomEditor: FC = () => {
                   toggleBlock(editor, format);
                 }}
               >
-                <option value={"paragraph"}>Paragraph</option>
-                <option value={"heading-one"}>Heading 1</option>
-                <option value={"heading-two"}>Heading 2</option>
-                <option value={"heading-three"}>Heading 3</option>
-                <option value={"heading-one"}>Heading 1</option>
-                <option value={"bulleted-list"}>List</option>
-                <option value={"numbered-list"}>Numbered List</option>
+                <option value={"paragraph"}>{t("editor.menu.paragraph")}</option>
+                <option value={"heading-one"}>{t("editor.menu.h1")}</option>
+                <option value={"heading-two"}>{t("editor.menu.h2")}</option>
+                <option value={"heading-three"}>{t("editor.menu.h3")}</option>
+                <option value={"heading-four"}>{t("editor.menu.h4")}</option>
+                <option value={"bulleted-list"}>{t("editor.menu.list")}</option>
+                <option value={"numbered-list"}>{t("editor.menu.numbered")}</option>
               </Form.Select>
-              <MarkButton format="bold">
+              <MarkButton format="bold" tooltip={t('editor.menu.bold')}>
                 <FontAwesomeIcon icon={faBold} />
               </MarkButton>
-              <MarkButton format="italic">
+              <MarkButton format="italic" tooltip={t('editor.menu.italic')}>
                 <FontAwesomeIcon icon={faItalic} />
               </MarkButton>
-              <MarkButton format="underline">
+              <MarkButton format="underline" tooltip={t('editor.menu.underline')}>
                 <FontAwesomeIcon icon={faUnderline} />
               </MarkButton>
-              <MarkButton format="strikethrough">
+              <MarkButton format="strikethrough" tooltip={t('editor.menu.strike')}>
                 <FontAwesomeIcon icon={faStrikethrough} />
               </MarkButton>
             </ButtonGroup>
             <div className="ms-3">
-              <h6 className="mb-0 text-muted">Writing Task:</h6>
-              <h5>{writingTask?.info.name ?? "None Selected"}</h5>
+              <h6 className="mb-0 text-muted">{t("editor.menu.task")}</h6>
+              <h5>{writingTask?.info.name ?? t("editor.menu.no_task")}</h5>
             </div>
           </ButtonToolbar>
           <Editable
