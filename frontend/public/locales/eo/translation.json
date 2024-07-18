@@ -1,0 +1,91 @@
+{
+  "editor": {
+    "menu": {
+      "file": "Dosiero",
+      "open": "Nova Skriba Tasko",
+      "save": "Konservu Notojn",
+      "view": "Vido",
+      "paragraph": "Alineo",
+      "h1": "Titolo 1",
+      "h2": "Titolo 2",
+      "h3": "Titolo 3",
+      "h4": "Titolo 4",
+      "list": "Listo",
+      "numbered": "Numerita Listo",
+      "bold": "Aŭdaca",
+      "italic": "Kursivo",
+      "underline": "Substreku",
+      "strike": "Strikethrough",
+      "task": "Skriba Tasko:",
+      "no_task": "Neniu Elektita"
+    }
+  },
+  "tool": {
+    "tab": {
+      "generate": "Malneto",
+      "refine": "pola",
+      "review": "Recenzo"
+    },
+    "button": {
+      "prose": {
+        "title": "Prozo",
+        "tooltip": "Generu Prozon el Notoj"
+      },
+      "bullets": {
+        "title": "Kugloj",
+        "tooltip": "Generu Kuglo-Liston el Notoj"
+      },
+      "expectation": {
+        "title": "Enhavo",
+        "tooltip": "Kontrolu Enhavaj Atendoj"
+      },
+      "flow": {
+        "title": "Fluo",
+        "tooltip": "Kontrolu Fluon Inter Frazoj"
+      },
+      "copyedit": {
+        "title": "Kopiu Redakton",
+        "tooltip": "Kopiu Redakton"
+      },
+      "grammar": {
+        "title": "Gramatiko",
+        "tooltip": "Ripari Gramatikon"
+      },
+      "view": {
+        "title": "Rigardu Skizon"
+      },
+      "select": {
+        "title": "Elektu Skriban Taskon"
+      }
+    },
+    "initial": "Skribu kaj reliefigu tekston por pliaj agoj.",
+    "bookmark": "Legomarko",
+    "bookmarked": "Legosignita",
+    "input": "Via Enigo",
+    "no_selection": "Bonvolu elekti iun tekston antaŭ lanĉi ĉi tiun ilon.",
+    "output": "A.I. Respondo",
+    "regenerate": "Regeneri",
+    "paste": "Algluu Tekston",
+    "expectation": "Atendo:",
+    "select_expectation": "Elektu Atendon",
+    "explanation": "Klarigo:",
+    "suggestion": "Proponitaj Revizioj:"
+  },
+  "clipboard": "Kopii al tondujo",
+  "expectation": {
+    "title": "Elektu Atendon",
+    "task": "Skriba Tasko"
+  },
+  "select_task": {
+    "title": "Elektu Skriban Taskon",
+    "upload": "Alŝutu Propran Skriban Taskon",
+    "invalid_upload": "Alŝutita dosiero ne estas valida specifo pri skribtasko!",
+    "null": "Neniu Skriba Tasko"
+  },
+  "cancel": "Nuligi",
+  "select": "Elektu",
+  "details": {
+    "include": "Inkluzivi Detalojn",
+    "insert": "Enmetu Skizon"
+  }
+}

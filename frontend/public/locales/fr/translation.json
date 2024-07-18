@@ -1,0 +1,91 @@
+{
+  "editor": {
+    "menu": {
+      "file": "Déposer",
+      "open": "Nouvelle tâche d'écriture",
+      "save": "Enregistrer les notes",
+      "view": "Voir",
+      "paragraph": "Paragraphe",
+      "h1": "Titre 1",
+      "h2": "Titre 2",
+      "h3": "Titre 3",
+      "h4": "Titre 4",
+      "list": "Liste",
+      "numbered": "Liste numérotée",
+      "bold": "Audacieux",
+      "italic": "Italique",
+      "underline": "Souligner",
+      "strike": "Barré",
+      "task": "Tâche d'écriture:",
+      "no_task": "Aucune sélection"
+    }
+  },
+  "tool": {
+    "tab": {
+      "generate": "Brouillon",
+      "refine": "polonais",
+      "review": "Revoir"
+    },
+    "button": {
+      "prose": {
+        "title": "Prose",
+        "tooltip": "Générer de la prose à partir de notes"
+      },
+      "bullets": {
+        "title": "Balles",
+        "tooltip": "Générer une liste à puces à partir de notes"
+      },
+      "expectation": {
+        "title": "Contenu",
+        "tooltip": "Vérifier les attentes en matière de contenu"
+      },
+      "flow": {
+        "title": "Couler",
+        "tooltip": "Vérifier le flux entre les phrases"
+      },
+      "copyedit": {
+        "title": "Copier Modifier",
+        "tooltip": "Copier Modifier"
+      },
+      "grammar": {
+        "title": "Grammaire",
+        "tooltip": "Corriger la grammaire"
+      },
+      "view": {
+        "title": "Afficher le plan"
+      },
+      "select": {
+        "title": "Sélectionnez une tâche d'écriture"
+      }
+    },
+    "initial": "Écrivez et surlignez le texte pour d'autres actions.",
+    "bookmark": "Signet",
+    "bookmarked": "Mis en signet",
+    "input": "Votre contribution",
+    "no_selection": "Veuillez sélectionner du texte avant de lancer cet outil.",
+    "output": "I.A. Réponse",
+    "regenerate": "Régénérer",
+    "paste": "Coller le texte",
+    "expectation": "Attente:",
+    "select_expectation": "Sélectionnez une attente",
+    "explanation": "Explication:",
+    "suggestion": "Révisions suggérées:"
+  },
+  "clipboard": "Copier dans le presse-papier",
+  "expectation": {
+    "title": "Sélectionnez une attente",
+    "task": "Tâche d'écriture"
+  },
+  "select_task": {
+    "title": "Sélectionnez une tâche d'écriture",
+    "upload": "Télécharger une tâche d'écriture personnalisée",
+    "invalid_upload": "Le fichier téléchargé n'est pas une spécification de tâche d'écriture valide!",
+    "null": "Aucune tâche d'écriture"
+  },
+  "cancel": "Annuler",
+  "select": "Sélectionner",
+  "details": {
+    "include": "Inclure les détails",
+    "insert": "Insérer un contour"
+  }
+}
