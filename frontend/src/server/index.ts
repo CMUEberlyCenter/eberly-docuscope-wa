@@ -200,7 +200,7 @@ async function __main__() {
     /api\/v.\//,
     /metrics\//,
     /index\.html$/,
-    /review\.html$/,
+    /review\.html$/
   );
   try {
     await Provider.deploy({ port: PORT });

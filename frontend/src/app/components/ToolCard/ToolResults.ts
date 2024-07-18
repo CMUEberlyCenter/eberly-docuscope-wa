@@ -1,8 +1,18 @@
-import { Descendant } from "slate";
-import { Rule } from "../../../lib/WritingTask";
-import { AssessmentData, CopyEditResponse, SelectedNotesProse } from "../../service/scribe.service";
+import { Descendant } from 'slate';
+import { Rule } from '../../../lib/WritingTask';
+import {
+  AssessmentData,
+  CopyEditResponse,
+  SelectedNotesProse,
+} from '../../service/scribe.service';
 
-export type Tool = 'prose' | 'bullets' | 'expectation' | 'flow' | 'copyedit' | 'grammar';
+export type Tool =
+  | 'prose'
+  | 'bullets'
+  | 'expectation'
+  | 'flow'
+  | 'copyedit'
+  | 'grammar';
 interface ToolData<T> {
   tool: Tool;
   datetime: Date;
@@ -13,7 +23,7 @@ interface ToolData<T> {
   // rating?: number;
   // expectation?: Rule;
   // TODO add writing task?
-};
+}
 
 export interface ProseTool extends ToolData<string> {
   tool: 'prose';
@@ -38,4 +48,10 @@ export interface FlowTool extends ToolData<string> {
   tool: 'flow'; // local-coherence
 }
 
-export type ToolResult = ProseTool | BulletTool | ExpectationTool | CopyEditTool | FlowTool | GrammarTool;
+export type ToolResult =
+  | ProseTool
+  | BulletTool
+  | ExpectationTool
+  | CopyEditTool
+  | FlowTool
+  | GrammarTool;

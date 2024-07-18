@@ -23,11 +23,10 @@ import {
   useProse,
   useScribe,
 } from "../../../service/scribe.service";
-import AIResponseIcon from '../../assets/icons/AIResponse.svg?react';
-import YourInputIcon from '../../assets/icons/YourInput.svg?react';
+import AIResponseIcon from "../../assets/icons/AIResponse.svg?react";
+import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { DisabledAlert } from "../DisabledAlert";
 import { TextToSpeech } from "../TextToSpeech";
-
 
 /**
  * Serialize editor fragment to html for rendering.

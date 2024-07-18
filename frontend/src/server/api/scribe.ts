@@ -23,62 +23,64 @@ async function readTemplates(): Promise<PromptData> {
   return prompts;
 }
 
-const scribeNotes = (key: 'notes_to_prose' | 'notes_to_bullets') => async (request: Request, response: Response) => {
-  const { notes } = request.body;
-  try {
-    const templates = (await readTemplates()).templates;
-    if (! (key in templates)) {
-      console.warn(`${key} is not a valid template.`)
-      return response.status(404).send({
-        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
-        title: 'Not Found',
-        detail: `${key} template not found.`,
-        status: 404,
-      } as ProblemDetails);
+const scribeNotes =
+  (key: 'notes_to_prose' | 'notes_to_bullets') =>
+  async (request: Request, response: Response) => {
+    const { notes } = request.body;
+    try {
+      const templates = (await readTemplates()).templates;
+      if (!(key in templates)) {
+        console.warn(`${key} is not a valid template.`);
+        return response.status(404).send({
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
+          title: 'Not Found',
+          detail: `${key} template not found.`,
+          status: 404,
+        } as ProblemDetails);
+      }
+      const { prompt, role, temperature } = templates[key];
+      if (!prompt || !role) {
+        // runtime safety - should never happen
+        console.warn('Malformed notes prompt data.');
+        return response.status(404).send({
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
+          title: 'Not Found',
+          detail: `${key} template not found.`,
+          status: 404,
+        } as ProblemDetails);
+      }
+      const content = format(prompt, {
+        notes,
+        target_lang: request.body.target_lang ?? 'English',
+        user_lang: request.body.user_lang ?? 'English',
+      });
+      const prose = await openai.chat.completions.create({
+        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+        messages: [
+          { role: 'system', content: role },
+          {
+            role: 'user',
+            content,
+          },
+        ],
+        model: 'gpt-4',
+      });
+      // TODO check for empty prose
+      response.json(prose);
+    } catch (err) {
+      console.error(err instanceof Error ? err.message : err);
+      if (err instanceof Error) {
+        return response.status(500).send({
+          type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
+          title: 'Internal Srver Error',
+          status: 500,
+          detail: err.message,
+          error: err,
+        } as ProblemDetails);
+      }
+      return response.sendStatus(500);
     }
-    const { prompt, role, temperature } = templates[key];
-    if (!prompt || !role) {
-      // runtime safety - should never happen
-      console.warn('Malformed notes prompt data.');
-      return response.status(404).send({
-        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
-        title: 'Not Found',
-        detail: `${key} template not found.`,
-        status: 404,
-      } as ProblemDetails);
-    }
-    const content = format(prompt, {
-      notes,
-      target_lang: request.body.target_lang ?? 'English',
-      user_lang: request.body.user_lang ?? 'English',
-    });
-    const prose = await openai.chat.completions.create({
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'system', content: role },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: 'gpt-4',
-    });
-    // TODO check for empty prose
-    response.json(prose);
-  } catch (err) {
-    console.error(err instanceof Error ? err.message : err);
-    if (err instanceof Error) {
-      return response.status(500).send({
-        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
-        title: 'Internal Srver Error',
-        status: 500,
-        detail: err.message,
-        error: err,
-      } as ProblemDetails);
-    }
-    return response.sendStatus(500);
-  }
-};
+  };
 scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
 scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 

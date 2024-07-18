@@ -1,6 +1,6 @@
 import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { slateToHtml } from '@slate-serializers/html';
+import { slateToHtml } from "@slate-serializers/html";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
   Button,
@@ -13,12 +13,12 @@ import {
   OverlayTrigger,
   Stack,
   Tab,
-  Tooltip
+  Tooltip,
 } from "react-bootstrap";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
-import ContentIcon from '../../assets/icons/Content.svg?react';
+import ContentIcon from "../../assets/icons/Content.svg?react";
 import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
@@ -32,7 +32,7 @@ import {
   useAssessFeature,
   useScribe,
   useScribeFeatureGrammar,
-  useScribeFeatureNotes2Prose
+  useScribeFeatureNotes2Prose,
 } from "../../service/scribe.service";
 import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
@@ -79,17 +79,25 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       async (data: ToolResult) => {
         setCurrentTool(data);
         switch (data.tool) {
-          case 'bullets':
-          case 'prose': {
-            const result = await postConvertNotes(data.input, data.tool, writingTask);
+          case "bullets":
+          case "prose": {
+            const result = await postConvertNotes(
+              data.input,
+              data.tool,
+              writingTask
+            );
             const toolResult = { ...data, result };
             setCurrentTool(toolResult);
             addHistory(toolResult);
             break;
           }
-          case 'expectation': {
+          case "expectation": {
             if (data.expectation) {
-              const result = await postExpectation(data.input.text, data.expectation, writingTask);
+              const result = await postExpectation(
+                data.input.text,
+                data.expectation,
+                writingTask
+              );
               const toolResult = { ...data, result };
               setCurrentTool(toolResult);
               addHistory(toolResult);
@@ -98,19 +106,20 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             }
             break;
           }
-          case 'copyedit': {
+          case "copyedit": {
             const result = await postClarifyText(data.input, writingTask);
             const toolResult = { ...data, result };
             setCurrentTool(toolResult);
             addHistory(toolResult);
             break;
           }
-          case 'flow':
+          case "flow":
           default:
             console.warn(`Unhandled tool: ${data.tool}`);
         }
-      }, [writingTask]
-    )
+      },
+      [writingTask]
+    );
     const onTool = useCallback(
       (tool: Tool) => {
         if (editor.selection) {
@@ -132,7 +141,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             tool,
             datetime: new Date(),
             input: {
-              text: '',
+              text: "",
             },
             result: null,
             // document: editorContent,
@@ -147,12 +156,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           ...previous,
           datetime: new Date(),
           result: null,
-        }), [doTool]
-    )
+        }),
+      [doTool]
+    );
 
     // Tab control stuff
     const tabId = useId();
-    const [tab, setTab] = useState('generate');
+    const [tab, setTab] = useState("generate");
 
     // If writing task is changed, show its details.
     useEffect(() => {
@@ -163,11 +173,18 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
 
     const onBookmark = useCallback(() => {
       if (currentTool) {
-        const updated = { ...currentTool, bookmarked: !currentTool?.bookmarked }
+        const updated = {
+          ...currentTool,
+          bookmarked: !currentTool?.bookmarked,
+        };
         setCurrentTool(updated);
-        setHistory(history.map(h => h.datetime === currentTool.datetime ? updated : h))
+        setHistory(
+          history.map((h) =>
+            h.datetime === currentTool.datetime ? updated : h
+          )
+        );
       }
-    }, [history, currentTool])
+    }, [history, currentTool]);
     return (
       <Card
         {...props}
@@ -181,12 +198,26 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Container>
                 <Nav variant="tabs">
                   <Nav.Item>
-                    <Nav.Link eventKey="generate" onClick={() => setTab('generate')}>{t('tool.tab.generate')}</Nav.Link>
+                    <Nav.Link
+                      eventKey="generate"
+                      onClick={() => setTab("generate")}
+                    >
+                      {t("tool.tab.generate")}
+                    </Nav.Link>
                   </Nav.Item>
                   <Nav.Item>
-                    <Nav.Link eventKey="refine" onClick={() => setTab('refine')}>{t('tool.tab.refine')}</Nav.Link>
+                    <Nav.Link
+                      eventKey="refine"
+                      onClick={() => setTab("refine")}
+                    >
+                      {t("tool.tab.refine")}
+                    </Nav.Link>
                   </Nav.Item>
-                  <Nav.Link onClick={() => window.open("review.html", '_blank')}>{t('tool.tab.review')}</Nav.Link>
+                  <Nav.Link
+                    onClick={() => window.open("review.html", "_blank")}
+                  >
+                    {t("tool.tab.review")}
+                  </Nav.Link>
                 </Nav>
                 <Navbar.Brand>
                   <img
@@ -202,23 +233,39 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <ButtonToolbar className="ms-5 mb-3">
                   <ButtonGroup className="bg-white shadow tools" size="sm">
                     {notes2proseFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.prose.tooltip')}</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("prose")}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
+                        }
+                      >
+                        <Button
+                          variant="outline-dark"
+                          disabled={!scribe}
+                          onClick={() => onTool("prose")}
+                        >
                           <Stack>
                             <GenerateIcon />
-                            <span>{t('tool.button.prose.title')}</span>
+                            <span>{t("tool.button.prose.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {bulletsFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.bullets.tooltip')}</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe} onClick={() => onTool("bullets")}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("tool.button.bullets.tooltip")}</Tooltip>
+                        }
+                      >
+                        <Button
+                          variant="outline-dark"
+                          disabled={!scribe}
+                          onClick={() => onTool("bullets")}
+                        >
                           <Stack>
                             <GenerateIcon />
-                            <span>{t('tool.button.bullets.title')}</span>
+                            <span>{t("tool.button.bullets.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -226,12 +273,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   </ButtonGroup>
                   <ButtonGroup className="bg-white shadow tools ms-2" size="sm">
                     {assessFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.expectation.tooltip')}</Tooltip>}>
-                        <Button variant="outline-dark" disabled={!scribe || !writingTask} onClick={() => onTool("expectation")}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>
+                            {t("tool.button.expectation.tooltip")}
+                          </Tooltip>
+                        }
+                      >
+                        <Button
+                          variant="outline-dark"
+                          disabled={!scribe || !writingTask}
+                          onClick={() => onTool("expectation")}
+                        >
                           <Stack>
                             <ContentIcon />
-                            <span>{t('tool.button.expectation.title')}</span>
+                            <span>{t("tool.button.expectation.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -243,32 +300,54 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <ButtonToolbar className="ms-5 mb-3">
                   <ButtonGroup className="bg-white shadow tools" size="sm">
                     {flowFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.flow.tooltip')}</Tooltip>}>
-                        <Button disabled variant="outline-dark" onClick={() => onTool('flow')}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("tool.button.flow.tooltip")}</Tooltip>
+                        }
+                      >
+                        <Button
+                          disabled
+                          variant="outline-dark"
+                          onClick={() => onTool("flow")}
+                        >
                           <Stack>
                             <FlowIcon />
-                            <span>{t('tool.button.flow.title')}</span>
+                            <span>{t("tool.button.flow.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {copyEditFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.copyedit.tooltip')}</Tooltip>}>
-                        <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("tool.button.copyedit.tooltip")}</Tooltip>
+                        }
+                      >
+                        <Button
+                          variant="outline-dark"
+                          onClick={() => onTool("copyedit")}
+                        >
                           <Stack>
-                            <span>{t('tool.button.copyedit.title')}</span>
+                            <span>{t("tool.button.copyedit.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
                     )}
                     {grammarFeature && (
-                      <OverlayTrigger placement="bottom"
-                        overlay={<Tooltip>{t('tool.button.grammar.tooltip')}</Tooltip>}>
-                        <Button variant="outline-dark" onClick={() => onTool('copyedit')}>
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("tool.button.grammar.tooltip")}</Tooltip>
+                        }
+                      >
+                        <Button
+                          variant="outline-dark"
+                          onClick={() => onTool("copyedit")}
+                        >
                           <Stack>
-                            <span>{t('tool.button.grammar.title')}</span>
+                            <span>{t("tool.button.grammar.title")}</span>
                           </Stack>
                         </Button>
                       </OverlayTrigger>
@@ -283,104 +362,169 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           {!currentTool && (
             <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
               <HighlightIcon className="icon-lg mx-auto" />
-              <span className="mx-auto text-center">
-                {t('tool.initial')}
-              </span>
+              <span className="mx-auto text-center">{t("tool.initial")}</span>
             </Stack>
           )}
           {/* Maybe use Carousel for history? */}
-          {currentTool?.tool === 'prose' && (
-            <ToolDisplay.Root title="Prose Generation" tool={currentTool} onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />}>
+          {currentTool?.tool === "prose" && (
+            <ToolDisplay.Root
+              title="Prose Generation"
+              tool={currentTool}
+              onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result} />}
+            >
               <ToolDisplay.Input tool={currentTool} />
-              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result ?? ''}>
+              <ToolDisplay.Response
+                tool={currentTool}
+                regenerate={retry}
+                text={currentTool.result ?? ""}
+              >
                 {/* TODO add error reporting */}
                 <Card.Text as="div">{currentTool.result}</Card.Text>
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {currentTool?.tool === 'bullets' && (
-            <ToolDisplay.Root title="Bullets Generation" tool={currentTool} onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />}>
+          {currentTool?.tool === "bullets" && (
+            <ToolDisplay.Root
+              title="Bullets Generation"
+              tool={currentTool}
+              onBookmark={onBookmark}
+              actions={<ToolDisplay.Paste text={currentTool.result} />}
+            >
               <ToolDisplay.Input tool={currentTool} />
-              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result ?? ''}>
-                {currentTool.result &&
+              <ToolDisplay.Response
+                tool={currentTool}
+                regenerate={retry}
+                text={currentTool.result ?? ""}
+              >
+                {currentTool.result && (
                   <ul>
-                    {currentTool.result.split(/\s*-\s+/).filter(b => b.trim() !== '').map(b => <li>{b}</li>)}
+                    {currentTool.result
+                      .split(/\s*-\s+/)
+                      .filter((b) => b.trim() !== "")
+                      .map((b) => (
+                        <li>{b}</li>
+                      ))}
                   </ul>
-                }
+                )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {currentTool?.tool === 'expectation' && (
-            <ToolDisplay.Root title={'Content'} tool={currentTool} onBookmark={onBookmark}>
+          {currentTool?.tool === "expectation" && (
+            <ToolDisplay.Root
+              title={"Content"}
+              tool={currentTool}
+              onBookmark={onBookmark}
+            >
               <ToolDisplay.Input tool={currentTool} />
               <Card as="section">
                 <Card.Body>
-                  <Card.Title>
-                    Expectation
-                  </Card.Title>
+                  <Card.Title>Expectation</Card.Title>
                   <div>
-                    {currentTool.expectation
-                      ? (<>
+                    {currentTool.expectation ? (
+                      <>
                         <h4>{currentTool.expectation.name}</h4>
                         <div
                           dangerouslySetInnerHTML={{
                             __html: currentTool.expectation.description,
                           }}
                         />
-                      </>)
-                      : (
-                        <Button onClick={() => setShowSelectExpectation(true)}>
-                          Select an Expectation
-                        </Button>
-                      )}
+                      </>
+                    ) : (
+                      <Button onClick={() => setShowSelectExpectation(true)}>
+                        Select an Expectation
+                      </Button>
+                    )}
                   </div>
                 </Card.Body>
               </Card>
 
-              <ToolDisplay.Response tool={currentTool} regenerate={retry} text={currentTool.result?.explanation ?? ''}>
-                {currentTool.result && (<>
-                  {currentTool.result && <Rating value={currentTool.result.rating} />}
-                  <div>{currentTool.result.explanation}</div>
-                </>
+              <ToolDisplay.Response
+                tool={currentTool}
+                regenerate={retry}
+                text={currentTool.result?.explanation ?? ""}
+              >
+                {currentTool.result && (
+                  <>
+                    {currentTool.result && (
+                      <Rating value={currentTool.result.rating} />
+                    )}
+                    <div>{currentTool.result.explanation}</div>
+                  </>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {currentTool?.tool === 'copyedit' && (
-            <ToolDisplay.Root title="Copy Edit" tool={currentTool} onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result?.["clear-revision"]} />}>
+          {currentTool?.tool === "copyedit" && (
+            <ToolDisplay.Root
+              title="Copy Edit"
+              tool={currentTool}
+              onBookmark={onBookmark}
+              actions={
+                <ToolDisplay.Paste
+                  text={currentTool.result?.["clear-revision"]}
+                />
+              }
+            >
               <ToolDisplay.Input tool={currentTool} />
-              <ToolDisplay.Response tool={currentTool} text={currentTool.result?.explanation}>
-                {currentTool.result &&
+              <ToolDisplay.Response
+                tool={currentTool}
+                text={currentTool.result?.explanation}
+              >
+                {currentTool.result && (
                   <>
                     <h3>Suggested Revisions:</h3>
-                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.revision }}></div>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: currentTool.result.revision,
+                      }}
+                    ></div>
                     <h3>Explanation:</h3>
-                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.explanation }}></div>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: currentTool.result.explanation,
+                      }}
+                    ></div>
                   </>
-                }
+                )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {currentTool?.tool === 'grammar' && (
-            <ToolDisplay.Root title="Grammar" tool={currentTool} onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result?.["clear-revision"]} />}>
+          {currentTool?.tool === "grammar" && (
+            <ToolDisplay.Root
+              title="Grammar"
+              tool={currentTool}
+              onBookmark={onBookmark}
+              actions={
+                <ToolDisplay.Paste
+                  text={currentTool.result?.["clear-revision"]}
+                />
+              }
+            >
               <ToolDisplay.Input tool={currentTool} />
-              <ToolDisplay.Response tool={currentTool} text={currentTool.result?.explanation}>
-                {currentTool.result &&
+              <ToolDisplay.Response
+                tool={currentTool}
+                text={currentTool.result?.explanation}
+              >
+                {currentTool.result && (
                   <>
                     <h3>Suggested Revisions:</h3>
-                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.revision }}></div>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: currentTool.result.revision,
+                      }}
+                    ></div>
                     <h3>Explanation:</h3>
-                    <div dangerouslySetInnerHTML={{ __html: currentTool.result.explanation }}></div>
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: currentTool.result.explanation,
+                      }}
+                    ></div>
                   </>
-                }
+                )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-
         </article>
         <Card.Footer>
           {writingTask && (
@@ -388,7 +532,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               variant="outline-dark"
               onClick={() => setShowWritingTask(true)}
             >
-              {t('tool.button.view.title')}
+              {t("tool.button.view.title")}
             </Button>
           )}
           {selectAvailable && (
@@ -396,12 +540,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               variant={writingTask ? "none" : "dark"}
               onClick={() => setShowSelectWritingTasks(true)}
             >
-              {writingTask ? (<>
-                <FontAwesomeIcon icon={faEllipsis} />
-                <span className="visually-hidden sr-only">{t('tool.button.select.title')}</span>
+              {writingTask ? (
+                <>
+                  <FontAwesomeIcon icon={faEllipsis} />
+                  <span className="visually-hidden sr-only">
+                    {t("tool.button.select.title")}
+                  </span>
                 </>
               ) : (
-                t('tool.button.select.title')
+                t("tool.button.select.title")
               )}
             </Button>
           )}
@@ -416,12 +563,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             onHide={() => setShowSelectWritingTasks(false)}
           />
         )}
-        <SelectExpectation show={showSelectExpectation} onHide={() => setShowSelectExpectation(false)}
+        <SelectExpectation
+          show={showSelectExpectation}
+          onHide={() => setShowSelectExpectation(false)}
           select={(expectation: Rule) => {
-            if (currentTool?.tool === 'expectation') {
+            if (currentTool?.tool === "expectation") {
               doTool({ ...currentTool, expectation });
             }
-          }} />
+          }}
+        />
       </Card>
     );
   }

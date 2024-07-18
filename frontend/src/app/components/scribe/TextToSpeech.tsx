@@ -3,7 +3,12 @@
  * a given text.
  * @module components/scribe/TextToSpeach
  */
-import { faEarListen, faPause, faPlay, faStop } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEarListen,
+  faPause,
+  faPlay,
+  faStop,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
@@ -41,9 +46,9 @@ export const TextToSpeech: FC<{ text: string }> = ({
   useEffect(() => {
     if (!open) {
       const synth = window.speechSynthesis;
-      synth.cancel()
+      synth.cancel();
     }
-  }, [open])
+  }, [open]);
 
   /** Start utterance when play is pressed or resume if paused. */
   const handlePlay = useCallback(() => {
@@ -74,10 +79,12 @@ export const TextToSpeech: FC<{ text: string }> = ({
       <Button onClick={() => setOpen(!open)} variant="icon">
         <FontAwesomeIcon icon={faEarListen} />
         <span className="sr-only visually-hidden">
-          {!open ? "Show text to speech controls." : "Hide text to speech controls."}
+          {!open
+            ? "Show text to speech controls."
+            : "Hide text to speech controls."}
         </span>
       </Button>
-      <Collapse in={open} dimension={'width'}>
+      <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
           <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
             <FontAwesomeIcon icon={faPlay} />

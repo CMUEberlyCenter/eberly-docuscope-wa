@@ -9,6 +9,7 @@ import {
   Popover,
   Stack,
 } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
@@ -31,6 +32,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
   show,
   onHide,
 }: SelectWritingTaskProps) => {
+  const { t } = useTranslation();
   const { data: writingTasks } = useWritingTasks(); // all public tasks
   const writing_task = useWritingTask(); // current task
   const inLti = useLti(); // in LTI context
@@ -65,7 +67,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
 
   return (
     <Modal show={show} onHide={onHide} size="lg" scrollable>
-      <Modal.Header closeButton>Select Writing Task</Modal.Header>
+      <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
         <Stack direction="horizontal" gap={3}>
           <ListGroup>
@@ -93,7 +95,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
               variant="warning"
               onClick={() => setSelected(null)}
             >
-              No Writing Task
+              {t("select_task.null")}
             </ListGroup.Item>
           </ListGroup>
           <Card className="w-50 h-100">
@@ -127,7 +129,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
             placement="top"
             overlay={
               <Popover>
-                <Popover.Header>Upload Custom Writing Task</Popover.Header>
+                <Popover.Header>{t("select_task.upload")}</Popover.Header>
                 <Popover.Body>
                   <Form noValidate>
                     <Form.Group>
@@ -137,7 +139,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
                         isInvalid={!valid}
                       />
                       <Form.Control.Feedback type="invalid">
-                        Uploaded file is not a valid writing task specificaton!
+                        {t("select_task.invalid_upload")}
                       </Form.Control.Feedback>
                     </Form.Group>
                   </Form>
@@ -148,15 +150,18 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
             <Button className="me-auto">+</Button>
           </OverlayTrigger>
         )}
+        <Button variant="secondary" onClick={onHide}>
+          {t("cancel")}
+        </Button>
         <Button
+          variant="dark"
           onClick={() => {
             writingTask.next(selected);
             onHide();
           }}
         >
-          Select
+          {t("select")}
         </Button>
-        <Button onClick={onHide}>Cancel</Button>
       </Modal.Footer>
     </Modal>
   );

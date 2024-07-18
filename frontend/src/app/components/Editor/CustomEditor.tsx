@@ -31,7 +31,7 @@ import {
   useSlate,
   withReact,
 } from "slate-react";
-import { withHistory } from 'slate-history';
+import { withHistory } from "slate-history";
 import { editorText } from "../../service/editor-state.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
@@ -67,9 +67,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -128,15 +128,14 @@ const toggleBlock = (editor: Editor, format: string) => {
     Transforms.wrapNodes(editor, block);
   }
 };
-const MarkButton: FC<{ format: Markings; children: ReactNode; tooltip: string }> = ({
-  format,
-  children,
-  tooltip,
-}) => {
+const MarkButton: FC<{
+  format: Markings;
+  children: ReactNode;
+  tooltip: string;
+}> = ({ format, children, tooltip }) => {
   const editor = useSlate();
   return (
-    <OverlayTrigger placement="bottom"
-      overlay={<Tooltip>{tooltip}</Tooltip>}>
+    <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
       <Button
         active={isMarkActive(editor, format)}
         onMouseDown={(e) => {
@@ -194,11 +193,26 @@ const CustomEditor: FC = () => {
         <main className="d-flex overflow-none h-100 flex-column">
           <ButtonToolbar aria-label="Editor Tools">
             <ButtonGroup>
-              <DropdownButton as={ButtonGroup} title={t("editor.menu.file")} variant="light">
-                <Dropdown.Item eventKey="open">{t("editor.menu.open")}</Dropdown.Item>
-                <Dropdown.Item eventKey="save" onClick={() => console.log(content)}>{t("editor.menu.save")}</Dropdown.Item>
+              <DropdownButton
+                as={ButtonGroup}
+                title={t("editor.menu.file")}
+                variant="light"
+              >
+                <Dropdown.Item eventKey="open">
+                  {t("editor.menu.open")}
+                </Dropdown.Item>
+                <Dropdown.Item
+                  eventKey="save"
+                  onClick={() => console.log(content)}
+                >
+                  {t("editor.menu.save")}
+                </Dropdown.Item>
               </DropdownButton>
-              <DropdownButton as={ButtonGroup} title={t("editor.menu.view")} variant="light">
+              <DropdownButton
+                as={ButtonGroup}
+                title={t("editor.menu.view")}
+                variant="light"
+              >
                 <Dropdown.Item eventKey="open">???</Dropdown.Item>
               </DropdownButton>
               <Form.Select
@@ -210,24 +224,34 @@ const CustomEditor: FC = () => {
                   toggleBlock(editor, format);
                 }}
               >
-                <option value={"paragraph"}>{t("editor.menu.paragraph")}</option>
+                <option value={"paragraph"}>
+                  {t("editor.menu.paragraph")}
+                </option>
                 <option value={"heading-one"}>{t("editor.menu.h1")}</option>
                 <option value={"heading-two"}>{t("editor.menu.h2")}</option>
                 <option value={"heading-three"}>{t("editor.menu.h3")}</option>
                 <option value={"heading-four"}>{t("editor.menu.h4")}</option>
                 <option value={"bulleted-list"}>{t("editor.menu.list")}</option>
-                <option value={"numbered-list"}>{t("editor.menu.numbered")}</option>
+                <option value={"numbered-list"}>
+                  {t("editor.menu.numbered")}
+                </option>
               </Form.Select>
-              <MarkButton format="bold" tooltip={t('editor.menu.bold')}>
+              <MarkButton format="bold" tooltip={t("editor.menu.bold")}>
                 <FontAwesomeIcon icon={faBold} />
               </MarkButton>
-              <MarkButton format="italic" tooltip={t('editor.menu.italic')}>
+              <MarkButton format="italic" tooltip={t("editor.menu.italic")}>
                 <FontAwesomeIcon icon={faItalic} />
               </MarkButton>
-              <MarkButton format="underline" tooltip={t('editor.menu.underline')}>
+              <MarkButton
+                format="underline"
+                tooltip={t("editor.menu.underline")}
+              >
                 <FontAwesomeIcon icon={faUnderline} />
               </MarkButton>
-              <MarkButton format="strikethrough" tooltip={t('editor.menu.strike')}>
+              <MarkButton
+                format="strikethrough"
+                tooltip={t("editor.menu.strike")}
+              >
                 <FontAwesomeIcon icon={faStrikethrough} />
               </MarkButton>
             </ButtonGroup>

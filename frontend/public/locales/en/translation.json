@@ -58,6 +58,31 @@
         "title": "Select Writing Task"
       }
     },
-    "initial": "Write & highlight text for further actions."
+    "initial": "Write & highlight text for further actions.",
+    "bookmark": "Bookmark",
+    "bookmarked": "Bookmarked",
+    "input": "Your Input",
+    "no_selection": "Please select some text before launching this tool.",
+    "output": "A.I. Response",
+    "regenerate": "Regenerate",
+    "paste": "Paste Text"
+  },
+  "clipboard": "Copy to Clipboard",
+
+  "expectation": {
+    "title": "Select an Expectation",
+    "task": "Writing Task"
+  },
+  "select_task": {
+    "title": "Select Writing Task",
+    "upload": "Upload Custom Writing Task",
+    "invalid_upload": "Uploaded file is not a valid writing task specificaton!",
+    "null": "No Writing Task"
+  },
+  "cancel": "Cancel",
+  "select": "Select",
+  "details": {
+    "include": "Include Details",
+    "insert": "Insert Outline"
   }
 }

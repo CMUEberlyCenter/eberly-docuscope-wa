@@ -134,14 +134,19 @@ export interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
 
-export async function postConvertNotes({text}: SelectedText, output: 'prose'|'bullets' = 'prose', writing_task?: WritingTask|null) {
-  const endpoint = output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
-  const {user_lang, target_lang} = writing_task?.info ?? {};
-  const response = await fetch(`/api/v2/scribe/${endpoint}`,
-    {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: text, user_lang, target_lang })
-    });
+export async function postConvertNotes(
+  { text }: SelectedText,
+  output: 'prose' | 'bullets' = 'prose',
+  writing_task?: WritingTask | null
+) {
+  const endpoint =
+    output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
+  const { user_lang, target_lang } = writing_task?.info ?? {};
+  const response = await fetch(`/api/v2/scribe/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes: text, user_lang, target_lang }),
+  });
   if (!response.ok) {
     const err = await response.text();
     //throw new Error(`${response.status}: ${err}`);
@@ -251,31 +256,33 @@ export const [useFixedGrammar, fixedGrammar$] = bind<
 /*** Clarify selected text ***/
 export type CopyEditResponse = {
   revision: string; // html
-  "clear-revision": string; // html
+  'clear-revision': string; // html
   explanation: string; // html
-
-}
-export async function postClarifyText({text}: SelectedText, writing_task?: WritingTask|null): Promise<CopyEditResponse> {
-  const {user_lang, target_lang} = writing_task?.info ?? {};
+};
+export async function postClarifyText(
+  { text }: SelectedText,
+  writing_task?: WritingTask | null
+): Promise<CopyEditResponse> {
+  const { user_lang, target_lang } = writing_task?.info ?? {};
   const response = await fetch(`/api/v2/scribe/copyedit`, {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({text, user_lang, target_lang}),
-  })
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text, user_lang, target_lang }),
+  });
   const errorData: CopyEditResponse = {
     revision: '',
-    "clear-revision": '',
+    'clear-revision': '',
     explanation: '',
-  }
+  };
   if (!response.ok) {
     const err = await response.text();
     console.error(err);
-    return {...errorData, explanation: err};
+    return { ...errorData, explanation: err };
   }
   const data: ChatResponse = await response.json();
   if ('error' in data) {
     console.error(data.message);
-    return {...errorData, explanation: data.message };
+    return { ...errorData, explanation: data.message };
   }
   if ('choices' in data) {
     const content = data.choices.at(0)?.message.content;
@@ -284,7 +291,7 @@ export async function postClarifyText({text}: SelectedText, writing_task?: Writi
     }
   }
   console.error(data);
-  return {...errorData, explanation: 'Invalid response from service.'};
+  return { ...errorData, explanation: 'Invalid response from service.' };
 }
 
 export const [useScribeFeatureClarify, clarifyFeature$] = bind(
@@ -356,11 +363,22 @@ export interface AssessmentData {
   explanation: string;
 }
 
-export async function postExpectation(text: string, {name, description}: Rule, writing_task?: WritingTask | null): Promise<AssessmentData> {
-  const {user_lang, target_lang} = writing_task?.info ?? {};
+export async function postExpectation(
+  text: string,
+  { name, description }: Rule,
+  writing_task?: WritingTask | null
+): Promise<AssessmentData> {
+  const { user_lang, target_lang } = writing_task?.info ?? {};
   const response = await fetch('/api/v2/scribe/assess_expectation', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({text, user_lang, target_lang, expectation: name, description})
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text,
+      user_lang,
+      target_lang,
+      expectation: name,
+      description,
+    }),
   });
   const errorData: AssessmentData = {
     rating: 0.0,
@@ -370,7 +388,7 @@ export async function postExpectation(text: string, {name, description}: Rule, w
   if (!response.ok) {
     const err = await response.text();
     console.error(err);
-    return {...errorData, explanation: err};
+    return { ...errorData, explanation: err };
   }
   const data: ChatResponse = await response.json();
   if ('error' in data) {
@@ -388,9 +406,7 @@ export async function postExpectation(text: string, {name, description}: Rule, w
     }
   }
   console.error(data);
-  return {...errorData,
-    explanation: 'Invalid respose from service.',
-  };
+  return { ...errorData, explanation: 'Invalid respose from service.' };
 }
 /**
  * Fetch expectation audit results from backend.
