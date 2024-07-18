@@ -198,10 +198,10 @@ const CustomEditor: FC = () => {
                 title={t("editor.menu.file")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open">
+                <Dropdown.Item eventKey="open" disabled>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
-                <Dropdown.Item
+                <Dropdown.Item disabled
                   eventKey="save"
                   onClick={() => console.log(content)}
                 >
@@ -213,7 +213,7 @@ const CustomEditor: FC = () => {
                 title={t("editor.menu.view")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open">???</Dropdown.Item>
+                <Dropdown.Item eventKey="open" disabled>???</Dropdown.Item>
               </DropdownButton>
               <Form.Select
                 aria-label="Block format"
