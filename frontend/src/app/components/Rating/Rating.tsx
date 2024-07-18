@@ -19,7 +19,10 @@ export const Rating: React.FC<RatingProps> = ({ value }: RatingProps) => {
   const fullSymbols = Math.floor(rating);
 
   return (
-    <OverlayTrigger placement="right" overlay={<Tooltip>{rating.toFixed(1)}</Tooltip>}>
+    <OverlayTrigger
+      placement="right"
+      overlay={<Tooltip>{rating.toFixed(1)}</Tooltip>}
+    >
       <div className="assess-rating">
         <div className={`d-flex rating-${fullSymbols}`}>
           {new Array(scale).fill(0).map((_v, i) => {

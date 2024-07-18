@@ -2,11 +2,17 @@ import { Request, Response, Router } from 'express';
 import { readFile } from 'fs/promises';
 import OpenAI from 'openai';
 import format from 'string-format';
-import { PromptData } from '../model/prompt';
-import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from '../settings';
 import { ProblemDetails } from '../../lib/ProblemDetails';
+import {
+  NotesPrompt,
+  PromptData,
+  ReviewPrompt,
+  TextPrompt,
+} from '../model/prompt';
+import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from '../settings';
 
 let prompts: PromptData;
+const DefaultLanguage = 'English';
 
 export const scribe = Router();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -24,8 +30,7 @@ async function readTemplates(): Promise<PromptData> {
 }
 
 const scribeNotes =
-  (key: 'notes_to_prose' | 'notes_to_bullets') =>
-  async (request: Request, response: Response) => {
+  (key: NotesPrompt) => async (request: Request, response: Response) => {
     const { notes } = request.body;
     try {
       const templates = (await readTemplates()).templates;
@@ -51,8 +56,8 @@ const scribeNotes =
       }
       const content = format(prompt, {
         notes,
-        target_lang: request.body.target_lang ?? 'English',
-        user_lang: request.body.user_lang ?? 'English',
+        target_lang: request.body.target_lang ?? DefaultLanguage,
+        user_lang: request.body.user_lang ?? DefaultLanguage,
       });
       const prose = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -84,9 +89,9 @@ const scribeNotes =
 scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
 scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 
-type TextPrompt = 'copyedit' | 'grammar' | 'logical_flow' | 'topics';
 const scribeText =
-  (key: TextPrompt) => async (request: Request, response: Response) => {
+  (key: TextPrompt | ReviewPrompt) =>
+  async (request: Request, response: Response) => {
     const { text } = request.body;
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates[
@@ -104,8 +109,8 @@ const scribeText =
       }
       const content = format(prompt, {
         text,
-        user_lang: request.body.user_lang ?? 'English',
-        target_lang: request.body.target_lang ?? 'English',
+        user_lang: request.body.user_lang ?? DefaultLanguage,
+        target_lang: request.body.target_lang ?? DefaultLanguage,
       });
       const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -135,15 +140,17 @@ const scribeText =
   };
 scribe.post('/proofread', scribeText('grammar'));
 scribe.post('/copyedit', scribeText('copyedit'));
-scribe.post('/logical_flow', scribeText('logical_flow'));
-scribe.post('/topics', scribeText('topics'));
+scribe.post('/local_coherence', scribeText('local_coherence'));
+scribe.post('/global_coherence', scribeText('global_coherence'));
+scribe.post('/arguments', scribeText('arguments'));
+scribe.post('/key_points', scribeText('key_points'));
 
 scribe.post(
   '/assess_expectation',
   async (request: Request, response: Response) => {
     const { text, expectation, description } = request.body;
-    const user_lang = request.body.user_lang ?? 'English';
-    const target_lang = request.body.target_lang ?? 'English';
+    const user_lang = request.body.user_lang ?? DefaultLanguage;
+    const target_lang = request.body.target_lang ?? DefaultLanguage;
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates
         .expectation;
@@ -192,3 +199,12 @@ scribe.post(
     }
   }
 );
+
+// scribe.post('/assess_expectations',
+//   async (request:Request, response: Response) => {
+//     const { text, task } = request.body;
+//     const user_lang = task.info.user_lang ?? DefaultLanguage;
+//     const target_lang = task.info.target_lang ?? DefaultLanguage;
+
+//   }
+// )

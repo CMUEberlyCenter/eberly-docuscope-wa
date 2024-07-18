@@ -29,6 +29,7 @@ import {
   postClarifyText,
   postConvertNotes,
   postExpectation,
+  postFlowText,
   useAssessFeature,
   useScribe,
   useScribeFeatureGrammar,
@@ -113,7 +114,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             addHistory(toolResult);
             break;
           }
-          case "flow":
+          case "flow": {
+            const result = await postFlowText(data.input, writingTask);
+            const toolResult = { ...data, result };
+            setCurrentTool(toolResult);
+            addHistory(toolResult);
+            break;
+          }
           default:
             console.warn(`Unhandled tool: ${data.tool}`);
         }
@@ -307,7 +314,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         }
                       >
                         <Button
-                          disabled
                           variant="outline-dark"
                           onClick={() => onTool("flow")}
                         >
@@ -368,7 +374,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           {/* Maybe use Carousel for history? */}
           {currentTool?.tool === "prose" && (
             <ToolDisplay.Root
-              title="Prose Generation"
+              title={t("tool.button.prose.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
               actions={<ToolDisplay.Paste text={currentTool.result} />}
@@ -386,7 +392,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "bullets" && (
             <ToolDisplay.Root
-              title="Bullets Generation"
+              title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
               actions={<ToolDisplay.Paste text={currentTool.result} />}
@@ -412,14 +418,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "expectation" && (
             <ToolDisplay.Root
-              title={"Content"}
+              title={t("tool.button.expectation.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
             >
               <ToolDisplay.Input tool={currentTool} />
               <Card as="section">
                 <Card.Body>
-                  <Card.Title>Expectation</Card.Title>
+                  <Card.Title>{t("tool.expectation")}</Card.Title>
                   <div>
                     {currentTool.expectation ? (
                       <>
@@ -432,7 +438,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       </>
                     ) : (
                       <Button onClick={() => setShowSelectExpectation(true)}>
-                        Select an Expectation
+                        {t("tool.select_expectation")}
                       </Button>
                     )}
                   </div>
@@ -446,9 +452,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 {currentTool.result && (
                   <>
-                    {currentTool.result && (
-                      <Rating value={currentTool.result.rating} />
-                    )}
+                    <Rating value={currentTool.result.rating} />
                     <div>{currentTool.result.explanation}</div>
                   </>
                 )}
@@ -457,29 +461,28 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "copyedit" && (
             <ToolDisplay.Root
-              title="Copy Edit"
+              title={t("tool.button.copyedit.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
               actions={
-                <ToolDisplay.Paste
-                  text={currentTool.result?.["clear-revision"]}
-                />
+                <ToolDisplay.Paste text={currentTool.result?.clean_revision} />
               }
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}
+                regenerate={retry}
                 text={currentTool.result?.explanation}
               >
                 {currentTool.result && (
                   <>
-                    <h3>Suggested Revisions:</h3>
+                    <h3>{t("tool.suggestion")}</h3>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: currentTool.result.revision,
                       }}
                     ></div>
-                    <h3>Explanation:</h3>
+                    <h3>{t("tool.explanation")}</h3>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: currentTool.result.explanation,
@@ -492,34 +495,54 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "grammar" && (
             <ToolDisplay.Root
-              title="Grammar"
+              title={t("tool.button.grammar.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
               actions={
-                <ToolDisplay.Paste
-                  text={currentTool.result?.["clear-revision"]}
-                />
+                <ToolDisplay.Paste text={currentTool.result?.clean_revision} />
               }
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
+                regenerate={retry}
                 tool={currentTool}
                 text={currentTool.result?.explanation}
               >
                 {currentTool.result && (
                   <>
-                    <h3>Suggested Revisions:</h3>
+                    <h3>{t("tool.suggestion")}</h3>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: currentTool.result.revision,
                       }}
                     ></div>
-                    <h3>Explanation:</h3>
+                    <h3>{t("tool.explanation")}</h3>
                     <div
                       dangerouslySetInnerHTML={{
                         __html: currentTool.result.explanation,
                       }}
                     ></div>
+                  </>
+                )}
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
+          )}
+          {currentTool?.tool === "flow" && (
+            <ToolDisplay.Root
+              title={t("tool.button.flow.tooltip")}
+              tool={currentTool}
+              onBookmark={onBookmark}
+            >
+              <ToolDisplay.Input tool={currentTool} />
+              <ToolDisplay.Response
+                tool={currentTool}
+                text={currentTool.result?.explanation}
+                regenerate={retry}
+              >
+                {currentTool.result && (
+                  <>
+                    <Rating value={currentTool.result.rating} />
+                    <div>{currentTool.result.explanation}</div>
                   </>
                 )}
               </ToolDisplay.Response>

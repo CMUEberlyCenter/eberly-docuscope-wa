@@ -5,13 +5,17 @@ export type Prompt = {
   temperature?: number | string;
 };
 
+export type NotesPrompt = 'notes_to_prose' | 'notes_to_bullets';
+type ExpectationPrompt = 'expectation';
+export type TextPrompt = 'copyedit' | 'grammar' | 'local_coherence';
+export type ReviewPrompt = 'arguments' | 'global_coherence' | 'key_points';
+type ReviewExpectationsPrompt = 'all_expectations';
 type PromptType =
-  | 'notes_to_prose'
-  | 'logical_flow'
-  | 'grammar'
-  | 'copyedit'
-  | 'expectation'
-  | 'topics';
+  | NotesPrompt
+  | ExpectationPrompt
+  | TextPrompt
+  | ReviewPrompt
+  | ReviewExpectationsPrompt;
 
 /** Prompt templates file json data. */
 export type PromptData = {

@@ -3,6 +3,7 @@ import { Rule } from '../../../lib/WritingTask';
 import {
   AssessmentData,
   CopyEditResponse,
+  LocalCoherenceResponse,
   SelectedNotesProse,
 } from '../../service/scribe.service';
 
@@ -43,8 +44,8 @@ export interface CopyEditTool extends ToolData<CopyEditResponse> {
 export interface GrammarTool extends ToolData<CopyEditResponse> {
   tool: 'grammar';
 }
-// TBD
-export interface FlowTool extends ToolData<string> {
+
+export interface FlowTool extends ToolData<LocalCoherenceResponse> {
   tool: 'flow'; // local-coherence
 }
 

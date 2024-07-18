@@ -256,24 +256,22 @@ export const [useFixedGrammar, fixedGrammar$] = bind<
 /*** Clarify selected text ***/
 export type CopyEditResponse = {
   revision: string; // html
-  'clear-revision': string; // html
+  clean_revision: string; // html
   explanation: string; // html
 };
-export async function postClarifyText(
+
+async function postText<T extends { explanation: string }>(
+  endpoint: string,
+  errorData: T,
   { text }: SelectedText,
   writing_task?: WritingTask | null
-): Promise<CopyEditResponse> {
+): Promise<T> {
   const { user_lang, target_lang } = writing_task?.info ?? {};
-  const response = await fetch(`/api/v2/scribe/copyedit`, {
+  const response = await fetch(`/api/v2/scribe/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ text, user_lang, target_lang }),
   });
-  const errorData: CopyEditResponse = {
-    revision: '',
-    'clear-revision': '',
-    explanation: '',
-  };
   if (!response.ok) {
     const err = await response.text();
     console.error(err);
@@ -287,12 +285,68 @@ export async function postClarifyText(
   if ('choices' in data) {
     const content = data.choices.at(0)?.message.content;
     if (content) {
-      return JSON.parse(content) as CopyEditResponse;
+      try {
+        return JSON.parse(content) as T;
+      } catch (err) {
+        console.log(content);
+        console.error(err);
+        if (err instanceof Error) {
+          return { ...errorData, explanation: err.message };
+        }
+      }
     }
   }
   console.error(data);
   return { ...errorData, explanation: 'Invalid response from service.' };
 }
+export const postClarifyText = (
+  selected: SelectedText,
+  writing_task?: WritingTask | null
+) =>
+  postText<CopyEditResponse>(
+    'copyedit',
+    {
+      revision: '',
+      clean_revision: '',
+      explanation: '',
+    },
+    selected,
+    writing_task
+  );
+// export async function postClarifyText(
+//   { text }: SelectedText,
+//   writing_task?: WritingTask | null
+// ): Promise<CopyEditResponse> {
+//   const { user_lang, target_lang } = writing_task?.info ?? {};
+//   const response = await fetch(`/api/v2/scribe/copyedit`, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ text, user_lang, target_lang }),
+//   });
+//   const errorData: CopyEditResponse = {
+//     revision: '',
+//     clean_revision: '',
+//     explanation: '',
+//   };
+//   if (!response.ok) {
+//     const err = await response.text();
+//     console.error(err);
+//     return { ...errorData, explanation: err };
+//   }
+//   const data: ChatResponse = await response.json();
+//   if ('error' in data) {
+//     console.error(data.message);
+//     return { ...errorData, explanation: data.message };
+//   }
+//   if ('choices' in data) {
+//     const content = data.choices.at(0)?.message.content;
+//     if (content) {
+//       return JSON.parse(content) as CopyEditResponse;
+//     }
+//   }
+//   console.error(data);
+//   return { ...errorData, explanation: 'Invalid response from service.' };
+// }
 
 export const [useScribeFeatureClarify, clarifyFeature$] = bind(
   settings$.pipe(map((settings) => settings.grammar)),
@@ -357,11 +411,11 @@ export const [useAssessFeature, assessFeature$] = bind(
   settings$.pipe(map((settings) => settings.assess_expectations)),
   false
 );
-export interface AssessmentData {
+export type AssessmentData = {
   rating: number;
   first_sentence: string;
   explanation: string;
-}
+};
 
 export async function postExpectation(
   text: string,
@@ -510,6 +564,25 @@ const assessed = combineLatest({
 export const [useAssessment, assessment$] = bind(assessed, SUSPENSE);
 
 /****** Logical Flow Audit ******/
+export type LocalCoherenceResponse = {
+  rating: number;
+  explanation: string;
+};
+
+export const postFlowText = (
+  selected: SelectedText,
+  writing_task?: WritingTask | null
+) =>
+  postText<LocalCoherenceResponse>(
+    'local_coherence',
+    {
+      rating: 0,
+      explanation: '',
+    },
+    selected,
+    writing_task
+  );
+
 export const [useScribeFeatureLogicalFlow, featureLogicalFlow] = bind(
   settings$.pipe(map((settings) => !!settings.logical_flow)),
   false
@@ -624,3 +697,37 @@ export const [useTopicsAudit, topicsAudit$] = bind<SUSPENSE | TextList>(
   ),
   SUSPENSE
 );
+
+////////
+// type Suggestion = {
+//   text: string; // reference
+//   explanation: string; // evaluation
+//   suggestions: string;
+// }
+// type GlobalCoherenceResponse = {
+//   "Given New Contract Violation": Suggestion[];
+//   "Sudden Shift in Topic": Suggestion[];
+//   "Illogical Order": Suggestion[];
+//   "Redundant Information": Suggestion[];
+//   "Inconsistent Information": Suggestion[];
+// }
+
+// type Claim = {claim: string, support: string, sentences: string[], suggestions: string[]}
+// type ArgumentsResponse = {
+//   main_argument: string;
+//   arguments: Claim[];
+//   counter_examples: Claim[];
+//   rebuttals: Claim[];
+// }
+
+// type KeyPointsResponse = {
+//   point: string;
+//   elaborations: {elaboration_strategy: string, explanation: string}[];
+//   sentences: string[];
+//   suggestions: string[];
+// }[]
+
+// type AllExpectationsResponse = {
+//   sentences: string[];
+//   explanation: string;
+// }

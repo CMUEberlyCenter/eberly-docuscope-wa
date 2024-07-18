@@ -65,7 +65,11 @@
     "no_selection": "Please select some text before launching this tool.",
     "output": "A.I. Response",
     "regenerate": "Regenerate",
-    "paste": "Paste Text"
+    "paste": "Paste Text",
+    "expectation": "Expectation:",
+    "select_expectation": "Select an Expectation",
+    "explanation": "Explanation:",
+    "suggestion": "Suggested Revisions:"
   },
   "clipboard": "Copy to Clipboard",
 
