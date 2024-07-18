@@ -1,0 +1,25 @@
+{
+  "title": "Review",
+  "select_tool": "Select a tool",
+  "sentences": {
+    "title": "Sentence Density Chart"
+  },
+  "global_coherence": {
+    "title": "Logical Progression Issues"
+  },
+  "key_ideas": {
+    "title": "List of Key Ideas"
+  },
+  "arguments": {
+    "title": "Lines of Arguments"
+  },
+  "expectations": {
+    "title": "Reader Expectations"
+  },
+  "organization": {
+    "title": "Organization (Term Matrix)"
+  },
+  "impressions": {
+    "title": "Impressions"
+  }
+}
