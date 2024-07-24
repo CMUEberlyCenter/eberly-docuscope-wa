@@ -697,37 +697,3 @@ export const [useTopicsAudit, topicsAudit$] = bind<SUSPENSE | TextList>(
   ),
   SUSPENSE
 );
-
-////////
-// type Suggestion = {
-//   text: string; // reference
-//   explanation: string; // evaluation
-//   suggestions: string;
-// }
-// type GlobalCoherenceResponse = {
-//   "Given New Contract Violation": Suggestion[];
-//   "Sudden Shift in Topic": Suggestion[];
-//   "Illogical Order": Suggestion[];
-//   "Redundant Information": Suggestion[];
-//   "Inconsistent Information": Suggestion[];
-// }
-
-// type Claim = {claim: string, support: string, sentences: string[], suggestions: string[]}
-// type ArgumentsResponse = {
-//   main_argument: string;
-//   arguments: Claim[];
-//   counter_examples: Claim[];
-//   rebuttals: Claim[];
-// }
-
-// type KeyPointsResponse = {
-//   point: string;
-//   elaborations: {elaboration_strategy: string, explanation: string}[];
-//   sentences: string[];
-//   suggestions: string[];
-// }[]
-
-// type AllExpectationsResponse = {
-//   sentences: string[];
-//   explanation: string;
-// }

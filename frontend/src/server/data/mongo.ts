@@ -5,11 +5,14 @@ import { PathLike } from 'fs';
 import { readFile, readdir, stat } from 'fs/promises';
 import { WritingTask, isWritingTask } from '../../lib/WritingTask';
 import { join } from 'path';
+import { Review } from '../model/review';
+import { Analysis } from '../../lib/ReviewResponse';
 
 const client = new MongoClient(MONGO_CLIENT);
 
 const ASSIGNMENTS = 'assignments';
 const WRITING_TASKS = 'writing_tasks';
+const REVIEW = 'review';
 
 /**
  * Retrieve settings for a given assignment.
@@ -124,4 +127,39 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
     console.error(err);
     return ret; // Should this return [] or current progress?
   }
+}
+
+export async function findReviewById(id: string) {
+  const _id = new ObjectId(id);
+  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  const review = await collection.findOne<Review>({ _id });
+  if (!review) {
+    throw new ReferenceError(`Document ${id} not found.`);
+  }
+  return review;
+}
+
+export async function insertReview(document: string, writing_task: WritingTask | null, user?: string, assignment?: string) {
+  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  const ins = await collection.insertOne({
+    writing_task,
+    assignment,
+    user,
+    document,
+    analysis: []
+  });
+  return ins.insertedId;
+} 
+
+export async function updateReviewByIdAddAnalysis(
+  id: string,
+  analysis: Analysis
+) {
+  const _id = new ObjectId(id);
+  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  await collection.updateOne(
+    { _id },
+    { $push: { analysis: {...analysis, datetime: new Date() } } }
+  );
+  // TODO error handling.
 }

@@ -27,6 +27,7 @@ import {
 } from './settings';
 import { isWritingTask } from '../lib/WritingTask';
 import { ProblemDetails } from '../lib/ProblemDetails';
+import { reviews } from './api/reviews';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -154,8 +155,11 @@ async function __main__() {
   Provider.app.use('/api/v2/assignments', assignments);
   // Scribe Endpoints
   Provider.app.use('/api/v2/scribe', scribe);
-  // OnTopic Enpoint
+  // OnTopic Enpoints
   Provider.app.use('/api/v2/ontopic', ontopic);
+  // Reviews Endpoints
+  Provider.app.use('/api/v2/reviews', reviews);
+  
   console.log(`OnTopic: ${ONTOPIC_URL}`);
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {

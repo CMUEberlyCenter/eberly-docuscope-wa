@@ -15,6 +15,7 @@ import {
   Tab,
   Tooltip,
 } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
@@ -23,7 +24,7 @@ import FlowIcon from "../../assets/icons/Flow.svg?react";
 import GenerateIcon from "../../assets/icons/Generate.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import logo from "../../assets/logo.svg";
-import { serialize } from "../../service/editor-state.service";
+import { serialize, serializeHtml } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
   postClarifyText,
@@ -44,7 +45,6 @@ import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolDisplay } from "./ToolDisplay";
 import { Tool, ToolResult } from "./ToolResults";
-import { useTranslation } from "react-i18next";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -192,6 +192,28 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         );
       }
     }, [history, currentTool]);
+
+    const onReview = useCallback(async () => {
+      const resp = await fetch('/api/v2/reviews/', {
+        method: 'POST',
+        credentials: 'same-origin',
+        redirect: 'manual',
+        headers:{ "Content-Type": "application/json",},
+        // TODO possibly add text serialization for data processing.
+        body: JSON.stringify({document: serializeHtml(editor.children), writing_task: writingTask})
+      });
+      if (resp.redirected) {
+        console.log(resp.url)
+        return window.open(resp.url, '_blank');
+      }
+      if (!resp.ok) {
+        console.error(resp.status);
+        return; // TODO better error reporting
+      }
+      const reviewId = await resp.json();
+      console.log(reviewId);
+      return window.open(`/review.html?id=${reviewId}`);
+    }, [writingTask, editor]);
     return (
       <Card
         {...props}
@@ -221,7 +243,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     </Nav.Link>
                   </Nav.Item>
                   <Nav.Link
-                    onClick={() => window.open("review.html", "_blank")}
+                    onClick={() => onReview()}
                   >
                     {t("tool.tab.review")}
                   </Nav.Link>

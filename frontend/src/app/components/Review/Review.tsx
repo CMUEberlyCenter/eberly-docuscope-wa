@@ -1,17 +1,21 @@
 import { FC, useState } from "react";
-import { Alert, Button, Card, Form } from "react-bootstrap";
+import { Alert, Button, Card, Form, Navbar, Placeholder } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import logo from "../../assets/logo.svg";
+import { useReview } from "../../service/review.service";
 import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import TaskViewer from "./TaskViewer";
 
 
 export const Review: FC = () => {
   const { t } = useTranslation('review');
+  const { t: tt } = useTranslation();
   const settings = useSettings();
+  const review = useReview();
   const [showWritingTask, setShowWritingTask] = useState(false);
-  const writingTask = useWritingTask(); // TODO writingTask.next(...)
+  const writingTask = useWritingTask();
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
   const sentencesFeature = true;
@@ -29,9 +33,16 @@ export const Review: FC = () => {
       expandToMin={true}
     >
       <main className="d-flex overflow-none h-100 flex-column">
-        <div className="p-2 flex-grow-1 overflow-auto">
-          User writing
-        </div>
+        <Navbar>
+          {/* TODO add assignment and user info. */}
+          <div className="ms-3">
+            <h6 className="mb-0 text-muted">{tt("editor.menu.task")}</h6>
+            <h5>{writingTask?.info.name ?? tt("editor.menu.no_task")}</h5>
+          </div>
+        </Navbar>
+        {typeof review !== 'object' ?
+          <Placeholder></Placeholder> :
+          <div className="p-2 flex-grow-1 overflow-auto" dangerouslySetInnerHTML={{ __html: review?.document ?? '' }} />}
       </main>
       <aside>
         <Card className="h-100 w-100">
@@ -79,12 +90,13 @@ export const Review: FC = () => {
           <Card.Footer>
             {writingTask && (
               <Button variant="outline-dark" onClick={() => setShowWritingTask(!showWritingTask)}>
-                {t("tool.button.view.title")}
+                {tt("tool.button.view.title")}
               </Button>
             )}
           </Card.Footer>
           {/* TODO non-editor linked task viewer */}
         </Card>
+        <TaskViewer show={showWritingTask} onHide={() => setShowWritingTask(false)} />
       </aside>
     </Split>)
 };

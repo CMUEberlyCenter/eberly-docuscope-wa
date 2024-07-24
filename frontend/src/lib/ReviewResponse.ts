@@ -1,0 +1,55 @@
+export type ReviewTool = 'global_coherence' | 'all_expectations' | 'arguments' | 'key_points'
+
+type Suggestion = {
+  text: string; // reference
+  explanation: string; // evaluation
+  suggestions: string;
+}
+export type GlobalCoherenceResponse = {
+  "Given New Contract Violation": Suggestion[];
+  "Sudden Shift in Topic": Suggestion[];
+  "Illogical Order": Suggestion[];
+  "Redundant Information": Suggestion[];
+  "Inconsistent Information": Suggestion[];
+}
+
+type Claim = { claim: string, support: string, sentences: string[], suggestions: string[] }
+export type ArgumentsResponse = {
+  main_argument: string;
+  arguments: Claim[];
+  counter_examples: Claim[];
+  rebuttals: Claim[];
+}
+
+export type KeyPointsResponse = {
+  point: string;
+  elaborations: { elaboration_strategy: string, explanation: string }[];
+  sentences: string[];
+  suggestions: string[];
+}[]
+
+export type AllExpectationsResponse = {
+  sentences: string[];
+  explanation: string;
+}
+
+type ReviewResponse = GlobalCoherenceResponse | KeyPointsResponse | AllExpectationsResponse | ArgumentsResponse;
+
+interface ReviewData<T extends ReviewResponse> {
+  tool: ReviewTool;
+  datetime?: Date;
+  response: T;
+}
+interface GlobalCoherenceData extends ReviewData<GlobalCoherenceResponse> {
+  tool: 'global_coherence';
+}
+interface KeyPointsData extends ReviewData<KeyPointsResponse> {
+  tool: 'key_points';
+}
+interface AllExpectationsData extends ReviewData<AllExpectationsResponse> {
+  tool: 'all_expectations';
+}
+interface ArgumentsData extends ReviewData<ArgumentsResponse> {
+  tool: 'arguments';
+}
+export type Analysis = GlobalCoherenceData | KeyPointsData | AllExpectationsData | ArgumentsData;

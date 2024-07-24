@@ -56,7 +56,7 @@ export const [useLti, lti$] = bind(lti, isLti());
  * Construct the request parameters that includes the LTI credentials
  * @returns Request parameters with included credentials.
  */
-const getLtiRequest = (): RequestInit => {
+export const getLtiRequest = (): RequestInit => {
   try {
     return {
       credentials: 'include',

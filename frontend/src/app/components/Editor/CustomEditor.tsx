@@ -16,13 +16,16 @@ import {
   OverlayTrigger,
   Tooltip,
 } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+import Split from "react-split";
 import {
+  createEditor,
   Descendant,
   Editor,
-  createEditor,
   Element as SlateElement,
   Transforms,
 } from "slate";
+import { withHistory } from "slate-history";
 import {
   Editable,
   RenderElementProps,
@@ -31,13 +34,9 @@ import {
   useSlate,
   withReact,
 } from "slate-react";
-import { withHistory } from "slate-history";
-import { editorText } from "../../service/editor-state.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
-import Split from "react-split";
 import ToolCard from "../ToolCard/ToolCard";
-import { useTranslation } from "react-i18next";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -51,6 +50,8 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
       return <h2 {...attributes}>{children}</h2>;
     case "heading-three":
       return <h3 {...attributes}>{children}</h3>;
+    case "heading-four":
+      return <h4 {...attributes}>{children}</h4>
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
@@ -67,9 +68,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-        "strikethrough" in leaf &&
-        leaf.underline &&
-        leaf.strikethrough
+          "strikethrough" in leaf &&
+          leaf.underline &&
+          leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -100,12 +101,19 @@ const toggleMark = (editor: Editor, format: Markings) => {
   }
 };
 const isBlockActive = (editor: Editor, format: string): boolean => {
+  const { selection } = editor;
+  if (!selection) return false;
   const [match] = Editor.nodes(editor, {
+    at: Editor.unhangRange(editor, selection),
     match: (n) =>
       !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
   });
   return !!match;
 };
+const activeBlockType = (editor: Editor) => {
+  const active = ["heading-one", "heading-two", "heading-three", "heading-four", "bulleted-list", "numbered-list", "paragraph"].find(format => isBlockActive(editor, format));
+  return active ?? 'paragraph';
+}
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
 const toggleBlock = (editor: Editor, format: string) => {
@@ -178,7 +186,7 @@ const CustomEditor: FC = () => {
       onChange={(content: Descendant[]) => {
         // only if change is not selection change.
         if (editor.operations.some((op) => "set_selection" !== op.type)) {
-          editorText.next(content);
+          // editorText.next(content); // FIXME does not have initial // unneccesary with useSlate
           setContent(content);
           sessionStorage.setItem("content", JSON.stringify(content));
         }
@@ -218,7 +226,7 @@ const CustomEditor: FC = () => {
               <Form.Select
                 aria-label="Block format"
                 size="sm"
-                defaultValue={"paragraph"}
+                value={activeBlockType(editor)}
                 onChange={(e) => {
                   const format = e.target.value;
                   toggleBlock(editor, format);
