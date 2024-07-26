@@ -1,12 +1,12 @@
-import { DBRef } from "mongodb";
+import { DBRef } from 'mongodb';
 import { Analysis } from '../../lib/ReviewResponse';
-import { WritingTask } from "../../lib/WritingTask";
-
+import { WritingTask } from '../../lib/WritingTask';
 
 export type Review = {
-  writing_task: WritingTask | null | DBRef;
   assignment?: string;
+  document: string; // html
+  text: string; // plain text
   user?: string;
-  document: string;
+  writing_task: WritingTask | null | DBRef;
   analysis: Analysis[];
-}
+};

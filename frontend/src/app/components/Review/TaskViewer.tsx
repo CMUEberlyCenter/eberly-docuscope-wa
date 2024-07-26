@@ -7,7 +7,7 @@ import {
   ListGroup,
   Modal,
   Row,
-  Stack
+  Stack,
 } from "react-bootstrap";
 import { Rule } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";

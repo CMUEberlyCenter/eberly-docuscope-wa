@@ -6,20 +6,15 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, ReactNode, useCallback } from "react";
-import { Alert, Button, Card, CardProps, Spinner } from "react-bootstrap";
+import { Alert, Button, Card, CardProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/AIResponse.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
+import { ToolResult } from "../../lib/ToolResults";
+import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../scribe/TextToSpeech";
-import { ToolResult } from "./ToolResults";
-
-const MySpinner: FC = () => (
-  <Spinner animation="border" role="status" variant="info" className="mx-auto">
-    <span className="visually-hidden sr-only">Processing...</span>
-  </Spinner>
-);
 
 type ToolProp = { tool?: ToolResult | null };
 type ToolRootProps = CardProps &
@@ -106,7 +101,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
             </Button>
           )}
         </Card.Title>
-        {tool?.result ? children : <MySpinner />}
+        {tool?.result ? children : <Loading />}
       </Card.Body>
     </Card>
   );
@@ -146,6 +141,6 @@ export const ToolDisplay = {
   Root: ToolRoot,
   Input: ToolInput,
   Response: ToolResponse,
-  Spinner: MySpinner,
+  Spinner: Loading,
   Paste: ToolPaste,
 };

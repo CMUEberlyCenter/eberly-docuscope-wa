@@ -51,7 +51,7 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
     case "heading-three":
       return <h3 {...attributes}>{children}</h3>;
     case "heading-four":
-      return <h4 {...attributes}>{children}</h4>
+      return <h4 {...attributes}>{children}</h4>;
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
@@ -68,9 +68,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -111,9 +111,17 @@ const isBlockActive = (editor: Editor, format: string): boolean => {
   return !!match;
 };
 const activeBlockType = (editor: Editor) => {
-  const active = ["heading-one", "heading-two", "heading-three", "heading-four", "bulleted-list", "numbered-list", "paragraph"].find(format => isBlockActive(editor, format));
-  return active ?? 'paragraph';
-}
+  const active = [
+    "heading-one",
+    "heading-two",
+    "heading-three",
+    "heading-four",
+    "bulleted-list",
+    "numbered-list",
+    "paragraph",
+  ].find((format) => isBlockActive(editor, format));
+  return active ?? "paragraph";
+};
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
 const toggleBlock = (editor: Editor, format: string) => {
@@ -209,7 +217,8 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="open" disabled>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
-                <Dropdown.Item disabled
+                <Dropdown.Item
+                  disabled
                   eventKey="save"
                   onClick={() => console.log(content)}
                 >
@@ -221,7 +230,9 @@ const CustomEditor: FC = () => {
                 title={t("editor.menu.view")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open" disabled>???</Dropdown.Item>
+                <Dropdown.Item eventKey="open" disabled>
+                  ???
+                </Dropdown.Item>
               </DropdownButton>
               <Form.Select
                 aria-label="Block format"

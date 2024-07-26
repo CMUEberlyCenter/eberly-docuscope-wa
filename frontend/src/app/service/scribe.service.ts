@@ -13,10 +13,16 @@ import {
   switchMap,
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { Descendant, type Range } from 'slate';
-import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
-import { settings$ } from './settings.service';
 import { Rule, WritingTask } from '../../lib/WritingTask';
+import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
+import {
+  AssessmentData,
+  CopyEditResponse,
+  LocalCoherenceResponse,
+  SelectedNotesProse,
+  SelectedText,
+} from '../lib/ToolResults';
+import { settings$ } from './settings.service';
 
 // TODO: per assignment feature settings.
 
@@ -123,16 +129,6 @@ export function downloadHistory(): void {
 }
 
 type ChatResponse = { error: boolean; message: string } | ChatCompletion;
-
-interface SelectedText {
-  text: string;
-  fragment?: Descendant[];
-  range?: Range;
-  html?: string;
-}
-export interface SelectedNotesProse extends SelectedText {
-  prose?: string;
-}
 
 export async function postConvertNotes(
   { text }: SelectedText,
@@ -254,13 +250,10 @@ export const [useFixedGrammar, fixedGrammar$] = bind<
 >(fixedGrammar, SUSPENSE);
 
 /*** Clarify selected text ***/
-export type CopyEditResponse = {
-  revision: string; // html
-  clean_revision: string; // html
-  explanation: string; // html
-};
 
-async function postText<T extends { explanation: string }>(
+async function postText<
+  T extends { explanation: string } | { general_assessment: string },
+>(
   endpoint: string,
   errorData: T,
   { text }: SelectedText,
@@ -411,11 +404,6 @@ export const [useAssessFeature, assessFeature$] = bind(
   settings$.pipe(map((settings) => settings.assess_expectations)),
   false
 );
-export type AssessmentData = {
-  rating: number;
-  first_sentence: string;
-  explanation: string;
-};
 
 export async function postExpectation(
   text: string,
@@ -439,28 +427,39 @@ export async function postExpectation(
     first_sentence: '',
     explanation: '',
   };
+  // const errorData: ExpectationData = {
+  //   rating: 0.0,
+  //   general_assessment: '',
+  //   gaps: [],
+  // };
   if (!response.ok) {
     const err = await response.text();
     console.error(err);
     return { ...errorData, explanation: err };
+    // return { ...errorData, general_assessment: err };
   }
   const data: ChatResponse = await response.json();
   if ('error' in data) {
     console.error(data.message);
     return {
-      rating: 0.0,
-      first_sentence: '',
+      ...errorData,
       explanation: data.message,
     };
+    // return {
+    //   ...errorData,
+    //   general_assessment: data.message,
+    // };
   }
   if ('choices' in data) {
     const content = data.choices.at(0)?.message.content;
     if (content) {
       return JSON.parse(content) as AssessmentData;
+      // return JSON.parse(content) as ExpectationData;
     }
   }
   console.error(data);
   return { ...errorData, explanation: 'Invalid respose from service.' };
+  // return { ...errorData, general_assessment: 'Invalid respose from service.' };
 }
 /**
  * Fetch expectation audit results from backend.
@@ -494,10 +493,15 @@ function requestAssess(text: string, expectation: string, description: string) {
     )
     .pipe(
       map((data: ChatResponse): AssessmentData => {
+        // const errorData: ExpectationData = {
+        //   rating: 0.0,
+        //   general_assessment: '',
+        //   gaps: [],
+        // };
         const errorData: AssessmentData = {
           rating: 0.0,
-          first_sentence: '',
           explanation: '',
+          first_sentence: '',
         };
         if ('error' in data) {
           console.error(data.message);
@@ -564,10 +568,6 @@ const assessed = combineLatest({
 export const [useAssessment, assessment$] = bind(assessed, SUSPENSE);
 
 /****** Logical Flow Audit ******/
-export type LocalCoherenceResponse = {
-  rating: number;
-  explanation: string;
-};
 
 export const postFlowText = (
   selected: SelectedText,
@@ -577,7 +577,8 @@ export const postFlowText = (
     'local_coherence',
     {
       rating: 0,
-      explanation: '',
+      general_assessment: '',
+      issues: [],
     },
     selected,
     writing_task

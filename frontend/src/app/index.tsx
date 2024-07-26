@@ -11,9 +11,13 @@ if (content) {
   createRoot(content).render(
     <StrictMode>
       {/* TODO Use placeholder instead of spinner for loading */}
-      <Suspense fallback={<Spinner animation="border" role="status" variant="dark">
-        <span className="visually-hidden">Loading...</span>
-      </Spinner>}>
+      <Suspense
+        fallback={
+          <Spinner animation="border" role="status" variant="dark">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        }
+      >
         <CustomEditor />
       </Suspense>
     </StrictMode>

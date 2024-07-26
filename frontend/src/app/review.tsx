@@ -10,9 +10,13 @@ console.assert(content, '"#content" not found!  Unable to render application.');
 if (content) {
   createRoot(content).render(
     <StrictMode>
-      <Suspense fallback={<Spinner animation="border" role="status" variant="dark">
-        <span className="visually-hidden">Loading...</span>
-      </Spinner>}>
+      <Suspense
+        fallback={
+          <Spinner animation="border" role="status" variant="dark">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        }
+      >
         <Review />
       </Suspense>
     </StrictMode>

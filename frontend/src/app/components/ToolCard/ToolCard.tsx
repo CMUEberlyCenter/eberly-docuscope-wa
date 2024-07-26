@@ -1,4 +1,8 @@
-import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowUpRightFromSquare,
+  faCopy,
+  faEllipsis,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from "@slate-serializers/html";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
@@ -44,7 +48,7 @@ import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolDisplay } from "./ToolDisplay";
-import { Tool, ToolResult } from "./ToolResults";
+import { Tool, ToolResult } from "../../lib/ToolResults";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -194,17 +198,26 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     }, [history, currentTool]);
 
     const onReview = useCallback(async () => {
-      const resp = await fetch('/api/v2/reviews/', {
-        method: 'POST',
-        credentials: 'same-origin',
-        redirect: 'manual',
-        headers:{ "Content-Type": "application/json",},
+      const text = serialize(editor.children);
+      if (!text) {
+        // TODO error message about no content.
+        return;
+      }
+      const resp = await fetch("/api/v2/reviews/", {
+        method: "POST",
+        credentials: "same-origin",
+        redirect: "manual",
+        headers: { "Content-Type": "application/json" },
         // TODO possibly add text serialization for data processing.
-        body: JSON.stringify({document: serializeHtml(editor.children), writing_task: writingTask})
+        body: JSON.stringify({
+          text,
+          document: serializeHtml(editor.children),
+          writing_task: writingTask,
+        }),
       });
       if (resp.redirected) {
-        console.log(resp.url)
-        return window.open(resp.url, '_blank');
+        console.log(resp.url);
+        return window.open(resp.url, "_blank");
       }
       if (!resp.ok) {
         console.error(resp.status);
@@ -242,11 +255,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       {t("tool.tab.refine")}
                     </Nav.Link>
                   </Nav.Item>
-                  <Nav.Link
-                    onClick={() => onReview()}
-                  >
+                  <Button variant="link" onClick={() => onReview()}>
                     {t("tool.tab.review")}
-                  </Nav.Link>
+                  </Button>
                 </Nav>
                 <Navbar.Brand>
                   <img
@@ -260,69 +271,100 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             <Tab.Content>
               <Tab.Pane eventKey="generate">
                 <ButtonToolbar className="ms-5 mb-3">
-                  <ButtonGroup className="bg-white shadow tools" size="sm">
-                    {notes2proseFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          disabled={!scribe}
-                          onClick={() => onTool("prose")}
+                  {(notes2proseFeature || bulletsFeature) && (
+                    <ButtonGroup className="bg-white shadow tools" size="sm">
+                      {notes2proseFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
+                          }
                         >
-                          <Stack>
-                            <GenerateIcon />
-                            <span>{t("tool.button.prose.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                    {bulletsFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("tool.button.bullets.tooltip")}</Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          disabled={!scribe}
-                          onClick={() => onTool("bullets")}
+                          <Button
+                            variant="outline-dark"
+                            disabled={!scribe}
+                            onClick={() => onTool("prose")}
+                          >
+                            <Stack>
+                              <GenerateIcon />
+                              <span>{t("tool.button.prose.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                      {bulletsFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>
+                              {t("tool.button.bullets.tooltip")}
+                            </Tooltip>
+                          }
                         >
-                          <Stack>
-                            <GenerateIcon />
-                            <span>{t("tool.button.bullets.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                  </ButtonGroup>
-                  <ButtonGroup className="bg-white shadow tools ms-2" size="sm">
-                    {assessFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>
-                            {t("tool.button.expectation.tooltip")}
-                          </Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          disabled={!scribe || !writingTask}
-                          onClick={() => onTool("expectation")}
+                          <Button
+                            variant="outline-dark"
+                            disabled={!scribe}
+                            onClick={() => onTool("bullets")}
+                          >
+                            <Stack>
+                              <GenerateIcon />
+                              <span>{t("tool.button.bullets.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                    </ButtonGroup>
+                  )}
+                  {assessFeature && (
+                    <ButtonGroup
+                      className="bg-white shadow tools ms-2"
+                      size="sm"
+                    >
+                      {assessFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>
+                              {t("tool.button.expectation.tooltip")}
+                            </Tooltip>
+                          }
                         >
-                          <Stack>
-                            <ContentIcon />
-                            <span>{t("tool.button.expectation.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                  </ButtonGroup>
+                          <Button
+                            variant="outline-dark"
+                            disabled={true || !scribe || !writingTask}
+                            onClick={() => onTool("expectation")}
+                          >
+                            <Stack>
+                              <ContentIcon />
+                              <span>{t("tool.button.expectation.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                      {assessFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>
+                              {t("tool.button.expectations.tooltip")}
+                            </Tooltip>
+                          }
+                        >
+                          <Button
+                            variant="outline-dark"
+                            disabled={true || !scribe || !writingTask}
+                          >
+                            <Stack>
+                              <FontAwesomeIcon
+                                icon={faArrowUpRightFromSquare}
+                              />
+                              <span>{t("tool.button.expectations.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                    </ButtonGroup>
+                  )}
                 </ButtonToolbar>
               </Tab.Pane>
               <Tab.Pane eventKey="refine">
@@ -358,6 +400,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           onClick={() => onTool("copyedit")}
                         >
                           <Stack>
+                            <FontAwesomeIcon icon={faCopy} />
                             <span>{t("tool.button.copyedit.title")}</span>
                           </Stack>
                         </Button>
@@ -438,6 +481,63 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
+          {/* {currentTool?.tool === "expectation" && (
+            <ToolDisplay.Root
+              title={t("tool.button.expectation.tooltip")}
+              tool={currentTool}
+              onBookmark={onBookmark}
+            >
+              <ToolDisplay.Input tool={currentTool} />
+              <Card as="section">
+                <Card.Body>
+                  <Card.Title>{t("tool.expectation")}</Card.Title>
+                  <div>
+                    {currentTool.expectation ? (
+                      <>
+                        <h4>{currentTool.expectation.name}</h4>
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: currentTool.expectation.description,
+                          }}
+                        />
+                      </>
+                    ) : (
+                      <Button onClick={() => setShowSelectExpectation(true)}>
+                        {t("tool.select_expectation")}
+                      </Button>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+
+              <ToolDisplay.Response
+                tool={currentTool}
+                regenerate={retry}
+                text={`${currentTool.result?.general_assessment ?? ""} ` + currentTool.result?.gaps.map(({description, suggestions})=> `${description} ${suggestions.join()}).join("\n\n")}
+              >
+                {currentTool.result && (
+                  <>
+                    {currentTool.result.rating && <Rating value={currentTool.result.rating} />}
+                    <p>{currentTool.result.general_assessment}</p>
+                    <dl>
+                      {currentTool.result.gaps.map(({ description, suggestions }) => (
+                        <>
+                          <dt>{description}</dt>
+                          <dd>
+                            <ul>
+                              {suggestions.map((suggestion) => (
+                                <li>{suggestion}</li>
+                              ))}
+                            </ul>
+                          </dd>
+                        </>
+                      ))}
+                    </dl>
+                  </>
+                )}
+              </ToolDisplay.Response>
+            </ToolDisplay.Root>
+          )} */}
           {currentTool?.tool === "expectation" && (
             <ToolDisplay.Root
               title={t("tool.button.expectation.tooltip")}
@@ -474,8 +574,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 {currentTool.result && (
                   <>
-                    <Rating value={currentTool.result.rating} />
-                    <div>{currentTool.result.explanation}</div>
+                    {currentTool.result.rating && (
+                      <Rating value={currentTool.result.rating} />
+                    )}
+                    <p>{currentTool.result.explanation}</p>
                   </>
                 )}
               </ToolDisplay.Response>
@@ -558,13 +660,40 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}
-                text={currentTool.result?.explanation}
+                text={
+                  currentTool.result?.general_assessment ??
+                  "" +
+                    currentTool.result?.issues
+                      .map(
+                        ({ description, suggestions }) =>
+                          `${description} ${suggestions.join()}`
+                      )
+                      .join()
+                }
                 regenerate={retry}
               >
                 {currentTool.result && (
                   <>
-                    <Rating value={currentTool.result.rating} />
-                    <div>{currentTool.result.explanation}</div>
+                    {currentTool.result.rating && (
+                      <Rating value={currentTool.result.rating} />
+                    )}
+                    <p>{currentTool.result.general_assessment}</p>
+                    <dl>
+                      {currentTool.result.issues.map(
+                        ({ description, suggestions }) => (
+                          <>
+                            <dt>{description}</dt>
+                            <dd>
+                              <ul>
+                                {suggestions.map((suggestion) => (
+                                  <li>{suggestion}</li>
+                                ))}
+                              </ul>
+                            </dd>
+                          </>
+                        )
+                      )}
+                    </dl>
                   </>
                 )}
               </ToolDisplay.Response>

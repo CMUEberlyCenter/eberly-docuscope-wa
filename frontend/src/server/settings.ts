@@ -96,3 +96,5 @@ export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
+
+export const DEFAULT_LANGUAGE = process.env.DEFAULT_LANGUAGE ?? 'English';

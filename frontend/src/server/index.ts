@@ -159,7 +159,7 @@ async function __main__() {
   Provider.app.use('/api/v2/ontopic', ontopic);
   // Reviews Endpoints
   Provider.app.use('/api/v2/reviews', reviews);
-  
+
   console.log(`OnTopic: ${ONTOPIC_URL}`);
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {

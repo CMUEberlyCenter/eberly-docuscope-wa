@@ -139,27 +139,35 @@ export async function findReviewById(id: string) {
   return review;
 }
 
-export async function insertReview(document: string, writing_task: WritingTask | null, user?: string, assignment?: string) {
+export async function insertReview(
+  text: string,
+  document: string,
+  writing_task: WritingTask | null,
+  user?: string,
+  assignment?: string
+) {
   const collection = client.db('docuscope').collection<Review>(REVIEW);
   const ins = await collection.insertOne({
     writing_task,
     assignment,
     user,
     document,
-    analysis: []
+    text,
+    analysis: [],
   });
   return ins.insertedId;
-} 
+}
 
 export async function updateReviewByIdAddAnalysis(
   id: string,
-  analysis: Analysis
+  ...analyses: Analysis[]
 ) {
   const _id = new ObjectId(id);
   const collection = client.db('docuscope').collection<Review>(REVIEW);
-  await collection.updateOne(
+  const result = await collection.findOneAndUpdate(
     { _id },
-    { $push: { analysis: {...analysis, datetime: new Date() } } }
+    { $push: { analysis: { $each: analyses } } }
   );
   // TODO error handling.
+  return result;
 }

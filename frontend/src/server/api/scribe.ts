@@ -9,10 +9,13 @@ import {
   ReviewPrompt,
   TextPrompt,
 } from '../model/prompt';
-import { OPENAI_API_KEY, SCRIBE_TEMPLATES } from '../settings';
+import {
+  DEFAULT_LANGUAGE,
+  OPENAI_API_KEY,
+  SCRIBE_TEMPLATES,
+} from '../settings';
 
 let prompts: PromptData;
-const DefaultLanguage = 'English';
 
 export const scribe = Router();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
@@ -21,7 +24,7 @@ const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
  * Read the prompts from a file with content caching.
  * @returns The contents of the prompts json file.
  */
-async function readTemplates(): Promise<PromptData> {
+export async function readTemplates(): Promise<PromptData> {
   if (!prompts) {
     const file = await readFile(SCRIBE_TEMPLATES, 'utf8');
     prompts = JSON.parse(file);
@@ -56,8 +59,8 @@ const scribeNotes =
       }
       const content = format(prompt, {
         notes,
-        target_lang: request.body.target_lang ?? DefaultLanguage,
-        user_lang: request.body.user_lang ?? DefaultLanguage,
+        target_lang: request.body.target_lang ?? DEFAULT_LANGUAGE,
+        user_lang: request.body.user_lang ?? DEFAULT_LANGUAGE,
       });
       const prose = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -89,7 +92,7 @@ const scribeNotes =
 scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
 scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 
-const scribeText =
+export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
   async (request: Request, response: Response) => {
     const { text } = request.body;
@@ -109,8 +112,8 @@ const scribeText =
       }
       const content = format(prompt, {
         text,
-        user_lang: request.body.user_lang ?? DefaultLanguage,
-        target_lang: request.body.target_lang ?? DefaultLanguage,
+        user_lang: request.body.user_lang ?? DEFAULT_LANGUAGE,
+        target_lang: request.body.target_lang ?? DEFAULT_LANGUAGE,
       });
       const chat = await openai.chat.completions.create({
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -121,7 +124,7 @@ const scribeText =
             content,
           },
         ],
-        model: 'gpt-4',
+        model: 'gpt-4o',
       });
       return response.json(chat);
     } catch (err) {
@@ -149,8 +152,8 @@ scribe.post(
   '/assess_expectation',
   async (request: Request, response: Response) => {
     const { text, expectation, description } = request.body;
-    const user_lang = request.body.user_lang ?? DefaultLanguage;
-    const target_lang = request.body.target_lang ?? DefaultLanguage;
+    const user_lang = request.body.user_lang ?? DEFAULT_LANGUAGE;
+    const target_lang = request.body.target_lang ?? DEFAULT_LANGUAGE;
     try {
       const { prompt, role, temperature } = (await readTemplates()).templates
         .expectation;

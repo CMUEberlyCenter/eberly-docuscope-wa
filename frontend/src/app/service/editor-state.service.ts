@@ -30,7 +30,7 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
     return node.map(serializeHtml).join('\n');
   }
   if (Text.isText(node)) {
-    let string = escapeHtml(node.text)
+    let string = escapeHtml(node.text);
     if ('bold' in node && node.bold) {
       string = `<strong>${string}</strong>`;
     }
@@ -45,28 +45,28 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
     }
     return string;
   }
-  const children = node.children.map(serializeHtml).join('')
+  const children = node.children.map(serializeHtml).join('');
   switch (node.type) {
-    case "block-quote":
+    case 'block-quote':
       return `<blockquote>${children}</blockquote>`;
-    case "bulleted-list":
+    case 'bulleted-list':
       return `<ul>${children}</ul>`;
-    case "heading-one":
+    case 'heading-one':
       return `<h1>${children}</h1>`;
-    case "heading-two":
+    case 'heading-two':
       return `<h2>${children}</h2>`;
-    case "heading-three":
+    case 'heading-three':
       return `<h3>${children}</h3>`;
-    case "heading-four":
+    case 'heading-four':
       return `<h4>${children}</h4>`;
-    case "list-item":
+    case 'list-item':
       return `<li>${children}</li>`;
-    case "numbered-list":
+    case 'numbered-list':
       return `<ol>${children}</ol>`;
     default:
       return `<p>${children}</p>`;
   }
-}
+};
 
 // For tracking the Editor text content.
 export const editorText = new BehaviorSubject<Descendant[]>([]);

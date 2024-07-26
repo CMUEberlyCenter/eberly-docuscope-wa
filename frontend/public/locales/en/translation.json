@@ -1,4 +1,5 @@
 {
+  "loading": "Processing...",
   "editor": {
     "menu": {
       "file": "File",
@@ -36,8 +37,12 @@
         "tooltip": "Generate Bulleted List from Notes"
       },
       "expectation": {
-        "title": "Content",
+        "title": "Check",
         "tooltip": "Check Content Expectations"
+      },
+      "expectations": {
+        "title": "Check All",
+        "tooltip": "Check All Content Expectations"
       },
       "flow": {
         "title": "Flow",

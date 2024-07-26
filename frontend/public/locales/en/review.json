@@ -5,13 +5,34 @@
     "title": "Sentence Density Chart"
   },
   "global_coherence": {
-    "title": "Logical Progression Issues"
+    "title": "Logical Progression Issues",
+    "contract": "Given New Contract Violation",
+    "shift": "Sudden Shift in Topic",
+    "order": "Illogical Order",
+    "redundant": "Redundant Information",
+    "inconsistent": "Inconsistent Information",
+    "suggestion": {
+      "text": "Text",
+      "explanation": "Explanation",
+      "suggestions": "Suggestions"
+    }
   },
   "key_ideas": {
-    "title": "List of Key Ideas"
+    "title": "List of Key Ideas",
+    "elaborations": "Elaborations",
+    "sentences": "Sentences",
+    "suggestions": "Suggestions"
   },
   "arguments": {
-    "title": "Lines of Arguments"
+    "title": "Lines of Arguments",
+    "main": "Main Argument",
+    "arguments": "Arguments",
+    "counter_examples": "Counter Examples",
+    "rebuttals": "Rebuttals",
+    "claim": "Claim",
+    "support": "Support",
+    "sentences": "Sentences",
+    "suggestions":"Suggestions"
   },
   "expectations": {
     "title": "Reader Expectations"
@@ -21,5 +42,9 @@
   },
   "impressions": {
     "title": "Impressions"
+  },
+  "null": {
+    "title": "Select a tool...",
+    "content": "Select a review tool from the above selection box."
   }
 }
