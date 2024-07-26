@@ -1,7 +1,7 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
-import { catchError, concat, Observable, of, switchMap } from 'rxjs';
-import { fromFetch } from 'rxjs/fetch';
+import { BehaviorSubject, filter, map, Observable } from 'rxjs';
+import { AllExpectationsData, ArgumentsData, GlobalCoherenceData, KeyPointsData, OnTopicReviewData } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { Review } from '../../server/model/review';
 import { getLtiRequest } from './lti.service';
@@ -22,7 +22,6 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
         subscriber.error(new Error(err));
       },
       onmessage(msg) {
-        console.log(msg);
         subscriber.next(JSON.parse(msg.data));
       },
       onclose() {
@@ -34,27 +33,6 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
   SUSPENSE
 );
 
-export const [useReviewo, reviewo$] = bind<SUSPENSE | Review | null>(
-  concat(
-    of(SUSPENSE),
-    fromFetch(`/api/v2/reviews/${id}`, { ...getLtiRequest }).pipe(
-      switchMap(async (response: Response) => {
-        if (!response.ok) {
-          throw new Error(response.statusText);
-        }
-        // check for form
-        console.log('got review');
-        const review = (await response.json()) as Review;
-        console.log(review);
-        return review;
-        // return (await response.json()) as Review;
-      }),
-      catchError(() => of(null))
-    )
-  ),
-  SUSPENSE
-);
-
 review$.subscribe((rev) => {
   if (typeof rev === 'object') {
     writingTask.next(
@@ -62,3 +40,37 @@ review$.subscribe((rev) => {
     );
   }
 });
+
+const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(null);
+const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
+const allExpectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(null);
+const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
+const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
+review$.pipe(filter(rev => typeof rev === 'object' && 'analysis' in rev), map(rev => rev.analysis)).subscribe(
+  analyses =>
+    analyses.forEach(analysis => {
+      switch (analysis.tool) {
+        case 'global_coherence':
+          globalCoherenceAnalysis.next(analysis);
+          break;
+        case 'key_points':
+          keyPointsAnalysis.next(analysis);
+          break;
+        case 'all_expectations':
+          allExpectationsAnalysis.next(analysis);
+          break;
+        case 'arguments':
+          argumentsAnalysis.next(analysis);
+          break;
+        case 'ontopic':
+          ontopicAnalysis.next(analysis);
+          break;
+      }
+    })
+);
+
+export const [useGlobalCoherenceData, globalCoherenceData$] = bind(globalCoherenceAnalysis, null);
+export const [useKeyPointsData, keyPointsData$] = bind(keyPointsAnalysis, null);
+export const [useAllExpectationsAnalysis] = bind(allExpectationsAnalysis, null);
+export const [useArgumentsData, argumentsData$] = bind(argumentsAnalysis, null);
+export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);

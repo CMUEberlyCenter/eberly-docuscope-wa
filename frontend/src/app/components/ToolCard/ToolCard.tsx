@@ -216,7 +216,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         }),
       });
       if (resp.redirected) {
-        console.log(resp.url);
         return window.open(resp.url, "_blank");
       }
       if (!resp.ok) {
@@ -224,7 +223,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      console.log(reviewId);
       return window.open(`/review.html?id=${reviewId}`);
     }, [writingTask, editor]);
     return (

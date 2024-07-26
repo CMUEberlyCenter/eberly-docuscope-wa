@@ -1,8 +1,12 @@
+import { OnTopicData } from "./OnTopicData";
+
 export type ReviewTool =
   | 'global_coherence'
   | 'all_expectations'
   | 'arguments'
-  | 'key_points';
+  | 'key_points'
+  | 'ontopic'
+  | 'docuscope';
 
 export type Suggestion = {
   text: string; // reference
@@ -46,7 +50,8 @@ type ReviewResponse =
   | GlobalCoherenceResponse
   | KeyPointsResponse
   | AllExpectationsResponse
-  | ArgumentsResponse;
+  | ArgumentsResponse
+  | OnTopicData;
 
 interface ReviewData<T extends ReviewResponse> {
   tool: ReviewTool;
@@ -67,8 +72,12 @@ export interface AllExpectationsData
 export interface ArgumentsData extends ReviewData<ArgumentsResponse> {
   tool: 'arguments';
 }
+export interface OnTopicReviewData extends ReviewData<OnTopicData> {
+  tool: 'ontopic';
+}
 export type Analysis =
   | GlobalCoherenceData
   | KeyPointsData
   | AllExpectationsData
-  | ArgumentsData;
+  | ArgumentsData
+  | OnTopicReviewData;

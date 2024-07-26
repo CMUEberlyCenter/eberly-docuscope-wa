@@ -17,6 +17,7 @@ import TaskViewer from "./TaskViewer";
 import { GlobalCoherence } from "./GlobalCoherence";
 import { KeyIdeas } from "./KeyIdeas";
 import { Arguments } from "./Arguments";
+import { Sentences } from "./Sentences";
 
 export const Review: FC = () => {
   const { t } = useTranslation("review");
@@ -78,7 +79,7 @@ export const Review: FC = () => {
             >
               <option>{t("null.title")}</option>
               {sentencesFeature && (
-                <option disabled value="sentences">
+                <option value="sentences">
                   {t("sentences.title")}
                 </option>
               )}
@@ -115,22 +116,15 @@ export const Review: FC = () => {
               </Stack>
             )}
             {tool === "global_coherence" && (
-              <GlobalCoherence
-                review={review?.analysis.find(
-                  (a) => a.tool === "global_coherence"
-                )}
-              />
+              <GlobalCoherence/>
             )}
             {tool === "key_ideas" && (
-              <KeyIdeas
-                review={review?.analysis.find((a) => a.tool === "key_points")}
-              />
+              <KeyIdeas/>
             )}
             {tool === "arguments" && (
-              <Arguments
-                review={review.analysis.find((a) => a.tool === "arguments")}
-              />
+              <Arguments/>
             )}
+            {tool === "sentences" && (<Sentences/>)}
           </Card.Body>
           <Card.Footer>
             {writingTask && (

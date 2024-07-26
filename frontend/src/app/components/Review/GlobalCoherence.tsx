@@ -1,7 +1,8 @@
 import { FC } from "react";
 import { Card, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { GlobalCoherenceData, Suggestion } from "../../../lib/ReviewResponse";
+import { Suggestion } from "../../../lib/ReviewResponse";
+import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
 const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
@@ -22,19 +23,21 @@ const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
   );
 };
 
-type GlobalCoherenceProps = { review: GlobalCoherenceData | undefined };
-export const GlobalCoherence: FC<GlobalCoherenceProps> = ({ review }) => {
+export const GlobalCoherence: FC = () => {
   const { t } = useTranslation("review");
+  const review = useGlobalCoherenceData();
 
   return (
     <Card>
       <Card.Body>
-        <Card.Title>{t("global_coherence.title")}</Card.Title>
+        <Card.Title className="text-center">
+          {t("global_coherence.title")}
+        </Card.Title>
         {!review ? (
           <Loading />
         ) : (
           <>
-            <Card.Subtitle>
+            <Card.Subtitle className="text-center">
               {review.datetime
                 ? new Date(review.datetime).toLocaleString()
                 : ""}

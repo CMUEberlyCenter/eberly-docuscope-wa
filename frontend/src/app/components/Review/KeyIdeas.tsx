@@ -1,22 +1,24 @@
 import { FC, Fragment } from "react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { KeyPointsData } from "../../../lib/ReviewResponse";
 import { Loading } from "../Loading/Loading";
+import { useKeyPointsData } from "../../service/review.service";
 
-type KeyIdeasProps = { review: KeyPointsData | undefined };
-export const KeyIdeas: FC<KeyIdeasProps> = ({ review }) => {
+export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
+  const review = useKeyPointsData();
 
   return (
     <Card>
       <Card.Body>
-        <Card.Title>{t("key_ideas.title")}</Card.Title>
+        <Card.Title className="text-center">
+          {t("key_ideas.title")}
+        </Card.Title>
         {!review ? (
           <Loading />
         ) : (
           <>
-            <Card.Subtitle>
+            <Card.Subtitle className="text-center">
               {review.datetime
                 ? new Date(review.datetime).toLocaleString()
                 : ""}

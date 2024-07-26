@@ -2,9 +2,9 @@ import { FC } from "react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
-  ArgumentsData,
-  Claim as ClaimProps,
+  Claim as ClaimProps
 } from "../../../lib/ReviewResponse";
+import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
 const Claim: FC<ClaimProps> = ({ claim, support, sentences, suggestions }) => {
@@ -33,19 +33,21 @@ const Claim: FC<ClaimProps> = ({ claim, support, sentences, suggestions }) => {
   );
 };
 
-type ArgumentsProps = { review: ArgumentsData | undefined };
-export const Arguments: FC<ArgumentsProps> = ({ review }) => {
+export const Arguments: FC = () => {
   const { t } = useTranslation("review");
+  const review = useArgumentsData();
 
   return (
     <Card>
       <Card.Body>
-        <Card.Title>{t("arguments.title")}</Card.Title>
+        <Card.Title className="text-center">
+          {t("arguments.title")}
+        </Card.Title>
         {!review ? (
           <Loading />
         ) : (
           <>
-            <Card.Subtitle>
+            <Card.Subtitle className="text-center">
               {review.datetime
                 ? new Date(review.datetime).toLocaleString()
                 : ""}

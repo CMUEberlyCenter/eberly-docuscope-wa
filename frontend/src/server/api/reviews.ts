@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import OpenAI from 'openai';
 import format from 'string-format';
-import { Analysis } from '../../lib/ReviewResponse';
+import { Analysis, OnTopicReviewData } from '../../lib/ReviewResponse';
 import { isWritingTask, WritingTask } from '../../lib/WritingTask';
 import {
   findReviewById,
@@ -11,17 +11,49 @@ import {
 import { IdToken } from '../model/lti';
 import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
-import { DEFAULT_LANGUAGE, OPENAI_API_KEY } from '../settings';
+import { DEFAULT_LANGUAGE, ONTOPIC_URL, OPENAI_API_KEY } from '../settings';
 import { readTemplates } from './scribe';
 
 export const reviews = Router();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-const ANALYSES: ReviewPrompt[] = [
+const ANALYSES: (ReviewPrompt)[] = [
   'global_coherence',
   'key_points',
   'arguments',
 ];
+
+const doOnTopic = async (review: Review): Promise<OnTopicReviewData | undefined> => {
+  try {
+    const res = await fetch(ONTOPIC_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        status: 'request',
+        data: {
+          base: encodeURIComponent(review.text),
+          custom: "", // no topics in current set of tasks
+          customStructured: [], // no topics in current set of tasks
+        }
+      }),
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+    if (!res.ok) {
+      console.error(`Bad response from ontopic: ${res.status} - ${res.statusText}`);
+      return;
+    }
+    const data = await res.json();
+    return {
+      tool: 'ontopic',
+      datetime: new Date(),
+      response: data,
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 const doReview = async (
   tool: ReviewPrompt,
@@ -81,8 +113,8 @@ reviews.get('/:id', async (request: Request, response: Response) => {
     response.on('close', () => response.end());
     const review = await findReviewById(id);
     response.write(`data: ${JSON.stringify(review)}\n\n`);
-    const analyses = await Promise.all(
-      ANALYSES.filter(
+    await Promise.all(
+      [...ANALYSES.filter(
         (tool) => !review.analysis.some((a) => a.tool === tool)
       ).map(async (tool) => {
         const analysis = await doReview(tool, review);
@@ -93,7 +125,18 @@ reviews.get('/:id', async (request: Request, response: Response) => {
           }
         }
         return analysis;
+      }),
+      // TODO skip if exists.
+      doOnTopic(review).then(async analysis => {
+        if (analysis) {
+          const upd = await updateReviewByIdAddAnalysis(id, analysis);
+          if (!response.closed) {
+            response.write(`data: ${JSON.stringify(upd)}\n\n`);
+          }
+        }
+        return analysis;
       })
+      ]
     );
     const final = await findReviewById(id);
     if (!response.closed) {

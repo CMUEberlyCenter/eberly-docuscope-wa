@@ -18,6 +18,7 @@ import { highlightSentence } from "../../service/topic.service";
 import TabTitle from "../TabTitle/TabTitle";
 
 import "./Clarity.scss";
+import { cleanAndRepairSentenceData } from "../../../lib/OnTopicData";
 
 /** Error feedback component for clarity tool. */
 const ClarityErrorFallback: FC<{ error?: Error }> = (props: {
@@ -36,15 +37,6 @@ const clarityText = combineLatest({
   map((c) => c.text)
 );
 const [useClarityText /*clarityText$*/] = bind(clarityText, "");
-
-const cleanAndRepairSentenceData = (
-  data?: { html_sentences?: string[][] } | null
-) => {
-  if (!data || !data.html_sentences) return null;
-  return data.html_sentences.map((paragraph) =>
-    paragraph.filter((sentence) => sentence !== "")
-  ); // sentence.trim()?
-};
 
 const dataTools = new OnTopicDataTools();
 
