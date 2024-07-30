@@ -3,8 +3,8 @@ FROM docker.io/python:3.7
 # Expose the ports we're interested in
 EXPOSE 5000
 ENV FLASK_APP=app.py
-ENV FLASK_ENV=development
-ENV FLASK_DEBUG=0
+# ENV FLASK_ENV=development
+# ENV FLASK_DEBUG=0
 
 RUN apt-get update && apt-get install -y --no-install-recommends apt-utils
 RUN apt-get install ffmpeg libsm6 libxext6 -y

@@ -7,16 +7,16 @@
 __author__    = "Suguru Ishizaki"
 __copyright__ = "2017-21 Suguru Ishizaki, Carnegie Mellon University"
 
-from time import time
+# from time import time
 import json
 import re
 import regex
 import string
 import os
-import sys
+# import sys
 from collections import Counter 
 
-from urllib.parse import urlparse
+# from urllib.parse import urlparse
 import base64
 from PIL import Image
 from io import BytesIO
@@ -30,9 +30,9 @@ from dslib.utils import resource_path
 
 from docx import Document
 from docx.shared import RGBColor
-from docx.enum.text import WD_COLOR_INDEX
-from docx.enum.text import WD_UNDERLINE
-from docx.shared import Pt, Inches
+# from docx.enum.text import WD_COLOR_INDEX
+# from docx.enum.text import WD_UNDERLINE
+from docx.shared import Inches
 
 
 ##################################################
@@ -3179,7 +3179,7 @@ class DSDocument():
         data      = self.sections[self.current_section]['data']
         #para_data = self.sections[self.current_section]['para_data']
 
-        if data is None:
+        if data is None or 'paragraphs' not in data:
             return
 
         for p in data['paragraphs']:                 # for each paragraph
@@ -4667,13 +4667,13 @@ class DSDocument():
         self.locateTopics(topics)                # to count the # of sentences each topic appears later. 8/23/2022.
 
         if global_data is None:
-            return ({'error': 'ncols is 0'});
+            return ({'error': 'ncols is 0'})
 
         data = global_data['data']
-        para_data = global_data['para_data']
+        # para_data = global_data['para_data']
 
         if data is None:
-            return ({'error': 'ncols is 0'});
+            return ({'error': 'ncols is 0'})
 
         header = data[0]   # list of tuples (POS, LEMMA, POS, COUNT)
 
@@ -4683,16 +4683,16 @@ class DSDocument():
         self.global_topics = list()
 
         if ncols == 0:
-            return ({'error': 'ncols is 0'});
+            return ({'error': 'ncols is 0'})
 
         vis_data = dict()
         vis_data['num_topics'] = ncols
         vis_data['data'] = list()
 
         # Filters
-        para_filter     = self.filterParaTopics(data, nrows, ncols)      #
-        sent_filter     = self.filterTopics(data, nrows, ncols)          # 
-        topic_filter    = TOPIC_FILTER_LEFT_RIGHT                   # 
+        para_filter     = self.filterParaTopics(data, nrows, ncols)
+        sent_filter     = self.filterTopics(data, nrows, ncols)
+        topic_filter    = TOPIC_FILTER_LEFT_RIGHT
 
         num_sents_per_topic = 0
         b_break = False

@@ -1,19 +1,19 @@
-from flask import make_response, jsonify
+from flask import make_response
 from urllib.parse import unquote
-from urllib.parse import quote_from_bytes
+# from urllib.parse import quote_from_bytes
 import os, threading, psutil, platform
 import prometheus
-import base64
-import html
+# import base64
+# import html
 import json
 
-import dslib.utils as utils
+# import dslib.utils as utils
 import dslib.views as views
 
 from dslib.models.document import DSDocument
 from dslib.models.synonym import DSSynset
 
-driver=prometheus.PythonPrometheus ()
+driver=prometheus.PythonPrometheus()
 
 ##
 #
@@ -24,7 +24,7 @@ class OnTopic:
   #
   ##
   def __init__(self):
-    print ("OnTopic()");
+    print ("OnTopic()")
 
     self.systemErrorMessage=""
     self.systemReady=True
@@ -34,7 +34,7 @@ class OnTopic:
       self.systemErrorMessage="Unable to load data model"
     else:  
       f = open("resources/rules.json", "r")
-      self.rules=f.read();
+      self.rules=f.read()
 
     if (os.path.exists("data/default_model") == False):
       self.systemErrorMessage="Unable to locate default language model"
@@ -127,17 +127,17 @@ class OnTopic:
 
     data=envelope ["data"]
     raw=data["base"]
-    customString=data["custom"]
-    customTopics=data["customStructured"];
-    custom="";
+    # customString=data["custom"]
+    customTopics=data["customStructured"]
+    # custom=""
 
     #print (customTopics)
 
     # Load and process the non-structured semi-colon separated list of topics. We will
     # remove this once the structured version works well
 
-    if (isinstance(customString, str)):
-      custom = customString.split(";")
+    # if (isinstance(customString, str)):
+    #   custom = customString.split(";")
 
     #decoded=base64.b64decode(raw).decode('utf-8')
     #unescaped=unquote(decoded)
@@ -148,7 +148,7 @@ class OnTopic:
 
     #print (raw)
 
-    multiword_topics = list();
+    multiword_topics = list()
     synsets = list ()
 
     for topic in customTopics:      
@@ -164,21 +164,21 @@ class OnTopic:
 
     # We should now be ready to start processing text
 
-    document=DSDocument ()
+    document = DSDocument()
 
     # New method, using the structured approach so that we can tie results back to topic clusters
     document.setMultiwordTopics(multiword_topics)
     document.setUserDefinedSynonyms(synsets)
-    document.loadFromTxt (unescaped)
+    document.loadFromTxt(unescaped)
 
     # Old method, using the linear list
     #document.setUserDefinedTopics (custom);
 
-    coherence=document.generateGlobalVisData (2,1,views.TOPIC_SORT_APPEARANCE)
+    coherence=document.generateGlobalVisData(2,1,views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()
-    topics=document.getCurrentTopics ()
+    topics=document.getCurrentTopics()
     html=document.toHtml_OTOnly_DSWA(topics,-1)
-    html_sentences=document.getHtmlSents (clarity);
+    html_sentences=document.getHtmlSents(clarity)
 
     # https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
     #html_bytes = html.encode('utf-8')
@@ -188,21 +188,21 @@ class OnTopic:
     # If there is not enough text to process or if there aren't enough results the coherence data might
     # result to be: {'error': 'ncols is 0'}
 
-    nrParagraphs=coherence.get ('num_paras');
+    nrParagraphs=coherence.get('num_paras')
 
     if nrParagraphs:
       print ("Number of paragraphs processed: " + str(nrParagraphs) + " (might be 1 for very short text)");
     else:
       print ("Error obtaining nr of paragraphs, setting to 0")
-      nrParagraphs=0;
+      nrParagraphs=0
  
     local=[]
 
     for i in range(nrParagraphs):
-      localSelected=[];
-      localSelected.append(i+1);
-      localDict=document.generateLocalVisData (localSelected,1,2);
-      local.append (localDict);
+      localSelected=[]
+      localSelected.append(i+1)
+      localDict=document.generateLocalVisData(localSelected,1,2)
+      local.append(localDict)
 
     data = {}
     data['coherence'] = json.loads(json.dumps(coherence))
