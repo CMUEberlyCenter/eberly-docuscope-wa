@@ -18,6 +18,7 @@ import { GlobalCoherence } from "./GlobalCoherence";
 import { KeyIdeas } from "./KeyIdeas";
 import { Arguments } from "./Arguments";
 import { Sentences } from "./Sentences";
+import { Organization } from "./Organization";
 
 export const Review: FC = () => {
   const { t } = useTranslation("review");
@@ -98,7 +99,7 @@ export const Review: FC = () => {
                 <option value="expectations">{t("expectations.title")}</option>
               )}
               {organizationFeature && (
-                <option disabled value="organization">
+                <option value="organization">
                   {t("organization.title")}
                 </option>
               )}
@@ -125,6 +126,7 @@ export const Review: FC = () => {
               <Arguments/>
             )}
             {tool === "sentences" && (<Sentences/>)}
+            {tool === "organization" && (<Organization/>)}
           </Card.Body>
           <Card.Footer>
             {writingTask && (
