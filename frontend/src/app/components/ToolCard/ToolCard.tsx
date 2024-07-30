@@ -329,7 +329,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         >
                           <Button
                             variant="outline-dark"
-                            disabled={true || !scribe || !writingTask}
+                            disabled={!scribe || !writingTask}
                             onClick={() => onTool("expectation")}
                           >
                             <Stack>
