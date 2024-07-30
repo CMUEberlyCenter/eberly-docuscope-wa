@@ -3359,6 +3359,9 @@ class DSDocument():
             return res
             
         data = self.sections[self.current_section]['data']
+        if data is None or 'paragraphs' not in data:
+            return res
+
         for p in data['paragraphs']:        # for each paragraph
             s_count = 1
             for s in p['sentences']:             # for each sentence
