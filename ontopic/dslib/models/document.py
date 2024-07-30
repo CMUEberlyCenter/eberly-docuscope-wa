@@ -136,7 +136,7 @@ nlp = None
 # https://spacy.io/api/top-level#spacy.info
 ##
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
-    print("setLanguageModel ()")
+    # print("setLanguageModel ()")
 
     global nlp
 
@@ -1405,7 +1405,7 @@ class DSDocument():
         and find all the unique lemmas in each sentence, and in each paragraph.
         """
 
-        print ("processDoc ()")
+        # print ("processDoc ()")
 
         if (isModelLoaded () == False):
            print ("Warning: language model not loaded yet, loading ...")
@@ -1805,7 +1805,7 @@ class DSDocument():
     #
     ########################################
     def loadFromTxt(self, aText):
-        print ("loadFromTxt ()")
+        #print ("loadFromTxt ()")
         #print (aText)
 
         self.current_section = 0
@@ -3170,7 +3170,7 @@ class DSDocument():
         all_lemmas = list()
         temp = list()
 
-        if self.sections is None:
+        if self.sections is None or len(self.sections) <= self.current_section:
             return
 
         #print (self.current_section)

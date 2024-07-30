@@ -30,7 +30,7 @@ const doOnTopic = async (review: Review): Promise<OnTopicReviewData | undefined>
       body: JSON.stringify({
         status: 'request',
         data: {
-          base: encodeURIComponent(review.text),
+          base: review.text,
           custom: "", // no topics in current set of tasks
           customStructured: [], // no topics in current set of tasks
         }
