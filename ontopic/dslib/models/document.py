@@ -914,7 +914,9 @@ class DSDocument():
 
     def getNumParagraphs(self):
         data = self.sections[self.current_section]['data']
-        return len(data['paragraphs'])
+        if 'paragraphs' in data:
+            return len(data['paragraphs'])
+        return 0
 
     def getNumSections(self):
         if self.sections:
