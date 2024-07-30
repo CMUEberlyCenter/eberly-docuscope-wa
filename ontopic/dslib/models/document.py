@@ -5145,6 +5145,7 @@ class DSDocument():
         return res        
 
     def updateGlobalTopics(self, global_data, min_topics=2):
+        if global_data is None: return []
 
         data = global_data['data']
 
