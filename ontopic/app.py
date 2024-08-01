@@ -1,4 +1,5 @@
 from flask import Flask, make_response, request
+import logging
 import sys
 import ontopic
 
@@ -6,7 +7,7 @@ print ("Booting ...")
 print (sys.version)
 
 app = Flask(__name__)
-driver=ontopic.OnTopic()
+driver = ontopic.OnTopic()
 
 ##
 #
@@ -43,6 +44,7 @@ def ontopic():
 ##
 if __name__ == '__main__':
   from waitress import serve
+  logging.setLevel(logging.INFO)
   serve(app, host="0.0.0.0", port=5000)
   # app.run(debug=False)
   # app.run(host="0.0.0.0", port=5000, debug=False)

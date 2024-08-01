@@ -8,6 +8,7 @@ __author__    = "Suguru Ishizaki"
 __copyright__ = "2017-21 Suguru Ishizaki, Carnegie Mellon University"
 
 # from time import time
+import logging
 import json
 import re
 import regex
@@ -143,13 +144,13 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     try:
         if lang == 'en':
             if model == NLP_MODEL_DEFAULT:
-                print("Loading Spacy default model ...")
+                logging.info("Loading Spacy default model ...")
                 nlp = spacy.load(resource_path('data/default_model'))
                 #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
                 #print("\n\n")
                 #print(result)
             else:
-                print("Loading Spacy large model ...")
+                logging.info("Loading Spacy large model ...")
                 nlp = spacy.load(resource_path('data/large_model'))
 
         elif lang == 'es':
@@ -158,10 +159,10 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
             nlp = spacy.load("es_core_news_lg")
 
     except Exception as e:
-        print(e)
+        logging.error(e)
     else:
-        print("Spacy language model loaded successfully")
-        print (spacy.info())
+        logging.info("Spacy language model loaded successfully")
+        logging.info(spacy.info())
 
 ##
 #
@@ -961,7 +962,7 @@ class DSDocument():
                 if data is None:
                     raise ValueError
             except:
-                print(self.sections[self.current_section])                
+                logging.warn(self.sections[self.current_section])                
                 return
 
         res = []
@@ -986,7 +987,7 @@ class DSDocument():
                         if clust is not None and clust not in clusters:
                             clusters.append(clust)
                     else:
-                        print("ERROR: dsw is none.")
+                        logging.warn("ERROR: dsw is none.")
                         continue
                 res = dict
                 for rule in ruleset.getRules():
@@ -1410,14 +1411,14 @@ class DSDocument():
         # print ("processDoc ()")
 
         if (isModelLoaded () == False):
-           print ("Warning: language model not loaded yet, loading ...")
+           logging.warn("Warning: language model not loaded yet, loading ...")
            setLanguageModel ("en",NLP_MODEL_DEFAULT)
 
         if (isModelLoaded () == False):
-           print ("Error: unable to load language model!")
+           logging.error("Error: unable to load language model!")
            return (list())
 
-        print("Language model appears to be loaded, processing text ...")   
+        logging.info("Language model appears to be loaded, processing text ...")   
 
 
 
@@ -1808,7 +1809,7 @@ class DSDocument():
     ########################################
     def loadFromTxt(self, aText):
         #print ("loadFromTxt ()")
-        print (aText)
+        logging.info(aText)
 
         self.current_section = 0
 
@@ -1817,7 +1818,7 @@ class DSDocument():
         doc = Document()
 
         for para in paragraphs:
-            if para.trim() != "":
+            if para.strip() != "":
                 para = adjustSpaces(para)
                 doc.add_paragraph(para)
 
@@ -2614,7 +2615,7 @@ class DSDocument():
                 if data is None:
                     raise ValueError
             except:
-                print(self.sections[self.current_section])                
+                logging.error(self.sections[self.current_section])                
                 return
 
         bTagOpen = False
@@ -5388,7 +5389,7 @@ class DSDocument():
     def testPrintGlobalVisData(self, vis_data):
 
         if vis_data['data'] == []:
-            print("No global topics")
+            logging.warn("No global topics")
             return
 
         data       = vis_data['data']
@@ -5400,7 +5401,7 @@ class DSDocument():
         for i in range(num_paras):
             line += "{} ".format(i+1)
 
-        print(line)
+        logging.debug(line)
 
         # For each data for a specific topic,
         for topic_data in data:                                    
@@ -5451,12 +5452,12 @@ class DSDocument():
                     else:
                         line += "  "
 
-                print(line)
+                logging.debug(line)
 
     def testPrintLocalVisData(self, vis_data):
 
         if vis_data['data'] == []:
-            print("No local topics")
+            logging.warn("No local topics")
             return
 
         data       = vis_data['data']
@@ -5468,7 +5469,7 @@ class DSDocument():
         for i in range(num_sents):
             line += "{} ".format(i+1)
 
-        print(line)
+        logging.debug(line)
 
         # For each topic data,
         for topic_data in data:
@@ -5485,7 +5486,7 @@ class DSDocument():
                 # Write a symbol for each sentence sentence.
                 for sent_data in topic_data['sentences']:
                     if sent_data is not None:
-                        sent_pos = sent_data['para_pos']
+                        # sent_pos = sent_data['para_pos']
                         is_left = sent_data['is_left']
                         is_topic_sent = sent_data['is_topic_sent']
 
@@ -5512,7 +5513,7 @@ class DSDocument():
                     else:
                         line += "  "
 
-                print(line)
+                logging.debug(line)
 
     def getCurrentTopics(self):
 
