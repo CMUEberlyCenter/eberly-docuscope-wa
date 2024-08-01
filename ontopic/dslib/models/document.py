@@ -959,7 +959,7 @@ class DSDocument():
             try:
                 data = self.sections[self.current_section]['data']
                 if data is None:
-                    raise valueError;
+                    raise ValueError
             except:
                 print(self.sections[self.current_section])                
                 return
@@ -1808,17 +1808,16 @@ class DSDocument():
     ########################################
     def loadFromTxt(self, aText):
         #print ("loadFromTxt ()")
-        #print (aText)
+        print (aText)
 
         self.current_section = 0
 
-        text = aText
-        paragraphs = text.splitlines()
+        paragraphs = aText.splitlines()
 
         doc = Document()
 
         for para in paragraphs:
-            if para:
+            if para.trim() != "":
                 para = adjustSpaces(para)
                 doc.add_paragraph(para)
 
@@ -2608,12 +2607,12 @@ class DSDocument():
                 data = self.sections[self.current_section]['data']
                 doc  = self.sections[self.current_section]['doc']
                 if doc is None:
-                    raise valueError;                    
+                    raise ValueError                    
                 else:
                     docx_paras = doc.paragraphs
 
                 if data is None:
-                    raise valueError;
+                    raise ValueError
             except:
                 print(self.sections[self.current_section])                
                 return
@@ -3536,40 +3535,40 @@ class DSDocument():
                 return []
 
     ### UNUSED NOW ####
-    def getAdjacentDSCategories(self, topic):
+    # def getAdjacentDSCategories(self, topic):
 
-        def isTopicInSent(sent, topic):
-            for w in sent['text_w_info']:
-                if w[lemma] == topic:
-                    return True
-            return False
+    #     def isTopicInSent(sent, topic):
+    #         for w in sent['text_w_info']:
+    #             if w[lemma] == topic:
+    #                 return True
+    #         return False
 
-        if self.sections:
-            data = self.sections[self.current_section]['data']
+    #     if self.sections:
+    #         data = self.sections[self.current_section]['data']
 
-            patterns = []
+    #         patterns = []
 
-            for para in data['paragraphs']:    # for each paragraph
-                for sent in para['sentences']: # for each sentence
+    #         for para in data['paragraphs']:    # for each paragraph
+    #             for sent in para['sentences']: # for each sentence
 
-                    lats_sentence  = []
-                    lats_paragraph = []
-                    lats_adjacent  = []
+    #                 lats_sentence  = []
+    #                 lats_paragraph = []
+    #                 lats_adjacent  = []
 
-                    if isTopicInSent(sent):
-                        # if 'topic' is in this sentence, add all the docuscope categories
-                        # in this sentence to the result.
-                        for w in sent['text_w_info']: 
-                            dsw = w[DS_DATA]
-                            end = dsw.getEnd()
-                            lat = getLAT()
-                            pos = getPos()
+    #                 if isTopicInSent(sent):
+    #                     # if 'topic' is in this sentence, add all the docuscope categories
+    #                     # in this sentence to the result.
+    #                     for w in sent['text_w_info']: 
+    #                         dsw = w[DS_DATA]
+    #                         end = dsw.getEnd()
+    #                         lat = getLAT()
+    #                         pos = getPos()
 
-                        line = line + [dsw.getEnd(), dsw.getLAT(), dsw.getPos()]
+    #                     line = line + [dsw.getEnd(), dsw.getLAT(), dsw.getPos()]
 
-            return adj_categories
+    #         return adj_categories
 
-        return None
+    #     return None
 
     def calculateAdjacencyStats(self, topic=None, para_pos=-1):
         """
@@ -3587,7 +3586,7 @@ class DSDocument():
             try:
                 data = self.sections[self.current_section]['data']
                 if data is None:
-                    raise valueError;
+                    raise ValueError
             except:
                 return
 
@@ -3716,7 +3715,7 @@ class DSDocument():
             try:
                 data = self.sections[self.current_section]['data']
                 if data is None:
-                    raise valueError;
+                    raise ValueError
             except:
                 return
 
@@ -3841,7 +3840,7 @@ class DSDocument():
             try:
                 data = self.sections[self.current_section]['data']
                 if data is None:
-                    raise valueError;
+                    raise ValueError
             except:
                 return
 
@@ -5562,7 +5561,7 @@ class DSDocument():
                 try:
                     data = self.sections[self.current_section]['data']
                     if data is None:
-                        raise valueError;
+                        raise ValueError
                 except:
                     return
 

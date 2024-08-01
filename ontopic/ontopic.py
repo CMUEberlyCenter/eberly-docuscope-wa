@@ -103,8 +103,8 @@ class OnTopic:
   # - A text where the back-end will find pre-defined topics, custom topics and unrelated topics
   # 
   ##
-  def ontopic (self,request):    
-    print ('ontopic(self,request)')
+  def ontopic (self, request):
+    # print ('ontopic(self,request)')
 
     #envelope=request.get_json()
 
@@ -125,7 +125,7 @@ class OnTopic:
 
     #print (envelope)
 
-    data=envelope ["data"]
+    data=envelope["data"]
     raw=data["base"]
     # customString=data["custom"]
     customTopics=data["customStructured"]
@@ -174,7 +174,7 @@ class OnTopic:
     # Old method, using the linear list
     #document.setUserDefinedTopics (custom);
 
-    coherence=document.generateGlobalVisData(2,1,views.TOPIC_SORT_APPEARANCE)
+    coherence=document.generateGlobalVisData(2, 1, views.TOPIC_SORT_APPEARANCE)
     clarity=document.getSentStructureData()
     topics=document.getCurrentTopics()
     html=document.toHtml_OTOnly_DSWA(topics,-1)

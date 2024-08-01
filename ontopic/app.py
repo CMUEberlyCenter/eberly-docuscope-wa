@@ -6,35 +6,35 @@ print ("Booting ...")
 print (sys.version)
 
 app = Flask(__name__)
-driver=ontopic.OnTopic ();
+driver=ontopic.OnTopic()
 
 ##
 #
 ##
 @app.route("/metrics")
 def metrics():
-  return (driver.metrics ());
+  return (driver.metrics())
 
 ##
 #
 ##
 @app.route("/api/v1/ping")
 def ping():
-  return (driver.ping());
+  return (driver.ping())
 
 ##
 #
 ##
 @app.route("/api/v1/rules")
 def rules():
-  return (driver.rules ());  
+  return (driver.rules())
 
 ##
 #
 ##
 @app.route("/api/v1/ontopic",methods = ['POST'])
 def ontopic():
-  return (driver.ontopic (request));    
+  return (driver.ontopic(request))    
 
 ##
 # If you run with app.run(debug=True), it will run the reloader as part of 
