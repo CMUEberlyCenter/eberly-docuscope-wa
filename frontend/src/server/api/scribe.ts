@@ -12,6 +12,7 @@ import {
 import {
   DEFAULT_LANGUAGE,
   OPENAI_API_KEY,
+  OPENAI_MODEL,
   SCRIBE_TEMPLATES,
 } from '../settings';
 
@@ -71,7 +72,7 @@ const scribeNotes =
             content,
           },
         ],
-        model: 'gpt-4',
+        model: OPENAI_MODEL,
       });
       // TODO check for empty prose
       response.json(prose);
@@ -124,7 +125,7 @@ export const scribeText =
             content,
           },
         ],
-        model: 'gpt-4o',
+        model: OPENAI_MODEL,
       });
       return response.json(chat);
     } catch (err) {
@@ -182,7 +183,7 @@ scribe.post(
           },
           { role: 'user', content },
         ],
-        model: 'gpt-4',
+        model: OPENAI_MODEL,
       });
       response.json(assessment);
     } catch (err) {

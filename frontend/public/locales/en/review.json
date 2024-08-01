@@ -48,7 +48,8 @@
     "suggestions":"Suggestions"
   },
   "expectations": {
-    "title": "Reader Expectations"
+    "title": "Reader Expectations",
+    "error": "Error loading expectation data."
   },
   "organization": {
     "title": "Organization (Term Matrix)",

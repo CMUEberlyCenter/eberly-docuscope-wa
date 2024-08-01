@@ -11,7 +11,12 @@ import {
 import { IdToken } from '../model/lti';
 import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
-import { DEFAULT_LANGUAGE, ONTOPIC_URL, OPENAI_API_KEY } from '../settings';
+import {
+  DEFAULT_LANGUAGE,
+  ONTOPIC_URL,
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+} from '../settings';
 import { readTemplates } from './scribe';
 
 export const reviews = Router();
@@ -89,7 +94,7 @@ const doReview = async (
           content,
         },
       ],
-      model: 'gpt-4',
+      model: OPENAI_MODEL,
     });
     const resp = chat.choices.at(0)?.message.content;
     if (!resp) {

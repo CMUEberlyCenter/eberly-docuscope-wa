@@ -16,8 +16,8 @@ import { fromFetch } from 'rxjs/fetch';
 import { Rule, WritingTask } from '../../lib/WritingTask';
 import { DocuScopeRuleCluster } from '../lib/DocuScopeRuleCluster';
 import {
-  AssessmentData,
   CopyEditResponse,
+  ExpectationData,
   LocalCoherenceResponse,
   SelectedNotesProse,
   SelectedText,
@@ -405,11 +405,17 @@ export const [useAssessFeature, assessFeature$] = bind(
   false
 );
 
+const errorExpectationData: ExpectationData = {
+  rating: 0.0,
+  general_assessment: '',
+  issues: [],
+};
+
 export async function postExpectation(
   text: string,
   { name, description }: Rule,
   writing_task?: WritingTask | null
-): Promise<AssessmentData> {
+): Promise<ExpectationData> {
   const { user_lang, target_lang } = writing_task?.info ?? {};
   const response = await fetch('/api/v2/scribe/assess_expectation', {
     method: 'POST',
@@ -422,44 +428,37 @@ export async function postExpectation(
       description,
     }),
   });
-  const errorData: AssessmentData = {
-    rating: 0.0,
-    first_sentence: '',
-    explanation: '',
-  };
-  // const errorData: ExpectationData = {
-  //   rating: 0.0,
-  //   general_assessment: '',
-  //   gaps: [],
-  // };
   if (!response.ok) {
     const err = await response.text();
     console.error(err);
-    return { ...errorData, explanation: err };
-    // return { ...errorData, general_assessment: err };
+    // return { ...errorData, explanation: err };
+    return { ...errorExpectationData, general_assessment: err };
   }
   const data: ChatResponse = await response.json();
   if ('error' in data) {
     console.error(data.message);
-    return {
-      ...errorData,
-      explanation: data.message,
-    };
     // return {
     //   ...errorData,
-    //   general_assessment: data.message,
+    //   explanation: data.message,
     // };
+    return {
+      ...errorExpectationData,
+      general_assessment: data.message,
+    };
   }
   if ('choices' in data) {
     const content = data.choices.at(0)?.message.content;
     if (content) {
-      return JSON.parse(content) as AssessmentData;
-      // return JSON.parse(content) as ExpectationData;
+      // return JSON.parse(content) as AssessmentData;
+      return JSON.parse(content) as ExpectationData;
     }
   }
   console.error(data);
-  return { ...errorData, explanation: 'Invalid respose from service.' };
-  // return { ...errorData, general_assessment: 'Invalid respose from service.' };
+  // return { ...errorData, explanation: 'Invalid respose from service.' };
+  return {
+    ...errorExpectationData,
+    general_assessment: 'Invalid respose from service.',
+  };
 }
 /**
  * Fetch expectation audit results from backend.
@@ -492,22 +491,12 @@ function requestAssess(text: string, expectation: string, description: string) {
       })
     )
     .pipe(
-      map((data: ChatResponse): AssessmentData => {
-        // const errorData: ExpectationData = {
-        //   rating: 0.0,
-        //   general_assessment: '',
-        //   gaps: [],
-        // };
-        const errorData: AssessmentData = {
-          rating: 0.0,
-          explanation: '',
-          first_sentence: '',
-        };
+      map((data: ChatResponse): ExpectationData => {
         if ('error' in data) {
           console.error(data.message);
           return {
-            ...errorData,
-            explanation:
+            ...errorExpectationData,
+            general_assessment:
               'An error occured while assessing the selected expectation for the selected text.',
           };
         }
@@ -515,10 +504,13 @@ function requestAssess(text: string, expectation: string, description: string) {
         if ('choices' in data) {
           const content = data.choices.at(0)?.message.content;
           if (content) {
-            return JSON.parse(content) as AssessmentData;
+            return JSON.parse(content) as ExpectationData;
           }
         }
-        return { ...errorData, explanation: 'Invalid response from myScribe.' };
+        return {
+          ...errorExpectationData,
+          general_assessment: 'Invalid response from myScribe.',
+        };
       })
     );
   // Post processing
@@ -554,7 +546,7 @@ const assessed = combineLatest({
     (a, b) => a.text === b.text && a.expectation?.name === b.expectation?.name
   ),
   switchMap(({ text, expectation }) =>
-    concat<[SUSPENSE, AssessmentData]>(
+    concat<[SUSPENSE, ExpectationData]>(
       of(SUSPENSE),
       // TODO use straight expectation.  need to filter on is_group === false
       requestAssess(

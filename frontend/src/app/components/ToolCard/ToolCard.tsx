@@ -49,6 +49,7 @@ import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolDisplay } from "./ToolDisplay";
 import { Tool, ToolResult } from "../../lib/ToolResults";
+import { ErrorBoundary } from "react-error-boundary";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -479,7 +480,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {/* {currentTool?.tool === "expectation" && (
+          {currentTool?.tool === "expectation" && (
             <ToolDisplay.Root
               title={t("tool.button.expectation.tooltip")}
               tool={currentTool}
@@ -511,32 +512,44 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <ToolDisplay.Response
                 tool={currentTool}
                 regenerate={retry}
-                text={`${currentTool.result?.general_assessment ?? ""} ` + currentTool.result?.gaps.map(({description, suggestions})=> `${description} ${suggestions.join()}).join("\n\n")}
+                text={
+                  `${currentTool.result?.general_assessment ?? ""}\n` +
+                  currentTool.result?.issues
+                    .map(
+                      ({ description, suggestions }) =>
+                        `${description} ${suggestions.join("\n")}`
+                    )
+                    .join("\n\n")
+                }
               >
                 {currentTool.result && (
-                  <>
-                    {currentTool.result.rating && <Rating value={currentTool.result.rating} />}
+                  <ErrorBoundary fallback={<div>{t("expectation.error")}</div>}>
+                    {currentTool.result.rating && (
+                      <Rating value={currentTool.result.rating} />
+                    )}
                     <p>{currentTool.result.general_assessment}</p>
                     <dl>
-                      {currentTool.result.gaps.map(({ description, suggestions }) => (
-                        <>
-                          <dt>{description}</dt>
-                          <dd>
-                            <ul>
-                              {suggestions.map((suggestion) => (
-                                <li>{suggestion}</li>
-                              ))}
-                            </ul>
-                          </dd>
-                        </>
-                      ))}
+                      {currentTool.result.issues.map(
+                        ({ description, suggestions }) => (
+                          <>
+                            <dt>{description}</dt>
+                            <dd>
+                              <ul>
+                                {suggestions.map((suggestion) => (
+                                  <li>{suggestion}</li>
+                                ))}
+                              </ul>
+                            </dd>
+                          </>
+                        )
+                      )}
                     </dl>
-                  </>
+                  </ErrorBoundary>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )} */}
-          {currentTool?.tool === "expectation" && (
+          )}
+          {/* {currentTool?.tool === "expectation" && (
             <ToolDisplay.Root
               title={t("tool.button.expectation.tooltip")}
               tool={currentTool}
@@ -580,7 +593,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
+          )} */}
           {currentTool?.tool === "copyedit" && (
             <ToolDisplay.Root
               title={t("tool.button.copyedit.tooltip")}

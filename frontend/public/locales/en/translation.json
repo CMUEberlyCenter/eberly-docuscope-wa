@@ -80,7 +80,8 @@
 
   "expectation": {
     "title": "Select an Expectation",
-    "task": "Writing Task"
+    "task": "Writing Task",
+    "error": "Error while processing results."
   },
   "select_task": {
     "title": "Select Writing Task",

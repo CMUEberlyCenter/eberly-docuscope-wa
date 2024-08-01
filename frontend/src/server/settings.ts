@@ -24,7 +24,7 @@ program
 program.parse();
 const options = program.opts();
 export const DEV = process.env.NODE_ENV !== 'production';
-export const PRODUCT = process.env.PRODUCT ?? 'myScribe Provider';
+export const PRODUCT = process.env.PRODUCT ?? 'myProse Provider';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 export const PORT = process.env.PORT ?? 8888;
 
@@ -64,7 +64,7 @@ export const LTI_OPTIONS = {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.
     // logo: new URL('/', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
-    description: 'myScribe LTI 1.3', // Tool Provider description.
+    description: 'myProse LTI 1.3', // Tool Provider description.
     redirectUris: [new URL('/launch', LTI_HOSTNAME).toString()], // Additional redirection URLs. The main URL is added by default.
     customParameters: { key: 'value' }, // Custom parameters.
     autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
@@ -92,6 +92,7 @@ const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
 export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
+export const OPENAI_MODEL = 'gpt-4o';
 export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
 export const WRITING_TASKS_PATH =

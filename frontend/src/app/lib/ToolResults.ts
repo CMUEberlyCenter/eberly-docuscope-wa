@@ -33,30 +33,31 @@ export interface BulletTool extends ToolData<string> {
   tool: 'bullets';
 }
 
-export type AssessmentData = {
-  rating: number;
-  first_sentence: string;
-  explanation: string;
-};
-export interface ExpectationTool extends ToolData<AssessmentData> {
-  tool: 'expectation';
-  expectation?: Rule;
-}
-// future
-// export type ExpectationData = {
-//   rating?: number;
-//   general_assessment: string;
-//   gaps: {
-//     description: string;
-//     suggestions: string[];
-//   }[];
+// export type AssessmentData = {
+//   rating: number;
+//   first_sentence: string;
+//   explanation: string;
 // };
-
-// export interface ExpectationTool extends ToolData<ExpectationData> {
+// export interface ExpectationTool extends ToolData<AssessmentData> {
 //   tool: 'expectation';
 //   expectation?: Rule;
 // }
+// future
+export type ExpectationData = {
+  rating?: number;
+  general_assessment: string;
+  issues: {
+    description: string;
+    suggestions: string[];
+  }[];
+};
 
+export interface ExpectationTool extends ToolData<ExpectationData> {
+  tool: 'expectation';
+  expectation?: Rule;
+}
+
+/** Expected form of result for 'copyedit' */
 export type CopyEditResponse = {
   revision: string; // html
   clean_revision: string; // html
