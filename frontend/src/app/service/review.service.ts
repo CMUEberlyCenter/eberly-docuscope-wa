@@ -35,6 +35,7 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
 
 review$.subscribe((rev) => {
   if (typeof rev === 'object') {
+    console.log(rev); // TODO remove, for debugging.
     writingTask.next(
       isWritingTask(rev?.writing_task) ? rev.writing_task : null
     );

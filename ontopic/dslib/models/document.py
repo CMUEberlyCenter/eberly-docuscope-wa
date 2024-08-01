@@ -2371,10 +2371,10 @@ class DSDocument():
 
         data = self.sections[self.current_section]['data']
 
-        if data is None:
+        if data is None or 'paragraphs' not in data:
             return ""
 
-        total_paras = len(data['paragraphs'])
+        # total_paras = len(data['paragraphs'])
         html_str = ""
         pcount  = 1
 
@@ -2384,10 +2384,10 @@ class DSDocument():
                 pcount += 1
                 continue
 
-            total_sents = len(para['sentences'])
+            # total_sents = len(para['sentences'])
 
-            para_style = para['style']
-            font_size = font_info[para_style]            
+            # para_style = para['style']
+            # font_size = font_info[para_style]            
             html_str += '<p id=\'p{}\' class=\'paragraph p{}\'>'.format(pcount,pcount)
 
             scount = 1
