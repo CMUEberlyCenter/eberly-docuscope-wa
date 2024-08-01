@@ -44,7 +44,7 @@ def ontopic():
 ##
 if __name__ == '__main__':
   from waitress import serve
-  logging.setLevel(logging.INFO)
+  logging.basicConfig(level=logging.INFO)
   serve(app, host="0.0.0.0", port=5000)
   # app.run(debug=False)
   # app.run(host="0.0.0.0", port=5000, debug=False)
