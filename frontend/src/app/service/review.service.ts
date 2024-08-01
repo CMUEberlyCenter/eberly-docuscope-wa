@@ -1,9 +1,15 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, Observable } from 'rxjs';
-import { AllExpectationsData, ArgumentsData, GlobalCoherenceData, KeyPointsData, OnTopicReviewData } from '../../lib/ReviewResponse';
+import {
+  AllExpectationsData,
+  ArgumentsData,
+  GlobalCoherenceData,
+  KeyPointsData,
+  OnTopicReviewData,
+} from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
-import { Review } from '../../server/model/review';
+import { isReview, Review } from '../../server/model/review';
 import { getLtiRequest } from './lti.service';
 import { writingTask } from './writing-task.service';
 
@@ -34,22 +40,27 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
 );
 
 review$.subscribe((rev) => {
-  if (typeof rev === 'object') {
-    console.log(rev); // TODO remove, for debugging.
-    writingTask.next(
-      isWritingTask(rev?.writing_task) ? rev.writing_task : null
-    );
+  if (isReview(rev)) {
+    writingTask.next(isWritingTask(rev.writing_task) ? rev.writing_task : null);
   }
 });
 
-const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(null);
+const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
+  null
+);
 const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
-const allExpectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(null);
+const allExpectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(
+  null
+);
 const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
 const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
-review$.pipe(filter(rev => typeof rev === 'object' && 'analysis' in rev), map(rev => rev.analysis)).subscribe(
-  analyses =>
-    analyses.forEach(analysis => {
+review$
+  .pipe(
+    filter((rev) => typeof rev === 'object' && 'analysis' in rev),
+    map((rev) => rev.analysis)
+  )
+  .subscribe((analyses) =>
+    analyses.forEach((analysis) => {
       switch (analysis.tool) {
         case 'global_coherence':
           globalCoherenceAnalysis.next(analysis);
@@ -68,9 +79,12 @@ review$.pipe(filter(rev => typeof rev === 'object' && 'analysis' in rev), map(re
           break;
       }
     })
-);
+  );
 
-export const [useGlobalCoherenceData, globalCoherenceData$] = bind(globalCoherenceAnalysis, null);
+export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
+  globalCoherenceAnalysis,
+  null
+);
 export const [useKeyPointsData, keyPointsData$] = bind(keyPointsAnalysis, null);
 export const [useAllExpectationsAnalysis] = bind(allExpectationsAnalysis, null);
 export const [useArgumentsData, argumentsData$] = bind(argumentsAnalysis, null);

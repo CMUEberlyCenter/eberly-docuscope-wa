@@ -1,9 +1,7 @@
 import { FC } from "react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import {
-  Claim as ClaimProps
-} from "../../../lib/ReviewResponse";
+import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
@@ -40,9 +38,7 @@ export const Arguments: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center">
-          {t("arguments.title")}
-        </Card.Title>
+        <Card.Title className="text-center">{t("arguments.title")}</Card.Title>
         {!review ? (
           <Loading />
         ) : (

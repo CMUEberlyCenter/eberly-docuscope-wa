@@ -8,8 +8,9 @@ __author__    = "Suguru Ishizaki"
 __copyright__ = "2017-20 Suguru Ishizaki, Carnegie Mellon University"
 
 
-import os, sys, codecs
+import os, sys
 import string
+import shutil
 import json
 import ftfy
 import re

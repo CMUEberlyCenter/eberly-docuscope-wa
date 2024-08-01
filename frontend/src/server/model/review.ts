@@ -10,3 +10,11 @@ export type Review = {
   writing_task: WritingTask | null | DBRef;
   analysis: Analysis[];
 };
+
+export const isReview = (obj: Review | unknown): obj is Review =>
+  !!obj &&
+  typeof obj === 'object' &&
+  'document' in obj &&
+  'text' in obj &&
+  'writing_task' in obj &&
+  'analysis' in obj;

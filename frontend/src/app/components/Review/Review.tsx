@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Button,
   Card,
@@ -19,6 +19,7 @@ import { KeyIdeas } from "./KeyIdeas";
 import { Arguments } from "./Arguments";
 import { Sentences } from "./Sentences";
 import { Organization } from "./Organization";
+import { isReview } from "../../../server/model/review";
 
 export const Review: FC = () => {
   const { t } = useTranslation("review");
@@ -28,6 +29,21 @@ export const Review: FC = () => {
   const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
   const [tool, setTool] = useState("");
+  const [document, setDocument] = useState<string>("");
+  useEffect(() => {
+    if (isReview(review)) {
+      const ontopic_doc = review.analysis.find(
+        (analysis) => analysis.tool === "ontopic"
+      )?.response.html;
+      if (ontopic_doc && ["sentences", "organization"].includes(tool)) {
+        setDocument(ontopic_doc);
+      } else {
+        setDocument(review.document);
+      }
+    } else {
+      setDocument("");
+    }
+  }, [review, tool]);
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
   const sentencesFeature = true;
@@ -58,7 +74,7 @@ export const Review: FC = () => {
         ) : (
           <div
             className="p-2 flex-grow-1 overflow-auto"
-            dangerouslySetInnerHTML={{ __html: review?.document ?? "" }}
+            dangerouslySetInnerHTML={{ __html: document }}
           />
         )}
       </main>
@@ -80,9 +96,7 @@ export const Review: FC = () => {
             >
               <option>{t("null.title")}</option>
               {sentencesFeature && (
-                <option value="sentences">
-                  {t("sentences.title")}
-                </option>
+                <option value="sentences">{t("sentences.title")}</option>
               )}
               {coherenceFeature && (
                 <option value="global_coherence">
@@ -99,9 +113,7 @@ export const Review: FC = () => {
                 <option value="expectations">{t("expectations.title")}</option>
               )}
               {organizationFeature && (
-                <option value="organization">
-                  {t("organization.title")}
-                </option>
+                <option value="organization">{t("organization.title")}</option>
               )}
               {impressionsFeature && (
                 <option disabled value="impressions">
@@ -116,17 +128,11 @@ export const Review: FC = () => {
                 <span className="mx-auto text-center">{t("null.content")}</span>
               </Stack>
             )}
-            {tool === "global_coherence" && (
-              <GlobalCoherence/>
-            )}
-            {tool === "key_ideas" && (
-              <KeyIdeas/>
-            )}
-            {tool === "arguments" && (
-              <Arguments/>
-            )}
-            {tool === "sentences" && (<Sentences/>)}
-            {tool === "organization" && (<Organization/>)}
+            {tool === "global_coherence" && <GlobalCoherence />}
+            {tool === "key_ideas" && <KeyIdeas />}
+            {tool === "arguments" && <Arguments />}
+            {tool === "sentences" && <Sentences />}
+            {tool === "organization" && <Organization />}
           </Card.Body>
           <Card.Footer>
             {writingTask && (

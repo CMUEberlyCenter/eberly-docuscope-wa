@@ -17,13 +17,15 @@ import { readTemplates } from './scribe';
 export const reviews = Router();
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-const ANALYSES: (ReviewPrompt)[] = [
+const ANALYSES: ReviewPrompt[] = [
   'global_coherence',
   'key_points',
   'arguments',
 ];
 
-const doOnTopic = async (review: Review): Promise<OnTopicReviewData | undefined> => {
+const doOnTopic = async (
+  review: Review
+): Promise<OnTopicReviewData | undefined> => {
   try {
     const res = await fetch(ONTOPIC_URL, {
       method: 'POST',
@@ -31,17 +33,19 @@ const doOnTopic = async (review: Review): Promise<OnTopicReviewData | undefined>
         status: 'request',
         data: {
           base: review.text,
-          custom: "", // no topics in current set of tasks
+          custom: '', // no topics in current set of tasks
           customStructured: [], // no topics in current set of tasks
-        }
+        },
       }),
       headers: {
         Accept: 'application/json',
-        'Content-Type': 'application/json'
-      }
-    })
+        'Content-Type': 'application/json',
+      },
+    });
     if (!res.ok) {
-      console.error(`Bad response from ontopic: ${res.status} - ${res.statusText}`);
+      console.error(
+        `Bad response from ontopic: ${res.status} - ${res.statusText}`
+      );
       return;
     }
     const data = await res.json();
@@ -49,11 +53,11 @@ const doOnTopic = async (review: Review): Promise<OnTopicReviewData | undefined>
       tool: 'ontopic',
       datetime: new Date(),
       response: data,
-    }
+    };
   } catch (err) {
     console.error(err);
   }
-}
+};
 
 const doReview = async (
   tool: ReviewPrompt,
@@ -113,8 +117,8 @@ reviews.get('/:id', async (request: Request, response: Response) => {
     response.on('close', () => response.end());
     const review = await findReviewById(id);
     response.write(`data: ${JSON.stringify(review)}\n\n`);
-    await Promise.all(
-      [...ANALYSES.filter(
+    await Promise.all([
+      ...ANALYSES.filter(
         (tool) => !review.analysis.some((a) => a.tool === tool)
       ).map(async (tool) => {
         const analysis = await doReview(tool, review);
@@ -126,18 +130,20 @@ reviews.get('/:id', async (request: Request, response: Response) => {
         }
         return analysis;
       }),
-      // TODO skip if exists.
-      doOnTopic(review).then(async analysis => {
-        if (analysis) {
-          const upd = await updateReviewByIdAddAnalysis(id, analysis);
-          if (!response.closed) {
-            response.write(`data: ${JSON.stringify(upd)}\n\n`);
-          }
-        }
-        return analysis;
-      })
-      ]
-    );
+      ...(review.analysis.some((a) => a.tool === 'ontopic')
+        ? []
+        : [
+            doOnTopic(review).then(async (analysis) => {
+              if (analysis) {
+                const upd = await updateReviewByIdAddAnalysis(id, analysis);
+                if (!response.closed) {
+                  response.write(`data: ${JSON.stringify(upd)}\n\n`);
+                }
+              }
+              return analysis;
+            }),
+          ]),
+    ]);
     const final = await findReviewById(id);
     if (!response.closed) {
       response.write(`data: ${JSON.stringify(final)}\n\n`);

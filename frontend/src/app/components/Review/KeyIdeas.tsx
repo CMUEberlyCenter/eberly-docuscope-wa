@@ -11,9 +11,7 @@ export const KeyIdeas: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center">
-          {t("key_ideas.title")}
-        </Card.Title>
+        <Card.Title className="text-center">{t("key_ideas.title")}</Card.Title>
         {!review ? (
           <Loading />
         ) : (

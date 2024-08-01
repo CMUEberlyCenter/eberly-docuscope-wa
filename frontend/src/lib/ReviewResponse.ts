@@ -1,4 +1,4 @@
-import { OnTopicData } from "./OnTopicData";
+import { OnTopicData } from './OnTopicData';
 
 export type ReviewTool =
   | 'global_coherence'

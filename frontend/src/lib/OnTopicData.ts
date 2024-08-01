@@ -60,6 +60,6 @@ export const cleanAndRepairSentenceData = (
 ) => {
   if (!data || !data.html_sentences) return null;
   return data.html_sentences.map((paragraph) =>
-    paragraph.filter((sentence) => sentence !== "")
+    paragraph.filter((sentence) => sentence !== '')
   ); // sentence.trim()?
 };

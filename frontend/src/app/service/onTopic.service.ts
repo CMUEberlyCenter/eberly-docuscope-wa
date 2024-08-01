@@ -16,7 +16,6 @@ import { OnTopicData } from '../../lib/OnTopicData';
 
 // type ErrorData = { error: string }
 
-
 // Shape of json sent to onTopic.
 type onTopicRequest = {
   custom: string;
