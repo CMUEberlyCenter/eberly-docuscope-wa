@@ -7,6 +7,8 @@ import "./index.scss";
 
 const content = document.getElementById("content");
 console.assert(content, '"#content" not found!  Unable to render application.');
+console.log(`Welcome to myProse Review Version: ${__APP_VERSION__} built on ${new Date(__BUILD_DATE__).toLocaleString()}`);
+
 if (content) {
   createRoot(content).render(
     <StrictMode>

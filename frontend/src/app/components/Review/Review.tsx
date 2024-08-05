@@ -9,27 +9,26 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
+import { isReview } from "../../../server/model/review";
 import logo from "../../assets/logo.svg";
 import { useReview } from "../../service/review.service";
-import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
-import TaskViewer from "./TaskViewer";
+import { Arguments } from "./Arguments";
 import { GlobalCoherence } from "./GlobalCoherence";
 import { KeyIdeas } from "./KeyIdeas";
-import { Arguments } from "./Arguments";
-import { Sentences } from "./Sentences";
 import { Organization } from "./Organization";
-import { isReview } from "../../../server/model/review";
+import { Sentences } from "./Sentences";
+import TaskViewer from "./TaskViewer";
 
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
-  const settings = useSettings();
+  // const settings = useSettings();
   const review = useReview();
   const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
   const [tool, setTool] = useState("");
-  const [document, setDocument] = useState<string>("");
+  const [prose, setProse] = useState<string>("");
   useEffect(() => {
     window.document.title = t('document.title');
   }, [t])
@@ -39,12 +38,12 @@ export const Review: FC = () => {
         (analysis) => analysis.tool === "ontopic"
       )?.response.html;
       if (ontopic_doc && ["sentences", "organization"].includes(tool)) {
-        setDocument(ontopic_doc);
+        setProse(ontopic_doc);
       } else {
-        setDocument(review.document);
+        setProse(review.document);
       }
     } else {
-      setDocument("");
+      setProse("");
     }
   }, [review, tool]);
 
@@ -59,7 +58,7 @@ export const Review: FC = () => {
 
   return (
     <Split
-      className="container-fluid h-100 v-100 d-flex flex-row"
+      className="container-fluid h-100 w-100 d-flex flex-row"
       sizes={[60, 40]}
       minSize={[400, 320]}
       expandToMin={true}
@@ -77,7 +76,7 @@ export const Review: FC = () => {
         ) : (
           <div
             className="p-2 flex-grow-1 overflow-auto"
-            dangerouslySetInnerHTML={{ __html: document }}
+            dangerouslySetInnerHTML={{ __html: prose }}
           />
         )}
       </main>
@@ -89,7 +88,7 @@ export const Review: FC = () => {
               <img
                 style={{ height: "1.75em" }}
                 src={logo}
-                alt={settings.brand ?? "onTopic"}
+                alt={tt('document.title')}
               />
             </div>
             <Form.Select

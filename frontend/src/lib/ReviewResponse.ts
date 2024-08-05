@@ -70,6 +70,7 @@ export interface KeyPointsData extends ReviewData<KeyPointsResponse> {
 export interface AllExpectationsData
   extends ReviewData<AllExpectationsResponse> {
   tool: 'all_expectations';
+  expectation: string;
 }
 export interface ArgumentsData extends ReviewData<ArgumentsResponse> {
   tool: 'arguments';

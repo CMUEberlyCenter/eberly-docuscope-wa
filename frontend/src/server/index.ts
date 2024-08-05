@@ -5,15 +5,16 @@ import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 // import { assignments } from './api/assignments';
+import { BadRequest, InternalServerError, ProblemDetails } from '../lib/ProblemDetails';
+import { isWritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
+import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
+import { writingTasks } from './api/tasks';
 import {
-  findAllPublicWritingTasks,
   findAssignmentById,
-  findWritingTaskById,
   initDatabase,
-  updateAssignmentWritingTask,
-  updatePublicWritingTasks,
+  updateAssignmentWritingTask
 } from './data/mongo';
 import { IdToken, isInstructor } from './model/lti';
 import { metrics } from './prometheus';
@@ -25,9 +26,6 @@ import {
   ONTOPIC_URL,
   PORT,
 } from './settings';
-import { isWritingTask } from '../lib/WritingTask';
-import { ProblemDetails } from '../lib/ProblemDetails';
-import { reviews } from './api/reviews';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -41,75 +39,33 @@ assignments.post('/', async (request: Request, response: Response) => {
     return response.sendStatus(401); // Unauthorized
   }
   if (!request.files) {
-    return response.sendStatus(400); // Bad Request
+    return response.status(400).send(BadRequest('No files!')); // Bad Request
   }
   try {
     const file = request.files.file;
     if (file instanceof Array) {
-      return response.sendStatus(400).send({
-        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
-        title: 'Bad Request',
-        detail: 'Multiple files unsupported.',
-        status: 400,
-      } as ProblemDetails);
+      return response.sendStatus(400).send(BadRequest('Multiple files unsupported.'));
     }
     const json = JSON.parse(file.data.toString('utf-8'));
     if (!isWritingTask(json)) {
       return response
-        .sendStatus(400)
-        .send('Not a valid writing task specification.'); // TODO: format
+        .status(400).send(BadRequest('Not a valid writing task specification.'));
     }
     await updateAssignmentWritingTask(token.platformContext.resource.id, json);
   } catch (err) {
     console.error(err);
     if (err instanceof SyntaxError) {
-      return response.sendStatus(400).send({
-        type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
-        title: 'Bad Request',
-        detail: err.message,
-        status: 400,
-      } as ProblemDetails);
+      return response.status(400).send(BadRequest(err));
     }
-    return response.sendStatus(500);
+    return response.status(500).send(InternalServerError(err));
   }
   return response.sendStatus(200);
 });
 
-const writingTasks = Router();
-writingTasks.patch('/update', async (request: Request, response: Response) => {
-  try {
-    await updatePublicWritingTasks();
-    return response.sendStatus(204);
-  } catch (err) {
-    console.error(err);
-    return response.sendStatus(500);
-  }
-});
-writingTasks.get('/:fileId', async (request: Request, response: Response) => {
-  const fileId = request.params.fileId;
-  try {
-    return response.send(await findWritingTaskById(fileId));
-  } catch (err) {
-    console.error(err);
-    if (err instanceof ReferenceError) {
-      return response.sendStatus(404);
-    }
-    return response.sendStatus(500);
-  }
-});
-writingTasks.get('', async (request: Request, response: Response) => {
-  try {
-    const rules = await findAllPublicWritingTasks();
-    return response.send(rules); // need everything for preview.
-  } catch (err) {
-    console.error(err);
-    return response.sendStatus(500);
-  }
-});
 
 async function __main__() {
   console.log(
-    `Configured the OnTopic backend url to be: ${ONTOPIC_URL.toString()}`
+    `OnTopic backend url: ${ONTOPIC_URL.toString()}`
   );
   await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
@@ -204,7 +160,8 @@ async function __main__() {
     /api\/v.\//,
     /metrics\//,
     /index\.html$/,
-    /review\.html$/
+    /review\.html$/,
+    /expectations\.html$/,
   );
   try {
     await Provider.deploy({ port: PORT });

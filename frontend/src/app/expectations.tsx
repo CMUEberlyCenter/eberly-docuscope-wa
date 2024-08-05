@@ -1,13 +1,13 @@
 import { StrictMode, Suspense } from "react";
 import { Spinner } from "react-bootstrap";
 import { createRoot } from "react-dom/client";
-import CustomEditor from "./components/Editor/CustomEditor";
+import { AllExpectations } from "./components/AllExpectations/AllExpectations";
 import "./i18n";
 import "./index.scss";
 
 const content = document.getElementById("content");
 console.assert(content, '"#content" not found!  Unable to render application.');
-console.log(`Welcome to myProse Version: ${__APP_VERSION__} built on ${new Date(__BUILD_DATE__).toLocaleString()}`);
+console.log(`Welcome to myProse Expectations Analysis Version: ${__APP_VERSION__} built on ${new Date(__BUILD_DATE__).toLocaleString()}`);
 
 if (content) {
   createRoot(content).render(
@@ -20,7 +20,7 @@ if (content) {
           </Spinner>
         }
       >
-        <CustomEditor />
+        <AllExpectations />
       </Suspense>
     </StrictMode>
   );

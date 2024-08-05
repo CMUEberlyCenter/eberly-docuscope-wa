@@ -1,7 +1,7 @@
 /**
  * @fileoverview Global runtime settings service.  This is used
  * to specify site wide settings including availability of features.
- * @see service/scribe.service.ts for per assignment myScribe feature settings.
+ * @see service/scribe.service.ts for per assignment myProse feature settings.
  *
  * Reads the "settings/settings.json" file which can be easily replaced in
  * various environments.

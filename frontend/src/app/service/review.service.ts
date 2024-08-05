@@ -49,7 +49,7 @@ const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
   null
 );
 const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
-const allExpectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(
+const allExpectationsAnalysis = new BehaviorSubject<Map<string,AllExpectationsData> | null>(
   null
 );
 const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
@@ -61,6 +61,7 @@ review$
   )
   .subscribe((analyses) =>
     analyses.forEach((analysis) => {
+      const expectations = new Map<string, AllExpectationsData>();
       switch (analysis.tool) {
         // TODO add shape checks
         case 'global_coherence':
@@ -70,7 +71,7 @@ review$
           keyPointsAnalysis.next(analysis);
           break;
         case 'all_expectations':
-          allExpectationsAnalysis.next(analysis);
+          expectations.set(analysis.expectation, analysis);
           break;
         case 'arguments':
           argumentsAnalysis.next(analysis);
@@ -79,6 +80,7 @@ review$
           ontopicAnalysis.next(analysis);
           break;
       }
+      allExpectationsAnalysis.next(expectations);
     })
   );
 

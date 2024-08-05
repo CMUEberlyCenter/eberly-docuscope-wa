@@ -9,17 +9,27 @@ export type ProblemDetails<Details = string> = {
   [key: string]: unknown;
 };
 
-export const FileNotFound = (err: Error | string): ProblemDetails => ({
+export const FileNotFound = (err: Error | string, instance?: string): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
   title: 'Not Found',
   detail: err instanceof Error ? err.message : err,
   status: 404,
+  instance,
 });
 
-export const InternalServerError = (err: Error): ProblemDetails => ({
+export const InternalServerError = (err: Error, instance?: string): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
   title: 'Internal Server Error',
   status: 500,
   detail: err.message,
   error: err,
+  instance,
+});
+
+export const BadRequest = (err: Error | string, instance?: string): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
+  title: 'Bad Request',
+  detail: err instanceof Error ? err.message : err,
+  status: 400,
+  instance,
 });

@@ -109,12 +109,13 @@ reviews.get(
               user_lang,
               target_lang,
             });
-            const resp = content.response.choices.at(0)?.message;
+            const resp = content.response.choices.at(0)?.message.content;
             if (!resp) return; //FIXME
             const analysis: AllExpectationsData = {
               tool: 'all_expectations',
               datetime: content.finished,
-              response: resp as unknown as AllExpectationsResponse,
+              expectation: expectation.name,
+              response: JSON.parse(resp) as AllExpectationsResponse,
             };
             const upd = await updateReviewByIdAddAnalysis(id, analysis);
             if (!response.closed) {

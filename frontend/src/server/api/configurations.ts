@@ -1,4 +1,5 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
+import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
 import { findAllFiles, findWritingTaskById, storeFile } from '../data/mysql';
 
 export const configurations = Router();
@@ -10,11 +11,11 @@ configurations.get('/:fileId', async (request: Request, response: Response) => {
     if (data) {
       response.send(data);
     } else {
-      response.sendStatus(404);
+      response.status(404).send(FileNotFound(`Configuration ${fileId} does not exist.`));
     }
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);
-    response.sendStatus(500);
+    response.status(500).send(InternalServerError(err));
   }
 });
 

@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { InternalServerError } from '../../lib/ProblemDetails';
 import { updateMetrics, updateResponseAvg } from '../prometheus';
 import { ONTOPIC_URL } from '../settings';
 
@@ -33,9 +34,9 @@ ontopic.post('/', async (request: Request, response: Response) => {
     }
     const ret = await res.json();
 
-    response.json(ret);
+    return response.json(ret);
   } catch (err) {
     console.error(err);
-    response.sendStatus(500);
+    return response.status(500).send(InternalServerError(err));
   }
 });
