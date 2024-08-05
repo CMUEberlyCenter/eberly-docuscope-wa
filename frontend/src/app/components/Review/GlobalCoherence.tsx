@@ -1,9 +1,10 @@
 import { FC } from "react";
-import { Card, ListGroup } from "react-bootstrap";
+import { Alert, Card, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
+import { ErrorBoundary } from "react-error-boundary";
 
 const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
   const { t } = useTranslation("review");
@@ -36,7 +37,11 @@ export const GlobalCoherence: FC = () => {
         {!review ? (
           <Loading />
         ) : (
-          <>
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">{t("global_coherence.error")}</Alert>
+            }
+          >
             <Card.Subtitle className="text-center">
               {review.datetime
                 ? new Date(review.datetime).toLocaleString()
@@ -80,7 +85,7 @@ export const GlobalCoherence: FC = () => {
                 />
               </Card.Body>
             </Card>
-          </>
+          </ErrorBoundary>
         )}
       </Card.Body>
     </Card>

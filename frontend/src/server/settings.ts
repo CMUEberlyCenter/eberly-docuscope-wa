@@ -1,9 +1,9 @@
 import { Command, Option } from 'commander';
 import { readFileSync } from 'fs';
 // import { fileURLToPath } from 'url';
-import { version } from '../../package.json';
 import 'dotenv/config';
 import { join } from 'path';
+import { version } from '../../package.json';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
@@ -92,6 +92,7 @@ const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
 export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
+
 export const OPENAI_MODEL = 'gpt-4o';
 export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');

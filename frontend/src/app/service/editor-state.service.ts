@@ -35,13 +35,13 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
       string = `<strong>${string}</strong>`;
     }
     if ('underline' in node && node.underline) {
-      `<span style="text-decoration: underline;">${string}</span>`;
+      string = `<span style="text-decoration: underline;">${string}</span>`;
     }
     if ('strikethrough' in node && node.strikethrough) {
-      `<span style="text-decoration: line-through;">${string}</span>`;
+      string = `<span style="text-decoration: line-through;">${string}</span>`;
     }
     if ('italic' in node && node.italic) {
-      `<span style="font-style: italic">${string}</span>`;
+      string = `<span style="font-style: italic">${string}</span>`;
     }
     return string;
   }

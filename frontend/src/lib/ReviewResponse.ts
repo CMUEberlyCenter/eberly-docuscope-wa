@@ -35,18 +35,20 @@ export type ArgumentsResponse = {
 };
 
 export type KeyPointsResponse = {
-  point: string;
-  elaborations: { elaboration_strategy: string; explanation: string }[];
-  sentences: string[];
-  suggestions: string[];
-}[];
+  points: {
+    point: string;
+    elaborations: { elaboration_strategy: string; explanation: string }[];
+    sentences: string[];
+    suggestions: string[];
+  }[];
+};
 
 export type AllExpectationsResponse = {
   sentences: string[];
-  explanation: string;
+  suggestions: string[];
 };
 
-type ReviewResponse =
+export type ReviewResponse =
   | GlobalCoherenceResponse
   | KeyPointsResponse
   | AllExpectationsResponse

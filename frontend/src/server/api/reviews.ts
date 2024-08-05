@@ -1,9 +1,19 @@
 import { Request, Response, Router } from 'express';
-import OpenAI from 'openai';
-import format from 'string-format';
-import { Analysis, OnTopicReviewData } from '../../lib/ReviewResponse';
-import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import { OnTopicData } from '../../lib/OnTopicData';
+import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
 import {
+  AllExpectationsData,
+  AllExpectationsResponse,
+  Analysis,
+  ArgumentsResponse,
+  GlobalCoherenceResponse,
+  KeyPointsResponse,
+  OnTopicReviewData,
+} from '../../lib/ReviewResponse';
+import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import { doChat } from '../data/chat';
+import {
+  deleteReviewById,
   findReviewById,
   insertReview,
   updateReviewByIdAddAnalysis,
@@ -11,16 +21,9 @@ import {
 import { IdToken } from '../model/lti';
 import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
-import {
-  DEFAULT_LANGUAGE,
-  ONTOPIC_URL,
-  OPENAI_API_KEY,
-  OPENAI_MODEL,
-} from '../settings';
-import { readTemplates } from './scribe';
+import { DEFAULT_LANGUAGE, ONTOPIC_URL } from '../settings';
 
 export const reviews = Router();
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const ANALYSES: ReviewPrompt[] = [
   'global_coherence',
@@ -53,7 +56,7 @@ const doOnTopic = async (
       );
       return;
     }
-    const data = await res.json();
+    const data = (await res.json()) as OnTopicData;
     return {
       tool: 'ontopic',
       datetime: new Date(),
@@ -64,54 +67,91 @@ const doOnTopic = async (
   }
 };
 
-const doReview = async (
-  tool: ReviewPrompt,
-  review: Review
-): Promise<Analysis | undefined> => {
-  try {
-    const { prompt, role, temperature } = (await readTemplates()).templates[
-      tool
-    ];
-    const user_lang =
-      (isWritingTask(review.writing_task)
-        ? review.writing_task.info.user_lang
-        : undefined) ?? DEFAULT_LANGUAGE;
-    const target_lang =
-      (isWritingTask(review.writing_task)
-        ? review.writing_task.info.target_lang
-        : undefined) ?? DEFAULT_LANGUAGE;
-    const content = format(prompt, {
-      text: review.text,
-      user_lang,
-      target_lang,
-    });
-    const chat = await openai.chat.completions.create({
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'system', content: role ?? 'You are a chatbot' },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: OPENAI_MODEL,
-    });
-    const resp = chat.choices.at(0)?.message.content;
-    if (!resp) {
-      throw new Error('No content in OpenAI response.');
+const reviewData = (review: Review) => ({
+  text: review.text,
+  user_lang:
+    (isWritingTask(review.writing_task)
+      ? review.writing_task.info.user_lang
+      : undefined) ?? DEFAULT_LANGUAGE,
+  target_lang:
+    (isWritingTask(review.writing_task)
+      ? review.writing_task.info.target_lang
+      : undefined) ?? DEFAULT_LANGUAGE,
+});
+
+reviews.get(
+  '/:id/expectations',
+  async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params;
+
+      response.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        Connection: 'keep-alive',
+      });
+      response.flushHeaders();
+      response.on('close', () => response.end());
+      const review = await findReviewById(id);
+      const { writing_task } = review;
+      response.write(`data: ${JSON.stringify(review)}\n\n`);
+      if (isWritingTask(writing_task)) {
+        const user_lang = writing_task.info.user_lang ?? DEFAULT_LANGUAGE;
+        const target_lang = writing_task.info.target_lang ?? DEFAULT_LANGUAGE;
+        const expectations = writing_task.rules.rules.flatMap((rule) =>
+          rule.is_group ? rule.children : [rule]
+        );
+        await Promise.allSettled(
+          expectations.map(async (expectation) => {
+            const content = await doChat('all_expectations', {
+              expectation: expectation.name,
+              description: expectation.description,
+              user_lang,
+              target_lang,
+            });
+            const resp = content.response.choices.at(0)?.message;
+            if (!resp) return; //FIXME
+            const analysis: AllExpectationsData = {
+              tool: 'all_expectations',
+              datetime: content.finished,
+              response: resp as unknown as AllExpectationsResponse,
+            };
+            const upd = await updateReviewByIdAddAnalysis(id, analysis);
+            if (!response.closed) {
+              response.write(`data: ${JSON.stringify(upd)}\n\n`);
+            }
+          })
+        );
+        if (!response.closed) {
+          const final = await findReviewById(id);
+          response.write(`data: ${JSON.stringify(final)}\n\n`);
+          return response.end();
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        return response.status(404).send(FileNotFound(err));
+      }
+      return response.status(500).send(InternalServerError(err));
     }
-    return {
-      tool,
-      datetime: new Date(),
-      response: JSON.parse(resp),
-    };
-  } catch (err) {
-    console.error(err);
   }
-};
+);
 
 reviews.get('/:id', async (request: Request, response: Response) => {
   const { id } = request.params;
+  const tool = request.query.tool;
+  const analyses = [...ANALYSES, 'ontopic'].filter((analysis) => {
+    if (!tool) {
+      return true;
+    }
+    if (Array.isArray(tool)) {
+      return (tool as string[]).includes(analysis);
+    }
+    if (typeof tool === 'string') {
+      return analysis === tool;
+    }
+  });
   try {
     response.set({
       'Cache-Control': 'no-cache',
@@ -122,46 +162,90 @@ reviews.get('/:id', async (request: Request, response: Response) => {
     response.on('close', () => response.end());
     const review = await findReviewById(id);
     response.write(`data: ${JSON.stringify(review)}\n\n`);
-    await Promise.all([
-      ...ANALYSES.filter(
-        (tool) => !review.analysis.some((a) => a.tool === tool)
-      ).map(async (tool) => {
-        const analysis = await doReview(tool, review);
-        if (analysis) {
-          const upd = await updateReviewByIdAddAnalysis(id, analysis);
-          if (!response.closed) {
-            response.write(`data: ${JSON.stringify(upd)}\n\n`);
-          }
-        }
-        return analysis;
-      }),
-      ...(review.analysis.some((a) => a.tool === 'ontopic')
-        ? []
-        : [
-            doOnTopic(review).then(async (analysis) => {
-              if (analysis) {
-                const upd = await updateReviewByIdAddAnalysis(id, analysis);
-                if (!response.closed) {
-                  response.write(`data: ${JSON.stringify(upd)}\n\n`);
-                }
+    await Promise.allSettled([
+      ...analyses
+        .filter((tool) => !review.analysis.some((a) => a.tool === tool))
+        .map(async (tool) => {
+          let analysis: Analysis | undefined = undefined;
+          switch (tool) {
+            case 'global_coherence': {
+              const resp = await doChat(tool, reviewData(review), true);
+              const data = resp?.response.choices.at(0)?.message.content;
+              if (data) {
+                analysis = {
+                  tool,
+                  datetime: resp.finished,
+                  response: JSON.parse(data) as GlobalCoherenceResponse,
+                };
               }
-              return analysis;
-            }),
-          ]),
+              break;
+            }
+            case 'key_points': {
+              const resp = await doChat(tool, reviewData(review), true);
+              const data = resp?.response.choices.at(0)?.message.content;
+              if (data) {
+                analysis = {
+                  tool,
+                  datetime: resp.finished,
+                  response: JSON.parse(data) as KeyPointsResponse,
+                };
+              }
+              break;
+            }
+            case 'arguments': {
+              const resp = await doChat(tool, reviewData(review), true);
+              const data = resp?.response.choices.at(0)?.message.content;
+              if (data) {
+                analysis = {
+                  tool,
+                  datetime: resp.finished,
+                  response: JSON.parse(data) as ArgumentsResponse,
+                };
+              }
+              break;
+            }
+            case 'ontopic':
+              analysis = await doOnTopic(review);
+              break;
+            default:
+              // never reachable...
+              console.error(`Unknown tool: ${tool}`);
+          }
+          if (analysis) {
+            const upd = await updateReviewByIdAddAnalysis(id, analysis);
+            if (!response.closed) {
+              response.write(`data: ${JSON.stringify(upd)}\n\n`);
+            }
+          }
+          return analysis;
+        }),
     ]);
-    const final = await findReviewById(id);
     if (!response.closed) {
+      const final = await findReviewById(id);
       response.write(`data: ${JSON.stringify(final)}\n\n`);
       return response.end();
     }
   } catch (err) {
-    return response.sendStatus(404);
+    console.error(err);
+    if (err instanceof ReferenceError) {
+      return response.status(404).send(FileNotFound(err));
+    }
+    return response.status(500).send(InternalServerError(err));
   }
 });
+
 reviews.delete('/:id', async (request: Request, response: Response) => {
-  const { id } = request.params;
-  console.log(`delete ${id}`);
-  return response.sendStatus(200);
+  try {
+    const { id } = request.params;
+    console.log(`delete ${id}`);
+    deleteReviewById(id);
+    return response.sendStatus(204);
+  } catch (err) {
+    if (err instanceof ReferenceError) {
+      return response.status(404).send(FileNotFound(err));
+    }
+    return response.status(500).send(InternalServerError(err));
+  }
 });
 
 type ReviewBody = {
@@ -182,6 +266,6 @@ reviews.post('/', async (request: Request, response: Response) => {
     );
     return response.send(id);
   } catch (err) {
-    return response.sendStatus(500);
+    return response.status(500).send(InternalServerError(err));
   }
 });

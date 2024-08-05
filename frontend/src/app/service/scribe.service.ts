@@ -306,40 +306,6 @@ export const postClarifyText = (
     selected,
     writing_task
   );
-// export async function postClarifyText(
-//   { text }: SelectedText,
-//   writing_task?: WritingTask | null
-// ): Promise<CopyEditResponse> {
-//   const { user_lang, target_lang } = writing_task?.info ?? {};
-//   const response = await fetch(`/api/v2/scribe/copyedit`, {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ text, user_lang, target_lang }),
-//   });
-//   const errorData: CopyEditResponse = {
-//     revision: '',
-//     clean_revision: '',
-//     explanation: '',
-//   };
-//   if (!response.ok) {
-//     const err = await response.text();
-//     console.error(err);
-//     return { ...errorData, explanation: err };
-//   }
-//   const data: ChatResponse = await response.json();
-//   if ('error' in data) {
-//     console.error(data.message);
-//     return { ...errorData, explanation: data.message };
-//   }
-//   if ('choices' in data) {
-//     const content = data.choices.at(0)?.message.content;
-//     if (content) {
-//       return JSON.parse(content) as CopyEditResponse;
-//     }
-//   }
-//   console.error(data);
-//   return { ...errorData, explanation: 'Invalid response from service.' };
-// }
 
 export const [useScribeFeatureClarify, clarifyFeature$] = bind(
   settings$.pipe(map((settings) => settings.grammar)),

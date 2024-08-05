@@ -88,7 +88,6 @@ import { TopicsAudit } from "../../components/scribe/TopicsAudit/TopicsAudit";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import { rules$, useOnTopic } from "../../service/onTopic.service";
 import {
-  SelectedNotesProse,
   assess,
   clarify,
   grammar,
@@ -111,6 +110,7 @@ import {
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
+import { SelectedNotesProse } from "../../lib/ToolResults";
 
 function fixOnTopicHtml(topicData?: { html?: string } | null) {
   return topicData?.html?.replaceAll("_", " ") ?? "";
@@ -220,7 +220,7 @@ const StudentView: FC = () => {
   const onMouseMove = useCallback(
     (e: MouseEvent) => {
       if (toolSeparatorDragging) {
-        e.preventDefault;
+        e.preventDefault();
       }
       onMove(e.clientX);
     },

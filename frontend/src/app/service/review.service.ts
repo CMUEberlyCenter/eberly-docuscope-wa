@@ -62,6 +62,7 @@ review$
   .subscribe((analyses) =>
     analyses.forEach((analysis) => {
       switch (analysis.tool) {
+        // TODO add shape checks
         case 'global_coherence':
           globalCoherenceAnalysis.next(analysis);
           break;

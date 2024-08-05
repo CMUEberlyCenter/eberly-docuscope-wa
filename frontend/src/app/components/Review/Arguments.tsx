@@ -1,9 +1,10 @@
 import { FC } from "react";
-import { Card } from "react-bootstrap";
+import { Alert, Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
+import { ErrorBoundary } from "react-error-boundary";
 
 const Claim: FC<ClaimProps> = ({ claim, support, sentences, suggestions }) => {
   const { t } = useTranslation("review");
@@ -42,7 +43,9 @@ export const Arguments: FC = () => {
         {!review ? (
           <Loading />
         ) : (
-          <>
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
+          >
             <Card.Subtitle className="text-center">
               {review.datetime
                 ? new Date(review.datetime).toLocaleString()
@@ -78,7 +81,7 @@ export const Arguments: FC = () => {
                 ))}
               </Card.Body>
             </Card>
-          </>
+          </ErrorBoundary>
         )}
       </Card.Body>
     </Card>

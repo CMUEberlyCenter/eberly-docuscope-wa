@@ -19,6 +19,7 @@
   },
   "global_coherence": {
     "title": "Logical Progression Issues",
+    "error": "Error loading Logical Progression data.",
     "contract": "Given New Contract Violation",
     "shift": "Sudden Shift in Topic",
     "order": "Illogical Order",
@@ -32,12 +33,14 @@
   },
   "key_ideas": {
     "title": "List of Key Ideas",
+    "error": "Error reading Key Ideas data.",
     "elaborations": "Elaborations",
     "sentences": "Sentences",
     "suggestions": "Suggestions"
   },
   "arguments": {
     "title": "Lines of Arguments",
+    "error":"Error reading Lines of Arguements data.",
     "main": "Main Argument",
     "arguments": "Arguments",
     "counter_examples": "Counter Examples",

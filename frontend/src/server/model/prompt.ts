@@ -10,7 +10,7 @@ type ExpectationPrompt = 'expectation';
 export type TextPrompt = 'copyedit' | 'grammar' | 'local_coherence';
 export type ReviewPrompt = 'arguments' | 'global_coherence' | 'key_points';
 type ReviewExpectationsPrompt = 'all_expectations';
-type PromptType =
+export type PromptType =
   | NotesPrompt
   | ExpectationPrompt
   | TextPrompt

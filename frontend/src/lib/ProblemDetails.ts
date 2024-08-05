@@ -8,3 +8,18 @@ export type ProblemDetails<Details = string> = {
   // additional are allowable
   [key: string]: unknown;
 };
+
+export const FileNotFound = (err: Error | string): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
+  title: 'Not Found',
+  detail: err instanceof Error ? err.message : err,
+  status: 404,
+});
+
+export const InternalServerError = (err: Error): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
+  title: 'Internal Server Error',
+  status: 500,
+  detail: err.message,
+  error: err,
+});
