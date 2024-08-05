@@ -5,7 +5,7 @@ import {
   faUnderline,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, ReactNode, useCallback, useState } from "react";
+import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 import {
   Button,
   ButtonGroup,
@@ -186,6 +186,10 @@ const CustomEditor: FC = () => {
     (props: RenderElementProps) => <Element {...props} />,
     []
   );
+
+  useEffect(() => {
+    window.document.title = t('document.title');
+  }, [t])
 
   return (
     <Slate

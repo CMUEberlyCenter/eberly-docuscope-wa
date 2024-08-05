@@ -183,12 +183,12 @@ export const [useProse, prose$] = bind<SUSPENSE | SelectedNotesProse>(
   SUSPENSE
 );
 
-notes.subscribe(
-  (notes) => notes !== undefined && console.log(`logging notes: ${notes.text}`)
-);
-prose$.subscribe(
-  (prose) => typeof prose === 'string' && console.log(`logging prose: ${prose}`)
-);
+// notes.subscribe(
+//   (notes) => notes !== undefined && console.log(`logging notes: ${notes.text}`)
+// );
+// prose$.subscribe(
+//   (prose) => typeof prose === 'string' && console.log(`logging prose: ${prose}`)
+// );
 
 /*** Fix Grammar ***/
 export const [useScribeFeatureGrammar, grammarFeature$] = bind(

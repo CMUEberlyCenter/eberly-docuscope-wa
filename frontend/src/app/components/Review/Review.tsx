@@ -31,6 +31,9 @@ export const Review: FC = () => {
   const [tool, setTool] = useState("");
   const [document, setDocument] = useState<string>("");
   useEffect(() => {
+    window.document.title = t('document.title');
+  }, [t])
+  useEffect(() => {
     if (isReview(review)) {
       const ontopic_doc = review.analysis.find(
         (analysis) => analysis.tool === "ontopic"

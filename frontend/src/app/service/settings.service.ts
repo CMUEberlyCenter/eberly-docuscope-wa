@@ -42,7 +42,7 @@ interface Settings {
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
-  brand: 'myScribe',
+  brand: 'myProse',
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   scribe: true,
