@@ -7,8 +7,7 @@ import { fileURLToPath } from 'url';
 // import { assignments } from './api/assignments';
 import {
   BadRequest,
-  InternalServerError,
-  ProblemDetails,
+  InternalServerError
 } from '../lib/ProblemDetails';
 import { isWritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
@@ -43,7 +42,7 @@ assignments.post('/', async (request: Request, response: Response) => {
     return response.sendStatus(401); // Unauthorized
   }
   if (!request.files) {
-    return response.status(400).send(BadRequest('No files!')); // Bad Request
+    return response.status(400).send(BadRequest('Null files!'));
   }
   try {
     const file = request.files.file;

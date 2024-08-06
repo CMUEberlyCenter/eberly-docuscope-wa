@@ -280,3 +280,21 @@ export async function deleteReviewById(id: string) {
     throw new ReferenceError(`Deletion operation for Review ${id} failed.`);
   }
 }
+
+// export async function avgAnalysisTime() {
+//   const collection = client.db('docuscope').collection<Review>(REVIEW);
+//   const avg = await collection.aggregate([
+//     {
+//       '$unwind': {
+//         'path': '$analysis',
+//         'preserveNullAndEmptyArrays': false
+//       }
+//     },
+//     {
+//       "$group": {
+//         _id: "$tool",
+//         avg_ms: { $avg: "$analysis.delta_ms" }
+//       }
+//     }]);
+//   return avg;
+// }
