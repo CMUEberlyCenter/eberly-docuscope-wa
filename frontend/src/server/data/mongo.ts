@@ -23,7 +23,7 @@ const REVIEW = 'review';
  */
 export async function findAssignmentById(id: string): Promise<Assignment> {
   try {
-    const collection = (await client.connect())
+    const collection = client
       .db('docuscope')
       .collection<Assignment>(ASSIGNMENTS);
     const assignment: Assignment | null = await collection.findOne<Assignment>({
@@ -43,8 +43,6 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -56,9 +54,7 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   try {
     const _id = new ObjectId(id);
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection(WRITING_TASKS);
+    const collection = client.db('docuscope').collection(WRITING_TASKS);
     const rules = await collection.findOne<WritingTask>({ _id });
     if (!rules) {
       throw new ReferenceError(`Expectation file ${id} not found.`);
@@ -67,8 +63,6 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -80,7 +74,7 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
  */
 export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   try {
-    const collection = (await client.connect())
+    const collection = client
       .db('docuscope')
       .collection<WritingTask>(WRITING_TASKS);
     const cursor = collection.find<WritingTask>({ public: true });
@@ -92,8 +86,6 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -108,18 +100,12 @@ export async function updateAssignmentWritingTask(
   assignment: string,
   writing_task: WritingTask
 ) {
-  try {
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Assignment>(ASSIGNMENTS);
-    await collection.updateOne(
-      { assignment },
-      { $set: { writing_task } },
-      { upsert: true }
-    );
-  } finally {
-    await client.close();
-  }
+  const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
+  await collection.updateOne(
+    { assignment },
+    { $set: { writing_task } },
+    { upsert: true }
+  );
 }
 
 /**
@@ -128,21 +114,16 @@ export async function updateAssignmentWritingTask(
  * @param task Identifier for an existing writing task (eg) a public task.
  */
 export async function updateAssignment(assignment: string, task: string) {
-  try {
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Assignment>(ASSIGNMENTS);
-    const writing_task = new ObjectId(task);
-    collection.updateOne(
-      {
-        assignment: assignment,
-      },
-      { $set: { 'writing_task.$ref': writing_task } },
-      { upsert: true }
-    );
-  } finally {
-    await client.close();
-  }
+  const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
+  const writing_task = new ObjectId(task);
+  const update = await collection.updateOne(
+    {
+      assignment: assignment,
+    },
+    { $set: { 'writing_task.$ref': writing_task } },
+    { upsert: true }
+  );
+  return update.upsertedId;
 }
 
 /**
@@ -155,7 +136,7 @@ export async function updatePublicWritingTasks() {
     const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
       (e) => ({ ...e, public: true })
     );
-    const collection = (await client.connect())
+    const collection = client
       .db('docuscope')
       .collection<WritingTask>(WRITING_TASKS);
     await collection.bulkWrite(
@@ -170,8 +151,6 @@ export async function updatePublicWritingTasks() {
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -216,9 +195,7 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
 export async function findReviewById(id: string) {
   try {
     const _id = new ObjectId(id);
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Review>(REVIEW);
+    const collection = client.db('docuscope').collection<Review>(REVIEW);
     const review = await collection.findOne<Review>({ _id });
     if (!review) {
       throw new ReferenceError(`Document ${id} not found.`);
@@ -227,8 +204,6 @@ export async function findReviewById(id: string) {
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -250,9 +225,7 @@ export async function insertReview(
   assignment?: string
 ) {
   try {
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Review>(REVIEW);
+    const collection = client.db('docuscope').collection<Review>(REVIEW);
     const ins = await collection.insertOne({
       writing_task,
       assignment,
@@ -265,8 +238,6 @@ export async function insertReview(
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -283,9 +254,7 @@ export async function updateReviewByIdAddAnalysis(
 ) {
   try {
     const _id = new ObjectId(id);
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Review>(REVIEW);
+    const collection = client.db('docuscope').collection<Review>(REVIEW);
     const result = await collection.findOneAndUpdate(
       { _id },
       { $push: { analysis: { $each: analyses } } }
@@ -295,8 +264,6 @@ export async function updateReviewByIdAddAnalysis(
   } catch (err) {
     console.error(err);
     throw err;
-  } finally {
-    await client.close();
   }
 }
 
@@ -306,16 +273,10 @@ export async function updateReviewByIdAddAnalysis(
  * @throws ReferenceError
  */
 export async function deleteReviewById(id: string) {
-  try {
-    const _id = new ObjectId(id);
-    const collection = (await client.connect())
-      .db('docuscope')
-      .collection<Review>(REVIEW);
-    const result = await collection.deleteOne({ _id });
-    if (!result.acknowledged || result.deletedCount !== 1) {
-      throw new ReferenceError(`Deletion operation for Review ${id} failed.`);
-    }
-  } finally {
-    await client.close();
+  const _id = new ObjectId(id);
+  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  const result = await collection.deleteOne({ _id });
+  if (!result.acknowledged || result.deletedCount !== 1) {
+    throw new ReferenceError(`Deletion operation for Review ${id} failed.`);
   }
 }

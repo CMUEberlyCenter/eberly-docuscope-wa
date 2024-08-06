@@ -11,7 +11,9 @@ configurations.get('/:fileId', async (request: Request, response: Response) => {
     if (data) {
       response.send(data);
     } else {
-      response.status(404).send(FileNotFound(`Configuration ${fileId} does not exist.`));
+      response
+        .status(404)
+        .send(FileNotFound(`Configuration ${fileId} does not exist.`));
     }
   } catch (err) {
     console.error(err instanceof Error ? err.message : err);

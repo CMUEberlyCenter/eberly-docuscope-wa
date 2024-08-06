@@ -7,6 +7,7 @@ import {
   Analysis,
   ArgumentsResponse,
   GlobalCoherenceResponse,
+  isAllExpectationsData,
   KeyPointsResponse,
   OnTopicReviewData,
 } from '../../lib/ReviewResponse';
@@ -98,17 +99,28 @@ reviews.get(
       if (isWritingTask(writing_task)) {
         const user_lang = writing_task.info.user_lang ?? DEFAULT_LANGUAGE;
         const target_lang = writing_task.info.target_lang ?? DEFAULT_LANGUAGE;
-        const expectations = writing_task.rules.rules.flatMap((rule) =>
-          rule.is_group ? rule.children : [rule]
+        // Filter out already analysed expectations.
+        const existing = new Set(
+          review.analysis
+            .filter(isAllExpectationsData)
+            .map(({ expectation }) => expectation)
         );
+        const expectations = writing_task.rules.rules
+          .flatMap((rule) => (rule.is_group ? rule.children : [rule]))
+          .filter((rule) => !existing.has(rule.name));
         await Promise.allSettled(
           expectations.map(async (expectation) => {
-            const content = await doChat('all_expectations', {
-              expectation: expectation.name,
-              description: expectation.description,
-              user_lang,
-              target_lang,
-            });
+            const content = await doChat(
+              'all_expectations',
+              {
+                expectation: expectation.name,
+                description: expectation.description,
+                text: review.text,
+                user_lang,
+                target_lang,
+              },
+              true
+            );
             const resp = content.response.choices.at(0)?.message.content;
             if (!resp) return; //FIXME
             const analysis: AllExpectationsData = {

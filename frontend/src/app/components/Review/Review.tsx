@@ -30,8 +30,8 @@ export const Review: FC = () => {
   const [tool, setTool] = useState("");
   const [prose, setProse] = useState<string>("");
   useEffect(() => {
-    window.document.title = t('document.title');
-  }, [t])
+    window.document.title = t("document.title");
+  }, [t]);
   useEffect(() => {
     if (isReview(review)) {
       const ontopic_doc = review.analysis.find(
@@ -88,7 +88,7 @@ export const Review: FC = () => {
               <img
                 style={{ height: "1.75em" }}
                 src={logo}
-                alt={tt('document.title')}
+                alt={tt("document.title")}
               />
             </div>
             <Form.Select

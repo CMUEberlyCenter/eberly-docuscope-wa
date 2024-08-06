@@ -5,7 +5,11 @@ import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 // import { assignments } from './api/assignments';
-import { BadRequest, InternalServerError, ProblemDetails } from '../lib/ProblemDetails';
+import {
+  BadRequest,
+  InternalServerError,
+  ProblemDetails,
+} from '../lib/ProblemDetails';
 import { isWritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
@@ -14,7 +18,7 @@ import { writingTasks } from './api/tasks';
 import {
   findAssignmentById,
   initDatabase,
-  updateAssignmentWritingTask
+  updateAssignmentWritingTask,
 } from './data/mongo';
 import { IdToken, isInstructor } from './model/lti';
 import { metrics } from './prometheus';
@@ -44,12 +48,15 @@ assignments.post('/', async (request: Request, response: Response) => {
   try {
     const file = request.files.file;
     if (file instanceof Array) {
-      return response.sendStatus(400).send(BadRequest('Multiple files unsupported.'));
+      return response
+        .sendStatus(400)
+        .send(BadRequest('Multiple files unsupported.'));
     }
     const json = JSON.parse(file.data.toString('utf-8'));
     if (!isWritingTask(json)) {
       return response
-        .status(400).send(BadRequest('Not a valid writing task specification.'));
+        .status(400)
+        .send(BadRequest('Not a valid writing task specification.'));
     }
     await updateAssignmentWritingTask(token.platformContext.resource.id, json);
   } catch (err) {
@@ -62,11 +69,8 @@ assignments.post('/', async (request: Request, response: Response) => {
   return response.sendStatus(200);
 });
 
-
 async function __main__() {
-  console.log(
-    `OnTopic backend url: ${ONTOPIC_URL.toString()}`
-  );
+  console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
@@ -161,7 +165,7 @@ async function __main__() {
     /metrics\//,
     /index\.html$/,
     /review\.html$/,
-    /expectations\.html$/,
+    /expectations\.html$/
   );
   try {
     await Provider.deploy({ port: PORT });

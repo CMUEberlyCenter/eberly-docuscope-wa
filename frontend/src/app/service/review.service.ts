@@ -2,7 +2,6 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, Observable } from 'rxjs';
 import {
-  AllExpectationsData,
   ArgumentsData,
   GlobalCoherenceData,
   KeyPointsData,
@@ -49,9 +48,6 @@ const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
   null
 );
 const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
-const allExpectationsAnalysis = new BehaviorSubject<Map<string,AllExpectationsData> | null>(
-  null
-);
 const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
 const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
 review$
@@ -61,7 +57,7 @@ review$
   )
   .subscribe((analyses) =>
     analyses.forEach((analysis) => {
-      const expectations = new Map<string, AllExpectationsData>();
+      // const expectations = new Map<string, AllExpectationsData>();
       switch (analysis.tool) {
         // TODO add shape checks
         case 'global_coherence':
@@ -70,17 +66,18 @@ review$
         case 'key_points':
           keyPointsAnalysis.next(analysis);
           break;
-        case 'all_expectations':
-          expectations.set(analysis.expectation, analysis);
-          break;
         case 'arguments':
           argumentsAnalysis.next(analysis);
           break;
         case 'ontopic':
           ontopicAnalysis.next(analysis);
           break;
+        case 'all_expectations':
+        default:
+          // expectations.set(analysis.expectation, analysis);
+          break;
       }
-      allExpectationsAnalysis.next(expectations);
+      // allExpectationsAnalysis.next(expectations);
     })
   );
 
@@ -89,6 +86,5 @@ export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
   null
 );
 export const [useKeyPointsData, keyPointsData$] = bind(keyPointsAnalysis, null);
-export const [useAllExpectationsAnalysis] = bind(allExpectationsAnalysis, null);
 export const [useArgumentsData, argumentsData$] = bind(argumentsAnalysis, null);
 export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);

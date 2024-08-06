@@ -1,24 +1,36 @@
-import { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
+import {
+  Accordion,
+  Alert,
+  Button,
+  Card,
+  Navbar,
+  Placeholder,
+  Spinner,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useAllExpectationsAnalysis, useReview } from "../../service/review.service";
-import { useWritingTask } from "../../service/writing-task.service";
-import { isReview } from "../../../server/model/review";
 import Split from "react-split";
-import { Accordion, Alert, Button, Card, Navbar, Placeholder, Spinner } from "react-bootstrap";
+import { isReview } from "../../../server/model/review";
 import logo from "../../assets/logo.svg";
+import { useWritingTask } from "../../service/writing-task.service";
 import TaskViewer from "../Review/TaskViewer";
+import {
+  useAllExpectationsAnalysis,
+  useExpectations,
+} from "../../service/expectations.service";
+import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
   const { t: tt } = useTranslation();
-  const review = useReview();
+  const review = useExpectations();
   const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
   const [prose, setProse] = useState("");
   const expectations = useAllExpectationsAnalysis();
 
   useEffect(() => {
-    window.document.title = t('document.title');
+    window.document.title = t("document.title");
   }, [t]);
   useEffect(() => {
     if (isReview(review)) {
@@ -26,7 +38,7 @@ export const AllExpectations: FC = () => {
     } else {
       setProse("");
     }
-  }, [review])
+  }, [review]);
 
   return (
     <Split
@@ -43,9 +55,13 @@ export const AllExpectations: FC = () => {
           </div>
         </Navbar>
         {prose ? (
-          <div className="p-2 flex-grow-1 overflow-auto"
-            dangerouslySetInnerHTML={{ __html: prose }} />
-        ) : <Placeholder />}
+          <div
+            className="p-2 flex-grow-1 overflow-auto"
+            dangerouslySetInnerHTML={{ __html: prose }}
+          />
+        ) : (
+          <Placeholder />
+        )}
       </main>
       <aside>
         <Card className="h-100 w-100">
@@ -55,40 +71,61 @@ export const AllExpectations: FC = () => {
               <img
                 style={{ height: "1.75em" }}
                 src={logo}
-                alt={tt('document.title')}
+                alt={tt("document.title")}
               />
             </div>
           </Card.Header>
           <Card.Body className="h-100 overflow-auto position-relative">
+            {/* Assumes strict two level writing tasks... */}
             {writingTask?.rules.rules.map((rule, i) => (
-              <>
+              <React.Fragment key={`rule-${i}`}>
                 <h4>{rule.name}</h4>
-                <Accordion>
-                  {rule.children.map((expectation, j) => (
-                    <Accordion.Item key={`expectation-${i}-${j}`} eventKey={`expectation-${i}-${j}`}>
-                      <Accordion.Header>{expectation.name}</Accordion.Header>
-                      <Accordion.Body>
-                        {expectations?.has(expectation.name) ? (
-                          <>
-                          <h6>{t('sentences')}</h6>
-                          {expectations.get(expectation.name)?.response.sentences.map((sentence,k) => (
-                            <p key={`sentence-${i}-${j}-${k}`}>{sentence}</p>
-                          ))}
-                          <h6>{t('suggestions')}</h6>
-                          {expectations.get(expectation.name)?.response.suggestions.map((suggestion,k) => (
-                            <p key={`suggestion-${i}-${j}-${k}`}>{suggestion}</p>
-                          ))}
-                        </>
-                        ) : (
-                          <Spinner/>
-                        )}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  ))}
+                <Accordion alwaysOpen>
+                  {rule.children
+                    .map(
+                      ({ name }) =>
+                        expectations?.get(name) ?? { expectation: name }
+                    )
+                    .map((expectation, j) => (
+                      <Accordion.Item
+                        key={`expectation-${i}-${j}`}
+                        eventKey={`expectation-${i}-${j}`}
+                      >
+                        <Accordion.Header>
+                          {expectation.expectation}
+                        </Accordion.Header>
+                        <Accordion.Body>
+                          {expectations?.has(expectation.expectation) ? (
+                            <>
+                              {isAllExpectationsData(expectation) &&
+                                expectation.response.sentences.length > 0 && (
+                                  <>
+                                    <h6>{t("sentences")}</h6>
+                                    {isAllExpectationsData(expectation) &&
+                                      expectation.response.sentences.map(
+                                        (sentence, k) => (
+                                          <p key={`sentence-${i}-${j}-${k}`}>
+                                            {sentence}
+                                          </p>
+                                        )
+                                      )}
+                                  </>
+                                )}
+                              <h6>{t("suggestions")}</h6>
+                              <p key={`suggestion-${i}-${j}`}>
+                                {isAllExpectationsData(expectation) &&
+                                  expectation.response.suggestions}
+                              </p>
+                            </>
+                          ) : (
+                            <Spinner />
+                          )}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    ))}
                 </Accordion>
-              </>
-            ))
-              ?? (<Alert variant="warning">{t('error.no_task')}</Alert>)}
+              </React.Fragment>
+            )) ?? <Alert variant="warning">{t("error.no_task")}</Alert>}
           </Card.Body>
           <Card.Footer>
             {writingTask && (
@@ -106,6 +143,6 @@ export const AllExpectations: FC = () => {
           onHide={() => setShowWritingTask(false)}
         />
       </aside>
-    </Split >
-  )
-}
+    </Split>
+  );
+};

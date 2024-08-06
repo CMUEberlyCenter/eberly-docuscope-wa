@@ -45,7 +45,7 @@ export type KeyPointsResponse = {
 
 export type AllExpectationsResponse = {
   sentences: string[];
-  suggestions: string[];
+  suggestions: string;
 };
 
 export type ReviewResponse =
@@ -72,6 +72,14 @@ export interface AllExpectationsData
   tool: 'all_expectations';
   expectation: string;
 }
+export const isAllExpectationsData = (
+  data: AllExpectationsData | unknown
+): data is AllExpectationsData =>
+  !!data &&
+  typeof data === 'object' &&
+  'tool' in data &&
+  data.tool === 'all_expectations';
+
 export interface ArgumentsData extends ReviewData<ArgumentsResponse> {
   tool: 'arguments';
 }

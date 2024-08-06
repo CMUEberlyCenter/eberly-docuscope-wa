@@ -226,6 +226,35 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       const reviewId = await resp.json();
       return window.open(`/review.html?id=${reviewId}`);
     }, [writingTask, editor]);
+
+    const onExpectations = useCallback(async () => {
+      const text = serialize(editor.children);
+      if (!text) {
+        // TODO error message about no content.
+        return;
+      }
+      const resp = await fetch("/api/v2/reviews/", {
+        method: "POST",
+        credentials: "same-origin",
+        redirect: "manual",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          text, // plain text
+          document: serializeHtml(editor.children),
+          writing_task: writingTask,
+        }),
+      });
+      if (resp.redirected) {
+        return window.open(resp.url, "_blank");
+      }
+      if (!resp.ok) {
+        console.error(resp.status);
+        return; // TODO better error reporting
+      }
+      const reviewId = await resp.json();
+      return window.open(`/expectations.html?id=${reviewId}`);
+    }, [writingTask, editor]);
+
     return (
       <Card
         {...props}
@@ -351,7 +380,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         >
                           <Button
                             variant="outline-dark"
-                            disabled={true || !scribe || !writingTask}
+                            disabled={!scribe || !writingTask}
+                            onClick={() => onExpectations()}
                           >
                             <Stack>
                               <FontAwesomeIcon

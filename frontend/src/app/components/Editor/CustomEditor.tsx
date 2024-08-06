@@ -188,8 +188,8 @@ const CustomEditor: FC = () => {
   );
 
   useEffect(() => {
-    window.document.title = t('document.title');
-  }, [t])
+    window.document.title = t("document.title");
+  }, [t]);
 
   return (
     <Slate

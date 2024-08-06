@@ -93,7 +93,7 @@ export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
 
-export const OPENAI_MODEL = 'gpt-4o';
+export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
 export const WRITING_TASKS_PATH =
