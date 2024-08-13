@@ -1,24 +1,30 @@
+import { faArrowUpRightFromSquare, faListCheck } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { FC, useEffect, useState } from "react";
 import {
   Accordion,
   Alert,
   Button,
   Card,
+  Container,
+  Nav,
   Navbar,
   Placeholder,
   Spinner,
+  Stack
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
+import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 import { isReview } from "../../../server/model/review";
-import logo from "../../assets/logo.svg";
-import { useWritingTask } from "../../service/writing-task.service";
-import TaskViewer from "../Review/TaskViewer";
+import NoEditIcon from '../../assets/icons/no_edit_icon.svg?react';
 import {
   useAllExpectationsAnalysis,
   useExpectations,
 } from "../../service/expectations.service";
-import { isAllExpectationsData } from "../../../lib/ReviewResponse";
+import { useWritingTask } from "../../service/writing-task.service";
+import { Logo } from "../Logo/Logo";
+import TaskViewer from "../Review/TaskViewer";
 
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
@@ -47,33 +53,62 @@ export const AllExpectations: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <main className="d-flex overflow-none h-100 flex-column">
-        <Navbar>
-          <div className="ms-3">
-            <h6 className="mb-0 text-muted">{tt("editor.menu.task")}</h6>
-            <h5>{writingTask?.info.name ?? tt("editor.menu.no_task")}</h5>
-          </div>
-        </Navbar>
-        {prose ? (
-          <div
-            className="p-2 flex-grow-1 overflow-auto"
-            dangerouslySetInnerHTML={{ __html: prose }}
-          />
-        ) : (
-          <Placeholder />
-        )}
-      </main>
+      <Card as={'main'}>
+        <Card.Header className="d-flex justify-content-between">
+          <Stack>
+            <Card.Subtitle className="text-muted">
+              {tt("editor.menu.task")}
+            </Card.Subtitle>
+            <Card.Title>
+              {writingTask?.info.name ?? tt("editor.menu.no_task")}
+            </Card.Title>
+          </Stack>
+          <NoEditIcon className="ms-auto" />
+        </Card.Header>
+        <Card.Body>
+          {prose ? (
+            <div
+              className="p-2 flex-grow-1 overflow-auto"
+              dangerouslySetInnerHTML={{ __html: prose }}
+            />
+          ) : (
+            <Placeholder />
+          )}
+        </Card.Body>
+      </Card>
       <aside>
         <Card className="h-100 w-100">
           <Card.Header>
-            <div className="d-flex justify-content-between">
-              <Card.Title>{t("title")}</Card.Title>
-              <img
-                style={{ height: "1.75em" }}
-                src={logo}
-                alt={tt("document.title")}
-              />
-            </div>
+            <Navbar>
+              <Container>
+                <Nav defaultActiveKey={"generate"} variant="tabs">
+                  <Nav.Item>
+                    <Nav.Link eventKey="generate">
+                      {tt("tool.tab.generate")}
+                    </Nav.Link>
+                  </Nav.Item>
+                  <Button variant="link" disabled>
+                    {tt("tool.tab.review")}
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                  </Button>
+                  <Nav.Item>
+                    <Nav.Link
+                      eventKey="refine"
+                      disabled
+                    >
+                      {tt("tool.tab.refine")}
+                    </Nav.Link>
+                  </Nav.Item>
+                </Nav>
+                <Navbar.Brand>
+                  <Logo />
+                </Navbar.Brand>
+              </Container>
+            </Navbar>
+            <Card.Title className="text-dark">
+              <FontAwesomeIcon icon={faListCheck} />{" "}
+              {t("title")}
+            </Card.Title>
           </Card.Header>
           <Card.Body className="h-100 overflow-auto position-relative">
             {/* Assumes strict two level writing tasks... */}

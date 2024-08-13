@@ -18,10 +18,11 @@ import { TextToSpeech } from "../scribe/TextToSpeech";
 
 type ToolProp = { tool?: ToolResult | null };
 type ToolRootProps = CardProps &
-  ToolProp & { title: string; onBookmark: () => void; actions?: ReactNode };
+  ToolProp & { title: string; icon?: ReactNode; onBookmark: () => void; actions?: ReactNode };
 export const ToolRoot: FC<ToolRootProps> = ({
   tool,
   children,
+  icon,
   title,
   onBookmark,
   actions,
@@ -31,8 +32,8 @@ export const ToolRoot: FC<ToolRootProps> = ({
   return (
     <Card {...props}>
       <Card.Body>
-        <Card.Title>{title}</Card.Title>
-        <Card.Subtitle>
+        <Card.Title className="text-center">{icon}{" "}{title}</Card.Title>
+        <Card.Subtitle className="text-center text-muted">
           {tool?.datetime.toLocaleString()}
           <Button variant="icon" onClick={() => onBookmark()}>
             <FontAwesomeIcon

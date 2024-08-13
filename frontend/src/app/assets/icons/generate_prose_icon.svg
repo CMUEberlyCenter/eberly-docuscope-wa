@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32" height="32" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <style>.cls-1{fill:#2445f0;stroke-width:0px;}</style>
+  </defs>
+  <path fill="currentColor"
+    d="M22.91,26.81l-.76-2.12c-.79-2.19-2.41-3.9-4.46-4.69l-1.95-.76,1.95-.76c2.05-.79,3.67-2.5,4.46-4.69l.76-2.12.76,2.12c.79,2.19,2.41,3.9,4.46,4.69l1.95.76-1.95.76c-2.05.79-3.67,2.5-4.46,4.69l-.76,2.12Z" />
+  <path fill="currentColor"
+    d="M5.08,5.19h19.44c.6,0,1.08.48,1.08,1.08h0c0,.6-.48,1.08-1.08,1.08H5.08c-.6,0-1.08-.48-1.08-1.08h0c0-.6.48-1.08,1.08-1.08Z" />
+  <rect fill="currentColor" x="4" y="11.67" width="12.96" height="2.16" rx="1.08" ry="1.08" />
+  <rect fill="currentColor" x="4" y="18.15" width="8.64" height="2.16" rx="1.08" ry="1.08" />
+  <path fill="currentColor"
+    d="M5.08,24.63h10.8c.6,0,1.08.48,1.08,1.08h0c0,.6-.48,1.08-1.08,1.08H5.08c-.6,0-1.08-.48-1.08-1.08h0c0-.6.48-1.08,1.08-1.08Z" />
+</svg>

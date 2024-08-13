@@ -10,7 +10,6 @@ import {
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
-import logo from "../../assets/logo.svg";
 import { useReview } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Arguments } from "./Arguments";
@@ -19,6 +18,7 @@ import { KeyIdeas } from "./KeyIdeas";
 import { Organization } from "./Organization";
 import { Sentences } from "./Sentences";
 import TaskViewer from "./TaskViewer";
+import { Logo } from "../Logo/Logo";
 
 export const Review: FC = () => {
   const { t } = useTranslation("review");
@@ -85,11 +85,7 @@ export const Review: FC = () => {
           <Card.Header>
             <div className="d-flex justify-content-between">
               <Card.Title>{t("title")}</Card.Title>
-              <img
-                style={{ height: "1.75em" }}
-                src={logo}
-                alt={tt("document.title")}
-              />
+              <Logo/>
             </div>
             <Form.Select
               aria-label={t("select_tool")}

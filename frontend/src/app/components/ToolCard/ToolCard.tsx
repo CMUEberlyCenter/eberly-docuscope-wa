@@ -1,7 +1,7 @@
 import {
   faArrowUpRightFromSquare,
-  faCopy,
   faEllipsis,
+  faListCheck
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from "@slate-serializers/html";
@@ -19,15 +19,18 @@ import {
   Tab,
   Tooltip,
 } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
-import ContentIcon from "../../assets/icons/Content.svg?react";
-import FlowIcon from "../../assets/icons/Flow.svg?react";
-import GenerateIcon from "../../assets/icons/Generate.svg?react";
+import CheckExpectationIcon from '../../assets/icons/check_expectation_icon.svg?react';
+import CopyEditIcon from '../../assets/icons/copyedit_icon.svg?react';
+import GenerateBulletsIcon from '../../assets/icons/generate_bullets_icon.svg?react';
+import GenerateProseIcon from '../../assets/icons/generate_prose_icon.svg?react';
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
-import logo from "../../assets/logo.svg";
+import LocalCoherenceIcon from '../../assets/icons/local_coherence_icon.svg?react';
+import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
 import {
@@ -40,16 +43,14 @@ import {
   useScribeFeatureGrammar,
   useScribeFeatureNotes2Prose,
 } from "../../service/scribe.service";
-import { useSettings } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
 import SelectExpectation from "../SelectExpectation/SelectExpectation";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolDisplay } from "./ToolDisplay";
-import { Tool, ToolResult } from "../../lib/ToolResults";
-import { ErrorBoundary } from "react-error-boundary";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -63,7 +64,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const writingTask = useWritingTask();
     const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
     const [showWritingTask, setShowWritingTask] = useState(false);
-    const settings = useSettings();
     const notes2proseFeature = useScribeFeatureNotes2Prose();
     const bulletsFeature = true; // TODO use settings and writing task
     const flowFeature = true; // TODO use settings and writing task
@@ -275,6 +275,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       {t("tool.tab.generate")}
                     </Nav.Link>
                   </Nav.Item>
+                  <Button variant="link" onClick={() => onReview()}>
+                    {t("tool.tab.review")}
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                  </Button>
                   <Nav.Item>
                     <Nav.Link
                       eventKey="refine"
@@ -283,177 +287,177 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       {t("tool.tab.refine")}
                     </Nav.Link>
                   </Nav.Item>
-                  <Button variant="link" onClick={() => onReview()}>
-                    {t("tool.tab.review")}
-                  </Button>
                 </Nav>
                 <Navbar.Brand>
-                  <img
-                    style={{ height: "1.75em" }}
-                    src={logo}
-                    alt={settings.brand ?? "onTopic"}
-                  />
+                  <Logo />
                 </Navbar.Brand>
               </Container>
             </Navbar>
             <Tab.Content>
               <Tab.Pane eventKey="generate">
-                <ButtonToolbar className="ms-5 mb-3">
-                  {(notes2proseFeature || bulletsFeature) && (
-                    <ButtonGroup className="bg-white shadow tools" size="sm">
-                      {notes2proseFeature && (
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
-                          }
-                        >
-                          <Button
-                            variant="outline-dark"
-                            disabled={!scribe}
-                            onClick={() => onTool("prose")}
+                <div className="d-flex justify-content-around">
+                  <ButtonToolbar className="mb-3 mx-auto">
+                    {(notes2proseFeature || bulletsFeature) && (
+                      <ButtonGroup className="bg-white shadow tools" size="sm">
+                        {notes2proseFeature && (
+                          <OverlayTrigger
+                            placement="bottom"
+                            overlay={
+                              <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
+                            }
                           >
-                            <Stack>
-                              <GenerateIcon />
-                              <span>{t("tool.button.prose.title")}</span>
-                            </Stack>
-                          </Button>
-                        </OverlayTrigger>
-                      )}
-                      {bulletsFeature && (
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>
-                              {t("tool.button.bullets.tooltip")}
-                            </Tooltip>
-                          }
-                        >
-                          <Button
-                            variant="outline-dark"
-                            disabled={!scribe}
-                            onClick={() => onTool("bullets")}
+                            <Button
+                              variant="outline-dark"
+                              disabled={!scribe}
+                              onClick={() => onTool("prose")}
+                            >
+                              <Stack>
+                                <GenerateProseIcon />
+                                <span>{t("tool.button.prose.title")}</span>
+                              </Stack>
+                            </Button>
+                          </OverlayTrigger>
+                        )}
+                        {bulletsFeature && (
+                          <OverlayTrigger
+                            placement="bottom"
+                            overlay={
+                              <Tooltip>
+                                {t("tool.button.bullets.tooltip")}
+                              </Tooltip>
+                            }
                           >
-                            <Stack>
-                              <GenerateIcon />
-                              <span>{t("tool.button.bullets.title")}</span>
-                            </Stack>
-                          </Button>
-                        </OverlayTrigger>
-                      )}
-                    </ButtonGroup>
-                  )}
-                  {assessFeature && (
-                    <ButtonGroup
-                      className="bg-white shadow tools ms-2"
-                      size="sm"
-                    >
-                      {assessFeature && (
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>
-                              {t("tool.button.expectation.tooltip")}
-                            </Tooltip>
-                          }
-                        >
-                          <Button
-                            variant="outline-dark"
-                            disabled={!scribe || !writingTask}
-                            onClick={() => onTool("expectation")}
+                            <Button
+                              variant="outline-dark"
+                              disabled={!scribe}
+                              onClick={() => onTool("bullets")}
+                            >
+                              <Stack>
+                                <GenerateBulletsIcon />
+                                <span>{t("tool.button.bullets.title")}</span>
+                              </Stack>
+                            </Button>
+                          </OverlayTrigger>
+                        )}
+                      </ButtonGroup>
+                    )}
+                    {assessFeature && (
+                      <ButtonGroup
+                        className="bg-white shadow tools ms-2"
+                        size="sm"
+                      >
+                        {assessFeature && (
+                          <OverlayTrigger
+                            placement="bottom"
+                            overlay={
+                              <Tooltip>
+                                {t("tool.button.expectation.tooltip")}
+                              </Tooltip>
+                            }
                           >
-                            <Stack>
-                              <ContentIcon />
-                              <span>{t("tool.button.expectation.title")}</span>
-                            </Stack>
-                          </Button>
-                        </OverlayTrigger>
-                      )}
-                      {assessFeature && (
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>
-                              {t("tool.button.expectations.tooltip")}
-                            </Tooltip>
-                          }
-                        >
-                          <Button
-                            variant="outline-dark"
-                            disabled={!scribe || !writingTask}
-                            onClick={() => onExpectations()}
+                            <Button
+                              variant="outline-dark"
+                              disabled={!scribe || !writingTask}
+                              onClick={() => onTool("expectation")}
+                            >
+                              <Stack>
+                                <CheckExpectationIcon />
+                                <span>{t("tool.button.expectation.title")}</span>
+                              </Stack>
+                            </Button>
+                          </OverlayTrigger>
+                        )}
+                        {assessFeature && (
+                          <OverlayTrigger
+                            placement="bottom"
+                            overlay={
+                              <Tooltip>
+                                {t("tool.button.expectations.tooltip")}
+                              </Tooltip>
+                            }
                           >
-                            <Stack>
-                              <FontAwesomeIcon
-                                icon={faArrowUpRightFromSquare}
-                              />
-                              <span>{t("tool.button.expectations.title")}</span>
-                            </Stack>
-                          </Button>
-                        </OverlayTrigger>
-                      )}
-                    </ButtonGroup>
-                  )}
-                </ButtonToolbar>
+                            <Button
+                              variant="outline-dark"
+                              disabled={!scribe || !writingTask}
+                              onClick={() => onExpectations()}
+                            >
+                              <Stack>
+                                <div className="d-flex justify-content-center align-items-end">
+                                  <FontAwesomeIcon icon={faListCheck} className="mx-0" />
+                                  <FontAwesomeIcon style={{ height: ".75rem", width: ".75rem" }} className="mx-1"
+                                    icon={faArrowUpRightFromSquare}
+                                  />
+                                </div>
+                                <span>{t("tool.button.expectations.title")}</span>
+                              </Stack>
+                            </Button>
+                          </OverlayTrigger>
+                        )}
+                      </ButtonGroup>
+                    )}
+                  </ButtonToolbar>
+                </div>
               </Tab.Pane>
               <Tab.Pane eventKey="refine">
-                <ButtonToolbar className="ms-5 mb-3">
-                  <ButtonGroup className="bg-white shadow tools" size="sm">
-                    {flowFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("tool.button.flow.tooltip")}</Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          onClick={() => onTool("flow")}
+                <div className="d-flex justify-content-around">
+                  <ButtonToolbar className="mb-3 mx-auto">
+                    <ButtonGroup className="bg-white shadow tools" size="sm">
+                      {flowFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("tool.button.flow.tooltip")}</Tooltip>
+                          }
                         >
-                          <Stack>
-                            <FlowIcon />
-                            <span>{t("tool.button.flow.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                    {copyEditFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("tool.button.copyedit.tooltip")}</Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          onClick={() => onTool("copyedit")}
+                          <Button
+                            variant="outline-dark"
+                            onClick={() => onTool("flow")}
+                          >
+                            <Stack>
+                              <LocalCoherenceIcon />
+                              <span>{t("tool.button.flow.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                      {copyEditFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("tool.button.copyedit.tooltip")}</Tooltip>
+                          }
                         >
-                          <Stack>
-                            <FontAwesomeIcon icon={faCopy} />
-                            <span>{t("tool.button.copyedit.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                    {grammarFeature && (
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("tool.button.grammar.tooltip")}</Tooltip>
-                        }
-                      >
-                        <Button
-                          variant="outline-dark"
-                          onClick={() => onTool("copyedit")}
+                          <Button
+                            variant="outline-dark"
+                            onClick={() => onTool("copyedit")}
+                          >
+                            <Stack>
+                              <CopyEditIcon />
+                              <span>{t("tool.button.copyedit.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                      {grammarFeature && (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("tool.button.grammar.tooltip")}</Tooltip>
+                          }
                         >
-                          <Stack>
-                            <span>{t("tool.button.grammar.title")}</span>
-                          </Stack>
-                        </Button>
-                      </OverlayTrigger>
-                    )}
-                  </ButtonGroup>
-                </ButtonToolbar>
+                          <Button
+                            variant="outline-dark"
+                            onClick={() => onTool("copyedit")}
+                          >
+                            <Stack>
+                              <span>{t("tool.button.grammar.title")}</span>
+                            </Stack>
+                          </Button>
+                        </OverlayTrigger>
+                      )}
+                    </ButtonGroup>
+                  </ButtonToolbar>
+                </div>
               </Tab.Pane>
             </Tab.Content>
           </Tab.Container>
@@ -468,6 +472,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           {/* Maybe use Carousel for history? */}
           {currentTool?.tool === "prose" && (
             <ToolDisplay.Root
+              icon={<GenerateProseIcon />}
               title={t("tool.button.prose.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
@@ -486,6 +491,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "bullets" && (
             <ToolDisplay.Root
+              icon={<GenerateBulletsIcon />}
               title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
@@ -512,6 +518,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "expectation" && (
             <ToolDisplay.Root
+              icon={<CheckExpectationIcon />}
               title={t("tool.button.expectation.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
@@ -579,53 +586,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </ToolDisplay.Response>
             </ToolDisplay.Root>
           )}
-          {/* {currentTool?.tool === "expectation" && (
-            <ToolDisplay.Root
-              title={t("tool.button.expectation.tooltip")}
-              tool={currentTool}
-              onBookmark={onBookmark}
-            >
-              <ToolDisplay.Input tool={currentTool} />
-              <Card as="section">
-                <Card.Body>
-                  <Card.Title>{t("tool.expectation")}</Card.Title>
-                  <div>
-                    {currentTool.expectation ? (
-                      <>
-                        <h4>{currentTool.expectation.name}</h4>
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: currentTool.expectation.description,
-                          }}
-                        />
-                      </>
-                    ) : (
-                      <Button onClick={() => setShowSelectExpectation(true)}>
-                        {t("tool.select_expectation")}
-                      </Button>
-                    )}
-                  </div>
-                </Card.Body>
-              </Card>
-
-              <ToolDisplay.Response
-                tool={currentTool}
-                regenerate={retry}
-                text={currentTool.result?.explanation ?? ""}
-              >
-                {currentTool.result && (
-                  <>
-                    {currentTool.result.rating && (
-                      <Rating value={currentTool.result.rating} />
-                    )}
-                    <p>{currentTool.result.explanation}</p>
-                  </>
-                )}
-              </ToolDisplay.Response>
-            </ToolDisplay.Root>
-          )} */}
           {currentTool?.tool === "copyedit" && (
             <ToolDisplay.Root
+              icon={<CopyEditIcon />}
               title={t("tool.button.copyedit.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
@@ -694,6 +657,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
           {currentTool?.tool === "flow" && (
             <ToolDisplay.Root
+              icon={<LocalCoherenceIcon />}
               title={t("tool.button.flow.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
@@ -704,12 +668,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 text={
                   currentTool.result?.general_assessment ??
                   "" +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join()}`
-                      )
-                      .join()
+                  currentTool.result?.issues
+                    .map(
+                      ({ description, suggestions }) =>
+                        `${description} ${suggestions.join()}`
+                    )
+                    .join()
                 }
                 regenerate={retry}
               >
