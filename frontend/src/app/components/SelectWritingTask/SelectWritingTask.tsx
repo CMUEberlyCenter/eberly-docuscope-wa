@@ -1,13 +1,12 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
 import {
   Button,
-  Card,
   Form,
   ListGroup,
   Modal,
   OverlayTrigger,
   Popover,
-  Stack,
+  Stack
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
@@ -17,6 +16,7 @@ import {
   useWritingTasks,
   writingTask,
 } from "../../service/writing-task.service";
+import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 
 type SelectWritingTaskProps = {
   show: boolean;
@@ -98,28 +98,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
               {t("select_task.null")}
             </ListGroup.Item>
           </ListGroup>
-          <Card className="w-50 h-100">
-            <Card.Header>
-              {selected?.info.name ?? "No Writing Task"}
-            </Card.Header>
-            <ListGroup variant="flush">
-              <ListGroup.Item>
-                Version: {selected?.info.version ?? "-"}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Author: {selected?.info.author ?? "-"}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Copyright: {selected && <>&copy; {selected?.info.copyright}</>}
-              </ListGroup.Item>
-              <ListGroup.Item>
-                Date:{" "}
-                {selected
-                  ? new Date(selected.info.saved).toLocaleString()
-                  : "-"}
-              </ListGroup.Item>
-            </ListGroup>
-          </Card>
+          <WritingTaskInfo task={selected} className="w-50 h-100"/>
         </Stack>
       </Modal.Body>
       <Modal.Footer>

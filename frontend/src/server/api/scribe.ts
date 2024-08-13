@@ -1,8 +1,9 @@
 import { Request, Response, Router } from 'express';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
+import { AssessExpectationRequest, NotesRequest, TextRequest } from '../../lib/Requests';
 import { doChat } from '../data/chat';
 import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
-import { DEFAULT_LANGUAGE } from '../settings';
+import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
 
 export const scribe = Router();
 
@@ -17,14 +18,14 @@ const handleChatError = (err: unknown, response: Response) => {
   return response.sendStatus(500);
 };
 
+
 const scribeNotes =
   (key: NotesPrompt) => async (request: Request, response: Response) => {
-    const { notes } = request.body;
+    const data = request.body as NotesRequest;
     try {
       const chat = await doChat(key, {
-        notes,
-        target_lang: request.body.target_lang ?? DEFAULT_LANGUAGE,
-        user_lang: request.body.user_lang ?? DEFAULT_LANGUAGE,
+        ...DEFAULT_LANGUAGE_SETTINGS,
+        ...data,
       });
       // TODO check for empty prose
       response.json(chat.response);
@@ -37,23 +38,22 @@ scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 
 export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
-  async (request: Request, response: Response) => {
-    const { text } = request.body;
-    try {
-      const chat = await doChat(
-        key,
-        {
-          text,
-          user_lang: request.body.user_lang ?? DEFAULT_LANGUAGE,
-          target_lang: request.body.target_lang ?? DEFAULT_LANGUAGE,
-        },
-        true
-      );
-      return response.json(chat.response);
-    } catch (err) {
-      return handleChatError(err, response);
-    }
-  };
+    async (request: Request, response: Response) => {
+      const data = request.body as TextRequest;
+      try {
+        const chat = await doChat(
+          key,
+          {
+            ...DEFAULT_LANGUAGE_SETTINGS,
+            ...data,
+          },
+          true
+        );
+        return response.json(chat.response);
+      } catch (err) {
+        return handleChatError(err, response);
+      }
+    };
 scribe.post('/proofread', scribeText('grammar'));
 scribe.post('/copyedit', scribeText('copyedit'));
 scribe.post('/local_coherence', scribeText('local_coherence'));
@@ -64,16 +64,10 @@ scribe.post('/key_points', scribeText('key_points'));
 scribe.post(
   '/assess_expectation',
   async (request: Request, response: Response) => {
-    const { text, expectation, description } = request.body;
-    const user_lang = request.body.user_lang ?? DEFAULT_LANGUAGE;
-    const target_lang = request.body.target_lang ?? DEFAULT_LANGUAGE;
+    const data = request.body as AssessExpectationRequest;
     try {
       const assessment = await doChat('expectation', {
-        text,
-        user_lang,
-        target_lang,
-        expectation,
-        description,
+        ...DEFAULT_LANGUAGE_SETTINGS, ...data
       });
       response.json(assessment.response);
     } catch (err) {

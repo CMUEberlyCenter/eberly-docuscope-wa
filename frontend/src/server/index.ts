@@ -9,7 +9,7 @@ import {
   BadRequest,
   InternalServerError
 } from '../lib/ProblemDetails';
-import { isWritingTask } from '../lib/WritingTask';
+import { isWritingTask, WritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
@@ -17,9 +17,9 @@ import { writingTasks } from './api/tasks';
 import {
   findAssignmentById,
   initDatabase,
-  updateAssignmentWritingTask,
+  updateAssignmentWritingTask
 } from './data/mongo';
-import { IdToken, isInstructor } from './model/lti';
+import { ContentItemType, IdToken, isInstructor } from './model/lti';
 import { metrics } from './prometheus';
 import {
   LTI_DB,
@@ -105,8 +105,36 @@ async function __main__() {
   // })
   Provider.onDeepLinking(
     async (_token: IdToken, _req: Request, res: Response) =>
-      Provider.redirect(res, '/deeplink.html', { newResource: true })
+      //  res.sendFile(join(PUBLIC, 'deeplink.html'))
+      // Provider.redirect(res, '/deeplink', { newResource: true })
+      Provider.redirect(res, '/deeplink')
   );
+  Provider.app.get('/deeplink', async (_req: Request, res: Response) => res.sendFile(join(PUBLIC, 'deeplink.html')));
+  Provider.app.post('/deeplink', async (request: Request, response: Response) => {
+    const task = JSON.parse(request.body.file) as WritingTask;
+    const url = new URL('/index.html', LTI_HOSTNAME);
+    // if (!isInstuctor(token)) { throw new Error(); }
+    // if (!isWritingTask(task)) { throw new Error(); }
+    // TODO try...catch
+    console.log(response.locals.token)
+    const assignmentId = await updateAssignmentWritingTask(response.locals.token.platformContext.context.id, task);
+    if (assignmentId) {
+       url.searchParams.append('assignment', assignmentId.toString());
+    }
+    const items: ContentItemType[] = [
+      {
+        type: 'ltiResourceLink',
+        url: url.toString(),
+        // custom: {
+        //   writing_task: task
+        // }
+      }
+    ]; // TODO
+    console.log(items);
+    const form = await Provider.DeepLinking.createDeepLinkingForm(response.locals.token, items); // {message: 'Success'}
+    console.log(form);
+    return response.send(form);
+  })
 
   // Configuration Endpoints
   Provider.app.use('/api/v2/writing_tasks', writingTasks);

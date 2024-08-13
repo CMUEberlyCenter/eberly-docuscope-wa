@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import 'dotenv/config';
 import { join } from 'path';
 import { version } from '../../package.json';
+import { LanguageSettingsRequest } from '../lib/Requests';
 
 // const __filename = fileURLToPath(import.meta.url);
 // const __dirname = dirname(__filename);
@@ -24,7 +25,7 @@ program
 program.parse();
 const options = program.opts();
 export const DEV = process.env.NODE_ENV !== 'production';
-export const PRODUCT = process.env.PRODUCT ?? 'myProse Provider';
+export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 export const PORT = process.env.PORT ?? 8888;
 
@@ -46,7 +47,7 @@ function fromEnvFile(base: string, defaultValue?: string): string {
 
 export const LTI_KEY = fromEnvFile('LTI_KEY');
 export const LTI_HOSTNAME = new URL(
-  process.env.LTI_HOSTNAME ?? 'http://localhost:8888/'
+  process.env.LTI_HOSTNAME ?? 'http://localhost:8877/'
 );
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
 const MONGO_DB = process.env.MONGO_DB ?? 'docuscope';
@@ -100,3 +101,4 @@ export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
 
 export const DEFAULT_LANGUAGE = process.env.DEFAULT_LANGUAGE ?? 'English';
+export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = { user_lang: DEFAULT_LANGUAGE, target_lang: DEFAULT_LANGUAGE };

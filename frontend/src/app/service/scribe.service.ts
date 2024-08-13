@@ -23,6 +23,7 @@ import {
   SelectedText,
 } from '../lib/ToolResults';
 import { settings$ } from './settings.service';
+import { AssessExpectationRequest, NotesRequest, TextRequest } from '../../lib/Requests';
 
 // TODO: per assignment feature settings.
 
@@ -141,7 +142,7 @@ export async function postConvertNotes(
   const response = await fetch(`/api/v2/scribe/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ notes: text, user_lang, target_lang }),
+    body: JSON.stringify({ notes: text, user_lang, target_lang } as NotesRequest),
   });
   if (!response.ok) {
     const err = await response.text();
@@ -263,7 +264,7 @@ async function postText<
   const response = await fetch(`/api/v2/scribe/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, user_lang, target_lang }),
+    body: JSON.stringify({ text, user_lang, target_lang } as TextRequest),
   });
   if (!response.ok) {
     const err = await response.text();
@@ -392,7 +393,7 @@ export async function postExpectation(
       target_lang,
       expectation: name,
       description,
-    }),
+    } as AssessExpectationRequest),
   });
   if (!response.ok) {
     const err = await response.text();

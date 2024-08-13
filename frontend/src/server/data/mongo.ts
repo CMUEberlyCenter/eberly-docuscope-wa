@@ -101,11 +101,12 @@ export async function updateAssignmentWritingTask(
   writing_task: WritingTask
 ) {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
-  await collection.updateOne(
+  const update = await collection.findOneAndUpdate(
     { assignment },
     { $set: { writing_task } },
     { upsert: true }
   );
+  return update?._id;
 }
 
 /**
@@ -116,14 +117,14 @@ export async function updateAssignmentWritingTask(
 export async function updateAssignment(assignment: string, task: string) {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
   const writing_task = new ObjectId(task);
-  const update = await collection.updateOne(
+  const update = await collection.findOneAndUpdate(
     {
       assignment: assignment,
     },
     { $set: { 'writing_task.$ref': writing_task } },
     { upsert: true }
   );
-  return update.upsertedId;
+  return update?._id;
 }
 
 /**
