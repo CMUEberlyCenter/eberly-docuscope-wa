@@ -8,6 +8,7 @@
       "open": "New Writing Task",
       "save": "Save Notes",
       "view": "View",
+      "view.font_size": "Editor Font Size: {{zoom}}%",
       "paragraph": "Paragraph",
       "h1": "Heading 1",
       "h2": "Heading 2",
