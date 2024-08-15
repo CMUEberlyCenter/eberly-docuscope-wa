@@ -1,6 +1,6 @@
 import {
   faArrowUpRightFromSquare,
-  faEllipsis
+  faEllipsis,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from "@slate-serializers/html";
@@ -24,12 +24,12 @@ import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
 import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
-import CheckExpectationIcon from '../../assets/icons/check_expectation_icon.svg?react';
-import CopyEditIcon from '../../assets/icons/copyedit_icon.svg?react';
-import GenerateBulletsIcon from '../../assets/icons/generate_bullets_icon.svg?react';
-import GenerateProseIcon from '../../assets/icons/generate_prose_icon.svg?react';
+import CheckExpectationIcon from "../../assets/icons/check_expectation_icon.svg?react";
+import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
+import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
+import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
-import LocalCoherenceIcon from '../../assets/icons/local_coherence_icon.svg?react';
+import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
 import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
@@ -277,7 +277,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   </Nav.Item>
                   <Button variant="link" onClick={() => onReview()}>
                     {t("tool.tab.review")}
-                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                    <FontAwesomeIcon
+                      icon={faArrowUpRightFromSquare}
+                      className="ms-1"
+                    />
                   </Button>
                   <Nav.Item>
                     <Nav.Link
@@ -303,7 +306,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           <OverlayTrigger
                             placement="bottom"
                             overlay={
-                              <Tooltip>{t("tool.button.prose.tooltip")}</Tooltip>
+                              <Tooltip>
+                                {t("tool.button.prose.tooltip")}
+                              </Tooltip>
                             }
                           >
                             <Button
@@ -362,7 +367,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             >
                               <Stack>
                                 <CheckExpectationIcon />
-                                <span>{t("tool.button.expectation.title")}</span>
+                                <span>
+                                  {t("tool.button.expectation.title")}
+                                </span>
                               </Stack>
                             </Button>
                           </OverlayTrigger>
@@ -384,11 +391,18 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                               <Stack>
                                 <div className="d-flex justify-content-center align-items-end">
                                   <AllExpectationsIcon />
-                                  <FontAwesomeIcon style={{ height: ".75rem", width: ".75rem" }} className="mx-1"
+                                  <FontAwesomeIcon
+                                    style={{
+                                      height: ".75rem",
+                                      width: ".75rem",
+                                    }}
+                                    className="mx-1"
                                     icon={faArrowUpRightFromSquare}
                                   />
                                 </div>
-                                <span>{t("tool.button.expectations.title")}</span>
+                                <span>
+                                  {t("tool.button.expectations.title")}
+                                </span>
                               </Stack>
                             </Button>
                           </OverlayTrigger>
@@ -424,7 +438,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         <OverlayTrigger
                           placement="bottom"
                           overlay={
-                            <Tooltip>{t("tool.button.copyedit.tooltip")}</Tooltip>
+                            <Tooltip>
+                              {t("tool.button.copyedit.tooltip")}
+                            </Tooltip>
                           }
                         >
                           <Button
@@ -442,7 +458,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         <OverlayTrigger
                           placement="bottom"
                           overlay={
-                            <Tooltip>{t("tool.button.grammar.tooltip")}</Tooltip>
+                            <Tooltip>
+                              {t("tool.button.grammar.tooltip")}
+                            </Tooltip>
                           }
                         >
                           <Button
@@ -668,12 +686,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 text={
                   currentTool.result?.general_assessment ??
                   "" +
-                  currentTool.result?.issues
-                    .map(
-                      ({ description, suggestions }) =>
-                        `${description} ${suggestions.join()}`
-                    )
-                    .join()
+                    currentTool.result?.issues
+                      .map(
+                        ({ description, suggestions }) =>
+                          `${description} ${suggestions.join()}`
+                      )
+                      .join()
                 }
                 regenerate={retry}
               >

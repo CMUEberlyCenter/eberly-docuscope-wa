@@ -55,18 +55,18 @@ type IconProps = {
   url: string; // URL
   width: number; // int
   height: number; // int
-}
+};
 
 type WindowProps = {
   targetName?: string;
   width?: number; // int
   height?: number; // int
   windowReatures?: string; // comma-separated list
-}
+};
 type StartEndDate = {
   startDateTime?: string; // ISO8601
   endDateTime?: string; // ISO8601
-}
+};
 
 type LTI_Link = {
   type: 'link';
@@ -81,8 +81,8 @@ type LTI_Link = {
     src: string; // URL
     width?: number; // int
     height?: number; // int
-  }
-}
+  };
+};
 
 type LTI_ResourceLink = {
   type: 'ltiResourceLink';
@@ -96,7 +96,7 @@ type LTI_ResourceLink = {
     width?: number;
     height?: number;
   };
-  custom?: Record<string,any>;
+  custom?: Record<string, any>;
   lineItem?: {
     label?: string;
     scoreMaximum: number;
@@ -106,7 +106,7 @@ type LTI_ResourceLink = {
   };
   available?: StartEndDate;
   submission?: StartEndDate;
-}
+};
 
 type LTI_File = {
   type: 'file';
@@ -116,14 +116,14 @@ type LTI_File = {
   icon?: IconProps;
   thumbnail?: IconProps;
   expiresAt?: string; // ISO8901
-}
+};
 
 type LTI_HTMLFragment = {
   type: 'html';
   html: string; // HTML
   title?: string;
   text?: string;
-}
+};
 
 type LTI_Image = {
   type: 'image';
@@ -134,5 +134,10 @@ type LTI_Image = {
   thumbnail?: IconProps;
   width?: number; // int
   height?: number; // int
-}
-export type ContentItemType = LTI_Link | LTI_ResourceLink | LTI_File | LTI_HTMLFragment | LTI_Image;
+};
+export type ContentItemType =
+  | LTI_Link
+  | LTI_ResourceLink
+  | LTI_File
+  | LTI_HTMLFragment
+  | LTI_Image;

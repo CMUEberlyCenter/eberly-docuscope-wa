@@ -1,5 +1,12 @@
 import { ChangeEvent, FC, useState } from "react";
-import { Button, Container, Form, ListGroup, Spinner, Stack } from "react-bootstrap";
+import {
+  Button,
+  Container,
+  Form,
+  ListGroup,
+  Spinner,
+  Stack,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
@@ -8,7 +15,7 @@ import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 export const DeepLink: FC = () => {
   const { t } = useTranslation();
   const { data, isLoading } = useWritingTasks();
-  const [selected, setSelected] = useState<WritingTask | null>(null)
+  const [selected, setSelected] = useState<WritingTask | null>(null);
   const [custom, setCustom] = useState<WritingTask | null>(null);
   const [valid, setValid] = useState(true); // Uploaded file validity
 
@@ -45,7 +52,7 @@ export const DeepLink: FC = () => {
   //       throw new Error(await resp.json());
   //     }
   //     // TODO post data for deep link
-  //     // writing task 
+  //     // writing task
   //     // TODO future: other assignment restrictions on available tools.
   //   } catch (err) {
   //     console.error(err);
@@ -56,55 +63,65 @@ export const DeepLink: FC = () => {
     <Container className="overflow-auto">
       {isLoading ? (
         <Spinner></Spinner>
-      ) : (<>
-        <Stack direction="horizontal" gap={3}>
-          <ListGroup>
-            {data?.map(task => (
-              <ListGroup.Item key={task.info.name}
-                active={selected === task}
+      ) : (
+        <>
+          <Stack direction="horizontal" gap={3}>
+            <ListGroup>
+              {data?.map((task) => (
+                <ListGroup.Item
+                  key={task.info.name}
+                  active={selected === task}
+                  action
+                  onClick={() => setSelected(task)}
+                >
+                  {task.info.name}
+                </ListGroup.Item>
+              ))}
+              {custom && (
+                <ListGroup.Item
+                  key="custom"
+                  action
+                  active={selected === custom}
+                  onClick={() => setSelected(custom)}
+                >
+                  {custom.info.name}
+                </ListGroup.Item>
+              )}
+              <ListGroup.Item
+                key="null"
                 action
-                onClick={() => setSelected(task)}>
-                {task.info.name}
-              </ListGroup.Item>
-            )
-            )}
-            {custom && (
-              <ListGroup.Item key="custom"
-                action
-                active={selected === custom}
-                onClick={() => setSelected(custom)}
+                variant="warning"
+                onClick={() => setSelected(null)}
               >
-                {custom.info.name}
+                {t("select_task.null")}
               </ListGroup.Item>
-            )}
-            <ListGroup.Item key="null"
-              action
-              variant="warning"
-              onClick={() => setSelected(null)}
-            >
-              {t("select_task.null")}
-            </ListGroup.Item>
-          </ListGroup>
-          <WritingTaskInfo task={selected} className="w-50 h-100" />
-        </Stack>
-        <Form.Group>
-          <Form.Control
-            type="file"
-            onChange={onFileChange}
-            isInvalid={!valid}
-          />
-          <Form.Control.Feedback type="invalid">
-            {t("select_task.invalid_upload")}
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form noValidate method="post">
-          <input type="hidden" name="file" value={JSON.stringify(selected)} className="d-none" readOnly={true}/>
-          <Button variant="dark" type="submit">
-            {t("select")}
-          </Button>
-        </Form>
-      </>
+            </ListGroup>
+            <WritingTaskInfo task={selected} className="w-50 h-100" />
+          </Stack>
+          <Form.Group>
+            <Form.Control
+              type="file"
+              onChange={onFileChange}
+              isInvalid={!valid}
+            />
+            <Form.Control.Feedback type="invalid">
+              {t("select_task.invalid_upload")}
+            </Form.Control.Feedback>
+          </Form.Group>
+          <Form noValidate method="post">
+            <input
+              type="hidden"
+              name="file"
+              value={JSON.stringify(selected)}
+              className="d-none"
+              readOnly={true}
+            />
+            <Button variant="dark" type="submit">
+              {t("select")}
+            </Button>
+          </Form>
+        </>
       )}
     </Container>
-  )
-}
+  );
+};

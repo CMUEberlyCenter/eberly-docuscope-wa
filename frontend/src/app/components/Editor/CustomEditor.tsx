@@ -13,7 +13,7 @@ import {
   Dropdown,
   Form,
   OverlayTrigger,
-  Tooltip
+  Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -67,9 +67,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -178,7 +178,6 @@ const CustomEditor: FC = () => {
   const writingTask = useWritingTask();
   const [zoom, setZoom] = useState<number>(100);
 
-
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <Leaf {...props} />,
     []
@@ -237,12 +236,20 @@ const CustomEditor: FC = () => {
                 <Dropdown.Menu>
                   <Dropdown.ItemText>
                     <Form className="m-2">
-                    <Form.Label>{t("editor.menu.view.font_size", { zoom })}</Form.Label>
-                    <br />
-                    <Form.Range min={10} max={300} step={10}
-                      onChange={(event) => setZoom(event.target.valueAsNumber)}
-                      value={zoom} />
-                  </Form>
+                      <Form.Label>
+                        {t("editor.menu.view.font_size", { zoom })}
+                      </Form.Label>
+                      <br />
+                      <Form.Range
+                        min={10}
+                        max={300}
+                        step={10}
+                        onChange={(event) =>
+                          setZoom(event.target.valueAsNumber)
+                        }
+                        value={zoom}
+                      />
+                    </Form>
                   </Dropdown.ItemText>
                 </Dropdown.Menu>
               </Dropdown>
@@ -293,7 +300,7 @@ const CustomEditor: FC = () => {
           </ButtonToolbar>
           <Editable
             className="p-2 flex-grow-1 overflow-auto"
-            style={{ fontSize: `${zoom}%`}}
+            style={{ fontSize: `${zoom}%` }}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             spellCheck

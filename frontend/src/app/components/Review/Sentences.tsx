@@ -12,14 +12,15 @@ import { cleanAndRepairSentenceData } from "../../../lib/OnTopicData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import { highlightSentence } from "../../service/topic.service";
-import SentencesIcon from '../../assets/icons/show_sentence_density_icon.svg?react';
+import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
 
 export const SentencesTitle: FC = () => (
-  <Translation ns={'review'}>
-    {(t) => (<>
-      <SentencesIcon />{" "}
-      {t("sentences.title")}
-    </>)}
+  <Translation ns={"review"}>
+    {(t) => (
+      <>
+        <SentencesIcon /> {t("sentences.title")}
+      </>
+    )}
   </Translation>
 );
 
@@ -99,14 +100,18 @@ export const Sentences: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center"><SentencesTitle /></Card.Title>
+        <Card.Title className="text-center">
+          <SentencesTitle />
+        </Card.Title>
         {!data ? (
           <Loading />
         ) : (
           <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-            {data.datetime && <Card.Subtitle className="text-center">
-              {new Date(data.datetime).toLocaleString()}
-            </Card.Subtitle>}
+            {data.datetime && (
+              <Card.Subtitle className="text-center">
+                {new Date(data.datetime).toLocaleString()}
+              </Card.Subtitle>
+            )}
             <Legend />
             <OnTopicVisualization
               mode="SENTENCE"

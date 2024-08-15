@@ -3,17 +3,15 @@ import { Alert, Card, ListGroup } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
-import GlobalCoherenceIcon from '../../assets/icons/global_coherence_icon.svg?react';
+import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?react";
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
-
 export const GlobalCoherenceTitle: FC = () => (
-  <Translation ns={'review'}>
+  <Translation ns={"review"}>
     {(t) => (
       <>
-        <GlobalCoherenceIcon />{" "}
-        {t("global_coherence.title")}
+        <GlobalCoherenceIcon /> {t("global_coherence.title")}
       </>
     )}
   </Translation>
@@ -55,9 +53,11 @@ export const GlobalCoherence: FC = () => {
               <Alert variant="danger">{t("global_coherence.error")}</Alert>
             }
           >
-            {review.datetime && <Card.Subtitle className="text-center">
-              {new Date(review.datetime).toLocaleString()}
-            </Card.Subtitle>}
+            {review.datetime && (
+              <Card.Subtitle className="text-center">
+                {new Date(review.datetime).toLocaleString()}
+              </Card.Subtitle>
+            )}
             <Card>
               <Card.Body>
                 <Card.Title>{t("global_coherence.contract")}</Card.Title>

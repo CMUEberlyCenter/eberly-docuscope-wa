@@ -1,6 +1,10 @@
 import { Request, Response, Router } from 'express';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
-import { AssessExpectationRequest, NotesRequest, TextRequest } from '../../lib/Requests';
+import {
+  AssessExpectationRequest,
+  NotesRequest,
+  TextRequest,
+} from '../../lib/Requests';
 import { doChat } from '../data/chat';
 import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
@@ -17,7 +21,6 @@ const handleChatError = (err: unknown, response: Response) => {
   }
   return response.sendStatus(500);
 };
-
 
 const scribeNotes =
   (key: NotesPrompt) => async (request: Request, response: Response) => {
@@ -38,22 +41,22 @@ scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
 
 export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
-    async (request: Request, response: Response) => {
-      const data = request.body as TextRequest;
-      try {
-        const chat = await doChat(
-          key,
-          {
-            ...DEFAULT_LANGUAGE_SETTINGS,
-            ...data,
-          },
-          true
-        );
-        return response.json(chat.response);
-      } catch (err) {
-        return handleChatError(err, response);
-      }
-    };
+  async (request: Request, response: Response) => {
+    const data = request.body as TextRequest;
+    try {
+      const chat = await doChat(
+        key,
+        {
+          ...DEFAULT_LANGUAGE_SETTINGS,
+          ...data,
+        },
+        true
+      );
+      return response.json(chat.response);
+    } catch (err) {
+      return handleChatError(err, response);
+    }
+  };
 scribe.post('/proofread', scribeText('grammar'));
 scribe.post('/copyedit', scribeText('copyedit'));
 scribe.post('/local_coherence', scribeText('local_coherence'));
@@ -67,7 +70,8 @@ scribe.post(
     const data = request.body as AssessExpectationRequest;
     try {
       const assessment = await doChat('expectation', {
-        ...DEFAULT_LANGUAGE_SETTINGS, ...data
+        ...DEFAULT_LANGUAGE_SETTINGS,
+        ...data,
       });
       response.json(assessment.response);
     } catch (err) {

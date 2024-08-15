@@ -10,7 +10,7 @@ import {
   Nav,
   Navbar,
   Placeholder,
-  Spinner
+  Spinner,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -25,7 +25,6 @@ import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 import TaskViewer from "../Review/TaskViewer";
 import { UserTextHeader } from "../UserTextHeader/UserTextHeader";
-
 
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
@@ -54,7 +53,7 @@ export const AllExpectations: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <Card as={'main'}>
+      <Card as={"main"}>
         <UserTextHeader title={writingTask?.info.name} />
         <Card.Body>
           {prose ? (
@@ -67,7 +66,7 @@ export const AllExpectations: FC = () => {
           )}
         </Card.Body>
       </Card>
-      <Card as={'aside'}>
+      <Card as={"aside"}>
         <Card.Header>
           <Navbar>
             <Container>
@@ -79,13 +78,13 @@ export const AllExpectations: FC = () => {
                 </Nav.Item>
                 <Button variant="link" disabled>
                   {tt("tool.tab.review")}
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                  <FontAwesomeIcon
+                    icon={faArrowUpRightFromSquare}
+                    className="ms-1"
+                  />
                 </Button>
                 <Nav.Item>
-                  <Nav.Link
-                    eventKey="refine"
-                    disabled
-                  >
+                  <Nav.Link eventKey="refine" disabled>
                     {tt("tool.tab.refine")}
                   </Nav.Link>
                 </Nav.Item>
@@ -96,8 +95,7 @@ export const AllExpectations: FC = () => {
             </Container>
           </Navbar>
           <Card.Title className="text-dark text-center">
-            <AllExpectationsIcon />{" "}
-            {t("title")}
+            <AllExpectationsIcon /> {t("title")}
           </Card.Title>
         </Card.Header>
         <Card.Body className="h-100 overflow-auto position-relative">
@@ -135,7 +133,8 @@ export const AllExpectations: FC = () => {
                                         )
                                       )}
                                   </>
-                                )} */ /* Sentences should not be displayed, used for highlighting. */}
+                                )} */
+                            /* Sentences should not be displayed, used for highlighting. */}
                             <h6>{t("suggestions")}</h6>
                             <p key={`suggestion-${i}-${j}`}>
                               {isAllExpectationsData(expectation) &&

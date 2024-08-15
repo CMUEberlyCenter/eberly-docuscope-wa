@@ -2,16 +2,15 @@ import { FC, Fragment } from "react";
 import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import KeyIdeasIcon from '../../assets/icons/list_key_ideas_icon.svg?react';
+import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { useKeyPointsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
 export const KeyIdeasTitle: FC = () => (
-  <Translation ns={'review'}>
+  <Translation ns={"review"}>
     {(t) => (
       <>
-        <KeyIdeasIcon />{" "}
-        {t("key_ideas.title")}
+        <KeyIdeasIcon /> {t("key_ideas.title")}
       </>
     )}
   </Translation>
@@ -24,16 +23,20 @@ export const KeyIdeas: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center"><KeyIdeasTitle /></Card.Title>
+        <Card.Title className="text-center">
+          <KeyIdeasTitle />
+        </Card.Title>
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            {review.datetime && <Card.Subtitle className="text-center">
-              {new Date(review.datetime).toLocaleString()}
-            </Card.Subtitle>}
+            {review.datetime && (
+              <Card.Subtitle className="text-center">
+                {new Date(review.datetime).toLocaleString()}
+              </Card.Subtitle>
+            )}
             {"points" in review.response &&
               review.response.points.map((point, i) => (
                 <Card key={i}>

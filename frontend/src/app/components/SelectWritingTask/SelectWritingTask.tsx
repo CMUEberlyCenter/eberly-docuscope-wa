@@ -6,7 +6,7 @@ import {
   Modal,
   OverlayTrigger,
   Popover,
-  Stack
+  Stack,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
@@ -98,7 +98,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
               {t("select_task.null")}
             </ListGroup.Item>
           </ListGroup>
-          <WritingTaskInfo task={selected} className="w-50 h-100"/>
+          <WritingTaskInfo task={selected} className="w-50 h-100" />
         </Stack>
       </Modal.Body>
       <Modal.Footer>

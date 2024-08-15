@@ -3,17 +3,17 @@ import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
-import ArgumentsIcon from '../../assets/icons/list_arguments_icon.svg?react';
+import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 
-
 export const ArgumentsTitle: FC = () => (
-  <Translation ns={'review'}>
-    {(t) => (<>
-      <ArgumentsIcon />{" "}
-      {t("arguments.title")}
-    </>)}
+  <Translation ns={"review"}>
+    {(t) => (
+      <>
+        <ArgumentsIcon /> {t("arguments.title")}
+      </>
+    )}
   </Translation>
 );
 
@@ -32,7 +32,8 @@ const Claim: FC<ClaimProps> = ({ claim, support, suggestions }) => {
           {sentences.map((sentence, i) => (
             <li key={`claim_sentence_${i}`}>{sentence}</li>
           ))}
-        </ul> */ /* TODO: sentences are for highlighting */}
+        </ul> */
+        /* TODO: sentences are for highlighting */}
         <Card.Title>{t("arguments.suggestions")}</Card.Title>
         <ul>
           {suggestions.map((suggestion, i) => (
@@ -51,16 +52,20 @@ export const Arguments: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center"><ArgumentsTitle /></Card.Title>
+        <Card.Title className="text-center">
+          <ArgumentsTitle />
+        </Card.Title>
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
           >
-            {review.datetime && <Card.Subtitle className="text-center">
-              {new Date(review.datetime).toLocaleString()}
-            </Card.Subtitle>}
+            {review.datetime && (
+              <Card.Subtitle className="text-center">
+                {new Date(review.datetime).toLocaleString()}
+              </Card.Subtitle>
+            )}
             <Card>
               <Card.Body>
                 <Card.Title>{t("arguments.main")}</Card.Title>

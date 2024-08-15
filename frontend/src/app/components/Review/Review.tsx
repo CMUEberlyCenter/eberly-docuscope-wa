@@ -9,7 +9,7 @@ import {
   Nav,
   Navbar,
   Placeholder,
-  Stack
+  Stack,
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -22,44 +22,62 @@ import { Arguments, ArgumentsTitle } from "./Arguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
 import { Organization, OrganizationTitle } from "./Organization";
-import './Review.scss';
+import "./Review.scss";
 import { Sentences, SentencesTitle } from "./Sentences";
 import TaskViewer from "./TaskViewer";
 
-type Tool = 'null' | 'sentences' | 'global_coherence' | 'key_ideas' | 'arguments' | 'expectations' | 'organization' | 'impressions';
+type Tool =
+  | "null"
+  | "sentences"
+  | "global_coherence"
+  | "key_ideas"
+  | "arguments"
+  | "expectations"
+  | "organization"
+  | "impressions";
 
 const NullTitle: FC = () => (
-  <Translation ns={'review'}>
-    {(t) => (t("null.title"))}
-  </Translation>
-)
+  <Translation ns={"review"}>{(t) => t("null.title")}</Translation>
+);
 
 type ToolProps = { tool: Tool };
 const ToolTitle: FC<ToolProps> = ({ tool }) => {
   switch (tool) {
-    case "sentences": return <SentencesTitle />;
-    case "global_coherence": return <GlobalCoherenceTitle />;
-    case "key_ideas": return <KeyIdeasTitle />;
-    case "arguments": return <ArgumentsTitle />;
-    case "expectations": return <Translation ns={'review'}>{(t) => (<>{t("expectations.title")}</>)}</Translation>;
-    case "organization": return <OrganizationTitle />;
-    case "impressions": return <Translation ns={'review'}>{(t) => (<>{t("impressions.title")}</>)}</Translation>;
+    case "sentences":
+      return <SentencesTitle />;
+    case "global_coherence":
+      return <GlobalCoherenceTitle />;
+    case "key_ideas":
+      return <KeyIdeasTitle />;
+    case "arguments":
+      return <ArgumentsTitle />;
+    case "expectations":
+      return (
+        <Translation ns={"review"}>
+          {(t) => <>{t("expectations.title")}</>}
+        </Translation>
+      );
+    case "organization":
+      return <OrganizationTitle />;
+    case "impressions":
+      return (
+        <Translation ns={"review"}>
+          {(t) => <>{t("impressions.title")}</>}
+        </Translation>
+      );
     case "null":
     default:
       return <NullTitle />;
   }
-}
+};
 
 const NullTool: FC = () => (
   <Stack className="position-absolute start-50 top-50 translate-middle">
     <span className="mx-auto text-center">
-      <Translation ns={'review'}>
-        {(t) => (<>{t("null.content")}</>)}
-      </Translation>
+      <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
     </span>
   </Stack>
-
-)
+);
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
@@ -67,7 +85,7 @@ export const Review: FC = () => {
   const review = useReview();
   const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
-  const [tool, setTool] = useState<Tool>('null');
+  const [tool, setTool] = useState<Tool>("null");
   const [prose, setProse] = useState<string>("");
 
   useEffect(() => {
@@ -99,7 +117,7 @@ export const Review: FC = () => {
 
   const onSelect = (id: Tool) => {
     setTool(id);
-  }
+  };
 
   return (
     <Split
@@ -108,7 +126,7 @@ export const Review: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <Card as={'main'}>
+      <Card as={"main"}>
         <UserTextHeader title={writingTask?.info.name} />
         <Card.Body>
           {typeof review !== "object" ? (
@@ -121,7 +139,7 @@ export const Review: FC = () => {
           )}
         </Card.Body>
       </Card>
-      <Card as={'aside'}>
+      <Card as={"aside"}>
         <Card.Header>
           <Navbar>
             <Container>
@@ -134,14 +152,14 @@ export const Review: FC = () => {
                 <Nav.Item>
                   <Nav.Link eventKey="review">
                     {tt("tool.tab.review")}
-                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                    <FontAwesomeIcon
+                      icon={faArrowUpRightFromSquare}
+                      className="ms-1"
+                    />
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
-                  <Nav.Link
-                    eventKey="refine"
-                    disabled
-                  >
+                  <Nav.Link eventKey="refine" disabled>
                     {tt("tool.tab.refine")}
                   </Nav.Link>
                 </Nav.Item>
@@ -159,7 +177,9 @@ export const Review: FC = () => {
               </div>
             </Dropdown.Toggle>
             <Dropdown.Menu>
-              <Dropdown.Header><NullTitle /></Dropdown.Header>
+              <Dropdown.Header>
+                <NullTitle />
+              </Dropdown.Header>
               {argumentsFeature && (
                 <Dropdown.Item onClick={() => onSelect("arguments")}>
                   <ToolTitle tool="arguments" />
@@ -171,7 +191,7 @@ export const Review: FC = () => {
                 </Dropdown.Item>
               )}
               {coherenceFeature && (
-                <Dropdown.Item onClick={() => onSelect('global_coherence')}>
+                <Dropdown.Item onClick={() => onSelect("global_coherence")}>
                   <ToolTitle tool="global_coherence" />
                 </Dropdown.Item>
               )}
@@ -181,7 +201,7 @@ export const Review: FC = () => {
                 </Dropdown.Item>
               )}
               {sentencesFeature && (
-                <Dropdown.Item onClick={() => onSelect('sentences')}>
+                <Dropdown.Item onClick={() => onSelect("sentences")}>
                   <ToolTitle tool="sentences" />
                 </Dropdown.Item>
               )}
@@ -200,7 +220,7 @@ export const Review: FC = () => {
           </Dropdown>
         </Card.Header>
         <Card.Body className="h-100 overflow-auto position-relative">
-          {(!tool || tool === 'null') && <NullTool />}
+          {(!tool || tool === "null") && <NullTool />}
           {tool === "arguments" && <Arguments />}
           {tool === "expectations" && <NullTool />}
           {tool === "global_coherence" && <GlobalCoherence />}

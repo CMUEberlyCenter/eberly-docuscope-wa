@@ -101,4 +101,7 @@ export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
 
 export const DEFAULT_LANGUAGE = process.env.DEFAULT_LANGUAGE ?? 'English';
-export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = { user_lang: DEFAULT_LANGUAGE, target_lang: DEFAULT_LANGUAGE };
+export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = {
+  user_lang: DEFAULT_LANGUAGE,
+  target_lang: DEFAULT_LANGUAGE,
+};
