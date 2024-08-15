@@ -55,11 +55,9 @@ export const GlobalCoherence: FC = () => {
               <Alert variant="danger">{t("global_coherence.error")}</Alert>
             }
           >
-            <Card.Subtitle className="text-center">
-              {review.datetime
-                ? new Date(review.datetime).toLocaleString()
-                : ""}
-            </Card.Subtitle>
+            {review.datetime && <Card.Subtitle className="text-center">
+              {new Date(review.datetime).toLocaleString()}
+            </Card.Subtitle>}
             <Card>
               <Card.Body>
                 <Card.Title>{t("global_coherence.contract")}</Card.Title>

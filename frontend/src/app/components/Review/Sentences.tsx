@@ -104,9 +104,9 @@ export const Sentences: FC = () => {
           <Loading />
         ) : (
           <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-            <Card.Subtitle className="text-center">
-              {data.datetime ? new Date(data.datetime).toLocaleString() : ""}
-            </Card.Subtitle>
+            {data.datetime && <Card.Subtitle className="text-center">
+              {new Date(data.datetime).toLocaleString()}
+            </Card.Subtitle>}
             <Legend />
             <OnTopicVisualization
               mode="SENTENCE"

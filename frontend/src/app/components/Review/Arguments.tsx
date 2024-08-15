@@ -58,11 +58,9 @@ export const Arguments: FC = () => {
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
           >
-            <Card.Subtitle className="text-center">
-              {review.datetime
-                ? new Date(review.datetime).toLocaleString()
-                : ""}
-            </Card.Subtitle>
+            {review.datetime && <Card.Subtitle className="text-center">
+              {new Date(review.datetime).toLocaleString()}
+            </Card.Subtitle>}
             <Card>
               <Card.Body>
                 <Card.Title>{t("arguments.main")}</Card.Title>

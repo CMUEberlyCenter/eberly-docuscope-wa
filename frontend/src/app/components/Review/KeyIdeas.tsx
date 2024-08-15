@@ -31,11 +31,9 @@ export const KeyIdeas: FC = () => {
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            <Card.Subtitle className="text-center">
-              {review.datetime
-                ? new Date(review.datetime).toLocaleString()
-                : ""}
-            </Card.Subtitle>
+            {review.datetime && <Card.Subtitle className="text-center">
+              {new Date(review.datetime).toLocaleString()}
+            </Card.Subtitle>}
             {"points" in review.response &&
               review.response.points.map((point, i) => (
                 <Card key={i}>

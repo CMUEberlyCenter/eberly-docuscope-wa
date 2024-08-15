@@ -1,0 +1,13 @@
+.review {
+  .select-button {
+    div {
+      width: 275px;
+      min-height: 32px;
+      display: inline-block;
+    }
+  }
+
+  .select-button:hover {
+    outline-style: inset;
+  }
+}

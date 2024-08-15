@@ -233,6 +233,9 @@ export const Organization: FC = () => {
           <Loading />
         ) : (
           <ErrorBoundary FallbackComponent={OrganizationErrorFallback}>
+            {data.datetime && <Card.Subtitle className="text-center">
+              {new Date(data.datetime).toLocaleString()}
+            </Card.Subtitle>}
             <Legend />
             <Card.Text>{t("organization.description")}</Card.Text>
             <Card className="mb-1">

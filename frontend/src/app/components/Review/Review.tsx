@@ -6,7 +6,6 @@ import {
   Card,
   Container,
   Dropdown,
-  DropdownButton,
   Nav,
   Navbar,
   Placeholder,
@@ -23,6 +22,7 @@ import { Arguments, ArgumentsTitle } from "./Arguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
 import { Organization, OrganizationTitle } from "./Organization";
+import './Review.scss';
 import { Sentences, SentencesTitle } from "./Sentences";
 import TaskViewer from "./TaskViewer";
 
@@ -103,7 +103,7 @@ export const Review: FC = () => {
 
   return (
     <Split
-      className="container-fluid h-100 w-100 d-flex flex-row"
+      className="container-fluid h-100 w-100 d-flex flex-row review"
       sizes={[60, 40]}
       minSize={[400, 320]}
       expandToMin={true}
@@ -151,46 +151,53 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Container>
           </Navbar>
-          <Card.Title className="text-center text-dark">{t("title")}</Card.Title>
-          <DropdownButton title={<ToolTitle tool={tool} />} variant="white">
-            <Dropdown.Header><NullTitle /></Dropdown.Header>
-            {argumentsFeature && (
-              <Dropdown.Item onClick={() => onSelect("arguments")}>
-                <ToolTitle tool="arguments" />
-              </Dropdown.Item>
-            )}
-            {ideasFeature && (
-              <Dropdown.Item onClick={() => onSelect("key_ideas")}>
-                <ToolTitle tool="key_ideas" />
-              </Dropdown.Item>
-            )}
-            {coherenceFeature && (
-              <Dropdown.Item onClick={() => onSelect('global_coherence')}>
-                <ToolTitle tool="global_coherence" />
-              </Dropdown.Item>
-            )}
-            {organizationFeature && (
-              <Dropdown.Item onClick={() => onSelect("organization")}>
-                <ToolTitle tool="organization" />
-              </Dropdown.Item>
-            )}
-            {sentencesFeature && (
-              <Dropdown.Item onClick={() => onSelect('sentences')}>
-                <ToolTitle tool="sentences" />
-              </Dropdown.Item>
-            )}
-            {expectationsFeature && (
-              <Dropdown.Item onClick={() => onSelect("expectations")}>
-                <ToolTitle tool="expectations" />
-              </Dropdown.Item>
-            )}
-            {impressionsFeature && (
-              <Dropdown.Item onClick={() => onSelect("impressions")}>
-                <ToolTitle tool="impressions" />
-              </Dropdown.Item>
-            )}
-            {/* Add tool title select option here. */}
-          </DropdownButton>
+          {/* <Card.Title className="text-center text-dark">{t("title")}</Card.Title> */}
+          <Dropdown className="d-flex justify-content-around">
+            <Dropdown.Toggle variant="white" className="select-button">
+              <div>
+                <ToolTitle tool={tool} />
+              </div>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Header><NullTitle /></Dropdown.Header>
+              {argumentsFeature && (
+                <Dropdown.Item onClick={() => onSelect("arguments")}>
+                  <ToolTitle tool="arguments" />
+                </Dropdown.Item>
+              )}
+              {ideasFeature && (
+                <Dropdown.Item onClick={() => onSelect("key_ideas")}>
+                  <ToolTitle tool="key_ideas" />
+                </Dropdown.Item>
+              )}
+              {coherenceFeature && (
+                <Dropdown.Item onClick={() => onSelect('global_coherence')}>
+                  <ToolTitle tool="global_coherence" />
+                </Dropdown.Item>
+              )}
+              {organizationFeature && (
+                <Dropdown.Item onClick={() => onSelect("organization")}>
+                  <ToolTitle tool="organization" />
+                </Dropdown.Item>
+              )}
+              {sentencesFeature && (
+                <Dropdown.Item onClick={() => onSelect('sentences')}>
+                  <ToolTitle tool="sentences" />
+                </Dropdown.Item>
+              )}
+              {expectationsFeature && (
+                <Dropdown.Item onClick={() => onSelect("expectations")}>
+                  <ToolTitle tool="expectations" />
+                </Dropdown.Item>
+              )}
+              {impressionsFeature && (
+                <Dropdown.Item onClick={() => onSelect("impressions")}>
+                  <ToolTitle tool="impressions" />
+                </Dropdown.Item>
+              )}
+              {/* Add tool title select option here. */}
+            </Dropdown.Menu>
+          </Dropdown>
         </Card.Header>
         <Card.Body className="h-100 overflow-auto position-relative">
           {(!tool || tool === 'null') && <NullTool />}
