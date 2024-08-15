@@ -1,7 +1,6 @@
 import {
   faArrowUpRightFromSquare,
-  faEllipsis,
-  faListCheck
+  faEllipsis
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from "@slate-serializers/html";
@@ -24,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
+import AllExpectationsIcon from "../../assets/icons/all_expectations_icon.svg?react";
 import CheckExpectationIcon from '../../assets/icons/check_expectation_icon.svg?react';
 import CopyEditIcon from '../../assets/icons/copyedit_icon.svg?react';
 import GenerateBulletsIcon from '../../assets/icons/generate_bullets_icon.svg?react';
@@ -383,7 +383,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             >
                               <Stack>
                                 <div className="d-flex justify-content-center align-items-end">
-                                  <FontAwesomeIcon icon={faListCheck} className="mx-0" />
+                                  <AllExpectationsIcon />
                                   <FontAwesomeIcon style={{ height: ".75rem", width: ".75rem" }} className="mx-1"
                                     icon={faArrowUpRightFromSquare}
                                   />
