@@ -1,10 +1,23 @@
 import { FC } from "react";
 import { Alert, Card, ListGroup } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { ErrorBoundary } from "react-error-boundary";
+import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
+import GlobalCoherenceIcon from '../../assets/icons/global_coherence_icon.svg?react';
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
-import { ErrorBoundary } from "react-error-boundary";
+
+
+export const GlobalCoherenceTitle: FC = () => (
+  <Translation ns={'review'}>
+    {(t) => (
+      <>
+        <GlobalCoherenceIcon />{" "}
+        {t("global_coherence.title")}
+      </>
+    )}
+  </Translation>
+);
 
 const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
   const { t } = useTranslation("review");
@@ -32,7 +45,7 @@ export const GlobalCoherence: FC = () => {
     <Card>
       <Card.Body>
         <Card.Title className="text-center">
-          {t("global_coherence.title")}
+          <GlobalCoherenceTitle />
         </Card.Title>
         {!review ? (
           <Loading />

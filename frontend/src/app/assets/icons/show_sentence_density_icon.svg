@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
+  <path fill="currentColor"
+    d="M16,5.74h0c.6,0,1.08.48,1.08,1.08v3.24c0,.6-.48,1.08-1.08,1.08h0c-.6,0-1.08-.48-1.08-1.08v-3.24c0-.6.48-1.08,1.08-1.08Z" />
+  <rect fill="currentColor" x="7.36" y="13.3" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <rect fill="currentColor" x="19.24" y="13.3" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <path fill="currentColor"
+    d="M4.12,13.3h0c.6,0,1.08.48,1.08,1.08v3.24c0,.6-.48,1.08-1.08,1.08h0c-.6,0-1.08-.48-1.08-1.08v-3.24c0-.6.48-1.08,1.08-1.08Z" />
+  <path fill="currentColor"
+    d="M27.88,18.7h0c-.6,0-1.08-.48-1.08-1.08v-3.24c0-.6.48-1.08,1.08-1.08h0c.6,0,1.08.48,1.08,1.08v3.24c0,.6-.48,1.08-1.08,1.08Z" />
+  <rect fill="currentColor" x="7.36" y="5.74" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <rect fill="currentColor" x="19.24" y="20.86" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <rect fill="currentColor" x="7.36" y="20.86" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <rect fill="currentColor" x="19.24" y="5.74" width="5.4" height="5.4" rx="1.08" ry="1.08" />
+  <path fill="currentColor"
+    d="M16,13.3h0c.6,0,1.08.48,1.08,1.08v3.24c0,.6-.48,1.08-1.08,1.08h0c-.6,0-1.08-.48-1.08-1.08v-3.24c0-.6.48-1.08,1.08-1.08Z" />
+  <path fill="currentColor"
+    d="M16,20.86h0c.6,0,1.08.48,1.08,1.08v3.24c0,.6-.48,1.08-1.08,1.08h0c-.6,0-1.08-.48-1.08-1.08v-3.24c0-.6.48-1.08,1.08-1.08Z" />
+</svg>

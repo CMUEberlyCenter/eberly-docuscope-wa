@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Trans, useTranslation } from "react-i18next";
+import { Trans, Translation, useTranslation } from "react-i18next";
 import { useOnTopicData, useReview } from "../../service/review.service";
 import { Alert, Card, ListGroup } from "react-bootstrap";
 import { Loading } from "../Loading/Loading";
@@ -12,6 +12,16 @@ import { cleanAndRepairSentenceData } from "../../../lib/OnTopicData";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import { highlightSentence } from "../../service/topic.service";
+import SentencesIcon from '../../assets/icons/show_sentence_density_icon.svg?react';
+
+export const SentencesTitle: FC = () => (
+  <Translation ns={'review'}>
+    {(t) => (<>
+      <SentencesIcon />{" "}
+      {t("sentences.title")}
+    </>)}
+  </Translation>
+);
 
 /** Error feedback component for clarity tool. */
 const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
@@ -89,7 +99,7 @@ export const Sentences: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center">{t("sentences.title")}</Card.Title>
+        <Card.Title className="text-center"><SentencesTitle /></Card.Title>
         {!data ? (
           <Loading />
         ) : (

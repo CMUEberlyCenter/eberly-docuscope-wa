@@ -3,7 +3,7 @@
   "title": "Review",
   "select_tool": "Select a tool",
   "sentences": {
-    "title": "Sentence Density Chart",
+    "title": "Sentence Density",
     "error": "Error loading Sentence data:",
     "select": "Select a sentence to see its composition.",
     "legend": {

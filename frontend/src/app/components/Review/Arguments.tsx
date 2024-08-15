@@ -1,12 +1,24 @@
 import { FC } from "react";
 import { Alert, Card } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { ErrorBoundary } from "react-error-boundary";
+import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
+import ArgumentsIcon from '../../assets/icons/list_arguments_icon.svg?react';
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
-import { ErrorBoundary } from "react-error-boundary";
 
-const Claim: FC<ClaimProps> = ({ claim, support, sentences, suggestions }) => {
+
+export const ArgumentsTitle: FC = () => (
+  <Translation ns={'review'}>
+    {(t) => (<>
+      <ArgumentsIcon />{" "}
+      {t("arguments.title")}
+    </>)}
+  </Translation>
+);
+
+/** Component for rendering a claim. */
+const Claim: FC<ClaimProps> = ({ claim, support, suggestions }) => {
   const { t } = useTranslation("review");
   return (
     <Card>
@@ -15,12 +27,12 @@ const Claim: FC<ClaimProps> = ({ claim, support, sentences, suggestions }) => {
         <Card.Text>{claim}</Card.Text>
         <Card.Title>{t("arguments.support")}</Card.Title>
         <Card.Text>{support}</Card.Text>
-        <Card.Title>{t("arguments.sentences")}</Card.Title>
+        {/* <Card.Title>{t("arguments.sentences")}</Card.Title>
         <ul>
           {sentences.map((sentence, i) => (
             <li key={`claim_sentence_${i}`}>{sentence}</li>
           ))}
-        </ul>
+        </ul> */ /* TODO: sentences are for highlighting */}
         <Card.Title>{t("arguments.suggestions")}</Card.Title>
         <ul>
           {suggestions.map((suggestion, i) => (
@@ -39,7 +51,7 @@ export const Arguments: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center">{t("arguments.title")}</Card.Title>
+        <Card.Title className="text-center"><ArgumentsTitle /></Card.Title>
         {!review ? (
           <Loading />
         ) : (

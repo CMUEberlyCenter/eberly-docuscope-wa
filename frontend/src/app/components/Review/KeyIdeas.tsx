@@ -1,9 +1,21 @@
 import { FC, Fragment } from "react";
 import { Alert, Card } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
-import { Loading } from "../Loading/Loading";
-import { useKeyPointsData } from "../../service/review.service";
 import { ErrorBoundary } from "react-error-boundary";
+import { Translation, useTranslation } from "react-i18next";
+import KeyIdeasIcon from '../../assets/icons/list_key_ideas_icon.svg?react';
+import { useKeyPointsData } from "../../service/review.service";
+import { Loading } from "../Loading/Loading";
+
+export const KeyIdeasTitle: FC = () => (
+  <Translation ns={'review'}>
+    {(t) => (
+      <>
+        <KeyIdeasIcon />{" "}
+        {t("key_ideas.title")}
+      </>
+    )}
+  </Translation>
+);
 
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
@@ -12,7 +24,7 @@ export const KeyIdeas: FC = () => {
   return (
     <Card>
       <Card.Body>
-        <Card.Title className="text-center">{t("key_ideas.title")}</Card.Title>
+        <Card.Title className="text-center"><KeyIdeasTitle /></Card.Title>
         {!review ? (
           <Loading />
         ) : (
@@ -42,12 +54,12 @@ export const KeyIdeas: FC = () => {
                         </Fragment>
                       ))}
                     </dl>
-                    <h4>{t("key_ideas.sentences")}</h4>
+                    {/* <h4>{t("key_ideas.sentences")}</h4>
                     <ul>
                       {point.sentences.map((sentence, s) => (
                         <li key={`sentence.${i}.${s}`}>{sentence}</li>
                       ))}
-                    </ul>
+                    </ul> */}
                     <h4>{t("key_ideas.suggestions")}</h4>
                     <ul>
                       {point.suggestions.map((suggestion, g) => (

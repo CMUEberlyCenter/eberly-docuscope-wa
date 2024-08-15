@@ -10,14 +10,12 @@ import {
   Nav,
   Navbar,
   Placeholder,
-  Spinner,
-  Stack
+  Spinner
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 import { isReview } from "../../../server/model/review";
-import NoEditIcon from '../../assets/icons/no_edit_icon.svg?react';
 import {
   useAllExpectationsAnalysis,
   useExpectations,
@@ -25,6 +23,7 @@ import {
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 import TaskViewer from "../Review/TaskViewer";
+import { UserTextHeader } from "../UserTextHeader/UserTextHeader";
 
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
@@ -54,17 +53,7 @@ export const AllExpectations: FC = () => {
       expandToMin={true}
     >
       <Card as={'main'}>
-        <Card.Header className="d-flex justify-content-between">
-          <Stack>
-            <Card.Subtitle className="text-muted">
-              {tt("editor.menu.task")}
-            </Card.Subtitle>
-            <Card.Title>
-              {writingTask?.info.name ?? tt("editor.menu.no_task")}
-            </Card.Title>
-          </Stack>
-          <NoEditIcon className="ms-auto" />
-        </Card.Header>
+        <UserTextHeader title={writingTask?.info.name} />
         <Card.Body>
           {prose ? (
             <div
@@ -76,8 +65,7 @@ export const AllExpectations: FC = () => {
           )}
         </Card.Body>
       </Card>
-      <aside>
-        <Card className="h-100 w-100">
+        <Card as={'aside'}>
           <Card.Header>
             <Navbar>
               <Container>
@@ -105,7 +93,7 @@ export const AllExpectations: FC = () => {
                 </Navbar.Brand>
               </Container>
             </Navbar>
-            <Card.Title className="text-dark">
+            <Card.Title className="text-dark text-center">
               <FontAwesomeIcon icon={faListCheck} />{" "}
               {t("title")}
             </Card.Title>
@@ -132,7 +120,7 @@ export const AllExpectations: FC = () => {
                         <Accordion.Body>
                           {expectations?.has(expectation.expectation) ? (
                             <>
-                              {isAllExpectationsData(expectation) &&
+                              {/* {isAllExpectationsData(expectation) &&
                                 expectation.response.sentences.length > 0 && (
                                   <>
                                     <h6>{t("sentences")}</h6>
@@ -145,7 +133,7 @@ export const AllExpectations: FC = () => {
                                         )
                                       )}
                                   </>
-                                )}
+                                )} */ /* Sentences should not be displayed, used for highlighting. */}
                               <h6>{t("suggestions")}</h6>
                               <p key={`suggestion-${i}-${j}`}>
                                 {isAllExpectationsData(expectation) &&
@@ -177,7 +165,6 @@ export const AllExpectations: FC = () => {
           show={showWritingTask}
           onHide={() => setShowWritingTask(false)}
         />
-      </aside>
     </Split>
   );
 };

@@ -1,25 +1,65 @@
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useEffect, useState } from "react";
 import {
   Button,
   Card,
-  Form,
+  Container,
+  Dropdown,
+  DropdownButton,
+  Nav,
   Navbar,
   Placeholder,
-  Stack,
+  Stack
 } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 import { useReview } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
-import { Arguments } from "./Arguments";
-import { GlobalCoherence } from "./GlobalCoherence";
-import { KeyIdeas } from "./KeyIdeas";
-import { Organization } from "./Organization";
-import { Sentences } from "./Sentences";
-import TaskViewer from "./TaskViewer";
 import { Logo } from "../Logo/Logo";
+import { UserTextHeader } from "../UserTextHeader/UserTextHeader";
+import { Arguments, ArgumentsTitle } from "./Arguments";
+import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
+import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
+import { Organization, OrganizationTitle } from "./Organization";
+import { Sentences, SentencesTitle } from "./Sentences";
+import TaskViewer from "./TaskViewer";
 
+type Tool = 'null' | 'sentences' | 'global_coherence' | 'key_ideas' | 'arguments' | 'expectations' | 'organization' | 'impressions';
+
+const NullTitle: FC = () => (
+  <Translation ns={'review'}>
+    {(t) => (t("null.title"))}
+  </Translation>
+)
+
+type ToolProps = { tool: Tool };
+const ToolTitle: FC<ToolProps> = ({ tool }) => {
+  switch (tool) {
+    case "sentences": return <SentencesTitle />;
+    case "global_coherence": return <GlobalCoherenceTitle />;
+    case "key_ideas": return <KeyIdeasTitle />;
+    case "arguments": return <ArgumentsTitle />;
+    case "expectations": return <Translation ns={'review'}>{(t) => (<>{t("expectations.title")}</>)}</Translation>;
+    case "organization": return <OrganizationTitle />;
+    case "impressions": return <Translation ns={'review'}>{(t) => (<>{t("impressions.title")}</>)}</Translation>;
+    case "null":
+    default:
+      return <NullTitle />;
+  }
+}
+
+const NullTool: FC = () => (
+  <Stack className="position-absolute start-50 top-50 translate-middle">
+    <span className="mx-auto text-center">
+      <Translation ns={'review'}>
+        {(t) => (<>{t("null.content")}</>)}
+      </Translation>
+    </span>
+  </Stack>
+
+)
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
@@ -27,8 +67,9 @@ export const Review: FC = () => {
   const review = useReview();
   const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
-  const [tool, setTool] = useState("");
+  const [tool, setTool] = useState<Tool>('null');
   const [prose, setProse] = useState<string>("");
+
   useEffect(() => {
     window.document.title = t("document.title");
   }, [t]);
@@ -56,6 +97,10 @@ export const Review: FC = () => {
   const expectationsFeature = false; // moving to own
   const organizationFeature = true;
 
+  const onSelect = (id: Tool) => {
+    setTool(id);
+  }
+
   return (
     <Split
       className="container-fluid h-100 w-100 d-flex flex-row"
@@ -63,91 +108,116 @@ export const Review: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <main className="d-flex overflow-none h-100 flex-column">
-        <Navbar>
-          {/* TODO add assignment and user info. */}
-          <div className="ms-3">
-            <h6 className="mb-0 text-muted">{tt("editor.menu.task")}</h6>
-            <h5>{writingTask?.info.name ?? tt("editor.menu.no_task")}</h5>
-          </div>
-        </Navbar>
-        {typeof review !== "object" ? (
-          <Placeholder></Placeholder>
-        ) : (
-          <div
-            className="p-2 flex-grow-1 overflow-auto"
-            dangerouslySetInnerHTML={{ __html: prose }}
-          />
-        )}
-      </main>
-      <aside>
-        <Card className="h-100 w-100">
-          <Card.Header>
-            <div className="d-flex justify-content-between">
-              <Card.Title>{t("title")}</Card.Title>
-              <Logo/>
-            </div>
-            <Form.Select
-              aria-label={t("select_tool")}
-              value={tool}
-              onChange={(e) => setTool(e.target.value)}
+      <Card as={'main'}>
+        <UserTextHeader title={writingTask?.info.name} />
+        <Card.Body>
+          {typeof review !== "object" ? (
+            <Placeholder></Placeholder>
+          ) : (
+            <div
+              className="p-2 flex-grow-1 overflow-auto"
+              dangerouslySetInnerHTML={{ __html: prose }}
+            />
+          )}
+        </Card.Body>
+      </Card>
+      <Card as={'aside'}>
+        <Card.Header>
+          <Navbar>
+            <Container>
+              <Nav defaultActiveKey={"review"} variant="tabs">
+                <Nav.Item>
+                  <Nav.Link eventKey="generate" disabled>
+                    {tt("tool.tab.generate")}
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link eventKey="review">
+                    {tt("tool.tab.review")}
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="ms-1" />
+                  </Nav.Link>
+                </Nav.Item>
+                <Nav.Item>
+                  <Nav.Link
+                    eventKey="refine"
+                    disabled
+                  >
+                    {tt("tool.tab.refine")}
+                  </Nav.Link>
+                </Nav.Item>
+              </Nav>
+              <Navbar.Brand>
+                <Logo />
+              </Navbar.Brand>
+            </Container>
+          </Navbar>
+          <Card.Title className="text-center text-dark">{t("title")}</Card.Title>
+          <DropdownButton title={<ToolTitle tool={tool} />} variant="white">
+            <Dropdown.Header><NullTitle /></Dropdown.Header>
+            {argumentsFeature && (
+              <Dropdown.Item onClick={() => onSelect("arguments")}>
+                <ToolTitle tool="arguments" />
+              </Dropdown.Item>
+            )}
+            {ideasFeature && (
+              <Dropdown.Item onClick={() => onSelect("key_ideas")}>
+                <ToolTitle tool="key_ideas" />
+              </Dropdown.Item>
+            )}
+            {coherenceFeature && (
+              <Dropdown.Item onClick={() => onSelect('global_coherence')}>
+                <ToolTitle tool="global_coherence" />
+              </Dropdown.Item>
+            )}
+            {organizationFeature && (
+              <Dropdown.Item onClick={() => onSelect("organization")}>
+                <ToolTitle tool="organization" />
+              </Dropdown.Item>
+            )}
+            {sentencesFeature && (
+              <Dropdown.Item onClick={() => onSelect('sentences')}>
+                <ToolTitle tool="sentences" />
+              </Dropdown.Item>
+            )}
+            {expectationsFeature && (
+              <Dropdown.Item onClick={() => onSelect("expectations")}>
+                <ToolTitle tool="expectations" />
+              </Dropdown.Item>
+            )}
+            {impressionsFeature && (
+              <Dropdown.Item onClick={() => onSelect("impressions")}>
+                <ToolTitle tool="impressions" />
+              </Dropdown.Item>
+            )}
+            {/* Add tool title select option here. */}
+          </DropdownButton>
+        </Card.Header>
+        <Card.Body className="h-100 overflow-auto position-relative">
+          {(!tool || tool === 'null') && <NullTool />}
+          {tool === "arguments" && <Arguments />}
+          {tool === "expectations" && <NullTool />}
+          {tool === "global_coherence" && <GlobalCoherence />}
+          {tool === "impressions" && <NullTool />}
+          {tool === "key_ideas" && <KeyIdeas />}
+          {tool === "organization" && <Organization />}
+          {tool === "sentences" && <Sentences />}
+          {/* Add more tool displays here. */}
+        </Card.Body>
+        <Card.Footer>
+          {writingTask && (
+            <Button
+              variant="outline-dark"
+              onClick={() => setShowWritingTask(!showWritingTask)}
             >
-              <option>{t("null.title")}</option>
-              {sentencesFeature && (
-                <option value="sentences">{t("sentences.title")}</option>
-              )}
-              {coherenceFeature && (
-                <option value="global_coherence">
-                  {t("global_coherence.title")}
-                </option>
-              )}
-              {ideasFeature && (
-                <option value="key_ideas">{t("key_ideas.title")}</option>
-              )}
-              {argumentsFeature && (
-                <option value="arguments">{t("arguments.title")}</option>
-              )}
-              {expectationsFeature && (
-                <option value="expectations">{t("expectations.title")}</option>
-              )}
-              {organizationFeature && (
-                <option value="organization">{t("organization.title")}</option>
-              )}
-              {impressionsFeature && (
-                <option disabled value="impressions">
-                  {t("impressions.title")}
-                </option>
-              )}
-            </Form.Select>
-          </Card.Header>
-          <Card.Body className="h-100 overflow-auto position-relative">
-            {!tool && (
-              <Stack className="position-absolute start-50 top-50 translate-middle">
-                <span className="mx-auto text-center">{t("null.content")}</span>
-              </Stack>
-            )}
-            {tool === "global_coherence" && <GlobalCoherence />}
-            {tool === "key_ideas" && <KeyIdeas />}
-            {tool === "arguments" && <Arguments />}
-            {tool === "sentences" && <Sentences />}
-            {tool === "organization" && <Organization />}
-          </Card.Body>
-          <Card.Footer>
-            {writingTask && (
-              <Button
-                variant="outline-dark"
-                onClick={() => setShowWritingTask(!showWritingTask)}
-              >
-                {tt("tool.button.view.title")}
-              </Button>
-            )}
-          </Card.Footer>
-        </Card>
-        <TaskViewer
-          show={showWritingTask}
-          onHide={() => setShowWritingTask(false)}
-        />
-      </aside>
+              {tt("tool.button.view.title")}
+            </Button>
+          )}
+        </Card.Footer>
+      </Card>
+      <TaskViewer
+        show={showWritingTask}
+        onHide={() => setShowWritingTask(false)}
+      />
     </Split>
   );
 };

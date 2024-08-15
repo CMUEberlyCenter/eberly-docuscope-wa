@@ -19,10 +19,19 @@ $light: #f6f7f9;
 
 $primary-text: #2445f0;
 
+$cmu-secondary-rose: #ef3340;
+$cmu-secondary-gold: #a60;
+$cmu-secondary-teal: #067;
+$cmu-secondary-blue-dark: #001e4b;
+
 $theme-colors: (
   "primary": $primary,
   "secondary": $secondary,
   "light": $light,
   "dark": $primary-text,
-  "organization": darkBlue,
+  "organization": darkBlue, //$cmu-secondary-blue-dark,
+  "white": white,
+  "info": $cmu-secondary-teal,
+  "warning": $cmu-secondary-gold,
+  "danger": $cmu-secondary-rose,
 );
