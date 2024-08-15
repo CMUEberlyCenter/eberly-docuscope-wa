@@ -16,7 +16,7 @@ import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 import { isReview } from "../../../server/model/review";
-import AllExpectationsIcon from "../../assets/icons/all_expectations_icon.svg?react";
+import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
 import {
   useAllExpectationsAnalysis,
   useExpectations,

@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
-import AllExpectationsIcon from "../../assets/icons/all_expectations_icon.svg?react";
+import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
 import CheckExpectationIcon from '../../assets/icons/check_expectation_icon.svg?react';
 import CopyEditIcon from '../../assets/icons/copyedit_icon.svg?react';
 import GenerateBulletsIcon from '../../assets/icons/generate_bullets_icon.svg?react';
