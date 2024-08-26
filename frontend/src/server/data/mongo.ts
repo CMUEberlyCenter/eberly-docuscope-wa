@@ -157,7 +157,7 @@ export async function updatePublicWritingTasks() {
 
 // Simple setTimeout promise wrapper.
 function timeout(ms: number | undefined): Promise<undefined> {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -171,7 +171,9 @@ export async function initDatabase(): Promise<void> {
       await client.connect();
       retry = 0;
     } catch (err) {
-      console.warn(`Failed to connect to database, retrying in ${sleep}ms (${retry} attempts left)...`)
+      console.warn(
+        `Failed to connect to database, retrying in ${sleep}ms (${retry} attempts left)...`
+      );
       retry -= 1;
       await timeout(sleep);
     }

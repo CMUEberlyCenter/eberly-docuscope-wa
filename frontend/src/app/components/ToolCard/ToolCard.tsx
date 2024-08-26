@@ -224,7 +224,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/review.html?id=${reviewId}`);
+      return window.open(`/review.html?id=${reviewId}`, "_blank");
     }, [writingTask, editor]);
 
     const onExpectations = useCallback(async () => {
@@ -252,7 +252,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/expectations.html?id=${reviewId}`);
+      return window.open(`/expectations.html?id=${reviewId}`, "_blank");
     }, [writingTask, editor]);
 
     return (
