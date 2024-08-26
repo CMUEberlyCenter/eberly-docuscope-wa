@@ -128,12 +128,12 @@ export const Review: FC = () => {
     >
       <Card as={"main"}>
         <UserTextHeader title={writingTask?.info.name} />
-        <Card.Body>
+        <Card.Body className="overflow-auto">
           {typeof review !== "object" ? (
             <Placeholder></Placeholder>
           ) : (
             <div
-              className="p-2 flex-grow-1 overflow-auto"
+              className="p-2 flex-grow-1"
               dangerouslySetInnerHTML={{ __html: prose }}
             />
           )}

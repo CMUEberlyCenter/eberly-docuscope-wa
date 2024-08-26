@@ -55,10 +55,10 @@ export const AllExpectations: FC = () => {
     >
       <Card as={"main"}>
         <UserTextHeader title={writingTask?.info.name} />
-        <Card.Body>
+        <Card.Body className="overflow-auto">
           {prose ? (
             <div
-              className="p-2 flex-grow-1 overflow-auto"
+              className="p-2 flex-grow-1"
               dangerouslySetInnerHTML={{ __html: prose }}
             />
           ) : (
