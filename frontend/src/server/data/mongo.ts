@@ -155,11 +155,27 @@ export async function updatePublicWritingTasks() {
   }
 }
 
+// Simple setTimeout promise wrapper.
+function timeout(ms: number | undefined): Promise<undefined> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 /**
  * Make sure connection is possible and populate database with filesystem writing tasks.
  */
 export async function initDatabase(): Promise<void> {
-  await client.connect();
+  let retry = 30;
+  const sleep = 5000;
+  while (retry > 0) {
+    try {
+      await client.connect();
+      retry = 0;
+    } catch (err) {
+      console.warn(`Failed to connect to database, retrying in ${sleep}ms (${retry} attempts left)...`)
+      retry -= 1;
+      await timeout(sleep);
+    }
+  }
   await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
 }
 
