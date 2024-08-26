@@ -44,7 +44,7 @@
     "error":"Error reading Lines of Arguements data.",
     "main": "Main Argument",
     "arguments": "Arguments",
-    "counter_examples": "Counter Examples",
+    "counter_examples": "Counter Argument",
     "rebuttals": "Rebuttals",
     "claim": "Claim",
     "support": "Support",
