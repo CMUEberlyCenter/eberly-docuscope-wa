@@ -7,7 +7,7 @@
       "file": "File",
       "open": "New Writing Task",
       "save": "Save Notes",
-      "view": "View",
+      "view": "Font",
       "view.font_size": "Editor Font Size: {{zoom}}%",
       "paragraph": "Paragraph",
       "h1": "Heading 1",
@@ -20,7 +20,7 @@
       "italic": "Italic",
       "underline": "Underline",
       "strike": "Strikethrough",
-      "task": "Writing Task:",
+      "task": "Outline:",
       "no_task": "None Selected"
     }
   },
@@ -63,7 +63,7 @@
         "title": "View Outline"
       },
       "select": {
-        "title": "Select Writing Task"
+        "title": "Select Outline"
       }
     },
     "initial": "Write & highlight text for further actions.",
@@ -87,10 +87,12 @@
     "error": "Error while processing results."
   },
   "select_task": {
-    "title": "Select Writing Task",
+    "title": "Select Outline",
     "upload": "Upload Custom Writing Task",
     "invalid_upload": "Uploaded file is not a valid writing task specificaton!",
-    "null": "No Writing Task"
+    "null": "No Writing Task",
+    "version": "Version: {{version}}",
+    "copyright": "Copyright: {{copyright}}"
   },
   "cancel": "Cancel",
   "select": "Select",

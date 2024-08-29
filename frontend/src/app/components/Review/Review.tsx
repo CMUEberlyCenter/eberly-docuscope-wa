@@ -1,23 +1,12 @@
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Container,
-  Dropdown,
-  Nav,
-  Navbar,
-  Placeholder,
-  Stack,
-} from "react-bootstrap";
+import { Button, Card, Container, Dropdown, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 import { useReview } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
-import { UserTextHeader } from "../UserTextHeader/UserTextHeader";
+import { UserTextView } from "../UserTextView/UserTextView";
 import { Arguments, ArgumentsTitle } from "./Arguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
@@ -126,22 +115,14 @@ export const Review: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <Card as={"main"}>
-        <UserTextHeader title={writingTask?.info.name} />
-        <Card.Body className="overflow-auto">
-          {typeof review !== "object" ? (
-            <Placeholder></Placeholder>
-          ) : (
-            <div
-              className="p-2 flex-grow-1"
-              dangerouslySetInnerHTML={{ __html: prose }}
-            />
-          )}
-        </Card.Body>
-      </Card>
+      <UserTextView prose={prose} />
       <Card as={"aside"}>
         <Card.Header>
-          <Navbar>
+          <Container className="d-flex justify-content-between align-item-baseline">
+            <span className="text-dark">{tt("tool.tab.review")}</span>
+            <Logo />
+          </Container>
+          {/* <Navbar>
             <Container>
               <Nav defaultActiveKey={"review"} variant="tabs">
                 <Nav.Item>
@@ -168,9 +149,9 @@ export const Review: FC = () => {
                 <Logo />
               </Navbar.Brand>
             </Container>
-          </Navbar>
+          </Navbar> */}
           {/* <Card.Title className="text-center text-dark">{t("title")}</Card.Title> */}
-          <Dropdown className="d-flex justify-content-around">
+          <Dropdown className="d-flex justify-content-start">
             <Dropdown.Toggle variant="white" className="select-button">
               <div>
                 <ToolTitle tool={tool} />

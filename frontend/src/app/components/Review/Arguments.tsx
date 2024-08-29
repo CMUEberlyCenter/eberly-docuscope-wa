@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Alert, Card } from "react-bootstrap";
+import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
@@ -10,95 +10,98 @@ import { Loading } from "../Loading/Loading";
 export const ArgumentsTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
-      <>
-        <ArgumentsIcon /> {t("arguments.title")}
-      </>
+      <span className="text-dark">
+        <ArgumentsIcon /> {t("arguments.entry")}
+      </span>
     )}
   </Translation>
 );
 
-/** Component for rendering a claim. */
-const Claim: FC<ClaimProps> = ({ claim, support, suggestions }) => {
-  const { t } = useTranslation("review");
-  return (
-    <Card>
-      <Card.Body>
-        <Card.Title>{t("arguments.claim")}</Card.Title>
-        <Card.Text>{claim}</Card.Text>
-        <Card.Title>{t("arguments.support")}</Card.Title>
-        <Card.Text>{support}</Card.Text>
-        {/* <Card.Title>{t("arguments.sentences")}</Card.Title>
-        <ul>
-          {sentences.map((sentence, i) => (
-            <li key={`claim_sentence_${i}`}>{sentence}</li>
-          ))}
-        </ul> */
-        /* TODO: sentences are for highlighting */}
-        <Card.Title>{t("arguments.suggestions")}</Card.Title>
-        <ul>
-          {suggestions.map((suggestion, i) => (
-            <li key={`claim_suggestion_${i}`}>{suggestion}</li>
-          ))}
-        </ul>
-      </Card.Body>
-    </Card>
-  );
+type ClaimsProps = AccordionProps & {
+  claims?: ClaimProps[] | null;
 };
+const Claims: FC<ClaimsProps> = ({ claims, ...props }) => (
+  <>
+    {claims?.length && (
+      <Translation ns={"review"}>
+        {(t) => (
+          <Accordion alwaysOpen {...props}>
+            {claims.map(({ claim, support, suggestions }, i) => (
+              <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                <Accordion.Header>
+                  <span>
+                    <span className="fw-bold">{t("arguments.claim")}</span>
+                    <span>{claim}</span>
+                  </span>
+                </Accordion.Header>
+                <Accordion.Body>
+                  {support && (
+                    <div>
+                      <span className="fw-bold">{t("arguments.support")}</span>
+                      <span>{support}</span>
+                    </div>
+                  )}
+                  {suggestions?.length && (
+                    <div>
+                      <span className="fw-bold">
+                        {t("arguments.suggestions")}
+                      </span>
+                      <ul>
+                        {suggestions.map((suggestion, k) => (
+                          <li key={`${i}-${k}`}>{suggestion}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </Accordion.Body>
+              </Accordion.Item>
+            ))}
+          </Accordion>
+        )}
+      </Translation>
+    )}
+  </>
+);
 
 export const Arguments: FC = () => {
   const { t } = useTranslation("review");
   const review = useArgumentsData();
 
   return (
-    <Card>
-      <Card.Body>
-        <Card.Title className="text-center">
-          <ArgumentsTitle />
-        </Card.Title>
-        {!review ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
-          >
-            {review.datetime && (
-              <Card.Subtitle className="text-center">
-                {new Date(review.datetime).toLocaleString()}
-              </Card.Subtitle>
-            )}
-            <Card>
-              <Card.Body>
-                <Card.Title>{t("arguments.main")}</Card.Title>
-                <Card.Text>{review.response.main_argument}</Card.Text>
-              </Card.Body>
-            </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>{t("arguments.arguments")}</Card.Title>
-                {review.response.arguments?.map((argument, i) => (
-                  <Claim key={`argument_${i}`} {...argument} />
-                ))}
-              </Card.Body>
-            </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>{t("arguments.counter_examples")}</Card.Title>
-                {review.response.counter_examples?.map((argument, i) => (
-                  <Claim key={`argument_${i}`} {...argument} />
-                ))}
-              </Card.Body>
-            </Card>
-            <Card>
-              <Card.Body>
-                <Card.Title>{t("arguments.rebuttals")}</Card.Title>
-                {review.response.rebuttals?.map((argument, i) => (
-                  <Claim key={`argument_${i}`} {...argument} />
-                ))}
-              </Card.Body>
-            </Card>
-          </ErrorBoundary>
-        )}
-      </Card.Body>
-    </Card>
+    <div className="overflow-auto">
+      <h4>{t("arguments.title")}</h4>
+      {!review ? (
+        <Loading />
+      ) : (
+        <ErrorBoundary
+          fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
+        >
+          {/* {review.datetime && (
+            <Card.Subtitle className="text-center">
+              {new Date(review.datetime).toLocaleString()}
+            </Card.Subtitle>
+          )} */}
+          {review.response.main_argument ? (
+            <>
+              <h5>{t("arguments.main")}</h5>
+              <p>{review.response.main_argument}</p>
+              <Claims claims={review.response.arguments} />
+            </>
+          ) : null}
+          {review.response.counter_examples?.length ? (
+            <>
+              <h5>{t("arguments.counter_examples")}</h5>
+              <Claims claims={review.response.counter_examples} />
+            </>
+          ) : null}
+          {review.response.rebuttals?.length ? (
+            <>
+              <h5>{t("arguments.rebuttals")}</h5>
+              <Claims claims={review.response.rebuttals} />
+            </>
+          ) : null}
+        </ErrorBoundary>
+      )}
+    </div>
   );
 };

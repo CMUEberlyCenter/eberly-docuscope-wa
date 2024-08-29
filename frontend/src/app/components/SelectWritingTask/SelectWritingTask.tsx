@@ -6,7 +6,6 @@ import {
   Modal,
   OverlayTrigger,
   Popover,
-  Stack,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
@@ -66,40 +65,47 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" scrollable>
+    <Modal show={show} onHide={onHide} size="lg">
       <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
-        <Stack direction="horizontal" gap={3}>
-          <ListGroup>
-            {writingTasks?.map((task) => (
+        <div
+          className="d-flex flex-row align-items-stretch position-relative"
+          style={{ maxHeight: "75vh" }}
+        >
+          <div className="w-100 pe-3 h-0">
+            <ListGroup className="overflow-auto w-100 mh-100">
+              {writingTasks?.map((task) => (
+                <ListGroup.Item
+                  key={task.info.name}
+                  active={selected === task}
+                  action
+                  onClick={() => setSelected(task)}
+                >
+                  {task.info.name}
+                </ListGroup.Item>
+              ))}
+              {custom && (
+                <ListGroup.Item
+                  action
+                  active={selected === custom}
+                  onClick={() => setSelected(custom)}
+                >
+                  {custom.info.name}
+                </ListGroup.Item>
+              )}
               <ListGroup.Item
-                key={task.info.name}
-                active={selected === task}
                 action
-                onClick={() => setSelected(task)}
+                variant="warning"
+                onClick={() => setSelected(null)}
               >
-                {task.info.name}
+                {t("select_task.null")}
               </ListGroup.Item>
-            ))}
-            {custom && (
-              <ListGroup.Item
-                action
-                active={selected === custom}
-                onClick={() => setSelected(custom)}
-              >
-                {custom.info.name}
-              </ListGroup.Item>
-            )}
-            <ListGroup.Item
-              action
-              variant="warning"
-              onClick={() => setSelected(null)}
-            >
-              {t("select_task.null")}
-            </ListGroup.Item>
-          </ListGroup>
-          <WritingTaskInfo task={selected} className="w-50 h-100" />
-        </Stack>
+            </ListGroup>
+          </div>
+          <div className="w-100 h-0">
+            <WritingTaskInfo task={selected} />
+          </div>
+        </div>
       </Modal.Body>
       <Modal.Footer>
         {(!inLti || ltiInfo?.instructor) && (

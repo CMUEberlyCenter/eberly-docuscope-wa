@@ -1,9 +1,8 @@
 import { FC } from "react";
-import { Card, CardProps, ListGroup } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import { WritingTask } from "../../../lib/WritingTask";
 
-type WritingTaskInfoProps = CardProps & {
+type WritingTaskInfoProps = {
   task: WritingTask | null;
 };
 /**
@@ -12,25 +11,21 @@ type WritingTaskInfoProps = CardProps & {
  * @returns
  * @component
  */
-export const WritingTaskInfo: FC<WritingTaskInfoProps> = ({
-  task,
-  ...props
-}) => (
-  <Card {...props}>
-    <Card.Header>
-      <Translation>
-        {(t) => <>{task?.info.name ?? t("select_task.null")}</>}
-      </Translation>
-    </Card.Header>
-    <ListGroup variant="flush">
-      <ListGroup.Item>Version: {task?.info.version ?? "-"}</ListGroup.Item>
-      <ListGroup.Item>Author: {task?.info.author ?? "-"}</ListGroup.Item>
-      <ListGroup.Item>
-        Copyright: {task && <>&copy; {task?.info.copyright}</>}
-      </ListGroup.Item>
-      <ListGroup.Item>
-        Date: {task ? new Date(task.info.saved).toLocaleString() : "-"}
-      </ListGroup.Item>
-    </ListGroup>
-  </Card>
+export const WritingTaskInfo: FC<WritingTaskInfoProps> = ({ task }) => (
+  <Translation>
+    {(t) => (
+      <div className="border rounded p-3 bg-light w-100 mh-100 overflow-auto">
+        <h4>{task?.info.name ?? t("select_task.null")}</h4>
+        <p>{task?.rules.overview}</p>
+        <p>
+          {t("select_task.version", { version: task?.info.version ?? "-" })}
+        </p>
+        <p>
+          {t("select_task.copyright", {
+            copyright: task?.info.copyright ?? "-",
+          })}
+        </p>
+      </div>
+    )}
+  </Translation>
 );

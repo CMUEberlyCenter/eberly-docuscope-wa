@@ -14,7 +14,7 @@ import { Translation } from "react-i18next";
 export const Logo: FC = () => (
   <Translation>
     {(t) => (
-      <img style={{ height: "1.75em" }} src={logo} alt={t("document.title")} />
+      <img style={{ height: "1.1em" }} src={logo} alt={t("document.title")} />
     )}
   </Translation>
 );

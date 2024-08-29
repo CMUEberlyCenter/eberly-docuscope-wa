@@ -23,7 +23,7 @@
       it appears at least once on the left side of the main verb in a sentence within the paragraph. 
 
  */
-import { FC, useCallback, useEffect, useId, useState } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Card, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -183,10 +183,11 @@ const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
 );
 
 export const Organization: FC = () => {
-  const toggleId = useId();
+  // const toggleId = useId();
   const { t } = useTranslation("review");
   const data = useOnTopicData();
-  const [showToggle, setShowToggle] = useState(true);
+  const showToggle = false;
+  // const [showToggle, setShowToggle] = useState(false);
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState(-1);
   const [selectedSentence, setSelectedSentence] = useState(-1);
@@ -211,6 +212,14 @@ export const Organization: FC = () => {
       const topics =
         data?.response.coherence?.data[index].topic.slice(0, 2) ?? [];
       highlightTopic(paragraph, -1, topics.length ? topics : [topic]);
+    },
+    [data]
+  );
+  const onTopicSentenceClick = useCallback(
+    (index: number, paragraph: number, sentence: number, topic: string) => {
+      const topics =
+        data?.response.coherence?.data[index].topic.slice(0, 2) ?? [];
+      highlightTopic(paragraph, sentence, topics.length ? topics : [topic]);
     },
     [data]
   );
@@ -243,7 +252,7 @@ export const Organization: FC = () => {
             <Card className="mb-1">
               <Card.Header className="d-flex justify-content-between">
                 <span>{t("organization.coherence.title")}</span>
-                <div
+                {/* <div
                   className="d-flex align-items-start"
                   onChange={() => setShowToggle(!showToggle)}
                 >
@@ -252,7 +261,7 @@ export const Organization: FC = () => {
                   </label>
                   <div className="form-check form-switch">
                     <input
-                      onChange={() => {}}
+                      onChange={() => { }}
                       className="form-check-input"
                       type="checkbox"
                       role="switch"
@@ -260,7 +269,7 @@ export const Organization: FC = () => {
                       checked={showToggle}
                     />
                   </div>
-                </div>
+                </div> */}
               </Card.Header>
               <Card.Body>
                 <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
@@ -271,11 +280,10 @@ export const Organization: FC = () => {
                           {t("organization.coherence.paragraphs")}
                         </td>
                         {paragraphRange.map((i) => (
-                          <td>
+                          <td key={`key-paragraph-${i}`}>
                             <Button
                               size="sm"
                               variant="outline-dark"
-                              key={`key-paragraph-${i}`}
                               active={i === selectedParagraph}
                               onClick={() =>
                                 setSelectedParagraph(
@@ -328,9 +336,8 @@ export const Organization: FC = () => {
                                       paraType?.is_left ? left : right
                                     }${paraType?.is_topic_sent ? "" : "*"}`;
                                     return (
-                                      <td>
+                                      <td key={`topic-key-${i}-${j}`}>
                                         <div
-                                          key={`topic-key-${i}-${j}`}
                                           className="text-center"
                                           onClick={() =>
                                             onTopicParagraphClick(i, j, topi)
@@ -370,9 +377,8 @@ export const Organization: FC = () => {
                             ?.at(selectedParagraph)
                             ?.data.at(0)
                             ?.sentences.map((_sentence, i) => (
-                              <td>
+                              <td key={`key-sentence-${i}`}>
                                 <Button
-                                  key={`key-sentence-${i}`}
                                   variant="outline-dark"
                                   active={selectedSentence === i}
                                   data-sentence={i}
@@ -418,12 +424,19 @@ export const Organization: FC = () => {
                                     sentence?.is_left ? left : right
                                   }${sentence?.is_topic_sent ? "" : "*"}`;
                                   return (
-                                    <td className="text-center">
+                                    <td
+                                      className="text-center"
+                                      key={`topic-sentence-key-${i}-${j}`}
+                                    >
                                       <div
-                                        key={`topic-sentence-key-${i}-${j}`}
                                         className="topic-type-default"
                                         onClick={() =>
-                                          onTopicParagraphClick(i, j, topi)
+                                          onTopicSentenceClick(
+                                            i,
+                                            selectedParagraph,
+                                            j,
+                                            topi
+                                          )
                                         }
                                       >
                                         {sentence ? (

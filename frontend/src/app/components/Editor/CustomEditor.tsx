@@ -33,9 +33,9 @@ import {
   useSlate,
   withReact,
 } from "slate-react";
-import { useWritingTask } from "../../service/writing-task.service";
 import { CustomText } from "../../slate";
 import ToolCard from "../ToolCard/ToolCard";
+import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -175,7 +175,6 @@ const CustomEditor: FC = () => {
       { type: "paragraph", children: [{ text: "" }] },
     ]
   );
-  const writingTask = useWritingTask();
   const [zoom, setZoom] = useState<number>(100);
 
   const renderLeaf = useCallback(
@@ -293,10 +292,7 @@ const CustomEditor: FC = () => {
                 <FontAwesomeIcon icon={faStrikethrough} />
               </MarkButton>
             </ButtonGroup>
-            <div className="ms-3">
-              <h6 className="mb-0 text-muted">{t("editor.menu.task")}</h6>
-              <h5>{writingTask?.info.name ?? t("editor.menu.no_task")}</h5>
-            </div>
+            <WritingTaskTitle className="ms-3" />
           </ButtonToolbar>
           <Editable
             className="p-2 flex-grow-1 overflow-auto"

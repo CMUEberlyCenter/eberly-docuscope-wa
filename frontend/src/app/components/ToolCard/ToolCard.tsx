@@ -265,9 +265,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         <Card.Header className="px-0">
           <Tab.Container id={tabId} defaultActiveKey="generate" activeKey={tab}>
             <Navbar>
-              <Container>
+              <Container className="p-0">
                 <Nav variant="tabs">
-                  <Nav.Item>
+                  <Nav.Item className="ms-3">
                     <Nav.Link
                       eventKey="generate"
                       onClick={() => setTab("generate")}
@@ -282,7 +282,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       className="ms-1"
                     />
                   </Button>
-                  <Nav.Item>
+                  <Nav.Item className="me-auto">
                     <Nav.Link
                       eventKey="refine"
                       onClick={() => setTab("refine")}

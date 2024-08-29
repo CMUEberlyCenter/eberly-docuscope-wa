@@ -27,27 +27,30 @@
     "redundant": "Redundant Information",
     "inconsistent": "Inconsistent Information",
     "suggestion": {
-      "text": "Text",
-      "explanation": "Explanation",
-      "suggestions": "Suggestions"
+      "text": "Your Text:",
+      "explanation": "Issue(s):",
+      "suggestions": "Suggestions:"
     }
   },
   "key_ideas": {
-    "title": "List of Key Ideas",
+    "entry": "List of Key Ideas",
+    "title": "Key Ideas found in the Text",
     "error": "Error reading Key Ideas data.",
-    "elaborations": "Elaborations",
+    "idea": "Idea:",
+    "elaborations": "Elaboration Strategy",
     "sentences": "Sentences",
     "suggestions": "Suggestions"
   },
   "arguments": {
-    "title": "Lines of Arguments",
+    "entry": "Lines of Arguments",
+    "title": "Reviw Lines of Arguments",
     "error":"Error reading Lines of Arguements data.",
     "main": "Main Argument",
     "arguments": "Arguments",
     "counter_examples": "Counter Argument",
     "rebuttals": "Rebuttals",
-    "claim": "Claim",
-    "support": "Support",
+    "claim": "Claim:",
+    "support": "Support:",
     "sentences": "Sentences",
     "suggestions":"Suggestions"
   },

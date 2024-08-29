@@ -47,7 +47,7 @@ function fromEnvFile(base: string, defaultValue?: string): string {
 
 export const LTI_KEY = fromEnvFile('LTI_KEY');
 export const LTI_HOSTNAME = new URL(
-  process.env.LTI_HOSTNAME ?? 'http://localhost:8877/'
+  process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
 );
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
 const MONGO_DB = process.env.MONGO_DB ?? 'docuscope';
@@ -64,8 +64,8 @@ export const LTI_OPTIONS = {
   dynReg: {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.
-    // logo: new URL('/', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
-    description: 'myProse LTI 1.3', // Tool Provider description.
+    // logo: new URL('logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
+    description: 'myProse tool for LTI 1.3', // Tool Provider description.
     redirectUris: [new URL('/launch', LTI_HOSTNAME).toString()], // Additional redirection URLs. The main URL is added by default.
     customParameters: { key: 'value' }, // Custom parameters.
     autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
@@ -99,6 +99,8 @@ export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
+export const PLATFORMS_PATH =
+  process.env['PLATFORMS'] ?? join('private', 'platforms');
 
 export const DEFAULT_LANGUAGE = process.env.DEFAULT_LANGUAGE ?? 'English';
 export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = {

@@ -9,7 +9,6 @@ import {
   Container,
   Nav,
   Navbar,
-  Placeholder,
   Spinner,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -24,7 +23,7 @@ import {
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 import TaskViewer from "../Review/TaskViewer";
-import { UserTextHeader } from "../UserTextHeader/UserTextHeader";
+import { UserTextView } from "../UserTextView/UserTextView";
 
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
@@ -53,19 +52,7 @@ export const AllExpectations: FC = () => {
       minSize={[400, 320]}
       expandToMin={true}
     >
-      <Card as={"main"}>
-        <UserTextHeader title={writingTask?.info.name} />
-        <Card.Body className="overflow-auto">
-          {prose ? (
-            <div
-              className="p-2 flex-grow-1"
-              dangerouslySetInnerHTML={{ __html: prose }}
-            />
-          ) : (
-            <Placeholder />
-          )}
-        </Card.Body>
-      </Card>
+      <UserTextView prose={prose} />
       <Card as={"aside"}>
         <Card.Header>
           <Navbar>
