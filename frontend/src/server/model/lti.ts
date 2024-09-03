@@ -15,6 +15,7 @@ export type ContextToken = {
     description?: string;
     id: string;
   };
+  custom?: { [key: string]: string };
 };
 
 export type IdToken = {
@@ -141,3 +142,24 @@ export type ContentItemType =
   | LTI_File
   | LTI_HTMLFragment
   | LTI_Image;
+
+type JWK_SET = {
+  method: 'JWK_SET';
+  key: string; // URL
+};
+type JWK_KEY = {
+  method: 'JWK_KEY';
+  key: string; // stringified json
+};
+type RSA_KEY = {
+  method: 'RSA_KEY';
+  key: string; // Public key.
+};
+export type LTIPlatform = {
+  url: string;
+  clientId: string;
+  name: string;
+  authenticationEndpoint: string;
+  accesstokenEndpoint: string;
+  authConfig: JWK_SET | JWK_KEY | RSA_KEY;
+};

@@ -4,9 +4,13 @@ import { createRoot } from "react-dom/client";
 import CustomEditor from "./components/Editor/CustomEditor";
 import "./i18n";
 import "./index.scss";
+// import "./index.css";
 
 const content = document.getElementById("content");
-console.assert(content, '"#content" not found!  Unable to render application.');
+console.assert(
+  content !== null,
+  '"#content" not found!  Unable to render application.'
+);
 console.log(
   `Welcome to myProse Version: ${__APP_VERSION__} built on ${new Date(__BUILD_DATE__).toLocaleString()}`
 );

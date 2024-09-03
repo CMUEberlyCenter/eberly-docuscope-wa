@@ -23,11 +23,12 @@ const REVIEW = 'review';
  */
 export async function findAssignmentById(id: string): Promise<Assignment> {
   try {
+    const _id = new ObjectId(id);
     const collection = client
       .db('docuscope')
       .collection<Assignment>(ASSIGNMENTS);
     const assignment: Assignment | null = await collection.findOne<Assignment>({
-      assignment: id,
+      _id,
     });
     if (!assignment) {
       console.error(`Assignment ${id} not found!`);

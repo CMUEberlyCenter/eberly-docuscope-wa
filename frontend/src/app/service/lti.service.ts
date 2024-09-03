@@ -1,15 +1,7 @@
 /** @fileoverview Accessing LTI 1.3 information. */
 
 import { bind } from '@react-rxjs/core';
-import {
-  BehaviorSubject,
-  catchError,
-  combineLatest,
-  filter,
-  map,
-  of,
-  switchMap,
-} from 'rxjs';
+import { BehaviorSubject, catchError, map, of, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { WritingTask } from '../../lib/WritingTask';
 import { writingTask } from './writing-task.service';
@@ -42,7 +34,7 @@ const getLtik = (): string => {
 const isLti = (): boolean => {
   try {
     const key = getLtik();
-    return !!key && Object.keys(key).length > 0;
+    return !!key && key.length > 0;
   } catch {
     return false;
   }
@@ -69,7 +61,7 @@ export const getLtiRequest = (): RequestInit => {
   }
 };
 
-export const [useLtiInfo, assignment$] = bind(
+export const [useLtiInfo, ltiInfo$] = bind(
   fromFetch('/lti/info', {
     ...getLtiRequest(),
     // selector: (r) => r.json(),
@@ -85,37 +77,15 @@ export const [useLtiInfo, assignment$] = bind(
   ),
   null
 );
-assignment$.subscribe((lti_info) => {
+ltiInfo$.subscribe((lti_info) => {
   if (lti_info?.writing_task) {
     writingTask.next(lti_info.writing_task);
   }
 });
 
 export const [useSelectTaskAvailable, selectTaskAvailable$] = bind(
-  assignment$.pipe(map((info) => !info || info?.instructor === true)),
+  ltiInfo$.pipe(map((info) => !info?.writing_task)),
   false
 );
 
-// When in LTI context and the user has modification rights, set
-// the writing task for the assignment.
-combineLatest({
-  task: writingTask,
-  lti_info: assignment$,
-})
-  .pipe(filter(({ lti_info }) => lti_info !== null && lti_info.instructor))
-  .subscribe(async ({ task }) => {
-    try {
-      const data = new FormData();
-      data.append('file', JSON.stringify(task));
-      const response = await fetch('/api/v2/assignments', {
-        method: 'POST',
-        body: data,
-      });
-      if (!response.ok) {
-        throw new Error(await response.json());
-      }
-    } catch (error) {
-      console.error(error);
-      // TODO report error.
-    }
-  });
+// Reassigning is done via deeplinking.

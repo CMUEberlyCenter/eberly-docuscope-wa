@@ -118,7 +118,7 @@ export const Review: FC = () => {
       <UserTextView prose={prose} />
       <Card as={"aside"}>
         <Card.Header>
-          <Container className="d-flex justify-content-between align-item-baseline">
+          <Container className="d-flex justify-content-between align-item-baseline border-bottom mb-2">
             <span className="text-dark">{tt("tool.tab.review")}</span>
             <Logo />
           </Container>
