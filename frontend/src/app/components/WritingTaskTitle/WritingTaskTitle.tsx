@@ -10,7 +10,7 @@ export const WritingTaskTitle: FC<StackProps> = (props) => {
     <Translation>
       {(t) => (
         <Stack {...props}>
-          <span className="mb-0 text-muted" style={{ fontSize: "75%" }}>
+          <span className="mb-0 text-muted" style={{ fontSize: "12px" }}>
             {t("editor.menu.task")}
           </span>
           <h6>{writingTask?.info.name ?? t("editor.menu.no_task")}</h6>

@@ -5,7 +5,7 @@ import {
   faClipboard,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, ReactNode, useCallback } from "react";
+import { FC, ReactNode, useCallback, useState } from "react";
 import { Alert, Button, Card, CardProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
@@ -34,6 +34,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
+  const [useBookmarks] = useState(false);
   return (
     <Card {...props}>
       <Card.Body>
@@ -42,14 +43,16 @@ export const ToolRoot: FC<ToolRootProps> = ({
         </Card.Title>
         <Card.Subtitle className="text-center text-muted">
           {tool?.datetime.toLocaleString()}
-          <Button variant="icon" onClick={() => onBookmark()}>
-            <FontAwesomeIcon
-              icon={tool?.bookmarked ? faBookmark : faRegularBookmark}
-            />
-            <span className="visually-hidden sr-only">
-              {tool?.bookmarked ? t("tool.bookmarked") : t("tool.bookmark")}
-            </span>
-          </Button>
+          {useBookmarks && (
+            <Button variant="icon" onClick={() => onBookmark()}>
+              <FontAwesomeIcon
+                icon={tool?.bookmarked ? faBookmark : faRegularBookmark}
+              />
+              <span className="visually-hidden sr-only">
+                {tool?.bookmarked ? t("tool.bookmarked") : t("tool.bookmark")}
+              </span>
+            </Button>
+          )}
         </Card.Subtitle>
         {children}
       </Card.Body>

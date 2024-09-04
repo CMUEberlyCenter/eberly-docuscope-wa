@@ -72,7 +72,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           className="d-flex flex-row align-items-stretch position-relative"
           style={{ maxHeight: "75vh" }}
         >
-          <div className="w-100 pe-3 h-0">
+          <div className="w-100 h-0">
             <ListGroup className="overflow-auto w-100 mh-100">
               {writingTasks?.map((task) => (
                 <ListGroup.Item

@@ -51,6 +51,10 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
       return <h3 {...attributes}>{children}</h3>;
     case "heading-four":
       return <h4 {...attributes}>{children}</h4>;
+    case "heading-five":
+      return <h5 {...attributes}>{children}</h5>;
+    case "heading-six":
+      return <h6 {...attributes}>{children}</h6>;
     case "list-item":
       return <li {...attributes}>{children}</li>;
     case "numbered-list":
@@ -115,6 +119,8 @@ const activeBlockType = (editor: Editor) => {
     "heading-two",
     "heading-three",
     "heading-four",
+    "heading-five",
+    "heading-six",
     "bulleted-list",
     "numbered-list",
     "paragraph",
@@ -268,6 +274,8 @@ const CustomEditor: FC = () => {
                 <option value={"heading-two"}>{t("editor.menu.h2")}</option>
                 <option value={"heading-three"}>{t("editor.menu.h3")}</option>
                 <option value={"heading-four"}>{t("editor.menu.h4")}</option>
+                <option value={"heading-five"}>{t("editor.menu.h5")}</option>
+                <option value={"heading-six"}>{t("editor.menu.h6")}</option>
                 <option value={"bulleted-list"}>{t("editor.menu.list")}</option>
                 <option value={"numbered-list"}>
                   {t("editor.menu.numbered")}
