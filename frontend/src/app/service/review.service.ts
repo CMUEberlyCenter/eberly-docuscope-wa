@@ -14,6 +14,7 @@ import { writingTask } from './writing-task.service';
 
 const searchParams = new URLSearchParams(window.location.search);
 const id = searchParams.get('id');
+// class FatalError extends Error {}
 
 export const [useReview, review$] = bind<SUSPENSE | Review>(
   new Observable((subscriber) => {
@@ -22,9 +23,22 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
     fetchEventSource(`/api/v2/reviews/${id}`, {
       ...getLtiRequest,
       signal: ctrl.signal,
+      // async onopen(response) {
+      //   if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+      //     return;
+      //   }
+      //   if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+      //     throw new FatalError(`Bad return status: ${response.status}`);
+      //   }
+      //   throw new Error();
+      // },
       onerror(err) {
         console.error(err);
         subscriber.error(new Error(err));
+        // if (err instanceof FatalError) {
+        //   throw err;
+        // }
+        // else retry
       },
       onmessage(msg) {
         subscriber.next(JSON.parse(msg.data));

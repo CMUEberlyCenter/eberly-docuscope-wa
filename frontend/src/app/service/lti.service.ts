@@ -23,7 +23,10 @@ type LtiInfo = {
 const getLtik = (): string => {
   const searchParams = new URLSearchParams(window.location.search);
   const ltik = searchParams.get('ltik');
-  if (!ltik) throw new Error('Missing lti key.');
+  if (!ltik) {
+    console.error('Missing LTI key!')
+    throw new Error('Missing LTI key.');
+  }
   return ltik;
 };
 
