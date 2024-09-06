@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -6,6 +6,7 @@ import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
 export const ArgumentsTitle: FC = () => (
   <Translation ns={"review"}>
@@ -20,13 +21,14 @@ export const ArgumentsTitle: FC = () => (
 type ClaimsProps = AccordionProps & {
   claims?: ClaimProps[] | null;
 };
-const Claims: FC<ClaimsProps> = ({ claims, ...props }) => (
-  <>
+const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
+  const dispatch = useContext(ReviewDispatchContext);
+  return (<>
     {claims?.length && (
       <Translation ns={"review"}>
         {(t) => (
-          <Accordion alwaysOpen {...props}>
-            {claims.map(({ claim, support, suggestions }, i) => (
+          <Accordion {...props}>
+            {claims.map(({ claim, support, suggestions, sentences }, i) => (
               <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                 <Accordion.Header>
                   <span>
@@ -34,7 +36,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => (
                     <span>{claim}</span>
                   </span>
                 </Accordion.Header>
-                <Accordion.Body>
+                <Accordion.Body onEntered={() => dispatch({type:'set', sentences})} onExit={() => dispatch({type:'unset'})}>
                   {support && (
                     <div>
                       <span className="fw-bold">{t("arguments.support")}</span>
@@ -60,48 +62,50 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => (
         )}
       </Translation>
     )}
-  </>
-);
+  </>);
+}
 
 export const Arguments: FC = () => {
   const { t } = useTranslation("review");
   const review = useArgumentsData();
 
   return (
-    <div className="overflow-auto">
-      <h4>{t("arguments.title")}</h4>
-      {!review ? (
-        <Loading />
-      ) : (
-        <ErrorBoundary
-          fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
-        >
-          {/* {review.datetime && (
+    <ReviewReset>
+      <div className="overflow-auto">
+        <h4>{t("arguments.title")}</h4>
+        {!review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
+          >
+            {/* {review.datetime && (
             <Card.Subtitle className="text-center">
               {new Date(review.datetime).toLocaleString()}
             </Card.Subtitle>
           )} */}
-          {review.response.main_argument ? (
-            <>
-              <h5>{t("arguments.main")}</h5>
-              <p>{review.response.main_argument}</p>
-              <Claims claims={review.response.arguments} />
-            </>
-          ) : null}
-          {review.response.counter_examples?.length ? (
-            <>
-              <h5>{t("arguments.counter_examples")}</h5>
-              <Claims claims={review.response.counter_examples} />
-            </>
-          ) : null}
-          {review.response.rebuttals?.length ? (
-            <>
-              <h5>{t("arguments.rebuttals")}</h5>
-              <Claims claims={review.response.rebuttals} />
-            </>
-          ) : null}
-        </ErrorBoundary>
-      )}
-    </div>
+            {review.response.main_argument ? (
+              <>
+                <h5>{t("arguments.main")}</h5>
+                <p>{review.response.main_argument}</p>
+                <Claims claims={review.response.arguments} />
+              </>
+            ) : null}
+            {review.response.counter_examples?.length ? (
+              <>
+                <h5>{t("arguments.counter_examples")}</h5>
+                <Claims claims={review.response.counter_examples} />
+              </>
+            ) : null}
+            {review.response.rebuttals?.length ? (
+              <>
+                <h5>{t("arguments.rebuttals")}</h5>
+                <Claims claims={review.response.rebuttals} />
+              </>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </div>
+    </ReviewReset>
   );
 };

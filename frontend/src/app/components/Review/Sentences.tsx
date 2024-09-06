@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faSquare } from "@fortawesome/free-solid-svg-icons";
 import { highlightSentence } from "../../service/topic.service";
 import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
+import { ReviewReset } from "./ReviewContext";
 
 export const SentencesTitle: FC = () => (
   <Translation ns={"review"}>
@@ -98,74 +99,76 @@ export const Sentences: FC = () => {
   };
 
   return (
-    <Card>
-      <Card.Body>
-        <Card.Title className="text-center">
-          <SentencesTitle />
-        </Card.Title>
-        {!data ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-            {data.datetime && (
-              <Card.Subtitle className="text-center">
-                {new Date(data.datetime).toLocaleString()}
-              </Card.Subtitle>
-            )}
-            <Legend />
-            <OnTopicVisualization
-              mode="SENTENCE"
-              singlepane={true}
-              onFlip={() => undefined}
-              onHandleTopic={() => undefined}
-              onHandleSentence={onHandleSentence}
-              loading={false}
-              invalidated={false}
-              textdata={textData}
-              highlight={"#E2D2BB"}
-            />
-            <div className="py-1">
-              {sentenceDetails ? (
-                <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
-              ) : (
-                <p>{t("sentences.select")}</p>
+    <ReviewReset>
+      <Card>
+        <Card.Body>
+          <Card.Title className="text-center">
+            <SentencesTitle />
+          </Card.Title>
+          {!data ? (
+            <Loading />
+          ) : (
+            <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
+              {data.datetime && (
+                <Card.Subtitle className="text-center">
+                  {new Date(data.datetime).toLocaleString()}
+                </Card.Subtitle>
               )}
-            </div>
-            <Card>
-              <Card.Body>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.overview"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.description"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.read_aloud"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.passive"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-              </Card.Body>
-            </Card>
-          </ErrorBoundary>
-        )}
-      </Card.Body>
-    </Card>
+              <Legend />
+              <OnTopicVisualization
+                mode="SENTENCE"
+                singlepane={true}
+                onFlip={() => undefined}
+                onHandleTopic={() => undefined}
+                onHandleSentence={onHandleSentence}
+                loading={false}
+                invalidated={false}
+                textdata={textData}
+                highlight={"#E2D2BB"}
+              />
+              <div className="py-1">
+                {sentenceDetails ? (
+                  <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
+                ) : (
+                  <p>{t("sentences.select")}</p>
+                )}
+              </div>
+              <Card>
+                <Card.Body>
+                  <p>
+                    <Trans
+                      t={t}
+                      i18nKey={"sentences.details.overview"}
+                      components={{ b: <b /> }}
+                    />
+                  </p>
+                  <p>
+                    <Trans
+                      t={t}
+                      i18nKey={"sentences.details.description"}
+                      components={{ b: <b /> }}
+                    />
+                  </p>
+                  <p>
+                    <Trans
+                      t={t}
+                      i18nKey={"sentences.details.read_aloud"}
+                      components={{ b: <b /> }}
+                    />
+                  </p>
+                  <p>
+                    <Trans
+                      t={t}
+                      i18nKey={"sentences.details.passive"}
+                      components={{ b: <b /> }}
+                    />
+                  </p>
+                </Card.Body>
+              </Card>
+            </ErrorBoundary>
+          )}
+        </Card.Body>
+      </Card>
+    </ReviewReset>
   );
 };

@@ -176,7 +176,7 @@ const CustomEditor: FC = () => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
-    // get from sessno storage
+    // get from session storage
     JSON.parse(sessionStorage.getItem("content") ?? "null") || [
       { type: "paragraph", children: [{ text: "" }] },
     ]

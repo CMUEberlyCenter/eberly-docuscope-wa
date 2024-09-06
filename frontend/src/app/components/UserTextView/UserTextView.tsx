@@ -1,36 +1,38 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useContext, useEffect, useState } from "react";
 import { Card, CardProps, Placeholder } from "react-bootstrap";
 import { useReview } from "../../service/review.service";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import "./UserTextView.scss";
+import { ReviewContext } from "../Review/ReviewContext";
+import escapeHtml from "escape-html";
 
 type UserTextViewProps = CardProps & {
   prose: string;
-  sentences?: string[] | null;
 };
-export const UserTextView: FC<UserTextViewProps> = ({
-  prose,
-  sentences,
-  ...props
-}) => {
+export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
   const review = useReview();
   const [content, setContent] = useState(prose);
+  const ctx = useContext(ReviewContext);
   useEffect(() => {
-    if (!sentences || sentences.length <= 0) {
+    if (!ctx?.sentences || ctx.sentences.length <= 0) {
       setContent(prose);
     } else {
-      const highlights = sentences.reduce(
-        (prev, sentence) =>
-          prev.replaceAll(
-            sentence,
-            `<span class="highlight">${sentence}</span>`
-          ),
-        prose
-      );
+      console.log("highlighting", ctx.sentences);
+      const highlights = ctx.sentences
+        .map(escapeHtml)
+        .reduce(
+          (prev, sentence) =>
+            prev.replaceAll(
+              sentence,
+              `<span class="highlight">${sentence}</span>`
+            ),
+          prose
+        );
+      console.log(highlights);
       setContent(highlights);
     }
-  }, [prose, sentences]);
+  }, [prose, ctx]);
 
   return (
     <Card as={"main"} {...props}>
@@ -43,7 +45,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
           <Placeholder></Placeholder>
         ) : (
           <div
-            className="p-2 flex-grow-1"
+            className="p-2 flex-grow-1 user-text"
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}

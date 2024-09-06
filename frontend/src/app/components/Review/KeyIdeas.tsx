@@ -1,10 +1,11 @@
-import { FC } from "react";
+import { FC, useContext } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { useKeyPointsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
 export const KeyIdeasTitle: FC = () => (
   <Translation ns={"review"}>
@@ -19,67 +20,81 @@ export const KeyIdeasTitle: FC = () => (
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
   const review = useKeyPointsData();
+  const dispatch = useContext(ReviewDispatchContext);
 
   return (
-    <div className="overflow-auto">
-      <h4>{t("key_ideas.title")}</h4>
-      {!review ? (
-        <Loading />
-      ) : (
-        <ErrorBoundary
-          fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
-        >
-          {/* {review.datetime && (
+    <ReviewReset>
+      <div className="overflow-auto">
+        <h4>{t("key_ideas.title")}</h4>
+        {!review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
+          >
+            {/* {review.datetime && (
               <Card.Subtitle className="text-center">
                 {new Date(review.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
-          <Accordion alwaysOpen>
-            {"points" in review.response &&
-              review.response.points.map(
-                ({ point, elaborations, suggestions }, i) => (
-                  <Accordion.Item key={`${i}`} eventKey={`${i}`}>
-                    <Accordion.Header>
-                      <span>
-                        <span className="fw-bold">{t("key_ideas.idea")}</span>
-                        <span>{point}</span>
-                      </span>
-                    </Accordion.Header>
-                    <Accordion.Body>
-                      {elaborations?.length ? (
-                        <>
-                          <h5>{t("key_ideas.elaborations")}</h5>
-                          <ul>
-                            {elaborations.map(
-                              ({ elaboration_strategy, explanation }, k) => (
-                                <li key={`elaboration-${i}-${k}`}>
-                                  <span className="fw-bold">
-                                    {elaboration_strategy}
-                                  </span>
-                                  <span>{explanation}</span>
+            <Accordion>
+              {"points" in review.response &&
+                review.response.points.map(
+                  ({ point, elaborations, suggestions, sentences }, i) => (
+                    <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                      <Accordion.Header>
+                        <span>
+                          <span className="fw-bold">{t("key_ideas.idea")}</span>
+                          <span>{point}</span>
+                        </span>
+                      </Accordion.Header>
+                      <Accordion.Body
+                        onEntered={() => {
+                          console.log("enter", point, sentences);
+                          dispatch({ type: "set", sentences });
+                        }}
+                        onExit={() => {
+                          console.log("exit", point);
+                          dispatch({ type: "unset" });
+                        }}
+                      >
+                        {elaborations?.length ? (
+                          <>
+                            <h5>{t("key_ideas.elaborations")}</h5>
+                            <ul>
+                              {elaborations.map(
+                                ({ elaboration_strategy, explanation }, k) => (
+                                  <li key={`elaboration-${i}-${k}`}>
+                                    <span className="fw-bold">
+                                      {elaboration_strategy}
+                                    </span>
+                                    <span>{explanation}</span>
+                                  </li>
+                                )
+                              )}
+                            </ul>
+                          </>
+                        ) : null}
+                        {suggestions?.length ? (
+                          <>
+                            <h5>{t("key_ideas.suggestions")}</h5>
+                            <ul>
+                              {suggestions.map((suggestion, k) => (
+                                <li key={`suggestion-${i}-${k}`}>
+                                  {suggestion}
                                 </li>
-                              )
-                            )}
-                          </ul>
-                        </>
-                      ) : null}
-                      {suggestions?.length ? (
-                        <>
-                          <h5>{t("key_ideas.suggestions")}</h5>
-                          <ul>
-                            {suggestions.map((suggestion, k) => (
-                              <li key={`suggestion-${i}-${k}`}>{suggestion}</li>
-                            ))}
-                          </ul>
-                        </>
-                      ) : null}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                )
-              )}
-          </Accordion>
-        </ErrorBoundary>
-      )}
-    </div>
+                              ))}
+                            </ul>
+                          </>
+                        ) : null}
+                      </Accordion.Body>
+                    </Accordion.Item>
+                  )
+                )}
+            </Accordion>
+          </ErrorBoundary>
+        )}
+      </div>
+    </ReviewReset>
   );
 };

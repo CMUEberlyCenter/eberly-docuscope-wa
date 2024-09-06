@@ -16,7 +16,6 @@ import {
   OverlayTrigger,
   Stack,
   Tab,
-  Tabs,
   Tooltip,
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
