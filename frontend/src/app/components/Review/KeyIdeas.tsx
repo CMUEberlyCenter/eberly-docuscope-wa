@@ -51,12 +51,8 @@ export const KeyIdeas: FC = () => {
                         </span>
                       </Accordion.Header>
                       <Accordion.Body
-                        onEntered={() =>
-                          dispatch({ type: "set", sentences })
-                        }
-                        onExit={() =>
-                          dispatch({ type: "unset" })
-                        }
+                        onEntered={() => dispatch({ type: "set", sentences })}
+                        onExit={() => dispatch({ type: "unset" })}
                       >
                         {elaborations?.length ? (
                           <>

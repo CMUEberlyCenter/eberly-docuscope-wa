@@ -172,8 +172,9 @@ export async function initDatabase(): Promise<void> {
       await client.connect();
       retry = 0;
     } catch (err) {
+      const { message } = err as Error;
       console.warn(
-        `Failed to connect to database, retrying in ${sleep}ms (${retry} attempts left)...`
+        `Failed to connect to database: ${message}, retrying in ${sleep}ms (${retry} attempts left)...`
       );
       retry -= 1;
       await timeout(sleep);

@@ -97,7 +97,7 @@ type LTI_ResourceLink = {
     width?: number;
     height?: number;
   };
-  custom?: Record<string, any>;
+  custom?: Record<string, unknown>;
   lineItem?: {
     label?: string;
     scoreMaximum: number;

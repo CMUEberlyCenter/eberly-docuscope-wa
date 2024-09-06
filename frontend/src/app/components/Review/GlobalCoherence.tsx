@@ -7,7 +7,10 @@ import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?re
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { AccordionEventKey, AccordionSelectCallback } from "react-bootstrap/esm/AccordionContext";
+import {
+  AccordionEventKey,
+  AccordionSelectCallback,
+} from "react-bootstrap/esm/AccordionContext";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC = () => (
@@ -20,9 +23,16 @@ export const GlobalCoherenceTitle: FC = () => (
   </Translation>
 );
 
-type SuggestionsProps = AccordionProps & { suggestions: Suggestion[], itemKeyPrefix?: string };
+type SuggestionsProps = AccordionProps & {
+  suggestions: Suggestion[];
+  itemKeyPrefix?: string;
+};
 /** Component for listing suggestions. */
-const Suggestions: FC<SuggestionsProps> = ({ suggestions, itemKeyPrefix, ...props }) => {
+const Suggestions: FC<SuggestionsProps> = ({
+  suggestions,
+  itemKeyPrefix,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const dispatch = useContext(ReviewDispatchContext);
   const prefix = itemKeyPrefix ?? useId();
@@ -75,23 +85,49 @@ export const GlobalCoherence: FC = () => {
 
   useEffect(() => {
     const violationsProp = "Given New Contract Violation";
-    setViolations(review && violationsProp in review.response &&
-      review.response[violationsProp]?.length ? review.response[violationsProp] : null);
+    setViolations(
+      review &&
+        violationsProp in review.response &&
+        review.response[violationsProp]?.length
+        ? review.response[violationsProp]
+        : null
+    );
     const shiftProp = "Sudden Shift in Topic";
-    setTopicShift(review && shiftProp in review.response &&
-      review.response[shiftProp]?.length ? review.response[shiftProp] : null);
+    setTopicShift(
+      review &&
+        shiftProp in review.response &&
+        review.response[shiftProp]?.length
+        ? review.response[shiftProp]
+        : null
+    );
     const illogicalProp = "Illogical Order";
-    setIllogical(review && illogicalProp in review.response &&
-      review.response[illogicalProp]?.length ? review.response[illogicalProp] : null);
+    setIllogical(
+      review &&
+        illogicalProp in review.response &&
+        review.response[illogicalProp]?.length
+        ? review.response[illogicalProp]
+        : null
+    );
     const redundantProp = "Redundant Information";
-    setRedundant(review && redundantProp in review.response &&
-      review.response[redundantProp]?.length ? review.response[redundantProp] : null);
+    setRedundant(
+      review &&
+        redundantProp in review.response &&
+        review.response[redundantProp]?.length
+        ? review.response[redundantProp]
+        : null
+    );
     const inconsistentProp = "Inconsistent Information";
-    setInconsistent(review && inconsistentProp in review.response &&
-      review.response[inconsistentProp]?.length ? review.response[inconsistentProp] : null)
+    setInconsistent(
+      review &&
+        inconsistentProp in review.response &&
+        review.response[inconsistentProp]?.length
+        ? review.response[inconsistentProp]
+        : null
+    );
   }, [review]);
 
-  const onSelect: AccordionSelectCallback = (eventKey, _event) => setCurrent(eventKey);
+  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
+    setCurrent(eventKey);
 
   return (
     <ReviewReset>
@@ -113,7 +149,9 @@ export const GlobalCoherence: FC = () => {
             {violations && (
               <article>
                 <h5>{t("global_coherence.contract")}</h5>
-                <Suggestions onSelect={onSelect} activeKey={current}
+                <Suggestions
+                  onSelect={onSelect}
+                  activeKey={current}
                   suggestions={violations}
                 />
               </article>
@@ -121,7 +159,9 @@ export const GlobalCoherence: FC = () => {
             {topicShift && (
               <article className="mt-1">
                 <h5>{t("global_coherence.shift")}</h5>
-                <Suggestions onSelect={onSelect} activeKey={current}
+                <Suggestions
+                  onSelect={onSelect}
+                  activeKey={current}
                   suggestions={topicShift}
                 />
               </article>
@@ -129,13 +169,19 @@ export const GlobalCoherence: FC = () => {
             {illogical && (
               <article className="mt-1">
                 <h5>{t("global_coherence.order")}</h5>
-                <Suggestions onSelect={onSelect} activeKey={current} suggestions={illogical} />
+                <Suggestions
+                  onSelect={onSelect}
+                  activeKey={current}
+                  suggestions={illogical}
+                />
               </article>
             )}
             {redundant && (
               <article className="mt-1">
                 <h5>{t("global_coherence.redundant")}</h5>
-                <Suggestions onSelect={onSelect} activeKey={current}
+                <Suggestions
+                  onSelect={onSelect}
+                  activeKey={current}
                   suggestions={redundant}
                 />
               </article>
@@ -143,7 +189,9 @@ export const GlobalCoherence: FC = () => {
             {inconsistent && (
               <article className="mt-1">
                 <h5>{t("global_coherence.inconsistent")}</h5>
-                <Suggestions onSelect={onSelect} activeKey={current}
+                <Suggestions
+                  onSelect={onSelect}
+                  activeKey={current}
                   suggestions={inconsistent}
                 />
               </article>

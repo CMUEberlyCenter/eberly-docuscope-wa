@@ -120,8 +120,8 @@ export const Review: FC = () => {
       >
         <UserTextView prose={prose} />
         <Card as={"aside"}>
-          <Card.Header>
-            <Container className="d-flex justify-content-between align-item-baseline border-bottom mb-2">
+          <Card.Header className="px-0">
+            <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
               <span className="text-dark">{tt("tool.tab.review")}</span>
               <Logo />
             </Container>
@@ -154,7 +154,7 @@ export const Review: FC = () => {
             </Container>
           </Navbar> */}
             {/* <Card.Title className="text-center text-dark">{t("title")}</Card.Title> */}
-            <Dropdown className="d-flex justify-content-start">
+            <Dropdown className="d-flex justify-content-start mx-2">
               <Dropdown.Toggle variant="white" className="select-button">
                 <div>
                   <ToolTitle tool={tool} />
