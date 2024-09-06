@@ -1,5 +1,5 @@
-import { FC, useContext } from "react";
-import { Accordion, Alert } from "react-bootstrap";
+import { FC, useContext, useEffect, useId, useState } from "react";
+import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
@@ -7,7 +7,9 @@ import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?re
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { AccordionEventKey, AccordionSelectCallback } from "react-bootstrap/esm/AccordionContext";
 
+/** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
@@ -18,14 +20,17 @@ export const GlobalCoherenceTitle: FC = () => (
   </Translation>
 );
 
-const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
+type SuggestionsProps = AccordionProps & { suggestions: Suggestion[], itemKeyPrefix?: string };
+/** Component for listing suggestions. */
+const Suggestions: FC<SuggestionsProps> = ({ suggestions, itemKeyPrefix, ...props }) => {
   const { t } = useTranslation("review");
   const dispatch = useContext(ReviewDispatchContext);
+  const prefix = itemKeyPrefix ?? useId();
 
   return (
-    <Accordion alwaysOpen>
+    <Accordion {...props}>
       {suggestions.map(({ text, explanation, suggestions }, i) => (
-        <Accordion.Item key={i} eventKey={`${i}`}>
+        <Accordion.Item key={i} eventKey={`${prefix}-${i}`}>
           <Accordion.Header>
             <span>
               <span className="fw-bold">
@@ -57,9 +62,36 @@ const Suggestions: FC<{ suggestions: Suggestion[] }> = ({ suggestions }) => {
   );
 };
 
+/** Component for displaying Logical Progression review results. */
 export const GlobalCoherence: FC = () => {
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
   const { t } = useTranslation("review");
   const review = useGlobalCoherenceData();
+  const [violations, setViolations] = useState<Suggestion[] | null>(null);
+  const [topicShift, setTopicShift] = useState<Suggestion[] | null>(null);
+  const [illogical, setIllogical] = useState<Suggestion[] | null>(null);
+  const [redundant, setRedundant] = useState<Suggestion[] | null>(null);
+  const [inconsistent, setInconsistent] = useState<Suggestion[] | null>(null);
+
+  useEffect(() => {
+    const violationsProp = "Given New Contract Violation";
+    setViolations(review && violationsProp in review.response &&
+      review.response[violationsProp]?.length ? review.response[violationsProp] : null);
+    const shiftProp = "Sudden Shift in Topic";
+    setTopicShift(review && shiftProp in review.response &&
+      review.response[shiftProp]?.length ? review.response[shiftProp] : null);
+    const illogicalProp = "Illogical Order";
+    setIllogical(review && illogicalProp in review.response &&
+      review.response[illogicalProp]?.length ? review.response[illogicalProp] : null);
+    const redundantProp = "Redundant Information";
+    setRedundant(review && redundantProp in review.response &&
+      review.response[redundantProp]?.length ? review.response[redundantProp] : null);
+    const inconsistentProp = "Inconsistent Information";
+    setInconsistent(review && inconsistentProp in review.response &&
+      review.response[inconsistentProp]?.length ? review.response[inconsistentProp] : null)
+  }, [review]);
+
+  const onSelect: AccordionSelectCallback = (eventKey, _event) => setCurrent(eventKey);
 
   return (
     <ReviewReset>
@@ -78,49 +110,44 @@ export const GlobalCoherence: FC = () => {
               {new Date(review.datetime).toLocaleString()}
             </Card.Subtitle>
           )} */}
-            {"Given New Contract Violation" in review.response &&
-            review.response["Given New Contract Violation"]?.length ? (
+            {violations && (
               <article>
                 <h5>{t("global_coherence.contract")}</h5>
-                <Suggestions
-                  suggestions={review.response["Given New Contract Violation"]}
+                <Suggestions onSelect={onSelect} activeKey={current}
+                  suggestions={violations}
                 />
               </article>
-            ) : null}
-            {"Sudden Shift in Topic" in review.response &&
-            review.response["Sudden Shift in Topic"]?.length ? (
+            )}
+            {topicShift && (
               <article className="mt-1">
                 <h5>{t("global_coherence.shift")}</h5>
-                <Suggestions
-                  suggestions={review.response["Sudden Shift in Topic"]}
+                <Suggestions onSelect={onSelect} activeKey={current}
+                  suggestions={topicShift}
                 />
               </article>
-            ) : null}
-            {"Illogical Order" in review.response &&
-            review.response["Illogical Order"]?.length ? (
+            )}
+            {illogical && (
               <article className="mt-1">
                 <h5>{t("global_coherence.order")}</h5>
-                <Suggestions suggestions={review.response["Illogical Order"]} />
+                <Suggestions onSelect={onSelect} activeKey={current} suggestions={illogical} />
               </article>
-            ) : null}
-            {"Redundant Information" in review.response &&
-            review.response["Redundant Information"]?.length ? (
+            )}
+            {redundant && (
               <article className="mt-1">
                 <h5>{t("global_coherence.redundant")}</h5>
-                <Suggestions
-                  suggestions={review.response["Redundant Information"]}
+                <Suggestions onSelect={onSelect} activeKey={current}
+                  suggestions={redundant}
                 />
               </article>
-            ) : null}
-            {"Inconsistent Information" in review.response &&
-            review.response["Inconsistent Information"]?.length ? (
+            )}
+            {inconsistent && (
               <article className="mt-1">
                 <h5>{t("global_coherence.inconsistent")}</h5>
-                <Suggestions
-                  suggestions={review.response["Inconsistent Information"]}
+                <Suggestions onSelect={onSelect} activeKey={current}
+                  suggestions={inconsistent}
                 />
               </article>
-            ) : null}
+            )}
           </ErrorBoundary>
         )}
       </div>

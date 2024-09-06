@@ -1,4 +1,4 @@
-import { FC, useContext } from "react";
+import { FC, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -7,7 +7,9 @@ import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { AccordionEventKey, AccordionSelectCallback } from "react-bootstrap/esm/AccordionContext";
 
+/** Lines of Arguments title component for use in selection menu. */
 export const ArgumentsTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
@@ -21,15 +23,19 @@ export const ArgumentsTitle: FC = () => (
 type ClaimsProps = AccordionProps & {
   claims?: ClaimProps[] | null;
 };
+
+/** Component for displaying a list of Claims. */
 const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
+  const prefix = useId();
+
   return (<>
     {claims?.length && (
       <Translation ns={"review"}>
         {(t) => (
           <Accordion {...props}>
             {claims.map(({ claim, support, suggestions, sentences }, i) => (
-              <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+              <Accordion.Item key={`${prefix}-${i}`} eventKey={`${prefix}-${i}`}>
                 <Accordion.Header>
                   <span>
                     <span className="fw-bold">{t("arguments.claim")}</span>
@@ -65,9 +71,15 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   </>);
 }
 
+/**
+ * Component for displaying the results of Lines of Arguments review. 
+ * @returns 
+ */
 export const Arguments: FC = () => {
   const { t } = useTranslation("review");
   const review = useArgumentsData();
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = (eventKey, _event) => setCurrent(eventKey);
 
   return (
     <ReviewReset>
@@ -85,23 +97,23 @@ export const Arguments: FC = () => {
             </Card.Subtitle>
           )} */}
             {review.response.main_argument ? (
-              <>
+              <article>
                 <h5>{t("arguments.main")}</h5>
                 <p>{review.response.main_argument}</p>
-                <Claims claims={review.response.arguments} />
-              </>
+                <Claims onSelect={onSelect} activeKey={current} claims={review.response.arguments} />
+              </article>
             ) : null}
             {review.response.counter_examples?.length ? (
-              <>
+              <article>
                 <h5>{t("arguments.counter_examples")}</h5>
-                <Claims claims={review.response.counter_examples} />
-              </>
+                <Claims onSelect={onSelect} activeKey={current} claims={review.response.counter_examples} />
+              </article>
             ) : null}
             {review.response.rebuttals?.length ? (
-              <>
+              <article>
                 <h5>{t("arguments.rebuttals")}</h5>
-                <Claims claims={review.response.rebuttals} />
-              </>
+                <Claims onSelect={onSelect} activeKey={current} claims={review.response.rebuttals} />
+              </article>
             ) : null}
           </ErrorBoundary>
         )}

@@ -7,6 +7,7 @@ import { useKeyPointsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
+/** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
@@ -17,6 +18,7 @@ export const KeyIdeasTitle: FC = () => (
   </Translation>
 );
 
+/** Component for displaying results of Key Ideas review results. */
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
   const review = useKeyPointsData();
@@ -49,14 +51,12 @@ export const KeyIdeas: FC = () => {
                         </span>
                       </Accordion.Header>
                       <Accordion.Body
-                        onEntered={() => {
-                          console.log("enter", point, sentences);
-                          dispatch({ type: "set", sentences });
-                        }}
-                        onExit={() => {
-                          console.log("exit", point);
-                          dispatch({ type: "unset" });
-                        }}
+                        onEntered={() =>
+                          dispatch({ type: "set", sentences })
+                        }
+                        onExit={() =>
+                          dispatch({ type: "unset" })
+                        }
                       >
                         {elaborations?.length ? (
                           <>
