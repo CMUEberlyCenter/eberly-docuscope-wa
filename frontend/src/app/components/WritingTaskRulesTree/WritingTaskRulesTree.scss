@@ -1,0 +1,28 @@
+.writing-task-tree {
+  [aria-expanded="true"] {
+    .expanded {
+      display: block;
+      ul {
+        list-style-type: none;
+        text-wrap: nowrap;      
+      }
+    }
+  }
+
+  [aria-expanded="false"] {
+    .expand-toggle {
+      i {
+        transform: rotate(-90deg);
+      }
+    }
+
+    .expanded {
+      display: none;
+    }
+  }
+
+
+  .pointer {
+    cursor: pointer;
+  }
+}
