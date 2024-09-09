@@ -4,15 +4,17 @@
  * @module components/scribe/TextToSpeach
  */
 import {
-  faEarListen,
+  faClose,
   faPause,
   faPlay,
   faStop,
+  faVolumeHigh
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useSettings } from "../../service/settings.service";
+import { useTranslation } from "react-i18next";
 
 /**
  * Component for adding text to speech controls.
@@ -25,6 +27,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
 }: {
   text: string;
 }) => {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
@@ -76,18 +79,10 @@ export const TextToSpeech: FC<{ text: string }> = ({
 
   return settings.text2speech ? (
     <ButtonGroup>
-      <Button onClick={() => setOpen(!open)} variant="icon">
-        <FontAwesomeIcon icon={faEarListen} />
-        <span className="sr-only visually-hidden">
-          {!open
-            ? "Show text to speech controls."
-            : "Hide text to speech controls."}
-        </span>
-      </Button>
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
           <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
-            <FontAwesomeIcon icon={faPlay} />
+            <FontAwesomeIcon icon={isPaused?faPause:faPlay} />
             <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
           </Button>
           <Button onClick={handlePause} title="Pause">
@@ -100,6 +95,18 @@ export const TextToSpeech: FC<{ text: string }> = ({
           </Button>
         </ButtonGroup>
       </Collapse>
+      <Button onClick={() => setOpen(!open)} variant={!open ? "icon" : "primary"}>
+        {!open ? (<>
+          <FontAwesomeIcon icon={faVolumeHigh} />
+          <span className="sr-only visually-hidden">
+            {t('audio.show')}
+          </span></>) : (<>
+            <FontAwesomeIcon icon={faClose} />
+            <span className="sr-only visually-hidden">
+              {t('audio.hide')}
+            </span>
+          </>)}
+      </Button>
     </ButtonGroup>
   ) : (
     <></>

@@ -9,6 +9,7 @@ $fa-font-path: "@fortawesome/fontawesome-free/webfonts";
   cursor: pointer;
 }
 
+
 .paragraph-highlight {
   background: #0eed0e36;
 }
@@ -27,6 +28,6 @@ $fa-font-path: "@fortawesome/fontawesome-free/webfonts";
   background-position: 50%;
   &.gutter-horizontal {
     background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==");
-    cursor: col-resize;
+    cursor: ew-resize;
   }
 }

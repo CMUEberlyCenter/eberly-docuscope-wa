@@ -1,14 +1,15 @@
 import { FC, useCallback, useState } from "react";
-import { Button, Form, ListGroup, Modal } from "react-bootstrap";
+import { Button, Form, Modal, ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import sanitizeHtml from "sanitize-html";
 import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
-import { Rule, WritingTask } from "../../../lib/WritingTask";
+import { WritingTask } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
+import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
-import "./WritingTaskDetails.scss";
 
+/** Serialization of an html string. */
 const descriptionToSlate = (description: string): string => {
   // TODO add markings.
   return sanitizeHtml(description, { allowedTags: [] });
@@ -26,138 +27,69 @@ const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
     },
     ...(details
       ? [
-          {
-            type: "paragraph",
-            children: [{ text: descriptionToSlate(rule.description) }],
-          },
-        ]
+        {
+          type: "paragraph",
+          children: [{ text: descriptionToSlate(rule.description) }],
+        },
+      ]
       : []),
     ...rule.children.flatMap((child) => [
       { type: "heading-six", children: [{ text: child.name }] },
       ...(details
         ? [
-            {
-              type: "paragraph",
-              children: [{ text: descriptionToSlate(child.description) }],
-            },
-          ]
+          {
+            type: "paragraph",
+            children: [{ text: descriptionToSlate(child.description) }],
+          },
+        ]
         : []),
     ]),
   ]),
 ];
 
-type ModalProps = {
-  show: boolean;
-  onHide: () => void;
-};
+/** Serialize to text for the clipboard. */
+const taskToClipboard = (task: WritingTask | null, includeDetails: boolean): string => {
+  if (!task) return "";
+  const lines = includeDetails ? [task.rules.overview] : [];
+  lines.push(...task.rules.rules.flatMap((rule) => [rule.name, ...includeDetails ? [descriptionToSlate(rule.description)] : [],
+  ...rule.children.flatMap((cluster) => ['\t' + cluster.name, ...includeDetails ? [descriptionToSlate(cluster.description)] : []])]));
+  return lines.join("\n\n");
+}
+
+// type ModalProps = {
+//   /** if the modal is visible. */
+//   show: boolean;
+//   /** Callback for when */
+//   onHide: () => void;
+// };
 /**
- * Modal dialog for viewing the outline of the writing task.
- * @param param0
+ * Modal dialog component for viewing the outline of the writing task.
+ * @argument show
+ * @argument "onHide" callback to call on hiding the modal.
  * @returns
  */
-const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
+const WritingTaskDetails: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
   const writingTask = useWritingTask();
-  const [selected, setSelected] = useState<Rule | null>(null);
+  // const [selected, setSelected] = useState<Rule | null>(null);
   const [includeDetails, setIncludeDetails] = useState(false);
   const editor = useSlate();
   const insert = useCallback(() => {
     if (writingTask) {
       Transforms.insertNodes(editor, taskToEditor(writingTask, includeDetails));
-      onHide();
+      onHide && onHide();
     }
   }, [editor, writingTask, includeDetails]);
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal show={show} onHide={onHide} size="lg" {...props}>
       <Modal.Header closeButton className="py-1">
         <Modal.Title>
           <WritingTaskTitle />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <div
-          className="d-flex flex-row align-items-stretch gap-3 position-relative"
-          style={{ maxHeight: "70vh" }}
-        >
-          <div className="h-0 overflow-auto">
-            <ListGroup className="writing-task-tree">
-              {writingTask?.rules.rules.map((rule) => (
-                <ListGroup.Item
-                  action
-                  as="div"
-                  key={`${rule.name}`}
-                  aria-expanded="true"
-                  active={selected === rule}
-                >
-                  <div className="d-flex">
-                    <Button
-                      size="sm"
-                      variant="none"
-                      className="expand-toggle"
-                      onClick={(e) => {
-                        const p = e.currentTarget.closest("[aria-expanded]");
-                        p?.setAttribute(
-                          "aria-expanded",
-                          p.getAttribute("aria-expanded") === "true"
-                            ? "false"
-                            : "true"
-                        );
-                      }}
-                    >
-                      <i className="fa-solid fa-caret-down flex-shrink-0"></i>
-                    </Button>
-                    <div
-                      className="fw-bold flex-grow-1 pointer"
-                      onClick={() =>
-                        setSelected(rule === selected ? null : rule)
-                      }
-                    >
-                      {rule.name}
-                    </div>
-                  </div>
-                  <div className="expanded">
-                    <ListGroup>
-                      {rule.children.map((cluster) => (
-                        <ListGroup.Item
-                          action
-                          key={cluster.name}
-                          className="pointer"
-                          active={cluster === selected}
-                          onClick={() =>
-                            setSelected(cluster === selected ? null : cluster)
-                          }
-                        >
-                          {cluster.name}
-                        </ListGroup.Item>
-                      ))}
-                    </ListGroup>
-                  </div>
-                </ListGroup.Item>
-              ))}
-            </ListGroup>
-          </div>
-          <div className="container-fluid rounded bg-light p-3 h-0 overflow-auto">
-            {!selected && (
-              <>
-                <h5>
-                  {writingTask?.info.name}{" "}
-                  <span className="text-muted">{t("details.overview")}</span>
-                </h5>
-                <p>{writingTask?.rules.overview}</p>
-              </>
-            )}
-            {selected && (
-              <>
-                <h6>{t("details.about")}</h6>
-                <h5>{selected.name}</h5>
-                <div
-                  dangerouslySetInnerHTML={{ __html: selected.description }}
-                />
-              </>
-            )}
-          </div>
-        </div>
+        <WritingTaskRulesTree style={{ maxHeight: "70vh" }} />
       </Modal.Body>
       <Modal.Footer>
         <Form.Check
@@ -170,7 +102,7 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide }) => {
         <Button
           variant="secondary"
           disabled={!writingTask}
-          onClick={() => console.log("TODO")}
+          onClick={async () => await navigator.clipboard.writeText(taskToClipboard(writingTask, includeDetails))}
         >
           {t("clipboard")}
         </Button>

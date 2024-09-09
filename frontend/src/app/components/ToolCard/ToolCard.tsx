@@ -1,6 +1,5 @@
 import {
-  faArrowUpRightFromSquare,
-  faEllipsis,
+  faArrowUpRightFromSquare
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { slateToHtml } from "@slate-serializers/html";
@@ -30,6 +29,7 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
+import OutlineDrawerIcon from '../../assets/icons/wtd_library.svg?react';
 import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
@@ -269,7 +269,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               defaultActiveKey="generate"
               activeKey={tab}
             >
-              <Navbar className="border-bottom w-100 pb-0 mb-1">
+              <Navbar className="border-bottom w-100 pb-0 mb-1 mt-0 pt-0">
                 <Container className="p-0">
                   <Nav variant="underline">
                     <Nav.Item className="ms-3">
@@ -700,12 +700,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                      currentTool.result?.issues
-                        .map(
-                          ({ description, suggestions }) =>
-                            `${description} ${suggestions.join()}`
-                        )
-                        .join()
+                    currentTool.result?.issues
+                      .map(
+                        ({ description, suggestions }) =>
+                          `${description} ${suggestions.join()}`
+                      )
+                      .join()
                   }
                   regenerate={retry}
                 >
@@ -737,10 +737,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               </ToolDisplay.Root>
             )}
           </article>
-          <Card.Footer as={"footer"} className="bg-light">
+          <Card.Footer as={"footer"} className="bg-light d-flex">
             {writingTask && (
               <Button
-                variant="outline-dark"
+              className="me-auto mw-50 w-50"
+                variant="secondary"
                 onClick={() => setShowWritingTask(true)}
               >
                 {t("tool.button.view.title")}
@@ -753,7 +754,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 {writingTask ? (
                   <>
-                    <FontAwesomeIcon icon={faEllipsis} />
+                    <OutlineDrawerIcon />
                     <span className="visually-hidden sr-only">
                       {t("tool.button.select.title")}
                     </span>
@@ -777,8 +778,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           <SelectExpectation
             show={showSelectExpectation}
             onHide={() => setShowSelectExpectation(false)}
-            select={(expectation: Rule) => {
-              if (currentTool?.tool === "expectation") {
+            select={(expectation: Rule | null) => {
+              if (currentTool?.tool === "expectation" && expectation) {
                 doTool({ ...currentTool, expectation });
               }
             }}

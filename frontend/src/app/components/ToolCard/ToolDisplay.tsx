@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, ReactNode, useCallback, useState } from "react";
-import { Alert, Button, Card, CardProps } from "react-bootstrap";
+import { Alert, Button, ButtonToolbar, Card, CardProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
@@ -99,18 +99,20 @@ export const ToolResponse: FC<ToolResponseProps> = ({
   return (
     <Card {...props} as="section">
       <Card.Body>
-        <Card.Title>
+        <Card.Title className="d-flex">
           <AIResponseIcon className="me-2" />
-          {t("tool.output")}
-          {text && <TextToSpeech text={text} />}
-          {tool?.result && regenerate && (
-            <Button onClick={() => regenerate(tool)}>
-              <FontAwesomeIcon icon={faArrowsRotate} />
-              <span className="visually-hidden sr-only">
-                {t("tool.regenerate")}
-              </span>
-            </Button>
-          )}
+          <span>{t("tool.output")}</span>
+          <ButtonToolbar className="ms-auto">
+            {text && <TextToSpeech text={text} />}
+            {tool?.result && regenerate && (
+              <Button onClick={() => regenerate(tool)} variant="icon">
+                <FontAwesomeIcon icon={faArrowsRotate} />
+                <span className="visually-hidden sr-only">
+                  {t("tool.regenerate")}
+                </span>
+              </Button>
+            )}
+          </ButtonToolbar>
         </Card.Title>
         {tool?.result ? children : <Loading />}
       </Card.Body>
