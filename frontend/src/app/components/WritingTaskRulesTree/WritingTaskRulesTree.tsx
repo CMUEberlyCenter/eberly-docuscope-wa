@@ -1,5 +1,5 @@
 import classnames from "classnames";
-import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
+import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Rule } from "../../../lib/WritingTask";
@@ -43,12 +43,13 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
     className,
     "d-flex flex-row align-items-stretch gap-3 position-relative"
   );
+  const id = useId();
   return (
     <div {...props} className={cn}>
       <div className="d-flex flex-column align-items-start writing-task-tree h-0 w-100 overflow-auto">
         {includeTitle && <WritingTaskTitle />}
-        {writingTask?.rules.rules.map((rule) => (
-          <div key={rule.name} aria-expanded="true">
+        {writingTask?.rules.rules.map((rule, i) => (
+          <div key={`${id}-${i}`} aria-expanded="true">
             {/* TODO?: add some indicator of sub-tree selection possibly only on non-expanded. */}
             <div className={classnames("d-flex")}>
               <Button

@@ -104,19 +104,19 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
           <YourInputIcon className="me-2" />
           <span className="fw-bold">{t("tool.input")}</span>
         </header>
-        <FadeContent>
-          {tool?.input.text.trim() ? (
+        {tool?.input.text.trim() ? (
+          <FadeContent>
             <Card.Text
               dangerouslySetInnerHTML={{
                 __html: tool.input.html ?? tool.input.text,
               }}
             ></Card.Text>
-          ) : (
-            <Card.Text as="div">
-              <Alert variant="warning">{t("tool.no_selection")}</Alert>
-            </Card.Text>
-          )}
-        </FadeContent>
+          </FadeContent>
+        ) : (
+          <Card.Text as="div">
+            <Alert variant="warning">{t("tool.no_selection")}</Alert>
+          </Card.Text>
+        )}
       </Card.Body>
     </Card>
   );

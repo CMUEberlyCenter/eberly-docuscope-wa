@@ -1,6 +1,12 @@
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { forwardRef, useCallback, useEffect, useId, useState } from "react";
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Button,
   ButtonGroup,
@@ -511,17 +517,19 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       <p>{currentTool.result.general_assessment}</p>
                       <dl>
                         {currentTool.result.issues.map(
-                          ({ description, suggestions }) => (
-                            <>
+                          ({ description, suggestions }, i) => (
+                            <React.Fragment key={`issue-${i}`}>
                               <dt>{description}</dt>
                               <dd>
                                 <ul>
-                                  {suggestions.map((suggestion) => (
-                                    <li>{suggestion}</li>
+                                  {suggestions.map((suggestion, j) => (
+                                    <li key={`suggestion-${i}-${j}`}>
+                                      {suggestion}
+                                    </li>
                                   ))}
                                 </ul>
                               </dd>
-                            </>
+                            </React.Fragment>
                           )
                         )}
                       </dl>
