@@ -6,15 +6,49 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, ReactNode, useCallback, useState } from "react";
-import { Alert, Button, ButtonToolbar, Card, CardProps } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  ButtonToolbar,
+  Card,
+  CardProps,
+  OverlayTrigger,
+  Stack,
+  Tooltip,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/AIResponse.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { ToolResult } from "../../lib/ToolResults";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../scribe/TextToSpeech";
+
+type ToolButtonProps = {
+  tooltip: string;
+  icon: ReactNode;
+  title: string;
+  onClick: () => void;
+  disabled?: boolean;
+};
+export const ToolButton: FC<ToolButtonProps> = ({
+  disabled,
+  tooltip,
+  icon,
+  title,
+  onClick,
+}) => (
+  <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
+    <Button variant="outline-dark" disabled={disabled} onClick={onClick}>
+      <Stack>
+        {icon}
+        <span>{title}</span>
+      </Stack>
+    </Button>
+  </OverlayTrigger>
+);
 
 type ToolProp = { tool?: ToolResult | null };
 type ToolRootProps = CardProps &
@@ -65,22 +99,24 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
   const { t } = useTranslation();
   return (
     <Card as="section">
-      <Card.Body>
-        <Card.Title>
+      <Card.Body className="pb-0">
+        <header>
           <YourInputIcon className="me-2" />
-          {t("tool.input")}
-        </Card.Title>
-        {tool?.input.text.trim() ? (
-          <Card.Text
-            dangerouslySetInnerHTML={{
-              __html: tool.input.html ?? tool.input.text,
-            }}
-          ></Card.Text>
-        ) : (
-          <Card.Text as="div">
-            <Alert variant="warning">{t("tool.no_selection")}</Alert>
-          </Card.Text>
-        )}
+          <span className="fw-bold">{t("tool.input")}</span>
+        </header>
+        <FadeContent>
+          {tool?.input.text.trim() ? (
+            <Card.Text
+              dangerouslySetInnerHTML={{
+                __html: tool.input.html ?? tool.input.text,
+              }}
+            ></Card.Text>
+          ) : (
+            <Card.Text as="div">
+              <Alert variant="warning">{t("tool.no_selection")}</Alert>
+            </Card.Text>
+          )}
+        </FadeContent>
       </Card.Body>
     </Card>
   );
@@ -135,18 +171,24 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
     [editor]
   );
   return (
-    <>
-      <Button disabled={!text} onClick={() => paste(text)}>
+    <div className="d-flex">
+      <Button
+        variant="dark"
+        disabled={!text}
+        onClick={() => paste(text)}
+        className="me-auto mw-50 w-50"
+      >
         {t("tool.paste")}
       </Button>
       <Button
+        variant="secondary"
         disabled={!text}
         onClick={() => text && navigator.clipboard.writeText(text)}
       >
         <FontAwesomeIcon icon={faClipboard} />
         <span className="visually-hidden sr-only">{t("clipboard")}</span>
       </Button>
-    </>
+    </div>
   );
 };
 
@@ -156,4 +198,6 @@ export const ToolDisplay = {
   Response: ToolResponse,
   Spinner: Loading,
   Paste: ToolPaste,
+  Button: ToolButton,
+  Fade: FadeContent,
 };

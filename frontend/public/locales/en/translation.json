@@ -84,7 +84,7 @@
     "output": "A.I. Response",
     "regenerate": "Regenerate",
     "paste": "Paste Text",
-    "expectation": "Expectation:",
+    "expectation": "Selected Expectation:",
     "select_expectation": "Select an Expectation",
     "explanation": "Explanation:",
     "suggestion": "Suggested Revisions:"

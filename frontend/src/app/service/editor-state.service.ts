@@ -25,6 +25,11 @@ export const serialize = (nodes: Descendant[]): string => {
   return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
 };
 
+/**
+ * Serialize editor content nodes to an html string.
+ * @param node Editor content
+ * @returns HTMLized string
+ */
 export const serializeHtml = (node: Descendant | Descendant[]): string => {
   if (Array.isArray(node)) {
     return node.map(serializeHtml).join('\n');

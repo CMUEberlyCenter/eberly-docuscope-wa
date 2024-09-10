@@ -6,7 +6,6 @@ import {
   Button,
   Card,
   Container,
-  Spinner,
 } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -23,10 +22,13 @@ import {
   useExpectations,
 } from "../../service/expectations.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import { Loading } from "../Loading/Loading";
 import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
 import TaskViewer from "../Review/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
+import AttentionIcon from "../../assets/icons/attention_icon.svg?react";
+import "./AllExpectations.scss";
 
 type ExpectationRuleProps = AccordionProps & { rule: Rule };
 const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
@@ -41,26 +43,28 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
       <Accordion {...props}>
         {rule.children
           .map(({ name }) => expectations?.get(name) ?? { expectation: name })
-          .map((expectation, j) => (
-            <Accordion.Item
-              key={`${id}-expectation-${j}`}
-              eventKey={`${id}-expectation-${j}`}
-            >
-              <Accordion.Header>{expectation.expectation}</Accordion.Header>
-              <Accordion.Body
-                onEntering={() =>
-                  isAllExpectationsData(expectation)
-                    ? dispatch({
-                        sentences: expectation.response.sentences,
-                        type: "set",
-                      })
-                    : dispatch({ type: "unset" })
-                }
-                onExiting={() => dispatch({ type: "unset" })}
+          .map((expectation, j) =>
+            isAllExpectationsData(expectation) &&
+            expectation.response.suggestions !== "none." ? (
+              <Accordion.Item
+                key={`${id}-expectation-${j}`}
+                eventKey={`${id}-expectation-${j}`}
               >
-                {expectations?.has(expectation.expectation) ? (
-                  <>
-                    {/* {isAllExpectationsData(expectation) &&
+                <Accordion.Header>{expectation.expectation}</Accordion.Header>
+                <Accordion.Body
+                  onEntering={() =>
+                    isAllExpectationsData(expectation)
+                      ? dispatch({
+                          sentences: expectation.response.sentences,
+                          type: "set",
+                        })
+                      : dispatch({ type: "unset" })
+                  }
+                  onExiting={() => dispatch({ type: "unset" })}
+                >
+                  {expectations?.has(expectation.expectation) ? (
+                    <>
+                      {/* {isAllExpectationsData(expectation) &&
                     expectation.response.sentences.length > 0 && (
                       <>
                         <h6>{t("sentences")}</h6>
@@ -74,19 +78,38 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                           )}
                       </>
                     )} */
-                    /* Sentences should not be displayed, used for highlighting. */}
-                    <h6>{t("suggestions")}</h6>
-                    <p key={`${id}-suggestion-${j}`}>
-                      {isAllExpectationsData(expectation) &&
-                        expectation.response.suggestions}
-                    </p>
-                  </>
-                ) : (
-                  <Spinner />
-                )}
-              </Accordion.Body>
-            </Accordion.Item>
-          ))}
+                      /* Sentences should not be displayed, they are used for highlighting. */}
+                      <h6>{t("suggestions")}</h6>
+                      <p key={`${id}-suggestion-${j}`}>
+                        {isAllExpectationsData(expectation) &&
+                          expectation.response.suggestions}
+                      </p>
+                    </>
+                  ) : (
+                    <Loading />
+                  )}
+                </Accordion.Body>
+              </Accordion.Item>
+            ) : (
+              <Accordion.Item
+                key={`${id}-expectation-${j}`}
+                eventKey={`${id}-expectation-${j}`}
+              >
+                <div className="fake-accordion-button">
+                  <div className="flex-grow-1 p">{expectation.expectation}</div>
+                  <div
+                    className="attention-icon text-warning"
+                    title={t("warning")}
+                  >
+                    <AttentionIcon />
+                    <span className="sr-only visually-hidden">
+                      {t("warning")}
+                    </span>
+                  </div>
+                </div>
+              </Accordion.Item>
+            )
+          )}
       </Accordion>
     </article>
   );

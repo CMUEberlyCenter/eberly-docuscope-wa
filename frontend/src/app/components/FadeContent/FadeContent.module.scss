@@ -1,0 +1,9 @@
+.fade-content {
+  &[aria-expanded="false"] {
+    mask-image: linear-gradient(
+      rgba(0 0 0 / 100%),
+      rgba(0 0 0 / 80%),
+      transparent
+    );
+  }
+}

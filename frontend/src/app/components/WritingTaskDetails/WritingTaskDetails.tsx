@@ -27,34 +27,45 @@ const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
     },
     ...(details
       ? [
-        {
-          type: "paragraph",
-          children: [{ text: descriptionToSlate(rule.description) }],
-        },
-      ]
+          {
+            type: "paragraph",
+            children: [{ text: descriptionToSlate(rule.description) }],
+          },
+        ]
       : []),
     ...rule.children.flatMap((child) => [
       { type: "heading-six", children: [{ text: child.name }] },
       ...(details
         ? [
-          {
-            type: "paragraph",
-            children: [{ text: descriptionToSlate(child.description) }],
-          },
-        ]
+            {
+              type: "paragraph",
+              children: [{ text: descriptionToSlate(child.description) }],
+            },
+          ]
         : []),
     ]),
   ]),
 ];
 
 /** Serialize to text for the clipboard. */
-const taskToClipboard = (task: WritingTask | null, includeDetails: boolean): string => {
+const taskToClipboard = (
+  task: WritingTask | null,
+  includeDetails: boolean
+): string => {
   if (!task) return "";
   const lines = includeDetails ? [task.rules.overview] : [];
-  lines.push(...task.rules.rules.flatMap((rule) => [rule.name, ...includeDetails ? [descriptionToSlate(rule.description)] : [],
-  ...rule.children.flatMap((cluster) => ['\t' + cluster.name, ...includeDetails ? [descriptionToSlate(cluster.description)] : []])]));
+  lines.push(
+    ...task.rules.rules.flatMap((rule) => [
+      rule.name,
+      ...(includeDetails ? [descriptionToSlate(rule.description)] : []),
+      ...rule.children.flatMap((cluster) => [
+        "\t" + cluster.name,
+        ...(includeDetails ? [descriptionToSlate(cluster.description)] : []),
+      ]),
+    ])
+  );
   return lines.join("\n\n");
-}
+};
 
 // type ModalProps = {
 //   /** if the modal is visible. */
@@ -102,7 +113,11 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide, ...props }) => {
         <Button
           variant="secondary"
           disabled={!writingTask}
-          onClick={async () => await navigator.clipboard.writeText(taskToClipboard(writingTask, includeDetails))}
+          onClick={async () =>
+            await navigator.clipboard.writeText(
+              taskToClipboard(writingTask, includeDetails)
+            )
+          }
         >
           {t("clipboard")}
         </Button>

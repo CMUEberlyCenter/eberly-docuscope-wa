@@ -8,7 +8,7 @@ import {
   faPause,
   faPlay,
   faStop,
-  faVolumeHigh
+  faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useCallback, useEffect, useState } from "react";
@@ -82,7 +82,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
           <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
-            <FontAwesomeIcon icon={isPaused?faPause:faPlay} />
+            <FontAwesomeIcon icon={isPaused ? faPause : faPlay} />
             <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
           </Button>
           <Button onClick={handlePause} title="Pause">
@@ -95,17 +95,21 @@ export const TextToSpeech: FC<{ text: string }> = ({
           </Button>
         </ButtonGroup>
       </Collapse>
-      <Button onClick={() => setOpen(!open)} variant={!open ? "icon" : "primary"}>
-        {!open ? (<>
-          <FontAwesomeIcon icon={faVolumeHigh} />
-          <span className="sr-only visually-hidden">
-            {t('audio.show')}
-          </span></>) : (<>
+      <Button
+        onClick={() => setOpen(!open)}
+        variant={!open ? "icon" : "primary"}
+      >
+        {!open ? (
+          <>
+            <FontAwesomeIcon icon={faVolumeHigh} />
+            <span className="sr-only visually-hidden">{t("audio.show")}</span>
+          </>
+        ) : (
+          <>
             <FontAwesomeIcon icon={faClose} />
-            <span className="sr-only visually-hidden">
-              {t('audio.hide')}
-            </span>
-          </>)}
+            <span className="sr-only visually-hidden">{t("audio.hide")}</span>
+          </>
+        )}
       </Button>
     </ButtonGroup>
   ) : (

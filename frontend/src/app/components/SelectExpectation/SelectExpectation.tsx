@@ -6,7 +6,7 @@ import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTr
 
 type SelectExpectationProps = ModalProps & {
   /** Callback to execute when the selection changes */
-  select?: (rule: Rule) => void
+  select?: (rule: Rule) => void;
 };
 /** Modal dialog component for selecting an expectation. */
 const SelectExpectation: FC<SelectExpectationProps> = ({
@@ -28,7 +28,12 @@ const SelectExpectation: FC<SelectExpectationProps> = ({
         {t("expectation.title")}
       </Modal.Header>
       <Modal.Body>
-        <WritingTaskRulesTree style={{ maxHeight: "70vh" }} includeTitle={true} select={setSelected} leafOnly={true} />
+        <WritingTaskRulesTree
+          style={{ maxHeight: "70vh" }}
+          includeTitle={true}
+          select={setSelected}
+          leafOnly={true}
+        />
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={onHide}>{t("cancel")}</Button>

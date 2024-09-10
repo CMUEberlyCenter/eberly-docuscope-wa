@@ -1,8 +1,5 @@
-import {
-  faArrowUpRightFromSquare
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { slateToHtml } from "@slate-serializers/html";
 import { forwardRef, useCallback, useEffect, useId, useState } from "react";
 import {
   Button,
@@ -12,10 +9,8 @@ import {
   Container,
   Nav,
   Navbar,
-  OverlayTrigger,
   Stack,
   Tab,
-  Tooltip,
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
@@ -29,7 +24,7 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
-import OutlineDrawerIcon from '../../assets/icons/wtd_library.svg?react';
+import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
 import { useSelectTaskAvailable } from "../../service/lti.service";
@@ -50,7 +45,7 @@ import SelectExpectation from "../SelectExpectation/SelectExpectation";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
-import { ToolDisplay } from "./ToolDisplay";
+import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
 type ToolCardProps = JSX.IntrinsicAttributes;
 
@@ -140,7 +135,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             datetime: new Date(),
             input: {
               text: serialize(Editor.fragment(editor, editor.selection)),
-              html: slateToHtml(Editor.fragment(editor, editor.selection)), // FIXME loosing formatting, need custom serializer
+              html: serializeHtml(Editor.fragment(editor, editor.selection)),
               fragment: Editor.fragment(editor, editor.selection),
               range: editor.selection,
             },
@@ -311,46 +306,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           size="sm"
                         >
                           {notes2proseFeature && (
-                            <OverlayTrigger
-                              placement="bottom"
-                              overlay={
-                                <Tooltip>
-                                  {t("tool.button.prose.tooltip")}
-                                </Tooltip>
-                              }
-                            >
-                              <Button
-                                variant="outline-dark"
-                                disabled={!scribe}
-                                onClick={() => onTool("prose")}
-                              >
-                                <Stack>
-                                  <GenerateProseIcon />
-                                  <span>{t("tool.button.prose.title")}</span>
-                                </Stack>
-                              </Button>
-                            </OverlayTrigger>
+                            <ToolButton
+                              tooltip={t("tool.button.prose.tooltip")}
+                              title={t("tool.button.prose.title")}
+                              icon={<GenerateProseIcon />}
+                              onClick={() => onTool("prose")}
+                              disabled={!scribe}
+                            />
                           )}
                           {bulletsFeature && (
-                            <OverlayTrigger
-                              placement="bottom"
-                              overlay={
-                                <Tooltip>
-                                  {t("tool.button.bullets.tooltip")}
-                                </Tooltip>
-                              }
-                            >
-                              <Button
-                                variant="outline-dark"
-                                disabled={!scribe}
-                                onClick={() => onTool("bullets")}
-                              >
-                                <Stack>
-                                  <GenerateBulletsIcon />
-                                  <span>{t("tool.button.bullets.title")}</span>
-                                </Stack>
-                              </Button>
-                            </OverlayTrigger>
+                            <ToolButton
+                              tooltip={t("tool.button.bullets.tooltip")}
+                              title={t("tool.button.bullets.title")}
+                              icon={<GenerateBulletsIcon />}
+                              onClick={() => onTool("bullets")}
+                              disabled={!scribe}
+                            />
                           )}
                         </ButtonGroup>
                       )}
@@ -360,60 +331,34 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           size="sm"
                         >
                           {assessFeature && (
-                            <OverlayTrigger
-                              placement="bottom"
-                              overlay={
-                                <Tooltip>
-                                  {t("tool.button.expectation.tooltip")}
-                                </Tooltip>
-                              }
-                            >
-                              <Button
-                                variant="outline-dark"
-                                disabled={!scribe || !writingTask}
-                                onClick={() => onTool("expectation")}
-                              >
-                                <Stack>
-                                  <CheckExpectationIcon />
-                                  <span>
-                                    {t("tool.button.expectation.title")}
-                                  </span>
-                                </Stack>
-                              </Button>
-                            </OverlayTrigger>
+                            <ToolButton
+                              tooltip={t("tool.button.expectation.tooltip")}
+                              title={t("tool.button.expectation.title")}
+                              icon={<CheckExpectationIcon />}
+                              disabled={!scribe || !writingTask}
+                              onClick={() => onTool("expectation")}
+                            />
                           )}
                           {assessFeature && (
-                            <OverlayTrigger
-                              placement="bottom"
-                              overlay={
-                                <Tooltip>
-                                  {t("tool.button.expectations.tooltip")}
-                                </Tooltip>
+                            <ToolButton
+                              tooltip={t("tool.button.expectations.tooltip")}
+                              disabled={!scribe || !writingTask}
+                              onClick={() => onExpectations()}
+                              icon={
+                                <div className="d-flex justify-content-center align-items-end">
+                                  <AllExpectationsIcon />
+                                  <FontAwesomeIcon
+                                    style={{
+                                      height: ".75rem",
+                                      width: ".75rem",
+                                    }}
+                                    className="mx-1"
+                                    icon={faArrowUpRightFromSquare}
+                                  />
+                                </div>
                               }
-                            >
-                              <Button
-                                variant="outline-dark"
-                                disabled={!scribe || !writingTask}
-                                onClick={() => onExpectations()}
-                              >
-                                <Stack>
-                                  <div className="d-flex justify-content-center align-items-end">
-                                    <AllExpectationsIcon />
-                                    <FontAwesomeIcon
-                                      style={{
-                                        height: ".75rem",
-                                        width: ".75rem",
-                                      }}
-                                      className="mx-1"
-                                      icon={faArrowUpRightFromSquare}
-                                    />
-                                  </div>
-                                  <span>
-                                    {t("tool.button.expectations.title")}
-                                  </span>
-                                </Stack>
-                              </Button>
-                            </OverlayTrigger>
+                              title={t("tool.button.expectations.title")}
+                            />
                           )}
                         </ButtonGroup>
                       )}
@@ -425,61 +370,31 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     <ButtonToolbar className="mb-3 mx-auto">
                       <ButtonGroup className="bg-white shadow tools" size="sm">
                         {flowFeature && (
-                          <OverlayTrigger
-                            placement="bottom"
-                            overlay={
-                              <Tooltip>{t("tool.button.flow.tooltip")}</Tooltip>
-                            }
-                          >
-                            <Button
-                              variant="outline-dark"
-                              onClick={() => onTool("flow")}
-                            >
-                              <Stack>
-                                <LocalCoherenceIcon />
-                                <span>{t("tool.button.flow.title")}</span>
-                              </Stack>
-                            </Button>
-                          </OverlayTrigger>
+                          <ToolButton
+                            tooltip={t("tool.button.flow.tooltip")}
+                            onClick={() => onTool("flow")}
+                            disabled={!scribe}
+                            icon={<LocalCoherenceIcon />}
+                            title={t("tool.button.flow.title")}
+                          />
                         )}
                         {copyEditFeature && (
-                          <OverlayTrigger
-                            placement="bottom"
-                            overlay={
-                              <Tooltip>
-                                {t("tool.button.copyedit.tooltip")}
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              variant="outline-dark"
-                              onClick={() => onTool("copyedit")}
-                            >
-                              <Stack>
-                                <CopyEditIcon />
-                                <span>{t("tool.button.copyedit.title")}</span>
-                              </Stack>
-                            </Button>
-                          </OverlayTrigger>
+                          <ToolButton
+                            tooltip={t("tool.button.copyedit.tooltip")}
+                            onClick={() => onTool("copyedit")}
+                            disabled={!scribe}
+                            icon={<CopyEditIcon />}
+                            title={t("tool.button.copyedit.title")}
+                          />
                         )}
                         {grammarFeature && (
-                          <OverlayTrigger
-                            placement="bottom"
-                            overlay={
-                              <Tooltip>
-                                {t("tool.button.grammar.tooltip")}
-                              </Tooltip>
-                            }
-                          >
-                            <Button
-                              variant="outline-dark"
-                              onClick={() => onTool("copyedit")}
-                            >
-                              <Stack>
-                                <span>{t("tool.button.grammar.title")}</span>
-                              </Stack>
-                            </Button>
-                          </OverlayTrigger>
+                          <ToolButton
+                            tooltip={t("tool.button.grammar.tooltip")}
+                            disabled={!scribe}
+                            onClick={() => onTool("copyedit")}
+                            icon={<></>}
+                            title={t("tool.button.grammar.title")}
+                          />
                         )}
                       </ButtonGroup>
                     </ButtonToolbar>
@@ -551,24 +466,25 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 <ToolDisplay.Input tool={currentTool} />
                 <Card as="section">
-                  <Card.Body>
-                    <Card.Title>{t("tool.expectation")}</Card.Title>
-                    <div>
-                      {currentTool.expectation ? (
-                        <>
-                          <h4>{currentTool.expectation.name}</h4>
-                          <div
-                            dangerouslySetInnerHTML={{
-                              __html: currentTool.expectation.description,
-                            }}
-                          />
-                        </>
-                      ) : (
-                        <Button onClick={() => setShowSelectExpectation(true)}>
-                          {t("tool.select_expectation")}
-                        </Button>
-                      )}
-                    </div>
+                  <Card.Body className="pb-0">
+                    <header>
+                      <CheckExpectationIcon />
+                      <span className="fw-bold">{t("tool.expectation")}</span>
+                    </header>
+                    {currentTool.expectation ? (
+                      <ToolDisplay.Fade>
+                        <p>{currentTool.expectation.name}</p>
+                        <p
+                          dangerouslySetInnerHTML={{
+                            __html: currentTool.expectation.description,
+                          }}
+                        />
+                      </ToolDisplay.Fade>
+                    ) : (
+                      <Button onClick={() => setShowSelectExpectation(true)}>
+                        {t("tool.select_expectation")}
+                      </Button>
+                    )}
                   </Card.Body>
                 </Card>
 
@@ -700,12 +616,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join()}`
-                      )
-                      .join()
+                      currentTool.result?.issues
+                        .map(
+                          ({ description, suggestions }) =>
+                            `${description} ${suggestions.join()}`
+                        )
+                        .join()
                   }
                   regenerate={retry}
                 >
@@ -740,7 +656,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           <Card.Footer as={"footer"} className="bg-light d-flex">
             {writingTask && (
               <Button
-              className="me-auto mw-50 w-50"
+                className="me-auto mw-50 w-50"
                 variant="secondary"
                 onClick={() => setShowWritingTask(true)}
               >
