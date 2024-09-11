@@ -559,9 +559,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   {currentTool.result && (
                     <>
                       <h4>{t("tool.suggestion")}</h4>
-                      <div dangerouslySetInnerHTML={{ __html: currentTool.result.clean_revision }} />
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: currentTool.result.clean_revision,
+                        }}
+                      />
                       <h4>{t("tool.tracking")}</h4>
-                      <div className="edits"
+                      <div
+                        className="edits"
                         dangerouslySetInnerHTML={{
                           __html: currentTool.result.revision,
                         }}
@@ -626,12 +631,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join()}`
-                      )
-                      .join()
+                      currentTool.result?.issues
+                        .map(
+                          ({ description, suggestions }) =>
+                            `${description} ${suggestions.join()}`
+                        )
+                        .join()
                   }
                   regenerate={retry}
                 >

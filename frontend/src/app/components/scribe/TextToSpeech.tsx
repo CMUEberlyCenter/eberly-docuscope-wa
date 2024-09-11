@@ -13,8 +13,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
-import { useSettings } from "../../service/settings.service";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "../../service/settings.service";
 
 /**
  * Component for adding text to speech controls.

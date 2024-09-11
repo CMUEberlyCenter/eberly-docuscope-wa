@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { Button } from "react-bootstrap";
 
-import "./Reset.scss";
 import { useSettings } from "../../service/settings.service";
+import "./Reset.scss";
 
 type ResetProps = {
   onCloseResetDialog?: (reset: boolean) => void;

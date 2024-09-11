@@ -1,11 +1,11 @@
+import escapeHtml from "escape-html";
 import { FC, useContext, useEffect, useState } from "react";
 import { Card, CardProps, Placeholder } from "react-bootstrap";
-import { useReview } from "../../service/review.service";
-import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
-import "./UserTextView.scss";
+import { useReview } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
-import escapeHtml from "escape-html";
+import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
+import "./UserTextView.scss";
 
 type UserTextViewProps = CardProps & {
   prose: string;

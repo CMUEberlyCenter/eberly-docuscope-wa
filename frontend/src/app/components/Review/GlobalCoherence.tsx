@@ -1,5 +1,9 @@
 import { FC, useContext, useEffect, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import {
+  AccordionEventKey,
+  AccordionSelectCallback,
+} from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
@@ -7,10 +11,6 @@ import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?re
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import {
-  AccordionEventKey,
-  AccordionSelectCallback,
-} from "react-bootstrap/esm/AccordionContext";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC = () => (
@@ -196,10 +196,12 @@ export const GlobalCoherence: FC = () => {
                 />
               </article>
             )}
-            {!violations?.length && !topicShift?.length && !illogical?.length && !redundant?.length && !inconsistent?.length ? (
-              <Alert variant="warning">
-                {t('global_coherence.null')}
-              </Alert>
+            {!violations?.length &&
+            !topicShift?.length &&
+            !illogical?.length &&
+            !redundant?.length &&
+            !inconsistent?.length ? (
+              <Alert variant="warning">{t("global_coherence.null")}</Alert>
             ) : null}
           </ErrorBoundary>
         )}

@@ -1,4 +1,4 @@
-import { ReactNode, FC, useState, useEffect } from "react";
+import { FC, ReactNode, useEffect, useState } from "react";
 import AnimateHeight, { Height } from "react-animate-height";
 import { Button } from "react-bootstrap";
 import css from "./FadeContent.module.scss";

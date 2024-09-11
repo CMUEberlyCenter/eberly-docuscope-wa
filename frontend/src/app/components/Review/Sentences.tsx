@@ -39,7 +39,10 @@ const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
 const Legend: FC = () => {
   const { t } = useTranslation("review");
   return (
-    <div className="border rounded p-1 px-3 d-inline-flex flex-row flex-wrap" style={{ columnGap: '3rem' }}>
+    <div
+      className="border rounded p-1 px-3 d-inline-flex flex-row flex-wrap"
+      style={{ columnGap: "3rem" }}
+    >
       <div>
         <FontAwesomeIcon icon={faSquare} style={{ color: "green" }} />{" "}
         {t("sentences.legend.noun")}

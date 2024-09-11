@@ -1,5 +1,9 @@
 import { FC, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import {
+  AccordionEventKey,
+  AccordionSelectCallback,
+} from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
@@ -7,10 +11,6 @@ import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import {
-  AccordionEventKey,
-  AccordionSelectCallback,
-} from "react-bootstrap/esm/AccordionContext";
 
 /** Lines of Arguments title component for use in selection menu. */
 export const ArgumentsTitle: FC = () => (
@@ -141,10 +141,10 @@ export const Arguments: FC = () => {
                 />
               </article>
             ) : null}
-            {!review.response.rebuttals?.length && !review.response.counter_examples?.length && !review.response.main_argument ? (
-              <Alert variant="warning">
-                {t('arguments.null')}
-              </Alert>
+            {!review.response.rebuttals?.length &&
+            !review.response.counter_examples?.length &&
+            !review.response.main_argument ? (
+              <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>
         )}

@@ -1,7 +1,7 @@
 import { FC } from "react";
 // import './Logo.scss';
-import logo from "../../assets/logo.svg";
 import { Translation } from "react-i18next";
+import logo from "../../assets/logo.svg";
 
 // CSS logo
 // export const Logo: FC = () => (

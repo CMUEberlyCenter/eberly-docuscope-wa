@@ -87,10 +87,9 @@ export const KeyIdeas: FC = () => {
                     </Accordion.Item>
                   )
                 )}
-              </Accordion>) : (
-              <Alert variant="warning">
-                {t('key_ideas.null')}
-              </Alert>
+              </Accordion>
+            ) : (
+              <Alert variant="warning">{t("key_ideas.null")}</Alert>
             )}
           </ErrorBoundary>
         )}

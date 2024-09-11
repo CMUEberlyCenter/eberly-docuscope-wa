@@ -4,8 +4,8 @@ import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Rule } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
-import "./WritingTaskRulesTree.scss";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
+import "./WritingTaskRulesTree.scss";
 
 type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   select?: (rule: Rule | null) => void;

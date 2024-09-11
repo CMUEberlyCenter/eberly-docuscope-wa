@@ -16,6 +16,7 @@ import Split from "react-split";
 import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
 import { isReview } from "../../../server/model/review";
+import AttentionIcon from "../../assets/icons/attention_icon.svg?react";
 import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
 import {
   useAllExpectationsAnalysis,
@@ -27,7 +28,6 @@ import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
 import TaskViewer from "../Review/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
-import AttentionIcon from "../../assets/icons/attention_icon.svg?react";
 import "./AllExpectations.scss";
 
 type ExpectationRuleProps = AccordionProps & { rule: Rule };
