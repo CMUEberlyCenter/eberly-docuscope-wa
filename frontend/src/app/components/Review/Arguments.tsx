@@ -141,6 +141,11 @@ export const Arguments: FC = () => {
                 />
               </article>
             ) : null}
+            {!review.response.rebuttals?.length && !review.response.counter_examples?.length && !review.response.main_argument ? (
+              <Alert variant="warning">
+                {t('arguments.null')}
+              </Alert>
+            ) : null}
           </ErrorBoundary>
         )}
       </div>

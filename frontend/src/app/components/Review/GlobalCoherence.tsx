@@ -196,6 +196,11 @@ export const GlobalCoherence: FC = () => {
                 />
               </article>
             )}
+            {!violations?.length && !topicShift?.length && !illogical?.length && !redundant?.length && !inconsistent?.length ? (
+              <Alert variant="warning">
+                {t('global_coherence.null')}
+              </Alert>
+            ) : null}
           </ErrorBoundary>
         )}
       </div>

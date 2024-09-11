@@ -39,9 +39,9 @@ export const KeyIdeas: FC = () => {
                 {new Date(review.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
-            <Accordion>
-              {"points" in review.response &&
-                review.response.points.map(
+            {"points" in review.response && review.response.points.length ? (
+              <Accordion>
+                {review.response.points.map(
                   ({ point, elaborations, suggestions, sentences }, i) => (
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
@@ -87,7 +87,11 @@ export const KeyIdeas: FC = () => {
                     </Accordion.Item>
                   )
                 )}
-            </Accordion>
+              </Accordion>) : (
+              <Alert variant="warning">
+                {t('key_ideas.null')}
+              </Alert>
+            )}
           </ErrorBoundary>
         )}
       </div>

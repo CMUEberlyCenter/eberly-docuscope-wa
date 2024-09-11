@@ -18,7 +18,6 @@ export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
     if (!ctx?.sentences || ctx.sentences.length <= 0) {
       setContent(prose);
     } else {
-      console.log("highlighting", ctx.sentences);
       const highlights = ctx.sentences
         .map(escapeHtml)
         .reduce(
@@ -29,7 +28,6 @@ export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
             ),
           prose
         );
-      console.log(highlights);
       setContent(highlights);
     }
   }, [prose, ctx]);

@@ -87,7 +87,8 @@
     "expectation": "Selected Expectation:",
     "select_expectation": "Select an Expectation",
     "explanation": "Explanation:",
-    "suggestion": "Suggested Revisions:"
+    "suggestion": "Revision:",
+    "tracking": "Revision with tracking:"
   },
   "clipboard": "Copy to Clipboard",
 

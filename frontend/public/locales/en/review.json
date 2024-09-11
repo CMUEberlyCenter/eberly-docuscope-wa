@@ -35,7 +35,8 @@
       "text": "Your Text:",
       "explanation": "Issue(s):",
       "suggestions": "Suggestions:"
-    }
+    },
+    "null": "No feeback concerning logical progression could be generated from your draft."
   },
   "key_ideas": {
     "entry": "List of Key Ideas",
@@ -44,7 +45,8 @@
     "idea": "Idea:",
     "elaborations": "Elaboration Strategy",
     "sentences": "Sentences",
-    "suggestions": "Suggestions"
+    "suggestions": "Suggestions",
+    "null": "No key ideas were found in your draft."
   },
   "arguments": {
     "entry": "Lines of Arguments",
@@ -57,7 +59,8 @@
     "claim": "Claim:",
     "support": "Support:",
     "sentences": "Sentences",
-    "suggestions":"Suggestions"
+    "suggestions":"Suggestions",
+    "null": "No lines of arguments were detected in your draft."
   },
   "expectations": {
     "title": "Reader Expectations",
@@ -80,7 +83,7 @@
     },
     "description": "The Coherence Panel charts the flow of your topic clusters across and within paragraphs. Dark circles indicate that a particular topic cluster is prominently discussed in a particular paragraph. White circles and gaps indicate that a particular topic cluster is mentioned but not prominently or not mentioned at all in the paragraph. Study the visualization for dark/white circles and gaps and see if the shifts in topic clusters and their prominence fits a writing plan your readers can easily follow.",
     "coherence": {
-      "title": "Coherence across paragraphs",
+      "title": "Terms Across Paragraphs",
       "topic_only": "Show only topic clusters:",
       "paragraphs": "Paragraphs:",
       "sentences_in_paragraph": "Coherence across sentences in paragraph: {{paragraph}}",

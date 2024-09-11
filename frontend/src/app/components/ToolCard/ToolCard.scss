@@ -23,4 +23,12 @@
       }
     }
   }
+  .edits {
+    del {
+      color: var(--bs-red);
+    }
+    ins {
+      color: var(--bs-indigo);
+    }
+  }
 }
