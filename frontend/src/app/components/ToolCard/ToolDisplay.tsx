@@ -95,6 +95,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
   );
 };
 
+/** Component for displaying the users input selected for this tool. */
 export const ToolInput: FC<ToolProp> = ({ tool }) => {
   const { t } = useTranslation();
   return (

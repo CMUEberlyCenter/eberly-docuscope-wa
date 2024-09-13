@@ -2,19 +2,22 @@
  * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
  */
 export function clearAllHighlights() {
+  document
+    .querySelectorAll('.user-text .highlight')
+    .forEach((hl) => hl.classList.remove('highlight'));
   // Select all paragraphs
   document
-    .querySelectorAll('.paragraph')
+    .querySelectorAll('.user-text .paragraph.paragraph-highlight')
     .forEach((para) => para.classList.remove('paragraph-highlight'));
 
   // Select all sentences
   document
-    .querySelectorAll('.sentence')
+    .querySelectorAll('.user-text .sentence.sentence-highlight')
     .forEach((sentence) => sentence.classList.remove('sentence-highlight'));
 
   // Select all topics
   document
-    .querySelectorAll('.word')
+    .querySelectorAll('.user-text .word.word-highlight')
     .forEach((word) => word.classList.remove('word-highlight'));
 }
 
@@ -24,9 +27,10 @@ export function clearAllHighlights() {
  */
 export function highlightParagraph(aParagraphIndex: number) {
   clearAllHighlights();
-
   const pId = `p${aParagraphIndex + 1}`;
-  document.getElementById(pId)?.classList.add('paragraph-highlight');
+  const element = document.getElementById(pId);
+  element?.classList.add('paragraph-highlight');
+  element?.scrollIntoView();
 }
 
 /**
@@ -39,11 +43,16 @@ export function highlightSentence(
   aSentenceIndex: number
 ) {
   clearAllHighlights();
+  const element = document.querySelector(
+    `.sentence[data-ds-paragraph="${aParagraphIndex + 1}"][data-ds-sentence="${aSentenceIndex + 1}"]`
+  );
+  element?.classList.add('highlight');
+  element?.scrollIntoView();
 
-  const pId = `p${aParagraphIndex + 1}`;
-  document.getElementById(pId)?.classList.add('paragraph-highlight');
-  const sId = `p${aParagraphIndex + 1}s${aSentenceIndex + 1}`;
-  document.getElementById(sId)?.classList.add('sentence-highlight');
+  // const pId = `p${aParagraphIndex + 1}`;
+  // document.getElementById(pId)?.classList.add('paragraph-highlight');
+  // const sId = `p${aParagraphIndex + 1}s${aSentenceIndex + 1}`;
+  // document.getElementById(sId)?.classList.add('sentence-highlight');
 }
 
 /**

@@ -8,10 +8,17 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
 
 type RuleTreeProps = HTMLProps<HTMLDivElement> & {
+  /** Callback for when rule selection changes. */
   select?: (rule: Rule | null) => void;
+  /** If true, only allow selecting leaf nodes. */
   leafOnly?: boolean;
+  /** If true, include the title of the outline. */
   includeTitle?: boolean;
 };
+/**
+ * Component for displaying the currently outline with a sidebar for displaying
+ * details about a selected rule or general information if nothing is selected.
+ */
 export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   includeTitle,
   select,

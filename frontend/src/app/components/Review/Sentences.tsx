@@ -1,19 +1,18 @@
-import {
-  OnTopicDataTools,
-  OnTopicVisualization,
-} from "@cmu-eberly-center/eberly-ontopic-visualization";
-import { faSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, useEffect, useState } from "react";
-import { Alert, Card } from "react-bootstrap";
+import classNames from "classnames";
+import { FC, HTMLProps, useEffect, useState } from "react";
+import { Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { Trans, Translation, useTranslation } from "react-i18next";
-import { cleanAndRepairSentenceData } from "../../../lib/OnTopicData";
+import { Translation, useTranslation } from "react-i18next";
+import {
+  ClarityData,
+  cleanAndRepairSentenceData,
+} from "../../../lib/OnTopicData";
 import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
 import { useOnTopicData, useReview } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewReset } from "./ReviewContext";
+import "./Sentences.scss";
 
 export const SentencesTitle: FC = () => (
   <Translation ns={"review"}>
@@ -36,30 +35,50 @@ const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
   );
 };
 
+type SentenceIconProps = HTMLProps<HTMLSpanElement>;
+const TopicTextIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
+  <span {...props} className={classNames(className, "topic-text-icon")}>
+    ■
+  </span>
+);
+const ActiveVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
+  <span {...props} className={classNames(className, "active-verb-icon")}>
+    ▲
+  </span>
+);
+const BeVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
+  <span {...props} className={classNames(className, "be-verb-icon")}>
+    ●
+  </span>
+);
+
 const Legend: FC = () => {
   const { t } = useTranslation("review");
   return (
     <div
-      className="border rounded p-1 px-3 d-inline-flex flex-row flex-wrap"
+      className="p-1 px-3 d-inline-flex flex-row flex-wrap"
       style={{ columnGap: "3rem" }}
     >
-      <div>
-        <FontAwesomeIcon icon={faSquare} style={{ color: "green" }} />{" "}
-        {t("sentences.legend.noun")}
+      <div className="topic-text">
+        <TopicTextIcon />{" "}
+        <span className="topic-text">{t("sentences.legend.noun")}</span>
       </div>
       <div>
-        <FontAwesomeIcon icon={faSquare} style={{ color: "red" }} />{" "}
-        {t("sentences.legend.action")}
+        <ActiveVerbIcon />{" "}
+        <span className="active-verb">{t("sentences.legend.action")}</span>
       </div>
       <div>
-        <FontAwesomeIcon icon={faSquare} style={{ color: "blue" }} />{" "}
-        {t("sentences.legend.passive")}
+        <BeVerbIcon />{" "}
+        <span className="be-verb">{t("sentences.legend.passive")}</span>
       </div>
     </div>
   );
 };
 
-const dataTools = new OnTopicDataTools();
+type TextData = {
+  plain: string;
+  sentences?: ClarityData;
+};
 
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
@@ -73,7 +92,7 @@ export const Sentences: FC = () => {
     () => setHtmlSentences(cleanAndRepairSentenceData(data?.response)),
     [data]
   );
-  const [textData, setTextData] = useState(dataTools.getInitialData());
+  const [textData, setTextData] = useState<TextData>({ plain: "" });
 
   useEffect(() => {
     setParagraphIndex(-1);
@@ -87,23 +106,29 @@ export const Sentences: FC = () => {
     } else {
       setSentenceDetails(
         htmlSentences
-          ?.at(paragraphIndex)
-          ?.at(sentenceIndex)
+          ?.at(paragraphIndex - 1)
+          ?.at(sentenceIndex - 1)
           ?.replaceAll('\\"', '"') ?? null
       );
     }
   }, [htmlSentences, paragraphIndex, sentenceIndex]);
 
   const onHandleSentence = (paragraph: number, sentence: number) => {
-    highlightSentence(paragraph, sentence);
-    setParagraphIndex(paragraph);
-    setSentenceIndex(sentence);
+    if (paragraph === paragraphIndex && sentence === sentenceIndex) {
+      setParagraphIndex(-1);
+      setSentenceIndex(-1);
+      highlightSentence(-1, -1);
+    } else {
+      highlightSentence(paragraph - 1, sentence - 1);
+      setParagraphIndex(paragraph);
+      setSentenceIndex(sentence);
+    }
     // TODO text highlighting
   };
 
   return (
     <ReviewReset>
-      <div className="overflow-auto">
+      <div className="sentences d-flex flex-column h-100">
         <h4>{t("sentences.title")}</h4>
         {!data ? (
           <Loading />
@@ -122,7 +147,68 @@ export const Sentences: FC = () => {
                 <p>{t("sentences.select")}</p>
               )}
             </div>
-            <OnTopicVisualization
+            {
+              <div className="overflow-auto w-100 h-100">
+                <table className="table table-sm sentence-data align-middle table-hover">
+                  <tbody>
+                    {textData.sentences?.map((sentence, i) =>
+                      typeof sentence === "string" ? (
+                        <tr key={`p${i}`}>
+                          <td
+                            className="bg-primary-subtle paragraph-count"
+                            colSpan={3}
+                          >
+                            &nbsp;
+                          </td>
+                        </tr>
+                      ) : (
+                        <tr
+                          key={`p${sentence.at(0)}-s${sentence.at(1)}`}
+                          className={
+                            paragraphIndex === sentence.at(0) &&
+                            sentenceIndex === sentence.at(1)
+                              ? "table-active"
+                              : ""
+                          }
+                          onClick={() =>
+                            onHandleSentence(sentence[0], sentence[1])
+                          }
+                        >
+                          <td className="text-end">
+                            {sentence[2].NPS.slice(0, sentence[2].L_NPS).map(
+                              (np, j) => (
+                                <TopicTextIcon
+                                  key={`s${i}-lnp${j}`}
+                                  title={np}
+                                />
+                              )
+                            )}
+                          </td>
+                          <td className="text-center">
+                            {sentence[2].BE_VERB ? (
+                              <BeVerbIcon />
+                            ) : (
+                              <ActiveVerbIcon />
+                            )}
+                          </td>
+                          <td className="text-start">
+                            {sentence[2].NPS.slice(-sentence[2].R_NPS).map(
+                              (np, j) => (
+                                <TopicTextIcon
+                                  key={`s${i}-rnp${j}`}
+                                  title={np}
+                                />
+                              )
+                            )}
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            }
+            {/* <OnTopicVisualization
               mode="SENTENCE"
               singlepane={true}
               onFlip={() => undefined}
@@ -132,8 +218,8 @@ export const Sentences: FC = () => {
               invalidated={false}
               textdata={textData}
               highlight={"#E2D2BB"}
-            />
-            <Card>
+            /> */}
+            {/* <Card>
               <Card.Body>
                 <p>
                   <Trans
@@ -164,7 +250,7 @@ export const Sentences: FC = () => {
                   />
                 </p>
               </Card.Body>
-            </Card>
+            </Card> */}
           </ErrorBoundary>
         )}
       </div>

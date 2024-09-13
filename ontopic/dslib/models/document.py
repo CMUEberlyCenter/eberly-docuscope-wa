@@ -2388,7 +2388,7 @@ class DSDocument():
 
             # para_style = para['style']
             # font_size = font_info[para_style]            
-            html_str += '<p id=\'p{}\' class=\'paragraph p{}\'>'.format(pcount,pcount)
+            html_str += '<p data-ds-paragraph="{0}" id="p{0}" class="paragraph">'.format(pcount)
 
             scount = 1
 
@@ -2397,7 +2397,7 @@ class DSDocument():
                 total_words = len(sent['text_w_info'])
                 is_combo = False
                 word_count = 0
-                html_str += '<span id=\'p{}s{}\' class=\'sentence p{} s{}\'>'.format(pcount, scount, pcount, scount)
+                html_str += '<span id="p{0}s{1}" class="sentence" data-ds-paragraph="{0}" data-ds-sentence="{1}">'.format(pcount, scount)
 
                 while word_count < total_words:
 
@@ -2409,7 +2409,7 @@ class DSDocument():
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
                         # we need to remove periods.
                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                        html_word = "<span class=\'word p{} s{}\' data-topic=\'{}\'>{}</span>".format(pcount, scount, topic, word)
+                        html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span>'.format(pcount, scount, topic, word)
                     else:
                         html_word = word
 
@@ -2499,7 +2499,7 @@ class DSDocument():
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
                                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                                        html_temp_word = "<span class=\'word p{} s{}\' data-topic=\'{}\'>{}</t>".format(pcount, scount, topic, temp_w[WORD])
+                                        html_temp_word = '<span data-ds-paragraph="{}" data-ds-sentence="{}" class="word" data-topic="{}">{}</t>'.format(pcount, scount, topic, temp_w[WORD])
                                     else:
                                         html_temp_word = temp_w[WORD]
 
@@ -5625,9 +5625,9 @@ class DSDocument():
                 for pos in np_positions:
                     if wpos == pos[0]:
                         if is_be_verb:
-                                return "<b class=\"topic-text;\">"
+                                return "<b class=\"topic-text\">"
                         else:
-                            return "<b class=\"topic-text;\";>"                        
+                            return "<b class=\"topic-text\">"                        
                     elif wpos == pos[1]:
                         return "</b>"
                 return ""
@@ -5638,7 +5638,7 @@ class DSDocument():
             wpos = 0
             sent_dict = sent_data[3]
 
-            html_str = "<p class=\"non-topic-text;\">"
+            html_str = '<p class="non-topic-text">'
 
             if is_be_verb:
                 verb_class = "be-verb"
@@ -5656,7 +5656,7 @@ class DSDocument():
 
                 html_str += getNPTag(wpos)
                 if w[DEP] == 'ROOT':
-                    html_str += "<span class=\"{};\"><b><u>{}</u></b></span>".format(verb_class, w[WORD])
+                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w[WORD])
                 else:
                     html_str += word
 

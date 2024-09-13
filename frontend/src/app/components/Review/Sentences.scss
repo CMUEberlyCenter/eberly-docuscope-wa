@@ -1,0 +1,43 @@
+.topic-text-icon {
+  color: var(--bs-green);
+}
+.topic-text {
+  color: var(--bs-green);
+  font-weight: bold;
+}
+
+.active-verb-icon {
+  color: var(--bs-red);
+}
+.active-verb {
+  color: var(--bs-red);
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.be-verb-icon {
+  color: var(--bs-cyan);
+}
+.be-verb {
+  color: var(--bs-cyan);
+  text-decoration: wavy underline;
+  font-weight: bold;
+}
+
+.sentences {
+  .sentence-data {
+    counter-reset: paragraph;
+
+    .paragraph-count {
+      column-span: all;
+      &::before {
+        counter-increment: paragraph;
+        content: "¶ " counter(paragraph) " ";
+      }
+    }
+
+    td {
+      padding: 0 !important;
+    }
+  }
+}

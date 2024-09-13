@@ -3,13 +3,11 @@ import { Translation } from "react-i18next";
 import { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskInfoProps = {
+  /** The writing task to display information about. */
   task: WritingTask | null;
 };
 /**
- * Card for displaying Metadata about a writing task.
- * @param param0
- * @returns
- * @component
+ * Component for displaying Metadata about a writing task (outline).
  */
 export const WritingTaskInfo: FC<WritingTaskInfoProps> = ({ task }) => (
   <Translation>

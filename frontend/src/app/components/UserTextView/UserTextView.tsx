@@ -8,8 +8,14 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./UserTextView.scss";
 
 type UserTextViewProps = CardProps & {
+  /** The html string representing the user's draft. */
   prose: string;
 };
+/**
+ * Component for displaying user's read only draft with sentence highlighting.
+ * This sentence highlighting expects a list of strings that exist in the draft
+ * as would be returned by the AI service.
+ */
 export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
   const review = useReview();
   const [content, setContent] = useState(prose);

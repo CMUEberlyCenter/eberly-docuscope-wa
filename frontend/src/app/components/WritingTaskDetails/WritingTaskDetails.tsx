@@ -67,17 +67,8 @@ const taskToClipboard = (
   return lines.join("\n\n");
 };
 
-// type ModalProps = {
-//   /** if the modal is visible. */
-//   show: boolean;
-//   /** Callback for when */
-//   onHide: () => void;
-// };
 /**
  * Modal dialog component for viewing the outline of the writing task.
- * @argument show
- * @argument "onHide" callback to call on hiding the modal.
- * @returns
  */
 const WritingTaskDetails: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
