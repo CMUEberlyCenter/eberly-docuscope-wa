@@ -471,7 +471,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 onBookmark={onBookmark}
               >
                 <ToolDisplay.Input tool={currentTool} />
-                <Card as="section">
+                <Card as="section" className="mx-1">
                   <Card.Body className="pb-0">
                     <header>
                       <CheckExpectationIcon />
@@ -487,13 +487,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         />
                       </ToolDisplay.Fade>
                     ) : (
-                      <Button onClick={() => setShowSelectExpectation(true)}>
+                      <Button variant="dark" className="mb-1 mx-1" onClick={() => setShowSelectExpectation(true)}>
                         {t("tool.select_expectation")}
                       </Button>
                     )}
                   </Card.Body>
                 </Card>
 
+                {currentTool.expectation && (
                 <ToolDisplay.Response
                   tool={currentTool}
                   regenerate={retry}
@@ -535,7 +536,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       </dl>
                     </ErrorBoundary>
                   )}
-                </ToolDisplay.Response>
+                </ToolDisplay.Response>)}
               </ToolDisplay.Root>
             )}
             {currentTool?.tool === "copyedit" && (
