@@ -671,11 +671,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           <Card.Footer as={"footer"} className="bg-light d-flex">
             {writingTask && (
               <Button
-                className="me-auto mw-50 w-50"
-                variant="secondary"
+                className="me-auto mw-50 w-50 text-truncate"
+                variant="outline-dark"
                 onClick={() => setShowWritingTask(true)}
+                title={t("tool.button.view.title", {title: writingTask.rules.name})}
               >
-                {t("tool.button.view.title")}
+                {t("tool.button.view.title", {title: writingTask.rules.name})}
               </Button>
             )}
             {selectAvailable && (

@@ -3,9 +3,8 @@ import {
   Accordion,
   AccordionProps,
   Alert,
-  Button,
   Card,
-  Container,
+  Container
 } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -26,7 +25,7 @@ import { useWritingTask } from "../../service/writing-task.service";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
-import TaskViewer from "../Review/TaskViewer";
+import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
 import "./AllExpectations.scss";
 
@@ -100,7 +99,6 @@ export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
   const { t: tt } = useTranslation();
   const review = useExpectations();
-  const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
   const [prose, setProse] = useState("");
   const [current, setCurrent] = useState<AccordionEventKey>(null);
@@ -176,19 +174,10 @@ export const AllExpectations: FC = () => {
           </Card.Body>
           <Card.Footer>
             {writingTask && (
-              <Button
-                variant="outline-dark"
-                onClick={() => setShowWritingTask(!showWritingTask)}
-              >
-                {tt("tool.button.view.title")}
-              </Button>
+              <TaskViewerButton/>
             )}
           </Card.Footer>
         </Card>
-        <TaskViewer
-          show={showWritingTask}
-          onHide={() => setShowWritingTask(false)}
-        />
       </Split>
     </ReviewProvider>
   );

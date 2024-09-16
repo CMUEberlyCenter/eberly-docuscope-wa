@@ -1,11 +1,12 @@
 import { FC, useEffect, useState } from "react";
-import { Button, Card, Container, Dropdown, Stack } from "react-bootstrap";
+import { Card, Container, Dropdown, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 import { useReview } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
+import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { Arguments, ArgumentsTitle } from "./Arguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
@@ -14,7 +15,6 @@ import { Organization, OrganizationTitle } from "./Organization";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesTitle } from "./Sentences";
-import TaskViewer from "./TaskViewer";
 
 type Tool =
   | "null"
@@ -74,7 +74,6 @@ export const Review: FC = () => {
   const { t: tt } = useTranslation();
   // const settings = useSettings();
   const review = useReview();
-  const [showWritingTask, setShowWritingTask] = useState(false);
   const writingTask = useWritingTask();
   const [tool, setTool] = useState<Tool>("null");
   const [prose, setProse] = useState<string>("");
@@ -215,20 +214,9 @@ export const Review: FC = () => {
             {/* Add more tool displays here. */}
           </Card.Body>
           <Card.Footer>
-            {writingTask && (
-              <Button
-                variant="outline-dark"
-                onClick={() => setShowWritingTask(!showWritingTask)}
-              >
-                {tt("tool.button.view.title")}
-              </Button>
-            )}
+            {writingTask && (<TaskViewerButton />)}
           </Card.Footer>
         </Card>
-        <TaskViewer
-          show={showWritingTask}
-          onHide={() => setShowWritingTask(false)}
-        />
       </Split>
     </ReviewProvider>
   );
