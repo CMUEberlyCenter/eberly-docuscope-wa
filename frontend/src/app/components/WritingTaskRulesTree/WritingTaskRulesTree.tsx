@@ -80,7 +80,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                 className={classnames(
                   "fw-bold",
                   "flex-grow-1",
-                  select && !leafOnly ? "pointer" : "",
+                  !leafOnly ? "pointer" : "",
                   selected === rule ? "text-bg-dark" : ""
                 )}
                 onClick={() => onSelect(rule)}

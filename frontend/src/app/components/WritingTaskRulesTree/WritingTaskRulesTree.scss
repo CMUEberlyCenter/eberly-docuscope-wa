@@ -23,5 +23,8 @@
 
   .pointer {
     cursor: pointer;
+    &:hover {
+      background-color: var(--bs-secondary-bg);
+    }
   }
 }
