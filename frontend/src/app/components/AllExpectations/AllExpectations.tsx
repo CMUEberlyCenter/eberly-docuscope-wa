@@ -23,7 +23,7 @@ import {
   useExpectations,
 } from "../../service/expectations.service";
 import { useWritingTask } from "../../service/writing-task.service";
-import { Loading } from "../Loading/Loading";
+import { LoadingSmall } from "../Loading/LoadingSmall";
 import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
 import TaskViewer from "../Review/TaskViewer";
@@ -31,6 +31,7 @@ import { UserTextView } from "../UserTextView/UserTextView";
 import "./AllExpectations.scss";
 
 type ExpectationRuleProps = AccordionProps & { rule: Rule };
+/** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const expectations = useAllExpectationsAnalysis();
@@ -39,62 +40,16 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
 
   return (
     <article>
-      <h4>{rule.name}</h4>
+      <h5>{rule.name}</h5>
       <Accordion {...props}>
         {rule.children
           .map(({ name }) => expectations?.get(name) ?? { expectation: name })
-          .map((expectation, j) =>
-            isAllExpectationsData(expectation) &&
-            expectation.response.suggestions !== "none." ? (
-              <Accordion.Item
-                key={`${id}-expectation-${j}`}
-                eventKey={`${id}-expectation-${j}`}
-              >
-                <Accordion.Header>{expectation.expectation}</Accordion.Header>
-                <Accordion.Body
-                  onEntering={() =>
-                    isAllExpectationsData(expectation)
-                      ? dispatch({
-                          sentences: expectation.response.sentences,
-                          type: "set",
-                        })
-                      : dispatch({ type: "unset" })
-                  }
-                  onExiting={() => dispatch({ type: "unset" })}
-                >
-                  {expectations?.has(expectation.expectation) ? (
-                    <>
-                      {/* {isAllExpectationsData(expectation) &&
-                    expectation.response.sentences.length > 0 && (
-                      <>
-                        <h6>{t("sentences")}</h6>
-                        {isAllExpectationsData(expectation) &&
-                          expectation.response.sentences.map(
-                            (sentence, k) => (
-                              <p key={`sentence-${i}-${j}-${k}`}>
-                                {sentence}
-                              </p>
-                            )
-                          )}
-                      </>
-                    )} */
-                      /* Sentences should not be displayed, they are used for highlighting. */}
-                      <h6>{t("suggestions")}</h6>
-                      <p key={`${id}-suggestion-${j}`}>
-                        {isAllExpectationsData(expectation) &&
-                          expectation.response.suggestions}
-                      </p>
-                    </>
-                  ) : (
-                    <Loading />
-                  )}
-                </Accordion.Body>
-              </Accordion.Item>
-            ) : (
-              <Accordion.Item
-                key={`${id}-expectation-${j}`}
-                eventKey={`${id}-expectation-${j}`}
-              >
+          .map((expectation, j) => (
+            <Accordion.Item
+              key={`${id}-expectation-${j}`}
+              eventKey={`${id}-expectation-${j}`}
+            >
+              {isAllExpectationsData(expectation) && expectation.response.suggestions === "none." ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1 p">{expectation.expectation}</div>
                   <div
@@ -107,13 +62,40 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                     </span>
                   </div>
                 </div>
-              </Accordion.Item>
-            )
-          )}
+              ) : null}
+              {isAllExpectationsData(expectation) && expectation.response.suggestions !== "none." ? (<>
+                <Accordion.Header>{expectation.expectation}</Accordion.Header>
+                <Accordion.Body
+                  onEntering={() =>
+                    isAllExpectationsData(expectation)
+                      ? dispatch({
+                        sentences: expectation.response.sentences,
+                        type: "set",
+                      })
+                      : dispatch({ type: "unset" })
+                  }
+                  onExiting={() => dispatch({ type: "unset" })}
+                >
+                  <h6>{t("suggestions")}</h6>
+                  <p key={`${id}-suggestion-${j}`}>
+                    {isAllExpectationsData(expectation) &&
+                      expectation.response.suggestions}
+                  </p>
+                </Accordion.Body>
+              </>) : null}
+              {!isAllExpectationsData(expectation) || !(expectations?.has(expectation.expectation)) ? (
+                <div className="fake-accordion-button">
+                  <div className="flex-grow-1 p">{expectation.expectation}</div>
+                  <LoadingSmall />
+                </div>
+              ) : null}
+            </Accordion.Item>))}
       </Accordion>
-    </article>
+    </article >
   );
 };
+
+/** Render the user's writing and each exectation with its generated evaluation. */
 export const AllExpectations: FC = () => {
   const { t } = useTranslation("expectations");
   const { t: tt } = useTranslation();
@@ -181,7 +163,7 @@ export const AllExpectations: FC = () => {
               <AllExpectationsIcon /> {t("title")}
             </Card.Title>
           </Card.Header>
-          <Card.Body className="h-100 overflow-auto position-relative">
+          <Card.Body className="h-100 overflow-auto position-relative bg-light">
             {/* Assumes strict two level writing tasks... */}
             {writingTask?.rules.rules.map((rule, i) => (
               <ExpectationRule
