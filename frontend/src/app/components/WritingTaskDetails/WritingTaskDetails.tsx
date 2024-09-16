@@ -79,9 +79,11 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const insert = useCallback(() => {
     if (writingTask) {
       Transforms.insertNodes(editor, taskToEditor(writingTask, includeDetails));
-      onHide && onHide();
+      if (onHide) {
+        onHide();
+      }
     }
-  }, [editor, writingTask, includeDetails]);
+  }, [editor, writingTask, includeDetails, onHide]);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" {...props}>

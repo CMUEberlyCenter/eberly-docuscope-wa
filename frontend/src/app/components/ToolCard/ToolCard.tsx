@@ -419,7 +419,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             {/* Maybe use Carousel for history? */}
             {currentTool?.tool === "prose" && (
               <ToolDisplay.Root
-                icon={<GenerateProseIcon />}
+                // icon={<GenerateProseIcon />}
                 title={t("tool.button.prose.tooltip")}
                 tool={currentTool}
                 onBookmark={onBookmark}
@@ -438,7 +438,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
             {currentTool?.tool === "bullets" && (
               <ToolDisplay.Root
-                icon={<GenerateBulletsIcon />}
+                // icon={<GenerateBulletsIcon />}
                 title={t("tool.button.bullets.tooltip")}
                 tool={currentTool}
                 onBookmark={onBookmark}
@@ -465,7 +465,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
             {currentTool?.tool === "expectation" && (
               <ToolDisplay.Root
-                icon={<CheckExpectationIcon />}
+                // icon={<CheckExpectationIcon />}
                 title={t("tool.button.expectation.tooltip")}
                 tool={currentTool}
                 onBookmark={onBookmark}
@@ -546,7 +546,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
             {currentTool?.tool === "copyedit" && (
               <ToolDisplay.Root
-                icon={<CopyEditIcon />}
+                // icon={<CopyEditIcon />}
                 title={t("tool.button.copyedit.tooltip")}
                 tool={currentTool}
                 onBookmark={onBookmark}
@@ -626,7 +626,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
             {currentTool?.tool === "flow" && (
               <ToolDisplay.Root
-                icon={<LocalCoherenceIcon />}
+                // icon={<LocalCoherenceIcon />}
                 title={t("tool.button.flow.tooltip")}
                 tool={currentTool}
                 onBookmark={onBookmark}

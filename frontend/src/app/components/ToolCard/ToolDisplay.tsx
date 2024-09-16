@@ -55,14 +55,14 @@ type ToolProp = { tool?: ToolResult | null };
 type ToolRootProps = HTMLProps<HTMLDivElement> &
   ToolProp & {
     title: string;
-    icon?: ReactNode;
+    // icon?: ReactNode;
     onBookmark: () => void;
     actions?: ReactNode;
   };
 export const ToolRoot: FC<ToolRootProps> = ({
   tool,
   children,
-  icon,
+  // icon,
   title,
   onBookmark,
   actions,
