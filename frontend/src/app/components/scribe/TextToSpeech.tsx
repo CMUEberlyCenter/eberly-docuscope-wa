@@ -29,67 +29,69 @@ export const TextToSpeech: FC<{ text: string }> = ({
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
+  const [state, setState] = useState<'paused' | 'stopped' | 'playing'>('stopped');
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
   const settings = useSettings();
 
+  useEffect(() => {
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, []);
+
   /** Update utterance on change of text. */
   useEffect(() => {
-    const synth = window.speechSynthesis;
+    setState('stopped');
+    window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     setUtterance(utter);
-    return () => {
-      synth.cancel();
-    };
   }, [text]);
 
   /** Cancel on close tools */
   useEffect(() => {
-    if (!open) {
-      const synth = window.speechSynthesis;
-      synth.cancel();
-    }
+    setState('stopped');
+    window.speechSynthesis.cancel();
   }, [open]);
 
   /** Start utterance when play is pressed or resume if paused. */
   const handlePlay = useCallback(() => {
     const synth = window.speechSynthesis;
-    console.log(isPaused, utterance?.text);
-    if (isPaused) {
-      synth.resume();
+    if (state === 'paused') {
+      if (synth.paused) {
+        synth.resume();
+      } else if (utterance) {
+        synth.speak(utterance);
+      }
+      if (synth.speaking) {
+        setState('playing');
+      }
+    } else if (state === 'playing') {
+      synth.pause();
+      setState('paused');
     } else if (utterance !== null) {
       synth.speak(utterance);
+      if (synth.speaking) {
+        setState('playing');
+      }
     }
-    setIsPaused(false);
-  }, [utterance, isPaused]);
-  /** Pause the current utterance. */
-  const handlePause = () => {
-    const synth = window.speechSynthesis;
-    synth.pause();
-    setIsPaused(true);
-  };
+  }, [utterance, state]);
   /** Stop playing and reset speech. */
   const handleStop = () => {
-    const synth = window.speechSynthesis;
-    synth.cancel();
-    setIsPaused(false);
+    setState('stopped');
+    window.speechSynthesis.cancel();
   };
 
   return settings.text2speech ? (
     <ButtonGroup>
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
-          <Button onClick={handlePlay} title={isPaused ? "Resume" : "Play"}>
-            <FontAwesomeIcon icon={isPaused ? faPause : faPlay} />
-            <span className="sr-only">{isPaused ? "Resume" : "Play"}</span>
+          <Button variant="dark" onClick={handlePlay} title={state ==='paused' ? "Resume" : "Play"}>
+            <FontAwesomeIcon icon={state === 'playing' ? faPause : faPlay} />
+            <span className="sr-only">{state === 'paused' ? "Resume" : "Play"}</span>
           </Button>
-          <Button onClick={handlePause} title="Pause">
-            <FontAwesomeIcon icon={faPause} />
-            <span className="sr-only">Pause</span>
-          </Button>
-          <Button onClick={handleStop} title="Stop">
+          <Button variant="dark" onClick={handleStop} title="Stop">
             <FontAwesomeIcon icon={faStop} />
             <span className="sr-only">Stop</span>
           </Button>
