@@ -5,16 +5,16 @@ import {
   faClipboard,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, ReactNode, useCallback, useState } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, ReactNode, useCallback, useState } from "react";
 import {
   Alert,
   Button,
   ButtonToolbar,
   Card,
-  CardProps,
   OverlayTrigger,
   Stack,
-  Tooltip,
+  Tooltip
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
@@ -25,6 +25,7 @@ import { ToolResult } from "../../lib/ToolResults";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../scribe/TextToSpeech";
+import { LoadingSmall } from "../Loading/LoadingSmall";
 
 type ToolButtonProps = {
   tooltip: string;
@@ -51,7 +52,7 @@ export const ToolButton: FC<ToolButtonProps> = ({
 );
 
 type ToolProp = { tool?: ToolResult | null };
-type ToolRootProps = CardProps &
+type ToolRootProps = HTMLProps<HTMLDivElement> &
   ToolProp & {
     title: string;
     icon?: ReactNode;
@@ -65,17 +66,17 @@ export const ToolRoot: FC<ToolRootProps> = ({
   title,
   onBookmark,
   actions,
+  className,
   ...props
 }) => {
   const { t } = useTranslation();
   const [useBookmarks] = useState(false);
+  const cn = classNames(className, 'bg-light');
   return (
-    <Card {...props}>
-      <Card.Body>
-        <Card.Title className="text-center">
-          {icon} {title}
-        </Card.Title>
-        <Card.Subtitle className="text-center text-muted">
+    <div className={cn} {...props}>
+      <header className="text-center">
+        <h5>{title}</h5>
+        <h6 className="text-muted">
           {tool?.datetime.toLocaleString()}
           {useBookmarks && (
             <Button variant="icon" onClick={() => onBookmark()}>
@@ -87,11 +88,13 @@ export const ToolRoot: FC<ToolRootProps> = ({
               </span>
             </Button>
           )}
-        </Card.Subtitle>
-        {children}
-      </Card.Body>
-      {actions && <Card.Footer>{actions}</Card.Footer>}
-    </Card>
+        </h6>
+      </header>
+      {children}
+      {actions && (
+        <footer className="mx-2">{actions}</footer>
+      )}
+    </div>
   );
 };
 
@@ -99,7 +102,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
 export const ToolInput: FC<ToolProp> = ({ tool }) => {
   const { t } = useTranslation();
   return (
-    <Card as="section">
+    <Card as="section" className="mx-1">
       <Card.Body className="pb-0">
         <header>
           <YourInputIcon className="me-2" />
@@ -123,37 +126,38 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
   );
 };
 
-type ToolResponseProps = CardProps &
+type ToolResponseProps = HTMLProps<HTMLDivElement> &
   ToolProp & { text?: string; regenerate?: (tool: ToolResult) => void };
 export const ToolResponse: FC<ToolResponseProps> = ({
   tool,
   text,
   regenerate,
   children,
+  className,
   ...props
 }) => {
   const { t } = useTranslation();
+  const cn = className ?? 'px-1 m-2 pb-2'
   return (
-    <Card {...props} as="section">
-      <Card.Body>
-        <Card.Title className="d-flex">
-          <AIResponseIcon className="me-2" />
-          <span>{t("tool.output")}</span>
-          <ButtonToolbar className="ms-auto">
-            {text && <TextToSpeech text={text} />}
-            {tool?.result && regenerate && (
-              <Button onClick={() => regenerate(tool)} variant="icon">
-                <FontAwesomeIcon icon={faArrowsRotate} />
-                <span className="visually-hidden sr-only">
-                  {t("tool.regenerate")}
-                </span>
-              </Button>
-            )}
-          </ButtonToolbar>
-        </Card.Title>
-        {tool?.result ? children : <Loading />}
-      </Card.Body>
-    </Card>
+    <section {...props} className={cn}>
+      <header className="d-flex">
+        <AIResponseIcon className="me-2" />
+        <span className="fw-bold">{t("tool.output")}</span>
+        <ButtonToolbar className="ms-auto">
+          {(tool?.result && text) && <TextToSpeech text={text} />}
+          {tool?.result && regenerate && (
+            <Button onClick={() => regenerate(tool)} variant="icon" className="text-dark">
+              <FontAwesomeIcon icon={faArrowsRotate} />
+              <span className="visually-hidden sr-only">
+                {t("tool.regenerate")}
+              </span>
+            </Button>
+          )}
+          {!tool?.result && (<LoadingSmall />)}
+        </ButtonToolbar>
+      </header>
+      {tool?.result ? children : <Loading />}
+    </section>
   );
 };
 

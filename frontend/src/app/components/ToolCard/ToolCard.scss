@@ -1,4 +1,5 @@
 .tool-card {
+
   // min-width: 320px;
   // max-width: 80vw;
   .icon-lg {
@@ -17,16 +18,29 @@
         margin-right: auto;
         margin-left: auto;
       }
+
       span {
         font-size: x-small;
         font-weight: 500;
       }
     }
   }
+
+  ul.no-bullets {
+    list-style: none;
+    padding: 0;
+    // margin: 0;
+    ul {
+      list-style: disc;
+    }
+  }
+
+
   .edits {
     del {
       color: var(--bs-red);
     }
+
     ins {
       color: var(--bs-indigo);
     }

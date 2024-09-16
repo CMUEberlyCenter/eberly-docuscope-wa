@@ -97,11 +97,11 @@ export const TextToSpeech: FC<{ text: string }> = ({
       </Collapse>
       <Button
         onClick={() => setOpen(!open)}
-        variant={!open ? "icon" : "primary"}
+        variant={!open ? "icon" : "dark"}
       >
         {!open ? (
           <>
-            <FontAwesomeIcon icon={faVolumeHigh} />
+            <FontAwesomeIcon icon={faVolumeHigh} className="text-dark" />
             <span className="sr-only visually-hidden">{t("audio.show")}</span>
           </>
         ) : (

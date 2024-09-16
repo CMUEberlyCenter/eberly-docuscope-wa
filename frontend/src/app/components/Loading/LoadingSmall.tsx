@@ -6,7 +6,7 @@ import "./Loading.scss";
 export const LoadingSmall: FC = () => {
   return (
     <div
-      role="status"
+      role="status" className="loading"
     >
       <DotSpinner
         aria-hidden="true"

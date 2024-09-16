@@ -646,22 +646,23 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         <Rating value={currentTool.result.rating} />
                       )}
                       <p>{currentTool.result.general_assessment}</p>
-                      <dl>
+                      <ul className="no-bullets">
                         {currentTool.result.issues.map(
-                          ({ description, suggestions }) => (
-                            <>
-                              <dt>{description}</dt>
-                              <dd>
+                          ({ description, suggestions }, i) => (
+                            <li key={`sentences-issue-${i}`}>
+                              <b>{t('flow.issue')}</b> {description}
+                              <div className="mt-1 mb-3">
+                                <b>{t('flow.suggestions')}</b>
                                 <ul>
-                                  {suggestions.map((suggestion) => (
-                                    <li>{suggestion}</li>
+                                  {suggestions.map((suggestion, j) => (
+                                    <li key={`sentences-issue-${i}-suggestion-${j}`}>{suggestion}</li>
                                   ))}
                                 </ul>
-                              </dd>
-                            </>
+                              </div>
+                            </li>
                           )
                         )}
-                      </dl>
+                        </ul>
                     </>
                   )}
                 </ToolDisplay.Response>

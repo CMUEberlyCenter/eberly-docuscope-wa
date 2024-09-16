@@ -70,7 +70,7 @@
         "tooltip": "Fix Grammar"
       },
       "view": {
-        "title": "View Outline"
+        "title": "View Outline: {{title}}"
       },
       "select": {
         "title": "Select Outline"
@@ -96,6 +96,10 @@
     "title": "Select an Expectation",
     "task": "Writing Task",
     "error": "Error while processing results."
+  },
+  "flow": {
+    "issue": "Issue:",
+    "suggestions": "Suggestions:"
   },
   "select_task": {
     "title": "Select Outline",
