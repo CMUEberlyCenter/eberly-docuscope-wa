@@ -213,9 +213,7 @@ export const Review: FC = () => {
             {tool === "sentences" && <Sentences />}
             {/* Add more tool displays here. */}
           </Card.Body>
-          <Card.Footer>
-            {writingTask && (<TaskViewerButton />)}
-          </Card.Footer>
+          <Card.Footer>{writingTask && <TaskViewerButton />}</Card.Footer>
         </Card>
       </Split>
     </ReviewProvider>

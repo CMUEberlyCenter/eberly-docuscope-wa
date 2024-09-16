@@ -14,7 +14,7 @@ import {
   Card,
   OverlayTrigger,
   Stack,
-  Tooltip
+  Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
@@ -71,7 +71,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
 }) => {
   const { t } = useTranslation();
   const [useBookmarks] = useState(false);
-  const cn = classNames(className, 'bg-light');
+  const cn = classNames(className, "bg-light");
   return (
     <div className={cn} {...props}>
       <header className="text-center">
@@ -91,9 +91,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
         </h6>
       </header>
       {children}
-      {actions && (
-        <footer className="mx-2">{actions}</footer>
-      )}
+      {actions && <footer className="mx-2">{actions}</footer>}
     </div>
   );
 };
@@ -137,23 +135,27 @@ export const ToolResponse: FC<ToolResponseProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const cn = className ?? 'px-1 m-2 pb-2'
+  const cn = className ?? "px-1 m-2 pb-2";
   return (
     <section {...props} className={cn}>
       <header className="d-flex">
         <AIResponseIcon className="me-2" />
         <span className="fw-bold">{t("tool.output")}</span>
         <ButtonToolbar className="ms-auto">
-          {(tool?.result && text) && <TextToSpeech text={text} />}
+          {tool?.result && text && <TextToSpeech text={text} />}
           {tool?.result && regenerate && (
-            <Button onClick={() => regenerate(tool)} variant="icon" className="text-dark">
+            <Button
+              onClick={() => regenerate(tool)}
+              variant="icon"
+              className="text-dark"
+            >
               <FontAwesomeIcon icon={faArrowsRotate} />
               <span className="visually-hidden sr-only">
                 {t("tool.regenerate")}
               </span>
             </Button>
           )}
-          {!tool?.result && (<LoadingSmall />)}
+          {!tool?.result && <LoadingSmall />}
         </ButtonToolbar>
       </header>
       {tool?.result ? children : <Loading />}

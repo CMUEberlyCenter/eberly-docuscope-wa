@@ -4,7 +4,7 @@ import {
   AccordionProps,
   Alert,
   Card,
-  Container
+  Container,
 } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -48,7 +48,8 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
               key={`${id}-expectation-${j}`}
               eventKey={`${id}-expectation-${j}`}
             >
-              {isAllExpectationsData(expectation) && expectation.response.suggestions === "none." ? (
+              {isAllExpectationsData(expectation) &&
+              expectation.response.suggestions === "none." ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1 p">{expectation.expectation}</div>
                   <div
@@ -62,35 +63,40 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                   </div>
                 </div>
               ) : null}
-              {isAllExpectationsData(expectation) && expectation.response.suggestions !== "none." ? (<>
-                <Accordion.Header>{expectation.expectation}</Accordion.Header>
-                <Accordion.Body
-                  onEntering={() =>
-                    isAllExpectationsData(expectation)
-                      ? dispatch({
-                        sentences: expectation.response.sentences,
-                        type: "set",
-                      })
-                      : dispatch({ type: "unset" })
-                  }
-                  onExiting={() => dispatch({ type: "unset" })}
-                >
-                  <h6>{t("suggestions")}</h6>
-                  <p key={`${id}-suggestion-${j}`}>
-                    {isAllExpectationsData(expectation) &&
-                      expectation.response.suggestions}
-                  </p>
-                </Accordion.Body>
-              </>) : null}
-              {!isAllExpectationsData(expectation) || !(expectations?.has(expectation.expectation)) ? (
+              {isAllExpectationsData(expectation) &&
+              expectation.response.suggestions !== "none." ? (
+                <>
+                  <Accordion.Header>{expectation.expectation}</Accordion.Header>
+                  <Accordion.Body
+                    onEntering={() =>
+                      isAllExpectationsData(expectation)
+                        ? dispatch({
+                            sentences: expectation.response.sentences,
+                            type: "set",
+                          })
+                        : dispatch({ type: "unset" })
+                    }
+                    onExiting={() => dispatch({ type: "unset" })}
+                  >
+                    <h6>{t("suggestions")}</h6>
+                    <p key={`${id}-suggestion-${j}`}>
+                      {isAllExpectationsData(expectation) &&
+                        expectation.response.suggestions}
+                    </p>
+                  </Accordion.Body>
+                </>
+              ) : null}
+              {!isAllExpectationsData(expectation) ||
+              !expectations?.has(expectation.expectation) ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1 p">{expectation.expectation}</div>
                   <LoadingSmall />
                 </div>
               ) : null}
-            </Accordion.Item>))}
+            </Accordion.Item>
+          ))}
       </Accordion>
-    </article >
+    </article>
   );
 };
 
@@ -172,11 +178,7 @@ export const AllExpectations: FC = () => {
               />
             )) ?? <Alert variant="warning">{t("error.no_task")}</Alert>}
           </Card.Body>
-          <Card.Footer>
-            {writingTask && (
-              <TaskViewerButton/>
-            )}
-          </Card.Footer>
+          <Card.Footer>{writingTask && <TaskViewerButton />}</Card.Footer>
         </Card>
       </Split>
     </ReviewProvider>

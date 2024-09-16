@@ -487,7 +487,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         />
                       </ToolDisplay.Fade>
                     ) : (
-                      <Button variant="dark" className="mb-1 mx-1" onClick={() => setShowSelectExpectation(true)}>
+                      <Button
+                        variant="dark"
+                        className="mb-1 mx-1"
+                        onClick={() => setShowSelectExpectation(true)}
+                      >
                         {t("tool.select_expectation")}
                       </Button>
                     )}
@@ -495,48 +499,49 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 </Card>
 
                 {currentTool.expectation && (
-                <ToolDisplay.Response
-                  tool={currentTool}
-                  regenerate={retry}
-                  text={
-                    `${currentTool.result?.general_assessment ?? ""}\n` +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join("\n")}`
-                      )
-                      .join("\n\n")
-                  }
-                >
-                  {currentTool.result && (
-                    <ErrorBoundary
-                      fallback={<div>{t("expectation.error")}</div>}
-                    >
-                      {currentTool.result.rating && (
-                        <Rating value={currentTool.result.rating} />
-                      )}
-                      <p>{currentTool.result.general_assessment}</p>
-                      <dl>
-                        {currentTool.result.issues.map(
-                          ({ description, suggestions }, i) => (
-                            <React.Fragment key={`issue-${i}`}>
-                              <dt>{description}</dt>
-                              <dd>
-                                <ul>
-                                  {suggestions.map((suggestion, j) => (
-                                    <li key={`suggestion-${i}-${j}`}>
-                                      {suggestion}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </dd>
-                            </React.Fragment>
-                          )
+                  <ToolDisplay.Response
+                    tool={currentTool}
+                    regenerate={retry}
+                    text={
+                      `${currentTool.result?.general_assessment ?? ""}\n` +
+                      currentTool.result?.issues
+                        .map(
+                          ({ description, suggestions }) =>
+                            `${description} ${suggestions.join("\n")}`
+                        )
+                        .join("\n\n")
+                    }
+                  >
+                    {currentTool.result && (
+                      <ErrorBoundary
+                        fallback={<div>{t("expectation.error")}</div>}
+                      >
+                        {currentTool.result.rating && (
+                          <Rating value={currentTool.result.rating} />
                         )}
-                      </dl>
-                    </ErrorBoundary>
-                  )}
-                </ToolDisplay.Response>)}
+                        <p>{currentTool.result.general_assessment}</p>
+                        <dl>
+                          {currentTool.result.issues.map(
+                            ({ description, suggestions }, i) => (
+                              <React.Fragment key={`issue-${i}`}>
+                                <dt>{description}</dt>
+                                <dd>
+                                  <ul>
+                                    {suggestions.map((suggestion, j) => (
+                                      <li key={`suggestion-${i}-${j}`}>
+                                        {suggestion}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </dd>
+                              </React.Fragment>
+                            )
+                          )}
+                        </dl>
+                      </ErrorBoundary>
+                    )}
+                  </ToolDisplay.Response>
+                )}
               </ToolDisplay.Root>
             )}
             {currentTool?.tool === "copyedit" && (
@@ -651,19 +656,23 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         {currentTool.result.issues.map(
                           ({ description, suggestions }, i) => (
                             <li key={`sentences-issue-${i}`}>
-                              <b>{t('flow.issue')}</b> {description}
+                              <b>{t("flow.issue")}</b> {description}
                               <div className="mt-1 mb-3">
-                                <b>{t('flow.suggestions')}</b>
+                                <b>{t("flow.suggestions")}</b>
                                 <ul>
                                   {suggestions.map((suggestion, j) => (
-                                    <li key={`sentences-issue-${i}-suggestion-${j}`}>{suggestion}</li>
+                                    <li
+                                      key={`sentences-issue-${i}-suggestion-${j}`}
+                                    >
+                                      {suggestion}
+                                    </li>
                                   ))}
                                 </ul>
                               </div>
                             </li>
                           )
                         )}
-                        </ul>
+                      </ul>
                     </>
                   )}
                 </ToolDisplay.Response>
@@ -676,9 +685,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 className="me-auto mw-50 w-50 text-truncate"
                 variant="outline-dark"
                 onClick={() => setShowWritingTask(true)}
-                title={t("tool.button.view.title", {title: writingTask.rules.name})}
+                title={t("tool.button.view.title", {
+                  title: writingTask.rules.name,
+                })}
               >
-                {t("tool.button.view.title", {title: writingTask.rules.name})}
+                {t("tool.button.view.title", { title: writingTask.rules.name })}
               </Button>
             )}
             {selectAvailable && (

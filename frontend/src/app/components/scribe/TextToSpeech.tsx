@@ -29,7 +29,9 @@ export const TextToSpeech: FC<{ text: string }> = ({
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [state, setState] = useState<'paused' | 'stopped' | 'playing'>('stopped');
+  const [state, setState] = useState<"paused" | "stopped" | "playing">(
+    "stopped"
+  );
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
@@ -43,7 +45,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
 
   /** Update utterance on change of text. */
   useEffect(() => {
-    setState('stopped');
+    setState("stopped");
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(text);
     setUtterance(utter);
@@ -51,35 +53,35 @@ export const TextToSpeech: FC<{ text: string }> = ({
 
   /** Cancel on close tools */
   useEffect(() => {
-    setState('stopped');
+    setState("stopped");
     window.speechSynthesis.cancel();
   }, [open]);
 
   /** Start utterance when play is pressed or resume if paused. */
   const handlePlay = useCallback(() => {
     const synth = window.speechSynthesis;
-    if (state === 'paused') {
+    if (state === "paused") {
       if (synth.paused) {
         synth.resume();
       } else if (utterance) {
         synth.speak(utterance);
       }
       if (synth.speaking) {
-        setState('playing');
+        setState("playing");
       }
-    } else if (state === 'playing') {
+    } else if (state === "playing") {
       synth.pause();
-      setState('paused');
+      setState("paused");
     } else if (utterance !== null) {
       synth.speak(utterance);
       if (synth.speaking) {
-        setState('playing');
+        setState("playing");
       }
     }
   }, [utterance, state]);
   /** Stop playing and reset speech. */
   const handleStop = () => {
-    setState('stopped');
+    setState("stopped");
     window.speechSynthesis.cancel();
   };
 
@@ -87,9 +89,15 @@ export const TextToSpeech: FC<{ text: string }> = ({
     <ButtonGroup>
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
-          <Button variant="dark" onClick={handlePlay} title={state ==='paused' ? "Resume" : "Play"}>
-            <FontAwesomeIcon icon={state === 'playing' ? faPause : faPlay} />
-            <span className="sr-only">{state === 'paused' ? "Resume" : "Play"}</span>
+          <Button
+            variant="dark"
+            onClick={handlePlay}
+            title={state === "paused" ? "Resume" : "Play"}
+          >
+            <FontAwesomeIcon icon={state === "playing" ? faPause : faPlay} />
+            <span className="sr-only">
+              {state === "paused" ? "Resume" : "Play"}
+            </span>
           </Button>
           <Button variant="dark" onClick={handleStop} title="Stop">
             <FontAwesomeIcon icon={faStop} />
@@ -97,10 +105,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
           </Button>
         </ButtonGroup>
       </Collapse>
-      <Button
-        onClick={() => setOpen(!open)}
-        variant={!open ? "icon" : "dark"}
-      >
+      <Button onClick={() => setOpen(!open)} variant={!open ? "icon" : "dark"}>
         {!open ? (
           <>
             <FontAwesomeIcon icon={faVolumeHigh} className="text-dark" />

@@ -10,21 +10,23 @@ export const TaskViewerButton: FC = () => {
   const { t } = useTranslation();
   const id = useId();
   const writingTask = useWritingTask();
-  return (<Button
-    className="w-50 mw-50 text-truncate"
-    variant="outline-dark"
-    onClick={() => setShow(!show)}
-    aria-controls={id}
-    title={t("tool.button.view.title", { title: writingTask?.rules.name ?? '' })}
-  >
-    {t("tool.button.view.title", { title: writingTask?.rules.name ?? '' })}
-    <TaskViewer id={id}
-      show={show}
-      onHide={() => setShow(false)}
-    />
-
-  </Button>)
-}
+  return (
+    <>
+      <Button
+        className="w-50 mw-50 text-truncate"
+        variant="outline-dark"
+        onClick={() => setShow(!show)}
+        aria-controls={id}
+        title={t("tool.button.view.title", {
+          title: writingTask?.rules.name ?? "",
+        })}
+      >
+        {t("tool.button.view.title", { title: writingTask?.rules.name ?? "" })}
+      </Button>
+      <TaskViewer id={id} show={show} onHide={() => setShow(false)} />
+    </>
+  );
+};
 
 /** Modal component for displaying the outline. */
 export const TaskViewer: FC<ModalProps> = (props) => {

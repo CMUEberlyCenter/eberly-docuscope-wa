@@ -5,17 +5,13 @@ import "./Loading.scss";
 
 export const LoadingSmall: FC = () => {
   return (
-    <div
-      role="status" className="loading"
-    >
+    <div role="status" className="loading">
       <DotSpinner
         aria-hidden="true"
         className="text-dark loading-animate-spin"
       />
       <Translation>
-        {(t) => (
-          <span className="sr-only visually-hidden">{t("loading")}</span>
-        )}
+        {(t) => <span className="sr-only visually-hidden">{t("loading")}</span>}
       </Translation>
     </div>
   );

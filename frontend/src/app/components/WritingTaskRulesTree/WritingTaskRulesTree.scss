@@ -2,6 +2,7 @@
   [aria-expanded="true"] {
     .expanded {
       display: block;
+
       ul {
         list-style-type: none;
         text-wrap: nowrap;
@@ -19,10 +20,24 @@
     .expanded {
       display: none;
     }
+
+    &:has([aria-selected="true"]) {
+      .outline-section {
+        border-bottom: 3px solid var(--bs-dark);
+      }
+    }
+  }
+
+  [aria-selected="true"] {
+    color: var(--bs-white);
+    background-color: var(--bs-dark) !important;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
   }
 
   .pointer {
     cursor: pointer;
+
     &:hover {
       background-color: var(--bs-secondary-bg);
     }
