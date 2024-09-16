@@ -41,7 +41,7 @@ function reviewReducer(
     case "unset":
       return { sentences: [] };
     default:
-      console.log(`Unknown action: ${type}`);
+      console.warn(`Unknown action: ${type}`);
       return review;
   }
 }
@@ -66,7 +66,7 @@ export const ReviewProvider: FC<{ children: ReactNode }> = ({ children }) => {
 /**
  * A component that unsets the review state in the current context when
  * mounted and unmounted.
- * @param param0
+ * @param param0.children Child elements.
  * @returns React component to use in composition with review tools.
  */
 export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
