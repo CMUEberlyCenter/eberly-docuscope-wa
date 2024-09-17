@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "2.0.0-alpha.9",
+  "version": "2.0.0-alpha.10",
   "description": "",
   "main": "src/app/index.tsx",
   "type": "module",
@@ -124,7 +124,6 @@
     "slate-react": "^0.110.1",
     "string-format": "^2.0.0",
     "swr": "^2.2.5",
-    "systeminformation": "^5.23.5",
-    "uuid": "^10.0.0"
+    "systeminformation": "^5.23.5"
   }
 }

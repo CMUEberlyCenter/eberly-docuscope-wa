@@ -34,7 +34,6 @@ import {
   highlightTopic,
 } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
-// import '../Coherence/Coherence.scss';
 import classNames from "classnames";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { ReviewReset } from "./ReviewContext";
