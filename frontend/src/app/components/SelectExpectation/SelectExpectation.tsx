@@ -23,7 +23,7 @@ const SelectExpectation: FC<SelectExpectationProps> = ({
   }, [select, onHide, selected]);
 
   return (
-    <Modal onHide={onHide} {...props} size="lg">
+    <Modal onHide={onHide} {...props} size="lg" backdrop="static">
       <Modal.Header closeButton className="bg-light">
         {t("expectation.title")}
       </Modal.Header>
