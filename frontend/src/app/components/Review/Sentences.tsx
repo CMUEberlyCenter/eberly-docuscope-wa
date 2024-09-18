@@ -17,7 +17,7 @@ import "./Sentences.scss";
 export const SentencesTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-dark">
+      <span className="text-primary">
         <SentencesIcon /> {t("sentences.title")}
       </span>
     )}

@@ -1,7 +1,7 @@
 /**
   Here is a brief summary of what the icons mean.
 
-      Dark circle — At least one sentence in the paragraph includes the word (topic) on the left side of the main verb of the sentence.
+      Disc — At least one sentence in the paragraph includes the word (topic) on the left side of the main verb of the sentence.
       Hollow circle — All of the instances of the word (topic) in the paragraph are on the right side of the sentences.
       Dot on the shoulder — If the word (topic) appears in the first sentence of the paragraph a small dot is added to the icon. The dot can bee added to (1) or (2) above. 
 
@@ -37,11 +37,12 @@ import { Loading } from "../Loading/Loading";
 import classNames from "classnames";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { ReviewReset } from "./ReviewContext";
+import "./Organization.scss";
 
 export const OrganizationTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span {...props} className={classNames(props.className, "text-dark")}>
+      <span {...props} className={classNames(props.className, "text-primary")}>
         <TermMatrixIcon /> {t("organization.title")}
       </span>
     )}
@@ -148,7 +149,7 @@ const Legend: FC = () => (
           </Col>
           <Col>
             <span
-              className="border rounded border-dark text-center px-2 text-dark"
+              className="border rounded border-primary text-center px-2 text-primary"
               title={t("organization.legend.boxed_number")}
             >
               1
@@ -184,11 +185,9 @@ const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
 );
 
 export const Organization: FC = () => {
-  // const toggleId = useId();
   const { t } = useTranslation("review");
   const data = useOnTopicData();
   const showToggle = false;
-  // const [showToggle, setShowToggle] = useState(false);
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState(-1);
   const [selectedSentence, setSelectedSentence] = useState(-1);
@@ -235,7 +234,7 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="overflow-auto h-100">
+      <div className="overflow-auto h-100 organization">
         <h4>{t("organization.title")}</h4>
         {!data ? (
           <Loading />
@@ -272,92 +271,98 @@ export const Organization: FC = () => {
             {/* </Card.Header>
               <Card.Body> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
-              <table className="xtable caption-top xtable-sm">
-                <caption>{t("organization.coherence.title")}</caption>
-                <thead>
-                  <tr>
-                    {/* <td style={{ width: "150px" }}> */}
-                    <td>{t("organization.coherence.paragraphs")}</td>
-                    {paragraphRange.map((i) => (
-                      <td key={`key-paragraph-${i}`}>
-                        <Button
-                          size="sm"
-                          variant="outline-dark"
-                          active={i === selectedParagraph}
-                          onClick={() =>
-                            setSelectedParagraph(
-                              i === selectedParagraph ? -1 : i
-                            )
-                          }
-                        >
-                          {`${i + 1}`}
-                        </Button>
-                      </td>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {/* Visualization Topics */}
-                  {data?.response.coherence?.error
-                    ? null
-                    : data?.response.coherence?.data
-                        .filter(
-                          ({ is_topic_cluster }) =>
-                            is_topic_cluster || !showToggle
-                        )
-                        .map(({ topic, is_non_local, paragraphs }, i) => {
-                          const topi = topic.at(2) ?? "";
-                          const [left, right] = ["l", "r"].map((lr) =>
-                            is_non_local ? lr : lr.toUpperCase()
-                          );
-                          const paraIconClass = is_non_local
-                            ? "topic-icon-small"
-                            : "topic-icon-large";
-                          return (
-                            <tr key={`topic-paragraph-key-${i}`}>
-                              <td>
-                                <Button
-                                  className="w-100 text-dark text-start"
-                                  variant="none"
-                                  onClick={() =>
-                                    highlightTopic(selectedParagraph, i, topic)
-                                  }
-                                >
-                                  {topi.replaceAll("_", " ")}
-                                </Button>
-                              </td>
-                              {paragraphs.map((paraType, j) => {
-                                const paraContent = `${
-                                  paraType?.is_left ? left : right
-                                }${paraType?.is_topic_sent ? "" : "*"}`;
-                                return (
-                                  <td key={`topic-key-${i}-${j}`}>
-                                    <div
-                                      className="text-center"
-                                      onClick={() =>
-                                        onTopicParagraphClick(i, j, topi)
-                                      }
-                                    >
-                                      {paraType ? (
-                                        <span
-                                          title={paraContent}
-                                          className={paraIconClass}
-                                        >
-                                          <IndicatorIcon unit={paraType} />
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          );
-                        })}
-                </tbody>
-              </table>
+              <div>
+                <table className="mt-1">
+                  <caption>{t("organization.coherence.title")}</caption>
+                  <thead>
+                    <tr>
+                      {/* <td style={{ width: "150px" }}> */}
+                      <th>{t("organization.coherence.paragraphs")}</th>
+                      {paragraphRange.map((i) => (
+                        <th key={`key-paragraph-${i}`}>
+                          <Button
+                            size="sm"
+                            variant="outline-primary"
+                            active={i === selectedParagraph}
+                            onClick={() =>
+                              setSelectedParagraph(
+                                i === selectedParagraph ? -1 : i
+                              )
+                            }
+                          >
+                            {`${i + 1}`}
+                          </Button>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {/* Visualization Topics */}
+                    {data?.response.coherence?.error
+                      ? null
+                      : data?.response.coherence?.data
+                          .filter(
+                            ({ is_topic_cluster }) =>
+                              is_topic_cluster || !showToggle
+                          )
+                          .map(({ topic, is_non_local, paragraphs }, i) => {
+                            const topi = topic.at(2) ?? "";
+                            const [left, right] = ["l", "r"].map((lr) =>
+                              is_non_local ? lr : lr.toUpperCase()
+                            );
+                            const paraIconClass = is_non_local
+                              ? "topic-icon-small"
+                              : "topic-icon-large";
+                            return (
+                              <tr key={`topic-paragraph-key-${i}`}>
+                                <th>
+                                  <Button
+                                    className="w-100 text-primary text-start"
+                                    variant="none"
+                                    onClick={() =>
+                                      highlightTopic(
+                                        selectedParagraph,
+                                        i,
+                                        topic
+                                      )
+                                    }
+                                  >
+                                    {topi.replaceAll("_", " ")}
+                                  </Button>
+                                </th>
+                                {paragraphs.map((paraType, j) => {
+                                  const paraContent = `${
+                                    paraType?.is_left ? left : right
+                                  }${paraType?.is_topic_sent ? "" : "*"}`;
+                                  return (
+                                    <td key={`topic-key-${i}-${j}`}>
+                                      <div
+                                        className="text-center"
+                                        onClick={() =>
+                                          onTopicParagraphClick(i, j, topi)
+                                        }
+                                      >
+                                        {paraType ? (
+                                          <span
+                                            title={paraContent}
+                                            className={paraIconClass}
+                                          >
+                                            <IndicatorIcon unit={paraType} />
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    </td>
+                                  );
+                                })}
+                              </tr>
+                            );
+                          })}
+                  </tbody>
+                </table>
+              </div>
               {/* {visualizationGlobal} */}
               {selectedParagraph < 0 ? null : (
-                <table className="caption-top">
+                <table className="mt-1">
                   <caption>
                     {t("organization.coherence.sentences_in_paragraph", {
                       paragraph: selectedParagraph + 1,
@@ -373,7 +378,7 @@ export const Organization: FC = () => {
                           <td key={`key-sentence-${i}`}>
                             <Button
                               size="sm"
-                              variant="outline-dark"
+                              variant="outline-primary"
                               active={selectedSentence === i}
                               data-sentence={i}
                               onClick={() =>
@@ -402,9 +407,9 @@ export const Organization: FC = () => {
                           : "topic-icon-large";
                         return (
                           <tr key={`topic-sentence-key-${i}`}>
-                            <td>
+                            <th>
                               <Button
-                                className="text-dark text-start"
+                                className="text-primary text-start"
                                 variant="none"
                                 onClick={() =>
                                   onTopicClick(selectedParagraph, i)
@@ -412,7 +417,7 @@ export const Organization: FC = () => {
                               >
                                 {topi.replaceAll("_", " ")}
                               </Button>
-                            </td>
+                            </th>
                             {sentences.map((sentence, j) => {
                               const content = `${
                                 sentence?.is_left ? left : right

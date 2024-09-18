@@ -1,10 +1,6 @@
 import { bind } from '@react-rxjs/core';
 import { type ChatCompletion } from 'openai/resources/chat/completions';
-import {
-  BehaviorSubject,
-  distinctUntilChanged,
-  map
-} from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import {
   AssessExpectationRequest,
   NotesRequest,
@@ -15,7 +11,7 @@ import {
   CopyEditResponse,
   ExpectationData,
   LocalCoherenceResponse,
-  SelectedText
+  SelectedText,
 } from '../lib/ToolResults';
 import { settings$ } from './settings.service';
 
@@ -54,7 +50,6 @@ export const [useScribeFeatureNotes2Prose, featureNotes2Prose$] = bind(
   settings$.pipe(map((settings) => settings.notes2prose)),
   false
 );
-
 
 const NOTES_TO_PROSE = 'notes2prose';
 function logCovertNotes(notes: string, prose: ChatCompletion) {
@@ -121,13 +116,11 @@ export async function postConvertNotes(
   return '';
 }
 
-
 /*** Fix Grammar ***/
 export const [useScribeFeatureGrammar, grammarFeature$] = bind(
   settings$.pipe(map((settings) => settings.grammar)),
   false
 );
-
 
 /*** Clarify selected text ***/
 
@@ -191,7 +184,6 @@ export const [useScribeFeatureClarify, clarifyFeature$] = bind(
   settings$.pipe(map((settings) => settings.grammar)),
   false
 );
-
 
 /*** Assess Expectations ***/
 export const [useAssessFeature, assessFeature$] = bind(
@@ -276,7 +268,6 @@ export const [useScribeFeatureLogicalFlow, featureLogicalFlow] = bind(
   settings$.pipe(map((settings) => !!settings.logical_flow)),
   false
 );
-
 
 /***** Topics *****/
 export const [useScribeFeatureTopics, featureTopics$] = bind(

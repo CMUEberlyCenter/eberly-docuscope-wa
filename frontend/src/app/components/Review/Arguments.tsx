@@ -16,7 +16,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 export const ArgumentsTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-dark">
+      <span className="text-primary">
         <ArgumentsIcon /> {t("arguments.entry")}
       </span>
     )}

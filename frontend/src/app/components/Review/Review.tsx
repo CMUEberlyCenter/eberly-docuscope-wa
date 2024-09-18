@@ -117,11 +117,11 @@ export const Review: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <UserTextView prose={prose} />
-        <Card as={"aside"}>
+        <UserTextView prose={prose} className="my-1" />
+        <Card as={"aside"} className="my-1">
           <Card.Header className="px-0">
             <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
-              <span className="text-dark">{tt("tool.tab.review")}</span>
+              <span className="text-primary">{tt("tool.tab.review")}</span>
               <Logo />
             </Container>
             {/* <Navbar>
@@ -152,7 +152,6 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Container>
           </Navbar> */}
-            {/* <Card.Title className="text-center text-dark">{t("title")}</Card.Title> */}
             <Dropdown className="d-flex justify-content-start mx-2">
               <Dropdown.Toggle variant="white" className="select-button">
                 <div>

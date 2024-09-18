@@ -82,7 +82,6 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                   "flex-grow-1",
                   "outline-section",
                   !leafOnly ? "pointer" : ""
-                  // selected === rule ? "text-bg-dark" : ""
                 )}
                 onClick={() => onSelect(rule)}
               >
@@ -95,10 +94,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                   <li
                     key={cluster.name}
                     aria-selected={selected === cluster}
-                    className={classnames(
-                      "pointer"
-                      // selected === cluster ? "text-bg-dark" : ""
-                    )}
+                    className={classnames("pointer")}
                     onClick={() => onSelectLeaf(cluster)}
                   >
                     {cluster.name}

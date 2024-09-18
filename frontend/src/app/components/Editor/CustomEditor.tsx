@@ -5,37 +5,23 @@ import {
   faUnderline,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, ReactNode, useCallback, useEffect, useState } from "react";
-import {
-  Button,
-  ButtonGroup,
-  ButtonToolbar,
-  Dropdown,
-  Form,
-  OverlayTrigger,
-  Tooltip,
-} from "react-bootstrap";
+import { FC, useCallback, useEffect, useState } from "react";
+import { ButtonGroup, ButtonToolbar, Dropdown, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import {
-  createEditor,
-  Descendant,
-  Editor,
-  Element as SlateElement,
-  Transforms,
-} from "slate";
+import { createEditor, Descendant } from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
   RenderElementProps,
   RenderLeafProps,
   Slate,
-  useSlate,
   withReact,
 } from "slate-react";
-import { CustomText } from "../../slate";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
+import { FormatDropdown } from "./FormatDropdown";
+import { MarkButton } from "./MarkButton";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -87,91 +73,6 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
   </span>
 );
 
-type Markings = "bold" | "underline" | "italic" | "strikethrough";
-type LeafProps = Omit<CustomText, "text"> & {
-  [index in Markings]?: boolean | undefined;
-};
-const isMarkActive = (editor: Editor, format: Markings) => {
-  const marks: LeafProps | null = Editor.marks(editor);
-  return marks && format in marks ? marks[format] === true : false;
-};
-const toggleMark = (editor: Editor, format: Markings) => {
-  const isActive = isMarkActive(editor, format);
-  if (isActive) {
-    Editor.removeMark(editor, format);
-  } else {
-    Editor.addMark(editor, format, true);
-  }
-};
-const isBlockActive = (editor: Editor, format: string): boolean => {
-  const { selection } = editor;
-  if (!selection) return false;
-  const [match] = Editor.nodes(editor, {
-    at: Editor.unhangRange(editor, selection),
-    match: (n) =>
-      !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
-  });
-  return !!match;
-};
-const activeBlockType = (editor: Editor) => {
-  const active = [
-    "heading-one",
-    "heading-two",
-    "heading-three",
-    "heading-four",
-    "heading-five",
-    "heading-six",
-    "bulleted-list",
-    "numbered-list",
-    "paragraph",
-  ].find((format) => isBlockActive(editor, format));
-  return active ?? "paragraph";
-};
-const LIST_TYPES = ["numbered-list", "bulleted-list"];
-
-const toggleBlock = (editor: Editor, format: string) => {
-  const isActive = isBlockActive(editor, format);
-  const isList = LIST_TYPES.includes(format);
-  Transforms.unwrapNodes(editor, {
-    match: (n) =>
-      !Editor.isEditor(n) &&
-      SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type),
-    split: true,
-  });
-  const newProperties: Partial<SlateElement> = {
-    type: isActive ? "paragraph" : isList ? "list-item" : format,
-  };
-  Transforms.setNodes(editor, newProperties);
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
-};
-const MarkButton: FC<{
-  format: Markings;
-  children: ReactNode;
-  tooltip: string;
-}> = ({ format, children, tooltip }) => {
-  const editor = useSlate();
-  return (
-    <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
-      <Button
-        active={isMarkActive(editor, format)}
-        onMouseDown={(e) => {
-          e.preventDefault();
-          toggleMark(editor, format);
-        }}
-        variant="light"
-      >
-        {children}
-        <span className="visually-hidden sr-only">{tooltip}</span>
-      </Button>
-    </OverlayTrigger>
-  );
-};
-
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
@@ -196,6 +97,18 @@ const CustomEditor: FC = () => {
     window.document.title = t("document.title");
   }, [t]);
 
+  // useEffect(() => {
+  //   console.log(selection);
+  //   // if (!selection) return;
+  //   // const [match] = [...Editor.nodes(editor, {
+  //   //   at: Editor.unhangRange(editor, selection),
+  //   //   match: (n) =>
+  //   //     !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
+  //   // })];
+  //   // return !!match;
+
+  // }, [selection])
+
   return (
     <Slate
       editor={editor}
@@ -215,7 +128,7 @@ const CustomEditor: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <main className="d-flex overflow-none h-100 flex-column">
+        <main className="d-flex overflow-none h-100 flex-column py-2">
           <ButtonToolbar aria-label="Editor Tools">
             <ButtonGroup>
               {/* <DropdownButton
@@ -258,29 +171,7 @@ const CustomEditor: FC = () => {
                   </Dropdown.ItemText>
                 </Dropdown.Menu>
               </Dropdown>
-              <Form.Select
-                aria-label="Block format"
-                size="sm"
-                value={activeBlockType(editor)}
-                onChange={(e) => {
-                  const format = e.target.value;
-                  toggleBlock(editor, format);
-                }}
-              >
-                <option value={"paragraph"}>
-                  {t("editor.menu.paragraph")}
-                </option>
-                <option value={"heading-one"}>{t("editor.menu.h1")}</option>
-                <option value={"heading-two"}>{t("editor.menu.h2")}</option>
-                <option value={"heading-three"}>{t("editor.menu.h3")}</option>
-                <option value={"heading-four"}>{t("editor.menu.h4")}</option>
-                <option value={"heading-five"}>{t("editor.menu.h5")}</option>
-                <option value={"heading-six"}>{t("editor.menu.h6")}</option>
-                <option value={"bulleted-list"}>{t("editor.menu.list")}</option>
-                <option value={"numbered-list"}>
-                  {t("editor.menu.numbered")}
-                </option>
-              </Form.Select>
+              <FormatDropdown />
               <MarkButton format="bold" tooltip={t("editor.menu.bold")}>
                 <FontAwesomeIcon icon={faBold} />
               </MarkButton>

@@ -118,7 +118,7 @@ export const DeepLink: FC = () => {
                 className="d-none"
                 readOnly={true}
               />
-              <Button variant="dark" type="submit">
+              <Button variant="primary" type="submit">
                 {t("select")}
               </Button>
             </Form>

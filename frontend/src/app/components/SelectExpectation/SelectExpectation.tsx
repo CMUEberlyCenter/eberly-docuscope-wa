@@ -37,7 +37,7 @@ const SelectExpectation: FC<SelectExpectationProps> = ({
       </Modal.Body>
       <Modal.Footer>
         <Button onClick={onHide}>{t("cancel")}</Button>
-        <Button variant="dark" onClick={onSelect} disabled={!selected}>
+        <Button variant="primary" onClick={onSelect} disabled={!selected}>
           {t("select")}
         </Button>
       </Modal.Footer>

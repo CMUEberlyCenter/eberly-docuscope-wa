@@ -90,7 +90,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>
           <Button
-            variant="dark"
+            variant="primary"
             onClick={handlePlay}
             title={state === "paused" ? "Resume" : "Play"}
           >
@@ -99,16 +99,19 @@ export const TextToSpeech: FC<{ text: string }> = ({
               {state === "paused" ? "Resume" : "Play"}
             </span>
           </Button>
-          <Button variant="dark" onClick={handleStop} title="Stop">
+          <Button variant="primary" onClick={handleStop} title="Stop">
             <FontAwesomeIcon icon={faStop} />
             <span className="sr-only">Stop</span>
           </Button>
         </ButtonGroup>
       </Collapse>
-      <Button onClick={() => setOpen(!open)} variant={!open ? "icon" : "dark"}>
+      <Button
+        onClick={() => setOpen(!open)}
+        variant={!open ? "icon" : "primary"}
+      >
         {!open ? (
           <>
-            <FontAwesomeIcon icon={faVolumeHigh} className="text-dark" />
+            <FontAwesomeIcon icon={faVolumeHigh} className="text-primary" />
             <span className="sr-only visually-hidden">{t("audio.show")}</span>
           </>
         ) : (

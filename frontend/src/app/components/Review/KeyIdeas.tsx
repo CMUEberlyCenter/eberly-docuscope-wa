@@ -11,7 +11,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 export const KeyIdeasTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-dark">
+      <span className="text-primary">
         <KeyIdeasIcon /> {t("key_ideas.entry")}
       </span>
     )}

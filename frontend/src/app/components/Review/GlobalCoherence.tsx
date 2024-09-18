@@ -16,7 +16,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 export const GlobalCoherenceTitle: FC = () => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-dark">
+      <span className="text-primary">
         <GlobalCoherenceIcon /> {t("global_coherence.title")}
       </span>
     )}

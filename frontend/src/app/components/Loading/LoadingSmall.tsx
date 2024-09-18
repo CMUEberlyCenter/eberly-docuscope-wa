@@ -8,7 +8,7 @@ export const LoadingSmall: FC = () => {
     <div role="status" className="loading">
       <DotSpinner
         aria-hidden="true"
-        className="text-dark loading-animate-spin"
+        className="text-primary loading-animate-spin"
       />
       <Translation>
         {(t) => <span className="sr-only visually-hidden">{t("loading")}</span>}

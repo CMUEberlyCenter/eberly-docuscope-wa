@@ -17,7 +17,7 @@ if (content) {
       {/* TODO Use placeholder instead of spinner for loading */}
       <Suspense
         fallback={
-          <Spinner animation="border" role="status" variant="dark">
+          <Spinner animation="border" role="status" variant="primary">
             <span className="visually-hidden">Loading...</span>
           </Spinner>
         }

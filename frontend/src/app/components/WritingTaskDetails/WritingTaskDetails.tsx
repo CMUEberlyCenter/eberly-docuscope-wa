@@ -114,7 +114,7 @@ const WritingTaskDetails: FC<ModalProps> = ({ show, onHide, ...props }) => {
         >
           {t("clipboard")}
         </Button>
-        <Button variant="dark" disabled={!writingTask} onClick={insert}>
+        <Button variant="primary" disabled={!writingTask} onClick={insert}>
           {t("details.insert")}
         </Button>
       </Modal.Footer>

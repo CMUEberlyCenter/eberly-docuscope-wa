@@ -42,7 +42,7 @@ export const ToolButton: FC<ToolButtonProps> = ({
   onClick,
 }) => (
   <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
-    <Button variant="outline-dark" disabled={disabled} onClick={onClick}>
+    <Button variant="outline-primary" disabled={disabled} onClick={onClick}>
       <Stack>
         {icon}
         <span>{title}</span>
@@ -147,7 +147,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
             <Button
               onClick={() => regenerate(tool)}
               variant="icon"
-              className="text-dark"
+              className="text-primary"
             >
               <FontAwesomeIcon icon={faArrowsRotate} />
               <span className="visually-hidden sr-only">
@@ -180,7 +180,7 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
   return (
     <div className="d-flex">
       <Button
-        variant="dark"
+        variant="primary"
         disabled={!text}
         onClick={() => paste(text)}
         className="me-auto mw-50 w-50"

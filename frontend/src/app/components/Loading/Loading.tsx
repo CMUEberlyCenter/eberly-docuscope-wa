@@ -12,7 +12,7 @@ export const Loading: FC = () => {
       <div className="position-absolute top-50 start-50 translate-middle">
         <DotSpinner
           aria-hidden="true"
-          className="text-dark loading-animate-spin"
+          className="text-primary loading-animate-spin"
         />
         <Translation>
           {(t) => (

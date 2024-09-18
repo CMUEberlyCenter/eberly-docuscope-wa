@@ -139,7 +139,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           {t("cancel")}
         </Button>
         <Button
-          variant="dark"
+          variant="primary"
           onClick={() => {
             writingTask.next(selected);
             onHide();

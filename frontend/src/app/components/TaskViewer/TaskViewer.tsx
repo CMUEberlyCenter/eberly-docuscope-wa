@@ -14,7 +14,7 @@ export const TaskViewerButton: FC = () => {
     <>
       <Button
         className="w-50 mw-50 text-truncate"
-        variant="outline-dark"
+        variant="outline-primary"
         onClick={() => setShow(!show)}
         aria-controls={id}
         title={t("tool.button.view.title", {

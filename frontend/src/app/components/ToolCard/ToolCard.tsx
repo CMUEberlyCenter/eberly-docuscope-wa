@@ -488,7 +488,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       </ToolDisplay.Fade>
                     ) : (
                       <Button
-                        variant="dark"
+                        variant="primary"
                         className="mb-1 mx-1"
                         onClick={() => setShowSelectExpectation(true)}
                       >
@@ -683,7 +683,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             {writingTask && (
               <Button
                 className="me-auto mw-50 w-50 text-truncate"
-                variant="outline-dark"
+                variant="outline-primary"
                 onClick={() => setShowWritingTask(true)}
                 title={t("tool.button.view.title", {
                   title: writingTask.rules.name,
@@ -694,7 +694,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
             {selectAvailable && (
               <Button
-                variant={writingTask ? "none" : "dark"}
+                variant={writingTask ? "none" : "primary"}
                 onClick={() => setShowSelectWritingTasks(true)}
               >
                 {writingTask ? (

@@ -13,7 +13,7 @@ $font-family-sans-serif:
   "Segoe UI Symbol",
   "Noto Color Emoji" !default;
 
-$primary: #4ca6ff;
+$primary: #2445f0; // #4ca6ff;
 $secondary: #e8f2f9;
 $light: #f6f7f9;
 
@@ -28,10 +28,11 @@ $theme-colors: (
   "primary": $primary,
   "secondary": $secondary,
   "light": $light,
-  "dark": $primary-text,
+  // "dark": $primary-text,
   "organization": darkBlue,
   //$cmu-secondary-blue-dark,
   "white": white,
+  "highlight": #fffbbb,
   "info": $cmu-secondary-teal,
   "warning": $cmu-secondary-gold,
   "danger": $cmu-secondary-rose,

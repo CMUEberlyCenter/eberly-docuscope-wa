@@ -1,5 +1,10 @@
 .user-text {
   .highlight {
-    background-color: #fffbbb; // TODO set from theme
+    background-color: var(--bs-highlight); // TODO set from theme
+
+    span[data-topic] {
+      color: var(--bs-blue);
+      font-weight: bold;
+    }
   }
 }

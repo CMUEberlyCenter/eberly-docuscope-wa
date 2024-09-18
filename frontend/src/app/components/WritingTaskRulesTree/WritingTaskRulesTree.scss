@@ -23,14 +23,14 @@
 
     &:has([aria-selected="true"]) {
       .outline-section {
-        border-bottom: 3px solid var(--bs-dark);
+        border-bottom: 3px solid var(--bs-primary);
       }
     }
   }
 
   [aria-selected="true"] {
     color: var(--bs-white);
-    background-color: var(--bs-dark) !important;
+    background-color: var(--bs-primary) !important;
     padding-left: 0.25rem;
     padding-right: 0.25rem;
   }

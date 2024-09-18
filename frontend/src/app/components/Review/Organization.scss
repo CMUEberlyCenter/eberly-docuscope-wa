@@ -1,0 +1,28 @@
+.organization {
+  table {
+    max-height: 20px;
+    border: 1px solid var(--bs-gray-400);
+    caption-side: top;
+    caption {
+      // position: sticky;
+      // top: 0;
+      padding-left: 0.25rem;
+      background-color: var(--bs-primary-bg-subtle);
+      font-weight: bold;
+    }
+    // thead tr {
+    //   // position: sticky;
+    //   // top: 0;
+    //   // z-index: 1;
+    // }
+    tr {
+      border-bottom: 1px solid var(--bs-gray-400);
+    }
+    tr th:first-of-type {
+      border-right: 1px solid var(--bs-gray-400);
+      // position: sticky;
+      // left: 0;
+      // z-index: 1;
+    }
+  }
+}

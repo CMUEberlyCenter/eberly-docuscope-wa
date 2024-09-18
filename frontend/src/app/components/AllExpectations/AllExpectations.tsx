@@ -134,7 +134,7 @@ export const AllExpectations: FC = () => {
         <Card as={"aside"}>
           <Card.Header className="px-0">
             <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
-              <span className="text-dark">{tt("tool.tab.generate")}</span>
+              <span className="text-primary">{tt("tool.tab.generate")}</span>
               <Logo />
             </Container>
             {/* <Navbar>
@@ -163,7 +163,7 @@ export const AllExpectations: FC = () => {
                 </Navbar.Brand>
               </Container>
             </Navbar> */}
-            <Card.Title className="text-dark mx-1">
+            <Card.Title className="text-primary mx-1">
               <AllExpectationsIcon /> {t("title")}
             </Card.Title>
           </Card.Header>
