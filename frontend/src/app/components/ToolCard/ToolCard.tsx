@@ -410,7 +410,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Tab.Container>
           </Card.Header>
           <article className="h-100 position-relative overflow-auto">
-            {!currentTool && (
+            {(!currentTool || (currentTool.tool === 'expectation' && !currentTool.expectation)) && (
               <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
                 <HighlightIcon className="icon-lg mx-auto" />
                 <span className="mx-auto text-center">{t("tool.initial")}</span>
@@ -463,7 +463,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 </ToolDisplay.Response>
               </ToolDisplay.Root>
             )}
-            {currentTool?.tool === "expectation" && (
+            {currentTool?.tool === "expectation" && currentTool.expectation && (
               <ToolDisplay.Root
                 // icon={<CheckExpectationIcon />}
                 title={t("tool.button.expectation.tooltip")}
