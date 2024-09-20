@@ -129,7 +129,7 @@ const CustomEditor: FC = () => {
         expandToMin={true}
       >
         <main className="d-flex overflow-none h-100 flex-column py-2">
-          <ButtonToolbar aria-label="Editor Tools">
+          <ButtonToolbar aria-label="Editor Tools" className="align-items-center">
             <ButtonGroup>
               {/* <DropdownButton
                 as={ButtonGroup}

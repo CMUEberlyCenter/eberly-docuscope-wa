@@ -9,7 +9,7 @@ export const WritingTaskTitle: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const writingTask = useWritingTask();
-  const cn = classNames(className, "d-flex align-items-start flex-column");
+  const cn = classNames(className, "d-flex align-items-start flex-column justify-content-center");
 
   return (
     <Translation>
@@ -18,7 +18,7 @@ export const WritingTaskTitle: FC<HTMLProps<HTMLDivElement>> = ({
           <span className="mb-0 text-muted" style={{ fontSize: "12px" }}>
             {t("editor.menu.task")}
           </span>
-          <h6>{writingTask?.info.name ?? t("editor.menu.no_task")}</h6>
+          <h6 className="mb-1">{writingTask?.info.name ?? t("editor.menu.no_task")}</h6>
         </div>
       )}
     </Translation>
