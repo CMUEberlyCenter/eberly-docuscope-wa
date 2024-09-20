@@ -637,12 +637,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                      currentTool.result?.issues
-                        .map(
-                          ({ description, suggestions }) =>
-                            `${description} ${suggestions.join()}`
-                        )
-                        .join()
+                    currentTool.result?.issues
+                      .map(
+                        ({ description, suggestions }) =>
+                          `${description} ${suggestions.join()}`
+                      )
+                      .join()
                   }
                   regenerate={retry}
                 >
@@ -680,7 +680,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
           </article>
           <Card.Footer as={"footer"} className="bg-light d-flex">
-            {writingTask && (
+            {writingTask && (<>
               <Button
                 className="me-auto mw-50 w-50 text-truncate"
                 variant="outline-primary"
@@ -691,22 +691,25 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 {t("tool.button.view.title", { title: writingTask.rules.name })}
               </Button>
-            )}
-            {selectAvailable && (
+              {selectAvailable && (
+                <Button
+                  variant={"none"}
+                  onClick={() => setShowSelectWritingTasks(true)}
+                >
+                  <OutlineDrawerIcon />
+                  <span className="visually-hidden sr-only">
+                    {t("tool.button.select.title")}
+                  </span>
+                </Button>
+              )}
+            </>)}
+            {selectAvailable && !writingTask && (
               <Button
-                variant={writingTask ? "none" : "primary"}
+                className="w-50"
+                variant={"primary"}
                 onClick={() => setShowSelectWritingTasks(true)}
               >
-                {writingTask ? (
-                  <>
-                    <OutlineDrawerIcon />
-                    <span className="visually-hidden sr-only">
-                      {t("tool.button.select.title")}
-                    </span>
-                  </>
-                ) : (
-                  t("tool.button.select.title")
-                )}
+                {t("tool.button.select.title")}
               </Button>
             )}
           </Card.Footer>

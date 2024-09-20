@@ -14,7 +14,7 @@ import { catchError, map, of, shareReplay } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 
 // URL for settings.json, 'base' gets it to work with webpack.
-const SETTINGS_URL = new URL('../settings/settings.json', import.meta.url);
+const SETTINGS_URL = new URL(/* @vite-ignore */'../settings/settings.json', import.meta.url);
 
 // Defines the form of the json settings.
 interface Settings {
