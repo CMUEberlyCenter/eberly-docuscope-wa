@@ -149,13 +149,13 @@ export const Sentences: FC = () => {
             </div>
             {
               <div className="overflow-auto w-100 h-100">
-                <table className="table table-sm sentence-data align-middle table-hover">
+                <table className="sentence-data align-middle table-hover w-100">
                   <tbody>
                     {textData.sentences?.map((sentence, i) =>
                       typeof sentence === "string" ? (
                         <tr key={`p${i}`}>
                           <td
-                            className="bg-primary-subtle paragraph-count"
+                            className="paragraph-count"
                             colSpan={3}
                           >
                             &nbsp;
@@ -164,11 +164,11 @@ export const Sentences: FC = () => {
                       ) : (
                         <tr
                           key={`p${sentence.at(0)}-s${sentence.at(1)}`}
-                          className={
+                          className={classNames("selectable",
                             paragraphIndex === sentence.at(0) &&
                             sentenceIndex === sentence.at(1)
                               ? "table-active"
-                              : ""
+                              : "")
                           }
                           onClick={() =>
                             onHandleSentence(sentence[0], sentence[1])

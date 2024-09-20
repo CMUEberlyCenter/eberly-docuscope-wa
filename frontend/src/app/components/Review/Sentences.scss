@@ -1,47 +1,72 @@
+$noun-phrase: #5c36af;
+$action-verb: #b10008;
+$be-verb: #4296f5;
+
 .topic-text-icon {
-  color: var(--bs-green);
+  color: $noun-phrase;
 }
+
 .topic-text {
-  color: var(--bs-green);
+  color: $noun-phrase;
   font-weight: bold;
 }
 
 .active-verb-icon {
-  color: var(--bs-red);
+  color: $action-verb;
 }
+
 .active-verb {
-  color: var(--bs-red);
+  color: $action-verb;
   text-decoration: underline;
   font-weight: bold;
 }
 
 .be-verb-icon {
-  color: var(--bs-cyan);
+  color: $be-verb;
 }
+
 .be-verb {
-  color: var(--bs-cyan);
+  color: $be-verb;
   text-decoration: wavy underline;
   font-weight: bold;
 }
 
 .sentences {
-  .sentence-data {
+  table.sentence-data {
+    border-spacing: 0px !important;
     counter-reset: paragraph;
+    margin-bottom: 1rem;
 
     .paragraph-count {
+      background-color: var(--bs-gray-200);
       column-span: all;
-      &::before {
+      padding-left: 0.25rem;
+
+      &::after {
         counter-increment: paragraph;
         content: "¶ " counter(paragraph) " ";
       }
     }
 
-    table {
-      border-spacing: 0px !important;
+    tr.table-active {
+      background-color: rgba(var(--bs-emphasis-color-rgb), 0.1);
+    }
+
+    tr.selectable:hover {
+      background-color: rgba(var(--bs-emphasis-color-rgb), 0.075);
+      cursor: pointer;
     }
 
     td {
       padding: 0 !important;
+
+      &.text-center {
+        width: 20px;
+      }
     }
+
+    // .table-active {
+
+    // }
   }
 }
