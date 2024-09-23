@@ -19,6 +19,8 @@ $be-verb: #4296f5;
   color: $action-verb;
   text-decoration: underline;
   font-weight: bold;
+  text-underline-offset: 1.2pt;
+  // text-decoration-thickness: 11%;
 }
 
 .be-verb-icon {
@@ -27,8 +29,10 @@ $be-verb: #4296f5;
 
 .be-verb {
   color: $be-verb;
-  text-decoration: wavy underline;
+  text-decoration: dotted underline;
   font-weight: bold;
+  text-underline-offset: 1.2pt;
+  text-decoration-thickness: 12%;
 }
 
 .sentences {
