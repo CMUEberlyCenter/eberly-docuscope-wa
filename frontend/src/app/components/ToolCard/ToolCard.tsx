@@ -225,7 +225,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/review.html?id=${reviewId}`, "_blank");
+      return window.open(`/review.html?id=${reviewId}`, "_blank", "scrollbars=no,resizable=yes");
     }, [writingTask, editor]);
 
     const onExpectations = useCallback(async () => {
@@ -246,14 +246,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         }),
       });
       if (resp.redirected) {
-        return window.open(resp.url, "_blank");
+        return window.open(resp.url, "_blank", "scrollbars=no,resizable=yes");
       }
       if (!resp.ok) {
         console.error(resp.status);
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/expectations.html?id=${reviewId}`, "_blank");
+      return window.open(`/expectations.html?id=${reviewId}`, "_blank", "scrollbars=no,resizable=yes");
     }, [writingTask, editor]);
 
     return (
