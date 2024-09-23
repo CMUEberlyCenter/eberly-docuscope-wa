@@ -225,7 +225,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/review.html?id=${reviewId}`, "_blank", "scrollbars=no,resizable=yes");
+      return window.open(
+        `/review.html?id=${reviewId}`,
+        "_blank",
+        "scrollbars=no,resizable=yes"
+      );
     }, [writingTask, editor]);
 
     const onExpectations = useCallback(async () => {
@@ -253,7 +257,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         return; // TODO better error reporting
       }
       const reviewId = await resp.json();
-      return window.open(`/expectations.html?id=${reviewId}`, "_blank", "scrollbars=no,resizable=yes");
+      return window.open(
+        `/expectations.html?id=${reviewId}`,
+        "_blank",
+        "scrollbars=no,resizable=yes"
+      );
     }, [writingTask, editor]);
 
     return (
@@ -285,7 +293,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       {t("tool.tab.review")}
                       <FontAwesomeIcon
                         icon={faArrowUpRightFromSquare}
-                        className="ms-1" style={{fontSize: "0.7em"}}
+                        className="ms-1"
+                        style={{ fontSize: "0.7em" }}
                       />
                     </Button>
                     <Nav.Item className="me-auto">
@@ -352,7 +361,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                               onClick={() => onExpectations()}
                               icon={
                                 <div className="d-flex justify-content-center align-items-end">
-                                  <AllExpectationsIcon style={{width: "auto"}}/>
+                                  <AllExpectationsIcon
+                                    style={{ width: "auto" }}
+                                  />
                                   {/* <FontAwesomeIcon
                                     style={{
                                       height: ".75rem",
@@ -410,7 +421,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Tab.Container>
           </Card.Header>
           <article className="h-100 position-relative overflow-auto">
-            {(!currentTool || (currentTool.tool === 'expectation' && !currentTool.expectation)) && (
+            {(!currentTool ||
+              (currentTool.tool === "expectation" &&
+                !currentTool.expectation)) && (
               <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
                 <HighlightIcon className="icon-lg mx-auto" />
                 <span className="mx-auto text-center">{t("tool.initial")}</span>
@@ -637,12 +650,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join()}`
-                      )
-                      .join()
+                      currentTool.result?.issues
+                        .map(
+                          ({ description, suggestions }) =>
+                            `${description} ${suggestions.join()}`
+                        )
+                        .join()
                   }
                   regenerate={retry}
                 >
@@ -680,29 +693,33 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             )}
           </article>
           <Card.Footer as={"footer"} className="bg-light d-flex">
-            {writingTask && (<>
-              <Button
-                className="me-auto mw-50 w-50 text-truncate"
-                variant="secondary"
-                onClick={() => setShowWritingTask(true)}
-                title={t("tool.button.view.title", {
-                  title: writingTask.rules.name,
-                })}
-              >
-                {t("tool.button.view.title", { title: writingTask.rules.name })}
-              </Button>
-              {selectAvailable && (
+            {writingTask && (
+              <>
                 <Button
-                  variant={"none"}
-                  onClick={() => setShowSelectWritingTasks(true)}
+                  className="me-auto mw-50 w-50 text-truncate"
+                  variant="secondary"
+                  onClick={() => setShowWritingTask(true)}
+                  title={t("tool.button.view.title", {
+                    title: writingTask.rules.name,
+                  })}
                 >
-                  <OutlineDrawerIcon height={24}/>
-                  <span className="visually-hidden sr-only">
-                    {t("tool.button.select.title")}
-                  </span>
+                  {t("tool.button.view.title", {
+                    title: writingTask.rules.name,
+                  })}
                 </Button>
-              )}
-            </>)}
+                {selectAvailable && (
+                  <Button
+                    variant={"none"}
+                    onClick={() => setShowSelectWritingTasks(true)}
+                  >
+                    <OutlineDrawerIcon height={24} />
+                    <span className="visually-hidden sr-only">
+                      {t("tool.button.select.title")}
+                    </span>
+                  </Button>
+                )}
+              </>
+            )}
             {selectAvailable && !writingTask && (
               <Button
                 className="w-50"

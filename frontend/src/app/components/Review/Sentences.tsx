@@ -154,22 +154,20 @@ export const Sentences: FC = () => {
                     {textData.sentences?.map((sentence, i) =>
                       typeof sentence === "string" ? (
                         <tr key={`p${i}`}>
-                          <td
-                            className="paragraph-count"
-                            colSpan={3}
-                          >
+                          <td className="paragraph-count" colSpan={3}>
                             &nbsp;
                           </td>
                         </tr>
                       ) : (
                         <tr
                           key={`p${sentence.at(0)}-s${sentence.at(1)}`}
-                          className={classNames("selectable",
+                          className={classNames(
+                            "selectable",
                             paragraphIndex === sentence.at(0) &&
-                            sentenceIndex === sentence.at(1)
+                              sentenceIndex === sentence.at(1)
                               ? "table-active"
-                              : "")
-                          }
+                              : ""
+                          )}
                           onClick={() =>
                             onHandleSentence(sentence[0], sentence[1])
                           }

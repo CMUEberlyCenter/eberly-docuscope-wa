@@ -1,8 +1,5 @@
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
-import {
-  faArrowsRotate,
-  faBookmark
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { FC, HTMLProps, ReactNode, useCallback, useState } from "react";

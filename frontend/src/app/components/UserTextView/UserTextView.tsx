@@ -17,7 +17,11 @@ type UserTextViewProps = HTMLProps<HTMLDivElement> & {
  * This sentence highlighting expects a list of strings that exist in the draft
  * as would be returned by the AI service.
  */
-export const UserTextView: FC<UserTextViewProps> = ({ prose, className, ...props }) => {
+export const UserTextView: FC<UserTextViewProps> = ({
+  prose,
+  className,
+  ...props
+}) => {
   const review = useReview();
   const [content, setContent] = useState(prose);
   const ctx = useContext(ReviewContext);
