@@ -1,13 +1,14 @@
+import classNames from "classnames";
 import escapeHtml from "escape-html";
-import { FC, useContext, useEffect, useState } from "react";
-import { Card, CardProps, Placeholder } from "react-bootstrap";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
+import { Placeholder } from "react-bootstrap";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useReview } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./UserTextView.scss";
 
-type UserTextViewProps = CardProps & {
+type UserTextViewProps = HTMLProps<HTMLDivElement> & {
   /** The html string representing the user's draft. */
   prose: string;
 };
@@ -16,10 +17,11 @@ type UserTextViewProps = CardProps & {
  * This sentence highlighting expects a list of strings that exist in the draft
  * as would be returned by the AI service.
  */
-export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
+export const UserTextView: FC<UserTextViewProps> = ({ prose, className, ...props }) => {
   const review = useReview();
   const [content, setContent] = useState(prose);
   const ctx = useContext(ReviewContext);
+  const cl = classNames(className, "py-1 d-flex h-100 flex-column");
   useEffect(() => {
     if (!ctx?.sentences || ctx.sentences.length <= 0) {
       setContent(prose);
@@ -43,12 +45,12 @@ export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
   }, [content]);
 
   return (
-    <Card as={"main"} {...props}>
-      <Card.Header className="d-flex justify-content-between align-items-center">
+    <main className={cl} {...props}>
+      <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
         <WritingTaskTitle />
         <NoEditIcon />
-      </Card.Header>
-      <Card.Body as="article" className="overflow-auto">
+      </header>
+      <article className="overflow-auto border-top">
         {typeof review !== "object" ? (
           <Placeholder></Placeholder>
         ) : (
@@ -57,7 +59,7 @@ export const UserTextView: FC<UserTextViewProps> = ({ prose, ...props }) => {
             dangerouslySetInnerHTML={{ __html: content }}
           />
         )}
-      </Card.Body>
-    </Card>
+      </article>
+    </main>
   );
 };

@@ -264,7 +264,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           className="overflow-hidden tool-card h-100 bg-light"
           ref={ref}
         >
-          <Card.Header as={"header"} className="bg-light px-0">
+          <Card.Header as={"header"} className="bg-light p-0">
             <Tab.Container
               id={tabId}
               defaultActiveKey="generate"
@@ -305,7 +305,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Tab.Content>
                 <Tab.Pane eventKey="generate">
                   <div className="d-flex justify-content-around">
-                    <ButtonToolbar className="mb-3 mx-auto">
+                    <ButtonToolbar className="mb-1 mx-auto">
                       {(notes2proseFeature || bulletsFeature) && (
                         <ButtonGroup
                           className="bg-white shadow tools"
@@ -373,7 +373,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 </Tab.Pane>
                 <Tab.Pane eventKey="refine">
                   <div className="d-flex justify-content-around">
-                    <ButtonToolbar className="mb-3 mx-auto">
+                    <ButtonToolbar className="mb-1 mx-auto">
                       <ButtonGroup className="bg-white shadow tools" size="sm">
                         {flowFeature && (
                           <ToolButton
