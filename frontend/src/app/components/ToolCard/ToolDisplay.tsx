@@ -188,7 +188,8 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
         {t("tool.paste")}
       </Button>
       <Button
-        variant="secondary"
+        variant="icon"
+        className="text-primary"
         disabled={!text}
         onClick={() => text && navigator.clipboard.writeText(text)}
       >

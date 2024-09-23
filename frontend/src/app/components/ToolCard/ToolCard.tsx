@@ -683,7 +683,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             {writingTask && (<>
               <Button
                 className="me-auto mw-50 w-50 text-truncate"
-                variant="outline-primary"
+                variant="secondary"
                 onClick={() => setShowWritingTask(true)}
                 title={t("tool.button.view.title", {
                   title: writingTask.rules.name,
@@ -696,7 +696,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   variant={"none"}
                   onClick={() => setShowSelectWritingTasks(true)}
                 >
-                  <OutlineDrawerIcon />
+                  <OutlineDrawerIcon height={24}/>
                   <span className="visually-hidden sr-only">
                     {t("tool.button.select.title")}
                   </span>
