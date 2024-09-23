@@ -147,7 +147,7 @@ export const GlobalCoherence: FC = () => {
             </Card.Subtitle>
           )} */}
             {violations && (
-              <article>
+              <article className="mt-3">
                 <h5>{t("global_coherence.contract")}</h5>
                 <Suggestions
                   onSelect={onSelect}
@@ -157,7 +157,7 @@ export const GlobalCoherence: FC = () => {
               </article>
             )}
             {topicShift && (
-              <article className="mt-1">
+              <article className="mt-3">
                 <h5>{t("global_coherence.shift")}</h5>
                 <Suggestions
                   onSelect={onSelect}
@@ -167,7 +167,7 @@ export const GlobalCoherence: FC = () => {
               </article>
             )}
             {illogical && (
-              <article className="mt-1">
+              <article className="mt-3">
                 <h5>{t("global_coherence.order")}</h5>
                 <Suggestions
                   onSelect={onSelect}
@@ -177,7 +177,7 @@ export const GlobalCoherence: FC = () => {
               </article>
             )}
             {redundant && (
-              <article className="mt-1">
+              <article className="mt-3">
                 <h5>{t("global_coherence.redundant")}</h5>
                 <Suggestions
                   onSelect={onSelect}
@@ -187,7 +187,7 @@ export const GlobalCoherence: FC = () => {
               </article>
             )}
             {inconsistent && (
-              <article className="mt-1">
+              <article className="mt-3">
                 <h5>{t("global_coherence.inconsistent")}</h5>
                 <Suggestions
                   onSelect={onSelect}
