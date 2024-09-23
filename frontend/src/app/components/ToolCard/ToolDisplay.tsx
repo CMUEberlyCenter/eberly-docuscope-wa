@@ -18,7 +18,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
-import AIResponseIcon from "../../assets/icons/AIResponse.svg?react";
+import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
 import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { ToolResult } from "../../lib/ToolResults";
@@ -139,7 +139,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
   return (
     <section {...props} className={cn}>
       <header className="d-flex">
-        <AIResponseIcon className="me-2" />
+        <AIResponseIcon className="me-2 text-body-tertiary" />
         <span className="fw-bold">{t("tool.output")}</span>
         <ButtonToolbar className="ms-auto">
           {tool?.result && text && <TextToSpeech text={text} />}
