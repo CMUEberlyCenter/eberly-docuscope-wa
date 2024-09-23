@@ -1,8 +1,7 @@
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
 import {
   faArrowsRotate,
-  faBookmark,
-  faClipboard,
+  faBookmark
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
@@ -20,12 +19,13 @@ import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/AIResponse.svg?react";
+import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { ToolResult } from "../../lib/ToolResults";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import { TextToSpeech } from "../scribe/TextToSpeech";
 import { LoadingSmall } from "../Loading/LoadingSmall";
+import { TextToSpeech } from "../scribe/TextToSpeech";
 
 type ToolButtonProps = {
   tooltip: string;
@@ -192,7 +192,7 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
         disabled={!text}
         onClick={() => text && navigator.clipboard.writeText(text)}
       >
-        <FontAwesomeIcon icon={faClipboard} />
+        <ClipboardIcon />
         <span className="visually-hidden sr-only">{t("clipboard")}</span>
       </Button>
     </div>
