@@ -23,7 +23,7 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
-import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
+import AllExpectationsIcon from "../../assets/icons/check_all_expectations_new_win_icon.svg?react";
 import CheckExpectationIcon from "../../assets/icons/check_expectation_icon.svg?react";
 import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
@@ -257,7 +257,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     }, [writingTask, editor]);
 
     return (
-      <div className="p-2">
+      <div className="py-2">
         <Card
           {...props}
           as="section"
@@ -285,7 +285,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       {t("tool.tab.review")}
                       <FontAwesomeIcon
                         icon={faArrowUpRightFromSquare}
-                        className="ms-1"
+                        className="ms-1" style={{fontSize: "0.7em"}}
                       />
                     </Button>
                     <Nav.Item className="me-auto">
@@ -352,15 +352,15 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                               onClick={() => onExpectations()}
                               icon={
                                 <div className="d-flex justify-content-center align-items-end">
-                                  <AllExpectationsIcon />
-                                  <FontAwesomeIcon
+                                  <AllExpectationsIcon style={{width: "auto"}}/>
+                                  {/* <FontAwesomeIcon
                                     style={{
                                       height: ".75rem",
                                       width: ".75rem",
                                     }}
                                     className="mx-1"
                                     icon={faArrowUpRightFromSquare}
-                                  />
+                                  /> */}
                                 </div>
                               }
                               title={t("tool.button.expectations.title")}
