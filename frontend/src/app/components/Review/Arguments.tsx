@@ -111,7 +111,7 @@ export const Arguments: FC = () => {
             </Card.Subtitle>
           )} */}
             {review.response.main_argument ? (
-              <article>
+              <article className="mt-3">
                 <h5>{t("arguments.main")}</h5>
                 <p>{review.response.main_argument}</p>
                 <Claims
@@ -122,7 +122,7 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {review.response.counter_examples?.length ? (
-              <article>
+              <article className="mt-3">
                 <h5>{t("arguments.counter_examples")}</h5>
                 <Claims
                   onSelect={onSelect}
@@ -132,7 +132,7 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {review.response.rebuttals?.length ? (
-              <article>
+              <article className="mt-3">
                 <h5>{t("arguments.rebuttals")}</h5>
                 <Claims
                   onSelect={onSelect}
