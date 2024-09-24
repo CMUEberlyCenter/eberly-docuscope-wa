@@ -153,7 +153,7 @@ export const Review: FC = () => {
             </Container>
           </Navbar> */}
             <Dropdown className="d-flex justify-content-start mx-2">
-              <Dropdown.Toggle variant="white" className="select-button">
+              <Dropdown.Toggle variant="white" className="select-button shadow">
                 <div>
                   <ToolTitle tool={tool} />
                 </div>
