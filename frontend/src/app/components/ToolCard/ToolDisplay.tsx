@@ -70,7 +70,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
   return (
     <div className={cn} {...props}>
       <header className="text-center">
-        <h5>{title}</h5>
+        <h5 className="fs-6 mb-0">{title}</h5>
         <h6 className="text-muted">
           {tool?.datetime.toLocaleString()}
           {useBookmarks && (
