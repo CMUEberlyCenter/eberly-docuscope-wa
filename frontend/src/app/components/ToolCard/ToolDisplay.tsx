@@ -6,6 +6,7 @@ import { FC, HTMLProps, ReactNode, useCallback, useState } from "react";
 import {
   Alert,
   Button,
+  ButtonProps,
   ButtonToolbar,
   Card,
   OverlayTrigger,
@@ -24,22 +25,19 @@ import { Loading } from "../Loading/Loading";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { TextToSpeech } from "../scribe/TextToSpeech";
 
-type ToolButtonProps = {
+type ToolButtonProps = ButtonProps & {
   tooltip: string;
   icon: ReactNode;
   title: string;
-  onClick: () => void;
-  disabled?: boolean;
 };
 export const ToolButton: FC<ToolButtonProps> = ({
-  disabled,
   tooltip,
   icon,
   title,
-  onClick,
+  ...props
 }) => (
   <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
-    <Button variant="outline-primary" disabled={disabled} onClick={onClick}>
+    <Button variant="outline-primary" {...props}>
       <Stack>
         {icon}
         <span>{title}</span>

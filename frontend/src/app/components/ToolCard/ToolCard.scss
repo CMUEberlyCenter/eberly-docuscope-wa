@@ -16,6 +16,17 @@
     button {
       width: 64px;
       height: 64px;
+      border: none; // overriding Bootstrap button styling
+      border-left-style: solid;
+      border-color: var(--bs-gray-400);
+
+      &:first-child {
+        border-left-style: none;
+      }
+
+      &[disabled] {
+        color: gray !important;
+      }
 
       svg {
         width: 24px;
