@@ -6,6 +6,12 @@
     height: 48px;
   }
 
+  nav {
+    .active {
+      font-weight: bolder;
+    }
+  }
+
   .tools {
     button {
       width: 64px;
