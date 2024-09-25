@@ -19,5 +19,8 @@
     thead tr button {
       width: 34px;
     }
+    tbody td button.btn-icon {
+      padding: 0 !important;
+    }
   }
 }

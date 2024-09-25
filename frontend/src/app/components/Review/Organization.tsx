@@ -34,9 +34,7 @@ import { Translation, useTranslation } from "react-i18next";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { useOnTopicData } from "../../service/review.service";
 import {
-  highlightParagraph,
-  highlightSentence,
-  highlightTopic,
+  clearAllHighlights
 } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import "./Organization.scss";
@@ -193,54 +191,46 @@ const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
   </Translation>
 );
 
+type Topic = string[];
+type SelectedRowCol = {
+  paragraph?: number;
+  topic?: Topic;
+  sentence?: number;
+} | null;
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
   const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
-  const [selectedParagraph, setSelectedParagraph] = useState(-1);
-  const [selectedSentence, setSelectedSentence] = useState(-1);
+  const [selected, setSelected] = useState<SelectedRowCol>(null);
+  // const [selectedParagraph, setSelectedParagraph] = useState(-1);
+  // const [selectedSentence, setSelectedSentence] = useState(-1);
+  // const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
 
   useEffect(() => {
     setParagraphRange([
       ...Array(data?.response.coherence?.num_paras ?? 0).keys(),
     ]);
-    setSelectedParagraph(-1);
-    setSelectedSentence(-1);
+    setSelected(null);
   }, [data]);
 
+  const onSelectTopic = useCallback((topic: Topic) => {
+    setSelected(selected?.topic === topic ? null : { topic });
+  }, [selected]);
+  const onSelectParagraph = useCallback((paragraph: number) => {
+    setSelected(selected?.paragraph === paragraph ? null : { paragraph });
+  }, [selected]);
+  const onSelectCell = useCallback((topic: Topic, paragraph: number) => {
+    setSelected(selected?.paragraph === paragraph && selected?.topic === topic ? null : { paragraph, topic })
+  }, [selected]);
+
   useEffect(() => {
-    setSelectedSentence(-1);
-    highlightParagraph(selectedParagraph);
-  }, [selectedParagraph]);
-  useEffect(
-    () => highlightSentence(selectedParagraph, selectedSentence),
-    [selectedParagraph, selectedSentence]
-  );
-  const onTopicParagraphClick = useCallback(
-    (index: number, paragraph: number, topic: string) => {
-      const topics =
-        data?.response.coherence?.data.at(index)?.topic.slice(0, 2) ?? [];
-      highlightTopic(paragraph, -1, topics.length ? topics : [topic]);
-    },
-    [data]
-  );
-  const onTopicSentenceClick = useCallback(
-    (index: number, paragraph: number, sentence: number, topic: string) => {
-      const topics =
-        data?.response.coherence?.data.at(index)?.topic.slice(0, 2) ?? [];
-      highlightTopic(paragraph, sentence, topics.length ? topics : [topic]);
-    },
-    [data]
-  );
-  const onTopicClick = useCallback(
-    (paragraph: number, sentence: number) => {
-      const topics =
-        data?.response.coherence?.data.at(paragraph)?.topic.slice(0, 2) ?? [];
-      highlightTopic(paragraph, sentence, topics);
-    },
-    [data]
-  );
+    clearAllHighlights();
+    selected?.topic?.forEach(topic => document.querySelectorAll(`.user-text .word[data-topic="${topic}"]`).forEach(ele => ele.classList.add('word-highlight')));
+    if (typeof(selected?.paragraph) === 'number') {
+      document.querySelectorAll(`.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`).forEach(ele=> ele.classList.add('paragraph-highlight'));
+    }
+  }, [selected])
 
   return (
     <ReviewReset>
@@ -278,10 +268,8 @@ export const Organization: FC = () => {
                     />
                   </div>
                 </div> */}
-            {/* </Card.Header>
-              <Card.Body> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
-              <div className=" mt-1 mw-100 flex-grow-1">
+              <div className="mt-1 mw-100 flex-grow-1">
                 {paragraphRange.length > 0 && (
                   <DataTable
                     options={{
@@ -313,12 +301,8 @@ export const Organization: FC = () => {
                             <Button
                               size="sm"
                               variant="outline-primary"
-                              active={i === selectedParagraph}
-                              onClick={() =>
-                                setSelectedParagraph(
-                                  i === selectedParagraph ? -1 : i
-                                )
-                              }
+                              active={i === selected?.paragraph}
+                              onClick={() => onSelectParagraph(i)}
                             >
                               {`${i + 1}`}
                             </Button>
@@ -331,108 +315,95 @@ export const Organization: FC = () => {
                       {data?.response.coherence?.error
                         ? null
                         : data?.response.coherence?.data
-                            .filter(
-                              ({ is_topic_cluster }) =>
-                                is_topic_cluster || !showToggle
-                            )
-                            .map(
-                              (
-                                { topic, is_non_local, paragraphs, sent_count },
-                                i
-                              ) => {
-                                const topi =
-                                  topic.at(2)?.replaceAll("_", " ") ?? "";
-                                const [left, right] = ["l", "r"].map((lr) =>
-                                  is_non_local ? lr : lr.toUpperCase()
-                                );
-                                const paraIconClass = is_non_local
-                                  ? "topic-icon-small"
-                                  : "topic-icon-large";
-                                return (
-                                  <tr key={`topic-paragraph-key-${i}`}>
-                                    <td
-                                      data-search={topi}
-                                      data-order={sent_count}
-                                      className="p-0"
+                          .filter(
+                            ({ is_topic_cluster }) =>
+                              is_topic_cluster || !showToggle
+                          )
+                          .map(
+                            (
+                              { topic, is_non_local, paragraphs, sent_count },
+                              i
+                            ) => {
+                              const topi =
+                                topic.at(2)?.replaceAll("_", " ") ?? "";
+                              const [left, right] = ["l", "r"].map((lr) =>
+                                is_non_local ? lr : lr.toUpperCase()
+                              );
+                              const paraIconClass = is_non_local
+                                ? "topic-icon-small"
+                                : "topic-icon-large";
+                              return (
+                                <tr key={`topic-paragraph-key-${i}`}>
+                                  <td
+                                    data-search={topi}
+                                    data-order={sent_count}
+                                    className="p-0"
+                                  >
+                                    <Button
+                                      className="w-100 text-primary text-start"
+                                      variant="none"
+                                      active={topic === selected?.topic}
+                                      onClick={() => onSelectTopic(topic)}
                                     >
-                                      <Button
-                                        className="w-100 text-primary text-start"
-                                        variant="none"
-                                        onClick={() =>
-                                          highlightTopic(
-                                            selectedParagraph,
-                                            i,
-                                            topic
-                                          )
-                                        }
-                                      >
-                                        {topi}
-                                      </Button>
-                                    </td>
-                                    {paragraphs.map((paraType, j) => {
-                                      const paraContent = `${
-                                        paraType?.is_left ? left : right
+                                      {topi}
+                                    </Button>
+                                  </td>
+                                  {paragraphs.map((paraType, j) => {
+                                    const paraContent = `${paraType?.is_left ? left : right
                                       }${paraType?.is_topic_sent ? "" : "*"}`;
-                                      return (
-                                        <td
-                                          key={`topic-key-${i}-${j}`}
-                                          className="p-0"
-                                        >
-                                          <div
-                                            className="text-center"
-                                            onClick={() =>
-                                              onTopicParagraphClick(i, j, topi)
-                                            }
-                                          >
-                                            {paraType ? (
-                                              <span
-                                                title={paraContent}
-                                                className={paraIconClass}
-                                              >
-                                                <IndicatorIcon
-                                                  unit={paraType}
-                                                />
-                                              </span>
-                                            ) : null}
-                                          </div>
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                );
-                              }
-                            )}
+                                    return (
+                                      <td
+                                        key={`topic-key-${i}-${j}`}
+                                        className="p-0 text-center"
+                                      >
+                                        {paraType ? (
+                                          <Button variant="icon"
+                                            title={paraContent}
+                                            className={paraIconClass}
+                                            onClick={() => onSelectCell(topic, j)}>
+                                            <IndicatorIcon
+                                              unit={paraType}
+                                            />
+                                          </Button>
+                                        ) : null}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              );
+                            }
+                          )}
                     </tbody>
                   </DataTable>
                 )}
               </div>
               {/* {visualizationGlobal} */}
-              {true || selectedParagraph < 0 ? null : (
+              {(true || selected?.paragraph) ? null : (
                 <div className="mw-100 mt-1 overflow-auto">
                   <table>
                     <caption>
                       {t("organization.coherence.sentences_in_paragraph", {
-                        paragraph: selectedParagraph + 1,
+                        paragraph: selected?.paragraph??0 + 1,
                       })}
                     </caption>
                     <thead>
                       <tr>
                         <td>{t("organization.coherence.sentences")}</td>
                         {data?.response.local
-                          ?.at(selectedParagraph)
+                          ?.at(selected?.paragraph??0)
                           ?.data?.at(0)
                           ?.sentences.map((_sentence, i) => (
                             <td key={`key-sentence-${i}`}>
                               <Button
                                 size="sm"
                                 variant="outline-primary"
-                                active={selectedSentence === i}
+                                active={selected?.sentence === i}
                                 data-sentence={i}
-                                onClick={() =>
-                                  setSelectedSentence(
-                                    selectedSentence === i ? -1 : i
-                                  )
-                                }
+                                // onClick={() =>
+                                //   setSelectedSentence(
+                                //     selectedSentence === i ? -1 : i
+                                //   )
+                                // }
                               >
                                 {i + 1}
                               </Button>
@@ -442,7 +413,7 @@ export const Organization: FC = () => {
                     </thead>
                     <tbody>
                       {data?.response.local
-                        ?.at(selectedParagraph)
+                        ?.at(selected?.paragraph??0)
                         ?.data?.filter((topic) => !!topic)
                         .map(({ topic, is_non_local, sentences }, i) => {
                           const topi = topic.at(2) ?? "";
@@ -458,17 +429,17 @@ export const Organization: FC = () => {
                                 <Button
                                   className="text-primary text-start"
                                   variant="none"
-                                  onClick={() =>
-                                    onTopicClick(selectedParagraph, i)
-                                  }
+                                  // onClick={() =>
+                                  //   setSelectedTopic(topic)
+                                  //   // onTopicClick(selectedParagraph, i)
+                                  // }
                                 >
                                   {topi.replaceAll("_", " ")}
                                 </Button>
                               </th>
                               {sentences.map((sentence, j) => {
-                                const content = `${
-                                  sentence?.is_left ? left : right
-                                }${sentence?.is_topic_sent ? "" : "*"}`;
+                                const content = `${sentence?.is_left ? left : right
+                                  }${sentence?.is_topic_sent ? "" : "*"}`;
                                 return (
                                   <td
                                     className="text-center p-0"
@@ -476,14 +447,11 @@ export const Organization: FC = () => {
                                   >
                                     <div
                                       className="topic-type-default"
-                                      onClick={() =>
-                                        onTopicSentenceClick(
-                                          i,
-                                          selectedParagraph,
-                                          j,
-                                          topi
-                                        )
-                                      }
+                                      // onClick={() => {
+                                      //   setSelectedSentence(selectedSentence === j ? );
+                                      //   setSelectedTopic(topic);
+                                      // }
+                                      // }
                                     >
                                       {sentence ? (
                                         <span

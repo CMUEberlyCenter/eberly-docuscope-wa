@@ -7,4 +7,20 @@
       font-weight: bold;
     }
   }
+
+  .paragraph-highlight {
+    background-color: var(--bs-highlight);
+    span[data-topic] {
+      text-decoration: underline dotted;
+      &.word-highlight {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .word-highlight {
+    color: var(--bs-blue);
+    // background: #f7f7f7;
+    font-weight: bolder;
+  }
 }

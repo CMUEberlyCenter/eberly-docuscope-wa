@@ -27,8 +27,12 @@ export function clearAllHighlights() {
  */
 export function highlightParagraph(aParagraphIndex: number) {
   clearAllHighlights();
-  const pId = `p${aParagraphIndex + 1}`;
-  const element = document.getElementById(pId);
+  if (aParagraphIndex < 0) return;
+  const element = document.querySelector(
+    `.paragraph[data-ds-paragraph="${aParagraphIndex + 1}"]`
+  );
+  // const pId = `p${aParagraphIndex + 1}`;
+  // const element = document.getElementById(pId);
   element?.classList.add('paragraph-highlight');
   element?.scrollIntoView();
 }
@@ -48,11 +52,6 @@ export function highlightSentence(
   );
   element?.classList.add('highlight');
   element?.scrollIntoView();
-
-  // const pId = `p${aParagraphIndex + 1}`;
-  // document.getElementById(pId)?.classList.add('paragraph-highlight');
-  // const sId = `p${aParagraphIndex + 1}s${aSentenceIndex + 1}`;
-  // document.getElementById(sId)?.classList.add('sentence-highlight');
 }
 
 /**
