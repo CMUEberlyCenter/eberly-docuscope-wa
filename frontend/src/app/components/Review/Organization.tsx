@@ -78,6 +78,7 @@ const SolidCircle: FC = () => (
     {(t) => (
       <i
         className="fa-solid fa-circle text-organization"
+        style={{fontSize: "1rem"}}
         title={t("organization.legend.before_verb")}
         aria-description={t("organization.legend.solid_circle")}
       ></i>
@@ -96,9 +97,9 @@ const DotSolidCircle: FC = () => (
       >
         <i
           className="fa-solid fa-circle"
-          style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}
+          style={{ fontSize: "0.3rem", transform: "translateY(-0.75rem)" }}
         ></i>
-        <i className="fa-solid fa-circle"></i>
+        <i className="fa-solid fa-circle" style={{fontSize: "1rem"}}></i>
       </span>
     )}
   </Translation>
@@ -110,6 +111,7 @@ const OutlineCircle: FC = () => (
     {(t) => (
       <i
         className="fa-regular fa-circle text-organization"
+        style={{fontSize: "1rem"}}
         title={t("organization.legend.after_verb")}
         aria-description={t("organization.legend.empty_circle")}
       ></i>
@@ -128,9 +130,9 @@ const DotOutlineCircle: FC = () => (
       >
         <i
           className="fa-solid fa-circle"
-          style={{ fontSize: "0.3em", transform: "translateY(-0.75rem)" }}
+          style={{ fontSize: "0.3rem", transform: "translateY(-0.75rem)" }}
         ></i>
-        <i className="fa-regular fa-circle"></i>
+        <i className="fa-regular fa-circle" style={{fontSize: "1rem"}}></i>
       </span>
     )}
   </Translation>
