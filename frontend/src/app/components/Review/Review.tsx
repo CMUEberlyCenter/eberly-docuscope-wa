@@ -208,7 +208,7 @@ export const Review: FC = () => {
             </Dropdown.Menu>
           </Dropdown>
           {/* </Card.Header> */}
-          <div className="position-relative bg-light flex-grow-1 overflow-auto">
+          <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <Arguments />}
             {tool === "expectations" && <NullTool />}

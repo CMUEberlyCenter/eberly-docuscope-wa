@@ -129,7 +129,7 @@ export const AllExpectations: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <UserTextView prose={prose} />
+        <UserTextView prose={prose} className="my-1"/>
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <header>
             <Container className="d-flex justify-content-between align-items-baseline border-bottom">

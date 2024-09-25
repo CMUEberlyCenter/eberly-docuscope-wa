@@ -25,7 +25,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
   const review = useReview();
   const [content, setContent] = useState(prose);
   const ctx = useContext(ReviewContext);
-  const cl = classNames(className, "py-1 d-flex h-100 flex-column");
+  const cl = classNames(className, "d-flex flex-column");
   useEffect(() => {
     if (!ctx?.sentences || ctx.sentences.length <= 0) {
       setContent(prose);
