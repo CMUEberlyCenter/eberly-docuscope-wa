@@ -295,6 +295,7 @@ export const Organization: FC = () => {
                       ],
                       fixedColumns: { start: 1 },
                       caption: t("organization.coherence.title"),
+                      searching: false
                     }}
                   >
                     {/* <caption>{t("organization.coherence.title")}</caption> */}
@@ -333,7 +334,7 @@ export const Organization: FC = () => {
                               ({ is_topic_cluster }) =>
                                 is_topic_cluster || !showToggle
                             )
-                            .map(({ topic, is_non_local, paragraphs }, i) => {
+                            .map(({ topic, is_non_local, paragraphs, sent_count }, i) => {
                               const topi =
                                 topic.at(2)?.replaceAll("_", " ") ?? "";
                               const [left, right] = ["l", "r"].map((lr) =>
@@ -344,7 +345,7 @@ export const Organization: FC = () => {
                                 : "topic-icon-large";
                               return (
                                 <tr key={`topic-paragraph-key-${i}`}>
-                                  <td data-search={topi} className="p-0">
+                                  <td data-search={topi} data-order={sent_count} className="p-0">
                                     <Button
                                       className="w-100 text-primary text-start"
                                       variant="none"
@@ -394,7 +395,7 @@ export const Organization: FC = () => {
                 )}
               </div>
               {/* {visualizationGlobal} */}
-              {selectedParagraph < 0 ? null : (
+              {true || selectedParagraph < 0 ? null : (
                 <div className="mw-100 mt-1 overflow-auto">
                   <table>
                     <caption>

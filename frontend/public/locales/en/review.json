@@ -73,6 +73,7 @@
       "before_verb": "Topic before the main verb.",
       "solid_circle": "A filled circle.",
       "topic": "Topic in a topic sentence.",
+      "before_topic": "Topic before the main verb of a topic sentence.",
       "dot_solid_circle": "A solid circle with a small circle in the upper left corner.",
       "after_verb": "Topic after the main verb.",
       "empty_circle": "An empty circle.",
@@ -85,7 +86,7 @@
     "coherence": {
       "title": "Terms Across Paragraphs",
       "topic_only": "Show only topic clusters:",
-      "paragraphs": "Paragraphs:",
+      "paragraphs": "Topic",
       "sentences_in_paragraph": "Coherence across sentences in paragraph: {{paragraph}}",
       "sentences": "Sentences:"
     }
