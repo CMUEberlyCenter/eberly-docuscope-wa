@@ -3,8 +3,7 @@ import {
   Accordion,
   AccordionProps,
   Alert,
-  Card,
-  Container,
+  Container
 } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -125,15 +124,15 @@ export const AllExpectations: FC = () => {
   return (
     <ReviewProvider>
       <Split
-        className="container-fluid h-100 w-100 d-flex flex-row"
+        className="container-fluid h-100 w-100 d-flex flex-row align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
       >
         <UserTextView prose={prose} />
-        <Card as={"aside"}>
-          <Card.Header className="px-0">
-            <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
+        <aside className="my-1 border rounded bg-light d-flex flex-column">
+          <header>
+            <Container className="d-flex justify-content-between align-items-baseline border-bottom">
               <span className="text-primary">{tt("tool.tab.generate")}</span>
               <Logo />
             </Container>
@@ -163,11 +162,11 @@ export const AllExpectations: FC = () => {
                 </Navbar.Brand>
               </Container>
             </Navbar> */}
-            <Card.Title className="text-primary mx-1">
+            <div className="container-fluid text-primary mb-2 border-bottom py-2">
               <AllExpectationsIcon /> {t("title")}
-            </Card.Title>
-          </Card.Header>
-          <Card.Body className="h-100 overflow-auto position-relative bg-light">
+            </div>
+          </header>
+          <div className="container-fluid overflow-auto position-relative flex-grow-1 ">
             {/* Assumes strict two level writing tasks... */}
             {writingTask?.rules.rules.map((rule, i) => (
               <ExpectationRule
@@ -177,9 +176,13 @@ export const AllExpectations: FC = () => {
                 activeKey={current}
               />
             )) ?? <Alert variant="warning">{t("error.no_task")}</Alert>}
-          </Card.Body>
-          <Card.Footer>{writingTask && <TaskViewerButton />}</Card.Footer>
-        </Card>
+          </div>
+          {writingTask && (
+            <Container as={"footer"} className="border-top py-2">
+              <TaskViewerButton />
+            </Container>
+          )}
+        </aside>
       </Split>
     </ReviewProvider>
   );
