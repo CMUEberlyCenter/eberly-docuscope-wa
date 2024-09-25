@@ -425,11 +425,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             {(!currentTool ||
               (currentTool.tool === "expectation" &&
                 !currentTool.expectation)) && (
-                <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
-                  <HighlightIcon className="icon-lg mx-auto" />
-                  <span className="mx-auto text-center">{t("tool.initial")}</span>
-                </Stack>
-              )}
+              <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
+                <HighlightIcon className="icon-lg mx-auto" />
+                <span className="mx-auto text-center">{t("tool.initial")}</span>
+              </Stack>
+            )}
             {/* Maybe use Carousel for history? */}
             {currentTool?.tool === "prose" && (
               <ToolDisplay.Root
@@ -651,12 +651,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   text={
                     currentTool.result?.general_assessment ??
                     "" +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join()}`
-                      )
-                      .join()
+                      currentTool.result?.issues
+                        .map(
+                          ({ description, suggestions }) =>
+                            `${description} ${suggestions.join()}`
+                        )
+                        .join()
                   }
                   regenerate={retry}
                 >

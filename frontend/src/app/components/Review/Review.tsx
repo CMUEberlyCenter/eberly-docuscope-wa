@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Card, Container, Dropdown, Stack } from "react-bootstrap";
+import { Container, Dropdown, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
@@ -112,19 +112,26 @@ export const Review: FC = () => {
   return (
     <ReviewProvider>
       <Split
-        className="container-fluid h-100 w-100 d-flex flex-row review"
+        className="container-fluid h-100 w-100 d-flex flex-row review align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
       >
         <UserTextView prose={prose} className="my-1" />
-        <Card as={"aside"} className="my-1">
-          <Card.Header className="px-0">
+        <aside className="my-1 border rounded bg-light d-flex flex-column">
+          <header>
             <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
               <span className="text-primary">{tt("tool.tab.review")}</span>
               <Logo />
             </Container>
-            {/* <Navbar>
+          </header>
+          {/* <Card as={"aside"} className="my-1"> */}
+          {/* <Card.Header className="px-0">
+            <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
+              <span className="text-primary">{tt("tool.tab.review")}</span>
+              <Logo />
+            </Container> */}
+          {/* <Navbar>
             <Container>
               <Nav defaultActiveKey={"review"} variant="tabs">
                 <Nav.Item>
@@ -152,56 +159,56 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Container>
           </Navbar> */}
-            <Dropdown className="d-flex justify-content-start mx-2">
-              <Dropdown.Toggle variant="white" className="select-button shadow">
-                <div>
-                  <ToolTitle tool={tool} />
-                </div>
-              </Dropdown.Toggle>
-              <Dropdown.Menu>
-                <Dropdown.Header>
-                  <NullTitle />
-                </Dropdown.Header>
-                {argumentsFeature && (
-                  <Dropdown.Item onClick={() => onSelect("arguments")}>
-                    <ToolTitle tool="arguments" />
-                  </Dropdown.Item>
-                )}
-                {ideasFeature && (
-                  <Dropdown.Item onClick={() => onSelect("key_ideas")}>
-                    <ToolTitle tool="key_ideas" />
-                  </Dropdown.Item>
-                )}
-                {coherenceFeature && (
-                  <Dropdown.Item onClick={() => onSelect("global_coherence")}>
-                    <ToolTitle tool="global_coherence" />
-                  </Dropdown.Item>
-                )}
-                {organizationFeature && (
-                  <Dropdown.Item onClick={() => onSelect("organization")}>
-                    <ToolTitle tool="organization" />
-                  </Dropdown.Item>
-                )}
-                {sentencesFeature && (
-                  <Dropdown.Item onClick={() => onSelect("sentences")}>
-                    <ToolTitle tool="sentences" />
-                  </Dropdown.Item>
-                )}
-                {expectationsFeature && (
-                  <Dropdown.Item onClick={() => onSelect("expectations")}>
-                    <ToolTitle tool="expectations" />
-                  </Dropdown.Item>
-                )}
-                {impressionsFeature && (
-                  <Dropdown.Item onClick={() => onSelect("impressions")}>
-                    <ToolTitle tool="impressions" />
-                  </Dropdown.Item>
-                )}
-                {/* Add tool title select option here. */}
-              </Dropdown.Menu>
-            </Dropdown>
-          </Card.Header>
-          <Card.Body className="h-100 overflow-auto position-relative bg-light">
+          <Dropdown className="d-flex justify-content-start mx-2 mb-2">
+            <Dropdown.Toggle variant="white" className="select-button shadow">
+              <div>
+                <ToolTitle tool={tool} />
+              </div>
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Header>
+                <NullTitle />
+              </Dropdown.Header>
+              {argumentsFeature && (
+                <Dropdown.Item onClick={() => onSelect("arguments")}>
+                  <ToolTitle tool="arguments" />
+                </Dropdown.Item>
+              )}
+              {ideasFeature && (
+                <Dropdown.Item onClick={() => onSelect("key_ideas")}>
+                  <ToolTitle tool="key_ideas" />
+                </Dropdown.Item>
+              )}
+              {coherenceFeature && (
+                <Dropdown.Item onClick={() => onSelect("global_coherence")}>
+                  <ToolTitle tool="global_coherence" />
+                </Dropdown.Item>
+              )}
+              {organizationFeature && (
+                <Dropdown.Item onClick={() => onSelect("organization")}>
+                  <ToolTitle tool="organization" />
+                </Dropdown.Item>
+              )}
+              {sentencesFeature && (
+                <Dropdown.Item onClick={() => onSelect("sentences")}>
+                  <ToolTitle tool="sentences" />
+                </Dropdown.Item>
+              )}
+              {expectationsFeature && (
+                <Dropdown.Item onClick={() => onSelect("expectations")}>
+                  <ToolTitle tool="expectations" />
+                </Dropdown.Item>
+              )}
+              {impressionsFeature && (
+                <Dropdown.Item onClick={() => onSelect("impressions")}>
+                  <ToolTitle tool="impressions" />
+                </Dropdown.Item>
+              )}
+              {/* Add tool title select option here. */}
+            </Dropdown.Menu>
+          </Dropdown>
+          {/* </Card.Header> */}
+          <div className="position-relative bg-light flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <Arguments />}
             {tool === "expectations" && <NullTool />}
@@ -211,9 +218,15 @@ export const Review: FC = () => {
             {tool === "organization" && <Organization />}
             {tool === "sentences" && <Sentences />}
             {/* Add more tool displays here. */}
-          </Card.Body>
-          <Card.Footer>{writingTask && <TaskViewerButton />}</Card.Footer>
-        </Card>
+          </div>
+          {writingTask && (
+            <Container as={"footer"} className="border-top py-2">
+              <TaskViewerButton />
+            </Container>
+          )}
+          {/* <footer className="border-top"></footer>} */}
+          {/* </Card> */}
+        </aside>
       </Split>
     </ReviewProvider>
   );

@@ -128,7 +128,7 @@ export const Sentences: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="sentences d-flex flex-column h-100">
+      <div className="container-fluid sentences d-flex flex-column h-100">
         <h4>{t("sentences.title")}</h4>
         {!data ? (
           <Loading />

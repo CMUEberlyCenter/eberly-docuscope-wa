@@ -131,7 +131,7 @@ export const GlobalCoherence: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="overflow-auto">
+      <div className="container-fluid overflow-auto">
         <h4>{t("global_coherence.title")}</h4>
         {!review ? (
           <Loading />

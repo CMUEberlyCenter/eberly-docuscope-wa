@@ -26,7 +26,7 @@ export const KeyIdeas: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="overflow-auto">
+      <div className="container-fluid overflow-auto">
         <h4>{t("key_ideas.title")}</h4>
         {!review ? (
           <Loading />
