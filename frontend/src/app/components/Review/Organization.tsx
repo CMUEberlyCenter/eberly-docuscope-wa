@@ -24,14 +24,13 @@
 
  */
 import classNames from "classnames";
-import DT, { ConfigColumns } from "datatables.net-dt";
+import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
 import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { CoherenceParagraph } from "../../../lib/OnTopicData";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { useOnTopicData } from "../../service/review.service";
 import {
@@ -192,62 +191,7 @@ const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
   </Translation>
 );
 
-type CellData =
-  | (CoherenceParagraph & { is_non_local?: boolean; topic: string })
-  | null;
-type ParagraphDatum = CellData | { topic: string[] };
 
-const CellRenderer = (data: CellData, row: number) => {
-  let content = `${data?.is_left ? "l" : "r"}`;
-  if (!data?.is_non_local) {
-    content = content.toUpperCase();
-  }
-  if (!data?.is_topic_sent) {
-    content += "*";
-  }
-  return (
-    <div
-      className="text-center"
-      onClick={
-        () => undefined
-        // onTopicParagraphClick(row, j, topi)
-      }
-    >
-      {data ? (
-        <span
-          title={content}
-          className={
-            data.is_non_local ? "topic-icon-small" : "topic-icon-large"
-          }
-        >
-          <IndicatorIcon unit={data} />
-        </span>
-      ) : null}
-    </div>
-  );
-};
-const HeadRenderer = (data: { topic: string[] }, row: number) => {
-  const { topic } = data;
-  const topi = topic.at(2)?.replaceAll("_", " ") ?? "";
-  return (
-    <Button
-      className="w-100 text-primary text-start"
-      variant="none"
-      data-search={topi}
-      // onClick={() =>
-      //   highlightTopic(
-      //     selectedParagraph,
-      //     row,
-      //     topic
-      //   )
-      // }
-    >
-      {topi}
-    </Button>
-  );
-};
-
-type SlotRecord = Record<number, (data: any, row: any) => JSX.Element>;
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
   const data = useOnTopicData();
@@ -255,63 +199,14 @@ export const Organization: FC = () => {
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selectedParagraph, setSelectedParagraph] = useState(-1);
   const [selectedSentence, setSelectedSentence] = useState(-1);
-  const [columnDefs, setColumnDefs] = useState<ConfigColumns[]>([
-    { title: "Topic" },
-  ]);
-  const [tableData, setTableData] = useState<ParagraphDatum[][]>([]);
-  const [slots, setSlots] = useState<SlotRecord>({});
 
   useEffect(() => {
     setParagraphRange([
       ...Array(data?.response.coherence?.num_paras ?? 0).keys(),
     ]);
-
-    setColumnDefs([
-      {
-        title: "Topic",
-        render: (data: { topic: string[] }, type, row) => {
-          if (type === "filter" || type === "display")
-            return data.topic.at(2)?.replaceAll("_", " ");
-          if (type === "sort") return data.topic.at(2)?.replaceAll("_", " ");
-          // if (type === 'display') return HeadRenderer(data,row);
-          return data;
-        },
-      },
-      ...[...Array(data?.response.coherence?.num_paras ?? 0)].map((_, i) => ({
-        title: `${i + 1}`,
-        orderable: false,
-      })),
-    ]);
-    const slt: SlotRecord = { 0: HeadRenderer };
-    [...Array(data?.response.coherence?.num_paras ?? 0)].forEach((_, i) => {
-      slt[i + 1] = CellRenderer;
-    });
-    setSlots(slt);
-    setTableData(
-      data?.response.coherence?.error
-        ? []
-        : (data?.response.coherence?.data
-            .filter(({ is_topic_cluster }) => is_topic_cluster || !showToggle)
-            .map(({ topic, is_non_local, paragraphs }) => {
-              return [
-                { topic },
-                ...paragraphs.map((para) =>
-                  para
-                    ? {
-                        ...para,
-                        is_non_local,
-                        topic,
-                      }
-                    : null
-                ),
-              ];
-            }) ?? [])
-    );
     setSelectedParagraph(-1);
     setSelectedSentence(-1);
   }, [data]);
-  useEffect(() => console.log(columnDefs), [columnDefs]);
-  useEffect(() => console.log(tableData), [tableData]);
 
   useEffect(() => {
     setSelectedSentence(-1);
@@ -386,7 +281,7 @@ export const Organization: FC = () => {
               <Card.Body> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
               <div className=" mt-1 mw-100 flex-grow-1">
-                {tableData.at(0)?.length === columnDefs.length && (
+                { paragraphRange.length > 0 && (
                   <DataTable
                     options={{
                       paging: false,
