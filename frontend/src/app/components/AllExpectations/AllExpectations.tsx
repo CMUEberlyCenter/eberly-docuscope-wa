@@ -3,7 +3,9 @@ import {
   Accordion,
   AccordionProps,
   Alert,
-  Container
+  Container,
+  Nav,
+  Navbar,
 } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -129,39 +131,19 @@ export const AllExpectations: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <UserTextView prose={prose} className="my-1"/>
+        <UserTextView prose={prose} className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <header>
-            <Container className="d-flex justify-content-between align-items-baseline border-bottom">
-              <span className="text-primary">{tt("tool.tab.generate")}</span>
-              <Logo />
-            </Container>
-            {/* <Navbar>
-              <Container>
-                <Nav defaultActiveKey={"generate"} variant="underline">
-                  <Nav.Item>
-                    <Nav.Link eventKey="generate">
-                      {tt("tool.tab.generate")}
-                    </Nav.Link>
-                  </Nav.Item>
-                  <Button variant="link" disabled>
-                    {tt("tool.tab.review")}
-                    <FontAwesomeIcon
-                      icon={faArrowUpRightFromSquare}
-                      className="ms-1"
-                    />
-                  </Button>
-                  <Nav.Item>
-                    <Nav.Link eventKey="refine" disabled>
-                      {tt("tool.tab.refine")}
-                    </Nav.Link>
-                  </Nav.Item>
-                </Nav>
-                <Navbar.Brand>
-                  <Logo />
-                </Navbar.Brand>
-              </Container>
-            </Navbar> */}
+            <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
+              <Nav defaultActiveKey={"generate"}>
+                <Nav.Item className="active fw-bolder text-primary ms-3">
+                  {tt("tool.tab.generate")}
+                </Nav.Item>
+              </Nav>
+              <Navbar.Brand>
+                <Logo />
+              </Navbar.Brand>
+            </Navbar>
             <div className="container-fluid text-primary mb-2 border-bottom py-2">
               <AllExpectationsIcon /> {t("title")}
             </div>

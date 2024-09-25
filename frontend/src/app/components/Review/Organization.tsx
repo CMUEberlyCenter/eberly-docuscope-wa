@@ -78,7 +78,7 @@ const SolidCircle: FC = () => (
     {(t) => (
       <i
         className="fa-solid fa-circle text-organization"
-        style={{fontSize: "1rem"}}
+        style={{ fontSize: "1rem" }}
         title={t("organization.legend.before_verb")}
         aria-description={t("organization.legend.solid_circle")}
       ></i>
@@ -99,7 +99,7 @@ const DotSolidCircle: FC = () => (
           className="fa-solid fa-circle"
           style={{ fontSize: "0.3rem", transform: "translateY(-0.75rem)" }}
         ></i>
-        <i className="fa-solid fa-circle" style={{fontSize: "1rem"}}></i>
+        <i className="fa-solid fa-circle" style={{ fontSize: "1rem" }}></i>
       </span>
     )}
   </Translation>
@@ -111,7 +111,7 @@ const OutlineCircle: FC = () => (
     {(t) => (
       <i
         className="fa-regular fa-circle text-organization"
-        style={{fontSize: "1rem"}}
+        style={{ fontSize: "1rem" }}
         title={t("organization.legend.after_verb")}
         aria-description={t("organization.legend.empty_circle")}
       ></i>
@@ -132,7 +132,7 @@ const DotOutlineCircle: FC = () => (
           className="fa-solid fa-circle"
           style={{ fontSize: "0.3rem", transform: "translateY(-0.75rem)" }}
         ></i>
-        <i className="fa-regular fa-circle" style={{fontSize: "1rem"}}></i>
+        <i className="fa-regular fa-circle" style={{ fontSize: "1rem" }}></i>
       </span>
     )}
   </Translation>
@@ -192,7 +192,6 @@ const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
     )}
   </Translation>
 );
-
 
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
@@ -283,7 +282,7 @@ export const Organization: FC = () => {
               <Card.Body> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
               <div className=" mt-1 mw-100 flex-grow-1">
-                { paragraphRange.length > 0 && (
+                {paragraphRange.length > 0 && (
                   <DataTable
                     options={{
                       paging: false,
@@ -297,7 +296,7 @@ export const Organization: FC = () => {
                       ],
                       fixedColumns: { start: 1 },
                       caption: t("organization.coherence.title"),
-                      searching: false
+                      searching: false,
                     }}
                   >
                     {/* <caption>{t("organization.coherence.title")}</caption> */}
@@ -336,62 +335,73 @@ export const Organization: FC = () => {
                               ({ is_topic_cluster }) =>
                                 is_topic_cluster || !showToggle
                             )
-                            .map(({ topic, is_non_local, paragraphs, sent_count }, i) => {
-                              const topi =
-                                topic.at(2)?.replaceAll("_", " ") ?? "";
-                              const [left, right] = ["l", "r"].map((lr) =>
-                                is_non_local ? lr : lr.toUpperCase()
-                              );
-                              const paraIconClass = is_non_local
-                                ? "topic-icon-small"
-                                : "topic-icon-large";
-                              return (
-                                <tr key={`topic-paragraph-key-${i}`}>
-                                  <td data-search={topi} data-order={sent_count} className="p-0">
-                                    <Button
-                                      className="w-100 text-primary text-start"
-                                      variant="none"
-                                      onClick={() =>
-                                        highlightTopic(
-                                          selectedParagraph,
-                                          i,
-                                          topic
-                                        )
-                                      }
+                            .map(
+                              (
+                                { topic, is_non_local, paragraphs, sent_count },
+                                i
+                              ) => {
+                                const topi =
+                                  topic.at(2)?.replaceAll("_", " ") ?? "";
+                                const [left, right] = ["l", "r"].map((lr) =>
+                                  is_non_local ? lr : lr.toUpperCase()
+                                );
+                                const paraIconClass = is_non_local
+                                  ? "topic-icon-small"
+                                  : "topic-icon-large";
+                                return (
+                                  <tr key={`topic-paragraph-key-${i}`}>
+                                    <td
+                                      data-search={topi}
+                                      data-order={sent_count}
+                                      className="p-0"
                                     >
-                                      {topi}
-                                    </Button>
-                                  </td>
-                                  {paragraphs.map((paraType, j) => {
-                                    const paraContent = `${
-                                      paraType?.is_left ? left : right
-                                    }${paraType?.is_topic_sent ? "" : "*"}`;
-                                    return (
-                                      <td
-                                        key={`topic-key-${i}-${j}`}
-                                        className="p-0"
+                                      <Button
+                                        className="w-100 text-primary text-start"
+                                        variant="none"
+                                        onClick={() =>
+                                          highlightTopic(
+                                            selectedParagraph,
+                                            i,
+                                            topic
+                                          )
+                                        }
                                       >
-                                        <div
-                                          className="text-center"
-                                          onClick={() =>
-                                            onTopicParagraphClick(i, j, topi)
-                                          }
+                                        {topi}
+                                      </Button>
+                                    </td>
+                                    {paragraphs.map((paraType, j) => {
+                                      const paraContent = `${
+                                        paraType?.is_left ? left : right
+                                      }${paraType?.is_topic_sent ? "" : "*"}`;
+                                      return (
+                                        <td
+                                          key={`topic-key-${i}-${j}`}
+                                          className="p-0"
                                         >
-                                          {paraType ? (
-                                            <span
-                                              title={paraContent}
-                                              className={paraIconClass}
-                                            >
-                                              <IndicatorIcon unit={paraType} />
-                                            </span>
-                                          ) : null}
-                                        </div>
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              );
-                            })}
+                                          <div
+                                            className="text-center"
+                                            onClick={() =>
+                                              onTopicParagraphClick(i, j, topi)
+                                            }
+                                          >
+                                            {paraType ? (
+                                              <span
+                                                title={paraContent}
+                                                className={paraIconClass}
+                                              >
+                                                <IndicatorIcon
+                                                  unit={paraType}
+                                                />
+                                              </span>
+                                            ) : null}
+                                          </div>
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                );
+                              }
+                            )}
                     </tbody>
                   </DataTable>
                 )}

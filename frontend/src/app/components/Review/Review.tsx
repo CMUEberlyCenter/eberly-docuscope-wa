@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Container, Dropdown, Stack } from "react-bootstrap";
+import { Container, Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
@@ -120,45 +120,17 @@ export const Review: FC = () => {
         <UserTextView prose={prose} className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <header>
-            <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
-              <span className="text-primary">{tt("tool.tab.review")}</span>
-              <Logo />
-            </Container>
-          </header>
-          {/* <Card as={"aside"} className="my-1"> */}
-          {/* <Card.Header className="px-0">
-            <Container className="d-flex justify-content-between align-items-baseline border-bottom mb-2">
-              <span className="text-primary">{tt("tool.tab.review")}</span>
-              <Logo />
-            </Container> */}
-          {/* <Navbar>
-            <Container>
-              <Nav defaultActiveKey={"review"} variant="tabs">
-                <Nav.Item>
-                  <Nav.Link eventKey="generate" disabled>
-                    {tt("tool.tab.generate")}
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="review">
-                    {tt("tool.tab.review")}
-                    <FontAwesomeIcon
-                      icon={faArrowUpRightFromSquare}
-                      className="ms-1"
-                    />
-                  </Nav.Link>
-                </Nav.Item>
-                <Nav.Item>
-                  <Nav.Link eventKey="refine" disabled>
-                    {tt("tool.tab.refine")}
-                  </Nav.Link>
+            <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
+              <Nav>
+                <Nav.Item className="active fw-bolder text-primary ms-3">
+                  {tt("tool.tab.review")}
                 </Nav.Item>
               </Nav>
               <Navbar.Brand>
                 <Logo />
               </Navbar.Brand>
-            </Container>
-          </Navbar> */}
+            </Navbar>
+          </header>
           <Dropdown className="d-flex justify-content-start mx-2 mb-2">
             <Dropdown.Toggle variant="white" className="select-button shadow">
               <div>

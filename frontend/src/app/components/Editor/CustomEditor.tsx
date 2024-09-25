@@ -22,6 +22,7 @@ import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
+// import './CustomEditor.scss';
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -123,13 +124,16 @@ const CustomEditor: FC = () => {
       }}
     >
       <Split
-        className="container-fluid h-100 v-100 d-flex flex-row"
+        className="container-fluid h-100 w-100 d-flex flex-row align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <main className="d-flex overflow-none h-100 flex-column py-2">
-          <ButtonToolbar aria-label="Editor Tools" className="align-items-center">
+        <main className="d-flex overflow-none flex-column my-1">
+          <ButtonToolbar
+            aria-label="Editor Tools"
+            className="align-items-center"
+          >
             <ButtonGroup>
               {/* <DropdownButton
                 as={ButtonGroup}
