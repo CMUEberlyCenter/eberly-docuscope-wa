@@ -20,9 +20,9 @@ import {
 } from "slate-react";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
+import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
-// import './CustomEditor.scss';
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -132,7 +132,7 @@ const CustomEditor: FC = () => {
         <main className="d-flex overflow-none flex-column my-1">
           <ButtonToolbar
             aria-label="Editor Tools"
-            className="align-items-center"
+            className="align-items-center mb-2"
           >
             <ButtonGroup>
               {/* <DropdownButton
