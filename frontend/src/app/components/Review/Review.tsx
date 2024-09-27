@@ -4,6 +4,13 @@ import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 import { useReview } from "../../service/review.service";
+import {
+  useGlobalFeatureArguments,
+  useGlobalFeatureImpressions,
+  useGlobalFeatureKeyIdeas,
+  useGlobalFeatureSentenceDensity,
+  useGlobalFeatureTermMatrix,
+} from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
@@ -97,13 +104,13 @@ export const Review: FC = () => {
   }, [review, tool]);
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
-  const sentencesFeature = true;
-  const coherenceFeature = true;
-  const ideasFeature = true;
-  const impressionsFeature = false;
-  const argumentsFeature = true;
+  const sentencesFeature = useGlobalFeatureSentenceDensity();
+  const coherenceFeature = false;
+  const ideasFeature = useGlobalFeatureKeyIdeas();
+  const impressionsFeature = useGlobalFeatureImpressions();
+  const argumentsFeature = useGlobalFeatureArguments();
   const expectationsFeature = false; // moving to own
-  const organizationFeature = true;
+  const organizationFeature = useGlobalFeatureTermMatrix();
 
   const onSelect = (id: Tool) => {
     setTool(id);
@@ -179,7 +186,6 @@ export const Review: FC = () => {
               {/* Add tool title select option here. */}
             </Dropdown.Menu>
           </Dropdown>
-          {/* </Card.Header> */}
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <Arguments />}
@@ -196,8 +202,6 @@ export const Review: FC = () => {
               <TaskViewerButton />
             </Container>
           )}
-          {/* <footer className="border-top"></footer>} */}
-          {/* </Card> */}
         </aside>
       </Split>
     </ReviewProvider>

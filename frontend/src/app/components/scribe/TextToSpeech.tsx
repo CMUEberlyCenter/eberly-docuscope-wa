@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useSettings } from "../../service/settings.service";
+import { useGlobalFeatureTextToSpeech } from "../../service/settings.service";
 
 /**
  * Component for adding text to speech controls.
@@ -35,7 +35,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
-  const settings = useSettings();
+  const settings = useGlobalFeatureTextToSpeech();
 
   useEffect(() => {
     return () => {
@@ -85,7 +85,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
     window.speechSynthesis.cancel();
   };
 
-  return settings.text2speech ? (
+  return settings ? (
     <ButtonGroup>
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>

@@ -40,11 +40,17 @@ import {
   postConvertNotes,
   postExpectation,
   postFlowText,
-  useAssessFeature,
   useScribe,
-  useScribeFeatureGrammar,
-  useScribeFeatureNotes2Prose,
 } from "../../service/scribe.service";
+import {
+  useGlobalFeatureCopyedit,
+  useGlobalFeatureExpectation,
+  useGlobalFeatureExpectations,
+  useGlobalFeatureFlow,
+  useGlobalFeatureNotes2Bullets,
+  useGlobalFeatureNotes2Prose,
+  useGlobalFeatureReview,
+} from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
@@ -66,20 +72,18 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const writingTask = useWritingTask();
     const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
     const [showWritingTask, setShowWritingTask] = useState(false);
-    const notes2proseFeature = useScribeFeatureNotes2Prose();
-    const bulletsFeature = true; // TODO use settings and writing task
-    const flowFeature = true; // TODO use settings and writing task
-    const copyEditFeature = true; // TODO use settings and writing task
-    // const clarifyFeature = useScribeFeatureClarify();
-    const grammarFeature = useScribeFeatureGrammar();
+    // TODO extend from global to global+assignment
+    const notes2proseFeature = useGlobalFeatureNotes2Prose();
+    const bulletsFeature = useGlobalFeatureNotes2Bullets();
+    const flowFeature = useGlobalFeatureFlow();
+    const copyEditFeature = useGlobalFeatureCopyedit();
+    const reviewFeature = useGlobalFeatureReview();
     const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
     const [history, setHistory] = useState<ToolResult[]>([]);
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
-    const assessFeature = useAssessFeature();
-    // const logicalflowFeature = useScribeFeatureLogicalFlow();
-    // const topicsFeature = useScribeFeatureTopics();
-    // const editorContent = useEditorContent();
+    const expectationFeature = useGlobalFeatureExpectation();
+    const expectationsFeature = useGlobalFeatureExpectations();
     const [showSelectExpectation, setShowSelectExpectation] = useState(false);
 
     const editor = useSlate();
@@ -282,29 +286,41 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             >
               {/* <Nav variant="underline"> // underline or tabs conveys meaning better */}
               <Nav>
-                <Nav.Item className="ms-3">
-                  <Nav.Link
-                    eventKey="generate"
-                    onClick={() => setTab("generate")}
-                  >
-                    {t("tool.tab.generate")}
-                  </Nav.Link>
-                </Nav.Item>
-                <Button variant="link" onClick={() => onReview()}>
-                  {t("tool.tab.review")}
-                  <FontAwesomeIcon
-                    icon={faArrowUpRightFromSquare}
-                    className="ms-1"
-                    style={{ fontSize: "0.7em" }}
-                  />
-                </Button>
-                <Nav.Item className="me-auto">
-                  <Nav.Link eventKey="refine" onClick={() => setTab("refine")}>
-                    {t("tool.tab.refine")}
-                  </Nav.Link>
-                </Nav.Item>
+                {(notes2proseFeature ||
+                  bulletsFeature ||
+                  expectationFeature ||
+                  expectationsFeature) && (
+                  <Nav.Item className="ms-3">
+                    <Nav.Link
+                      eventKey="generate"
+                      onClick={() => setTab("generate")}
+                    >
+                      {t("tool.tab.generate")}
+                    </Nav.Link>
+                  </Nav.Item>
+                )}
+                {reviewFeature && (
+                  <Button variant="link" onClick={() => onReview()}>
+                    {t("tool.tab.review")}
+                    <FontAwesomeIcon
+                      icon={faArrowUpRightFromSquare}
+                      className="ms-1"
+                      style={{ fontSize: "0.7em" }}
+                    />
+                  </Button>
+                )}
+                {(copyEditFeature || flowFeature) && (
+                  <Nav.Item>
+                    <Nav.Link
+                      eventKey="refine"
+                      onClick={() => setTab("refine")}
+                    >
+                      {t("tool.tab.refine")}
+                    </Nav.Link>
+                  </Nav.Item>
+                )}
               </Nav>
-              <Navbar.Brand>
+              <Navbar.Brand className="ms-auto">
                 <Logo />
               </Navbar.Brand>
             </Navbar>
@@ -334,12 +350,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         )}
                       </ButtonGroup>
                     )}
-                    {assessFeature && (
+                    {(expectationFeature || expectationsFeature) && (
                       <ButtonGroup
                         className="bg-white shadow tools ms-2"
                         size="sm"
                       >
-                        {assessFeature && (
+                        {expectationFeature && (
                           <ToolButton
                             tooltip={t("tool.button.expectation.tooltip")}
                             title={t("tool.button.expectation.title")}
@@ -348,7 +364,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             onClick={() => onTool("expectation")}
                           />
                         )}
-                        {assessFeature && (
+                        {expectationsFeature && (
                           <ToolButton
                             tooltip={t("tool.button.expectations.tooltip")}
                             disabled={!scribe || !writingTask}
@@ -396,15 +412,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           disabled={!scribe}
                           icon={<CopyEditIcon />}
                           title={t("tool.button.copyedit.title")}
-                        />
-                      )}
-                      {grammarFeature && (
-                        <ToolButton
-                          tooltip={t("tool.button.grammar.tooltip")}
-                          disabled={!scribe}
-                          onClick={() => onTool("copyedit")}
-                          icon={<></>}
-                          title={t("tool.button.grammar.title")}
                         />
                       )}
                     </ButtonGroup>

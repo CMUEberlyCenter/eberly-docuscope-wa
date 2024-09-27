@@ -1,6 +1,6 @@
 import { bind } from '@react-rxjs/core';
 import { type ChatCompletion } from 'openai/resources/chat/completions';
-import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import {
   AssessExpectationRequest,
   NotesRequest,
@@ -13,14 +13,8 @@ import {
   LocalCoherenceResponse,
   SelectedText,
 } from '../lib/ToolResults';
-import { settings$ } from './settings.service';
 
 // TODO: per assignment feature settings.
-
-export const [useScribeAvailable, ScribeAvailable$] = bind(
-  settings$.pipe(map((settings) => settings.scribe)),
-  true
-);
 
 // Show the myScribe warning and setting dialog.
 const showAtStartup =
@@ -46,10 +40,6 @@ scribe.subscribe((enable) =>
 );
 
 /*** Notes to Prose ***/
-export const [useScribeFeatureNotes2Prose, featureNotes2Prose$] = bind(
-  settings$.pipe(map((settings) => settings.notes2prose)),
-  false
-);
 
 const NOTES_TO_PROSE = 'notes2prose';
 function logCovertNotes(notes: string, prose: ChatCompletion) {
@@ -117,10 +107,6 @@ export async function postConvertNotes(
 }
 
 /*** Fix Grammar ***/
-export const [useScribeFeatureGrammar, grammarFeature$] = bind(
-  settings$.pipe(map((settings) => settings.grammar)),
-  false
-);
 
 /*** Clarify selected text ***/
 
@@ -180,16 +166,7 @@ export const postClarifyText = (
     writing_task
   );
 
-export const [useScribeFeatureClarify, clarifyFeature$] = bind(
-  settings$.pipe(map((settings) => settings.grammar)),
-  false
-);
-
 /*** Assess Expectations ***/
-export const [useAssessFeature, assessFeature$] = bind(
-  settings$.pipe(map((settings) => settings.assess_expectations)),
-  false
-);
 
 const errorExpectationData: ExpectationData = {
   rating: 0.0,
@@ -263,14 +240,3 @@ export const postFlowText = (
     selected,
     writing_task
   );
-
-export const [useScribeFeatureLogicalFlow, featureLogicalFlow] = bind(
-  settings$.pipe(map((settings) => !!settings.logical_flow)),
-  false
-);
-
-/***** Topics *****/
-export const [useScribeFeatureTopics, featureTopics$] = bind(
-  settings$.pipe(map((settings) => !!settings.topics)),
-  false
-);

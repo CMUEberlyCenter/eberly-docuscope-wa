@@ -23,24 +23,29 @@ const SETTINGS_URL = new URL(
 interface Settings {
   brand?: string;
 
-  common_dictionary: string; // needed for impressions
-  tagger: string; // needed for impressions
-
+  text2speech?: boolean;
   scribe?: boolean; // global scribe availability
   // scribe features
+  // Draft
   notes2prose?: boolean;
-  grammar?: boolean;
-  copyedit?: boolean;
+  notes2bullets?: boolean;
+  assess_expectation?: boolean;
   assess_expectations?: boolean;
-  text2speech?: boolean;
-  logical_flow?: boolean;
-  topics?: boolean;
+  // Review
+  lines_of_arguments?: boolean;
+  key_ideas?: boolean;
+  logical_progression?: boolean;
+  term_matrix?: boolean;
+  sentence_density?: boolean;
+  // Refine
+  flow?: boolean;
+  copyedit?: boolean;
 
-  docuscope?: boolean; // global docuscope availability
   // docuscope features
-  coherence?: boolean;
-  clarity?: boolean;
+  docuscope?: boolean; // global docuscope availability
   impressions?: boolean;
+  common_dictionary: string; // URL.  Needed for impressions
+  tagger: string; // URL. Needed for impressions
 }
 
 // Default json settings, in case of network failure.
@@ -48,17 +53,27 @@ const DEFAULT: Settings = {
   brand: 'myProse',
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
-  scribe: true,
-  notes2prose: true,
-  assess_expectations: true,
   text2speech: true,
-  logical_flow: true,
-  topics: true,
+  scribe: true, // global scribe availability
+  // scribe features
+  // Draft
+  notes2prose: true,
+  notes2bullets: true,
+  assess_expectation: true,
+  assess_expectations: true,
+  // Review
+  lines_of_arguments: true,
+  key_ideas: true,
+  logical_progression: false,
+  term_matrix: true,
+  sentence_density: true,
+  // Refine
+  flow: true,
+  copyedit: true,
 
-  docuscope: true,
-  coherence: true,
-  clarity: true,
-  impressions: true,
+  // docuscope features
+  docuscope: false, // global docuscope availability
+  impressions: false,
 };
 
 // useSettings: for use in a component, settings$: the rxjs observable
@@ -76,4 +91,94 @@ export const [useSettings, settings$] = bind(
     })
   ),
   DEFAULT
+);
+
+export const [useGlobalFeatureTextToSpeech, globalFeatureTextToSpeech$] = bind(
+  settings$.pipe(map((settings) => !!settings.text2speech)),
+  false
+);
+
+export const [useGlobalScribeAvailable, globalScribeAvailable$] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe)),
+  true
+);
+
+export const [useGlobalFeatureNotes2Prose, globalFeatureNotes2Prose$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.notes2prose)
+  ),
+  false
+);
+export const [useGlobalFeatureNotes2Bullets, globalFeatureNotes2Bullets$] =
+  bind(
+    settings$.pipe(
+      map((settings) => !!settings.scribe && !!settings.notes2bullets)
+    ),
+    false
+  );
+
+export const [useGlobalFeatureExpectation, globalFeatureExpectation$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.assess_expectation)
+  ),
+  false
+);
+export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.assess_expectation)
+  ),
+  false
+);
+
+export const [useGlobalFeatureCopyedit, globalFeatureCopyedit$] = bind(
+  settings$.pipe(map((settings) => !!settings.copyedit)),
+  false
+);
+
+export const [useGlobalFeatureFlow, globalFeatureFlow$] = bind(
+  settings$.pipe(map((settings) => !!settings.flow)),
+  false
+);
+
+export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
+  settings$.pipe(
+    map(
+      (settings) =>
+        !!settings.lines_of_arguments ||
+        !!settings.key_ideas ||
+        !!settings.logical_progression ||
+        !!settings.term_matrix ||
+        !!settings.sentence_density
+    )
+  ),
+  false
+);
+
+export const [useGlobalFeatureArguments, globalFeatureArguments$] = bind(
+  settings$.pipe(map((settings) => !!settings.lines_of_arguments)),
+  false
+);
+export const [useGlobalFeatureKeyIdeas, globalFeatureKeyIdeas$] = bind(
+  settings$.pipe(map((settings) => !!settings.key_ideas)),
+  false
+);
+export const [
+  useGlobalFeatureLogicalProgression,
+  globalFeatureLogicalProgression$,
+] = bind(
+  settings$.pipe(map((settings) => !!settings.logical_progression)),
+  false
+);
+export const [useGlobalFeatureTermMatrix, globalFeatureTermMatrix$] = bind(
+  settings$.pipe(map((settings) => !!settings.term_matrix)),
+  false
+);
+export const [useGlobalFeatureSentenceDensity, globalFeatureSentenceDensity$] =
+  bind(settings$.pipe(map((settings) => !!settings.sentence_density)), false);
+
+export const [useGlobalFeatureImpressions, globalFeatureImpressions$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.docuscope && !!settings.impressions)
+  ),
+  false
 );

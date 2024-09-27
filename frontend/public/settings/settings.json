@@ -2,15 +2,21 @@
   "brand": "myProse",
   "common_dictionary": "https://docuscope.eberly.cmu.edu/common_dictionary",
   "tagger": "https://docuscope.eberly.cmu.edu/tagger/tag",
+
+  "text2speech": true,
   "scribe": true,
   "notes2prose": true,
+  "notes2bullets": true,
+  "assess_expectation": true,
   "assess_expectations": true,
-  "grammar": false,
+  "lines_of_arguments": true,
+  "key_ideas": true,
+  "logical_progression": false,
+  "term_matrix": true,
+  "sentence_density": true,
+  "flow": true,
   "copyedit": true,
-  "text2speech": true,
 
   "docuscope": false,
-  "coherence": true,
-  "clarity": true,
   "impressions": true
 }
