@@ -30,7 +30,7 @@ export type Claim = {
 export type ArgumentsResponse = {
   main_argument: string;
   arguments: Claim[];
-  counter_examples: Claim[];
+  counter_arguments: Claim[];
   rebuttals: Claim[];
 };
 

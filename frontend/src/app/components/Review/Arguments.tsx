@@ -121,13 +121,13 @@ export const Arguments: FC = () => {
                 />
               </article>
             ) : null}
-            {review.response.counter_examples?.length ? (
+            {review.response.counter_arguments?.length ? (
               <article className="mt-3">
                 <h5>{t("arguments.counter_examples")}</h5>
                 <Claims
                   onSelect={onSelect}
                   activeKey={current}
-                  claims={review.response.counter_examples}
+                  claims={review.response.counter_arguments}
                 />
               </article>
             ) : null}
@@ -142,7 +142,7 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {!review.response.rebuttals?.length &&
-            !review.response.counter_examples?.length &&
+            !review.response.counter_arguments?.length &&
             !review.response.main_argument ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
