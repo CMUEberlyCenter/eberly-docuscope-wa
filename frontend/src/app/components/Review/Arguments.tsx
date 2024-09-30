@@ -55,15 +55,16 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                   >
                     {support && (
                       <div>
-                        <span className="fw-bold">
+                        <span className="fw-bolder">
                           {t("arguments.support")}
                         </span>
+                        {" "}
                         <span>{support}</span>
                       </div>
                     )}
                     {suggestions?.length && (
                       <div>
-                        <span className="fw-bold">
+                        <span className="fw-bolder">
                           {t("arguments.suggestions")}
                         </span>
                         <ul>
