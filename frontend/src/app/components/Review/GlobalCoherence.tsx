@@ -60,9 +60,7 @@ const Suggestions: FC<SuggestionsProps> = ({
               <span>{explanation}</span>
             </p>
             <p>
-              <h6>
-                {t("global_coherence.suggestion.suggestions")}
-              </h6>{" "}
+              <h6>{t("global_coherence.suggestion.suggestions")}</h6>{" "}
               <span>{suggestions}</span>
             </p>
           </Accordion.Body>

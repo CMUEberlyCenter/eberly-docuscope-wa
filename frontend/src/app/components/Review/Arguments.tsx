@@ -55,18 +55,13 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                   >
                     {support && (
                       <p>
-                        <h6 className="d-inline">
-                          {t("arguments.support")}
-                        </h6>
-                        {" "}
+                        <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
                         <span>{support}</span>
                       </p>
                     )}
                     {suggestions?.length && (
                       <p>
-                        <h6>
-                          {t("arguments.suggestions")}
-                        </h6>
+                        <h6>{t("arguments.suggestions")}</h6>
                         <ul>
                           {suggestions.map((suggestion, k) => (
                             <li key={`${i}-${k}`}>{suggestion}</li>
@@ -143,8 +138,8 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {!review.response.rebuttals?.length &&
-              !review.response.counter_arguments?.length &&
-              !review.response.main_argument ? (
+            !review.response.counter_arguments?.length &&
+            !review.response.main_argument ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>

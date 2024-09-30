@@ -16,6 +16,8 @@ import {
   writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 type SelectWritingTaskProps = {
   show: boolean;
@@ -41,6 +43,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
+  const [showFile, setShowFile] = useState(false);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -52,6 +55,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           setValid(true);
           setCustom(json);
           setSelected(json);
+          setShowFile(false);
         } else {
           setValid(false);
         }
@@ -110,6 +114,8 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
       <Modal.Footer>
         {(!inLti || ltiInfo?.instructor) && (
           <OverlayTrigger
+            onToggle={(nextShow) => setShowFile(nextShow)}
+            show={showFile}
             trigger="click"
             placement="top"
             overlay={
@@ -132,7 +138,13 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
               </Popover>
             }
           >
-            <Button className="me-auto">+</Button>
+            <Button className="me-auto">
+              {showFile ? (
+                <FontAwesomeIcon icon={faXmark} />
+              ) : (
+                <FontAwesomeIcon icon={faPlus} />
+              )}
+            </Button>
           </OverlayTrigger>
         )}
         <Button variant="secondary" onClick={onHide}>
