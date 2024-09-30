@@ -45,7 +45,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 >
                   <Accordion.Header>
                     <span>
-                      <span className="fw-bold">{t("arguments.claim")}</span>
+                      <span className="fw-bolder">{t("arguments.claim")}</span>{" "}
                       <span>{claim}</span>
                     </span>
                   </Accordion.Header>
@@ -142,8 +142,8 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {!review.response.rebuttals?.length &&
-            !review.response.counter_arguments?.length &&
-            !review.response.main_argument ? (
+              !review.response.counter_arguments?.length &&
+              !review.response.main_argument ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>

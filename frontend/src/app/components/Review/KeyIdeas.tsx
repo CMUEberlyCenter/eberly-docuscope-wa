@@ -46,7 +46,7 @@ export const KeyIdeas: FC = () => {
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
                         <span>
-                          <span className="fw-bold">{t("key_ideas.idea")}</span>
+                          <span className="fw-bolder">{t("key_ideas.idea")}</span>{" "}
                           <span>{point}</span>
                         </span>
                       </Accordion.Header>
