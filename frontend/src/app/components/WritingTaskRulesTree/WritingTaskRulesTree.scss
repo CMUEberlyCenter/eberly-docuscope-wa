@@ -6,6 +6,7 @@
       ul {
         list-style-type: none;
         text-wrap: nowrap;
+        margin-bottom: 0 !important;
       }
     }
   }
@@ -21,7 +22,7 @@
       display: none;
     }
 
-    &:has([aria-selected="true"]) {
+    &:has(li[aria-selected="true"]) {
       .outline-section {
         border-bottom: 3px solid var(--bs-primary);
       }
@@ -29,17 +30,20 @@
   }
 
   [aria-selected="true"] {
-    color: var(--bs-white);
-    background-color: var(--bs-primary) !important;
-    padding-left: 0.25rem;
-    padding-right: 0.25rem;
-  }
-
-  .pointer {
-    cursor: pointer;
-
-    &:hover {
-      background-color: var(--bs-secondary-bg);
+    .active {
+      color: var(--bs-white);
+      background-color: var(--bs-primary) !important;
     }
   }
+
+  .btn-none:hover {
+    background-color: var(--bs-secondary-bg);
+  }
+  // .pointer {
+  //   cursor: pointer;
+
+  //   &:hover {
+  //     background-color: var(--bs-secondary-bg);
+  //   }
+  // }
 }

@@ -1,6 +1,6 @@
 import classnames from "classnames";
 import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Rule } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
@@ -57,12 +57,12 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
         {includeTitle && <WritingTaskTitle />}
         {writingTask?.rules.rules.map((rule, i) => (
           <div key={`${id}-${i}`} aria-expanded="true">
-            {/* TODO?: add some indicator of sub-tree selection possibly only on non-expanded. */}
-            <div className={classnames("d-flex")}>
+            <ButtonGroup aria-selected={selected===rule}>
               <Button
                 size="sm"
                 variant="none"
-                className="expand-toggle"
+                active={selected===rule}
+                className="expand-toggle py-0"
                 onClick={(e) => {
                   const p = e.currentTarget.closest("[aria-expanded]");
                   p?.setAttribute(
@@ -75,29 +75,38 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
               >
                 <i className="fa-solid fa-caret-down flex-shrink-0"></i>
               </Button>
-              <div
-                aria-selected={selected === rule}
-                className={classnames(
-                  "fw-bold",
-                  "flex-grow-1",
-                  "outline-section",
-                  !leafOnly ? "pointer" : ""
-                )}
-                onClick={() => onSelect(rule)}
-              >
-                {rule.name}
-              </div>
-            </div>
+              {leafOnly ? (
+                <div className="fw-bold flex-grow-1 outline-section">
+                  {rule.name}
+                </div>
+              ) : (
+                <Button
+                className="py-0 ps-1"
+                 variant="none"
+                  active={selected === rule}
+                   onClick={() => onSelect(rule)}>
+                  <span className="outline-section fw-bold">{rule.name}</span>
+                </Button>
+              )}
+            </ButtonGroup>
             <div className="expanded">
               <ul>
                 {rule.children.map((cluster) => (
                   <li
                     key={cluster.name}
                     aria-selected={selected === cluster}
-                    className={classnames("pointer")}
-                    onClick={() => onSelectLeaf(cluster)}
+                    className={classnames("hover")}
                   >
-                    {cluster.name}
+                    <Button
+                      variant="none"
+                      active={selected === cluster}
+                      className="py-0"
+                      onClick={() => {
+                        onSelectLeaf(cluster);
+                      }}
+                    >
+                      {cluster.name}
+                    </Button>
                   </li>
                 ))}
               </ul>

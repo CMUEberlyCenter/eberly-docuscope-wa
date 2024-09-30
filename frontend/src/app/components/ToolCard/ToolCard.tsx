@@ -92,7 +92,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       async (data: ToolResult) => {
         setCurrentTool(data);
         const emptyInput = data.input.text.trim() === "";
-        console.log(emptyInput, data.input.text);
         try {
           switch (data.tool) {
             case "bullets":
