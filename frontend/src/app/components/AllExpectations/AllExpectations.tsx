@@ -40,8 +40,8 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
 
   return (
     <article>
-      <h5>{rule.name}</h5>
-      <Accordion {...props}>
+      <h5 className="mb-0">{rule.name}</h5>
+      <Accordion {...props} className="mb-3">
         {rule.children
           .map(({ name }) => expectations?.get(name) ?? { expectation: name })
           .map((expectation, j) => (
@@ -52,7 +52,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
               {isAllExpectationsData(expectation) &&
               expectation.response.suggestions === "none." ? (
                 <div className="fake-accordion-button">
-                  <div className="flex-grow-1 p">{expectation.expectation}</div>
+                  <div className="flex-grow-1">{expectation.expectation}</div>
                   <div
                     className="attention-icon text-warning"
                     title={t("warning")}
