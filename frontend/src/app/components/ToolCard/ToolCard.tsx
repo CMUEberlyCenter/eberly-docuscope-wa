@@ -61,6 +61,7 @@ import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
 type ToolCardProps = HTMLProps<HTMLDivElement>;
+class NoSelectedTextError extends Error {}
 
 /**
  * Top level framework for writing tools display.
@@ -90,53 +91,77 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const doTool = useCallback(
       async (data: ToolResult) => {
         setCurrentTool(data);
-        switch (data.tool) {
-          case "bullets":
-          case "prose": {
-            const result = await postConvertNotes(
-              data.input,
-              data.tool,
-              writingTask
-            );
-            const toolResult = { ...data, result };
-            setCurrentTool(toolResult);
-            addHistory(toolResult);
-            break;
-          }
-          case "expectation": {
-            if (data.expectation) {
-              const result = await postExpectation(
-                data.input.text,
-                data.expectation,
+        const emptyInput = data.input.text.trim() === "";
+        console.log(emptyInput, data.input.text);
+        try {
+          switch (data.tool) {
+            case "bullets":
+            case "prose": {
+              if (emptyInput) {
+                throw new NoSelectedTextError(
+                  t(`error.no_selection.${data.tool}`)
+                );
+              }
+              const result = await postConvertNotes(
+                data.input,
+                data.tool,
                 writingTask
               );
               const toolResult = { ...data, result };
               setCurrentTool(toolResult);
               addHistory(toolResult);
-            } else {
-              setShowSelectExpectation(true);
+              break;
             }
-            break;
+            case "expectation": {
+              if (emptyInput) {
+                throw new NoSelectedTextError(t("error.no_selection.default"));
+              }
+              if (data.expectation) {
+                const result = await postExpectation(
+                  data.input.text,
+                  data.expectation,
+                  writingTask
+                );
+                const toolResult = { ...data, result };
+                setCurrentTool(toolResult);
+                addHistory(toolResult);
+              } else {
+                setShowSelectExpectation(true);
+              }
+              break;
+            }
+            case "copyedit": {
+              if (emptyInput) {
+                throw new NoSelectedTextError(t("error.no_selection.default"));
+              }
+              const result = await postClarifyText(data.input, writingTask);
+              const toolResult = { ...data, result };
+              setCurrentTool(toolResult);
+              addHistory(toolResult);
+              break;
+            }
+            case "flow": {
+              if (emptyInput) {
+                throw new NoSelectedTextError(t("error.no_selection.default"));
+              }
+              const result = await postFlowText(data.input, writingTask);
+              const toolResult = { ...data, result };
+              setCurrentTool(toolResult);
+              addHistory(toolResult);
+              break;
+            }
+            default:
+              console.error(`Unhandled tool: ${data.tool}`);
           }
-          case "copyedit": {
-            const result = await postClarifyText(data.input, writingTask);
-            const toolResult = { ...data, result };
-            setCurrentTool(toolResult);
-            addHistory(toolResult);
-            break;
+        } catch (error) {
+          if (error instanceof Error) {
+            setCurrentTool({ ...data, error });
+          } else {
+            console.error(`Unknown error type: ${error}`);
           }
-          case "flow": {
-            const result = await postFlowText(data.input, writingTask);
-            const toolResult = { ...data, result };
-            setCurrentTool(toolResult);
-            addHistory(toolResult);
-            break;
-          }
-          default:
-            console.warn(`Unhandled tool: ${data.tool}`);
         }
       },
-      [writingTask]
+      [writingTask, t]
     );
     const onTool = useCallback(
       (tool: Tool) => {
@@ -162,11 +187,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               text: "",
             },
             result: null,
+            error: new NoSelectedTextError(t("error.no_selection.default")),
             // document: editorContent,
           });
         }
       },
-      [editor, doTool]
+      [editor, doTool, t]
     ); // Does this need to be wrapped in useCallback?
     const retry = useCallback(
       async (previous: ToolResult) =>
@@ -527,9 +553,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   }
                 >
                   {currentTool.result && (
-                    <ErrorBoundary
-                      fallback={<div>{t("expectation.error")}</div>}
-                    >
+                    <ErrorBoundary fallback={<div>{t("error.unknown")}</div>}>
                       {currentTool.result.rating && (
                         <Rating value={currentTool.result.rating} />
                       )}

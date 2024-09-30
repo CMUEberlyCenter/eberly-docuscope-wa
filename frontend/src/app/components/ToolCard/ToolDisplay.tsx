@@ -73,7 +73,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
         <h5 className="fs-6 mb-0">{title}</h5>
         <h6 className="text-muted">
           {tool?.datetime.toLocaleString()}
-          {useBookmarks && (
+          {useBookmarks && tool && !tool.error && (
             <Button variant="icon" onClick={() => onBookmark()}>
               <FontAwesomeIcon
                 icon={tool?.bookmarked ? faBookmark : faRegularBookmark}
@@ -85,8 +85,14 @@ export const ToolRoot: FC<ToolRootProps> = ({
           )}
         </h6>
       </header>
-      {children}
-      {actions && <footer className="mx-2">{actions}</footer>}
+      {tool && tool.error ? (
+        <Alert variant="warning">{tool.error.message}</Alert>
+      ) : (
+        <>
+          {children}
+          {actions && <footer className="mx-2">{actions}</footer>}
+        </>
+      )}
     </div>
   );
 };

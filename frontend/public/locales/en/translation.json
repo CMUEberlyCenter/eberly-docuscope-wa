@@ -36,9 +36,9 @@
   },
   "tool": {
     "tab": {
-    "generate": "Draft",
-    "refine": "Refine",
-    "review": "Review"
+      "generate": "Draft",
+      "refine": "Refine",
+      "review": "Review"
     },
     "button": {
       "prose": {
@@ -91,11 +91,17 @@
     "tracking": "Revision with tracking:"
   },
   "clipboard": "Copy to Clipboard",
-
+  "error": {
+    "unknown": "Unknown error occurred while processing results.",
+    "no_selection": {
+      "prose": "It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable paragraph.",
+      "bullets": "It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable list.",
+      "default": "Please select some text before attempting to use this tool."
+    }
+  },
   "expectation": {
     "title": "Select an Expectation",
-    "task": "Writing Task",
-    "error": "Error while processing results."
+    "task": "Writing Task"
   },
   "flow": {
     "issue": "Issue:",

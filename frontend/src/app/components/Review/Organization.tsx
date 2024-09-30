@@ -243,12 +243,11 @@ export const Organization: FC = () => {
         .forEach((ele) => ele.classList.add("word-highlight"))
     );
     if (typeof selected?.paragraph === "number") {
-      const ele = document
-        .querySelector(
-          `.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`
-        );
-        ele?.scrollIntoView();
-        ele?.classList.add("paragraph-highlight");
+      const ele = document.querySelector(
+        `.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`
+      );
+      ele?.scrollIntoView();
+      ele?.classList.add("paragraph-highlight");
     }
   }, [selected]);
 

@@ -24,6 +24,7 @@ interface ToolData<T> {
   input: SelectedNotesProse;
   result: T | undefined | null;
   bookmarked?: boolean;
+  error?: Error;
 }
 
 export interface ProseTool extends ToolData<string> {
@@ -33,16 +34,6 @@ export interface BulletTool extends ToolData<string> {
   tool: 'bullets';
 }
 
-// export type AssessmentData = {
-//   rating: number;
-//   first_sentence: string;
-//   explanation: string;
-// };
-// export interface ExpectationTool extends ToolData<AssessmentData> {
-//   tool: 'expectation';
-//   expectation?: Rule;
-// }
-// future
 export type ExpectationData = {
   rating?: number;
   general_assessment: string;
