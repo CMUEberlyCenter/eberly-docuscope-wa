@@ -54,25 +54,25 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                     onExit={() => dispatch({ type: "unset" })}
                   >
                     {support && (
-                      <div>
-                        <span className="fw-bolder">
+                      <p>
+                        <h6 className="d-inline">
                           {t("arguments.support")}
-                        </span>
+                        </h6>
                         {" "}
                         <span>{support}</span>
-                      </div>
+                      </p>
                     )}
                     {suggestions?.length && (
-                      <div>
-                        <span className="fw-bolder">
+                      <p>
+                        <h6>
                           {t("arguments.suggestions")}
-                        </span>
+                        </h6>
                         <ul>
                           {suggestions.map((suggestion, k) => (
                             <li key={`${i}-${k}`}>{suggestion}</li>
                           ))}
                         </ul>
-                      </div>
+                      </p>
                     )}
                   </Accordion.Body>
                 </Accordion.Item>

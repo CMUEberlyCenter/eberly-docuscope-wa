@@ -55,25 +55,25 @@ export const KeyIdeas: FC = () => {
                         onExit={() => dispatch({ type: "unset" })}
                       >
                         {elaborations?.length ? (
-                          <>
-                            <h5>{t("key_ideas.elaborations")}</h5>
+                          <p>
+                            <h6>{t("key_ideas.elaborations")}</h6>
                             <ul>
                               {elaborations.map(
                                 ({ elaboration_strategy, explanation }, k) => (
                                   <li key={`elaboration-${i}-${k}`}>
                                     <span className="fw-bold">
                                       {elaboration_strategy}
-                                    </span>
+                                    </span>{"  "}
                                     <span>{explanation}</span>
                                   </li>
                                 )
                               )}
                             </ul>
-                          </>
+                          </p>
                         ) : null}
                         {suggestions?.length ? (
-                          <>
-                            <h5>{t("key_ideas.suggestions")}</h5>
+                          <p>
+                            <h6>{t("key_ideas.suggestions")}</h6>
                             <ul>
                               {suggestions.map((suggestion, k) => (
                                 <li key={`suggestion-${i}-${k}`}>
@@ -81,7 +81,7 @@ export const KeyIdeas: FC = () => {
                                 </li>
                               ))}
                             </ul>
-                          </>
+                          </p>
                         ) : null}
                       </Accordion.Body>
                     </Accordion.Item>

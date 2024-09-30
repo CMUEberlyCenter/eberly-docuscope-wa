@@ -54,15 +54,15 @@ const Suggestions: FC<SuggestionsProps> = ({
             onExit={() => dispatch({ type: "unset" })}
           >
             <p>
-              <span className="fw-bold">
+              <h6 className="d-inline">
                 {t("global_coherence.suggestion.explanation")}
-              </span>{" "}
+              </h6>{" "}
               <span>{explanation}</span>
             </p>
             <p>
-              <span className="fw-bold">
+              <h6>
                 {t("global_coherence.suggestion.suggestions")}
-              </span>{" "}
+              </h6>{" "}
               <span>{suggestions}</span>
             </p>
           </Accordion.Body>
