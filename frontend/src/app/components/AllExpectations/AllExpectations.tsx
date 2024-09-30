@@ -50,7 +50,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
               eventKey={`${id}-expectation-${j}`}
             >
               {isAllExpectationsData(expectation) &&
-              expectation.response.suggestions === "none." ? (
+              expectation.response.suggestions.toLowerCase().startsWith("none") ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
                   <div
