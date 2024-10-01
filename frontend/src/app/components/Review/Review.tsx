@@ -8,6 +8,7 @@ import {
   useGlobalFeatureArguments,
   useGlobalFeatureImpressions,
   useGlobalFeatureKeyIdeas,
+  useGlobalFeatureLogicalProgression,
   useGlobalFeatureSentenceDensity,
   useGlobalFeatureTermMatrix,
 } from "../../service/settings.service";
@@ -105,7 +106,7 @@ export const Review: FC = () => {
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
   const sentencesFeature = useGlobalFeatureSentenceDensity();
-  const coherenceFeature = false;
+  const coherenceFeature = useGlobalFeatureLogicalProgression();
   const ideasFeature = useGlobalFeatureKeyIdeas();
   const impressionsFeature = useGlobalFeatureImpressions();
   const argumentsFeature = useGlobalFeatureArguments();

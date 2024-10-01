@@ -57,11 +57,11 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
         {includeTitle && <WritingTaskTitle />}
         {writingTask?.rules.rules.map((rule, i) => (
           <div key={`${id}-${i}`} aria-expanded="true">
-            <ButtonGroup aria-selected={selected===rule}>
+            <ButtonGroup aria-selected={selected === rule}>
               <Button
                 size="sm"
                 variant="none"
-                active={selected===rule}
+                active={selected === rule}
                 className="expand-toggle py-0"
                 onClick={(e) => {
                   const p = e.currentTarget.closest("[aria-expanded]");
@@ -81,10 +81,11 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                 </div>
               ) : (
                 <Button
-                className="py-0 ps-1"
-                 variant="none"
+                  className="py-0 ps-1"
+                  variant="none"
                   active={selected === rule}
-                   onClick={() => onSelect(rule)}>
+                  onClick={() => onSelect(rule)}
+                >
                   <span className="outline-section fw-bold">{rule.name}</span>
                 </Button>
               )}

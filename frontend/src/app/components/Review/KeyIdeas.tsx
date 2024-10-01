@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { useKeyPointsData } from "../../service/review.service";
+import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
@@ -45,12 +46,16 @@ export const KeyIdeas: FC = () => {
                   ({ point, elaborations, suggestions, sentences }, i) => (
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
-                        <span>
+                        <div className="flex-grow-1">
                           <span className="fw-bolder">
                             {t("key_ideas.idea")}
                           </span>{" "}
                           <span>{point}</span>
-                        </span>
+                        </div>
+                        <AlertIcon
+                          show={sentences.length === 0}
+                          message={t("key_ideas.no_sentences")}
+                        />
                       </Accordion.Header>
                       <Accordion.Body
                         onEntered={() => dispatch({ type: "set", sentences })}

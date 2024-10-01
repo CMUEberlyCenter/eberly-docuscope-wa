@@ -6,5 +6,6 @@
   },
   "sentences": "Sentences:",
   "suggestions": "Suggestions:",
-  "warning": "This expectation is not addressed in your draft."
+  "warning": "This expectation is not addressed in your draft.",
+  "no_sentences": "No relevant text was located in your draft."
 }

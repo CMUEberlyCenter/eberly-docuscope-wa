@@ -9,6 +9,7 @@ import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
+import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
@@ -44,10 +45,14 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                   eventKey={`${prefix}-${i}`}
                 >
                   <Accordion.Header>
-                    <span>
+                    <div className="flex-grow-1">
                       <span className="fw-bolder">{t("arguments.claim")}</span>{" "}
                       <span>{claim}</span>
-                    </span>
+                    </div>
+                    <AlertIcon
+                      message={t("arguments.no_sentences")}
+                      show={sentences.length === 0}
+                    />
                   </Accordion.Header>
                   <Accordion.Body
                     onEntered={() => dispatch({ type: "set", sentences })}

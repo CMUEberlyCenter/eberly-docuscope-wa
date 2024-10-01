@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "2.0.0-alpha.17",
+  "version": "2.0.0-alpha.18",
   "description": "",
   "main": "src/app/index.tsx",
   "type": "module",

@@ -16,13 +16,13 @@ import Split from "react-split";
 import { isAllExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
 import { isReview } from "../../../server/model/review";
-import AttentionIcon from "../../assets/icons/attention_icon.svg?react";
 import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
 import {
   useAllExpectationsAnalysis,
   useExpectations,
 } from "../../service/expectations.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
@@ -55,21 +55,19 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                 .startsWith("none") ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
-                  <div
-                    className="attention-icon text-warning"
-                    title={t("warning")}
-                  >
-                    <AttentionIcon />
-                    <span className="sr-only visually-hidden">
-                      {t("warning")}
-                    </span>
-                  </div>
+                  <AlertIcon message={t("warning")} show />
                 </div>
               ) : null}
               {isAllExpectationsData(expectation) &&
               expectation.response.suggestions !== "none." ? (
                 <>
-                  <Accordion.Header>{expectation.expectation}</Accordion.Header>
+                  <Accordion.Header>
+                    <div className="flex-grow-1">{expectation.expectation}</div>
+                    <AlertIcon
+                      message={t("no_sentences")}
+                      show={expectation.response.sentences.length === 0}
+                    />
+                  </Accordion.Header>
                   <Accordion.Body
                     onEntering={() =>
                       isAllExpectationsData(expectation)

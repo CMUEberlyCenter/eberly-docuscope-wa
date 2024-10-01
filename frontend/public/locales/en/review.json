@@ -42,6 +42,7 @@
     "entry": "List of Key Ideas",
     "title": "Key Ideas found in the Text",
     "error": "Error reading Key Ideas data.",
+    "no_sentences":"No relevant text addressing this idea was found in your draft.",
     "idea": "Idea:",
     "elaborations": "Elaboration Strategy",
     "sentences": "Sentences",
@@ -51,7 +52,8 @@
   "arguments": {
     "entry": "Lines of Arguments",
     "title": "Review Lines of Arguments",
-    "error":"Error reading Lines of Arguements data.",
+    "error": "Error reading Lines of Arguements data.",
+    "no_sentences": "No sentences to support this claim were found in your draft.",
     "main": "Main Argument",
     "arguments": "Arguments",
     "counter_examples": "Counter Argument",
