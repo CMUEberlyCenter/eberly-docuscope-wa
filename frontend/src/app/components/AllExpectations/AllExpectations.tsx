@@ -30,6 +30,7 @@ import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
 import "./AllExpectations.scss";
 
+const isNone = (suggestion: string): boolean => suggestion.match(/^none/i) !== null
 type ExpectationRuleProps = AccordionProps & { rule: Rule };
 /** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
@@ -50,16 +51,14 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
               eventKey={`${id}-expectation-${j}`}
             >
               {isAllExpectationsData(expectation) &&
-              expectation.response.suggestions
-                .toLowerCase()
-                .startsWith("none") ? (
+                isNone(expectation.response.suggestions) ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
                   <AlertIcon message={t("warning")} show />
                 </div>
               ) : null}
               {isAllExpectationsData(expectation) &&
-              expectation.response.suggestions !== "none." ? (
+                !isNone(expectation.response.suggestions) ? (
                 <>
                   <Accordion.Header>
                     <div className="flex-grow-1">{expectation.expectation}</div>
@@ -72,9 +71,9 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                     onEntering={() =>
                       isAllExpectationsData(expectation)
                         ? dispatch({
-                            sentences: expectation.response.sentences,
-                            type: "set",
-                          })
+                          sentences: expectation.response.sentences,
+                          type: "set",
+                        })
                         : dispatch({ type: "unset" })
                     }
                     onExiting={() => dispatch({ type: "unset" })}
@@ -88,7 +87,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({ rule, ...props }) => {
                 </>
               ) : null}
               {!isAllExpectationsData(expectation) ||
-              !expectations?.has(expectation.expectation) ? (
+                !expectations?.has(expectation.expectation) ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
                   <LoadingSmall />
