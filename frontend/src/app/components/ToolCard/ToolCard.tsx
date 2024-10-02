@@ -365,7 +365,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
                     {(notes2proseFeature || bulletsFeature) && (
-                      <ButtonGroup className="bg-white shadow-sm tools rounded-4" size="sm">
+                      <ButtonGroup
+                        className="bg-white shadow-sm tools rounded-4"
+                        size="sm"
+                      >
                         {notes2proseFeature && (
                           <ToolButton
                             tooltip={t("tool.button.prose.tooltip")}
@@ -431,7 +434,10 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Tab.Pane eventKey="refine">
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
-                    <ButtonGroup className="bg-white shadow-sm tools rounded-4" size="sm">
+                    <ButtonGroup
+                      className="bg-white shadow-sm tools rounded-4"
+                      size="sm"
+                    >
                       {flowFeature && (
                         <ToolButton
                           tooltip={t("tool.button.flow.tooltip")}
@@ -498,7 +504,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <ToolDisplay.Response
                 tool={currentTool}
                 regenerate={retry}
-                text={currentTool.result ?? ""}
+                text={currentTool.result ?? ""} // TODO post as list
               >
                 {currentTool.result && (
                   <ul>
@@ -525,7 +531,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <Card.Body className="pb-0">
                   <header className="d-flex align-items-center">
                     <CheckExpectationIcon height={16} width={16} />
-                    <span className="ms-2 fw-bold">{t("tool.expectation")}</span>
+                    <span className="ms-2 fw-bold">
+                      {t("tool.expectation")}
+                    </span>
                   </header>
                   {currentTool.expectation ? (
                     <ToolDisplay.Fade>

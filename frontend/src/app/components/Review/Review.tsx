@@ -140,7 +140,10 @@ export const Review: FC = () => {
             </Navbar>
           </header>
           <Dropdown className="d-flex justify-content-start mx-2 mb-2">
-            <Dropdown.Toggle variant="white" className="select-button shadow">
+            <Dropdown.Toggle
+              variant="white"
+              className="select-button shadow-sm"
+            >
               <div>
                 <ToolTitle tool={tool} />
               </div>

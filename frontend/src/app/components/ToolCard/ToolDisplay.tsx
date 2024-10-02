@@ -104,7 +104,7 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
     <Card as="section" className="mx-1">
       <Card.Body className="pb-0">
         <header className="d-flex align-items-baseline">
-          <YourInputIcon style={{height: "0.75em"}} />
+          <YourInputIcon style={{ height: "0.75em" }} />
           <span className="ms-2 fw-bold">{t("tool.input")}</span>
         </header>
         {tool?.input.text.trim() ? (
@@ -140,7 +140,10 @@ export const ToolResponse: FC<ToolResponseProps> = ({
   return (
     <section {...props} className={cn}>
       <header className="d-flex align-items-baseline">
-        <AIResponseIcon className="text-body-tertiary" style={{height: "0.8em"}}/>
+        <AIResponseIcon
+          className="text-body-tertiary"
+          style={{ height: "0.8em" }}
+        />
         <span className="ms-2 fw-bold">{t("tool.output")}</span>
         <ButtonToolbar className="ms-auto">
           {tool?.result && text && <TextToSpeech text={text} />}

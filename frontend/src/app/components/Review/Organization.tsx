@@ -253,7 +253,7 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <Container fluid className="organization d-flex flex-column">
+      <div className="container-fluid organization">
         <h4>{t("organization.title")}</h4>
         {!data ? (
           <Loading />
@@ -496,11 +496,9 @@ export const Organization: FC = () => {
                 </div>
               )}
             </ErrorBoundary>
-            {/* </Card.Body>
-            </Card> */}
           </ErrorBoundary>
         )}
-      </Container>
+      </div>
     </ReviewReset>
   );
 };
