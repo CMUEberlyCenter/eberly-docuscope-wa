@@ -214,13 +214,19 @@ export const Organization: FC = () => {
 
   const onSelectTopic = useCallback(
     (topic: Topic) => {
-      setSelected(selected?.topic === topic ? null : { topic });
+      setSelected({
+        ...selected,
+        topic: topic === selected?.topic ? undefined : topic,
+      });
     },
     [selected]
   );
   const onSelectParagraph = useCallback(
     (paragraph: number) => {
-      setSelected(selected?.paragraph === paragraph ? null : { paragraph });
+      setSelected({
+        ...selected,
+        paragraph: selected?.paragraph === paragraph ? undefined : paragraph,
+      });
     },
     [selected]
   );
@@ -352,7 +358,14 @@ export const Organization: FC = () => {
                                   ? "topic-icon-small"
                                   : "topic-icon-large";
                                 return (
-                                  <tr key={`topic-paragraph-key-${i}`}>
+                                  <tr
+                                    key={`topic-paragraph-key-${i}`}
+                                    className={
+                                      topic === selected?.topic
+                                        ? "bg-highlight"
+                                        : ""
+                                    }
+                                  >
                                     <td
                                       data-search={topi}
                                       data-order={sent_count}
@@ -374,7 +387,12 @@ export const Organization: FC = () => {
                                       return (
                                         <td
                                           key={`topic-key-${i}-${j}`}
-                                          className="p-0 text-center"
+                                          className={classNames(
+                                            "p-0 text-center",
+                                            selected?.paragraph === j
+                                              ? "bg-highlight"
+                                              : ""
+                                          )}
                                         >
                                           {paraType ? (
                                             <Button
