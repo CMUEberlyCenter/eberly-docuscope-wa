@@ -1,6 +1,9 @@
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChangeEvent, FC, useEffect, useState } from "react";
 import {
   Button,
+  CloseButton,
   Form,
   ListGroup,
   Modal,
@@ -16,8 +19,6 @@ import {
   writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 type SelectWritingTaskProps = {
   show: boolean;
@@ -120,7 +121,10 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
             placement="top"
             overlay={
               <Popover>
-                <Popover.Header>{t("select_task.upload")}</Popover.Header>
+                <Popover.Header className="d-flex justify-content-between">
+                  <div>{t("select_task.upload")}</div>
+                  <CloseButton onClick={() => setShowFile(false)} />
+                </Popover.Header>
                 <Popover.Body>
                   <Form noValidate>
                     <Form.Group>
@@ -139,11 +143,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
             }
           >
             <Button className="me-auto">
-              {showFile ? (
-                <FontAwesomeIcon icon={faXmark} />
-              ) : (
-                <FontAwesomeIcon icon={faPlus} />
-              )}
+              <FontAwesomeIcon icon={faPlus} />
             </Button>
           </OverlayTrigger>
         )}

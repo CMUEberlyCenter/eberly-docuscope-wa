@@ -46,7 +46,8 @@ export const UserTextView: FC<UserTextViewProps> = ({
 
   useEffect(() => {
     document.querySelector(".user-text .highlight")?.scrollIntoView({
-      behavior: "smooth", block: "center"
+      behavior: "smooth",
+      block: "center",
     });
   }, [content]);
 
