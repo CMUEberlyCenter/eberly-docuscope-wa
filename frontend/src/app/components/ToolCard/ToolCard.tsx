@@ -365,7 +365,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
                     {(notes2proseFeature || bulletsFeature) && (
-                      <ButtonGroup className="bg-white shadow-sm tools" size="sm">
+                      <ButtonGroup className="bg-white shadow-sm tools rounded-4" size="sm">
                         {notes2proseFeature && (
                           <ToolButton
                             tooltip={t("tool.button.prose.tooltip")}
@@ -388,7 +388,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     )}
                     {(expectationFeature || expectationsFeature) && (
                       <ButtonGroup
-                        className="bg-white shadow-sm tools ms-2"
+                        className="bg-white shadow-sm tools rounded-4 ms-2"
                         size="sm"
                       >
                         {expectationFeature && (
@@ -431,7 +431,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Tab.Pane eventKey="refine">
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
-                    <ButtonGroup className="bg-white shadow-sm tools" size="sm">
+                    <ButtonGroup className="bg-white shadow-sm tools rounded-4" size="sm">
                       {flowFeature && (
                         <ToolButton
                           tooltip={t("tool.button.flow.tooltip")}
