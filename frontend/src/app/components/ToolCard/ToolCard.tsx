@@ -325,14 +325,25 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   </Nav.Item>
                 )}
                 {reviewFeature && (
-                  <Button variant="link" onClick={() => onReview()}>
-                    {t("tool.tab.review")}
-                    <FontAwesomeIcon
-                      icon={faArrowUpRightFromSquare}
-                      className="ms-1"
-                      style={{ fontSize: "0.7em" }}
-                    />
-                  </Button>
+                  <Nav.Item>
+                    <Nav.Link eventKey={"review"} onClick={() => onReview()}>
+                      {t("tool.tab.review")}
+                      <FontAwesomeIcon
+                        icon={faArrowUpRightFromSquare}
+                        className="ms-1"
+                        style={{ fontSize: "0.65em" }}
+                      />
+                    </Nav.Link>
+                  </Nav.Item>
+                  // link button is a better usability choice
+                  // <Button variant="link" onClick={() => onReview()}>
+                  //   {t("tool.tab.review")}
+                  //   <FontAwesomeIcon
+                  //     icon={faArrowUpRightFromSquare}
+                  //     className="ms-1"
+                  //     style={{ fontSize: "0.7em" }}
+                  //   />
+                  // </Button>
                 )}
                 {(copyEditFeature || flowFeature) && (
                   <Nav.Item>
