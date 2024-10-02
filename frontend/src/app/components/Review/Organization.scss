@@ -16,6 +16,12 @@
 
   table {
     caption-side: top;
+    caption {
+      background-color: var(--bs-secondary);
+      font-weight: bold;
+      color: var(--bs-black);
+      padding-left: 0.5rem;
+    }
     thead tr button {
       width: 34px;
     }
