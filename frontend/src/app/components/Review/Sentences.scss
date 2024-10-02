@@ -36,6 +36,9 @@ $be-verb: #4296f5;
 }
 
 .sentences {
+  .sentence-display {
+    height: 8em;
+  }
   table.sentence-data {
     border-spacing: 0px !important;
     counter-reset: paragraph;

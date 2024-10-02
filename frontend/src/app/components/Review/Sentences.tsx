@@ -140,7 +140,7 @@ export const Sentences: FC = () => {
               </Card.Subtitle>
             )} */}
             <Legend />
-            <div className="py-1">
+            <div className="py-1 overflow-auto sentence-display mb-1">
               {sentenceDetails ? (
                 <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
               ) : (

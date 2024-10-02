@@ -246,7 +246,7 @@ export const Organization: FC = () => {
       const ele = document.querySelector(
         `.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`
       );
-      ele?.scrollIntoView();
+      ele?.scrollIntoView({ behavior: "smooth", block: "center" });
       ele?.classList.add("paragraph-highlight");
     }
   }, [selected]);

@@ -34,7 +34,7 @@ export function highlightParagraph(aParagraphIndex: number) {
   // const pId = `p${aParagraphIndex + 1}`;
   // const element = document.getElementById(pId);
   element?.classList.add('paragraph-highlight');
-  element?.scrollIntoView();
+  element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /**
@@ -51,7 +51,7 @@ export function highlightSentence(
     `.sentence[data-ds-paragraph="${aParagraphIndex + 1}"][data-ds-sentence="${aSentenceIndex + 1}"]`
   );
   element?.classList.add('highlight');
-  element?.scrollIntoView();
+  element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 /**
