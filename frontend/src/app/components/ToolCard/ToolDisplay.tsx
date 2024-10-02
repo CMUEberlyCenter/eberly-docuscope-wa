@@ -103,9 +103,9 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
   return (
     <Card as="section" className="mx-1">
       <Card.Body className="pb-0">
-        <header>
-          <YourInputIcon className="me-2" />
-          <span className="fw-bold">{t("tool.input")}</span>
+        <header className="d-flex align-items-baseline">
+          <YourInputIcon style={{height: "0.75em"}} />
+          <span className="ms-2 fw-bold">{t("tool.input")}</span>
         </header>
         {tool?.input.text.trim() ? (
           <FadeContent>
@@ -139,9 +139,9 @@ export const ToolResponse: FC<ToolResponseProps> = ({
   const cn = className ?? "px-1 m-2 pb-2";
   return (
     <section {...props} className={cn}>
-      <header className="d-flex">
-        <AIResponseIcon className="me-2 text-body-tertiary" />
-        <span className="fw-bold">{t("tool.output")}</span>
+      <header className="d-flex align-items-baseline">
+        <AIResponseIcon className="text-body-tertiary" style={{height: "0.8em"}}/>
+        <span className="ms-2 fw-bold">{t("tool.output")}</span>
         <ButtonToolbar className="ms-auto">
           {tool?.result && text && <TextToSpeech text={text} />}
           {tool?.result && regenerate && (

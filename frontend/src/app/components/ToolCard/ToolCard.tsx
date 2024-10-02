@@ -523,9 +523,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <ToolDisplay.Input tool={currentTool} />
               <Card as="section" className="mx-1">
                 <Card.Body className="pb-0">
-                  <header>
-                    <CheckExpectationIcon />
-                    <span className="fw-bold">{t("tool.expectation")}</span>
+                  <header className="d-flex align-items-center">
+                    <CheckExpectationIcon height={16} width={16} />
+                    <span className="ms-2 fw-bold">{t("tool.expectation")}</span>
                   </header>
                   {currentTool.expectation ? (
                     <ToolDisplay.Fade>
