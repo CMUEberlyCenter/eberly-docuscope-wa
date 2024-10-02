@@ -17,8 +17,10 @@
   }
 
   .tools {
+    --prose-tool-radius: 0.75rem;
+    border-radius: var(--prose-tool-radius);
     button {
-      width: 64px;
+      min-width: 64px;
       height: 64px;
       border: none; // overriding Bootstrap button styling
       border-left-style: solid;
@@ -26,6 +28,12 @@
 
       &:first-child {
         border-left-style: none;
+        border-top-left-radius: var(--prose-tool-radius);
+        border-bottom-left-radius: var(--prose-tool-radius);
+      }
+      &:last-child {
+        border-top-right-radius: var(--prose-tool-radius);
+        border-bottom-right-radius: var(--prose-tool-radius);
       }
 
       &[disabled] {

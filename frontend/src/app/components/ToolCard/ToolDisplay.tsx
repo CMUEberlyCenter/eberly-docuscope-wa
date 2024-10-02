@@ -30,6 +30,7 @@ type ToolButtonProps = ButtonProps & {
   icon: ReactNode;
   title: string;
 };
+/** Button component with a tooltip and an icon. */
 export const ToolButton: FC<ToolButtonProps> = ({
   tooltip,
   icon,
@@ -127,6 +128,7 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
 
 type ToolResponseProps = HTMLProps<HTMLDivElement> &
   ToolProp & { text?: string; regenerate?: (tool: ToolResult) => void };
+/** Component for displaying the LLM response with the appropriate header */
 export const ToolResponse: FC<ToolResponseProps> = ({
   tool,
   text,
@@ -168,6 +170,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
 };
 
 type ToolPasteProps = { text: string | undefined | null };
+/** Footer button components for copying LLM output. */
 export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
   const { t } = useTranslation();
   const editor = useSlate();
