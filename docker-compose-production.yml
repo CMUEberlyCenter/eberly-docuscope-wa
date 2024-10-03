@@ -17,14 +17,11 @@ services:
       - mongo_pass
 
   ontopic:
-    build:
-      context: ./ontopic
-      dockerfile: ./Dockerfile
+    image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
     restart: always
-    ports:
-     - 5000:5000
 
   frontend:
+    image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/myprose:latest
     build:
       context: ./frontend
       dockerfile: ./Dockerfile
@@ -37,7 +34,7 @@ services:
       - token
     environment:
       ONTOPIC_SERVER: http://ontopic:5000/
-      LTI_HOSTNAME: https://docuscope-sc-test.eberly.cmu.edu/
+      LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
       TOKEN_SECRET_FILE: /run/secrets/token
       OPENAI_API_KEY_FILE: /run/secrets/openai_api_key

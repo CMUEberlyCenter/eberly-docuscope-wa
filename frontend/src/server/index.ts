@@ -1,16 +1,17 @@
 import cors from 'cors';
-import express, { Request, Response, Router } from 'express';
+import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
+import { readdir, readFile, stat } from 'fs/promises';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-// import { assignments } from './api/assignments';
 import {
   BadRequest,
   FileNotFound,
   InternalServerError,
 } from '../lib/ProblemDetails';
-import { isWritingTask, WritingTask } from '../lib/WritingTask';
+import { WritingTask } from '../lib/WritingTask';
+import { assignments } from './api/assignments';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
@@ -36,45 +37,10 @@ import {
   PLATFORMS_PATH,
   PORT,
 } from './settings';
-import { readdir, readFile, stat } from 'fs/promises';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
-
-const assignments = Router();
-assignments.post('/', async (request: Request, response: Response) => {
-  const token: IdToken = response.locals.token;
-  if (!token || !isInstructor(token.platformContext)) {
-    // TODO: add other admin roles
-    return response.sendStatus(401); // Unauthorized
-  }
-  if (!request.files) {
-    return response.status(400).send(BadRequest('Null files!'));
-  }
-  try {
-    const file = request.files.file;
-    if (file instanceof Array) {
-      return response
-        .sendStatus(400)
-        .send(BadRequest('Multiple files unsupported.'));
-    }
-    const json = JSON.parse(file.data.toString('utf-8'));
-    if (!isWritingTask(json)) {
-      return response
-        .status(400)
-        .send(BadRequest('Not a valid writing task specification.'));
-    }
-    await updateAssignmentWritingTask(token.platformContext.resource.id, json);
-  } catch (err) {
-    console.error(err);
-    if (err instanceof SyntaxError) {
-      return response.status(400).send(BadRequest(err));
-    }
-    return response.status(500).send(InternalServerError(err));
-  }
-  return response.sendStatus(200);
-});
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);

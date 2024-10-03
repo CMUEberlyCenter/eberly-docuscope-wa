@@ -29,7 +29,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/frontend
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/myprose
     - name: Build and push frontend Docker image
       id: push
       uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
@@ -41,7 +41,7 @@ jobs:
     - name: Generate frontend artifact attestation
       uses: actions/attest-build-provenance@v1
       with:
-        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/frontend
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/myprose
         subject-digest: ${{ steps.push.outputs.digest }}
         push-to-registry: true
         
