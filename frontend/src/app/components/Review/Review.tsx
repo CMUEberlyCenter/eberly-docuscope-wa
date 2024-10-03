@@ -130,7 +130,7 @@ export const Review: FC = () => {
           <header>
             <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
               <Nav>
-                <Nav.Item className="active fw-bolder text-primary ms-3">
+                <Nav.Item className="active text-primary ms-3">
                   {tt("tool.tab.review")}
                 </Nav.Item>
               </Nav>
