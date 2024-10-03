@@ -489,21 +489,21 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />}
+              actions={<ToolDisplay.Paste text={currentTool.result} />} // TODO post as list
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}
                 regenerate={retry}
-                text={currentTool.result ?? ""} // TODO post as list
+                text={currentTool.result ?? ""}
               >
                 {currentTool.result && (
                   <ul>
                     {currentTool.result
                       .split(/\s*-\s+/)
                       .filter((b) => b.trim() !== "")
-                      .map((b) => (
-                        <li>{b}</li>
+                      .map((b, i) => (
+                        <li key={`list-item-${i}`}>{b}</li>
                       ))}
                   </ul>
                 )}

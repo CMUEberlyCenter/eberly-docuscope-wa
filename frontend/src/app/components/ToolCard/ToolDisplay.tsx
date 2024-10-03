@@ -14,7 +14,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Transforms } from "slate";
+import { Transforms, Node } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
 import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
@@ -177,9 +177,30 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
   const paste = useCallback(
     (text: string | undefined | null) => {
       if (text && editor.selection) {
-        Transforms.insertNodes(editor, [
-          { type: "paragraph", children: [{ text }] },
-        ]);
+        const nodes: Node[] = [];
+        if (text.match(/<.*>/)) {
+          // is html
+          nodes.push(
+            ...[...text.matchAll(/<p>(.*)<\/p>/gi)].map((element) => ({
+              type: "paragraph",
+              children: [{ text: element.at(1) ?? "" }],
+            }))
+          );
+        } else if (text.match(/^\w*-/)) {
+          console.log(text);
+          [...text.matchAll(/^\s*-\s*(.*)$/g)].forEach(console.log);
+          // is a list
+          nodes.push({
+            type: "bulleted-list",
+            children: text
+              .split(/\s*-\s+/)
+              .filter((li) => li.trim() !== "")
+              .map((li) => ({ type: "list-item", children: [{ text: li }] })),
+          });
+        } else {
+          nodes.push({ type: "paragraph", children: [{ text }] });
+        }
+        Transforms.insertNodes(editor, nodes);
       }
     },
     [editor]
