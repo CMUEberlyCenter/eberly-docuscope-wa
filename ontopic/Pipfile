@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+psutil = "*"
+pathlib = "*"
+python-docx = "*"
+nltk = "*"
+beautifulsoup4 = "*"
+ftfy = "*"
+spacy = "==2.3.5"
+reportlab = "*"
+numpy = "*"
+pydocx = "*"
+unidecode = "*"
+pyqt5 = "*"
+waitress = "<3"
+
+[dev-packages]
+
+[requires]
+python_version = "3.7"
