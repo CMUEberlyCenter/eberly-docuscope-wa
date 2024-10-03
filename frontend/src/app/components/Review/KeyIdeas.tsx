@@ -1,4 +1,4 @@
-import { FC, useContext } from "react";
+import { FC, HTMLProps, useContext } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -9,10 +9,10 @@ import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
 /** List of Key Ideas title component for use in selection menu. */
-export const KeyIdeasTitle: FC = () => (
+export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-primary">
+      <span {...props}>
         <KeyIdeasIcon /> {t("key_ideas.entry")}
       </span>
     )}
@@ -47,9 +47,9 @@ export const KeyIdeas: FC = () => {
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
                         <div className="flex-grow-1">
-                          <span className="fw-bolder">
+                          <h6 className="d-inline">
                             {t("key_ideas.idea")}
-                          </span>{" "}
+                          </h6>{" "}
                           <span>{point}</span>
                         </div>
                         <AlertIcon
@@ -68,9 +68,9 @@ export const KeyIdeas: FC = () => {
                               {elaborations.map(
                                 ({ elaboration_strategy, explanation }, k) => (
                                   <li key={`elaboration-${i}-${k}`}>
-                                    <span className="fw-bold">
+                                    <h6 className="d-inline">
                                       {elaboration_strategy}
-                                    </span>
+                                    </h6>
                                     {"  "}
                                     <span>{explanation}</span>
                                   </li>

@@ -1,4 +1,4 @@
-import { FC, useContext, useEffect, useId, useState } from "react";
+import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -13,10 +13,10 @@ import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
 /** Logical Progression title component for use in selection menu. */
-export const GlobalCoherenceTitle: FC = () => (
+export const GlobalCoherenceTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-primary">
+      <span {...props}>
         <GlobalCoherenceIcon /> {t("global_coherence.title")}
       </span>
     )}
@@ -43,9 +43,9 @@ const Suggestions: FC<SuggestionsProps> = ({
         <Accordion.Item key={i} eventKey={`${prefix}-${i}`}>
           <Accordion.Header>
             <span>
-              <span className="fw-bold">
+              <h6 className="d-inline">
                 {t("global_coherence.suggestion.text")}
-              </span>{" "}
+              </h6>{" "}
               <span>{text}</span>
             </span>
           </Accordion.Header>

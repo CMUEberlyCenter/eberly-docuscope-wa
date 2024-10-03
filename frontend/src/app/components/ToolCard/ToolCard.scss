@@ -7,13 +7,16 @@
   }
 
   nav {
-    .active {
-      font-weight: bolder;
+    .nav-link {
+      font-weight: 600;
     }
-    .nav-link:hover {
-      color: var(--bs-secondary);
-      font-weight: bold;
-    }
+    // .active {
+    //   font-weight: bolder;
+    // }
+    // .nav-link:hover {
+    //   color: var(--bs-primary);
+    //   font-weight: bold;
+    // }
   }
 
   .tools {

@@ -1,4 +1,4 @@
-import { FC, useContext, useId, useState } from "react";
+import { FC, HTMLProps, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -14,10 +14,10 @@ import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 
 /** Lines of Arguments title component for use in selection menu. */
-export const ArgumentsTitle: FC = () => (
+export const ArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-primary">
+      <span {...props}>
         <ArgumentsIcon /> {t("arguments.entry")}
       </span>
     )}
@@ -46,7 +46,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 >
                   <Accordion.Header>
                     <div className="flex-grow-1">
-                      <span className="fw-bolder">{t("arguments.claim")}</span>{" "}
+                      <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
                       <span>{claim}</span>
                     </div>
                     <AlertIcon

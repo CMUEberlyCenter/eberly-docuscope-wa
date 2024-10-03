@@ -14,10 +14,10 @@ import { Loading } from "../Loading/Loading";
 import { ReviewReset } from "./ReviewContext";
 import "./Sentences.scss";
 
-export const SentencesTitle: FC = () => (
+export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span className="text-primary">
+      <span {...props}>
         <SentencesIcon /> {t("sentences.title")}
       </span>
     )}

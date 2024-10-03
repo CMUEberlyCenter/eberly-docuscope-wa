@@ -143,7 +143,7 @@ export const FormatDropdown: FC = () => {
       <Dropdown.Toggle
         variant="light"
         className="text-end"
-        style={{ width: "10em" }}
+        // style={{ width: "10em" }}
       >
         {label}
       </Dropdown.Toggle>

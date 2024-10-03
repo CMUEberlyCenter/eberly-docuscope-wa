@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, HTMLProps, useEffect, useState } from "react";
 import { Container, Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -34,38 +34,38 @@ type Tool =
   | "organization"
   | "impressions";
 
-const NullTitle: FC = () => (
-  <Translation ns={"review"}>{(t) => t("null.title")}</Translation>
+const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
+  <Translation ns={"review"}>{(t) => <span {...props}>{t("null.title")}</span>}</Translation>
 );
 
-type ToolProps = { tool: Tool };
-const ToolTitle: FC<ToolProps> = ({ tool }) => {
+type ToolProps = HTMLProps<HTMLSpanElement> & { tool: Tool };
+const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
   switch (tool) {
     case "sentences":
-      return <SentencesTitle />;
+      return <SentencesTitle {...props}/>;
     case "global_coherence":
-      return <GlobalCoherenceTitle />;
+      return <GlobalCoherenceTitle {...props}/>;
     case "key_ideas":
-      return <KeyIdeasTitle />;
+      return <KeyIdeasTitle {...props}/>;
     case "arguments":
-      return <ArgumentsTitle />;
+      return <ArgumentsTitle {...props}/>;
     case "expectations":
       return (
         <Translation ns={"review"}>
-          {(t) => <>{t("expectations.title")}</>}
+          {(t) => <span {...props}>{t("expectations.title")}</span>}
         </Translation>
       );
     case "organization":
-      return <OrganizationTitle />;
+      return <OrganizationTitle {...props}/>;
     case "impressions":
       return (
         <Translation ns={"review"}>
-          {(t) => <>{t("impressions.title")}</>}
+          {(t) => <span {...props}>{t("impressions.title")}</span>}
         </Translation>
       );
     case "null":
     default:
-      return <NullTitle />;
+      return <NullTitle {...props}/>;
   }
 };
 
@@ -141,7 +141,7 @@ export const Review: FC = () => {
           </header>
           <Dropdown className="d-flex justify-content-start mx-2 mb-2">
             <Dropdown.Toggle
-              variant="white"
+              variant="primary"
               className="select-button shadow-sm"
             >
               <div>
@@ -154,37 +154,37 @@ export const Review: FC = () => {
               </Dropdown.Header>
               {argumentsFeature && (
                 <Dropdown.Item onClick={() => onSelect("arguments")}>
-                  <ToolTitle tool="arguments" />
+                  <ToolTitle tool="arguments" className="text-primary" />
                 </Dropdown.Item>
               )}
               {ideasFeature && (
                 <Dropdown.Item onClick={() => onSelect("key_ideas")}>
-                  <ToolTitle tool="key_ideas" />
+                  <ToolTitle tool="key_ideas" className="text-primary" />
                 </Dropdown.Item>
               )}
               {coherenceFeature && (
                 <Dropdown.Item onClick={() => onSelect("global_coherence")}>
-                  <ToolTitle tool="global_coherence" />
+                  <ToolTitle tool="global_coherence" className="text-primary" />
                 </Dropdown.Item>
               )}
               {organizationFeature && (
                 <Dropdown.Item onClick={() => onSelect("organization")}>
-                  <ToolTitle tool="organization" />
+                  <ToolTitle tool="organization" className="text-primary" />
                 </Dropdown.Item>
               )}
               {sentencesFeature && (
                 <Dropdown.Item onClick={() => onSelect("sentences")}>
-                  <ToolTitle tool="sentences" />
+                  <ToolTitle tool="sentences" className="text-primary" />
                 </Dropdown.Item>
               )}
               {expectationsFeature && (
                 <Dropdown.Item onClick={() => onSelect("expectations")}>
-                  <ToolTitle tool="expectations" />
+                  <ToolTitle tool="expectations" className="text-primary" />
                 </Dropdown.Item>
               )}
               {impressionsFeature && (
                 <Dropdown.Item onClick={() => onSelect("impressions")}>
-                  <ToolTitle tool="impressions" />
+                  <ToolTitle tool="impressions" className="text-primary" />
                 </Dropdown.Item>
               )}
               {/* Add tool title select option here. */}

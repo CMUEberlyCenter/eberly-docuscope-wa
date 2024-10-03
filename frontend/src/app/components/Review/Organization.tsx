@@ -43,7 +43,7 @@ DataTable.use(DT);
 export const OrganizationTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <span {...props} className={classNames(props.className, "text-primary")}>
+      <span {...props}>
         <TermMatrixIcon /> {t("organization.title")}
       </span>
     )}
