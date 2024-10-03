@@ -6,6 +6,15 @@
 ###################################################################################
 
 services:
+  # redirect:
+  #   # Temporary redirect of main page.
+  #   image: morbz/docker-web-redirect
+  #   ports:
+  #     - 8888:80
+  #   restart: always
+  #   environment:
+  #     - REDIRECT_TARGET=https://www.cmu.edu/dietrich/english/research-and-publications/myscribe.html
+  #     - REDIRECT_TYPE=redirect
   mongo:
     image: docker.io/mongo:latest
     restart: always
@@ -19,12 +28,12 @@ services:
   ontopic:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
     restart: always
+    volumes:
+      - "./ontopic/data:/home/appuser/data:ro"
+      - "./ontopic/resources:/home/appuser/resources:ro"
 
   frontend:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/myprose:latest
-    build:
-      context: ./frontend
-      dockerfile: ./Dockerfile
     ports:
      - 8888:8888
     secrets:
