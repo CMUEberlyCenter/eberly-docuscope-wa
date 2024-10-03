@@ -14,7 +14,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Transforms, Node } from "slate";
+import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
 import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
@@ -22,7 +22,6 @@ import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { ToolResult } from "../../lib/ToolResults";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import { LoadingSmall } from "../Loading/LoadingSmall";
 import { TextToSpeech } from "../scribe/TextToSpeech";
 
 type ToolButtonProps = ButtonProps & {
@@ -161,7 +160,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
               </span>
             </Button>
           )}
-          {!tool?.result && <LoadingSmall />}
+          {/* {!tool?.result && <LoadingSmall />} */}
         </ButtonToolbar>
       </header>
       {tool?.result ? children : <Loading />}
@@ -178,13 +177,15 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
     (text: string | undefined | null) => {
       if (text && editor.selection) {
         const nodes: Node[] = [];
-        if (text.match(/<.*>/)) {
+        if (text.match(/<p.*>/)) {
           // is html
           nodes.push(
-            ...[...text.matchAll(/<p>(.*)<\/p>/gi)].map((element) => ({
-              type: "paragraph",
-              children: [{ text: element.at(1) ?? "" }],
-            }))
+            ...[...text.matchAll(/<p>(.*)<\/p>/gi)]
+              .filter((p) => p.at(0) && p.at(1))
+              .map((element) => ({
+                type: "paragraph",
+                children: [{ text: element.at(1) ?? "" }],
+              }))
           );
         } else if (text.match(/^\w*-/)) {
           console.log(text);
