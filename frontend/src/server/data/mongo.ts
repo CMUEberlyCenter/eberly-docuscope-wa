@@ -1,56 +1,16 @@
-import { MongoClient, ObjectId } from 'mongodb';
-import { WRITING_TASKS_PATH, MONGO_CLIENT } from '../settings';
-import { Assignment } from '../model/assignment';
 import { PathLike } from 'fs';
 import { readFile, readdir, stat } from 'fs/promises';
-import { WritingTask, isWritingTask } from '../../lib/WritingTask';
+import { MongoClient, ObjectId } from 'mongodb';
 import { join } from 'path';
-import { Review } from '../model/review';
 import { Analysis } from '../../lib/ReviewResponse';
-import { deprecate } from 'util';
+import { WritingTask } from '../../lib/WritingTask';
+import { Review } from '../model/review';
+import { MONGO_CLIENT, WRITING_TASKS_PATH } from '../settings';
 
 const client = new MongoClient(MONGO_CLIENT);
 
-/** @deprecated */
-const ASSIGNMENTS = 'assignments';
 const WRITING_TASKS = 'writing_tasks';
 const REVIEW = 'review';
-
-/**
- * Retrieve settings for a given assignment.
- * TODO move to deep linking parameters.
- * @param id identifier from lms.
- * @returns Stored information about the given assignment.
- * @throws ReferenceError if no such assignment exists.
- * @deprecated
- */
-export const findAssignmentById = deprecate(async function (
-  id: string
-): Promise<Assignment> {
-  try {
-    const _id = new ObjectId(id);
-    const collection = client
-      .db('docuscope')
-      .collection<Assignment>(ASSIGNMENTS);
-    const assignment: Assignment | null = await collection.findOne<Assignment>({
-      _id,
-    });
-    if (!assignment) {
-      console.error(`Assignment ${id} not found!`);
-      throw new ReferenceError(`Assignment ${id} no found.`);
-    }
-    const { writing_task } = assignment;
-    if (!isWritingTask(writing_task)) {
-      // replace with $lookup
-      const task = await findWritingTaskById(writing_task.oid.toString());
-      assignment.writing_task = task;
-    }
-    return assignment;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}, 'Deprecating Assignment database, use LTI custom instead.');
 
 /**
  * Retrieves a given writing task specification from the database.
@@ -112,49 +72,6 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
     throw err;
   }
 }
-
-/**
- * Set the writing task for a given assignment.  This version stores the full
- * writing task in order to handle custom tasks.
- * Meant for LMS instructors to set writing tasks.
- * @param assignment Identifier for the given assignment from LMS.
- * @param writing_task The writing task to associate with the given assignment.
- * @deprecated
- */
-export const updateAssignmentWritingTask = deprecate(async function (
-  assignment: string,
-  writing_task: WritingTask
-) {
-  const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
-  const update = await collection.findOneAndUpdate(
-    { assignment },
-    { $set: { writing_task } },
-    { upsert: true }
-  );
-  return update?._id;
-}, 'Deprecating Assignment collection in favor of LTI custom fields.');
-
-/**
- * Updates the writing task for an assignment to reference a writing task.
- * @param assignment Identifier for the given assignment from LMS.
- * @param task Identifier for an existing writing task (eg) a public task.
- * @deprecated
- */
-export const updateAssignment = deprecate(async function (
-  assignment: string,
-  task: string
-) {
-  const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
-  const writing_task = new ObjectId(task);
-  const update = await collection.findOneAndUpdate(
-    {
-      assignment: assignment,
-    },
-    { $set: { 'writing_task.$ref': writing_task } },
-    { upsert: true }
-  );
-  return update?._id;
-}, 'Deprecate in favor of using LTI custom fields.');
 
 /**
  * Reread the public writing tasks from the file system in order to syncronize
