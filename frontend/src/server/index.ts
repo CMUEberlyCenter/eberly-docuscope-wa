@@ -180,11 +180,11 @@ async function __main__() {
     app.use(metrics);
 
     // Static directories that do not need to be managed by ltijs
-    app.use('/favicon.ico', express.static(`${PUBLIC}/favicon.ico`));
-    app.use('/static', express.static(`${PUBLIC}/static`));
-    app.use('/assets', express.static(`${PUBLIC}/assets`));
-    app.use('/locales', express.static(`${PUBLIC}/locales`));
-    app.use('/settings', express.static(`${PUBLIC}/settings`));
+    app.use('/favicon.ico', express.static(join(PUBLIC, 'favicon.ico')));
+    app.use('/static', express.static(join(PUBLIC, 'static')));
+    app.use('/assets', express.static(join(PUBLIC, 'assets')));
+    app.use('/locales', express.static(join(PUBLIC, 'locales')));
+    app.use('/settings', express.static(join(PUBLIC, 'settings')));
 
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
