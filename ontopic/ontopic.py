@@ -29,12 +29,12 @@ class OnTopic:
     self.systemErrorMessage=""
     self.systemReady=True
 
-    if (os.path.isfile("resources/rules.json")==False):
-      self.systemReady=False
-      self.systemErrorMessage="Unable to load data model"
-    else:  
-      f = open("resources/rules.json", "r")
-      self.rules=f.read()
+    # if (os.path.isfile("resources/rules.json")==False):
+    #   self.systemReady=False
+    #   self.systemErrorMessage="Unable to load data model"
+    # else:  
+    #   f = open("resources/rules.json", "r")
+    #   self.rules=f.read()
 
     if (os.path.exists("data/default_model") == False):
       self.systemErrorMessage="Unable to locate default language model"
@@ -89,10 +89,10 @@ class OnTopic:
   ##
   #
   ##
-  def rules (self):
-    response = make_response(self.rules, 200)
-    response.mimetype = "application/json"
-    return response
+  # def rules (self):
+  #   response = make_response(self.rules, 200)
+  #   response.mimetype = "application/json"
+  #   return response
 
   ##
   # 

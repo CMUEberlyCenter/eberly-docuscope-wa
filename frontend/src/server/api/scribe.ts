@@ -33,7 +33,7 @@ const scribeNotes =
       // TODO check for empty prose
       response.json(chat.response);
     } catch (err) {
-      return handleChatError(err, response);
+      handleChatError(err, response);
     }
   };
 scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
@@ -52,9 +52,9 @@ export const scribeText =
         },
         true
       );
-      return response.json(chat.response);
+      response.json(chat.response);
     } catch (err) {
-      return handleChatError(err, response);
+      handleChatError(err, response);
     }
   };
 scribe.post('/proofread', scribeText('grammar'));
@@ -75,7 +75,7 @@ scribe.post(
       });
       response.json(assessment.response);
     } catch (err) {
-      return handleChatError(err, response);
+      handleChatError(err, response);
     }
   }
 );

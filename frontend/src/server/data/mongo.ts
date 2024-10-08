@@ -7,9 +7,11 @@ import { WritingTask, isWritingTask } from '../../lib/WritingTask';
 import { join } from 'path';
 import { Review } from '../model/review';
 import { Analysis } from '../../lib/ReviewResponse';
+import { deprecate } from 'util';
 
 const client = new MongoClient(MONGO_CLIENT);
 
+/** @deprecated */
 const ASSIGNMENTS = 'assignments';
 const WRITING_TASKS = 'writing_tasks';
 const REVIEW = 'review';
@@ -20,8 +22,11 @@ const REVIEW = 'review';
  * @param id identifier from lms.
  * @returns Stored information about the given assignment.
  * @throws ReferenceError if no such assignment exists.
+ * @deprecated
  */
-export async function findAssignmentById(id: string): Promise<Assignment> {
+export const findAssignmentById = deprecate(async function (
+  id: string
+): Promise<Assignment> {
   try {
     const _id = new ObjectId(id);
     const collection = client
@@ -45,7 +50,7 @@ export async function findAssignmentById(id: string): Promise<Assignment> {
     console.error(err);
     throw err;
   }
-}
+}, 'Deprecating Assignment database, use LTI custom instead.');
 
 /**
  * Retrieves a given writing task specification from the database.
@@ -56,7 +61,10 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
   try {
     const _id = new ObjectId(id);
     const collection = client.db('docuscope').collection(WRITING_TASKS);
-    const rules = await collection.findOne<WritingTask>({ _id });
+    const rules = await collection.findOne<WritingTask>(
+      { _id },
+      { projection: { _id: 0 } }
+    );
     if (!rules) {
       throw new ReferenceError(`Expectation file ${id} not found.`);
     }
@@ -65,6 +73,21 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
     console.error(err);
     throw err;
   }
+}
+
+/**
+ * Insert a non-public writing task into database.
+ * @param writing_task
+ * @returns The id of the record.
+ */
+export async function insertWritingTask(
+  writing_task: WritingTask
+): Promise<ObjectId> {
+  const collection = client
+    .db('docuscope')
+    .collection<WritingTask>(WRITING_TASKS);
+  const ins = await collection.insertOne({ ...writing_task, public: false });
+  return ins.insertedId;
 }
 
 /**
@@ -96,8 +119,9 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
  * Meant for LMS instructors to set writing tasks.
  * @param assignment Identifier for the given assignment from LMS.
  * @param writing_task The writing task to associate with the given assignment.
+ * @deprecated
  */
-export async function updateAssignmentWritingTask(
+export const updateAssignmentWritingTask = deprecate(async function (
   assignment: string,
   writing_task: WritingTask
 ) {
@@ -108,14 +132,18 @@ export async function updateAssignmentWritingTask(
     { upsert: true }
   );
   return update?._id;
-}
+}, 'Deprecating Assignment collection in favor of LTI custom fields.');
 
 /**
  * Updates the writing task for an assignment to reference a writing task.
  * @param assignment Identifier for the given assignment from LMS.
  * @param task Identifier for an existing writing task (eg) a public task.
+ * @deprecated
  */
-export async function updateAssignment(assignment: string, task: string) {
+export const updateAssignment = deprecate(async function (
+  assignment: string,
+  task: string
+) {
   const collection = client.db('docuscope').collection<Assignment>(ASSIGNMENTS);
   const writing_task = new ObjectId(task);
   const update = await collection.findOneAndUpdate(
@@ -126,7 +154,7 @@ export async function updateAssignment(assignment: string, task: string) {
     { upsert: true }
   );
   return update?._id;
-}
+}, 'Deprecate in favor of using LTI custom fields.');
 
 /**
  * Reread the public writing tasks from the file system in order to syncronize
@@ -141,11 +169,23 @@ export async function updatePublicWritingTasks() {
     const collection = client
       .db('docuscope')
       .collection<WritingTask>(WRITING_TASKS);
+    await collection.updateMany(
+      { public: true },
+      {
+        $set: {
+          public: false,
+        },
+      }
+    ); // make all public private to delist old but without breaking links.
+    // update record if name and version match (assuming that if it matches it is an edit, probably not a safe assumption) else insert.
     await collection.bulkWrite(
       expectations.map((data) => ({
         replaceOne: {
-          filter: { public: true, 'info.name': data.info.name },
-          replacement: data,
+          filter: {
+            'info.name': data.info.name,
+            'info.version': data.info.version,
+          },
+          replacement: { ...data, public: true },
           upsert: true,
         },
       }))

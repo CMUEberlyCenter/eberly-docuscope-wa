@@ -30,13 +30,14 @@ ontopic.post('/', async (request: Request, response: Response) => {
         `Bad response from ontopic: ${res.status} - ${res.statusText}`
       );
       // forward bad response.
-      return response.status(res.status).send(res.statusText);
+      response.status(res.status).send(res.statusText);
+      return;
     }
     const ret = await res.json();
 
-    return response.json(ret);
+    response.json(ret);
   } catch (err) {
     console.error(err);
-    return response.status(500).send(InternalServerError(err));
+    response.status(500).send(InternalServerError(err));
   }
 });

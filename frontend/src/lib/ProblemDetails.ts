@@ -42,3 +42,14 @@ export const BadRequest = (
   status: 400,
   instance,
 });
+
+export const Unauthorized = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/401',
+  title: 'Unauthorized',
+  detail: err instanceof Error ? err.message : err,
+  status: 401,
+  instance,
+});

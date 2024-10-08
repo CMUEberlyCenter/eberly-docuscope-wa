@@ -36,7 +36,8 @@ const validate = (...validations: ContextRunner[]) => {
     for (const validation of validations) {
       const valid = await validation.run(req);
       if (!valid.isEmpty()) {
-        return res.status(400).send(BadRequest(JSON.stringify(valid.array())));
+        res.status(400).send(BadRequest(JSON.stringify(valid.array())));
+        return;
       }
     }
     next();
@@ -156,15 +157,16 @@ reviews.get(
         if (!response.closed) {
           const final = await findReviewById(id);
           response.write(`data: ${JSON.stringify(final)}\n\n`);
-          return response.end();
+          response.end();
         }
       }
     } catch (err) {
       console.error(err);
       if (err instanceof ReferenceError) {
-        return response.status(404).send(FileNotFound(err));
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
       }
-      return response.status(500).send(InternalServerError(err));
     }
   }
 );
@@ -257,14 +259,15 @@ reviews.get(
       if (!response.closed) {
         const final = await findReviewById(id);
         response.write(`data: ${JSON.stringify(final)}\n\n`);
-        return response.end();
+        response.end();
       }
     } catch (err) {
       console.error(err);
       if (err instanceof ReferenceError) {
-        return response.status(404).send(FileNotFound(err));
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
       }
-      return response.status(500).send(InternalServerError(err));
     }
   }
 );
@@ -277,12 +280,13 @@ reviews.delete(
       const { id } = request.params;
       console.log(`delete ${id}`);
       deleteReviewById(id);
-      return response.sendStatus(204);
+      response.sendStatus(204);
     } catch (err) {
       if (err instanceof ReferenceError) {
-        return response.status(404).send(FileNotFound(err));
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
       }
-      return response.status(500).send(InternalServerError(err));
     }
   }
 );
@@ -306,9 +310,9 @@ reviews.post(
         token?.user,
         token?.platformContext.resource.id
       );
-      return response.send(id);
+      response.send(id);
     } catch (err) {
-      return response.status(500).send(InternalServerError(err));
+      response.status(500).send(InternalServerError(err));
     }
   }
 );

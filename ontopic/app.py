@@ -26,9 +26,9 @@ def ping():
 ##
 #
 ##
-@app.route("/api/v1/rules")
-def rules():
-  return (driver.rules())
+# @app.route("/api/v1/rules")
+# def rules():
+#   return (driver.rules())
 
 ##
 #

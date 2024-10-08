@@ -11,15 +11,14 @@ import {
   InternalServerError,
 } from '../lib/ProblemDetails';
 import { WritingTask } from '../lib/WritingTask';
-import { assignments } from './api/assignments';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
 import { writingTasks } from './api/tasks';
 import {
-  findAssignmentById,
+  findWritingTaskById,
   initDatabase,
-  updateAssignmentWritingTask,
+  insertWritingTask,
 } from './data/mongo';
 import {
   ContentItemType,
@@ -47,8 +46,6 @@ async function __main__() {
   await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
-  // Provider.app.set('etag', 'strong');
-  Provider.app.use(express.json());
   Provider.app.use(cors({ origin: '*' }));
   Provider.app.use(fileUpload({ createParentPath: true }));
   Provider.app.use(
@@ -58,20 +55,10 @@ async function __main__() {
   );
 
   Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
-    // if (token) {
-    // return Provider.redirect(res, '/index.html', { query: { assignment: token.platformContext.resource.id }})
-    // }
-    // const assignment = await findAssignmentById(token.platformContext.resource.id);
-    // const rules = await findRulesById(assignment.rules.toString());
-    // if (token && token.platformContext && isInstructor(token.platformContext)) {
-    //   console.log('isInstructor');
-    //   return res.sendFile(join(PUBLIC, 'deeplink.html'))
-    // }
-    //return res.send(token);
     if (token) {
       return res.sendFile(join(PUBLIC, 'index.html'));
     }
-    return Provider.redirect(res, '/index.html');
+    Provider.redirect(res, '/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
@@ -89,47 +76,40 @@ async function __main__() {
   Provider.app.post(
     '/deeplink',
     async (request: Request, response: Response) => {
-      const task = JSON.parse(request.body.file) as WritingTask;
+      const task = JSON.parse(request.body.file) as {
+        _id?: string;
+      } & WritingTask;
       // const url = new URL('/index.html', LTI_HOSTNAME);
       const url = new URL('/', LTI_HOSTNAME);
       // if (!isInstuctor(token)) { throw new Error(); }
       // if (!isWritingTask(task)) { throw new Error(); }
-      // TODO try...catch
-      const assignmentId = await updateAssignmentWritingTask(
-        response.locals.token.platformContext.context.id,
-        task
-      );
-      if (assignmentId) {
-        url.searchParams.append('assignment', assignmentId.toString());
-      }
-      const items: ContentItemType[] = [
-        {
-          type: 'ltiResourceLink',
-          url: url.toString(),
-          custom: {
-            assignment: assignmentId?.toString() ?? 'NULL',
-            // writing_task: task  // TODO store here?
+      try {
+        const { _id, ...writing_task } = task;
+        const writing_task_id: string =
+          _id ?? (await insertWritingTask(task)).toString();
+        if (writing_task_id) {
+          url.searchParams.append('writing_task', writing_task_id);
+        }
+        const items: ContentItemType[] = [
+          {
+            type: 'ltiResourceLink',
+            url: url.toString(),
+            custom: {
+              writing_task_id,
+              writing_task: JSON.stringify(writing_task),
+            },
           },
-        },
-      ];
-      const form = await Provider.DeepLinking.createDeepLinkingForm(
-        response.locals.token,
-        items
-      ); // {message: 'Success'}
-      return response.send(form);
+        ];
+        const form = await Provider.DeepLinking.createDeepLinkingForm(
+          response.locals.token,
+          items
+        ); // {message: 'Success'}
+        return response.send(form);
+      } catch (err) {
+        return response.status(500).send(err.message);
+      }
     }
   );
-
-  // Configuration Endpoints
-  Provider.app.use('/api/v2/writing_tasks', writingTasks);
-  // Assignment Endpoints
-  Provider.app.use('/api/v2/assignments', assignments);
-  // Scribe Endpoints
-  Provider.app.use('/api/v2/scribe', scribe);
-  // OnTopic Enpoints
-  Provider.app.use('/api/v2/ontopic', ontopic);
-  // Reviews Endpoints
-  Provider.app.use('/api/v2/reviews', reviews);
 
   console.log(`OnTopic: ${ONTOPIC_URL}`);
 
@@ -146,52 +126,32 @@ async function __main__() {
       resource: token.platformContext.resource,
     };
     try {
-      const assignmentId = token.platformContext.custom?.assignment;
-      if (!assignmentId) {
-        throw new BadRequestError('No assignment id in custom parameters.');
+      const taskId = token.platformContext.custom?.writing_task_id;
+      if (!taskId || typeof taskId !== 'string') {
+        throw new BadRequestError('No writing task id in custom parameters.');
       }
-      const assignmentData = await findAssignmentById(assignmentId);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { writing_task, assignment, ...tools } = assignmentData;
-      // TODO: remove _id fields.
+      const writing_task = await findWritingTaskById(taskId);
       const ret = {
         ...context,
-        tools,
         writing_task,
       };
-      // console.log(ret);
-      return res.send(ret);
+      res.send(ret);
     } catch (err) {
       console.error(err);
       if (err instanceof ReferenceError) {
-        return res.status(404).send(FileNotFound(err));
+        res.status(404).send(FileNotFound(err));
+      } else if (err instanceof BadRequestError) {
+        res.status(400).send(BadRequest(err));
+      } else {
+        res.status(500).send(InternalServerError(err));
       }
-      if (err instanceof BadRequestError) {
-        return res.status(400).send(BadRequest(err));
-      }
-      return res.status(500).send(InternalServerError(err));
     }
   });
 
-  Provider.app.use(metrics);
-
-  Provider.app.use(express.static(PUBLIC));
-  Provider.whitelist(
-    Provider.appRoute(),
-    /assets\//,
-    /locales\//,
-    /\.ico$/,
-    /\.svg$/,
-    /\.png$/,
-    /settings/,
-    /api\/v.\//,
-    /metrics\//,
-    /index\.html$/,
-    /review\.html$/,
-    /expectations\.html$/
-  );
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/);
   try {
-    await Provider.deploy({ port: PORT });
+    // await Provider.deploy({ port: PORT });
+    await Provider.deploy({ serverless: true });
 
     // Register manually configured platforms.
     const files = await readdir(PLATFORMS_PATH);
@@ -204,8 +164,33 @@ async function __main__() {
         await Provider.registerPlatform(json);
       }
     }
+    const app = express();
+    app.use(express.json());
+    app.use(cors({ origin: '*' }));
 
-    console.log(` > Ready on ${LTI_HOSTNAME.toString()}`);
+    // Writing Task/Outline Endpoints
+    app.use('/api/v2/writing_tasks', writingTasks);
+    // Scribe Endpoints
+    app.use('/api/v2/scribe', scribe);
+    // OnTopic Enpoints
+    app.use('/api/v2/ontopic', ontopic);
+    // Reviews Endpoints
+    app.use('/api/v2/reviews', reviews);
+    // Metrics
+    app.use(metrics);
+
+    // Static directories that do not need to be managed by ltijs
+    app.use('/favicon.ico', express.static(`${PUBLIC}/favicon.ico`));
+    app.use('/static', express.static(`${PUBLIC}/static`));
+    app.use('/assets', express.static(`${PUBLIC}/assets`));
+    app.use('/locales', express.static(`${PUBLIC}/locales`));
+    app.use('/settings', express.static(`${PUBLIC}/settings`));
+
+    app.use(Provider.app);
+    app.use(express.static(PUBLIC));
+    app.listen(PORT, () =>
+      console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
+    );
   } catch (err) {
     console.error(err);
   }
