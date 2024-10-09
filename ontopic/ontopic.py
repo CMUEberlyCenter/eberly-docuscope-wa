@@ -1,13 +1,9 @@
 from flask import make_response
 from urllib.parse import unquote
-# from urllib.parse import quote_from_bytes
 import os, threading, psutil, platform
 import prometheus
-# import base64
-# import html
 import json
 
-# import dslib.utils as utils
 import dslib.views as views
 
 from dslib.models.document import DSDocument
@@ -24,17 +20,8 @@ class OnTopic:
   #
   ##
   def __init__(self):
-    print ("OnTopic()")
-
     self.systemErrorMessage=""
     self.systemReady=True
-
-    # if (os.path.isfile("resources/rules.json")==False):
-    #   self.systemReady=False
-    #   self.systemErrorMessage="Unable to load data model"
-    # else:  
-    #   f = open("resources/rules.json", "r")
-    #   self.rules=f.read()
 
     if (os.path.exists("data/default_model") == False):
       self.systemErrorMessage="Unable to locate default language model"
@@ -87,14 +74,6 @@ class OnTopic:
     return response
 
   ##
-  #
-  ##
-  # def rules (self):
-  #   response = make_response(self.rules, 200)
-  #   response.mimetype = "application/json"
-  #   return response
-
-  ##
   # 
   # So in general we have to test 4 cases:
   # - A garbage text
@@ -104,10 +83,6 @@ class OnTopic:
   # 
   ##
   def ontopic (self, request):
-    # print ('ontopic(self,request)')
-
-    #envelope=request.get_json()
-
     envelope=None
 
     try:
@@ -122,8 +97,6 @@ class OnTopic:
       response.mimetype = "application/json"
       response.headers["Content-Type"] = "application/json"
       return response
-
-    #print (envelope)
 
     data=envelope["data"]
     raw=data["base"]
@@ -145,8 +118,6 @@ class OnTopic:
     #unescaped=raw
 
     unescaped=unquote(raw)
-
-    #print (raw)
 
     multiword_topics = list()
     synsets = list ()
@@ -212,9 +183,6 @@ class OnTopic:
     #data['html'] = base64.b64encode(html.encode('utf-8')).decode("utf-8")
     #data['html_sentences'] = base64.b64encode(html_sentences.encode('utf-8')).decode("utf-8")
     data['html_sentences'] = json.loads(json.dumps(html_sentences))
-
-    #print ("data: ")
-    #print (data)
 
     response = make_response(data, 200)
     response.mimetype = "application/json"

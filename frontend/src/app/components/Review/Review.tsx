@@ -35,20 +35,22 @@ type Tool =
   | "impressions";
 
 const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>{(t) => <span {...props}>{t("null.title")}</span>}</Translation>
+  <Translation ns={"review"}>
+    {(t) => <span {...props}>{t("null.title")}</span>}
+  </Translation>
 );
 
 type ToolProps = HTMLProps<HTMLSpanElement> & { tool: Tool };
 const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
   switch (tool) {
     case "sentences":
-      return <SentencesTitle {...props}/>;
+      return <SentencesTitle {...props} />;
     case "global_coherence":
-      return <GlobalCoherenceTitle {...props}/>;
+      return <GlobalCoherenceTitle {...props} />;
     case "key_ideas":
-      return <KeyIdeasTitle {...props}/>;
+      return <KeyIdeasTitle {...props} />;
     case "arguments":
-      return <ArgumentsTitle {...props}/>;
+      return <ArgumentsTitle {...props} />;
     case "expectations":
       return (
         <Translation ns={"review"}>
@@ -56,7 +58,7 @@ const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
         </Translation>
       );
     case "organization":
-      return <OrganizationTitle {...props}/>;
+      return <OrganizationTitle {...props} />;
     case "impressions":
       return (
         <Translation ns={"review"}>
@@ -65,7 +67,7 @@ const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
       );
     case "null":
     default:
-      return <NullTitle {...props}/>;
+      return <NullTitle {...props} />;
   }
 };
 

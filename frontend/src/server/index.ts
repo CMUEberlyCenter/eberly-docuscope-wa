@@ -10,7 +10,7 @@ import {
   FileNotFound,
   InternalServerError,
 } from '../lib/ProblemDetails';
-import { WritingTask } from '../lib/WritingTask';
+import { isWritingTask, WritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
@@ -40,6 +40,12 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
+
+class BadRequestError extends Error {
+  constructor(message?: string) {
+    super(message);
+  }
+}
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -74,6 +80,7 @@ async function __main__() {
     res.sendFile(join(PUBLIC, 'deeplink.html'))
   );
   Provider.app.post(
+    // TODO validate(checkSchema({})),
     '/deeplink',
     async (request: Request, response: Response) => {
       const task = JSON.parse(request.body.file) as {
@@ -81,10 +88,11 @@ async function __main__() {
       } & WritingTask;
       // const url = new URL('/index.html', LTI_HOSTNAME);
       const url = new URL('/', LTI_HOSTNAME);
-      // if (!isInstuctor(token)) { throw new Error(); }
-      // if (!isWritingTask(task)) { throw new Error(); }
       try {
         const { _id, ...writing_task } = task;
+        if (!isWritingTask(writing_task)) {
+          throw new BadRequestError('Invalid Outline');
+        }
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
         if (writing_task_id) {
@@ -104,20 +112,18 @@ async function __main__() {
           response.locals.token,
           items
         ); // {message: 'Success'}
-        return response.send(form);
+        response.send(form);
       } catch (err) {
-        return response.status(500).send(err.message);
+        if (err instanceof BadRequestError) {
+          response.status(400).send(BadRequest(err));
+        } else {
+          response.status(500).send(InternalServerError(err));
+        }
       }
     }
   );
 
   console.log(`OnTopic: ${ONTOPIC_URL}`);
-
-  class BadRequestError extends Error {
-    constructor(message?: string) {
-      super(message);
-    }
-  }
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {
     const token: IdToken = res.locals.token;

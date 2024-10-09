@@ -34,7 +34,7 @@ import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?reac
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
-import { useSelectTaskAvailable } from "../../service/lti.service";
+import { useSelectTaskAvailable } from "../../service/writing-task.service";
 import {
   postClarifyText,
   postConvertNotes,

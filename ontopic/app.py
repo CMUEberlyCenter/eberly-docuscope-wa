@@ -1,10 +1,6 @@
 from flask import Flask, make_response, request
 import logging
-import sys
 import ontopic
-
-print ("Booting ...")
-print (sys.version)
 
 app = Flask(__name__)
 driver = ontopic.OnTopic()
@@ -26,14 +22,7 @@ def ping():
 ##
 #
 ##
-# @app.route("/api/v1/rules")
-# def rules():
-#   return (driver.rules())
-
-##
-#
-##
-@app.route("/api/v1/ontopic",methods = ['POST'])
+@app.route("/api/v1/ontopic", methods = ['POST'])
 def ontopic():
   return (driver.ontopic(request))    
 

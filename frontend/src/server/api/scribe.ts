@@ -1,4 +1,5 @@
 import { Request, Response, Router } from 'express';
+import { body } from 'express-validator';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
 import {
   AssessExpectationRequest,
@@ -7,6 +8,7 @@ import {
 } from '../../lib/Requests';
 import { doChat } from '../data/chat';
 import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
+import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
 
 export const scribe = Router();
@@ -36,8 +38,14 @@ const scribeNotes =
       handleChatError(err, response);
     }
   };
-scribe.post('/convert_to_prose', scribeNotes('notes_to_prose'));
-scribe.post('/convert_to_bullets', scribeNotes('notes_to_bullets'));
+
+const validate_notes = validate(body('notes').isString());
+scribe.post('/convert_to_prose', validate_notes, scribeNotes('notes_to_prose'));
+scribe.post(
+  '/convert_to_bullets',
+  validate_notes,
+  scribeNotes('notes_to_bullets')
+);
 
 export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
@@ -57,15 +65,21 @@ export const scribeText =
       handleChatError(err, response);
     }
   };
-scribe.post('/proofread', scribeText('grammar'));
-scribe.post('/copyedit', scribeText('copyedit'));
-scribe.post('/local_coherence', scribeText('local_coherence'));
-scribe.post('/global_coherence', scribeText('global_coherence'));
-scribe.post('/arguments', scribeText('arguments'));
-scribe.post('/key_points', scribeText('key_points'));
+const validate_text = validate(body('text').isString());
+scribe.post('/proofread', validate_text, scribeText('grammar'));
+scribe.post('/copyedit', validate_text, scribeText('copyedit'));
+scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));
+scribe.post('/global_coherence', validate_text, scribeText('global_coherence'));
+scribe.post('/arguments', validate_text, scribeText('arguments'));
+scribe.post('/key_points', validate_text, scribeText('key_points'));
 
 scribe.post(
   '/assess_expectation',
+  validate(
+    body('text').isString(),
+    body('expectation').isString(),
+    body('description').isString()
+  ),
   async (request: Request, response: Response) => {
     const data = request.body as AssessExpectationRequest;
     try {

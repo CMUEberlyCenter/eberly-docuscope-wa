@@ -1,10 +1,9 @@
 /** @fileoverview Accessing LTI 1.3 information. */
 
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, catchError, map, of, switchMap } from 'rxjs';
+import { BehaviorSubject, catchError, filter, of, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import { WritingTask } from '../../lib/WritingTask';
-import { writingTask } from './writing-task.service';
 
 type LtiInfo = {
   instructor: boolean;
@@ -24,7 +23,6 @@ const getLtik = (): string => {
   const searchParams = new URLSearchParams(window.location.search);
   const ltik = searchParams.get('ltik');
   if (!ltik) {
-    console.error('Missing LTI key!');
     throw new Error('Missing LTI key.');
   }
   return ltik;
@@ -65,30 +63,25 @@ export const getLtiRequest = (): RequestInit => {
 };
 
 export const [useLtiInfo, ltiInfo$] = bind(
-  fromFetch('/lti/info', {
-    ...getLtiRequest(),
-    // selector: (r) => r.json(),
-  }).pipe(
-    switchMap(async (response: Response) => {
-      if (!response.ok) {
-        throw new Error(response.statusText);
-      }
-      // check for form
-      return (await response.json()) as LtiInfo;
-    }),
-    catchError(() => of(null))
+  lti.pipe(
+    filter((v) => v), // only if in LTI mode
+    switchMap(() =>
+      fromFetch('/lti/info', {
+        ...getLtiRequest(),
+        // selector: (r) => r.json(),
+      }).pipe(
+        switchMap(async (response: Response) => {
+          if (!response.ok) {
+            throw new Error(response.statusText);
+          }
+          // check for form
+          return (await response.json()) as LtiInfo;
+        }),
+        catchError(() => of(null))
+      )
+    )
   ),
   null
-);
-ltiInfo$.subscribe((lti_info) => {
-  if (lti_info?.writing_task) {
-    writingTask.next(lti_info.writing_task);
-  }
-});
-
-export const [useSelectTaskAvailable, selectTaskAvailable$] = bind(
-  ltiInfo$.pipe(map((info) => !info?.writing_task)),
-  false
 );
 
 // Reassigning is done via deeplinking.

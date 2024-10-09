@@ -1,11 +1,7 @@
-import { NextFunction, Request, Response, Router } from 'express';
-import { body, ContextRunner, param } from 'express-validator';
+import { Request, Response, Router } from 'express';
+import { body, param } from 'express-validator';
 import { OnTopicData } from '../../lib/OnTopicData';
-import {
-  BadRequest,
-  FileNotFound,
-  InternalServerError,
-} from '../../lib/ProblemDetails';
+import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
 import {
   AllExpectationsData,
   AllExpectationsResponse,
@@ -27,22 +23,10 @@ import {
 import { IdToken } from '../model/lti';
 import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
+import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL } from '../settings';
 
 export const reviews = Router();
-
-const validate = (...validations: ContextRunner[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    for (const validation of validations) {
-      const valid = await validation.run(req);
-      if (!valid.isEmpty()) {
-        res.status(400).send(BadRequest(JSON.stringify(valid.array())));
-        return;
-      }
-    }
-    next();
-  };
-};
 
 const ANALYSES: ReviewPrompt[] = [
   'global_coherence',

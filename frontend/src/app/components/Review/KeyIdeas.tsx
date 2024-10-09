@@ -47,9 +47,7 @@ export const KeyIdeas: FC = () => {
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
                         <div className="flex-grow-1">
-                          <h6 className="d-inline">
-                            {t("key_ideas.idea")}
-                          </h6>{" "}
+                          <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
                           <span>{point}</span>
                         </div>
                         <AlertIcon

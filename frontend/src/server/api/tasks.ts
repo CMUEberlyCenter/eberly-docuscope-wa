@@ -5,6 +5,8 @@ import {
   updatePublicWritingTasks,
 } from '../data/mongo';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
+import { validate } from '../model/validate';
+import { param } from 'express-validator';
 
 export const writingTasks = Router();
 
@@ -18,19 +20,23 @@ writingTasks.patch('/update', async (_request: Request, response: Response) => {
   }
 });
 
-writingTasks.get('/:fileId', async (request: Request, response: Response) => {
-  const fileId = request.params.fileId;
-  try {
-    response.send(await findWritingTaskById(fileId));
-  } catch (err) {
-    console.error(err);
-    if (err instanceof ReferenceError) {
-      response.status(404).send(FileNotFound(err));
-    } else {
-      response.status(500).send(InternalServerError(err));
+writingTasks.get(
+  '/:fileId',
+  validate(param('fileId').isMongoId()),
+  async (request: Request, response: Response) => {
+    const fileId = request.params.fileId;
+    try {
+      response.send(await findWritingTaskById(fileId));
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
     }
   }
-});
+);
 
 writingTasks.get('', async (_request: Request, response: Response) => {
   try {
