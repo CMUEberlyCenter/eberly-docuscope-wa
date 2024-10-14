@@ -1,6 +1,0 @@
-MODE=development
-DSWA_ONTOPIC_HOST="http://dswa-ontopic"
-DSWA_ONTOPIC_PORT=5000
-DB_HOST="dswadb"
-DB_PORT=3306
-TOKEN_SECRET="dummy"
