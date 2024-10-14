@@ -4,6 +4,7 @@ function isStringArray(arr: unknown): arr is string[] {
 
 export type Topic = {
   lemma: string;
+  /** True if topic is user generated. */
   user_defined: boolean;
   pre_defined_topics?: string[];
   custom_topics?: string[];
@@ -28,7 +29,9 @@ function isTopic(topic: Topic | unknown): topic is Topic {
 }
 
 export type Rule = {
+  /** Rule name, used for rule lookup. */
   name: string;
+  /** Human readable description of the rule. */
   description: string;
   topics?: Topic[];
   examples?: string;
@@ -36,6 +39,11 @@ export type Rule = {
   is_group: boolean;
   children: Rule[];
   cv_description?: string;
+  /**
+   * Parent rule name.
+   *
+   * @TJS-type ["string", "null"]
+   */
   parent?: string | null;
   sentenceCount?: number;
 };
@@ -63,14 +71,22 @@ function isRule(rule: Rule | unknown): rule is Rule {
 }
 
 export type WritingTaskMetaData = {
+  /** Title of the Writing Task/Outline */
   name: string;
+  /** String used to identify the version of the outline, expected to be a SemTag */
   version: string;
+  /** Author of the outline. */
   author: string;
+  /** Copyright information. */
   copyright: string;
+  /** Last modified date, expected to be ISO 8601 format. */
   saved: string; // DateTime
+  /** OS filename */
   filename: string;
   dict_path?: string;
+  /** Optionally specify the input language for LLM templates. (Default configured in server settings) */
   user_lang?: string;
+  /** Optinally specify the output language for LLM templates. (Default configured in server settings) */
   target_lang?: string;
 };
 function isWritingTaskMetaData(
@@ -104,8 +120,11 @@ export const ERROR_INFORMATION: WritingTaskMetaData = {
 };
 
 type Rules = {
+  /** Title of the rule set. */
   name: string;
+  /** Human readable description of the overall rule set/outline. */
   overview: string;
+  /** List of top-level rules. */
   rules: Rule[];
 };
 function isRules(rules: unknown): rules is Rules {
@@ -137,14 +156,24 @@ function isImpressions(imp: unknown): imp is Impressions {
   );
 }
 
-/** Configuration file json data. */
+/**
+ * Schema for a myProse writing tasks specification json file.
+ *
+ * @$id writing-task
+ * @$comment JSON schema file should not be modified as it is generated from the typescript definition using 'npx typescript-json-schema'.
+ * @additionalProperties false
+ */
 export type WritingTask = {
+  /** Outline rules. */
   rules: Rules;
+  /** Extra information for Impressions tool. */
   impressions: Impressions;
   values: unknown;
+  /** Metadata about the task. */
   info: WritingTaskMetaData;
   extra_instructions?: string;
   wtd_version?: string;
+  /** True if the task is listed in publicly available listings.  This is normally set by the server. */
   public?: boolean;
 };
 

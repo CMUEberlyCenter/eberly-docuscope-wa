@@ -32,6 +32,8 @@ export const InternalServerError = (
   instance,
 });
 
+export class BadRequestError extends Error {}
+
 export const BadRequest = (
   err: Error | string,
   instance?: string
@@ -52,4 +54,24 @@ export const Unauthorized = (
   detail: err instanceof Error ? err.message : err,
   status: 401,
   instance,
+});
+
+export class UnprocessableContentError extends Error {
+  validation: unknown = undefined;
+  constructor(validation?: unknown, ...params: any) {
+    super(...params);
+    this.validation = validation;
+  }
+}
+
+export const UnprocessableContent = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/422',
+  title: 'Unprocessable Content',
+  detail: err instanceof Error ? err.message : err,
+  status: 422,
+  instance,
+  errors: err instanceof UnprocessableContentError ? err.validation : undefined,
 });

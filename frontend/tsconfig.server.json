@@ -4,7 +4,7 @@
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "Node",
-    "resolveJsonModule": true,
+    "resolveJsonModule": true
   },
   "ts-node": {
     "esm": true

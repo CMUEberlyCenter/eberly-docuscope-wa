@@ -16,12 +16,12 @@ export const scribe = Router();
 const handleChatError = (err: unknown, response: Response) => {
   console.error(err);
   if (err instanceof ReferenceError) {
-    return response.status(404).send(FileNotFound(err));
+    response.status(404).send(FileNotFound(err));
+  } else if (err instanceof Error) {
+    response.status(500).send(InternalServerError(err));
+  } else {
+    response.sendStatus(500);
   }
-  if (err instanceof Error) {
-    return response.status(500).send(InternalServerError(err));
-  }
-  return response.sendStatus(500);
 };
 
 const scribeNotes =

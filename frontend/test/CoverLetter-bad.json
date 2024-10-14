@@ -1,0 +1,126 @@
+{
+  "rule_s": {
+    "name": "Cover Letter",
+    "overview": "A cover letter serves as a personal introduction to a potential employer, highlighting your qualifications and interest in a specific position. Mastering this genre is crucial as it can significantly impact your job application success and can be adapted for diverse professional scenarios, from applying to entry-level positions to executive roles, across industries, and for both traditional employment and freelance opportunities",
+    "rules": [
+      {
+        "name": "Introduction",
+        "description": "<body>\n<p>This section introduces the applicant and states the purpose of the letter.</p></body>",
+        "examples": "",
+        "type": "bounded_optional",
+        "is_group": true,
+        "children": [
+          {
+            "name": "What positions are you applying for?",
+            "description": "<body>\n<p>State the specific job title you are applying for and where you found the listing. This sets the context for your letter and shows your interest in the specific role.</p>\n<p>Identifying the position helps the reader understand your intent and aligns your qualifications with their needs.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Introduction"
+          },
+          {
+            "name": "Who are you addressing?",
+            "description": "<body>\n<p>Use the hiring manager's name if possible. This personal touch demonstrates your effort and interest in the company.</p>\n<p>Addressing the letter to a specific person makes it more engaging and shows that you have done your research.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Introduction"
+          },
+          {
+            "name": "Why are you interested in this position?",
+            "description": "<body>\n<p>Express your enthusiasm for the role and the company. Connect your values or career goals with the organization's mission.</p>\n<p>Showing genuine interest can make you stand out as a candidate who is not just looking for any job, but is specifically drawn to this opportunity.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Introduction"
+          }
+        ],
+        "parent": null
+      },
+      {
+        "name": "Body",
+        "description": "<body>\n<p>This section elaborates on your qualifications and experiences relevant to the position.</p>\n<h3></h3></body>",
+        "examples": "",
+        "type": "bounded_optional",
+        "is_group": true,
+        "children": [
+          {
+            "name": "What relevant skills and experiences do you possess?",
+            "description": "<body>\n<p>Highlight specific skills and experiences that align with the job description. Use examples to illustrate your qualifications.</p>\n<p>Detailing your relevant skills helps the employer see how you can contribute to their team and meet their needs.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Body"
+          },
+          {
+            "name": "How do your experiences relate to the company's goals?",
+            "description": "<body>\n<p>Discuss how your background aligns with the company's objectives or culture. Make connections between your past roles and the potential impact you could have.</p>\n<p>These actions show that you understand the company and are prepared to contribute positively to its mission.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Body"
+          },
+          {
+            "name": "Why should the employer consider you?",
+            "description": "<body>\n<p>Summarize your unique selling points and what sets you apart from other candidates. Be confident but humble in your presentation.</p>\n<p>Convincing the employer of your value can increase your chances of being invited for an interview.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Body"
+          }
+        ],
+        "parent": null
+      },
+      {
+        "name": "Conclusion",
+        "description": "<body>\n<p>This section wraps up the letter and expresses gratitude.</p></body>",
+        "examples": "",
+        "type": "bounded_optional",
+        "is_group": true,
+        "children": [
+          {
+            "name": "What is your call to action?",
+            "description": "<body>\n<p>Express your desire for an interview or further discussion. Encourage the reader to take the next step.</p>\n<p>A strong call to action can prompt the employer to consider you more seriously and take the initiative to reach out.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Conclusion"
+          },
+          {
+            "name": "How do you express gratitude?",
+            "description": "<body>\n<p>Thank the reader for their time and consideration. A polite closing leaves a positive impression.</p>\n<p>Expressing gratitude shows professionalism and respect, which can enhance your overall candidacy.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Conclusion"
+          },
+          {
+            "name": "What closing statement will you use?",
+            "description": "<body>\n<p>Choose a professional closing statement, such as 'Sincerely' or 'Best regards,' followed by your name. This maintains a formal tone.</p>\n<p>A proper closing reinforces your professionalism and leaves the reader with a clear sense of your identity.</p></body>",
+            "examples": "",
+            "type": "active",
+            "is_group": false,
+            "children": [],
+            "parent": "Conclusion"
+          }
+        ],
+        "parent": null
+      }
+    ]
+  },
+  "impressions": {
+    "common_clusters": [],
+    "rare_clusters": []
+  },
+  "values": {},
+  "extra_instructions": "",
+  "wtd_version": "2.1.0"
+}

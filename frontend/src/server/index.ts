@@ -7,9 +7,13 @@ import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 import {
   BadRequest,
+  BadRequestError,
   FileNotFound,
   InternalServerError,
+  UnprocessableContent,
+  UnprocessableContentError,
 } from '../lib/ProblemDetails';
+import { validateWritingTask } from '../lib/schemaValidate';
 import { isWritingTask, WritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
@@ -40,12 +44,6 @@ import {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PUBLIC = join(__dirname, '../../build/app');
-
-class BadRequestError extends Error {
-  constructor(message?: string) {
-    super(message);
-  }
-}
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -90,8 +88,18 @@ async function __main__() {
       const url = new URL('/', LTI_HOSTNAME);
       try {
         const { _id, ...writing_task } = task;
+        const valid = validateWritingTask(task);
+        if (!valid) {
+          throw new UnprocessableContentError(
+            validateWritingTask.errors,
+            'Invalid Outline'
+          );
+        }
         if (!isWritingTask(writing_task)) {
-          throw new BadRequestError('Invalid Outline');
+          throw new UnprocessableContentError(
+            ['Failed type checking!'],
+            'Invalid Outline'
+          );
         }
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
@@ -114,7 +122,9 @@ async function __main__() {
         ); // {message: 'Success'}
         response.send(form);
       } catch (err) {
-        if (err instanceof BadRequestError) {
+        if (err instanceof UnprocessableContentError) {
+          response.status(422).send(UnprocessableContent(err));
+        } else if (err instanceof BadRequestError) {
           response.status(400).send(BadRequest(err));
         } else {
           response.status(500).send(InternalServerError(err));
