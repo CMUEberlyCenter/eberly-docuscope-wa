@@ -172,15 +172,19 @@ async function __main__() {
     await Provider.deploy({ serverless: true });
 
     // Register manually configured platforms.
-    const files = await readdir(PLATFORMS_PATH);
-    for (const file of files) {
-      const path = join(PLATFORMS_PATH, file);
-      const stats = await stat(path);
-      if (stats.isFile() && file.endsWith('.json')) {
-        const content = await readFile(path, { encoding: 'utf8' });
-        const json = JSON.parse(content) as LTIPlatform;
-        await Provider.registerPlatform(json);
+    try {
+      const files = await readdir(PLATFORMS_PATH);
+      for (const file of files) {
+        const path = join(PLATFORMS_PATH, file);
+        const stats = await stat(path);
+        if (stats.isFile() && file.endsWith('.json')) {
+          const content = await readFile(path, { encoding: 'utf8' });
+          const json = JSON.parse(content) as LTIPlatform;
+          await Provider.registerPlatform(json);
+        }
       }
+    } catch (err) {
+      console.error(err);
     }
     const app = express();
     app.use(express.json());
