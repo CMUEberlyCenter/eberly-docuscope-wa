@@ -18,8 +18,8 @@
     "watch:server": "rollup -c --watch",
     "express": "npm run build:client && npm run dev:server",
     "prettier": "npx prettier -c src/",
-    "lint": "npx eslint@^9 src",
-    "precommit": "npm run prettier && npm run lint && npm test",
+    "eslint": "npx eslint@^9 src",
+    "precommit": "npm run prettier && npm run eslint && npm test",
     "gen:schema": "npx typescript-json-schema ./src/lib/WritingTask.ts WritingTask --out ./src/lib/WritingTask.schema.json"
   },
   "repository": {
