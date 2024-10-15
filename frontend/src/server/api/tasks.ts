@@ -2,12 +2,20 @@ import { Request, Response, Router } from 'express';
 import {
   findAllPublicWritingTasks,
   findWritingTaskById,
+  insertWritingTask,
   updatePublicWritingTasks,
 } from '../data/mongo';
-import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
+import {
+  FileNotFound,
+  InternalServerError,
+  UnprocessableContent,
+  UnprocessableContentError,
+} from '../../lib/ProblemDetails';
 import { validate } from '../model/validate';
 import { param } from 'express-validator';
 import { LTI_HOSTNAME } from '../settings';
+import { validateWritingTask } from '../../lib/schemaValidate';
+import { isWritingTask } from '../../lib/WritingTask';
 
 export const writingTasks = Router();
 
@@ -52,5 +60,35 @@ writingTasks.get('', async (request: Request, response: Response) => {
   } catch (err) {
     console.error(err);
     response.status(500).send(InternalServerError(err));
+  }
+});
+
+writingTasks.post('', async (request: Request, response: Response) => {
+  try {
+    const task = request.body;
+    const valid = validateWritingTask(task);
+    if (!valid) {
+      throw new UnprocessableContentError(
+        validateWritingTask.errors,
+        'Invalid JSON'
+      );
+    }
+    if (!isWritingTask(task)) {
+      throw new UnprocessableContentError(
+        ['Failed type check.'],
+        'Invalid JSON'
+      );
+    }
+    const writing_task_id = (await insertWritingTask(task)).toString();
+    response.send(writing_task_id);
+  } catch (err) {
+    if (
+      err instanceof SyntaxError ||
+      err instanceof UnprocessableContentError
+    ) {
+      response.status(422).send(UnprocessableContent(err));
+    } else {
+      response.status(500).send(InternalServerError(err));
+    }
   }
 });

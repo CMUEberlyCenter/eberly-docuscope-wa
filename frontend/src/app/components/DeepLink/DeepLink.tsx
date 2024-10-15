@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useState } from "react";
+import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Button, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
@@ -12,6 +12,10 @@ export const DeepLink: FC = () => {
   const [selected, setSelected] = useState<WritingTask | null>(null);
   const [custom, setCustom] = useState<WritingTask | null>(null);
   const [valid, setValid] = useState(true); // Uploaded file validity
+
+  useEffect(() => {
+    window.document.title = t("deeplinking.title");
+  }, [t]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -34,24 +38,6 @@ export const DeepLink: FC = () => {
       }
     }
   };
-
-  // const onSubmit = useCallback(async () => {
-  //   if (!selected) return;
-  //   try {
-  //     const resp = await fetch('/deeplink', {
-  //       method: 'POST',
-  //       body: JSON.stringify(selected)
-  //     });
-  //     if (!resp.ok) {
-  //       throw new Error(await resp.json());
-  //     }
-  //     // TODO post data for deep link
-  //     // writing task
-  //     // TODO future: other assignment restrictions on available tools.
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // }, [selected]);
 
   return (
     <main className="h-100 w-100 pt-2">

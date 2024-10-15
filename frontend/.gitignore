@@ -4,4 +4,6 @@ dist/
 build/
 output/
 coverage/
-.env
+.env*
+stats.html
+

@@ -58,7 +58,10 @@ export const Unauthorized = (
 
 export class UnprocessableContentError extends Error {
   validation: unknown = undefined;
-  constructor(validation?: unknown, ...params: any) {
+  constructor(
+    validation?: unknown,
+    ...params: ConstructorParameters<typeof Error>
+  ) {
     super(...params);
     this.validation = validation;
   }

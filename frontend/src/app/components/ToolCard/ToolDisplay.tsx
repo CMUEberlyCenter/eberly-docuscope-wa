@@ -17,9 +17,9 @@ import { useTranslation } from "react-i18next";
 import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
-import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { ToolResult } from "../../lib/ToolResults";
+import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../scribe/TextToSpeech";
@@ -195,7 +195,8 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
             type: "bulleted-list",
             children: text
               .split(/\s*-\s+/)
-              .filter((li) => li.trim() !== "")
+              .map((li) => li.trim())
+              .filter((li) => li !== "")
               .map((li) => ({ type: "list-item", children: [{ text: li }] })),
           });
         } else {
@@ -216,15 +217,10 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
       >
         {t("tool.paste")}
       </Button>
-      <Button
-        variant="icon"
-        className="text-primary"
+      <ClipboardIconButton
         disabled={!text}
         onClick={() => text && navigator.clipboard.writeText(text)}
-      >
-        <ClipboardIcon />
-        <span className="visually-hidden sr-only">{t("clipboard")}</span>
-      </Button>
+      />
     </div>
   );
 };

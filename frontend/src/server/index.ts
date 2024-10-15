@@ -81,24 +81,24 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     '/deeplink',
     async (request: Request, response: Response) => {
-      const task = JSON.parse(request.body.file) as {
-        _id?: string;
-      } & WritingTask;
       // const url = new URL('/index.html', LTI_HOSTNAME);
       const url = new URL('/', LTI_HOSTNAME);
       try {
+        const task = JSON.parse(request.body.file) as {
+          _id?: string;
+        } & WritingTask;
         const { _id, ...writing_task } = task;
         const valid = validateWritingTask(task);
         if (!valid) {
           throw new UnprocessableContentError(
             validateWritingTask.errors,
-            'Invalid Outline'
+            'Invalid JSON'
           );
         }
         if (!isWritingTask(writing_task)) {
           throw new UnprocessableContentError(
             ['Failed type checking!'],
-            'Invalid Outline'
+            'Invalid JSON'
           );
         }
         const writing_task_id: string =
@@ -122,7 +122,9 @@ async function __main__() {
         ); // {message: 'Success'}
         response.send(form);
       } catch (err) {
-        if (err instanceof UnprocessableContentError) {
+        if (err instanceof SyntaxError) {
+          response.status(422).send(UnprocessableContent(err));
+        } else if (err instanceof UnprocessableContentError) {
           response.status(422).send(UnprocessableContent(err));
         } else if (err instanceof BadRequestError) {
           response.status(400).send(BadRequest(err));

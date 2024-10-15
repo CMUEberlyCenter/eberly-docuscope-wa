@@ -418,7 +418,7 @@ export const Organization: FC = () => {
                 )}
               </div>
               {/* {visualizationGlobal} */}
-              {true || selected?.paragraph ? null : (
+              {/* {true || selected?.paragraph ? null : (
                 <div className="mw-100 mt-1 overflow-auto">
                   <table>
                     <caption>
@@ -512,7 +512,7 @@ export const Organization: FC = () => {
                     </tbody>
                   </table>
                 </div>
-              )}
+              )} */}
             </ErrorBoundary>
           </ErrorBoundary>
         )}
