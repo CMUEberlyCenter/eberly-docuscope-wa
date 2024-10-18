@@ -76,12 +76,12 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                 <i className="fa-solid fa-caret-down flex-shrink-0"></i>
               </Button>
               {leafOnly ? (
-                <div className="fw-bold flex-grow-1 outline-section">
+                <div className="fw-bold flex-grow-1 outline-section text-nowrap">
                   {rule.name}
                 </div>
               ) : (
                 <Button
-                  className="py-0 ps-1"
+                  className="py-0 ps-1 text-start text-nowrap"
                   variant="none"
                   active={selected === rule}
                   onClick={() => onSelect(rule)}
@@ -101,7 +101,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                     <Button
                       variant="none"
                       active={selected === cluster}
-                      className="py-0"
+                      className="py-0 text-nowrap text-start"
                       onClick={() => {
                         onSelectLeaf(cluster);
                       }}

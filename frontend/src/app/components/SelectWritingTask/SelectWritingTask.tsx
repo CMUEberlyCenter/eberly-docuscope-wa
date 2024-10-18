@@ -74,7 +74,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
       <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
         <div
-          className="d-flex flex-row align-items-stretch position-relative"
+          className="d-flex flex-row align-items-stretch position-relative gap-3"
           style={{ maxHeight: "75vh" }}
         >
           <div className="w-100 h-0">
