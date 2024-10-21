@@ -24,6 +24,8 @@ services:
     secrets:
       - mongo_user
       - mongo_pass
+    volumes:
+      - db_data: /data/db
 
   ontopic:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
@@ -63,9 +65,9 @@ services:
       - "./private:/app/private:ro"
 
 volumes:
-  db-data:
+  db_data:
     labels:
-      edu.cmu.eberly.docuscope.description: "Database for DocuScope Write & Audit Scribe"
+      edu.cmu.eberly.docuscope.description: "Database volume"
 
 secrets:
   mongo_user:
