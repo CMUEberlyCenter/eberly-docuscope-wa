@@ -4,7 +4,7 @@
     "overview": "A cover letter serves as a personal introduction to a potential employer, highlighting your qualifications and interest in a specific position. Mastering this genre is crucial as it can significantly impact your job application success and can be adapted for diverse professional scenarios, from applying to entry-level positions to executive roles, across industries, and for both traditional employment and freelance opportunities",
     "rules": [
       {
-        "name": "Introduction",
+        "name": "Introduction Present your Age-Appropriate Explanations",
         "description": "<body>\n<p>This section introduces the applicant and states the purpose of the letter.</p></body>",
         "examples": "",
         "type": "bounded_optional",

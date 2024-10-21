@@ -169,6 +169,7 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
  * Retrieves the stored review data.
  * @param id Identifier for the cached review data.
  * @returns The current state of the review.
+ * @throws ReferenceError
  */
 export async function findReviewById(id: string) {
   try {
@@ -211,6 +212,7 @@ export async function insertReview(
       document,
       text,
       analysis: [],
+      created: new Date(),
     });
     return ins.insertedId;
   } catch (err) {

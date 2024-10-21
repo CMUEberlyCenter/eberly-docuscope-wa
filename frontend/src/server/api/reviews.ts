@@ -1,7 +1,12 @@
 import { Request, Response, Router } from 'express';
 import { body, param } from 'express-validator';
 import { OnTopicData } from '../../lib/OnTopicData';
-import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
+import {
+  FileNotFound,
+  InternalServerError,
+  UnprocessableContent,
+  UnprocessableContentError,
+} from '../../lib/ProblemDetails';
 import {
   AllExpectationsData,
   AllExpectationsResponse,
@@ -160,7 +165,7 @@ reviews.get(
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
     const { id } = request.params;
-    const tool = request.query.tool;
+    const tool = request.query.tool; // use query to specify subset
     const analyses = [...ANALYSES, 'ontopic'].filter((analysis) => {
       if (!tool) {
         return true;
@@ -285,6 +290,9 @@ reviews.post(
   validate(body('text').isString(), body('document').isString()),
   async (request: Request, response: Response) => {
     const { text, document, writing_task } = request.body as ReviewBody;
+    if (!isWritingTask(writing_task)) {
+      throw new UnprocessableContentError(['Invalid writing task object']);
+    }
     const token: IdToken | undefined = response.locals.token;
     try {
       const id = await insertReview(
@@ -296,7 +304,11 @@ reviews.post(
       );
       response.send(id);
     } catch (err) {
-      response.status(500).send(InternalServerError(err));
+      if (err instanceof UnprocessableContentError) {
+        response.status(422).send(UnprocessableContent(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
     }
   }
 );
