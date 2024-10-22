@@ -27,7 +27,10 @@ const options = program.opts();
 export const DEV = process.env.NODE_ENV !== 'production';
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
-export const PORT = process.env.PORT ?? 8888;
+export const PORT =
+  process.env.PORT && !isNaN(parseInt(process.env.PORT))
+    ? parseInt(process.env.PORT)
+    : 8888;
 
 /**
  * Retrieves value from environment variables.

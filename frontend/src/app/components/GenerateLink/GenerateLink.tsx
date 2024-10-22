@@ -87,7 +87,7 @@ export const GenerateLink: FC = () => {
       <header className="text-center card-header">
         <h1>{t("genlink.title")}</h1>
       </header>
-      <div className="card-body">
+      <div className="card-body overflow-hidden">
         {isLoading ? (
           <Loading />
         ) : (
@@ -96,7 +96,7 @@ export const GenerateLink: FC = () => {
               className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
               style={{ minHeight: 0 }}
             >
-              <ListGroup className="overflow-auto w-100">
+              <ListGroup className="overflow-auto w-100 mh-100">
                 {data?.map((task) => (
                   <ListGroup.Item
                     key={task.info.name}
