@@ -290,11 +290,11 @@ reviews.post(
   validate(body('text').isString(), body('document').isString()),
   async (request: Request, response: Response) => {
     const { text, document, writing_task } = request.body as ReviewBody;
-    if (!isWritingTask(writing_task)) {
-      throw new UnprocessableContentError(['Invalid writing task object']);
-    }
     const token: IdToken | undefined = response.locals.token;
     try {
+      if (!isWritingTask(writing_task)) {
+        throw new UnprocessableContentError(['Invalid writing task object']);
+      }
       const id = await insertReview(
         text,
         document,
@@ -307,7 +307,13 @@ reviews.post(
       if (err instanceof UnprocessableContentError) {
         response.status(422).send(UnprocessableContent(err));
       } else {
-        response.status(500).send(InternalServerError(err));
+        response
+          .status(500)
+          .send(
+            InternalServerError(
+              err instanceof Error ? err : new Error('Unrecognized Error')
+            )
+          );
       }
     }
   }

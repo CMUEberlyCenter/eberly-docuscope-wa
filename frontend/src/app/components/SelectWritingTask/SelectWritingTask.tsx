@@ -7,6 +7,7 @@ import {
   Form,
   ListGroup,
   Modal,
+  ModalProps,
   OverlayTrigger,
   Popover,
 } from "react-bootstrap";
@@ -20,20 +21,13 @@ import {
 } from "../../service/writing-task.service";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 
-type SelectWritingTaskProps = {
-  show: boolean;
-  onHide: () => void;
-};
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
  * @param param0.show if true, show the modal.
  * @param param0.onHide callback to execute when modal is closed.
  * @returns
  */
-const SelectWritingTask: FC<SelectWritingTaskProps> = ({
-  show,
-  onHide,
-}: SelectWritingTaskProps) => {
+const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
   const { data: writingTasks } = useWritingTasks(); // all public tasks
   const writing_task = useWritingTask(); // current task
@@ -70,7 +64,7 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg">
+    <Modal show={show} onHide={onHide} size="lg" {...props}>
       <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
         <div
@@ -154,7 +148,9 @@ const SelectWritingTask: FC<SelectWritingTaskProps> = ({
           variant="primary"
           onClick={() => {
             writingTask.next(selected);
-            onHide();
+            if (onHide) {
+              onHide();
+            }
           }}
         >
           {t("select")}

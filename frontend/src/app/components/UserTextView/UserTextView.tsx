@@ -5,8 +5,8 @@ import { Placeholder } from "react-bootstrap";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useReview } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
-import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./UserTextView.scss";
+import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement> & {
   /** The html string representing the user's draft. */
@@ -54,7 +54,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
   return (
     <main className={cl} {...props}>
       <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
-        <WritingTaskTitle />
+        <TaskViewerButton />
         <NoEditIcon />
       </header>
       <article className="overflow-auto border-top">

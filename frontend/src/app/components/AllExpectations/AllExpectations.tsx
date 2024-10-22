@@ -1,12 +1,5 @@
 import { FC, useContext, useEffect, useId, useState } from "react";
-import {
-  Accordion,
-  AccordionProps,
-  Alert,
-  Container,
-  Nav,
-  Navbar,
-} from "react-bootstrap";
+import { Accordion, AccordionProps, Alert, Nav, Navbar } from "react-bootstrap";
 import {
   AccordionEventKey,
   AccordionSelectCallback,
@@ -23,10 +16,10 @@ import {
 } from "../../service/expectations.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { Legal } from "../Legal/Legal";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { Logo } from "../Logo/Logo";
 import { ReviewDispatchContext, ReviewProvider } from "../Review/ReviewContext";
-import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
 import "./AllExpectations.scss";
 
@@ -165,11 +158,7 @@ export const AllExpectations: FC = () => {
               />
             )) ?? <Alert variant="warning">{t("error.no_task")}</Alert>}
           </div>
-          {writingTask && (
-            <Container as={"footer"} className="border-top py-2">
-              <TaskViewerButton />
-            </Container>
-          )}
+          <Legal />
         </aside>
       </Split>
     </ReviewProvider>

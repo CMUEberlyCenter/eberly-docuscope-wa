@@ -5,7 +5,6 @@ import React, {
   forwardRef,
   HTMLProps,
   useCallback,
-  useEffect,
   useId,
   useState,
 } from "react";
@@ -31,10 +30,8 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
-import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import { Tool, ToolResult } from "../../lib/ToolResults";
 import { serialize, serializeHtml } from "../../service/editor-state.service";
-import { useSelectTaskAvailable } from "../../service/writing-task.service";
 import {
   postClarifyText,
   postConvertNotes,
@@ -52,11 +49,10 @@ import {
   useGlobalFeatureReview,
 } from "../../service/settings.service";
 import { useWritingTask } from "../../service/writing-task.service";
+import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
 import SelectExpectation from "../SelectExpectation/SelectExpectation";
-import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
-import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
@@ -69,10 +65,7 @@ class NoSelectedTextError extends Error {}
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ className, ...props }, ref) => {
     const { t } = useTranslation();
-    const selectAvailable = useSelectTaskAvailable();
     const writingTask = useWritingTask();
-    const [showSelectWritingTasks, setShowSelectWritingTasks] = useState(false);
-    const [showWritingTask, setShowWritingTask] = useState(false);
     // TODO extend from global to global+assignment
     const notes2proseFeature = useGlobalFeatureNotes2Prose();
     const bulletsFeature = useGlobalFeatureNotes2Bullets();
@@ -207,13 +200,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const tabId = useId();
     const [tab, setTab] = useState("generate");
 
-    // If writing task is changed, show its details.
-    useEffect(() => {
-      if (writingTask) {
-        setShowWritingTask(true);
-      }
-    }, [writingTask]);
-
     const onBookmark = useCallback(() => {
       if (currentTool) {
         const updated = {
@@ -326,7 +312,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
                 {reviewFeature && (
                   <Nav.Item>
-                    <Nav.Link eventKey={"review"} onClick={() => onReview()}>
+                    <Nav.Link
+                      disabled={!writingTask}
+                      eventKey={"review"}
+                      onClick={() => onReview()}
+                    >
                       {t("tool.tab.review")}
                       <FontAwesomeIcon
                         icon={faArrowUpRightFromSquare}
@@ -722,54 +712,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </ToolDisplay.Root>
           )}
         </article>
-        <footer className="container-fluid border-top py-2 d-flex">
-          {writingTask && (
-            <>
-              <Button
-                className="me-auto mw-50 w-50 text-truncate"
-                variant="secondary"
-                onClick={() => setShowWritingTask(true)}
-                title={t("tool.button.view.title", {
-                  title: writingTask.rules.name,
-                })}
-              >
-                {t("tool.button.view.title", {
-                  title: writingTask.rules.name,
-                })}
-              </Button>
-              {selectAvailable && (
-                <Button
-                  variant={"none"}
-                  onClick={() => setShowSelectWritingTasks(true)}
-                >
-                  <OutlineDrawerIcon height={24} />
-                  <span className="visually-hidden sr-only">
-                    {t("tool.button.select.title")}
-                  </span>
-                </Button>
-              )}
-            </>
-          )}
-          {selectAvailable && !writingTask && (
-            <Button
-              className="w-50"
-              variant={"primary"}
-              onClick={() => setShowSelectWritingTasks(true)}
-            >
-              {t("tool.button.select.title")}
-            </Button>
-          )}
-        </footer>
-        <WritingTaskDetails
-          show={showWritingTask}
-          onHide={() => setShowWritingTask(false)}
-        />
-        {selectAvailable && (
-          <SelectWritingTask
-            show={showSelectWritingTasks}
-            onHide={() => setShowSelectWritingTasks(false)}
-          />
-        )}
+        <Legal />
         <SelectExpectation
           show={showSelectExpectation}
           onHide={() => setShowSelectExpectation(false)}

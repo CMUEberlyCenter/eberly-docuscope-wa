@@ -11,20 +11,24 @@ export const TaskViewerButton: FC = () => {
   const id = useId();
   const writingTask = useWritingTask();
   return (
-    <>
-      <Button
-        className="w-50 mw-50 text-truncate"
-        variant="secondary"
-        onClick={() => setShow(!show)}
-        aria-controls={id}
-        title={t("tool.button.view.title", {
-          title: writingTask?.rules.name ?? "",
-        })}
-      >
-        {t("tool.button.view.title", { title: writingTask?.rules.name ?? "" })}
-      </Button>
+    <div className="d-flex align-items-baseline gap-1 py-1">
+      <span className="text-muted">{t("editor.menu.task")}</span>
+      {writingTask ? (
+        <Button
+          variant="secondary"
+          onClick={() => setShow(!show)}
+          aria-controls={id}
+          title={t("tool.button.view.title", {
+            title: writingTask?.rules.name ?? "",
+          })}
+        >
+          {writingTask?.rules.name ?? t("select_task.null")}
+        </Button>
+      ) : (
+        <h6 className="mb-1">{t("editor.menu.no_task")}</h6>
+      )}
       <TaskViewer id={id} show={show} onHide={() => setShow(false)} />
-    </>
+    </div>
   );
 };
 
