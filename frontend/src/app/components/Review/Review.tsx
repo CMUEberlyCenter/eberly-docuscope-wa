@@ -1,8 +1,9 @@
 import { FC, HTMLProps, useEffect, useState } from "react";
-import { Container, Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
+import { Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
+// import { useUnload } from "../../service/beforeUnload.service";
 import { useReview } from "../../service/review.service";
 import {
   useGlobalFeatureArguments,
@@ -12,9 +13,8 @@ import {
   useGlobalFeatureSentenceDensity,
   useGlobalFeatureTermMatrix,
 } from "../../service/settings.service";
-import { useWritingTask } from "../../service/writing-task.service";
+import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
-import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { Arguments, ArgumentsTitle } from "./Arguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
@@ -84,10 +84,10 @@ export const Review: FC = () => {
   const { t: tt } = useTranslation();
   // const settings = useSettings();
   const review = useReview();
-  const writingTask = useWritingTask();
   const [tool, setTool] = useState<Tool>("null");
   const [prose, setProse] = useState<string>("");
 
+  // useUnload();
   useEffect(() => {
     window.document.title = t("document.title");
   }, [t]);
@@ -203,11 +203,7 @@ export const Review: FC = () => {
             {tool === "sentences" && <Sentences />}
             {/* Add more tool displays here. */}
           </div>
-          {writingTask && (
-            <Container as={"footer"} className="border-top py-2">
-              <TaskViewerButton />
-            </Container>
-          )}
+          <Legal />
         </aside>
       </Split>
     </ReviewProvider>

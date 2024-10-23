@@ -2,6 +2,11 @@
   "document.title": "myProse",
   "document.description": "myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.",
   "loading": "Processing...",
+  "legal": {
+    "myprose": "myProse Privacy Notice",
+    "cmu": "Legal",
+    "privacy": "Privacy Notice"
+  },
   "deeplink": "Select an outline for this assignment",
   "deeplinking": {
     "title": "myProse LTI Deeplinking"
@@ -77,7 +82,7 @@
         "tooltip": "Fix Grammar"
       },
       "view": {
-        "title": "View Outline: {{title}}"
+        "title": "Popup outline: {{title}}"
       },
       "select": {
         "title": "Select Outline"

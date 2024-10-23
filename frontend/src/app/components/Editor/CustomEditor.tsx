@@ -19,10 +19,10 @@ import {
   withReact,
 } from "slate-react";
 import ToolCard from "../ToolCard/ToolCard";
-import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
+import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton.tsx";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -195,9 +195,10 @@ const CustomEditor: FC = () => {
                 <FontAwesomeIcon icon={faStrikethrough} />
               </MarkButton>
             </ButtonGroup>
-            <WritingTaskTitle className="ms-3" />
+            <WritingTaskButton className="ms-auto" />
           </ButtonToolbar>
           <Editable
+            aria-label="user text"
             className="p-2 flex-grow-1 overflow-auto"
             style={{ fontSize: `${zoom}%` }}
             renderElement={renderElement}
