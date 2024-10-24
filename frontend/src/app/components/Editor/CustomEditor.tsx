@@ -172,7 +172,7 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
-                {docx && <FileDownload content={docx} />}
+                {docx && <FileDownload content={docx} title={lti?.resource.title || writingTask?.rules.name} />}
               </DropdownButton>
               <Dropdown as={ButtonGroup}>
                 <Dropdown.Toggle variant="light">

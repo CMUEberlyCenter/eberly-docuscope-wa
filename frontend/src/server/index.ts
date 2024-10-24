@@ -143,6 +143,7 @@ async function __main__() {
       instructor: isInstructor(token?.platformContext),
       resource: token?.platformContext?.resource,
       userInfo: token?.userInfo,
+      context: token?.platformContext.context,
     };
     try {
       const taskId = token?.platformContext.custom?.writing_task_id;

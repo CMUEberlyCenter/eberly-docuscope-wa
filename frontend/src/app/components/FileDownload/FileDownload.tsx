@@ -5,7 +5,7 @@ import { FC, useEffect, useRef, useState } from "react";
  * @param content the Blob content of the file to download.
  * @returns 
  */
-export const FileDownload: FC<{ content: Blob }> = ({ content }) => {
+export const FileDownload: FC<{ content: Blob, title?: string }> = ({ content, title }) => {
   const [url, setUrl] = useState<string>(""); // content as ObjectURL.
   const ref = useRef<HTMLAnchorElement>(null); // ahref reference.
   // Create and destroy Object URL to use in link.
@@ -23,5 +23,5 @@ export const FileDownload: FC<{ content: Blob }> = ({ content }) => {
     }
   }, [url, ref]);
 
-  return <a className="d-none" ref={ref} href={url} download="myprose.docx" />;
+  return <a className="d-none" ref={ref} href={url} download={title ?? true} />;
 };

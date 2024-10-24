@@ -82,7 +82,7 @@
         "tooltip": "Fix Grammar"
       },
       "view": {
-        "title": "Popup outline: {{title}}"
+        "title": "Open outline: {{title}}"
       },
       "select": {
         "title": "Select Outline"
