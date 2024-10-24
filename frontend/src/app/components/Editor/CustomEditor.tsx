@@ -32,7 +32,10 @@ import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
+import { useWritingTask } from "../../service/writing-task.service";
+import { useLtiInfo } from "../../service/lti.service";
 
+/** Component for rendering editor content nodes. */
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
     case "block-quote":
@@ -60,6 +63,7 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   }
 };
 
+/** Component for rendering editor content leaf nodes. */
 const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
   <span
     {...attributes}
@@ -103,6 +107,7 @@ const CustomEditor: FC = () => {
     []
   );
 
+  // Update document title based on translation.
   useEffect(() => {
     window.document.title = t("document.title");
   }, [t]);
@@ -118,14 +123,18 @@ const CustomEditor: FC = () => {
   //   // return !!match;
 
   // }, [selection])
+
+  // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
+  const writingTask = useWritingTask();
+  const lti = useLtiInfo();
   const saveAs = useCallback(() => {
     if (content) {
-      Packer.toBlob(serializeDocx(content)).then((blob) => setDocx(blob));
+      Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name)).then((blob) => setDocx(blob));
     } else {
       setDocx(null);
     }
-  }, [content]);
+  }, [content, lti, writingTask]);
 
   return (
     <Slate

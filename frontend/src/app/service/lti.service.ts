@@ -12,6 +12,12 @@ type LtiInfo = {
     description?: string;
     id: string;
   };
+  userInfo?: {
+    given_name?: string;
+    family_name?: string;
+    name?: string;
+    email?: string;
+  }
   writing_task?: WritingTask;
 };
 

@@ -69,6 +69,7 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
   }
 };
 
+////////// Docx serialization ///////////
 const serializeTextRun = (customText: CustomText): TextRun =>
   new TextRun({
     text: customText.text,
@@ -144,10 +145,11 @@ const serializeNumberList = (
  */
 export const serializeDocx = (
   content: Descendant[],
-  writing_task?: WritingTask
+  writing_task?: WritingTask | null,
+  creator?: string,
 ) => {
   return new Document({
-    // creater: // TODO get from LTI
+    creator,
     description: writing_task?.rules.overview,
     title: writing_task?.rules.name,
     lastModifiedBy: 'myProse',
