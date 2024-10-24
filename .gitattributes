@@ -5,24 +5,40 @@
 # to native line endings on checkout.
 *.java text
 *.js text
+*.mjs text
+*.cjs text
 *.jsx text
 *.ts text
 *.tsx text
+*.svelte text
 *.json text
+*.yml text
+*.yaml text
 *.txt text
-*.html text
+*.html text diff=html
+*.svg text
 *.xml text
-*.sass text
-*.scss text
-*.css text
-*.md text
+*.sass text diff=css
+*.scss text diff=css
+*.css text diff=css
+*.md text diff=markdown
 *.gradle text
 *.xsl text
-*.sh text
-*.py text
+*.sh text eol=lf
+*.bash text eol=lf
+*.py text diff=python
+*.py3 text diff=python
+Pipfile* text
+
+Dockerfile text
+LICENSE text
+tsconfig.json linguist-language=JSON-with-Comments
+.gitattributes text
+.editorconfig text
 
 # Declare files that will always have CRLF line endings on checkout.
 *.bat text eol=crlf
+*.cmd text eol=crlf
 
 # Denote all files that are truly binary and should not be modified.
 *.png binary
@@ -30,5 +46,11 @@
 *.gif binary
 *.ico binary
 *.doc binary
+*.docx binary
 *.pdf binary
 *.jar binary
+
+*.*rc text
+*.*ignore text
+*.env* text
+.keep text

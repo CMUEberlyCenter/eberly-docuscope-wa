@@ -188,7 +188,6 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
               }))
           );
         } else if (text.match(/^\w*-/)) {
-          console.log(text);
           [...text.matchAll(/^\s*-\s*(.*)$/g)].forEach(console.log);
           // is a list
           nodes.push({
