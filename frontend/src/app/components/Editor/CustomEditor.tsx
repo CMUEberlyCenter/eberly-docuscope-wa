@@ -5,8 +5,15 @@ import {
   faUnderline,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Packer } from "docx";
 import { FC, useCallback, useEffect, useState } from "react";
-import { ButtonGroup, ButtonToolbar, Dropdown, Form } from "react-bootstrap";
+import {
+  ButtonGroup,
+  ButtonToolbar,
+  Dropdown,
+  DropdownButton,
+  Form,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { createEditor, Descendant } from "slate";
@@ -18,11 +25,13 @@ import {
   Slate,
   withReact,
 } from "slate-react";
+import { serializeDocx } from "../../lib/slate";
+import { FileDownload } from "../FileDownload/FileDownload";
 import ToolCard from "../ToolCard/ToolCard";
+import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
-import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton.tsx";
 
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
@@ -109,6 +118,14 @@ const CustomEditor: FC = () => {
   //   // return !!match;
 
   // }, [selection])
+  const [docx, setDocx] = useState<Blob | null>(null);
+  const saveAs = useCallback(() => {
+    if (content) {
+      Packer.toBlob(serializeDocx(content)).then((blob) => setDocx(blob));
+    } else {
+      setDocx(null);
+    }
+  }, [content]);
 
   return (
     <Slate
@@ -135,7 +152,7 @@ const CustomEditor: FC = () => {
             className="align-items-center mb-2"
           >
             <ButtonGroup>
-              {/* <DropdownButton
+              <DropdownButton
                 as={ButtonGroup}
                 title={t("editor.menu.file")}
                 variant="light"
@@ -143,14 +160,11 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="open" disabled>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
-                <Dropdown.Item
-                  disabled
-                  eventKey="save"
-                  onClick={() => console.log(content)}
-                >
+                <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
-              </DropdownButton> */}
+                {docx && <FileDownload content={docx} />}
+              </DropdownButton>
               <Dropdown as={ButtonGroup}>
                 <Dropdown.Toggle variant="light">
                   {t("editor.menu.view")}

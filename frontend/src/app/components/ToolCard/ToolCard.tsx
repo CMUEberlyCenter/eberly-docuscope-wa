@@ -30,8 +30,8 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
+import { serialize, serializeHtml } from "../../lib/slate";
 import { Tool, ToolResult } from "../../lib/ToolResults";
-import { serialize, serializeHtml } from "../../service/editor-state.service";
 import {
   postClarifyText,
   postConvertNotes,
