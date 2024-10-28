@@ -71,9 +71,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-        "strikethrough" in leaf &&
-        leaf.underline &&
-        leaf.strikethrough
+          "strikethrough" in leaf &&
+          leaf.underline &&
+          leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -128,9 +128,38 @@ const CustomEditor: FC = () => {
   const [docx, setDocx] = useState<Blob | null>(null);
   const writingTask = useWritingTask();
   const lti = useLtiInfo();
-  const saveAs = useCallback(() => {
+  const saveAs = useCallback(async () => {
     if (content) {
-      Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name)).then((blob) => setDocx(blob));
+      if ('showSaveFilePicker' in window) {
+        const rootname = /* TODO import file name || */ lti?.resource.title || writingTask?.rules.name || 'myProse';
+        try {
+          const handle: FileSystemFileHandle = await window.showSaveFilePicker({
+            id: 'myProse',
+            suggestedName: `${rootname}`,
+            types: [{
+              accept: { "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] }
+            }]
+          });
+          const writable = await handle.createWritable();
+          const blob = await Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name));
+          await writable.write(blob)
+          await writable.close();
+        } catch (err) {
+          if (!(err instanceof DOMException)) {
+            console.error(err);
+            return;
+          }
+          switch (err.name) {
+            case 'AbortError': break; // user cancelled
+            case 'SecurityError': break; // os reject
+            default:
+              console.error(err);
+          }
+        }
+      } else {
+        const blob = await Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name));
+        setDocx(blob);
+      }
     } else {
       setDocx(null);
     }
@@ -172,7 +201,7 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
-                {docx && <FileDownload content={docx} title={lti?.resource.title || writingTask?.rules.name} />}
+                {docx && <FileDownload content={docx} title={lti?.resource.title || writingTask?.rules.name || 'myProse'} />}
               </DropdownButton>
               <Dropdown as={ButtonGroup}>
                 <Dropdown.Toggle variant="light">
