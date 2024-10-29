@@ -9,7 +9,8 @@ import {
   TextRun,
 } from 'docx';
 import escapeHtml from 'escape-html';
-import { Descendant, Node, Text } from 'slate';
+import { Descendant, Node as SlateNode, Text } from 'slate';
+import { jsx } from 'slate-hyperscript';
 import { WritingTask } from '../../lib/WritingTask';
 import { CustomElement, CustomText, ListElement } from '../slate';
 
@@ -18,7 +19,7 @@ import { CustomElement, CustomText, ListElement } from '../slate';
  * paragraphs.
  */
 export const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
+  return nodes.map((n: Descendant) => SlateNode.string(n)).join('\n\n');
 };
 
 /**
@@ -68,6 +69,71 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
       return `<p>${children}</p>`;
   }
 };
+
+type Deserialized = null | Descendant[]
+function deserializeHtml(el: Element|ChildNode, markAttributes: Record<string, boolean> = {}): Deserialized {
+  if (el.nodeType === Node.TEXT_NODE) {
+    return [jsx('text', markAttributes, el.textContent)];
+  } else if (el.nodeType !== Node.ELEMENT_NODE) {
+    return null;
+  }
+
+  const nodeAttributes = { ...markAttributes };
+  switch (el.nodeName) {
+    case 'STRONG':
+      nodeAttributes.bold = true;
+      break;
+    case 'EM':
+      nodeAttributes.italic = true;
+      break;
+    case 'S':
+      nodeAttributes.strikethrough = true;
+      break;
+    case 'U':
+      nodeAttributes.underline = true;
+      break;
+  }
+  const children: Descendant[] = Array.from(el.childNodes).flatMap(node => deserializeHtml(node, nodeAttributes)).filter(e => e !== null);
+  if (children.length === 0) {
+    children.push(jsx('text', nodeAttributes, ''));
+  }
+
+  switch (el.nodeName) {
+    case 'BODY':
+      return jsx('fragment', {}, ...children);
+    // case 'BR':
+    //   return '\n';
+    case 'BLOCKQUOTE':
+      return [jsx('element', { type: 'quote' }, ...children)];
+    case 'P':
+      return [jsx('element', { type: 'paragraph' }, ...children)];
+    case 'H1':
+      return [jsx('element', { type: 'heading-one' }, ...children)];
+    case 'H2':
+      return [jsx('element', { type: 'heading-two' }, ...children)];
+    case 'H3':
+      return [jsx('element', { type: 'heading-three' }, ...children)];
+    case 'H4':
+      return [jsx('element', { type: 'heading-four' }, ...children)];
+    case 'H5':
+      return [jsx('element', { type: 'heading-five' }, ...children)];
+    case 'H6':
+      return [jsx('element', { type: 'heading-six' }, ...children)];
+    case 'UL':
+      return [jsx('element', { type: 'bulleted-list'}, ...children)];
+    case 'OL':
+      return [jsx('element', { type: 'numbered-list'}, ...children)];
+    case 'LI':
+      return [jsx('element', { type: 'list-item'}, ...children)];
+    default:
+      return children;
+  }
+}
+export const deserializeHtmlText = (html: string): Deserialized => {
+  console.log(html);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return deserializeHtml(doc.body)
+}
 
 ////////// Docx serialization ///////////
 const serializeTextRun = (customText: CustomText): TextRun =>

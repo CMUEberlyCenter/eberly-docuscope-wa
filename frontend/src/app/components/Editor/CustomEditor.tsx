@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
+import { convertToHtml } from 'mammoth';
 import { FC, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
@@ -16,7 +17,7 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { createEditor, Descendant } from "slate";
+import { createEditor, Descendant, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
@@ -25,15 +26,15 @@ import {
   Slate,
   withReact,
 } from "slate-react";
-import { serializeDocx } from "../../lib/slate";
+import { deserializeHtmlText, serializeDocx } from "../../lib/slate";
+import { useLtiInfo } from "../../service/lti.service";
+import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
-import { useWritingTask } from "../../service/writing-task.service";
-import { useLtiInfo } from "../../service/lti.service";
 
 /** Component for rendering editor content nodes. */
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
@@ -124,6 +125,36 @@ const CustomEditor: FC = () => {
 
   // }, [selection])
 
+  // Import a docx file
+  const loadSaveFileOps = {
+    id: 'myprose',
+    types: [{
+      accept: { "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] }
+    }]
+  }
+
+  const loadFile = useCallback(async () => {
+    if ('showOpenFilePicker' in window) {
+      try {
+        const [handle]: FileSystemFileHandle[] = await window.showOpenFilePicker(loadSaveFileOps);
+        const file = await handle.getFile();
+        const arrayBuffer = await file.arrayBuffer();
+        const {value, messages} = await convertToHtml({arrayBuffer}, {styleMap: 'u => u'});
+        if (messages) {
+          console.log(messages);
+        }
+        const content = deserializeHtmlText(value);
+        if (content) {
+          console.log(content);
+          // FIXME this currently appends content.
+          Transforms.insertNodes(editor, content);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  }, [editor]);
+
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
   const writingTask = useWritingTask();
@@ -134,11 +165,8 @@ const CustomEditor: FC = () => {
         const rootname = /* TODO import file name || */ lti?.resource.title || writingTask?.rules.name || 'myProse';
         try {
           const handle: FileSystemFileHandle = await window.showSaveFilePicker({
-            id: 'myProse',
+            ...loadSaveFileOps,
             suggestedName: `${rootname}`,
-            types: [{
-              accept: { "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] }
-            }]
           });
           const writable = await handle.createWritable();
           const blob = await Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name));
@@ -195,9 +223,10 @@ const CustomEditor: FC = () => {
                 title={t("editor.menu.file")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open" disabled>
+                <Dropdown.Item eventKey="open" onClick={()=>loadFile()}>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
+                {/* TODO file upload form if filesystem api is not available. */}
                 <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
