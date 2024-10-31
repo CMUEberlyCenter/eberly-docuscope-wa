@@ -1039,7 +1039,7 @@ class DSDocument():
                         lemma = DSDocument.user_defined_synonyms.get(t, None)   
 
                         if lemma is None:
-                            lemma = token.lemma_
+                            lemma = token.lemma_.lower()
 
                     elif token.tag_ == 'PRP' or token.tag_ == 'PRP$':   # if the token is a pronoun
                         is_left = True
@@ -1047,13 +1047,13 @@ class DSDocument():
                         lemma = DSDocument.user_defined_synonyms.get(t, None)
       
                         if lemma is None:
-                           lemma = token.lemma_
+                           lemma = token.lemma_.lower()
 
                     else:
                         t = token.text.lower()
                         lemma = getPronounLemma(t)
                         if lemma is None:
-                            lemma = token.lemma_
+                            lemma = token.lemma_.lower()
 
                     if token.text in end_puncts:
                         pos = 'PUNCT'
@@ -1139,7 +1139,7 @@ class DSDocument():
                             lemma = DSDocument.user_defined_synonyms.get(t, None)
 
                         if lemma is None:
-                            lemma = token.lemma_
+                            lemma = token.lemma_.lower()
 
                     elif token.tag_ == 'PRP' or token.tag_ == 'PRP$':
                         t = token.text.lower()
@@ -1148,7 +1148,7 @@ class DSDocument():
                         if lemma is None:
                             lemma = getPronounLemma(t)  # e.g., his
                             if lemma is None:
-                                lemma = token.lemma_
+                                lemma = token.lemma_.lower()
                         else:
                             token.pos_ = 'NOUN'
                             token.tag_ = 'NN'       # if it is a synonym, treat them like a noun
@@ -1160,7 +1160,7 @@ class DSDocument():
                         if lemma is None:
                             lemma = getPronounLemma(t)
                             if lemma is None:
-                                lemma = token.lemma_
+                                lemma = token.lemma_.lower()
                         else:
                             token.pos_ = 'NOUN'
                             token.tag_ = 'NN'
@@ -1169,12 +1169,12 @@ class DSDocument():
                     t = token.text.lower()
                     lemma = getPronounLemma(t)
                     if lemma is None:
-                        lemma = token.lemma_
+                        lemma = token.lemma_.lower()
                 else:
                     t = token.text.lower()
                     lemma = getPronounLemma(t)
                     if lemma is None:
-                        lemma = token.lemma_
+                        lemma = token.lemma_.lower()
 
                 # temporary fix about 'data'
                 if lemma == "datum":
