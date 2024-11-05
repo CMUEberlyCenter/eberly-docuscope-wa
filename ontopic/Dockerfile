@@ -35,4 +35,4 @@ EXPOSE 5000
 # RUN export FLASK_ENV=development
 # RUN export FLASK_DEBUG=0
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "--worker-tmp-dir", "/dev/shm", "-b", "0.0.0.0:5000", "app:app"]
