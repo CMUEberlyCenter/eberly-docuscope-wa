@@ -70,8 +70,11 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
   }
 };
 
-type Deserialized = null | Descendant[]
-function deserializeHtml(el: Element|ChildNode, markAttributes: Record<string, boolean> = {}): Deserialized {
+type Deserialized = null | Descendant[];
+function deserializeHtml(
+  el: Element | ChildNode,
+  markAttributes: Record<string, boolean> = {}
+): Deserialized {
   if (el.nodeType === Node.TEXT_NODE) {
     return [jsx('text', markAttributes, el.textContent)];
   } else if (el.nodeType !== Node.ELEMENT_NODE) {
@@ -93,7 +96,9 @@ function deserializeHtml(el: Element|ChildNode, markAttributes: Record<string, b
       nodeAttributes.underline = true;
       break;
   }
-  const children: Descendant[] = Array.from(el.childNodes).flatMap(node => deserializeHtml(node, nodeAttributes)).filter(e => e !== null);
+  const children: Descendant[] = Array.from(el.childNodes)
+    .flatMap((node) => deserializeHtml(node, nodeAttributes))
+    .filter((e) => e !== null);
   if (children.length === 0) {
     children.push(jsx('text', nodeAttributes, ''));
   }
@@ -120,11 +125,11 @@ function deserializeHtml(el: Element|ChildNode, markAttributes: Record<string, b
     case 'H6':
       return [jsx('element', { type: 'heading-six' }, ...children)];
     case 'UL':
-      return [jsx('element', { type: 'bulleted-list'}, ...children)];
+      return [jsx('element', { type: 'bulleted-list' }, ...children)];
     case 'OL':
-      return [jsx('element', { type: 'numbered-list'}, ...children)];
+      return [jsx('element', { type: 'numbered-list' }, ...children)];
     case 'LI':
-      return [jsx('element', { type: 'list-item'}, ...children)];
+      return [jsx('element', { type: 'list-item' }, ...children)];
     default:
       return children;
   }
@@ -132,8 +137,8 @@ function deserializeHtml(el: Element|ChildNode, markAttributes: Record<string, b
 export const deserializeHtmlText = (html: string): Deserialized => {
   console.log(html);
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  return deserializeHtml(doc.body)
-}
+  return deserializeHtml(doc.body);
+};
 
 ////////// Docx serialization ///////////
 const serializeTextRun = (customText: CustomText): TextRun =>
@@ -212,7 +217,7 @@ const serializeNumberList = (
 export const serializeDocx = (
   content: Descendant[],
   writing_task?: WritingTask | null,
-  creator?: string,
+  creator?: string
 ) => {
   return new Document({
     creator,

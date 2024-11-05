@@ -3,9 +3,12 @@ import { FC, useEffect, useRef, useState } from "react";
 /**
  * A simple hidden component that prompts a file download event.
  * @param content the Blob content of the file to download.
- * @returns 
+ * @returns
  */
-export const FileDownload: FC<{ content: Blob, title?: string }> = ({ content, title }) => {
+export const FileDownload: FC<{ content: Blob; title?: string }> = ({
+  content,
+  title,
+}) => {
   const [url, setUrl] = useState<string>(""); // content as ObjectURL.
   const ref = useRef<HTMLAnchorElement>(null); // ahref reference.
   // Create and destroy Object URL to use in link.

@@ -183,10 +183,16 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
           nodes.push(
             ...[...text.matchAll(/<p>(.*)<\/p>/gi)]
               .filter((p) => p.at(0) && p.at(1))
-              .map((element) => jsx('element', {
-                type: "paragraph",
-              },
-                jsx('text', {}, element.at(1) ?? ""))));
+              .map((element) =>
+                jsx(
+                  "element",
+                  {
+                    type: "paragraph",
+                  },
+                  jsx("text", {}, element.at(1) ?? "")
+                )
+              )
+          );
         } else if (text.match(/^\w*-/)) {
           [...text.matchAll(/^\s*-\s*(.*)$/g)].forEach(console.log);
           // is a list

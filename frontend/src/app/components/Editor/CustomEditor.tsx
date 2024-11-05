@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
-import { convertToHtml } from 'mammoth';
+import { convertToHtml } from "mammoth";
 import { FC, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
@@ -30,6 +30,7 @@ import { deserializeHtmlText, serializeDocx } from "../../lib/slate";
 import { useLtiInfo } from "../../service/lti.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
+import { FileUpload } from "../FileUpload/FileUpload";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import "./CustomEditor.scss";
@@ -72,9 +73,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -126,20 +127,16 @@ const CustomEditor: FC = () => {
   // }, [selection])
 
   // Import a docx file
-  const loadSaveFileOps = {
-    id: 'myprose',
-    types: [{
-      accept: { "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"] }
-    }]
-  }
-
-  const loadFile = useCallback(async () => {
-    if ('showOpenFilePicker' in window) {
+  const [showUpload, setShowUpload] = useState(false);
+  const [upload, setUpload] = useState<File | null>(null);
+  const loadFile = useCallback(
+    async (file: File) => {
       try {
-        const [handle]: FileSystemFileHandle[] = await window.showOpenFilePicker(loadSaveFileOps);
-        const file = await handle.getFile();
         const arrayBuffer = await file.arrayBuffer();
-        const {value, messages} = await convertToHtml({arrayBuffer}, {styleMap: 'u => u'});
+        const { value, messages } = await convertToHtml(
+          { arrayBuffer },
+          { styleMap: "u => u" }
+        );
         if (messages) {
           console.log(messages);
         }
@@ -152,8 +149,40 @@ const CustomEditor: FC = () => {
       } catch (err) {
         console.error(err);
       }
+    },
+    [editor]
+  );
+  useEffect(() => {
+    if (upload) {
+      loadFile(upload);
     }
-  }, [editor]);
+  }, [upload]);
+  const loadSaveFileOps = {
+    id: "myprose",
+    types: [
+      {
+        accept: {
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            [".docx"],
+        },
+      },
+    ],
+  };
+
+  const uploadFile = useCallback(async () => {
+    if ("showOpenFilePicker" in window) {
+      try {
+        const [handle]: FileSystemFileHandle[] =
+          await window.showOpenFilePicker(loadSaveFileOps);
+        const file = await handle.getFile();
+        setUpload(file);
+      } catch (err) {
+        console.error(err);
+      }
+    } else {
+      setShowUpload(true);
+    }
+  }, []);
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
@@ -161,16 +190,21 @@ const CustomEditor: FC = () => {
   const lti = useLtiInfo();
   const saveAs = useCallback(async () => {
     if (content) {
-      if ('showSaveFilePicker' in window) {
-        const rootname = /* TODO import file name || */ lti?.resource.title || writingTask?.rules.name || 'myProse';
+      if ("showSaveFilePicker" in window) {
+        const rootname =
+          /* TODO import file name || */ lti?.resource.title ||
+          writingTask?.rules.name ||
+          "myProse";
         try {
           const handle: FileSystemFileHandle = await window.showSaveFilePicker({
             ...loadSaveFileOps,
             suggestedName: `${rootname}`,
           });
           const writable = await handle.createWritable();
-          const blob = await Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name));
-          await writable.write(blob)
+          const blob = await Packer.toBlob(
+            serializeDocx(content, writingTask, lti?.userInfo?.name)
+          );
+          await writable.write(blob);
           await writable.close();
         } catch (err) {
           if (!(err instanceof DOMException)) {
@@ -178,14 +212,18 @@ const CustomEditor: FC = () => {
             return;
           }
           switch (err.name) {
-            case 'AbortError': break; // user cancelled
-            case 'SecurityError': break; // os reject
+            case "AbortError":
+              break; // user cancelled
+            case "SecurityError":
+              break; // os reject
             default:
               console.error(err);
           }
         }
       } else {
-        const blob = await Packer.toBlob(serializeDocx(content, writingTask, lti?.userInfo?.name));
+        const blob = await Packer.toBlob(
+          serializeDocx(content, writingTask, lti?.userInfo?.name)
+        );
         setDocx(blob);
       }
     } else {
@@ -223,14 +261,23 @@ const CustomEditor: FC = () => {
                 title={t("editor.menu.file")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open" onClick={()=>loadFile()}>
+                <Dropdown.Item eventKey="open" onClick={() => uploadFile()}>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
                 {/* TODO file upload form if filesystem api is not available. */}
                 <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
-                {docx && <FileDownload content={docx} title={lti?.resource.title || writingTask?.rules.name || 'myProse'} />}
+                {docx && (
+                  <FileDownload
+                    content={docx}
+                    title={
+                      lti?.resource.title ||
+                      writingTask?.rules.name ||
+                      "myProse"
+                    }
+                  />
+                )}
               </DropdownButton>
               <Dropdown as={ButtonGroup}>
                 <Dropdown.Toggle variant="light">
@@ -290,6 +337,11 @@ const CustomEditor: FC = () => {
         </main>
         <ToolCard />
       </Split>
+      <FileUpload
+        show={showUpload}
+        onHide={() => setShowUpload(false)}
+        onFile={setUpload}
+      />
     </Slate>
   );
 };

@@ -23,6 +23,14 @@
     "hide": "Hide text to speech controls."
   },
   "editor": {
+    "upload": {
+      "title": "Open",
+      "file": "File",
+      "open": "Open",
+      "error": {
+        "fail": "Single file selection only."
+      }
+    },
     "menu": {
       "file": "File",
       "open": "Import",

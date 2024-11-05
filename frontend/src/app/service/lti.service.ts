@@ -17,7 +17,7 @@ type LtiInfo = {
     family_name?: string;
     name?: string;
     email?: string;
-  }
+  };
   writing_task?: WritingTask;
 };
 
