@@ -31,9 +31,8 @@ EXPOSE 5000
 # RUN pip install spacy==2.3.5
 
 
-RUN export FLASK_APP=app.py
+# RUN export FLASK_APP=app.py
 # RUN export FLASK_ENV=development
 # RUN export FLASK_DEBUG=0
 
-ENTRYPOINT ["python"]
-CMD ["app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:5000", "app:app"]
