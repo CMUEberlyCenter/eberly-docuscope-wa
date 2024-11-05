@@ -31,9 +31,11 @@ def ontopic():
 # debug mode. If you don't want to use debug mode, pass debug=False or 
 # don't pass it at all.
 ##
-if __name__ == '__main__':
-  from waitress import serve
-  logging.basicConfig(level=logging.WARN)
-  serve(app, host="0.0.0.0", port=5000)
+# if __name__ == '__main__':
+#   from waitress import serve
+#   logging.basicConfig(level=logging.WARN)
+#   serve(app, host="0.0.0.0", port=5000)
   # app.run(debug=False)
   # app.run(host="0.0.0.0", port=5000, debug=False)
+
+# use "gunicorn -b 0.0.0.0:5000 app:app"

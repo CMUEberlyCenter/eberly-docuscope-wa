@@ -13,11 +13,10 @@ beautifulsoup4 = "*"
 ftfy = "*"
 spacy = "==2.3.5"
 reportlab = "*"
-numpy = "*"
 pydocx = "*"
 unidecode = "*"
 pyqt5 = "*"
-waitress = "<3"
+gunicorn = "*"
 
 [dev-packages]
 
