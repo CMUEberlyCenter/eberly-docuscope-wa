@@ -71,6 +71,12 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
 };
 
 type Deserialized = null | Descendant[];
+/**
+ * Walks the element structure to generate content for the Slate editor.
+ * @param el HTML element.
+ * @param markAttributes Any styling from ancestor elements.
+ * @returns Slate editor content.
+ */
 function deserializeHtml(
   el: Element | ChildNode,
   markAttributes: Record<string, boolean> = {}
@@ -134,8 +140,12 @@ function deserializeHtml(
       return children;
   }
 }
+/**
+ * Takes a string of HTML and deserializes it for Slate editor content.
+ * @param html a string of valid html.
+ * @returns Slate editor content.
+ */
 export const deserializeHtmlText = (html: string): Deserialized => {
-  console.log(html);
   const doc = new DOMParser().parseFromString(html, 'text/html');
   return deserializeHtml(doc.body);
 };
@@ -150,6 +160,7 @@ const serializeTextRun = (customText: CustomText): TextRun =>
     strike: !!customText.strikethrough,
   });
 
+// Page style
 const CONTINUOUS = {
   properties: { type: SectionType.CONTINUOUS },
 };
@@ -158,6 +169,7 @@ const serializeParagraph = (customElement: CustomElement) =>
     children: customElement.children.map((child) => serializeTextRun(child)),
   });
 
+// Heading translation map.
 const HEADING = new Map([
   ['heading-one', HeadingLevel.HEADING_1],
   ['heading-two', HeadingLevel.HEADING_2],

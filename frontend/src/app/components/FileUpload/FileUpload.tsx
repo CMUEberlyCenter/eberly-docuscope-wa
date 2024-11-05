@@ -19,16 +19,11 @@ export const FileUpload: FC<FileUploadProps> = ({
     setFile(null);
     const files = event.target.files;
     if (!files) return;
-    if (files.length > 1) {
+    if (files.length !== 1) {
       setValid(false);
       return;
     }
-    try {
-      setFile(files[0]);
-    } catch (err) {
-      setValid(false);
-      console.error(err);
-    }
+    setFile(files[0]);
   };
   return (
     <Modal show={show} onHide={onHide} {...props}>
@@ -40,6 +35,7 @@ export const FileUpload: FC<FileUploadProps> = ({
               type="file"
               isInvalid={!valid}
               onChange={onFileChange}
+              accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             />
             <Form.Control.Feedback type="invalid">
               {t("editor.upload.error.fail")}

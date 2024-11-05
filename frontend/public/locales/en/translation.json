@@ -28,7 +28,11 @@
       "file": "File",
       "open": "Open",
       "error": {
-        "fail": "Single file selection only."
+        "title": "Errors:",
+        "fail": "Single file selection only.",
+        "not_docx": "{{file}} is not a docx file!",
+        "failed_write": "Unable to save file.",
+        "security": "File rejected due to secuity error."
       }
     },
     "menu": {

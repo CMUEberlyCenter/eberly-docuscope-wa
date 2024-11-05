@@ -14,6 +14,8 @@ import {
   Dropdown,
   DropdownButton,
   Form,
+  ListGroup,
+  Toast,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -127,27 +129,46 @@ const CustomEditor: FC = () => {
   // }, [selection])
 
   // Import a docx file
+  type Message =
+    | { type: "error"; message: string; error: unknown }
+    | { type: "warning"; message: string };
   const [showUpload, setShowUpload] = useState(false);
   const [upload, setUpload] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Message[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
   const loadFile = useCallback(
     async (file: File) => {
       try {
+        if (
+          file.type !==
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          throw new TypeError(file.name);
+        }
+
         const arrayBuffer = await file.arrayBuffer();
         const { value, messages } = await convertToHtml(
           { arrayBuffer },
           { styleMap: "u => u" }
         );
-        if (messages) {
+        if (messages.length) {
+          setErrors(messages);
+          setShowErrors(true);
           console.log(messages);
         }
         const content = deserializeHtmlText(value);
         if (content) {
-          console.log(content);
           // FIXME this currently appends content.
           Transforms.insertNodes(editor, content);
         }
       } catch (err) {
-        console.error(err);
+        if (err instanceof Error) {
+          setErrors([{ type: "error", message: err.message, error: err }]);
+          setShowErrors(true);
+          console.error(err);
+        } else {
+          console.error("Caught non-error", err);
+        }
       }
     },
     [editor]
@@ -177,6 +198,10 @@ const CustomEditor: FC = () => {
         const file = await handle.getFile();
         setUpload(file);
       } catch (err) {
+        if (err instanceof Error) {
+          setErrors([{ type: "error", message: err.message, error: err }]);
+          setShowErrors(true);
+        }
         console.error(err);
       }
     } else {
@@ -192,7 +217,8 @@ const CustomEditor: FC = () => {
     if (content) {
       if ("showSaveFilePicker" in window) {
         const rootname =
-          /* TODO import file name || */ lti?.resource.title ||
+          upload?.name ||
+          lti?.resource.title ||
           writingTask?.rules.name ||
           "myProse";
         try {
@@ -208,6 +234,8 @@ const CustomEditor: FC = () => {
           await writable.close();
         } catch (err) {
           if (!(err instanceof DOMException)) {
+            setErrors([{ type: "error", message: "Failed Write", error: err }]);
+            setShowErrors(true);
             console.error(err);
             return;
           }
@@ -215,6 +243,10 @@ const CustomEditor: FC = () => {
             case "AbortError":
               break; // user cancelled
             case "SecurityError":
+              setErrors([
+                { type: "error", message: "Security Error", error: err },
+              ]);
+              setShowErrors(true);
               break; // os reject
             default:
               console.error(err);
@@ -342,6 +374,35 @@ const CustomEditor: FC = () => {
         onHide={() => setShowUpload(false)}
         onFile={setUpload}
       />
+      <Toast
+        bg="danger"
+        className="position-absolute start-50 bottom-0 translate-middle"
+        show={showErrors}
+        onClose={() => setShowErrors(!showErrors)}
+      >
+        <Toast.Header className="justify-content-between">
+          {t("editor.upload.error.title")}
+        </Toast.Header>
+        <Toast.Body>
+          <ListGroup>
+            {errors.map((msg, i) => (
+              <ListGroup.Item
+                key={i}
+                variant={msg.type === "error" ? "danger" : "warning"}
+              >
+                {(msg.message === "Security Error" &&
+                  t("editor.upload.error.security")) ||
+                  (msg.message === "Failed Write" &&
+                    t("editor.upload.error.failed_write")) ||
+                  (msg.type === "error" &&
+                    msg.error instanceof TypeError &&
+                    t("editor.upload.error.not_docx", { file: msg.message })) ||
+                  msg.message}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Toast.Body>
+      </Toast>
     </Slate>
   );
 };
