@@ -23,10 +23,22 @@
     "hide": "Hide text to speech controls."
   },
   "editor": {
+    "upload": {
+      "title": "Open",
+      "file": "File",
+      "open": "Open",
+      "error": {
+        "title": "Errors:",
+        "fail": "Single file selection only.",
+        "not_docx": "{{file}} is not a docx file!",
+        "failed_write": "Unable to save file.",
+        "security": "File rejected due to secuity error."
+      }
+    },
     "menu": {
       "file": "File",
-      "open": "New Writing Task",
-      "save": "Save Notes",
+      "open": "Import",
+      "save": "Export",
       "view": "Font",
       "view.font_size": "Editor Font Size: {{zoom}}%",
       "paragraph": "Paragraph",
@@ -82,7 +94,7 @@
         "tooltip": "Fix Grammar"
       },
       "view": {
-        "title": "Popup outline: {{title}}"
+        "title": "Open outline: {{title}}"
       },
       "select": {
         "title": "Select Outline"

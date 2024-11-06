@@ -148,9 +148,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           variant="primary"
           onClick={() => {
             writingTask.next(selected);
-            if (onHide) {
-              onHide();
-            }
+            onHide?.();
           }}
         >
           {t("select")}

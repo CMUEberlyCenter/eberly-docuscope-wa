@@ -138,13 +138,15 @@ async function __main__() {
   console.log(`OnTopic: ${ONTOPIC_URL}`);
 
   Provider.app.get('/lti/info', async (req: Request, res: Response) => {
-    const token: IdToken = res.locals.token;
+    const token: IdToken | undefined = res.locals.token;
     const context = {
-      instructor: isInstructor(token.platformContext),
-      resource: token.platformContext.resource,
+      instructor: isInstructor(token?.platformContext),
+      resource: token?.platformContext?.resource,
+      userInfo: token?.userInfo,
+      context: token?.platformContext.context,
     };
     try {
-      const taskId = token.platformContext.custom?.writing_task_id;
+      const taskId = token?.platformContext.custom?.writing_task_id;
       if (!taskId || typeof taskId !== 'string') {
         throw new BadRequestError('No writing task id in custom parameters.');
       }

@@ -9,69 +9,13 @@ import {
   filter,
   map,
 } from 'rxjs';
-import { Descendant, Node, Text } from 'slate';
-import escapeHtml from 'escape-html';
+import { Descendant } from 'slate';
+import { serialize } from '../lib/slate';
 
 // For tracking Editor editable toggle.
 export const editorState = new BehaviorSubject(true);
 export const setEditorState = (state: boolean) => editorState.next(state);
 export const [useEditorState, editorState$] = bind(editorState, true);
-
-/**
- * Convert editor's Descendants to a string with double newline between
- * paragraphs.
- */
-export const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => Node.string(n)).join('\n\n');
-};
-
-/**
- * Serialize editor content nodes to an html string.
- * @param node Editor content
- * @returns HTMLized string
- */
-export const serializeHtml = (node: Descendant | Descendant[]): string => {
-  if (Array.isArray(node)) {
-    return node.map(serializeHtml).join('\n');
-  }
-  if (Text.isText(node)) {
-    let string = escapeHtml(node.text);
-    if ('bold' in node && node.bold) {
-      string = `<strong>${string}</strong>`;
-    }
-    if ('underline' in node && node.underline) {
-      string = `<span style="text-decoration: underline;">${string}</span>`;
-    }
-    if ('strikethrough' in node && node.strikethrough) {
-      string = `<span style="text-decoration: line-through;">${string}</span>`;
-    }
-    if ('italic' in node && node.italic) {
-      string = `<span style="font-style: italic">${string}</span>`;
-    }
-    return string;
-  }
-  const children = node.children.map(serializeHtml).join('');
-  switch (node.type) {
-    case 'block-quote':
-      return `<blockquote>${children}</blockquote>`;
-    case 'bulleted-list':
-      return `<ul>${children}</ul>`;
-    case 'heading-one':
-      return `<h1>${children}</h1>`;
-    case 'heading-two':
-      return `<h2>${children}</h2>`;
-    case 'heading-three':
-      return `<h3>${children}</h3>`;
-    case 'heading-four':
-      return `<h4>${children}</h4>`;
-    case 'list-item':
-      return `<li>${children}</li>`;
-    case 'numbered-list':
-      return `<ol>${children}</ol>`;
-    default:
-      return `<p>${children}</p>`;
-  }
-};
 
 // For tracking the Editor text content.
 export const editorText = new BehaviorSubject<Descendant[]>([]);

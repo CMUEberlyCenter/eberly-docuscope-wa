@@ -21,7 +21,6 @@ describe('editor-state.service', () => {
       .pipe(first())
       .subscribe((state) => expect(state, 'False now.').toBeFalsy());
   });
-  //test('serialize');
   test('given -b a=<empty string> b=<some text> when editorText then ^ab', () => {
     editorText$
       .pipe(first())

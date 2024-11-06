@@ -5,11 +5,21 @@ import {
   faUnderline,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Packer } from "docx";
+import { convertToHtml } from "mammoth";
 import { FC, useCallback, useEffect, useState } from "react";
-import { ButtonGroup, ButtonToolbar, Dropdown, Form } from "react-bootstrap";
+import {
+  ButtonGroup,
+  ButtonToolbar,
+  Dropdown,
+  DropdownButton,
+  Form,
+  ListGroup,
+  Toast,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { createEditor, Descendant } from "slate";
+import { createEditor, Descendant, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
@@ -18,12 +28,18 @@ import {
   Slate,
   withReact,
 } from "slate-react";
+import { deserializeHtmlText, serializeDocx } from "../../lib/slate";
+import { useLtiInfo } from "../../service/lti.service";
+import { useWritingTask } from "../../service/writing-task.service";
+import { FileDownload } from "../FileDownload/FileDownload";
+import { FileUpload } from "../FileUpload/FileUpload";
 import ToolCard from "../ToolCard/ToolCard";
+import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
-import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton.tsx";
 
+/** Component for rendering editor content nodes. */
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   switch (element.type) {
     case "block-quote":
@@ -51,6 +67,7 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
   }
 };
 
+/** Component for rendering editor content leaf nodes. */
 const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
   <span
     {...attributes}
@@ -94,6 +111,7 @@ const CustomEditor: FC = () => {
     []
   );
 
+  // Update document title based on translation.
   useEffect(() => {
     window.document.title = t("document.title");
   }, [t]);
@@ -109,6 +127,141 @@ const CustomEditor: FC = () => {
   //   // return !!match;
 
   // }, [selection])
+
+  // Import a docx file
+  type Message =
+    | { type: "error"; message: string; error: unknown }
+    | { type: "warning"; message: string };
+  const [showUpload, setShowUpload] = useState(false);
+  const [upload, setUpload] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Message[]>([]);
+  const [showErrors, setShowErrors] = useState(false);
+  const loadFile = useCallback(
+    async (file: File) => {
+      try {
+        if (
+          file.type !==
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        ) {
+          throw new TypeError(file.name);
+        }
+
+        const arrayBuffer = await file.arrayBuffer();
+        const { value, messages } = await convertToHtml(
+          { arrayBuffer },
+          { styleMap: "u => u" }
+        );
+        if (messages.length) {
+          setErrors(messages);
+          setShowErrors(true);
+          console.log(messages);
+        }
+        const content = deserializeHtmlText(value);
+        if (content) {
+          // FIXME this currently appends content.
+          Transforms.insertNodes(editor, content);
+        }
+      } catch (err) {
+        if (err instanceof Error) {
+          setErrors([{ type: "error", message: err.message, error: err }]);
+          setShowErrors(true);
+          console.error(err);
+        } else {
+          console.error("Caught non-error", err);
+        }
+      }
+    },
+    [editor]
+  );
+  useEffect(() => {
+    if (upload) {
+      loadFile(upload);
+    }
+  }, [upload]);
+  const loadSaveFileOps = {
+    id: "myprose",
+    types: [
+      {
+        accept: {
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+            [".docx"],
+        },
+      },
+    ],
+  };
+
+  const uploadFile = useCallback(async () => {
+    if ("showOpenFilePicker" in window) {
+      try {
+        const [handle]: FileSystemFileHandle[] =
+          await window.showOpenFilePicker(loadSaveFileOps);
+        const file = await handle.getFile();
+        setUpload(file);
+      } catch (err) {
+        if (err instanceof Error) {
+          setErrors([{ type: "error", message: err.message, error: err }]);
+          setShowErrors(true);
+        }
+        console.error(err);
+      }
+    } else {
+      setShowUpload(true);
+    }
+  }, []);
+
+  // Stuff for exporting docx file.
+  const [docx, setDocx] = useState<Blob | null>(null);
+  const writingTask = useWritingTask();
+  const lti = useLtiInfo();
+  const saveAs = useCallback(async () => {
+    if (content) {
+      if ("showSaveFilePicker" in window) {
+        const rootname =
+          upload?.name ||
+          lti?.resource.title ||
+          writingTask?.rules.name ||
+          "myProse";
+        try {
+          const handle: FileSystemFileHandle = await window.showSaveFilePicker({
+            ...loadSaveFileOps,
+            suggestedName: `${rootname}`,
+          });
+          const writable = await handle.createWritable();
+          const blob = await Packer.toBlob(
+            serializeDocx(content, writingTask, lti?.userInfo?.name)
+          );
+          await writable.write(blob);
+          await writable.close();
+        } catch (err) {
+          if (!(err instanceof DOMException)) {
+            setErrors([{ type: "error", message: "Failed Write", error: err }]);
+            setShowErrors(true);
+            console.error(err);
+            return;
+          }
+          switch (err.name) {
+            case "AbortError":
+              break; // user cancelled
+            case "SecurityError":
+              setErrors([
+                { type: "error", message: "Security Error", error: err },
+              ]);
+              setShowErrors(true);
+              break; // os reject
+            default:
+              console.error(err);
+          }
+        }
+      } else {
+        const blob = await Packer.toBlob(
+          serializeDocx(content, writingTask, lti?.userInfo?.name)
+        );
+        setDocx(blob);
+      }
+    } else {
+      setDocx(null);
+    }
+  }, [content, lti, writingTask]);
 
   return (
     <Slate
@@ -135,22 +288,29 @@ const CustomEditor: FC = () => {
             className="align-items-center mb-2"
           >
             <ButtonGroup>
-              {/* <DropdownButton
+              <DropdownButton
                 as={ButtonGroup}
                 title={t("editor.menu.file")}
                 variant="light"
               >
-                <Dropdown.Item eventKey="open" disabled>
+                <Dropdown.Item eventKey="open" onClick={() => uploadFile()}>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
-                <Dropdown.Item
-                  disabled
-                  eventKey="save"
-                  onClick={() => console.log(content)}
-                >
+                {/* TODO file upload form if filesystem api is not available. */}
+                <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>
-              </DropdownButton> */}
+                {docx && (
+                  <FileDownload
+                    content={docx}
+                    title={
+                      lti?.resource.title ||
+                      writingTask?.rules.name ||
+                      "myProse"
+                    }
+                  />
+                )}
+              </DropdownButton>
               <Dropdown as={ButtonGroup}>
                 <Dropdown.Toggle variant="light">
                   {t("editor.menu.view")}
@@ -209,6 +369,40 @@ const CustomEditor: FC = () => {
         </main>
         <ToolCard />
       </Split>
+      <FileUpload
+        show={showUpload}
+        onHide={() => setShowUpload(false)}
+        onFile={setUpload}
+      />
+      <Toast
+        bg="danger"
+        className="position-absolute start-50 bottom-0 translate-middle"
+        show={showErrors}
+        onClose={() => setShowErrors(!showErrors)}
+      >
+        <Toast.Header className="justify-content-between">
+          {t("editor.upload.error.title")}
+        </Toast.Header>
+        <Toast.Body>
+          <ListGroup>
+            {errors.map((msg, i) => (
+              <ListGroup.Item
+                key={i}
+                variant={msg.type === "error" ? "danger" : "warning"}
+              >
+                {(msg.message === "Security Error" &&
+                  t("editor.upload.error.security")) ||
+                  (msg.message === "Failed Write" &&
+                    t("editor.upload.error.failed_write")) ||
+                  (msg.type === "error" &&
+                    msg.error instanceof TypeError &&
+                    t("editor.upload.error.not_docx", { file: msg.message })) ||
+                  msg.message}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Toast.Body>
+      </Toast>
     </Slate>
   );
 };
