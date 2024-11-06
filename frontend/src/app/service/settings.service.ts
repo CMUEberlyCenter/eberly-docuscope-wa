@@ -21,8 +21,6 @@ const SETTINGS_URL = new URL(
 
 // Defines the form of the json settings.
 interface Settings {
-  brand?: string;
-
   text2speech?: boolean;
   scribe?: boolean; // global scribe availability
   // scribe features
@@ -50,7 +48,6 @@ interface Settings {
 
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
-  brand: 'myProse',
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   text2speech: true,
@@ -59,8 +56,8 @@ const DEFAULT: Settings = {
   // Draft
   notes2prose: true,
   notes2bullets: true,
-  assess_expectation: true,
-  assess_expectations: true,
+  assess_expectation: false,
+  assess_expectations: false,
   // Review
   lines_of_arguments: true,
   key_ideas: true,
