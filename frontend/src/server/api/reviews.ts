@@ -75,7 +75,12 @@ const doOnTopic = async (
   }
 };
 
-const reviewData = (review: Review) => ({
+/**
+ * Extract data from a Review's writing task used for the templates.
+ * @param review
+ * @returns Acceptable object for "format" function.
+ */
+const reviewData = (review: Review): Record<string, string> => ({
   text: review.text,
   user_lang:
     (isWritingTask(review.writing_task)
@@ -85,6 +90,10 @@ const reviewData = (review: Review) => ({
     (isWritingTask(review.writing_task)
       ? review.writing_task.info.target_lang
       : undefined) ?? DEFAULT_LANGUAGE,
+  extra_instructions:
+    (isWritingTask(review.writing_task)
+      ? review.writing_task.extra_instructions
+      : undefined) ?? '',
 });
 
 reviews.get(
@@ -105,8 +114,6 @@ reviews.get(
       const { writing_task } = review;
       response.write(`data: ${JSON.stringify(review)}\n\n`);
       if (isWritingTask(writing_task)) {
-        const user_lang = writing_task.info.user_lang ?? DEFAULT_LANGUAGE;
-        const target_lang = writing_task.info.target_lang ?? DEFAULT_LANGUAGE;
         // Filter out already analysed expectations.
         const existing = new Set(
           review.analysis
@@ -121,11 +128,9 @@ reviews.get(
             const content = await doChat(
               'all_expectations',
               {
+                ...reviewData(review),
                 expectation: expectation.name,
                 description: expectation.description,
-                text: review.text,
-                user_lang,
-                target_lang,
               },
               true
             );

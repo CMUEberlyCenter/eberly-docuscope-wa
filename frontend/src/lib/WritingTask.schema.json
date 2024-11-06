@@ -76,6 +76,7 @@
   "description": "Schema for a myProse writing tasks specification json file.",
   "properties": {
     "extra_instructions": {
+      "description": "Additional information that can be instantiated in the LLM prompts.",
       "type": "string"
     },
     "impressions": {

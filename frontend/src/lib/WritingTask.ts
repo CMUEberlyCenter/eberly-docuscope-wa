@@ -171,6 +171,7 @@ export type WritingTask = {
   values: unknown;
   /** Metadata about the task. */
   info: WritingTaskMetaData;
+  /** Additional information that can be instantiated in the LLM prompts. */
   extra_instructions?: string;
   wtd_version?: string;
   /** True if the task is listed in publicly available listings.  This is normally set by the server. */
