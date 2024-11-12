@@ -12,7 +12,7 @@ import {
   AllExpectationsResponse,
   Analysis,
   isAllExpectationsData,
-  OnTopicReviewData
+  OnTopicReviewData,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
