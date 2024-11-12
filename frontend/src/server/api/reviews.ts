@@ -11,13 +11,14 @@ import {
   AllExpectationsData,
   AllExpectationsResponse,
   Analysis,
-  ArgumentsResponse,
-  GlobalCoherenceResponse,
   isAllExpectationsData,
-  KeyPointsResponse,
-  OnTopicReviewData,
+  OnTopicReviewData
 } from '../../lib/ReviewResponse';
-import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import {
+  getExpectations,
+  isWritingTask,
+  WritingTask,
+} from '../../lib/WritingTask';
 import { doChat } from '../data/chat';
 import {
   deleteReviewById,
@@ -34,7 +35,7 @@ import { DEFAULT_LANGUAGE, ONTOPIC_URL } from '../settings';
 export const reviews = Router();
 
 const ANALYSES: ReviewPrompt[] = [
-  'global_coherence',
+  // 'global_coherence',
   'key_points',
   'arguments',
 ];
@@ -171,17 +172,15 @@ reviews.get(
   async (request: Request, response: Response) => {
     const { id } = request.params;
     const tool = request.query.tool; // use query to specify subset
-    const analyses = [...ANALYSES, 'ontopic'].filter((analysis) => {
-      if (!tool) {
-        return true;
+    const analyses = [...ANALYSES, 'ontopic', 'expectations'].filter(
+      (analysis) => {
+        return (
+          !tool ||
+          (typeof tool === 'string' && analysis === tool) ||
+          (Array.isArray(tool) && (tool as string[]).includes(analysis))
+        );
       }
-      if (Array.isArray(tool)) {
-        return (tool as string[]).includes(analysis);
-      }
-      if (typeof tool === 'string') {
-        return analysis === tool;
-      }
-    });
+    );
     try {
       const review = await findReviewById(id);
       response.set({
@@ -192,64 +191,76 @@ reviews.get(
       response.flushHeaders();
       response.on('close', () => response.end());
       response.write(`data: ${JSON.stringify(review)}\n\n`);
-      await Promise.allSettled([
-        ...analyses
-          .filter((tool) => !review.analysis.some((a) => a.tool === tool))
-          .map(async (tool) => {
-            let analysis: Analysis | undefined = undefined;
-            switch (tool) {
-              case 'global_coherence': {
-                const resp = await doChat(tool, reviewData(review), true);
-                const data = resp?.response.choices.at(0)?.message.content;
-                if (data) {
-                  analysis = {
-                    tool,
-                    datetime: resp.finished,
-                    response: JSON.parse(data) as GlobalCoherenceResponse,
-                  };
-                }
-                break;
+
+      const updateAnalysis = async (analysis: Analysis | undefined) => {
+        if (analysis) {
+          const upd = await updateReviewByIdAddAnalysis(id, analysis);
+          if (!response.closed) {
+            response.write(`data: ${JSON.stringify(upd)}\n\n`);
+          }
+        }
+        return analysis;
+      };
+
+      const expectJobs: Promise<Analysis | undefined>[] = [];
+      if (
+        isWritingTask(review.writing_task) &&
+        analyses.includes('expectations')
+      ) {
+        const existing = new Set(
+          review.analysis
+            .filter(isAllExpectationsData)
+            .map(({ expectation }) => expectation)
+        );
+        const expectations = getExpectations(review.writing_task).filter(
+          (rule) => !existing.has(rule.name)
+        );
+        expectJobs.push(
+          ...expectations.map(async ({ name: expectation, description }) => {
+            const { response, finished: datetime } = await doChat(
+              'all_expectations',
+              {
+                ...reviewData(review),
+                expectation,
+                description,
               }
-              case 'key_points': {
-                const resp = await doChat(tool, reviewData(review), true);
-                const data = resp?.response.choices.at(0)?.message.content;
-                if (data) {
-                  analysis = {
-                    tool,
-                    datetime: resp.finished,
-                    response: JSON.parse(data) as KeyPointsResponse,
-                  };
-                }
-                break;
-              }
-              case 'arguments': {
-                const resp = await doChat(tool, reviewData(review), true);
-                const data = resp?.response.choices.at(0)?.message.content;
-                if (data) {
-                  analysis = {
-                    tool,
-                    datetime: resp.finished,
-                    response: JSON.parse(data) as ArgumentsResponse,
-                  };
-                }
-                break;
-              }
-              case 'ontopic':
-                analysis = await doOnTopic(review);
-                break;
-              default:
-                // never reachable...
-                console.error(`Unknown tool: ${tool}`);
-            }
-            if (analysis) {
-              const upd = await updateReviewByIdAddAnalysis(id, analysis);
-              if (!response.closed) {
-                response.write(`data: ${JSON.stringify(upd)}\n\n`);
-              }
-            }
-            return analysis;
-          }),
-      ]);
+            );
+            const data = response.choices.at(0)?.message.content;
+            if (!data) return; // TODO throw null results
+            return updateAnalysis({
+              tool: 'all_expectations',
+              datetime,
+              expectation,
+              response: JSON.parse(data) as AllExpectationsResponse,
+            });
+          })
+        );
+      }
+      const chatJobs = analyses
+        .filter((a): a is ReviewPrompt => ANALYSES.includes(a as ReviewPrompt))
+        .map(async (key) => {
+          if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber
+          const { response, finished: datetime } = await doChat(
+            key,
+            reviewData(review),
+            true
+          );
+          const data = response.choices.at(0)?.message.content;
+          if (!data) return;
+          return updateAnalysis({
+            tool: key,
+            datetime,
+            response: JSON.parse(data),
+          });
+        });
+      const ontopicJobs = ['ontopic'].map(async () => {
+        if (!analyses.includes('ontopic')) return;
+        if (review.analysis.some(({ tool }) => tool === 'ontopic')) return;
+        const data = await doOnTopic(review);
+        if (!data) return;
+        return updateAnalysis(data);
+      });
+      await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {
         const final = await findReviewById(id);
         response.write(`data: ${JSON.stringify(final)}\n\n`);

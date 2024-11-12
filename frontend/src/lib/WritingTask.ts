@@ -70,6 +70,21 @@ function isRule(rule: Rule | unknown): rule is Rule {
   );
 }
 
+function* leafRuleGenerator(rule: Rule): Generator<Rule> {
+  if (rule.children.length === 0) {
+    yield rule;
+  } else {
+    for (const child of rule.children) {
+      yield* leafRuleGenerator(child);
+    }
+  }
+}
+export function getExpectations(task: WritingTask | null) {
+  return task === null
+    ? []
+    : task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]);
+}
+
 export type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
   name: string;

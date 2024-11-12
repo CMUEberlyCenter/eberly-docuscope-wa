@@ -75,7 +75,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
               >
                 <i className="fa-solid fa-caret-down flex-shrink-0"></i>
               </Button>
-              {leafOnly ? (
+              {leafOnly || !rule.description ? (
                 <div className="fw-bold flex-grow-1 outline-section text-nowrap">
                   {rule.name}
                 </div>

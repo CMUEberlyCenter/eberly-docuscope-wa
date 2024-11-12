@@ -147,7 +147,7 @@ export const AllExpectations: FC = () => {
               <AllExpectationsIcon /> {t("title")}
             </div>
           </header>
-          <div className="container-fluid overflow-auto position-relative flex-grow-1 ">
+          <div className="container-fluid overflow-auto position-relative flex-grow-1">
             {/* Assumes strict two level writing tasks... */}
             {writingTask?.rules.rules.map((rule, i) => (
               <ExpectationRule

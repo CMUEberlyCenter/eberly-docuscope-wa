@@ -57,7 +57,7 @@ const DEFAULT: Settings = {
   notes2prose: true,
   notes2bullets: true,
   assess_expectation: false,
-  assess_expectations: false,
+  assess_expectations: true,
   // Review
   lines_of_arguments: true,
   key_ideas: true,
@@ -122,7 +122,7 @@ export const [useGlobalFeatureExpectation, globalFeatureExpectation$] = bind(
 );
 export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
   settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.assess_expectation)
+    map((settings) => !!settings.scribe && !!settings.assess_expectations)
   ),
   false
 );

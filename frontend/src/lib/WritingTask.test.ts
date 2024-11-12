@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { isWritingTask } from './WritingTask';
+import { getExpectations, isWritingTask } from './WritingTask';
 import * as CoverLeter from '../../test/CoverLetter.json';
 
 describe('isWritingTask', () => {
@@ -17,5 +17,14 @@ describe('isWritingTask', () => {
   });
   test('given CoverLetter then true', () => {
     expect(isWritingTask(CoverLeter)).toBeTruthy();
+  });
+});
+
+describe('getExpectations', () => {
+  test('given CoverLetter then array', () => {
+    const exp = getExpectations(CoverLeter);
+    expect(exp.length).toBe(9);
+    expect(exp.at(0)?.name).toBe('What positions are you applying for?');
+    expect(exp.every((e) => e.children.length === 0));
   });
 });
