@@ -57,7 +57,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
                 >
                   <OutlineDrawerIcon height={24} />
                   <span className="visually-hidden sr-only">
-                    {t("tool.button.select.title")}
+                    {t("select_task.title")}
                   </span>
                 </Button>
               )}
@@ -69,7 +69,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
               aria-controls={selectId}
               onClick={() => setShowSelect(!showSelect)}
             >
-              {t("tool.button.select.title")}
+              {t("select_task.title")}
             </Button>
           )}
           {!selectAvailable && !writingTask && (
