@@ -45,7 +45,6 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   );
   useEffect(() => {
     setExpectation(expectations?.get(rule.name) ?? null);
-    console.log(expectations);
   }, [expectations, rule]);
 
   return (

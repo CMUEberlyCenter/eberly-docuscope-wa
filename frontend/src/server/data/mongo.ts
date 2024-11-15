@@ -5,7 +5,7 @@ import { join } from 'path';
 import { Analysis } from '../../lib/ReviewResponse';
 import { WritingTask } from '../../lib/WritingTask';
 import { Review } from '../model/review';
-import { MONGO_CLIENT, WRITING_TASKS_PATH } from '../settings';
+import { EXPIRE_REVIEW_SECONDS, MONGO_CLIENT, WRITING_TASKS_PATH } from '../settings';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -123,7 +123,7 @@ function timeout(ms: number | undefined): Promise<undefined> {
  */
 export async function initDatabase(): Promise<void> {
   let retry = 30;
-  const sleep = 5000;
+  const sleep = 5000; // 5 seconds
   while (retry > 0) {
     try {
       await client.connect();
@@ -136,6 +136,14 @@ export async function initDatabase(): Promise<void> {
       retry -= 1;
       await timeout(sleep);
     }
+  }
+  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  // Add expire index if necessary.
+  const ExpireIndexName = "expire";
+  const indx = (await collection.indexes()).find(idx => "created" in idx.key);
+  if (indx?.expireAfterSeconds !== EXPIRE_REVIEW_SECONDS) {
+    if (indx?.name) await collection.dropIndex(indx.name);
+    await collection.createIndex({ "created": 1 }, { name: ExpireIndexName, expireAfterSeconds: EXPIRE_REVIEW_SECONDS });
   }
   await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
 }

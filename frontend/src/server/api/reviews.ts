@@ -11,8 +11,12 @@ import {
   AllExpectationsData,
   AllExpectationsResponse,
   Analysis,
+  ArgumentsResponse,
+  GlobalCoherenceResponse,
   isAllExpectationsData,
+  KeyPointsResponse,
   OnTopicReviewData,
+  ReviewResponse,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
@@ -126,7 +130,7 @@ reviews.get(
           .filter((rule) => !existing.has(rule.name));
         await Promise.allSettled(
           expectations.map(async (expectation) => {
-            const content = await doChat(
+            const {response: data, finished: datetime} = await doChat(
               'all_expectations',
               {
                 ...reviewData(review),
@@ -135,13 +139,12 @@ reviews.get(
               },
               true
             );
-            const resp = content.response.choices.at(0)?.message.content;
-            if (!resp) return; //FIXME
+            if (!data) return; //FIXME add throw
             const analysis: AllExpectationsData = {
               tool: 'all_expectations',
-              datetime: content.finished,
+              datetime,
               expectation: expectation.name,
-              response: JSON.parse(resp) as AllExpectationsResponse,
+              response: data as AllExpectationsResponse,
             };
             const upd = await updateReviewByIdAddAnalysis(id, analysis);
             if (!response.closed) {
@@ -225,13 +228,12 @@ reviews.get(
                 description,
               }
             );
-            const data = response.choices.at(0)?.message.content;
-            if (!data) return; // TODO throw null results
+            if (!response) return; // TODO throw null results
             return updateAnalysis({
               tool: 'all_expectations',
               datetime,
               expectation,
-              response: JSON.parse(data) as AllExpectationsResponse,
+              response: response as AllExpectationsResponse,
             });
           })
         );
@@ -245,13 +247,12 @@ reviews.get(
             reviewData(review),
             true
           );
-          const data = response.choices.at(0)?.message.content;
-          if (!data) return;
+          if (!response) return;
           return updateAnalysis({
             tool: key,
             datetime,
-            response: JSON.parse(data),
-          });
+            response,
+          } as Analysis); // FIXME typescript shenanigans
         });
       const ontopicJobs = ['ontopic'].map(async () => {
         if (!analyses.includes('ontopic')) return;
