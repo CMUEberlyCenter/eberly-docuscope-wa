@@ -65,7 +65,7 @@ export async function doChat(
   // TODO improve this logic
   let model: string;
   let response: string | object = '';
-  if (CLIENT === 'openai') {
+  if (CLIENT === 'openai' && OPENAI_API_KEY) {
     const chat = await openai.chat.completions.create({
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
       messages: [
@@ -85,7 +85,7 @@ export async function doChat(
     }
     response = resp;
     model = chat.model;
-  } else {
+  } else if (CLIENT === 'anthropic' && ANTHROPIC_API_KEY) {
     const chat = await anthropic.messages.create({
       max_tokens: ANTHROPIC_MAX_TOKENS,
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
@@ -106,6 +106,8 @@ export async function doChat(
     } else {
       console.warn(resp);
     }
+  } else {
+    throw new Error("No LLM configured.")
   }
   response = json ? JSON.parse(response) : response;
   const finished = new Date();
