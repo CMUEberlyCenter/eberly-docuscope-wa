@@ -143,6 +143,9 @@
     "include": "Include Details",
     "insert": "Insert",
     "overview": "Overview",
-    "about": "About This Expectation:"
+    "about": {
+      "expectation": "About this Expectation:",
+      "section": "About this Section:"
+    }
   }
 }
