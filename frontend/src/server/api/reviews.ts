@@ -130,7 +130,7 @@ reviews.get(
           .filter((rule) => !existing.has(rule.name));
         await Promise.allSettled(
           expectations.map(async (expectation) => {
-            const {response: data, finished: datetime} = await doChat(
+            const { response: data, finished: datetime } = await doChat(
               'all_expectations',
               {
                 ...reviewData(review),
@@ -226,7 +226,8 @@ reviews.get(
                 ...reviewData(review),
                 expectation,
                 description,
-              }
+              },
+              true
             );
             if (!response) return; // TODO throw null results
             return updateAnalysis({

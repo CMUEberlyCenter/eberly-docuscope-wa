@@ -28,9 +28,9 @@ export const DEV = process.env.NODE_ENV !== 'production';
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 
-function envInt(env: string|undefined, fallback=0) {
+function envInt(env: string | undefined, fallback = 0) {
   if (!env) return fallback;
-  const num = parseInt(env)
+  const num = parseInt(env);
   return num && !isNaN(num) ? num : fallback;
 }
 export const PORT = envInt(process.env.PORT, 8888);
@@ -101,7 +101,12 @@ export const ONTOPIC_URL = new URL('api/v1/ontopic', ONTOPIC_SERVER);
 export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
 export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 export const ANTHROPIC_API_KEY = fromEnvFile('ANTHROPIC_API_KEY');
-export const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';
+export const ANTHROPIC_MODEL =
+  process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';
+export const ANTHROPIC_MAX_TOKENS = envInt(
+  process.env.ANTHROPIC_MAX_TOKENS,
+  1024
+);
 
 export const SCRIBE_TEMPLATES =
   process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
@@ -116,5 +121,8 @@ export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = {
   target_lang: DEFAULT_LANGUAGE,
 };
 
-const SIX_MONTHS = 60*60*24*30*6; // (seconds/minute)(minutes/hour)(hours/day)(days/month)(months)
-export const EXPIRE_REVIEW_SECONDS = envInt(process.env.EXPIRE_REVIEW_SECONDS, SIX_MONTHS);
+const SIX_MONTHS = 60 * 60 * 24 * 30 * 6; // (seconds/minute)(minutes/hour)(hours/day)(days/month)(months)
+export const EXPIRE_REVIEW_SECONDS = envInt(
+  process.env.EXPIRE_REVIEW_SECONDS,
+  SIX_MONTHS
+);

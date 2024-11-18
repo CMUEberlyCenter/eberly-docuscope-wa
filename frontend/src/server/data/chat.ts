@@ -1,10 +1,20 @@
+import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
 import OpenAI from 'openai';
 import format from 'string-format';
 import { PromptData, PromptType } from '../model/prompt';
-import { OPENAI_API_KEY, OPENAI_MODEL, SCRIBE_TEMPLATES } from '../settings';
+import {
+  ANTHROPIC_API_KEY,
+  ANTHROPIC_MAX_TOKENS,
+  ANTHROPIC_MODEL,
+  OPENAI_API_KEY,
+  OPENAI_MODEL,
+  SCRIBE_TEMPLATES,
+} from '../settings';
 
-export const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const CLIENT: 'anthropic' | 'openai' = 'anthropic';
+const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 let prompts: PromptData;
 /**
@@ -21,6 +31,20 @@ export async function readTemplates(): Promise<PromptData> {
   return prompts;
 }
 
+// function isOpenAIResponse(data: ChatCompletion | unknown): data is ChatCompletion {
+//   return !!data && typeof data === 'object' && 'object' in data && data.object === 'chat.completion';
+// }
+// function isAnthropicResponse(data: Message | unknown): data is Message {
+//   return !!data && typeof data === 'object' && 'type' in data && data.type === 'message';
+// }
+
+/**
+ * Given a template key and instantiating data, perform the chat operation with a LLM.
+ * @param key Which prompt to use.
+ * @param data Data used to instantiate prompt.
+ * @param json if true, returns a JSON object.
+ * @returns a string unless json pramameter is truthy.
+ */
 export async function doChat(
   key: PromptType,
   data: Record<string, string>,
@@ -38,28 +62,59 @@ export async function doChat(
     throw new Error(`Malformed prompt for ${key}.`);
   }
   const content = format(prompt, data);
-  const chat = await openai.chat.completions.create({
-    temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-    messages: [
-      { role: 'system', content: role ?? 'You are a chatbot' },
-      {
-        role: 'user',
-        content,
-      },
-    ],
-    model: OPENAI_MODEL,
-    ...(json ? { response_format: { type: 'json_object' } } : {}),
-  });
-  const resp = chat.choices.at(0)?.message.content;
-  if (!resp) {
-    throw new Error('No content in OpenAI response.');
+  // TODO improve this logic
+  let model: string;
+  let response: string | object = '';
+  if (CLIENT === 'openai') {
+    const chat = await openai.chat.completions.create({
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      messages: [
+        { role: 'system', content: role ?? 'You are a chatbot' },
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: OPENAI_MODEL,
+      ...(json ? { response_format: { type: 'json_object' } } : {}),
+    });
+    // TODO handle openai error
+    const resp = chat.choices.at(0)?.message.content;
+    if (!resp) {
+      throw new Error('No content in OpenAI response.');
+    }
+    response = resp;
+    model = chat.model;
+  } else {
+    const chat = await anthropic.messages.create({
+      max_tokens: ANTHROPIC_MAX_TOKENS,
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      messages: [
+        { role: 'assistant', content: role ?? 'You are a chatbot' },
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: ANTHROPIC_MODEL,
+    });
+    model = chat.model;
+    // TODO handle anthropic error
+    const resp = chat.content.at(0);
+    if (resp?.type === 'text') {
+      response = resp.text;
+    } else {
+      console.warn(resp);
+    }
   }
+  response = json ? JSON.parse(response) : response;
   const finished = new Date();
   return {
     key,
     started,
     finished,
     delta_ms: finished.getTime() - started.getTime(),
-    response: chat,
+    model,
+    response,
   };
 }

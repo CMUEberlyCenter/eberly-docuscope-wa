@@ -127,7 +127,11 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
         )}
         {selected && (
           <>
-            <h6>{selected.is_group ? t("details.about.section") : t("details.about.expectation")}</h6>
+            <h6>
+              {selected.is_group
+                ? t("details.about.section")
+                : t("details.about.expectation")}
+            </h6>
             <h5>{selected.name}</h5>
             <div dangerouslySetInnerHTML={{ __html: selected.description }} />
           </>
