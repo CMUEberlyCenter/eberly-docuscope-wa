@@ -2,7 +2,11 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { validateWritingTask } from "../../../lib/schemaValidate";
-import { hasKeywords, isWritingTask, WritingTask } from "../../../lib/WritingTask";
+import {
+  hasKeywords,
+  isWritingTask,
+  WritingTask,
+} from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { Loading } from "../Loading/Loading";
@@ -100,16 +104,22 @@ export const GenerateLink: FC = () => {
             >
               <WritingTaskFilter className="w-100" update={setActiveKeywords} />
               <ListGroup className="overflow-auto w-100 mh-100">
-                {data?.filter((task) => activeKeywords.length === 0 || hasKeywords(task, activeKeywords)).map((task) => (
-                  <ListGroup.Item
-                    key={task.info.name}
-                    active={selected === task}
-                    action
-                    onClick={() => setSelected(task)}
-                  >
-                    {task.info.name}
-                  </ListGroup.Item>
-                ))}
+                {data
+                  ?.filter(
+                    (task) =>
+                      activeKeywords.length === 0 ||
+                      hasKeywords(task, activeKeywords)
+                  )
+                  .map((task) => (
+                    <ListGroup.Item
+                      key={task.info.name}
+                      active={selected === task}
+                      action
+                      onClick={() => setSelected(task)}
+                    >
+                      {task.info.name}
+                    </ListGroup.Item>
+                  ))}
                 {custom && (
                   <ListGroup.Item
                     key="custom"

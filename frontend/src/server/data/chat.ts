@@ -107,7 +107,7 @@ export async function doChat(
       console.warn(resp);
     }
   } else {
-    throw new Error("No LLM configured.")
+    throw new Error('No LLM configured.');
   }
   response = json ? JSON.parse(response) : response;
   const finished = new Date();

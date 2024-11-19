@@ -12,7 +12,11 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { WritingTask, hasKeywords, isWritingTask } from "../../../lib/WritingTask";
+import {
+  WritingTask,
+  hasKeywords,
+  isWritingTask,
+} from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   useWritingTask,
@@ -66,26 +70,32 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" {...props}>
+    <Modal show={show} onHide={onHide} size="xl" {...props}>
       <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
         <div
           className="d-flex flex-row align-items-stretch position-relative gap-3"
           style={{ maxHeight: "75vh" }}
         >
+          <WritingTaskFilter className="w-100" update={setActiveKeywords} />
           <div className="w-100 h-0">
-            <WritingTaskFilter className="w-100" update={setActiveKeywords} />
             <ListGroup className="overflow-auto w-100 mh-100">
-              {writingTasks?.filter(task => activeKeywords.length === 0 || hasKeywords(task, activeKeywords)).map((task) => (
-                <ListGroup.Item
-                  key={task.info.name}
-                  active={selected === task}
-                  action
-                  onClick={() => setSelected(task)}
-                >
-                  {task.info.name}
-                </ListGroup.Item>
-              ))}
+              {writingTasks
+                ?.filter(
+                  (task) =>
+                    activeKeywords.length === 0 ||
+                    hasKeywords(task, activeKeywords)
+                )
+                .map((task) => (
+                  <ListGroup.Item
+                    key={task.info.name}
+                    active={selected === task}
+                    action
+                    onClick={() => setSelected(task)}
+                  >
+                    {task.info.name}
+                  </ListGroup.Item>
+                ))}
               {custom && (
                 <ListGroup.Item
                   action

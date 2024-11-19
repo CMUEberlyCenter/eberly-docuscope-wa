@@ -129,7 +129,7 @@ function isWritingTaskMetaData(
 }
 
 function extractKeywords(tasks: WritingTask[]) {
-  return tasks.flatMap(task => task.info.keywords ?? []);
+  return tasks.flatMap((task) => task.info.keywords ?? []);
 }
 /**
  * Given a set of writing tasks, generate a mapping of categories
@@ -138,26 +138,36 @@ function extractKeywords(tasks: WritingTask[]) {
  * @returns An object that maps "category:..." keywords to an array
  * of keywords that cooccur with that category.
  */
-export function keywordsByCategory(tasks: WritingTask[]): { [k: string]: string[]; } {
-  const acc = tasks.reduce((acc, task) => {
-    const { category, keyword } = categoryKeywords([task]);
-    const keywords = new Set(keyword);
-    category?.forEach(cat => {
-      acc[cat] = (cat in acc) ? acc[cat].union(keywords) : new Set(keyword);
-    });
-    acc.ALL = acc.ALL.union(keywords);
-    return acc;
-  }, {ALL: new Set()} as Record<string, Set<string>>);
-  return Object.fromEntries(Object.entries(acc).map(([key, val]) => [key, [...val].toSorted()]))
+export function keywordsByCategory(tasks: WritingTask[]): {
+  [k: string]: string[];
+} {
+  const acc = tasks.reduce(
+    (acc, task) => {
+      const { category, keyword } = categoryKeywords([task]);
+      const keywords = new Set(keyword);
+      category?.forEach((cat) => {
+        acc[cat] = cat in acc ? acc[cat].union(keywords) : new Set(keyword);
+      });
+      acc.ALL = acc.ALL.union(keywords);
+      return acc;
+    },
+    { ALL: new Set() } as Record<string, Set<string>>
+  );
+  return Object.fromEntries(
+    Object.entries(acc).map(([key, val]) => [key, [...val].toSorted()])
+  );
 }
 export function categoryKeywords(tasks: WritingTask[]) {
-  return Object.groupBy(extractKeywords(tasks), (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword');
+  return Object.groupBy(
+    extractKeywords(tasks),
+    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
+  );
 }
 export function hasKeywords(task: WritingTask, keywords: string[]) {
   if (!task.info.keywords) return false;
   if (keywords.length === 0) return false;
   const keys = new Set(task.info.keywords);
-  return keywords.some(key => keys.has(key));
+  return keywords.some((key) => keys.has(key));
 }
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {
