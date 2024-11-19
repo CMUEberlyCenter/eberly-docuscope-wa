@@ -12,7 +12,7 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
+import { WritingTask, hasKeywords, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   useWritingTask,
@@ -20,6 +20,7 @@ import {
   writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
+import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
@@ -39,6 +40,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
+  const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -72,8 +74,9 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           style={{ maxHeight: "75vh" }}
         >
           <div className="w-100 h-0">
+            <WritingTaskFilter className="w-100" update={setActiveKeywords} />
             <ListGroup className="overflow-auto w-100 mh-100">
-              {writingTasks?.map((task) => (
+              {writingTasks?.filter(task => activeKeywords.length === 0 || hasKeywords(task, activeKeywords)).map((task) => (
                 <ListGroup.Item
                   key={task.info.name}
                   active={selected === task}

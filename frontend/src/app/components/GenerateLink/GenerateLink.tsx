@@ -2,10 +2,11 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { validateWritingTask } from "../../../lib/schemaValidate";
-import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
+import { hasKeywords, isWritingTask, WritingTask } from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { Loading } from "../Loading/Loading";
+import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 
 type IdWritingTask = WritingTask & { _id?: string };
@@ -21,6 +22,7 @@ export const GenerateLink: FC = () => {
   const [error, setError] = useState(""); // Error messages for uploaded file.
   const hostname = new URL("/index.html", window.location.href); // base url for link
   const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
+  const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
   useEffect(() => {
     window.document.title = t("genlink.title");
@@ -96,8 +98,9 @@ export const GenerateLink: FC = () => {
               className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
               style={{ minHeight: 0 }}
             >
+              <WritingTaskFilter className="w-100" update={setActiveKeywords} />
               <ListGroup className="overflow-auto w-100 mh-100">
-                {data?.map((task) => (
+                {data?.filter((task) => activeKeywords.length === 0 || hasKeywords(task, activeKeywords)).map((task) => (
                   <ListGroup.Item
                     key={task.info.name}
                     active={selected === task}

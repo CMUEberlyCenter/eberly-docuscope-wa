@@ -135,7 +135,10 @@
     "version": "Version: {{version}}",
     "copyright": "Copyright: {{copyright}}",
     "multiple_file_error": "Upload only one file at a time.",
-    "malformed_json": "Content could not be parsed as JSON."
+    "malformed_json": "Content could not be parsed as JSON.",
+    "select": "Select category",
+    "select_all": "Select All",
+    "all_category": "All"
   },
   "cancel": "Cancel",
   "select": "Select",
