@@ -7,6 +7,7 @@ import { useKeyPointsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -29,6 +30,7 @@ export const KeyIdeas: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("key_ideas.title")}</h4>
+        <FadeContent>{t("key_ideas.overview")}</FadeContent>
         {!review ? (
           <Loading />
         ) : (
@@ -40,23 +42,27 @@ export const KeyIdeas: FC = () => {
                 {new Date(review.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
-            {"points" in review.response && review.response.points.length ? (
+            {review.response.central_idea && (<>
+              <h5>{t("key_ideas.main_idea")}</h5>
+              <p>{review.response.central_idea}</p>
+            </>)}
+            {"ideas" in review.response && review.response.ideas.length ? (
               <Accordion>
-                {review.response.points.map(
-                  ({ point, elaborations, suggestions, sentences }, i) => (
+                {review.response.ideas.map(
+                  ({ idea, elaborations, suggestions, idea_sentences, elaboration_sentences }, i) => (
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header>
                         <div className="flex-grow-1">
                           <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
-                          <span>{point}</span>
+                          <span>{idea}</span>
                         </div>
                         <AlertIcon
-                          show={sentences.length === 0}
+                          show={idea_sentences.length + elaboration_sentences.length === 0}
                           message={t("key_ideas.no_sentences")}
                         />
                       </Accordion.Header>
                       <Accordion.Body
-                        onEntered={() => dispatch({ type: "set", sentences })}
+                        onEntered={() => dispatch({ type: "set", sentences: [...idea_sentences, ...elaboration_sentences] })}
                         onExit={() => dispatch({ type: "unset" })}
                       >
                         {elaborations?.length ? (

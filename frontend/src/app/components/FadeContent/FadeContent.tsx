@@ -1,17 +1,17 @@
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, HTMLProps, useEffect, useState } from "react";
 import AnimateHeight, { Height } from "react-animate-height";
 import { Button } from "react-bootstrap";
 import css from "./FadeContent.module.scss";
 
 type ToolFadeContentProps = {
-  children: ReactNode;
   minHeight?: Height;
   maxHeight?: Height;
-};
+} & HTMLProps<HTMLDivElement>;
 export const FadeContent: FC<ToolFadeContentProps> = ({
   children,
   minHeight,
   maxHeight,
+  ...props
 }) => {
   minHeight = minHeight ?? 80;
   maxHeight = maxHeight ?? "auto";
@@ -22,7 +22,7 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
   }, [expanded]);
 
   return (
-    <article>
+    <article {...props}>
       <AnimateHeight
         height={height}
         aria-expanded={expanded}

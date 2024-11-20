@@ -41,10 +41,12 @@
   "key_ideas": {
     "entry": "List of Key Ideas",
     "title": "Key Ideas found in the Text",
+    "overview": "Key ideas overview...",
+    "main_idea": "Main Idea",
     "error": "Error reading Key Ideas data.",
     "no_sentences":"No relevant text addressing this idea was found in your draft.",
     "idea": "Idea:",
-    "elaborations": "Elaboration Strategy",
+    "elaborations": "Elaboration Strategies",
     "sentences": "Sentences",
     "suggestions": "Suggestions",
     "null": "No key ideas were found in your draft."
@@ -52,9 +54,10 @@
   "arguments": {
     "entry": "Lines of Arguments",
     "title": "Review Lines of Arguments",
+    "overview": "Arguments Overview...",
     "error": "Error reading Lines of Arguements data.",
     "no_sentences": "No sentences to support this claim were found in your draft.",
-    "main": "Main Argument",
+    "main": "Thesis",
     "arguments": "Arguments",
     "counter_examples": "Counter Argument",
     "rebuttals": "Rebuttals",

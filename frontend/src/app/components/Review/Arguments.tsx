@@ -39,7 +39,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
         <Translation ns={"review"}>
           {(t) => (
             <Accordion {...props}>
-              {claims.map(({ claim, support, suggestions, sentences }, i) => (
+              {claims.map(({ claim, support, suggestions, claim_sentences, evidence_sentences }, i) => (
                 <Accordion.Item
                   key={`${prefix}-${i}`}
                   eventKey={`${prefix}-${i}`}
@@ -51,11 +51,11 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                     </div>
                     <AlertIcon
                       message={t("arguments.no_sentences")}
-                      show={sentences.length === 0}
+                      show={claim_sentences.length + evidence_sentences.length === 0}
                     />
                   </Accordion.Header>
                   <Accordion.Body
-                    onEntered={() => dispatch({ type: "set", sentences })}
+                    onEntered={() => dispatch({ type: "set", sentences: [...claim_sentences, ...evidence_sentences] })}
                     onExit={() => dispatch({ type: "unset" })}
                   >
                     {support && (
@@ -111,10 +111,10 @@ export const Arguments: FC = () => {
               {new Date(review.datetime).toLocaleString()}
             </Card.Subtitle>
           )} */}
-            {review.response.main_argument ? (
+            {review.response.thesis ? (
               <article className="mt-3">
                 <h5>{t("arguments.main")}</h5>
-                <p>{review.response.main_argument}</p>
+                <p>{review.response.thesis}</p>
                 <Claims
                   onSelect={onSelect}
                   activeKey={current}
@@ -144,7 +144,7 @@ export const Arguments: FC = () => {
             ) : null}
             {!review.response.rebuttals?.length &&
             !review.response.counter_arguments?.length &&
-            !review.response.main_argument ? (
+            !review.response.thesis ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>
