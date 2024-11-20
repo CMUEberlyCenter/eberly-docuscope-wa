@@ -25,11 +25,11 @@ const isNone = (suggestion: string): boolean =>
   suggestion.match(/^none/i) !== null;
 
 export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"expectations"}>
+  <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
         <AllExpectationsIcon />
-        {t("title")}
+        {t("expectations.title")}
       </span>
     )}
   </Translation>
@@ -123,7 +123,7 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
 };
 
 export const Expectations: FC = () => {
-  const { t } = useTranslation("expectations");
+  const { t } = useTranslation("review");
   const writingTask = useWritingTask();
   // const [expectations, setExpectations] = useState<Rule[]>([]);
   // useEffect(() => {
@@ -136,8 +136,8 @@ export const Expectations: FC = () => {
   return (
     <ReviewReset>
       <div className="container-fluid overflow-auto">
-        <h4>{t("title")}</h4>
-        <FadeContent>{t("overview")}</FadeContent>
+        <h4>{t("expectations.title")}</h4>
+        <FadeContent>{t("expectations.overview")}</FadeContent>
         {!writingTask ? (
           <Loading />
         ) : (

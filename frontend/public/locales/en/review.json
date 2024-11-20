@@ -46,7 +46,7 @@
     "overview": "Key ideas overview...TBD",
     "main_idea": "Main Idea",
     "error": "Error reading Key Ideas data.",
-    "no_sentences":"No relevant text addressing this idea was found in your draft.",
+    "no_sentences": "No relevant text addressing this idea was found in your draft.",
     "idea": "Idea:",
     "elaborations": "Elaboration Strategies",
     "sentences": "Sentences",
@@ -66,12 +66,19 @@
     "claim": "Claim:",
     "support": "Support:",
     "sentences": "Sentences",
-    "suggestions":"Suggestions",
+    "suggestions": "Suggestions",
     "null": "No lines of arguments were detected in your draft."
   },
   "expectations": {
-    "title": "Reader Expectations",
-    "error": "Error loading expectation data."
+    "title": "Check Content Expectations",
+    "overview": "Expectations Overview...TBD",
+    "error": {
+      "no_task": "No text type specified!"
+    },
+    "sentences": "Sentences:",
+    "suggestions": "Suggestions:",
+    "warning": "This expectation is not addressed in your draft.",
+    "no_sentences": "No relevant text was located in your draft."
   },
   "organization": {
     "title": "Organization (Term Matrix)",
