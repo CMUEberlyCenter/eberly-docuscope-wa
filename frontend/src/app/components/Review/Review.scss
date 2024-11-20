@@ -20,4 +20,14 @@
       font-weight: 600;
     }
   }
+
+  .highlight {
+    background-color: var(--bs-highlight);
+    &.highlight-1 {
+      background-color: var(--bs-teal);
+    }
+  }
+  .accordion-header-highlight {
+    --bs-accordion-active-bg: var(--bs-highlight);
+  }
 }

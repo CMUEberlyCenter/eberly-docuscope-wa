@@ -71,7 +71,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             onEntering={() =>
               isAllExpectationsData(expectation)
                 ? dispatch({
-                    sentences: expectation.response.sentences,
+                    sentences: [expectation.response.sentences],
                     type: "set",
                   })
                 : dispatch({ type: "unset" })

@@ -51,19 +51,19 @@ const Suggestions: FC<SuggestionsProps> = ({
             </span>
           </Accordion.Header>
           <Accordion.Body
-            onEntered={() => dispatch({ type: "set", sentences: [text] })}
+            onEntered={() => dispatch({ type: "set", sentences: [[text]] })}
             onExit={() => dispatch({ type: "unset" })}
           >
-            <p>
+            <div className="mb-3">
               <h6 className="d-inline">
                 {t("global_coherence.suggestion.explanation")}
               </h6>{" "}
               <span>{explanation}</span>
-            </p>
-            <p>
+            </div>
+            <div className="mb-3">
               <h6>{t("global_coherence.suggestion.suggestions")}</h6>{" "}
               <span>{suggestions}</span>
-            </p>
+            </div>
           </Accordion.Body>
         </Accordion.Item>
       ))}

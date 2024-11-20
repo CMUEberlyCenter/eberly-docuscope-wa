@@ -10,9 +10,10 @@ import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
+import classNames from "classnames";
 
 /** Lines of Arguments title component for use in selection menu. */
 export const ArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -30,7 +31,7 @@ type ClaimsProps = AccordionProps & {
 };
 
 /** Component for displaying a list of Claims. */
-const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
+const Claims: FC<ClaimsProps> = ({ claims, className, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const prefix = useId();
 
@@ -45,7 +46,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                   key={`${prefix}-${i}`}
                   eventKey={`${prefix}-${i}`}
                 >
-                  <Accordion.Header>
+                  <Accordion.Header className="accordion-header-highlight">
                     <div className="flex-grow-1">
                       <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
                       <span>{claim}</span>
@@ -56,24 +57,24 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                     />
                   </Accordion.Header>
                   <Accordion.Body
-                    onEntered={() => dispatch({ type: "set", sentences: [...claim_sentences, ...evidence_sentences] })}
+                    onEntered={() => dispatch({ type: "set", sentences: [claim_sentences, evidence_sentences] })}
                     onExit={() => dispatch({ type: "unset" })}
                   >
                     {support && (
-                      <p>
+                      <div className={classNames('mb-3', evidence_sentences.length && "highlight highlight-1")}>
                         <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
                         <span>{support}</span>
-                      </p>
+                      </div>
                     )}
                     {suggestions?.length && (
-                      <p>
+                      <div>
                         <h6>{t("arguments.suggestions")}</h6>
                         <ul>
                           {suggestions.map((suggestion, k) => (
                             <li key={`${i}-${k}`}>{suggestion}</li>
                           ))}
                         </ul>
-                      </p>
+                      </div>
                     )}
                   </Accordion.Body>
                 </Accordion.Item>

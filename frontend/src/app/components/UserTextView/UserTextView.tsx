@@ -31,15 +31,16 @@ export const UserTextView: FC<UserTextViewProps> = ({
       setContent(prose);
     } else {
       const highlights = ctx.sentences
-        .map(escapeHtml)
-        .reduce(
-          (prev, sentence) =>
-            prev.replaceAll(
-              sentence,
-              `<span class="highlight">${sentence}</span>`
-            ),
-          prose
-        );
+        .reduce((prev, sentences, i) =>
+          sentences.map(escapeHtml)
+            .reduce(
+              (prev, sentence) =>
+                prev.replaceAll(
+                  sentence,
+                  `<span class="highlight highlight-${i}">${sentence}</span>`
+                ),
+              prev
+            ), prose);
       setContent(highlights);
     }
   }, [prose, ctx]);

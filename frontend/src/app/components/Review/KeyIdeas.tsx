@@ -8,6 +8,7 @@ import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { FadeContent } from "../FadeContent/FadeContent";
+import classNames from "classnames";
 
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -51,7 +52,7 @@ export const KeyIdeas: FC = () => {
                 {review.response.ideas.map(
                   ({ idea, elaborations, suggestions, idea_sentences, elaboration_sentences }, i) => (
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
-                      <Accordion.Header>
+                      <Accordion.Header className="accordion-header-highlight">
                         <div className="flex-grow-1">
                           <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
                           <span>{idea}</span>
@@ -62,11 +63,11 @@ export const KeyIdeas: FC = () => {
                         />
                       </Accordion.Header>
                       <Accordion.Body
-                        onEntered={() => dispatch({ type: "set", sentences: [...idea_sentences, ...elaboration_sentences] })}
+                        onEntered={() => dispatch({ type: "set", sentences: [idea_sentences, elaboration_sentences] })}
                         onExit={() => dispatch({ type: "unset" })}
                       >
                         {elaborations?.length ? (
-                          <p>
+                          <div className={classNames('mb-3', elaboration_sentences.length && 'highlight highlight-1')}>
                             <h6>{t("key_ideas.elaborations")}</h6>
                             <ul>
                               {elaborations.map(
@@ -81,10 +82,10 @@ export const KeyIdeas: FC = () => {
                                 )
                               )}
                             </ul>
-                          </p>
+                          </div>
                         ) : null}
                         {suggestions?.length ? (
-                          <p>
+                          <div>
                             <h6>{t("key_ideas.suggestions")}</h6>
                             <ul>
                               {suggestions.map((suggestion, k) => (
@@ -93,7 +94,7 @@ export const KeyIdeas: FC = () => {
                                 </li>
                               ))}
                             </ul>
-                          </p>
+                          </div>
                         ) : null}
                       </Accordion.Body>
                     </Accordion.Item>

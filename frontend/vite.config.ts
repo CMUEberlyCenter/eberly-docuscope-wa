@@ -28,7 +28,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('slate')) { return 'vendor-slate'; }
         }
       }
-    }
+    },
+    target: "ES2022",
   },
   define: {
     __APP_VERSION__: JSON.stringify(version),
