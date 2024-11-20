@@ -18,6 +18,7 @@ import "../AllExpectations/AllExpectations.scss";
 import { Loading } from "../Loading/Loading";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
@@ -136,6 +137,7 @@ export const Expectations: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("title")}</h4>
+        <FadeContent>{t("overview")}</FadeContent>
         {!writingTask ? (
           <Loading />
         ) : (

@@ -12,6 +12,7 @@ import { useArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Lines of Arguments title component for use in selection menu. */
 export const ArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -100,6 +101,7 @@ export const Arguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
+        <FadeContent>{t("arguments.overview")}</FadeContent>
         {!review ? (
           <Loading />
         ) : (

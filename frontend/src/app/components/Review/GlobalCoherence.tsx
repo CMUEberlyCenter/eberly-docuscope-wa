@@ -11,6 +11,7 @@ import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?re
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -131,6 +132,7 @@ export const GlobalCoherence: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("global_coherence.title")}</h4>
+        <FadeContent>{t("global_coherence.overview")}</FadeContent>
         {!review ? (
           <Loading />
         ) : (
