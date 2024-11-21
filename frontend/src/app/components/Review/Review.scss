@@ -1,4 +1,7 @@
 .review {
+  --highlight-1-bg: #e4ff92;
+  --highlight-1-text: black;
+
   .select-button {
     div {
       width: 275px;
@@ -15,18 +18,30 @@
     font-weight: 600 !important;
     margin-bottom: 0 !important;
   }
+
   nav {
     .nav-item {
       font-weight: 600;
     }
   }
 
+  span.highlight-1 {
+    text-decoration: underline;
+  }
+
   .highlight {
     background-color: var(--bs-highlight);
+
     &.highlight-1 {
-      background-color: var(--bs-teal);
+      background-color: var(--highlight-1-bg);
+      color: var(--highlight-1-text);
+      li,
+      span {
+        text-decoration: underline;
+      }
     }
   }
+
   .accordion-header-highlight {
     --bs-accordion-active-bg: var(--bs-highlight);
   }

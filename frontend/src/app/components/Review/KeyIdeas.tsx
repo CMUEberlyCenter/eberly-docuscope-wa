@@ -43,14 +43,25 @@ export const KeyIdeas: FC = () => {
                 {new Date(review.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
-            {review.response.central_idea && (<>
-              <h5>{t("key_ideas.main_idea")}</h5>
-              <p>{review.response.central_idea}</p>
-            </>)}
+            {review.response.central_idea && (
+              <>
+                <h5>{t("key_ideas.main_idea")}</h5>
+                <p>{review.response.central_idea}</p>
+              </>
+            )}
             {"ideas" in review.response && review.response.ideas.length ? (
               <Accordion>
                 {review.response.ideas.map(
-                  ({ idea, elaborations, suggestions, idea_sentences, elaboration_sentences }, i) => (
+                  (
+                    {
+                      idea,
+                      elaborations,
+                      suggestions,
+                      idea_sentences,
+                      elaboration_sentences,
+                    },
+                    i
+                  ) => (
                     <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                       <Accordion.Header className="accordion-header-highlight">
                         <div className="flex-grow-1">
@@ -58,16 +69,32 @@ export const KeyIdeas: FC = () => {
                           <span>{idea}</span>
                         </div>
                         <AlertIcon
-                          show={idea_sentences.length + elaboration_sentences.length === 0}
+                          show={
+                            idea_sentences.length +
+                              elaboration_sentences.length ===
+                            0
+                          }
                           message={t("key_ideas.no_sentences")}
                         />
                       </Accordion.Header>
                       <Accordion.Body
-                        onEntered={() => dispatch({ type: "set", sentences: [idea_sentences, elaboration_sentences] })}
+                        className="p-0 pb-3"
+                        onEntered={() =>
+                          dispatch({
+                            type: "set",
+                            sentences: [idea_sentences, elaboration_sentences],
+                          })
+                        }
                         onExit={() => dispatch({ type: "unset" })}
                       >
                         {elaborations?.length ? (
-                          <div className={classNames('mb-3', elaboration_sentences.length && 'highlight highlight-1')}>
+                          <div
+                            className={classNames(
+                              "pt-3 px-3 pb-0",
+                              elaboration_sentences.length &&
+                                "highlight highlight-1"
+                            )}
+                          >
                             <h6>{t("key_ideas.elaborations")}</h6>
                             <ul>
                               {elaborations.map(
@@ -85,7 +112,7 @@ export const KeyIdeas: FC = () => {
                           </div>
                         ) : null}
                         {suggestions?.length ? (
-                          <div>
+                          <div className="m-3 mt-2">
                             <h6>{t("key_ideas.suggestions")}</h6>
                             <ul>
                               {suggestions.map((suggestion, k) => (

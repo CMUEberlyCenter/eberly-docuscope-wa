@@ -41,44 +41,69 @@ const Claims: FC<ClaimsProps> = ({ claims, className, ...props }) => {
         <Translation ns={"review"}>
           {(t) => (
             <Accordion {...props}>
-              {claims.map(({ claim, support, suggestions, claim_sentences, evidence_sentences }, i) => (
-                <Accordion.Item
-                  key={`${prefix}-${i}`}
-                  eventKey={`${prefix}-${i}`}
-                >
-                  <Accordion.Header className="accordion-header-highlight">
-                    <div className="flex-grow-1">
-                      <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
-                      <span>{claim}</span>
-                    </div>
-                    <AlertIcon
-                      message={t("arguments.no_sentences")}
-                      show={claim_sentences.length + evidence_sentences.length === 0}
-                    />
-                  </Accordion.Header>
-                  <Accordion.Body
-                    onEntered={() => dispatch({ type: "set", sentences: [claim_sentences, evidence_sentences] })}
-                    onExit={() => dispatch({ type: "unset" })}
+              {claims.map(
+                (
+                  {
+                    claim,
+                    support,
+                    suggestions,
+                    claim_sentences,
+                    evidence_sentences,
+                  },
+                  i
+                ) => (
+                  <Accordion.Item
+                    key={`${prefix}-${i}`}
+                    eventKey={`${prefix}-${i}`}
                   >
-                    {support && (
-                      <div className={classNames('mb-3', evidence_sentences.length && "highlight highlight-1")}>
-                        <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
-                        <span>{support}</span>
+                    <Accordion.Header className="accordion-header-highlight">
+                      <div className="flex-grow-1">
+                        <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
+                        <span>{claim}</span>
                       </div>
-                    )}
-                    {suggestions?.length && (
-                      <div>
-                        <h6>{t("arguments.suggestions")}</h6>
-                        <ul>
-                          {suggestions.map((suggestion, k) => (
-                            <li key={`${i}-${k}`}>{suggestion}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </Accordion.Body>
-                </Accordion.Item>
-              ))}
+                      <AlertIcon
+                        message={t("arguments.no_sentences")}
+                        show={
+                          claim_sentences.length + evidence_sentences.length ===
+                          0
+                        }
+                      />
+                    </Accordion.Header>
+                    <Accordion.Body
+                      className="p-0 pb-3"
+                      onEntered={() =>
+                        dispatch({
+                          type: "set",
+                          sentences: [claim_sentences, evidence_sentences],
+                        })
+                      }
+                      onExit={() => dispatch({ type: "unset" })}
+                    >
+                      {support && (
+                        <div
+                          className={classNames(
+                            "p-3 pb-2",
+                            evidence_sentences.length && "highlight highlight-1"
+                          )}
+                        >
+                          <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
+                          <span>{support}</span>
+                        </div>
+                      )}
+                      {suggestions?.length && (
+                        <div className="m-3 mt-2">
+                          <h6>{t("arguments.suggestions")}</h6>
+                          <ul>
+                            {suggestions.map((suggestion, k) => (
+                              <li key={`${i}-${k}`}>{suggestion}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                )
+              )}
             </Accordion>
           )}
         </Translation>

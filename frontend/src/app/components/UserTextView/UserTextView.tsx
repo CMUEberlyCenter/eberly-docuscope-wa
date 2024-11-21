@@ -30,9 +30,10 @@ export const UserTextView: FC<UserTextViewProps> = ({
     if (!ctx?.sentences || ctx.sentences.length <= 0) {
       setContent(prose);
     } else {
-      const highlights = ctx.sentences
-        .reduce((prev, sentences, i) =>
-          sentences.map(escapeHtml)
+      const highlights = ctx.sentences.reduce(
+        (prev, sentences, i) =>
+          sentences
+            .map(escapeHtml)
             .reduce(
               (prev, sentence) =>
                 prev.replaceAll(
@@ -40,7 +41,9 @@ export const UserTextView: FC<UserTextViewProps> = ({
                   `<span class="highlight highlight-${i}">${sentence}</span>`
                 ),
               prev
-            ), prose);
+            ),
+        prose
+      );
       setContent(highlights);
     }
   }, [prose, ctx]);
