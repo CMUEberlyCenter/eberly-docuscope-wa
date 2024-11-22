@@ -31,6 +31,15 @@ export default defineConfig(({ mode }) => ({
     },
     target: "ES2022",
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // quiet warnings from bootstrap, monitor this when bootstrap updates.
+        quietDeps: true,
+        silenceDeprecations: ['legacy-js-api', 'color-functions', 'import']
+      }
+    }
+  },
   define: {
     __APP_VERSION__: JSON.stringify(version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString())
