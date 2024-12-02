@@ -14,7 +14,7 @@ export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
 );
 
 type ReviewContextState = {
-  sentences: string[];
+  sentences: string[][];
 };
 const initialReviewContext: ReviewContextState = {
   sentences: [],
@@ -23,7 +23,7 @@ const initialReviewContext: ReviewContextState = {
 type ReviewAction =
   | {
       type: "set";
-      sentences: string[];
+      sentences: string[][];
     }
   | {
       type: "unset";

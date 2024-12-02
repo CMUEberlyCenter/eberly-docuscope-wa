@@ -1,8 +1,9 @@
 {
   "document.title": "myProse Expectations Analysis",
-  "title": "Check Reader Expectations",
+  "title": "Check Content Expectations",
+  "overview": "Expectations Overview...TBD",
   "error": {
-    "no_task": "No writing task!"
+    "no_task": "No text type specified!"
   },
   "sentences": "Sentences:",
   "suggestions": "Suggestions:",

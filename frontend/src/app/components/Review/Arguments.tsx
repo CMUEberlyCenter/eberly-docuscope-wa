@@ -10,8 +10,10 @@ import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
 import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import classNames from "classnames";
 
 /** Lines of Arguments title component for use in selection menu. */
 export const ArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -29,7 +31,7 @@ type ClaimsProps = AccordionProps & {
 };
 
 /** Component for displaying a list of Claims. */
-const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
+const Claims: FC<ClaimsProps> = ({ claims, className, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const prefix = useId();
 
@@ -39,44 +41,69 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
         <Translation ns={"review"}>
           {(t) => (
             <Accordion {...props}>
-              {claims.map(({ claim, support, suggestions, sentences }, i) => (
-                <Accordion.Item
-                  key={`${prefix}-${i}`}
-                  eventKey={`${prefix}-${i}`}
-                >
-                  <Accordion.Header>
-                    <div className="flex-grow-1">
-                      <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
-                      <span>{claim}</span>
-                    </div>
-                    <AlertIcon
-                      message={t("arguments.no_sentences")}
-                      show={sentences.length === 0}
-                    />
-                  </Accordion.Header>
-                  <Accordion.Body
-                    onEntered={() => dispatch({ type: "set", sentences })}
-                    onExit={() => dispatch({ type: "unset" })}
+              {claims.map(
+                (
+                  {
+                    claim,
+                    support,
+                    suggestions,
+                    claim_sentences,
+                    evidence_sentences,
+                  },
+                  i
+                ) => (
+                  <Accordion.Item
+                    key={`${prefix}-${i}`}
+                    eventKey={`${prefix}-${i}`}
                   >
-                    {support && (
-                      <p>
-                        <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
-                        <span>{support}</span>
-                      </p>
-                    )}
-                    {suggestions?.length && (
-                      <p>
-                        <h6>{t("arguments.suggestions")}</h6>
-                        <ul>
-                          {suggestions.map((suggestion, k) => (
-                            <li key={`${i}-${k}`}>{suggestion}</li>
-                          ))}
-                        </ul>
-                      </p>
-                    )}
-                  </Accordion.Body>
-                </Accordion.Item>
-              ))}
+                    <Accordion.Header className="accordion-header-highlight">
+                      <div className="flex-grow-1">
+                        <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
+                        <span>{claim}</span>
+                      </div>
+                      <AlertIcon
+                        message={t("arguments.no_sentences")}
+                        show={
+                          claim_sentences.length + evidence_sentences.length ===
+                          0
+                        }
+                      />
+                    </Accordion.Header>
+                    <Accordion.Body
+                      className="p-0 pb-3"
+                      onEntered={() =>
+                        dispatch({
+                          type: "set",
+                          sentences: [claim_sentences, evidence_sentences],
+                        })
+                      }
+                      onExit={() => dispatch({ type: "unset" })}
+                    >
+                      {support && (
+                        <div
+                          className={classNames(
+                            "p-3 pb-2",
+                            evidence_sentences.length && "highlight highlight-1"
+                          )}
+                        >
+                          <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
+                          <span>{support}</span>
+                        </div>
+                      )}
+                      {suggestions?.length && (
+                        <div className="m-3 mt-2">
+                          <h6>{t("arguments.suggestions")}</h6>
+                          <ul>
+                            {suggestions.map((suggestion, k) => (
+                              <li key={`${i}-${k}`}>{suggestion}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </Accordion.Body>
+                  </Accordion.Item>
+                )
+              )}
             </Accordion>
           )}
         </Translation>
@@ -100,6 +127,7 @@ export const Arguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
+        <FadeContent>{t("arguments.overview")}</FadeContent>
         {!review ? (
           <Loading />
         ) : (
@@ -111,10 +139,10 @@ export const Arguments: FC = () => {
               {new Date(review.datetime).toLocaleString()}
             </Card.Subtitle>
           )} */}
-            {review.response.main_argument ? (
+            {review.response.thesis ? (
               <article className="mt-3">
                 <h5>{t("arguments.main")}</h5>
-                <p>{review.response.main_argument}</p>
+                <p>{review.response.thesis}</p>
                 <Claims
                   onSelect={onSelect}
                   activeKey={current}
@@ -144,7 +172,7 @@ export const Arguments: FC = () => {
             ) : null}
             {!review.response.rebuttals?.length &&
             !review.response.counter_arguments?.length &&
-            !review.response.main_argument ? (
+            !review.response.thesis ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>

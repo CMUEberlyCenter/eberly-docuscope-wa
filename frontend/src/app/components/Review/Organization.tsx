@@ -37,6 +37,7 @@ import { clearAllHighlights } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import "./Organization.scss";
 import { ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 DataTable.use(DT);
 
@@ -261,6 +262,7 @@ export const Organization: FC = () => {
     <ReviewReset>
       <div className="container-fluid organization">
         <h4>{t("organization.title")}</h4>
+        <FadeContent>{t("organization.overview")}</FadeContent>
         {!data ? (
           <Loading />
         ) : (

@@ -28,6 +28,16 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('slate')) { return 'vendor-slate'; }
         }
       }
+    },
+    target: "ES2022",
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // quiet warnings from bootstrap, monitor this when bootstrap updates.
+        quietDeps: true,
+        silenceDeprecations: ['legacy-js-api', 'color-functions', 'import']
+      }
     }
   },
   define: {

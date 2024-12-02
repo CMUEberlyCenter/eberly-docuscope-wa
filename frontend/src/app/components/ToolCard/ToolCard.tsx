@@ -42,7 +42,6 @@ import {
 import {
   useGlobalFeatureCopyedit,
   useGlobalFeatureExpectation,
-  useGlobalFeatureExpectations,
   useGlobalFeatureFlow,
   useGlobalFeatureNotes2Bullets,
   useGlobalFeatureNotes2Prose,
@@ -77,7 +76,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
     const expectationFeature = useGlobalFeatureExpectation();
-    const expectationsFeature = useGlobalFeatureExpectations();
+    const expectationsFeature = false; //useGlobalFeatureExpectations();
     const [showSelectExpectation, setShowSelectExpectation] = useState(false);
 
     const editor = useSlate();

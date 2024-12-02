@@ -9,6 +9,7 @@
   },
   "sentences": {
     "title": "Sentence Density",
+    "overview": "Sentence Density Overview...TBD",
     "error": "Error loading Sentence data:",
     "select": "Select a sentence to see its composition.",
     "legend": {
@@ -25,6 +26,7 @@
   },
   "global_coherence": {
     "title": "Logical Progression Issues",
+    "overview": "Logical Progression Overview...TBD",
     "error": "Error loading Logical Progression data.",
     "contract": "Given New Contract Violation",
     "shift": "Sudden Shift in Topic",
@@ -41,10 +43,12 @@
   "key_ideas": {
     "entry": "List of Key Ideas",
     "title": "Key Ideas found in the Text",
+    "overview": "Key ideas overview...TBD",
+    "main_idea": "Main Idea",
     "error": "Error reading Key Ideas data.",
-    "no_sentences":"No relevant text addressing this idea was found in your draft.",
+    "no_sentences": "No relevant text addressing this idea was found in your draft.",
     "idea": "Idea:",
-    "elaborations": "Elaboration Strategy",
+    "elaborations": "Elaboration Strategies",
     "sentences": "Sentences",
     "suggestions": "Suggestions",
     "null": "No key ideas were found in your draft."
@@ -52,24 +56,33 @@
   "arguments": {
     "entry": "Lines of Arguments",
     "title": "Review Lines of Arguments",
+    "overview": "Arguments Overview...TBD",
     "error": "Error reading Lines of Arguements data.",
     "no_sentences": "No sentences to support this claim were found in your draft.",
-    "main": "Main Argument",
+    "main": "Thesis",
     "arguments": "Arguments",
     "counter_examples": "Counter Argument",
     "rebuttals": "Rebuttals",
     "claim": "Claim:",
     "support": "Support:",
     "sentences": "Sentences",
-    "suggestions":"Suggestions",
+    "suggestions": "Suggestions",
     "null": "No lines of arguments were detected in your draft."
   },
   "expectations": {
-    "title": "Reader Expectations",
-    "error": "Error loading expectation data."
+    "title": "Check Content Expectations",
+    "overview": "Expectations Overview...TBD",
+    "error": {
+      "no_task": "No text type specified!"
+    },
+    "sentences": "Sentences:",
+    "suggestions": "Suggestions:",
+    "warning": "This expectation is not addressed in your draft.",
+    "no_sentences": "No relevant text was located in your draft."
   },
   "organization": {
     "title": "Organization (Term Matrix)",
+    "overview": "Organization Overview...TBD",
     "error": "Error loading Organization data:",
     "legend": {
       "before_verb": "Topic before the main verb.",

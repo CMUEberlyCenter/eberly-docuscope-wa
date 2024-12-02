@@ -13,6 +13,7 @@ import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewReset } from "./ReviewContext";
 import "./Sentences.scss";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -130,6 +131,7 @@ export const Sentences: FC = () => {
     <ReviewReset>
       <div className="container-fluid sentences d-flex flex-column h-100">
         <h4>{t("sentences.title")}</h4>
+        <FadeContent>{t("sentences.overview")}</FadeContent>
         {!data ? (
           <Loading />
         ) : (

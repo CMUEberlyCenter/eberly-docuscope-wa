@@ -70,6 +70,21 @@ function isRule(rule: Rule | unknown): rule is Rule {
   );
 }
 
+function* leafRuleGenerator(rule: Rule): Generator<Rule> {
+  if (rule.children.length === 0) {
+    yield rule;
+  } else {
+    for (const child of rule.children) {
+      yield* leafRuleGenerator(child);
+    }
+  }
+}
+export function getExpectations(task: WritingTask | null) {
+  return task === null
+    ? []
+    : task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]);
+}
+
 export type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
   name: string;
@@ -88,7 +103,10 @@ export type WritingTaskMetaData = {
   user_lang?: string;
   /** Optinally specify the output language for LLM templates. (Default configured in server settings) */
   target_lang?: string;
+  /** Keywords, optionally prefixed with a special tag like "category:" */
+  keywords?: string[];
 };
+
 function isWritingTaskMetaData(
   info: WritingTaskMetaData | unknown
 ): info is WritingTaskMetaData {
@@ -108,6 +126,48 @@ function isWritingTaskMetaData(
     'filename' in info &&
     typeof info.filename === 'string'
   );
+}
+
+function extractKeywords(tasks: WritingTask[]) {
+  return tasks.flatMap((task) => task.info.keywords ?? []);
+}
+/**
+ * Given a set of writing tasks, generate a mapping of categories
+ * to co-occuring keywords.
+ * @param tasks A list of writing task specifications.
+ * @returns An object that maps "category:..." keywords to an array
+ * of keywords that cooccur with that category.
+ */
+export function keywordsByCategory(tasks: WritingTask[]): {
+  [k: string]: string[];
+} {
+  const acc = tasks.reduce(
+    (acc, task) => {
+      const { category, keyword } = categoryKeywords([task]);
+      const keywords = new Set(keyword);
+      category?.forEach((cat: string) => {
+        acc[cat] = cat in acc ? acc[cat].union(keywords) : new Set(keyword);
+      });
+      acc.ALL = acc.ALL.union(keywords);
+      return acc;
+    },
+    { ALL: new Set() } as Record<string, Set<string>>
+  );
+  return Object.fromEntries(
+    Object.entries(acc).map(([key, val]) => [key, [...val].toSorted()])
+  );
+}
+export function categoryKeywords(tasks: WritingTask[]) {
+  return Object.groupBy(
+    extractKeywords(tasks),
+    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
+  );
+}
+export function hasKeywords(task: WritingTask, keywords: string[]) {
+  if (!task.info.keywords) return false;
+  if (keywords.length === 0) return false;
+  const keys = new Set(task.info.keywords);
+  return keywords.some((key) => keys.has(key));
 }
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {

@@ -6,7 +6,7 @@ import { ONTOPIC_URL } from '../settings';
 export const ontopic = Router();
 
 /** middleware for collecting metrics. */
-ontopic.use('/', async (request: Request, response: Response, next) => {
+ontopic.use('/', async (_request: Request, _response: Response, next) => {
   // TODO replace with some prometheus library.
   const start = Date.now();
   updateMetrics();

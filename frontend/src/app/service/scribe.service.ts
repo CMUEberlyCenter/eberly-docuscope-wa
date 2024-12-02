@@ -1,5 +1,4 @@
 import { bind } from '@react-rxjs/core';
-import { type ChatCompletion } from 'openai/resources/chat/completions';
 import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
 import {
   AssessExpectationRequest,
@@ -42,13 +41,13 @@ scribe.subscribe((enable) =>
 /*** Notes to Prose ***/
 
 const NOTES_TO_PROSE = 'notes2prose';
-function logCovertNotes(notes: string, prose: ChatCompletion) {
-  const data = JSON.parse(retrieveConvertLog());
-  sessionStorage.setItem(
-    NOTES_TO_PROSE,
-    JSON.stringify([...data, { notes, prose }])
-  );
-}
+// function logCovertNotes(notes: string, prose: ChatCompletion) {
+//   const data = JSON.parse(retrieveConvertLog());
+//   sessionStorage.setItem(
+//     NOTES_TO_PROSE,
+//     JSON.stringify([...data, { notes, prose }])
+//   );
+// }
 export function retrieveConvertLog() {
   return sessionStorage.getItem(NOTES_TO_PROSE) ?? '[]';
 }
@@ -66,9 +65,10 @@ export function downloadHistory(): void {
   document.body.appendChild(element); // Required for this to work in FireFox
   element.click();
   // remove element?
+  element.remove();
 }
 
-type ChatResponse = { error: boolean; message: string } | ChatCompletion;
+// type ChatResponse = { error: boolean; message: string } | ChatCompletion;
 
 export async function postConvertNotes(
   { text }: SelectedText,
@@ -93,15 +93,19 @@ export async function postConvertNotes(
     // TODO improve error reporting.
     return err;
   }
-  const data: ChatResponse = await response.json();
+  const data = await response.json();
+  if (typeof data === 'string') {
+    return data;
+  }
+  // TODO fix this for server errors instead of openai errors.
   if ('error' in data) {
     console.error(data.message);
     return data.message;
   }
-  if ('choices' in data) {
-    logCovertNotes(text, data);
-    return data.choices[0].message.content ?? '';
-  }
+  // if ('choices' in data) {
+  //   logCovertNotes(text, data);
+  //   return data.choices[0].message.content ?? '';
+  // }
   console.error(data);
   return '';
 }
@@ -129,25 +133,25 @@ async function postText<
     console.error(err);
     return { ...errorData, explanation: err };
   }
-  const data: ChatResponse = await response.json();
+  const data = await response.json();
   if ('error' in data) {
     console.error(data.message);
     return { ...errorData, explanation: data.message };
   }
-  if ('choices' in data) {
-    const content = data.choices.at(0)?.message.content;
-    if (content) {
-      try {
-        return JSON.parse(content) as T;
-      } catch (err) {
-        console.log(content);
-        console.error(err);
-        if (err instanceof Error) {
-          return { ...errorData, explanation: err.message };
-        }
+  // if ('choices' in data) {
+  const content = data; // data.choices.at(0)?.message.content;
+  if (content) {
+    try {
+      return content as T;
+    } catch (err) {
+      console.log(content);
+      console.error(err);
+      if (err instanceof Error) {
+        return { ...errorData, explanation: err.message };
       }
     }
   }
+  // }
   console.error(data);
   return { ...errorData, explanation: 'Invalid response from service.' };
 }
@@ -197,7 +201,7 @@ export async function postExpectation(
     // return { ...errorData, explanation: err };
     return { ...errorExpectationData, general_assessment: err };
   }
-  const data: ChatResponse = await response.json();
+  const data = await response.json();
   if ('error' in data) {
     console.error(data.message);
     // return {
