@@ -27,7 +27,12 @@ export const InternalServerError = (
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
   title: 'Internal Server Error',
   status: 500,
-  detail: err instanceof Error ? err.message : typeof(err) === 'string' ? err : 'Unknown error type!',
+  detail:
+    err instanceof Error
+      ? err.message
+      : typeof err === 'string'
+        ? err
+        : 'Unknown error type!',
   error: err,
   instance,
 });
