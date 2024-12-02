@@ -47,7 +47,9 @@ export const FileUpload: FC<FileUploadProps> = ({
         <Button
           variant="primary"
           onClick={() => {
-            if (file) { onFile?.(file); }
+            if (file) {
+              onFile?.(file);
+            }
             onHide?.();
           }}
         >
