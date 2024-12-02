@@ -11,12 +11,8 @@ import {
   AllExpectationsData,
   AllExpectationsResponse,
   Analysis,
-  ArgumentsResponse,
-  GlobalCoherenceResponse,
   isAllExpectationsData,
-  KeyPointsResponse,
-  OnTopicReviewData,
-  ReviewResponse,
+  OnTopicReviewData
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,

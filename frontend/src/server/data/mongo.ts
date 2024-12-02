@@ -118,8 +118,8 @@ export async function updatePublicWritingTasks() {
 }
 
 // Simple setTimeout promise wrapper.
-function timeout(ms: number | undefined): Promise<undefined> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function timeout(ms: number | undefined): Promise<void> {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
 /**

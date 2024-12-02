@@ -21,13 +21,13 @@ export const FileNotFound = (
 });
 
 export const InternalServerError = (
-  err: Error,
+  err: Error | string | unknown,
   instance?: string
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
   title: 'Internal Server Error',
   status: 500,
-  detail: err.message,
+  detail: err instanceof Error ? err.message : typeof(err) === 'string' ? err : 'Unknown error type!',
   error: err,
   instance,
 });

@@ -145,7 +145,7 @@ export function keywordsByCategory(tasks: WritingTask[]): {
     (acc, task) => {
       const { category, keyword } = categoryKeywords([task]);
       const keywords = new Set(keyword);
-      category?.forEach((cat) => {
+      category?.forEach((cat: string) => {
         acc[cat] = cat in acc ? acc[cat].union(keywords) : new Set(keyword);
       });
       acc.ALL = acc.ALL.union(keywords);
