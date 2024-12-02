@@ -60,7 +60,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
       {isAllExpectationsData(expectation) &&
       !isNone(expectation.response.suggestions) ? (
         <>
-          <Accordion.Header>
+          <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
             <AlertIcon
               message={t("no_sentences")}
