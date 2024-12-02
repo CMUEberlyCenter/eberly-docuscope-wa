@@ -31,7 +31,7 @@ type ClaimsProps = AccordionProps & {
 };
 
 /** Component for displaying a list of Claims. */
-const Claims: FC<ClaimsProps> = ({ claims, className, ...props }) => {
+const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const prefix = useId();
 
