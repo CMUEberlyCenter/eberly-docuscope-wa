@@ -18,8 +18,14 @@ import { CustomElement, CustomText, ListElement } from '../slate';
  * Convert editor's Descendants to a string with double newline between
  * paragraphs.
  */
-export const serialize = (nodes: Descendant[]): string => {
-  return nodes.map((n: Descendant) => SlateNode.string(n)).join('\n\n');
+export const serialize = (nodes: Descendant | Descendant[]): string => {
+  if (Array.isArray(nodes)) {
+    return nodes.map(serialize).join('\n\n');
+  }
+  if (Text.isText(nodes)) {
+    return SlateNode.string(nodes);
+  }
+  return nodes.children.map(serialize).join(' ');
 };
 
 /**
@@ -61,6 +67,10 @@ export const serializeHtml = (node: Descendant | Descendant[]): string => {
       return `<h3>${children}</h3>`;
     case 'heading-four':
       return `<h4>${children}</h4>`;
+    case 'heading-five':
+      return `<h5>${children}</h5>`;
+    case 'heading-six':
+      return `<h6>${children}</h6>`;
     case 'list-item':
       return `<li>${children}</li>`;
     case 'numbered-list':
