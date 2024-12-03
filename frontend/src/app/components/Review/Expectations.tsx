@@ -51,14 +51,14 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   return (
     <Accordion.Item {...props}>
       {isAllExpectationsData(expectation) &&
-      isNone(expectation.response.suggestions) ? (
+        isNone(expectation.response.suggestions) ? (
         <div className="fake-accordion-button">
           <div className="flex-grow-1">{expectation.expectation}</div>
           <AlertIcon message={t("warning")} show />
         </div>
       ) : null}
       {isAllExpectationsData(expectation) &&
-      !isNone(expectation.response.suggestions) ? (
+        !isNone(expectation.response.suggestions) ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
@@ -71,9 +71,9 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             onEntering={() =>
               isAllExpectationsData(expectation)
                 ? dispatch({
-                    sentences: [expectation.response.sentences],
-                    type: "set",
-                  })
+                  sentences: [expectation.response.sentences],
+                  type: "set",
+                })
                 : dispatch({ type: "unset" })
             }
             onExiting={() => dispatch({ type: "unset" })}
@@ -87,7 +87,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
         </>
       ) : null}
       {!isAllExpectationsData(expectation) ||
-      !expectations?.has(expectation.expectation) ? (
+        !expectations?.has(expectation.expectation) ? (
         <div className="fake-accordion-button">
           <div className="flex-grow-1">{rule.name}</div>
           <LoadingSmall />
@@ -137,7 +137,7 @@ export const Expectations: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("expectations.title")}</h4>
-        <FadeContent>{t("expectations.overview")}</FadeContent>
+        <FadeContent htmlContent={t("expectations.overview")} />
         {!writingTask ? (
           <Loading />
         ) : (

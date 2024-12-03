@@ -6,11 +6,13 @@ import css from "./FadeContent.module.scss";
 type ToolFadeContentProps = {
   minHeight?: Height;
   maxHeight?: Height;
+  htmlContent?: string;
 } & HTMLProps<HTMLDivElement>;
 export const FadeContent: FC<ToolFadeContentProps> = ({
   children,
   minHeight,
   maxHeight,
+  htmlContent,
   ...props
 }) => {
   minHeight = minHeight ?? 80;
@@ -28,6 +30,10 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
         aria-expanded={expanded}
         className={css["fade-content"]}
       >
+        {/* Workaround for html string content. */}
+        {htmlContent && (<div dangerouslySetInnerHTML={{
+          __html: htmlContent
+        }}/>)}
         {children}
       </AnimateHeight>
       <div className="d-flex justify-content-around">

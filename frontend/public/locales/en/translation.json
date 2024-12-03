@@ -87,7 +87,8 @@
       },
       "copyedit": {
         "title": "Copy Edit",
-        "tooltip": "Copy Edit"
+        "tooltip": "Copy Edit",
+        "overview": "This tool provides suggestions to make your writing clearer and more concise. It offers two versions: one showing the revised text, and another marking the suggested changes. Explanations accompany each suggestion, helping you improve your writing while retaining your original message."
       },
       "grammar": {
         "title": "Grammar",

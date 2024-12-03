@@ -127,7 +127,7 @@ export const Arguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
-        <FadeContent>{t("arguments.overview")}</FadeContent>
+        <FadeContent htmlContent={t("arguments.overview")} />
         {!review ? (
           <Loading />
         ) : (
@@ -171,8 +171,8 @@ export const Arguments: FC = () => {
               </article>
             ) : null}
             {!review.response.rebuttals?.length &&
-            !review.response.counter_arguments?.length &&
-            !review.response.thesis ? (
+              !review.response.counter_arguments?.length &&
+              !review.response.thesis ? (
               <Alert variant="warning">{t("arguments.null")}</Alert>
             ) : null}
           </ErrorBoundary>
