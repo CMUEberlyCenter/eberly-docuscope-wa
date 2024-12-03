@@ -1,4 +1,4 @@
-#!/usr/bin/env pyhtmlhon
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -1562,7 +1562,7 @@ class DSDocument():
             if p == "":                       # skip if it is an empty line.
                 continue
 
-            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
                 style = 'Normal'
             else:
                 style = para.style.name
@@ -1587,7 +1587,7 @@ class DSDocument():
             
             para_dict['style']              = style                 # set the paragraph style (from the docx file).
 
-            if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Title']:
+            if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title']:
                 slist = [para.text]
             else:
                 parsed_para = nlp(p)                                # split the paragraph into sentencees.
@@ -1991,7 +1991,7 @@ class DSDocument():
             ptext = adjustSpaces(ptext)
 
             # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
                 style = para.style.name
                          
             # elif para.style.name.startswith('List'):
@@ -2123,7 +2123,7 @@ class DSDocument():
                     new_sections.append(section_data)
 
             # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
                 style = para.style.name
             else:
                 style = 'Normal'
@@ -2169,13 +2169,13 @@ class DSDocument():
             if tag_name == 'p':
                 text = tag.text            
                 doc.add_paragraph(tag.text.replace('\n', ' '))
-            elif tag_name.startswith("h"):
+            elif tag_name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 level = tag_name[-1]
                 style_str = f"Heading {level}"
                 doc.add_paragraph(tag.text.replace('\n', ' '), style_str)
             elif tag_name == 'li':
                 doc.add_paragraph(tag.text, 'List Paragraph')
-            elif tag_name == 'ul':
+            elif tag_name in ['ul', 'ol']:
                 for li_tag in tag.children:
                     if li_tag.name == 'li':
                          doc.add_paragraph(tag.text.replace('\n', ' '), 'List Paragraph')
@@ -3098,7 +3098,7 @@ class DSDocument():
             if ul_tag == True and para_style != 'List Paragraph':  # Close the UL tag if needed.
                 xml_str += '</ul>\n\n'
             elif nl_tag == True and para_style != 'List Paragraph':  # Close the NL tag if needed.
-                xml_str += '</nl>\n\n'
+                xml_str += '</ol>\n\n'
 
             if para_style == 'Title':
                 xml_str += f"<title id=\"p{pcount}\">"
@@ -3115,11 +3115,17 @@ class DSDocument():
             elif para_style == 'Heading 4':               
                 xml_str += f"<h4 id=\"p{pcount}\">"
                 htag_level = 4
+            elif para_style == 'Heading 5':               
+                xml_str += f"<h5 id=\"p{pcount}\">"
+                htag_level = 5
+            elif para_style == 'Heading 6':               
+                xml_str += f"<h6 id=\"p{pcount}\">"
+                htag_level = 6
             elif para_style == 'Unordered List':
                 xml_str += f"<ul id=\"p{pcount}\">"
                 ul_tag = True
-            elif para_style == 'Unordered List':
-                xml_str += f"<nl id=\"p{pcount}\">"
+            elif para_style == 'Ordered List':
+                xml_str += f"<ol id=\"p{pcount}\">"
                 nl_tag = True                
             elif para_style == 'List Paragraph':
                 xml_str += '<li>'
@@ -3150,7 +3156,7 @@ class DSDocument():
             elif title_tag:
                 xml_str += '</title>\n'                  # Close the title tag                
             elif li_tag:
-                xml_str += '</li>\n'                  # Close the list tag 
+                xml_str += '</li>\n'                  # Close the list tag
             else:
                 xml_str += '</p>\n\n'                 # Close the paragraph tag
                 pcount += 1 # increment the paragraph count (incl. headings)
