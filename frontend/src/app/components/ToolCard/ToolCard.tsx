@@ -157,13 +157,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const onTool = useCallback(
       (tool: Tool) => {
         if (editor.selection) {
+          const fragment = Editor.fragment(editor, editor.selection);
           doTool({
             tool,
             datetime: new Date(),
             input: {
-              text: serialize(Editor.fragment(editor, editor.selection)),
-              html: serializeHtml(Editor.fragment(editor, editor.selection)),
-              fragment: Editor.fragment(editor, editor.selection),
+              text: serialize(fragment),
+              html: serializeHtml(fragment),
+              fragment: fragment,
               range: editor.selection,
             },
             result: null,
