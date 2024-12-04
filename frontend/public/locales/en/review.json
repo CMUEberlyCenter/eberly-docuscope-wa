@@ -12,7 +12,7 @@
   },
   "sentences": {
     "title": "Sentence Density",
-    "overview": "Sentence Density Overview...TBD",
+    "overview": "<p>This tool identifies <b>sentences that may be difficult to read</b>. It uses a visualization system where squares represent ideas (noun phrases), and triangles or circles indicate the main verb.</p><p>Start by reviewing sentences with many squares before the main verb. These sentences often indicate overly complex sentences. Next, review sentences with auxiliary verbs (e.g., am, is, are, was, were) shown as light blue circles, and consider revising them to use active verbs instead.</p>",
     "error": "Error loading Sentence data:",
     "select": "Select a sentence to see its composition.",
     "legend": {
@@ -114,9 +114,6 @@
   },
   "sources": {
     "overview": "<p>This tool helps verify whether <b>source credibility has been assigned as intended</b>. It identifies how each source in your draft is used, whether as an authority, an alternative viewpoint, for hedging, or in a neutral capacity.</p><p>Click on each source listed to confirm its appropriate use in your draft.</p>"
-  },
-  "clarity": {
-    "overview": "<p>This tool identifies <b>sentences that may be difficult to read</b>. It uses a visualization system where squares represent ideas (noun phrases), and triangles or circles indicate the main verb.</p><p>Start by reviewing sentences with many squares before the main verb. These sentences often indicate overly complex sentences. Next, review sentences with auxiliary verbs (e.g., am, is, are, was, were) shown as light blue circles, and consider revising them to use active verbs instead.</p>"
   },
   "credibility": {
     "overview": "<p>This tool analyzes your writing for four <b>language features that may affect a professional tone</b>: confidence, subjectivity, and sentiment. It identifies instances where these features might introduce bias or informality, helping you maintain an appropriate tone for academic or professional contexts.</p><p>Review the issues categorized under each language feature and revise as needed.</p>"
