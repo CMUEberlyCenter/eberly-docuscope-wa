@@ -146,15 +146,19 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
 
     try:
         if lang == 'en':
-            if model == NLP_MODEL_DEFAULT:
+            default_model = resource_path("data/default_model")
+            large_model = resource_path("data/large_model")
+            if model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
-                nlp = spacy.load(resource_path('data/default_model'))
+                nlp = spacy.load(default_model)
                 #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
                 #print("\n\n")
                 #print(result)
-            else:
+            elif os.path.exists(large_model):
                 logging.info("Loading Spacy large model ...")
-                nlp = spacy.load(resource_path('data/large_model'))
+                nlp = spacy.load(large_model)
+            else:
+                nlp = spacy.load("en_core_web_sm")
 
         elif lang == 'es':
             # It is an experimental feature for now.
@@ -204,13 +208,13 @@ def adjustSpaces(text):
     # Just in case a period is found in front of a word (e.g, ".And")  This handles
     # a case where 4 dot ellipses is used (3 dot ellipses followed by a period
     # followed by no space.) 
-    text = re.sub(u'\.([a-zA-Z]+)(?!\.)', r'. \1', text)
+    text = re.sub(r'\.([a-zA-Z]+)(?!\.)', r'. \1', text)
 
     # If there is a comma followed by a character (i.e., missing a sapce), add a space.
     text = re.sub(',(=?[a-zA-Z])',  r', \1', text)
 
     # Remove the image HTLM elements.
-    text = re.sub('\<img.+>', '', text)
+    text = re.sub(r'\<img.+>', '', text)
 
     # Replace the space character(s) in multiword patterns with underscor character "_"
     for mw_topic in DSDocument.multiword_topics: 
@@ -1432,8 +1436,8 @@ class DSDocument():
         # print ("processDoc ()")
 
         if (isModelLoaded () == False):
-           logging.warn("Warning: language model not loaded yet, loading ...")
-           setLanguageModel ("en",NLP_MODEL_DEFAULT)
+           logging.warning("Warning: language model not loaded yet, loading ...")
+           setLanguageModel ("en", NLP_MODEL_DEFAULT)
 
         if (isModelLoaded () == False):
            logging.error("Error: unable to load language model!")
@@ -1600,7 +1604,7 @@ class DSDocument():
                     sent_dict['text'] = s.strip()
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s.strip(), start=word_pos+1)
                 else:
-                    sent_dict['text'] = s.string.strip()
+                    sent_dict['text'] = s.text.strip()
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s, start=word_pos+1) 
 
 
@@ -3220,7 +3224,7 @@ class DSDocument():
                 sent_text = sent['text']
 
                 if htag_level == 0:
-                    xml_str += f"<s id=\"p{pcount}s{scount}\">{sent_text}</s>"
+                    xml_str += f"<span id=\"p{pcount}s{scount}\">{sent_text}</span>"
                 else:
                     # this text is inisde a heading tag. We do not mark it as a sentence.
                     sent_text = sent['text']
@@ -3240,7 +3244,7 @@ class DSDocument():
                 xml_str += '</p>\n\n'  
                 pcount += 1
 
-        xml_str = "<text>\n" + xml_str + "</text>"
+        # xml_str = "<text>\n" + xml_str + "</text>"
 
         return xml_str
 
@@ -4362,7 +4366,7 @@ class DSDocument():
 
                 # get a list of numbers with thousand separator(s)
                 # num_list = re.findall("\"[0-9,.]+\"(?=,)", line) 
-                num_list = re.findall("\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
+                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
                 if num_list:
                     token_info = num_list + token_info[-3:]
             else:
@@ -4509,7 +4513,7 @@ class DSDocument():
                 # Get a list of numbers with thousand separator(s), followed by a comma separator
                 # This also captures patterns like N=2,000 etc.
                 # num_list = re.findall("\"[0-9,.]+\"(?=,)", line)  # old
-                num_list = re.findall("\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021               
+                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021               
                 if num_list:
                     token_info = num_list + token_info[-3:]
 
