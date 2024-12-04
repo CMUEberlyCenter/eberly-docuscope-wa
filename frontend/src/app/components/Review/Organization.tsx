@@ -262,7 +262,7 @@ export const Organization: FC = () => {
     <ReviewReset>
       <div className="container-fluid organization">
         <h4>{t("organization.title")}</h4>
-        <FadeContent>{t("organization.overview")}</FadeContent>
+        <FadeContent htmlContent={t("organization.overview")} />
         {!data ? (
           <Loading />
         ) : (

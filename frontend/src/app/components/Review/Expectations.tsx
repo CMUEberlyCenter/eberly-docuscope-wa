@@ -137,7 +137,7 @@ export const Expectations: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("expectations.title")}</h4>
-        <FadeContent>{t("expectations.overview")}</FadeContent>
+        <FadeContent htmlContent={t("expectations.overview")} />
         {!writingTask ? (
           <Loading />
         ) : (

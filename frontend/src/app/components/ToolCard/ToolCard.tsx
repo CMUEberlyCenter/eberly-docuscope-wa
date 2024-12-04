@@ -430,7 +430,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       )}
                       {copyEditFeature && (
                         <ToolButton
-                          tooltip={t("tool.button.copyedit.tooltip")}
+                          tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}
                           disabled={!scribe}
                           icon={<CopyEditIcon />}
@@ -591,6 +591,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <ToolDisplay.Paste text={currentTool.result?.clean_revision} />
               }
             >
+              {/* <FadeContent>{t("tool.button.copyedit.overview")}</FadeContent> */}
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}

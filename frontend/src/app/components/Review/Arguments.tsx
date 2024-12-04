@@ -127,7 +127,7 @@ export const Arguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
-        <FadeContent>{t("arguments.overview")}</FadeContent>
+        <FadeContent htmlContent={t("arguments.overview")} />
         {!review ? (
           <Loading />
         ) : (

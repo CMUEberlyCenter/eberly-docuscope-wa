@@ -7,9 +7,12 @@
     "content": "There was an error retrieving the review data.",
     "details": "Details: {{message}}"
   },
+  "summary": {
+    "overview": "<p>Each section below highlights key strengths and areas for improvement, designed to align with myProse's <b>review tools</b>. Use these tools to pinpoint and address specific issues effectively.</p><p>Click the category name to access detailed feedback in the review tool.</p>"
+  },
   "sentences": {
     "title": "Sentence Density",
-    "overview": "Sentence Density Overview...TBD",
+    "overview": "<p>This tool identifies <b>sentences that may be difficult to read</b>. It uses a visualization system where squares represent ideas (noun phrases), and triangles or circles indicate the main verb.</p><p>Start by reviewing sentences with many squares before the main verb. These sentences often indicate overly complex sentences. Next, review sentences with auxiliary verbs (e.g., am, is, are, was, were) shown as light blue circles, and consider revising them to use active verbs instead.</p>",
     "error": "Error loading Sentence data:",
     "select": "Select a sentence to see its composition.",
     "legend": {
@@ -26,7 +29,7 @@
   },
   "global_coherence": {
     "title": "Logical Progression Issues",
-    "overview": "Logical Progression Overview...TBD",
+    "overview": "<p>This tool identifies disruptions in organization that hinder reading flow and comprehension, such as presenting ideas out of order, separating related details, or scattering connected concepts.</p><p>Review each issue identified and address those comments that you find useful.</p>",
     "error": "Error loading Logical Progression data.",
     "contract": "Given New Contract Violation",
     "shift": "Sudden Shift in Topic",
@@ -43,7 +46,7 @@
   "key_ideas": {
     "entry": "List of Key Ideas",
     "title": "Key Ideas found in the Text",
-    "overview": "Key ideas overview...TBD",
+    "overview": "<p>This tool evaluates how well your writing <b>communicates its central idea</b>. It examines how each idea is presented, whether it includes sufficient details or clear explanations, and offers suggestions for revisions to enhance clarity.</p><p>First, review the central idea identified in your writing. If it’s inaccurate, revise your text for clarity. Then, analyze each supporting idea to ensure it aligns with your central idea. Click on each idea for tips on improving descriptions and how these changes reinforce your overall thesis.</p>",
     "main_idea": "Main Idea",
     "error": "Error reading Key Ideas data.",
     "no_sentences": "No relevant text addressing this idea was found in your draft.",
@@ -56,7 +59,7 @@
   "arguments": {
     "entry": "Lines of Arguments",
     "title": "Review Lines of Arguments",
-    "overview": "Arguments Overview...TBD",
+    "overview": "<p>This tool identifies <b>weak spots in your argument</b> and provides guidance on how to address them. It highlights the claims you make, how they are supported, potential counterarguments, and your rebuttals.</p><p>Start by reviewing the thesis identified in your writing. If it’s incorrect, revise your text to clarify it. Then, assess each claim to ensure it supports your thesis. Click on each claim for suggestions on strengthening it and improving its alignment with your overall thesis.</p>",
     "error": "Error reading Lines of Arguements data.",
     "no_sentences": "No sentences to support this claim were found in your draft.",
     "main": "Thesis",
@@ -71,7 +74,7 @@
   },
   "expectations": {
     "title": "Check Content Expectations",
-    "overview": "Expectations Overview...TBD",
+    "overview": "<p>This tool checks whether your writing includes all <b>the information readers expect in this type of writing</b>. It identifies missing content and offers suggestions for incorporating those elements.</p><p>Review the questions below, which represent typical inquiries your readers may have. Focus first on those marked with a warning icon, as they indicate gaps in your text. Then, review the remaining questions—though addressed in your draft, these may have room for further improvement. Click each question for specific suggestions.</p>",
     "error": {
       "no_task": "No text type specified!"
     },
@@ -82,7 +85,7 @@
   },
   "organization": {
     "title": "Organization (Term Matrix)",
-    "overview": "Organization Overview...TBD",
+    "overview": "<p>This tool visualizes <b>how ideas are organized throughout your draft</b>. An interactive display shows where important words appear and how they connect across paragraphs.</p><p>Review the list of potential organizational issues. Click on each issue for guidance on improving the structure and flow of your ideas.</p>",
     "error": "Error loading Organization data:",
     "legend": {
       "before_verb": "Topic before the main verb.",
@@ -108,6 +111,12 @@
   },
   "impressions": {
     "title": "Impressions"
+  },
+  "sources": {
+    "overview": "<p>This tool helps verify whether <b>source credibility has been assigned as intended</b>. It identifies how each source in your draft is used, whether as an authority, an alternative viewpoint, for hedging, or in a neutral capacity.</p><p>Click on each source listed to confirm its appropriate use in your draft.</p>"
+  },
+  "credibility": {
+    "overview": "<p>This tool analyzes your writing for four <b>language features that may affect a professional tone</b>: confidence, subjectivity, and sentiment. It identifies instances where these features might introduce bias or informality, helping you maintain an appropriate tone for academic or professional contexts.</p><p>Review the issues categorized under each language feature and revise as needed.</p>"
   },
   "null": {
     "title": "Select a tool...",

@@ -31,7 +31,7 @@ export const KeyIdeas: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("key_ideas.title")}</h4>
-        <FadeContent>{t("key_ideas.overview")}</FadeContent>
+        <FadeContent htmlContent={t("key_ideas.overview")} />
         {!review ? (
           <Loading />
         ) : (
