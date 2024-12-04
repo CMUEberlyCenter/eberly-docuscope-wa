@@ -54,7 +54,6 @@ import { Rating } from "../Rating/Rating";
 import SelectExpectation from "../SelectExpectation/SelectExpectation";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
-import { FadeContent } from "../FadeContent/FadeContent";
 
 type ToolCardProps = HTMLProps<HTMLDivElement>;
 class NoSelectedTextError extends Error {}
@@ -431,7 +430,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       )}
                       {copyEditFeature && (
                         <ToolButton
-                          tooltip={t("tool.button.copyedit.tooltip")}
+                          tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}
                           disabled={!scribe}
                           icon={<CopyEditIcon />}
@@ -592,7 +591,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <ToolDisplay.Paste text={currentTool.result?.clean_revision} />
               }
             >
-              <FadeContent>{t("tool.button.copyedit.overview")}</FadeContent>
+              {/* <FadeContent>{t("tool.button.copyedit.overview")}</FadeContent> */}
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}
