@@ -1562,7 +1562,7 @@ class DSDocument():
             if p == "":                       # skip if it is an empty line.
                 continue
 
-            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = 'Normal'
             else:
                 style = para.style.name
@@ -1991,7 +1991,7 @@ class DSDocument():
             ptext = adjustSpaces(ptext)
 
             # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = para.style.name
                          
             # elif para.style.name.startswith('List'):
@@ -2123,7 +2123,7 @@ class DSDocument():
                     new_sections.append(section_data)
 
             # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet', 'List Paragraph']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = para.style.name
             else:
                 style = 'Normal'
@@ -2157,7 +2157,7 @@ class DSDocument():
         with open(os.path.join(src_dir,html_file), errors="ignore") as fin:
             html_str = fin.read()
         self.loadFromHtmlString(html_str)
-            
+
     def loadFromHtmlString(self, html_str):
         soup = bs(html_str, "html.parser")
         body = soup.find("body")
@@ -2167,18 +2167,39 @@ class DSDocument():
                 continue
             tag_name = tag.name
             if tag_name == 'p':
-                text = tag.text            
-                doc.add_paragraph(tag.text.replace('\n', ' '))
+                # text = tag.text
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+                doc.add_paragraph(text)
+
             elif tag_name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 level = tag_name[-1]
                 style_str = f"Heading {level}"
-                doc.add_paragraph(tag.text.replace('\n', ' '), style_str)
+
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+
+                doc.add_paragraph(text, style_str)
+
             elif tag_name == 'li':
-                doc.add_paragraph(tag.text, 'List Paragraph')
-            elif tag_name in ['ul', 'ol']:
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+                doc.add_paragraph(text, 'List Bullet')
+
+            elif tag_name == 'ul':
                 for li_tag in tag.children:
                     if li_tag.name == 'li':
-                         doc.add_paragraph(tag.text.replace('\n', ' '), 'List Paragraph')
+                        text = li_tag.decode_contents()
+                        text = text.replace('\n', ' ')                        
+                        doc.add_paragraph(text, 'List Bullet')
+
+            elif tag_name == 'ol':
+                for li_tag in tag.children:
+                    if li_tag.name == 'li':
+                        text = li_tag.decode_contents()
+                        text = text.replace('\n', ' ')                        
+                        doc.add_paragraph(text, 'List Number')
+
 
         section_data = dict()
         section_data['doc']       = doc
@@ -2193,6 +2214,7 @@ class DSDocument():
         section_data['start'] = 0
         self.processDoc(section_data)
 
+
     ########################################
     #
     # Methods for creating HTML/XML strings from the text data
@@ -2206,7 +2228,6 @@ class DSDocument():
         that it is either used without the Impressions panel, or it is used from the Online version
         where docuscope is not integrated into the Coherence visualization.
         """
-
         data = self.sections[self.current_section]['data']
 
         if data is None:
@@ -2215,7 +2236,9 @@ class DSDocument():
         total_paras = len(data['paragraphs'])
         html_str = ""
         pcount  = 1
-
+        li_tag = False
+        ol_tag = False
+        ul_tag = False 
         for para in data['paragraphs']: # for each paragraph
 
             if para_pos != -1 and (para_pos+1) != pcount:
@@ -2225,8 +2248,40 @@ class DSDocument():
             total_sents = len(para['sentences'])
 
             para_style = para['style']
-            font_size = font_info[para_style]            
-            html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+            font_size = font_info[para_style] 
+    
+            if li_tag: # previous li_tag
+                # If the prev tag was li, and the current tag is also li, do nothing.
+                # Otherwise, we need to close the ul tag.
+                if para_style == 'List Bullet' or para_style == 'List Number':
+                    pass
+                elif ul_tag:
+                    html_str += "</ul>"
+                    ul_tag = False
+                elif ol_tag:
+                    html_str += "</ol>"
+                    ol_tag = False
+
+            elif li_tag == False:
+                # If the prev tag was not li, and the current tag is li, we will fist add the ul tag.
+                if para_style == 'List Bullet':
+                    html_str += "<ul>"
+                    ul_tag = True
+                elif para_style == 'List Number':
+                    html_str += "<ol>"
+                    ol_tag = True    
+
+            li_tag = False
+
+            if para_style == 'Heading 1' or para_style == 'Heading 2':                
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size) 
+            elif para_style == 'Heading 3' or para_style == 'Heading 4':                 
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size) 
+            elif para_style == 'List Bullet' or para_style == 'List Number':
+                html_str += '<li class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+                li_tag = True
+            else:
+                html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
 
             scount = 1
 
@@ -2238,7 +2293,7 @@ class DSDocument():
                 html_str += '<sent class=\'p{} s{}\'>'.format(pcount, scount)
 
                 while word_count < total_words:
-
+                    
                     w = sent['text_w_info'][word_count]
                     word  = w[WORD]         # ontopic word
                     lemma = w[LEMMA]        # lemma/topic
@@ -2260,7 +2315,7 @@ class DSDocument():
                         # Let's deal with hyphenations and words followed by a no-space units.
                         next_w = sent['text_w_info'][word_count+1]
                         next_next_w = None
-                        
+
                         if word_count+1 < total_words-1:
                             next_next_w = sent['text_w_info'][word_count+2]
 
@@ -2365,7 +2420,7 @@ class DSDocument():
 
                                     elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
                                                                          and temp_next_w[WORD] != ellipsis:
-                                        is_space = False                                        
+                                        is_space = False   
 
                                     else:
                                         is_space = True
@@ -2373,7 +2428,7 @@ class DSDocument():
                                     is_space = True
 
                                 word_count = temp_word_count # skip all the words in the hyphenated word
-                                is_space = True
+                                # is_space = True
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
@@ -2382,6 +2437,8 @@ class DSDocument():
                             elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
+                            elif next_w[POS] == 'PUNCT' and next_w[WORD] in end_puncts:
+                                is_space = False
                             else:
                                 is_space = True
 
@@ -2423,7 +2480,10 @@ class DSDocument():
 
             # sent
             pcount += 1
-            html_str += '</p>'   # Close the paragraph tag
+            if li_tag:
+                html_str += '</li>'   # Close the list tag
+            else:
+                html_str += '</p>'   # Close the paragraph tag
 
         html_str = "<html><body>\n" + html_str + "\n</body></html>"
 
@@ -3070,7 +3130,6 @@ class DSDocument():
 
         return res_docx
 
-
     def toXml(self):
         """
         This method is used to generate a XML tagged representation of the document. It's primary purpose
@@ -3083,22 +3142,45 @@ class DSDocument():
 
         total_paras = len(data['paragraphs'])
         xml_str = ""
-        pcount  = 1
+        pcount = 1
+        scount = 1
+        ul_tag = False
+        ol_tag = False
+        li_tag = False
+        title_tag = False
+        htag_level = 0
 
         for para in data['paragraphs']: # for each paragraph
 
             para_style = para['style']
 
-            ul_tag = False
-            nl_tag = False            
+            if li_tag: # previous li_tag
+                # If the prev tag was li, and the current tag is also li, do nothing.
+                # Otherwise, we need to close the ul tag.
+                if para_style == 'List Bullet' or para_style == 'List Number':
+                    pass
+                elif ul_tag:
+                    xml_str += "</ul>\n\n"
+                    ul_tag = False
+                    pcount += 1                                       
+                elif ol_tag:
+                    xml_str += "</ol>\n\n"
+                    ol_tag = False
+                    pcount += 1                   
+            elif li_tag == False:
+                # If the prev tag was not li, and the current tag is li, we will fist add the ul tag.
+                if para_style == 'List Bullet':
+                    xml_str += f"<ul id=\"p{pcount}\">"
+                    ul_tag = True
+                    scount = 1
+                elif para_style == 'List Number':
+                    xml_str += f"<ol id=\"p{pcount}\">"
+                    ol_tag = True    
+                    scount = 1                    
+
             li_tag = False
             title_tag = False
             htag_level = 0
-
-            if ul_tag == True and para_style != 'List Paragraph':  # Close the UL tag if needed.
-                xml_str += '</ul>\n\n'
-            elif nl_tag == True and para_style != 'List Paragraph':  # Close the NL tag if needed.
-                xml_str += '</ol>\n\n'
 
             if para_style == 'Title':
                 xml_str += f"<title id=\"p{pcount}\">"
@@ -3115,31 +3197,28 @@ class DSDocument():
             elif para_style == 'Heading 4':               
                 xml_str += f"<h4 id=\"p{pcount}\">"
                 htag_level = 4
-            elif para_style == 'Heading 5':               
+            elif para_style == 'Heading 5':
                 xml_str += f"<h5 id=\"p{pcount}\">"
-                htag_level = 5
-            elif para_style == 'Heading 6':               
+                htag_level = 5              
+            elif para_style == 'Heading 6':
                 xml_str += f"<h6 id=\"p{pcount}\">"
-                htag_level = 6
-            elif para_style == 'Unordered List':
-                xml_str += f"<ul id=\"p{pcount}\">"
-                ul_tag = True
-            elif para_style == 'Ordered List':
-                xml_str += f"<ol id=\"p{pcount}\">"
-                nl_tag = True                
-            elif para_style == 'List Paragraph':
+                htag_level = 6                                       
+            elif para_style == 'List Bullet':
                 xml_str += '<li>'
                 li_tag = True
-            else:
+            elif para_style == 'List Number':
+                xml_str += '<li>'
+                li_tag = True                
+            elif ol_tag != True and ul_tag != True:
                 xml_str += f'<p id=\"p{pcount}\">'
 
-            # print("pcount =", pcount)
-            scount =1
+            if ol_tag != True and ul_tag != True:
+                scount = 1
+
             for sent in para['sentences']: # for each sentence
-                # print("scount =", scount)
-                # print("sid =", sid)            
 
                 sent_text = sent['text']
+
                 if htag_level == 0:
                     xml_str += f"<s id=\"p{pcount}s{scount}\">{sent_text}</s>"
                 else:
@@ -3151,15 +3230,15 @@ class DSDocument():
             # sent
 
             if htag_level > 0:
-                xml_str += f'</h{htag_level}>\n\n'      # Close the heading tag
-                pcount += 1 # increment the paragraph count (incl. headings)                
+                xml_str += f'</h{htag_level}>\n\n'
+                pcount += 1
             elif title_tag:
-                xml_str += '</title>\n'                  # Close the title tag                
+                xml_str += '</title>\n'
             elif li_tag:
-                xml_str += '</li>\n'                  # Close the list tag
-            else:
-                xml_str += '</p>\n\n'                 # Close the paragraph tag
-                pcount += 1 # increment the paragraph count (incl. headings)
+                xml_str += '</li>\n'   
+            elif ol_tag != True and ul_tag != True:
+                xml_str += '</p>\n\n'  
+                pcount += 1
 
         xml_str = "<text>\n" + xml_str + "</text>"
 
