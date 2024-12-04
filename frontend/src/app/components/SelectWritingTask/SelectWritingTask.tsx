@@ -12,7 +12,11 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
+import {
+  WritingTask,
+  hasKeywords,
+  isWritingTask,
+} from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   useWritingTask,
@@ -20,6 +24,7 @@ import {
   writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
+import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
@@ -39,6 +44,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
+  const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -64,25 +70,32 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   };
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" {...props}>
+    <Modal show={show} onHide={onHide} size="xl" {...props}>
       <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
       <Modal.Body>
         <div
           className="d-flex flex-row align-items-stretch position-relative gap-3"
           style={{ maxHeight: "75vh" }}
         >
+          <WritingTaskFilter className="w-100" update={setActiveKeywords} />
           <div className="w-100 h-0">
             <ListGroup className="overflow-auto w-100 mh-100">
-              {writingTasks?.map((task) => (
-                <ListGroup.Item
-                  key={task.info.name}
-                  active={selected === task}
-                  action
-                  onClick={() => setSelected(task)}
-                >
-                  {task.info.name}
-                </ListGroup.Item>
-              ))}
+              {writingTasks
+                ?.filter(
+                  (task) =>
+                    activeKeywords.length === 0 ||
+                    hasKeywords(task, activeKeywords)
+                )
+                .map((task) => (
+                  <ListGroup.Item
+                    key={task.info.name}
+                    active={selected === task}
+                    action
+                    onClick={() => setSelected(task)}
+                  >
+                    {task.info.name}
+                  </ListGroup.Item>
+                ))}
               {custom && (
                 <ListGroup.Item
                   action

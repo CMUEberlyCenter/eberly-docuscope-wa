@@ -1,17 +1,19 @@
-import { FC, ReactNode, useEffect, useState } from "react";
+import { FC, HTMLProps, useEffect, useState } from "react";
 import AnimateHeight, { Height } from "react-animate-height";
 import { Button } from "react-bootstrap";
 import css from "./FadeContent.module.scss";
 
 type ToolFadeContentProps = {
-  children: ReactNode;
   minHeight?: Height;
   maxHeight?: Height;
-};
+  htmlContent?: string;
+} & HTMLProps<HTMLDivElement>;
 export const FadeContent: FC<ToolFadeContentProps> = ({
   children,
   minHeight,
   maxHeight,
+  htmlContent,
+  ...props
 }) => {
   minHeight = minHeight ?? 80;
   maxHeight = maxHeight ?? "auto";
@@ -22,12 +24,20 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
   }, [expanded]);
 
   return (
-    <article>
+    <article {...props}>
       <AnimateHeight
         height={height}
         aria-expanded={expanded}
         className={css["fade-content"]}
       >
+        {/* Workaround for html string content. */}
+        {htmlContent && (
+          <div
+            dangerouslySetInnerHTML={{
+              __html: htmlContent,
+            }}
+          />
+        )}
         {children}
       </AnimateHeight>
       <div className="d-flex justify-content-around">

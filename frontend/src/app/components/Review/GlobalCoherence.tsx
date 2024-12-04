@@ -11,6 +11,7 @@ import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?re
 import { useGlobalCoherenceData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -50,19 +51,19 @@ const Suggestions: FC<SuggestionsProps> = ({
             </span>
           </Accordion.Header>
           <Accordion.Body
-            onEntered={() => dispatch({ type: "set", sentences: [text] })}
+            onEntered={() => dispatch({ type: "set", sentences: [[text]] })}
             onExit={() => dispatch({ type: "unset" })}
           >
-            <p>
+            <div className="mb-3">
               <h6 className="d-inline">
                 {t("global_coherence.suggestion.explanation")}
               </h6>{" "}
               <span>{explanation}</span>
-            </p>
-            <p>
+            </div>
+            <div className="mb-3">
               <h6>{t("global_coherence.suggestion.suggestions")}</h6>{" "}
               <span>{suggestions}</span>
-            </p>
+            </div>
           </Accordion.Body>
         </Accordion.Item>
       ))}
@@ -131,6 +132,7 @@ export const GlobalCoherence: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("global_coherence.title")}</h4>
+        <FadeContent htmlContent={t("global_coherence.overview")} />
         {!review ? (
           <Loading />
         ) : (

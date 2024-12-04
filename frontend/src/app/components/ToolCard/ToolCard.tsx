@@ -42,7 +42,6 @@ import {
 import {
   useGlobalFeatureCopyedit,
   useGlobalFeatureExpectation,
-  useGlobalFeatureExpectations,
   useGlobalFeatureFlow,
   useGlobalFeatureNotes2Bullets,
   useGlobalFeatureNotes2Prose,
@@ -77,7 +76,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
     const expectationFeature = useGlobalFeatureExpectation();
-    const expectationsFeature = useGlobalFeatureExpectations();
+    const expectationsFeature = false; //useGlobalFeatureExpectations();
     const [showSelectExpectation, setShowSelectExpectation] = useState(false);
 
     const editor = useSlate();
@@ -158,13 +157,14 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const onTool = useCallback(
       (tool: Tool) => {
         if (editor.selection) {
+          const fragment = Editor.fragment(editor, editor.selection);
           doTool({
             tool,
             datetime: new Date(),
             input: {
-              text: serialize(Editor.fragment(editor, editor.selection)),
-              html: serializeHtml(Editor.fragment(editor, editor.selection)),
-              fragment: Editor.fragment(editor, editor.selection),
+              text: serialize(fragment),
+              html: serializeHtml(fragment),
+              fragment: fragment,
               range: editor.selection,
             },
             result: null,
@@ -430,7 +430,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       )}
                       {copyEditFeature && (
                         <ToolButton
-                          tooltip={t("tool.button.copyedit.tooltip")}
+                          tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}
                           disabled={!scribe}
                           icon={<CopyEditIcon />}
@@ -591,6 +591,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <ToolDisplay.Paste text={currentTool.result?.clean_revision} />
               }
             >
+              {/* <FadeContent>{t("tool.button.copyedit.overview")}</FadeContent> */}
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
                 tool={currentTool}

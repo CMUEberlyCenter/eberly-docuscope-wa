@@ -24,22 +24,25 @@ export type GlobalCoherenceResponse = {
 export type Claim = {
   claim: string;
   support: string;
-  sentences: string[];
+  claim_sentences: string[];
   suggestions: string[];
+  evidence_sentences: string[];
 };
 export type ArgumentsResponse = {
-  main_argument: string;
+  thesis: string; // This is a sentence that summarizes the main argument.
   arguments: Claim[];
   counter_arguments: Claim[];
   rebuttals: Claim[];
 };
 
 export type KeyPointsResponse = {
-  points: {
-    point: string;
+  central_idea: string; // Sentence that summarizes the main argument
+  ideas: {
+    idea: string;
     elaborations: { elaboration_strategy: string; explanation: string }[];
-    sentences: string[];
+    idea_sentences: string[];
     suggestions: string[];
+    elaboration_sentences: string[];
   }[];
 };
 

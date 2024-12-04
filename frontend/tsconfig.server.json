@@ -2,6 +2,7 @@
   "extends": "@tsconfig/recommended/tsconfig.json",
   "compilerOptions": {
     "esModuleInterop": true,
+    "lib": ["ESNext"],
     "module": "ESNext",
     "moduleResolution": "Node",
     "resolveJsonModule": true

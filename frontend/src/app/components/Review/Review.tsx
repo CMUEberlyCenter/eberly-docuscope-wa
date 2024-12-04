@@ -7,6 +7,7 @@ import { isReview } from "../../../server/model/review";
 import { useReview } from "../../service/review.service";
 import {
   useGlobalFeatureArguments,
+  useGlobalFeatureExpectations,
   useGlobalFeatureImpressions,
   useGlobalFeatureKeyIdeas,
   useGlobalFeatureLogicalProgression,
@@ -23,6 +24,7 @@ import { Organization, OrganizationTitle } from "./Organization";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesTitle } from "./Sentences";
+import { Expectations, ExpectationsTitle } from "./Expectations";
 
 type Tool =
   | "null"
@@ -52,11 +54,7 @@ const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
     case "arguments":
       return <ArgumentsTitle {...props} />;
     case "expectations":
-      return (
-        <Translation ns={"review"}>
-          {(t) => <span {...props}>{t("expectations.title")}</span>}
-        </Translation>
-      );
+      return <ExpectationsTitle {...props} />;
     case "organization":
       return <OrganizationTitle {...props} />;
     case "impressions":
@@ -84,7 +82,7 @@ export const Review: FC = () => {
   const { t: tt } = useTranslation();
   // const settings = useSettings();
   const review = useReview();
-  const [tool, setTool] = useState<Tool>("null");
+  const [tool, setTool] = useState<Tool>("expectations");
   const [prose, setProse] = useState<string>("");
 
   // useUnload();
@@ -112,7 +110,7 @@ export const Review: FC = () => {
   const ideasFeature = useGlobalFeatureKeyIdeas();
   const impressionsFeature = useGlobalFeatureImpressions();
   const argumentsFeature = useGlobalFeatureArguments();
-  const expectationsFeature = false; // moving to own
+  const expectationsFeature = useGlobalFeatureExpectations();
   const organizationFeature = useGlobalFeatureTermMatrix();
 
   const onSelect = (id: Tool) => {
@@ -154,6 +152,11 @@ export const Review: FC = () => {
               <Dropdown.Header>
                 <NullTitle />
               </Dropdown.Header>
+              {expectationsFeature && (
+                <Dropdown.Item onClick={() => onSelect("expectations")}>
+                  <ToolTitle tool="expectations" className="text-primary" />
+                </Dropdown.Item>
+              )}
               {argumentsFeature && (
                 <Dropdown.Item onClick={() => onSelect("arguments")}>
                   <ToolTitle tool="arguments" className="text-primary" />
@@ -179,11 +182,6 @@ export const Review: FC = () => {
                   <ToolTitle tool="sentences" className="text-primary" />
                 </Dropdown.Item>
               )}
-              {expectationsFeature && (
-                <Dropdown.Item onClick={() => onSelect("expectations")}>
-                  <ToolTitle tool="expectations" className="text-primary" />
-                </Dropdown.Item>
-              )}
               {impressionsFeature && (
                 <Dropdown.Item onClick={() => onSelect("impressions")}>
                   <ToolTitle tool="impressions" className="text-primary" />
@@ -195,7 +193,7 @@ export const Review: FC = () => {
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <Arguments />}
-            {tool === "expectations" && <NullTool />}
+            {tool === "expectations" && <Expectations />}
             {tool === "global_coherence" && <GlobalCoherence />}
             {tool === "impressions" && <NullTool />}
             {tool === "key_ideas" && <KeyIdeas />}

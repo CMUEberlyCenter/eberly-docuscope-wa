@@ -7,12 +7,12 @@
     "cmu": "Legal",
     "privacy": "Privacy Notice"
   },
-  "deeplink": "Select an outline for this assignment",
+  "deeplink": "Select a text type for this assignment",
   "deeplinking": {
     "title": "myProse LTI Deeplinking"
   },
   "genlink": {
-    "title": "myProse Writing Task Link Generator",
+    "title": "myProse Text Type Link Generator",
     "link": "Link:"
   },
   "audio": {
@@ -54,7 +54,7 @@
       "italic": "Italic",
       "underline": "Underline",
       "strike": "Strikethrough",
-      "task": "Outline:",
+      "task": "Content Expectations:",
       "no_task": "None Selected"
     }
   },
@@ -87,17 +87,15 @@
       },
       "copyedit": {
         "title": "Copy Edit",
-        "tooltip": "Copy Edit"
+        "tooltip": "Copy Edit",
+        "overview": "This tool provides suggestions to make your writing clearer and more concise. It offers two versions: one showing the revised text, and another marking the suggested changes. Explanations accompany each suggestion, helping you improve your writing while retaining your original message."
       },
       "grammar": {
         "title": "Grammar",
         "tooltip": "Fix Grammar"
       },
       "view": {
-        "title": "Open outline: {{title}}"
-      },
-      "select": {
-        "title": "Select Outline"
+        "title": "Open content expectations: {{title}}"
       }
     },
     "initial": "Write & highlight text for further actions.",
@@ -124,22 +122,24 @@
     }
   },
   "expectation": {
-    "title": "Select an Expectation",
-    "task": "Writing Task"
+    "title": "Select an Expectation"
   },
   "flow": {
     "issue": "Issue:",
     "suggestions": "Suggestions:"
   },
   "select_task": {
-    "title": "Select Outline",
-    "upload": "Upload Custom Writing Task",
-    "invalid_upload": "Uploaded file is not a valid writing task specificaton!",
-    "null": "No Writing Task",
+    "title": "Select Text Type",
+    "upload": "Upload Custom Text Type",
+    "invalid_upload": "Uploaded file is not a valid text type specificaton!",
+    "null": "No Text Type",
     "version": "Version: {{version}}",
     "copyright": "Copyright: {{copyright}}",
     "multiple_file_error": "Upload only one file at a time.",
-    "malformed_json": "Content could not be parsed as JSON."
+    "malformed_json": "Content could not be parsed as JSON.",
+    "select": "Select category",
+    "select_all": "Select All",
+    "all_category": "All"
   },
   "cancel": "Cancel",
   "select": "Select",
@@ -147,6 +147,9 @@
     "include": "Include Details",
     "insert": "Insert",
     "overview": "Overview",
-    "about": "About This Expectation:"
+    "about": {
+      "expectation": "About this Expectation:",
+      "section": "About this Section:"
+    }
   }
 }

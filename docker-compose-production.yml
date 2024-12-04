@@ -1,6 +1,7 @@
 ###################################################################################
 #
-# A copy of docker-compose.yml with added mounting of the `settings` directory
+# For use on production server.
+# docker-compose-production.yml with added mounting of the `settings` directory
 # so that features and options can be changed without needing to recompile.
 #
 ###################################################################################
@@ -39,23 +40,25 @@ services:
     ports:
      - 8888:8888
     secrets:
+      - anthropic_api_key
       - mongo_user
       - mongo_pass
       - openai_api_key
       - token
     environment:
-      ONTOPIC_SERVER: http://ontopic:5000/
+      ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
-      TOKEN_SECRET_FILE: /run/secrets/token
-      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
-      SCRIBE_TEMPLATES: /app/private/templates.json
-      PORT: 8888
-      MONGO_HOST: mongo:27017
       MONGO_DB: doscuscope
-      MONGO_USER_FILE: /run/secrets/mongo_user
+      MONGO_HOST: mongo:27017
       MONGO_PASSWORD_FILE: /run/secrets/mongo_pass
+      MONGO_USER_FILE: /run/secrets/mongo_user
       NODE_ENV: production
+      ONTOPIC_SERVER: http://ontopic:5000/
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
+      PORT: 8888
+      SCRIBE_TEMPLATES: /app/private/templates.json
+      TOKEN_SECRET_FILE: /run/secrets/token
       WRITING_TASKS: /app/private/writing_tasks
     restart: always
     depends_on:
@@ -70,6 +73,8 @@ volumes:
       edu.cmu.eberly.docuscope.description: "Database volume"
 
 secrets:
+  anthropic_api_key:
+    file: secrets/anthropic_api_key
   mongo_user:
     file: secrets/mongo_user
   mongo_pass:

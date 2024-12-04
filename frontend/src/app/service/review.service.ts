@@ -1,7 +1,8 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
-import { BehaviorSubject, filter, map, Observable } from 'rxjs';
+import { BehaviorSubject, filter, map, Observable, scan } from 'rxjs';
 import {
+  AllExpectationsData,
   ArgumentsData,
   GlobalCoherenceData,
   KeyPointsData,
@@ -64,9 +65,12 @@ const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
 const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
 const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
 const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
+const expectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(
+  null
+);
 review$
   .pipe(
-    filter((rev) => typeof rev === 'object' && 'analysis' in rev),
+    filter((rev) => isReview(rev)),
     map((rev) => rev.analysis)
   )
   .subscribe((analyses) =>
@@ -87,6 +91,8 @@ review$
           ontopicAnalysis.next(analysis);
           break;
         case 'all_expectations':
+          expectationsAnalysis.next(analysis);
+          break;
         default:
           // expectations.set(analysis.expectation, analysis);
           break;
@@ -102,3 +108,23 @@ export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
 export const [useKeyPointsData, keyPointsData$] = bind(keyPointsAnalysis, null);
 export const [useArgumentsData, argumentsData$] = bind(argumentsAnalysis, null);
 export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);
+export const [useExpectationsData, expectationsData$] = bind(
+  expectationsAnalysis.pipe(
+    scan(
+      (
+        acc: Map<string, AllExpectationsData>,
+        current: AllExpectationsData | null
+      ) => {
+        if (!current) {
+          return acc;
+        }
+        const m = new Map(acc);
+        m.set(current.expectation, current);
+        return m;
+      },
+      new Map<string, AllExpectationsData>()
+    )
+  ),
+  null
+);
+expectationsData$.subscribe(() => undefined); // at least one subscription to make sure it works.
