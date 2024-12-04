@@ -31,9 +31,13 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
         className={css["fade-content"]}
       >
         {/* Workaround for html string content. */}
-        {htmlContent && (<div dangerouslySetInnerHTML={{
-          __html: htmlContent
-        }}/>)}
+        {htmlContent && (
+          <div
+            dangerouslySetInnerHTML={{
+              __html: htmlContent,
+            }}
+          />
+        )}
         {children}
       </AnimateHeight>
       <div className="d-flex justify-content-around">
