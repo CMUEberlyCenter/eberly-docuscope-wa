@@ -3,7 +3,7 @@ import { readFile, readdir, stat } from 'fs/promises';
 import { MongoClient, ObjectId } from 'mongodb';
 import { join } from 'path';
 import { Analysis } from '../../lib/ReviewResponse';
-import { WritingTask } from '../../lib/WritingTask';
+import { isWritingTask, WritingTask } from '../../lib/WritingTask';
 import { Review } from '../model/review';
 import {
   EXPIRE_REVIEW_SECONDS,
@@ -13,7 +13,9 @@ import {
 
 const client = new MongoClient(MONGO_CLIENT);
 
+/** Database collection for storing writing tasks. */
 const WRITING_TASKS = 'writing_tasks';
+/** Database collection for storing reviews.  */
 const REVIEW = 'review';
 
 /**
@@ -58,7 +60,7 @@ export async function insertWritingTask(
  * Retrieve the list of public writing task specifications.
  * This is used for populating writing task selection actions for publicly
  * facing versions.
- * @returns Array of writing tasks that are tagged as public.
+ * @returns Array of writing tasks where the public attribute is true.
  */
 export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   try {
@@ -155,6 +157,12 @@ export async function initDatabase(): Promise<void> {
   await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
 }
 
+/**
+ * Retrieve all of the writing tasks from the filesystem.
+ * This is to be initiated in the public writing task root directory.
+ * @param dir directory where to look for writing task files.
+ * @returns List of valid writing tasks.
+ */
 async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
   const ret: WritingTask[] = [];
   try {
@@ -164,8 +172,10 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
       const stats = await stat(path);
       if (stats.isFile() && file.endsWith('.json')) {
         const content = await readFile(path, { encoding: 'utf8' });
-        const json = JSON.parse(content) as WritingTask;
-        ret.push(json);
+        const json = JSON.parse(content);
+        if (isWritingTask(json)) { // only add valid writing tasks.
+          ret.push(json);
+        }
       } else if (stats.isDirectory()) {
         const subdir = await readPublicWritingTasks(path);
         ret.push(...subdir);
@@ -204,16 +214,16 @@ export async function findReviewById(id: string) {
 /**
  * Inserts the initial version of the review data with an empty
  * analysis array.
- * @param text Plain text version of input to analyze.
  * @param document HTML version of input.
+ * @param segmented Segmented version of document.  This is INVALID content for onTopic.
  * @param writing_task Writing task to use for analysis.
  * @param user User identifier from LMS.
  * @param assignment Assignment identifier from LMS.
  * @returns Identifier of the inserted review.
  */
 export async function insertReview(
-  text: string,
   document: string,
+  segmented: string,
   writing_task: WritingTask | null,
   user?: string,
   assignment?: string
@@ -225,7 +235,7 @@ export async function insertReview(
       assignment,
       user,
       document,
-      text,
+      segmented,
       analysis: [],
       created: new Date(),
     });

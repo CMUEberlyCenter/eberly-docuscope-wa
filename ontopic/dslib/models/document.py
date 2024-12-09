@@ -135,6 +135,7 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
 import dslib.models.stat as ds_stat
 
 nlp = None
+LOAD_TRAINED_MODEL = False # If True, will check for the existence of models in the filesystem.
 
 ##
 # https://spacy.io/api/top-level#spacy.info
@@ -148,13 +149,13 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if lang == 'en':
             default_model = resource_path("data/default_model")
             large_model = resource_path("data/large_model")
-            if model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
+            if LOAD_TRAINED_MODEL and model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
                 nlp = spacy.load(default_model)
                 #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
                 #print("\n\n")
                 #print(result)
-            elif os.path.exists(large_model):
+            elif LOAD_TRAINED_MODEL and os.path.exists(large_model):
                 logging.info("Loading Spacy large model ...")
                 nlp = spacy.load(large_model)
             else:
@@ -1445,8 +1446,6 @@ class DSDocument():
 
         logging.info("Language model appears to be loaded, processing text ...")   
 
-
-
         self.global_topical_prog_data = None # clear the cache
 
         doc = section_data['doc']
@@ -2163,6 +2162,7 @@ class DSDocument():
         self.loadFromHtmlString(html_str)
 
     def loadFromHtmlString(self, html_str):
+        self.current_section = 0
         soup = bs(html_str, "html.parser")
         body = soup.find("body")
         doc = Document()
@@ -2215,7 +2215,8 @@ class DSDocument():
 
         self.sections = [section_data]
 
-        section_data['start'] = 0
+        # self.processDoc(section_data)
+        # section_data['start'] = 0
         self.processDoc(section_data)
 
 
