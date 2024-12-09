@@ -79,7 +79,7 @@ const doOnTopic = async (
 const segmentText = async (text: string): Promise<string> => {
   try {
     const res = await fetch(SEGMENT_URL, {
-      method: "POST",
+      method: 'POST',
       body: JSON.stringify({ text }),
       headers: {
         Accept: 'application/json',
@@ -92,29 +92,30 @@ const segmentText = async (text: string): Promise<string> => {
       );
       return text;
     }
-    const data = await res.json() as string;
+    const data = (await res.json()) as string;
     return data;
   } catch (err) {
     console.error(err); // fetch error, rare errors
     return text;
   }
-}
+};
 
 /**
  * Extract data from a Review's writing task used for the templates.
  * @param review A review object from the database.
  * @returns Acceptable object for "format" function.
  */
-const reviewData = ({segmented, writing_task}: Review): Record<string, string> => ({
+const reviewData = ({
+  segmented,
+  writing_task,
+}: Review): Record<string, string> => ({
   text: segmented, // use content which has already been segmented into sentences.
   user_lang:
-    (isWritingTask(writing_task)
-      ? writing_task.info.user_lang
-      : undefined) ?? DEFAULT_LANGUAGE,
+    (isWritingTask(writing_task) ? writing_task.info.user_lang : undefined) ??
+    DEFAULT_LANGUAGE,
   target_lang:
-    (isWritingTask(writing_task)
-      ? writing_task.info.target_lang
-      : undefined) ?? DEFAULT_LANGUAGE,
+    (isWritingTask(writing_task) ? writing_task.info.target_lang : undefined) ??
+    DEFAULT_LANGUAGE,
   extra_instructions:
     (isWritingTask(writing_task)
       ? writing_task.extra_instructions
@@ -369,12 +370,12 @@ reviews.post(
         throw new UnprocessableContentError(['Invalid writing task object']);
       }
       // Validate document.  It should contain some text.
-      if (document.trim() === "") {
-        throw new UnprocessableContentError(['Empty document!'])
+      if (document.trim() === '') {
+        throw new UnprocessableContentError(['Empty document!']);
       }
       // Preprocessing - Sentence Segmenting.
       const segmented = await segmentText(document);
-      if (segmented.trim() === "") {
+      if (segmented.trim() === '') {
         throw new UnprocessableContentError(['Unable to segment document']);
       }
       // Add to database.

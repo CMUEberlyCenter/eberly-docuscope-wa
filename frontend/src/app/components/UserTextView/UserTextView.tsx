@@ -1,15 +1,14 @@
 import classNames from "classnames";
-import escapeHtml from "escape-html";
-import { FC, HTMLProps, useContext, useEffect, useState } from "react";
+import { FC, HTMLProps, useContext, useEffect } from "react";
 import { Placeholder } from "react-bootstrap";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useReview } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
-import "./UserTextView.scss";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
+import "./UserTextView.scss";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement> & {
-  /** The html string representing the user's draft. */
+  /** The tagged html string representing the user's draft. */
   prose: string;
 };
 /**
@@ -23,37 +22,36 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const review = useReview();
-  const [content, setContent] = useState(prose);
   const ctx = useContext(ReviewContext);
   const cl = classNames(className, "d-flex flex-column");
+  // TODO make this so that it is aware of the previous number of levels and
+  // removes them instead of hard coding.
+  const maxHighlightLevels = 2;
   useEffect(() => {
+    const highlightClasses = [
+      "highlight",
+      ...Array(maxHighlightLevels)
+        .keys()
+        .map((i) => `highlight-${i}`),
+    ];
+    document.querySelectorAll(".user-text .highlight").forEach((ele) => {
+      ele.classList.remove(...highlightClasses);
+    });
     if (!ctx?.sentences || ctx.sentences.length <= 0) {
-      setContent(prose);
-    } else {
-      const highlights = ctx.sentences.reduce(
-        (prev, sentences, i) =>
-          sentences
-            .map(escapeHtml)
-            .reduce(
-              (prev, sentence) =>
-                prev.replaceAll(
-                  sentence,
-                  `<span class="highlight highlight-${i}">${sentence}</span>`
-                ),
-              prev
-            ),
-        prose
-      );
-      setContent(highlights);
+      return;
     }
-  }, [prose, ctx]);
-
-  useEffect(() => {
+    ctx.sentences.forEach((ids, index) => {
+      ids.forEach((id) =>
+        document
+          .getElementById(id)
+          ?.classList.add("highlight", `highlight-${index}`)
+      );
+    });
     document.querySelector(".user-text .highlight")?.scrollIntoView({
       behavior: "smooth",
       block: "center",
     });
-  }, [content]);
+  }, [prose, ctx]);
 
   return (
     <main className={cl} {...props}>
@@ -67,7 +65,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
         ) : (
           <div
             className="p-2 flex-grow-1 user-text"
-            dangerouslySetInnerHTML={{ __html: content }}
+            dangerouslySetInnerHTML={{ __html: prose }}
           />
         )}
       </article>

@@ -173,7 +173,8 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
       if (stats.isFile() && file.endsWith('.json')) {
         const content = await readFile(path, { encoding: 'utf8' });
         const json = JSON.parse(content);
-        if (isWritingTask(json)) { // only add valid writing tasks.
+        if (isWritingTask(json)) {
+          // only add valid writing tasks.
           ret.push(json);
         }
       } else if (stats.isDirectory()) {

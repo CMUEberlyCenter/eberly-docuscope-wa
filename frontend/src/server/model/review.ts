@@ -26,4 +26,5 @@ export const isReview = (obj: Review | unknown): obj is Review =>
   typeof obj.document === 'string' &&
   'writing_task' in obj &&
   isWritingTask(obj.writing_task) &&
-  'analysis' in obj && Array.isArray(obj.analysis); // TODO add obj.analysis.every(isAnalysis)
+  'analysis' in obj &&
+  Array.isArray(obj.analysis); // TODO add obj.analysis.every(isAnalysis)
