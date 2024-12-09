@@ -35,4 +35,4 @@ EXPOSE 5000
 # RUN export FLASK_ENV=development
 # RUN export FLASK_DEBUG=0
 
-CMD ["hypercorn", "-bind", "0.0.0.0:5000", "app:app", "--root-path", "/"]
+CMD ["hypercorn", "-b", "0.0.0.0:5000", "--root-path", "/", "app:app"]
