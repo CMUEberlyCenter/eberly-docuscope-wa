@@ -4,21 +4,21 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-flask = "*"
 psutil = "*"
 pathlib = "*"
 python-docx = "*"
 nltk = "*"
 beautifulsoup4 = "*"
 ftfy = "*"
-spacy = "==2.3.5"
+spacy = "*"
 reportlab = "*"
 pydocx = "*"
 unidecode = "*"
 pyqt5 = "*"
-gunicorn = "*"
+fastapi = "*"
+hypercorn = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.12"

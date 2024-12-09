@@ -226,10 +226,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
         credentials: "same-origin",
         redirect: "manual",
         headers: { "Content-Type": "application/json" },
-        // TODO possibly add text serialization for data processing.
         body: JSON.stringify({
-          text,
-          document: serializeHtml(editor.children),
+          document: serializeHtml(editor.children), // Segmenting is handled server side
           writing_task: writingTask,
         }),
       });
@@ -244,7 +242,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       return window.open(
         `/review.html?id=${reviewId}`,
         "_blank",
-        "scrollbars=no,resizable=yes"
+        "scrollbars=no,resizable=yes,menubar=yes,toolbar=yes"
       );
     }, [writingTask, editor]);
 

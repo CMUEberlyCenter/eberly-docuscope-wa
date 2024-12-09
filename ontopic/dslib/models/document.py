@@ -1,4 +1,4 @@
-#!/usr/bin/env pyhtmlhon
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -23,6 +23,8 @@ from PIL import Image
 from io import BytesIO
 
 from bs4 import BeautifulSoup as bs
+import bs4
+
 from pydocx import PyDocX
 import unidecode
 
@@ -33,7 +35,7 @@ from docx import Document
 from docx.shared import RGBColor
 # from docx.enum.text import WD_COLOR_INDEX
 # from docx.enum.text import WD_UNDERLINE
-from docx.shared import Inches
+from docx.shared import Pt, Inches
 
 
 ##################################################
@@ -88,8 +90,9 @@ TOPIC_SORT_APPEARANCE   = 0
 TOPIC_SORT_LEFT_COUNT   = 1
 
 
-# Default font info used to create HTML strings.
-default_font_info = {'Title': 24, 'Heading 1': 20, 'Heading 2': 18, 'Normal': 16}
+# Default font info used to create HTML strings. # 2024.12.02
+default_font_info = {'Title': 24, 'Heading 1': 20, 'Heading 2': 18, 'Heading 3': 16, 'Heading 4': 14, 
+                     'Normal': 12, 'List Bullet': 12, }
 
 import pprint                                  # pretty prnting for debugging
 pp = pprint.PrettyPrinter(indent=4)            # create a pretty printing object used for debugging.
@@ -132,6 +135,7 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
 import dslib.models.stat as ds_stat
 
 nlp = None
+LOAD_TRAINED_MODEL = False # If True, will check for the existence of models in the filesystem.
 
 ##
 # https://spacy.io/api/top-level#spacy.info
@@ -143,15 +147,19 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
 
     try:
         if lang == 'en':
-            if model == NLP_MODEL_DEFAULT:
+            default_model = resource_path("data/default_model")
+            large_model = resource_path("data/large_model")
+            if LOAD_TRAINED_MODEL and model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
-                nlp = spacy.load(resource_path('data/default_model'))
+                nlp = spacy.load(default_model)
                 #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
                 #print("\n\n")
                 #print(result)
-            else:
+            elif LOAD_TRAINED_MODEL and os.path.exists(large_model):
                 logging.info("Loading Spacy large model ...")
-                nlp = spacy.load(resource_path('data/large_model'))
+                nlp = spacy.load(large_model)
+            else:
+                nlp = spacy.load("en_core_web_sm")
 
         elif lang == 'es':
             # It is an experimental feature for now.
@@ -201,13 +209,13 @@ def adjustSpaces(text):
     # Just in case a period is found in front of a word (e.g, ".And")  This handles
     # a case where 4 dot ellipses is used (3 dot ellipses followed by a period
     # followed by no space.) 
-    text = re.sub(u'\.([a-zA-Z]+)(?!\.)', r'. \1', text)
+    text = re.sub(r'\.([a-zA-Z]+)(?!\.)', r'. \1', text)
 
     # If there is a comma followed by a character (i.e., missing a sapce), add a space.
     text = re.sub(',(=?[a-zA-Z])',  r', \1', text)
 
     # Remove the image HTLM elements.
-    text = re.sub('\<img.+>', '', text)
+    text = re.sub(r'\<img.+>', '', text)
 
     # Replace the space character(s) in multiword patterns with underscor character "_"
     for mw_topic in DSDocument.multiword_topics: 
@@ -232,7 +240,7 @@ def adjustSpaces(text):
     text = text.replace(u'/ ', u' ')                 # a slash followed by a space is replaced by a space
 
     text = text.replace(u' )', u')')                 # remove a space followed by a close parentesis
-    text = text.replace(u'( ', u'(')                 # remove a space followed by a close parentesis
+    text = text.replace(u'( ', u'(')                 # remove a space followed by a open parentesis
 
     text = text.replace(u'. . .', u' \u2026')        # convert the MLA style ellipsis to an ellipsis character
     text = text.replace(u'...', u' \u2026')          # convert 3 dots to an ellipsis character
@@ -1079,8 +1087,26 @@ class DSDocument():
                     is_left = False
                     if token.pos_ in ['NOUN', 'PROPN', 'PRON']:
                         is_left = True
-                    res.append((token.pos_, token.text, token.lemma_, is_left, 
-                               token.dep_, '', None, False, word_pos, None))
+
+                    if token.text in end_puncts:
+                        pos = 'PUNCT'
+                    elif token.pos_ == 'PROPN':                            # Proper Nouns
+                        pos = 'NOUN'
+                    elif token.tag_ == 'PRP' or token.tag_ == 'PRP$':      # Pronouns / Pronoun Possessive
+                        pos = 'PRP'
+                    elif token.is_punct:                                   # Punctuations
+                        pos = 'PUNCT'
+                    elif token.pos_ == 'PRON' and token.tag_ == 'NN':
+                        pos = 'NOUN'
+                    else:                                                  # Everything else
+                        pos = token.pos_
+
+                    res.append((pos, token.text, token.lemma_.lower(), is_left, 
+                               token.dep_, '', None, False, word_pos, None))   
+
+                    # res.append((token.pos_, token.text, token.lemma_, is_left, 
+                    #            token.dep_, '', None, False, word_pos, None))
+
                     word_pos += 1
 
             temp = []
@@ -1411,16 +1437,14 @@ class DSDocument():
         # print ("processDoc ()")
 
         if (isModelLoaded () == False):
-           logging.warn("Warning: language model not loaded yet, loading ...")
-           setLanguageModel ("en",NLP_MODEL_DEFAULT)
+           logging.warning("Warning: language model not loaded yet, loading ...")
+           setLanguageModel ("en", NLP_MODEL_DEFAULT)
 
         if (isModelLoaded () == False):
            logging.error("Error: unable to load language model!")
            return (list())
 
         logging.info("Language model appears to be loaded, processing text ...")   
-
-
 
         self.global_topical_prog_data = None # clear the cache
 
@@ -1453,12 +1477,11 @@ class DSDocument():
             temp = list()
 
             for w in sent:
-                if w[POS] is not None and \
-                   w[POS] == 'NOUN' and \
-                   w[LEMMA] not in stop_words:
-                    if (w[POS], w[LEMMA]) not in temp:
-                        temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
-                        lemmas.append(w)
+                if w[POS] is not None and  w[LEMMA] not in stop_words:
+                    if w[POS] == 'NOUN' or w[POS] == 'PRP':
+                        if (w[POS], w[LEMMA]) not in temp:
+                            temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
+                            lemmas.append(w)
             return lemmas
 
         def listStems(sent):
@@ -1542,7 +1565,7 @@ class DSDocument():
             if p == "":                       # skip if it is an empty line.
                 continue
 
-            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Title']:
+            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = 'Normal'
             else:
                 style = para.style.name
@@ -1567,7 +1590,7 @@ class DSDocument():
             
             para_dict['style']              = style                 # set the paragraph style (from the docx file).
 
-            if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Title']:
+            if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title']:
                 slist = [para.text]
             else:
                 parsed_para = nlp(p)                                # split the paragraph into sentencees.
@@ -1580,7 +1603,7 @@ class DSDocument():
                     sent_dict['text'] = s.strip()
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s.strip(), start=word_pos+1)
                 else:
-                    sent_dict['text'] = s.string.strip()
+                    sent_dict['text'] = s.text.strip()
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s, start=word_pos+1) 
 
 
@@ -1664,7 +1687,7 @@ class DSDocument():
               
         if pos1 == pos2:                                 
             # these 2 lemmas share the same POS tag.
-            if pronoun == False and pos1.startswith('PRON'):
+            if pronoun == False and pos1 == 'PRP':
                 # we'll ignore this since they are pronouns and the pronoun display is OFF.
                 return False 
             elif l1 == l2:  # lemma 1 == lemma 2 and POS1 == POS1
@@ -1672,7 +1695,7 @@ class DSDocument():
             else:
                 return False
 
-        elif pronoun == True and pos1.startswith('PRON'):
+        elif pronoun == True and pos1 == 'PRP':
             # The pronoun display is ON, and pos1 is a pronoun.
             # Pronouns are ALWAYS given.
             return True            
@@ -1711,7 +1734,7 @@ class DSDocument():
 
                             # Note: POS is no longer checked for optmization.
                             # if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
-                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=self.prp):
 
                                 # and if 'gl' is not already in the sentence's given lemma's list
                                 if gl[LEMMA] not in [x[LEMMA] for x in sent['given_accum_lemmas']]:
@@ -1725,10 +1748,10 @@ class DSDocument():
                             for cl in temp_sent['accum_lemmas']:  # for each accum_lemma in the sentence
                                 # if a lemma ('gl') is in the sentence AND their POSs maatch
                                 # Note: POS is no longer checked for optmization.
-                                if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=True):
+                                if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=self.prp):
                                     # if 'cl' is not already in the sentence's new lemmas list
-                                    if gl[POS] != 'PRON' and cl[LEMMA] not in [x[LEMMA] for x in temp_sent['new_accum_lemmas']]:
-                                        temp_sent['new_accum_lemmas'].append(cl)     # add 'cl' to the list 
+                                    if gl[POS] != 'PRP' and cl[LEMMA] not in [x[LEMMA] for x in temp_sent['new_accum_lemmas']]:
+                                        temp_sent['new_accum_lemmas'].append(gl)     # add 'cl' to the list ol
 
                         # if 'lemma' a user defined topic, force it to be 'given'
                         if gl[LEMMA].lower() in DSDocument.user_defined_topics:
@@ -1768,8 +1791,9 @@ class DSDocument():
                     for cl in prev_p['accum_lemmas']:   # for each given lemmas in the prev. paragraph
                         # if a lemma ('gl') is in the previous paragraphs AND their POSs maatch
                         #if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
-                        if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                        if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=self.prp):
                             para['given_accum_lemmas'].append(gl)         # add 'gl' to the list
+                            break # 2024.12.02
 
                     for temp_para in data['paragraphs']: 
                         if temp_para == para:
@@ -1777,13 +1801,12 @@ class DSDocument():
 
                         for cl in temp_para['accum_lemmas']:     # for each paragraph's accum_lemmas 
                             # if a lemma ('gl') is in the previous paragraph AND their POSs maatch
-                            # if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
-                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
+                            if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=self.prp):
                                 # if 'cl' is not already in the previous paragraph's new lemmas list
-                                if cl[LEMMA] not in [x[LEMMA] for x in temp_para['new_accum_lemmas']]:
-                                    temp_para['new_accum_lemmas'].append(cl)         # add 'cl' to the list
+                                if gl[LEMMA] not in [x[LEMMA] for x in temp_para['new_accum_lemmas']]:
+                                    temp_para['new_accum_lemmas'].append(gl)     # add 'gl' to the list
 
-                    # if 'lemma' is a user defined topic, force it to be 'given'
+                    # if 'lemma' is a user defined topic, force it to be 'given' (not used by myProse...)
                     if DSDocument.isUserDefinedTopic(gl[LEMMA].lower()) or \
                        DSDocument.isUserDefinedSynonym(gl[LEMMA]):
                         if gl[LEMMA].lower() not in para['given_accum_lemmas']:
@@ -1797,6 +1820,10 @@ class DSDocument():
             else:
                 prev_p = para           
                 for gl in para['lemmas']: 
+                    #### Adding new (not-given) lemmas to the first paragraph (2024.12.02)
+                    if gl[LEMMA] not in [x[LEMMA] for x in para['new_accum_lemmas']]:
+                        para['new_accum_lemmas'].append(gl) 
+
                     if DSDocument.isUserDefinedTopic(gl[LEMMA].lower()) or \
                        DSDocument.isUserDefinedSynonym(gl[LEMMA]):
                         if gl[LEMMA].lower() not in para['given_accum_lemmas']:
@@ -1966,36 +1993,48 @@ class DSDocument():
 
             ptext = adjustSpaces(ptext)
 
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
+            # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = para.style.name
                          
-            elif para.style.name.startswith('List'):
-                # if we find a (any) list, we'll add it to the previous paragraph.
-                if p is not None:
-                    p.add_run(" " + ptext)
-                else: 
-                    # if a list item is used first, or right after a heading.
-                    p = section_data['doc'].add_paragraph(ptext, style='Normal')
+            # elif para.style.name.startswith('List'):
+            #     # if we find a (any) list, we'll add it to the previous paragraph.
+            #     if p is not None:
+            #         p.add_run(" " + ptext)
+            #     else: 
+            #         # if a list item is used first, or right after a heading.
+            #         p = section_data['doc'].add_paragraph(ptext, style='Normal')
 
-                style = 'Normal'
-                continue
+            #     style = 'Normal'
+            #     continue
             else:
                 style = 'Normal'
 
-            if para.style.name == 'Heading 1' or para.style.name == 'Title':
+            # if para.style.name == 'Heading 1' or para.style.name == 'Title':
 
-                # start a new section if we find 'Heading 1'
-                section_data = dict()
-                section_data['doc'] = Document()
-                section_data['heading'] = ptext
-                section_data['pos'] = sect_count
-                section_data['para_data'] = []        
-                self.sections.append(section_data)
-                headings.append(ptext)
-                sect_count += 1
-                p = None
+            #     # start a new section if we find 'Heading 1'
+            #     section_data = dict()
+            #     section_data['doc'] = Document()
+            #     section_data['heading'] = ptext
+            #     section_data['pos'] = sect_count
+            #     section_data['para_data'] = []        
+            #     self.sections.append(section_data)
+            #     headings.append(ptext)
+            #     sect_count += 1
+            #     p = None
+            # elif para_count == 0 and sect_count == 0:
+            #     # if the first paragraph is not a heading. We need to crreate a doc w/o a heading
+            #     section_data = dict()
+            #     section_data['doc'] = Document()
+            #     section_data['heading'] = ptext
+            #     section_data['pos'] = sect_count
+            #     section_data['para_data'] = []                        
+            #     self.sections.append(section_data)
+            #     headings.append("")                
+            #     sect_count += 1
+            #     p = None
 
-            elif para_count == 0 and sect_count == 0:
+            if para_count == 0 and sect_count == 0:
                 # if the first paragraph is not a heading. We need to crreate a doc w/o a heading
                 section_data = dict()
                 section_data['doc'] = Document()
@@ -2086,7 +2125,8 @@ class DSDocument():
                     headings.append("(No Heading)")
                     new_sections.append(section_data)
 
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
+            # if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Title']:
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title', 'List Bullet']:
                 style = para.style.name
             else:
                 style = 'Normal'
@@ -2116,6 +2156,70 @@ class DSDocument():
 
         return headings
 
+    def loadFromHtmlFile(self, src_dir, html_file):
+        with open(os.path.join(src_dir,html_file), errors="ignore") as fin:
+            html_str = fin.read()
+        self.loadFromHtmlString(html_str)
+
+    def loadFromHtmlString(self, html_str):
+        self.current_section = 0
+        soup = bs(html_str, "html.parser")
+        body = soup.find("body")
+        doc = Document()
+        for tag in body.children:
+            if type(tag) == bs4.element.NavigableString:
+                continue
+            tag_name = tag.name
+            if tag_name == 'p':
+                # text = tag.text
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+                doc.add_paragraph(text)
+
+            elif tag_name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
+                level = tag_name[-1]
+                style_str = f"Heading {level}"
+
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+
+                doc.add_paragraph(text, style_str)
+
+            elif tag_name == 'li':
+                text = tag.decode_contents()
+                text = text.replace('\n', ' ')
+                doc.add_paragraph(text, 'List Bullet')
+
+            elif tag_name == 'ul':
+                for li_tag in tag.children:
+                    if li_tag.name == 'li':
+                        text = li_tag.decode_contents()
+                        text = text.replace('\n', ' ')                        
+                        doc.add_paragraph(text, 'List Bullet')
+
+            elif tag_name == 'ol':
+                for li_tag in tag.children:
+                    if li_tag.name == 'li':
+                        text = li_tag.decode_contents()
+                        text = text.replace('\n', ' ')                        
+                        doc.add_paragraph(text, 'List Number')
+
+
+        section_data = dict()
+        section_data['doc']       = doc
+        section_data['data']      = dict()
+        section_data['heading']   = "n/a"
+        section_data['start']     = 0
+        section_data['pos']       = 0
+        section_data['para_data'] = []
+
+        self.sections = [section_data]
+
+        # self.processDoc(section_data)
+        # section_data['start'] = 0
+        self.processDoc(section_data)
+
+
     ########################################
     #
     # Methods for creating HTML/XML strings from the text data
@@ -2129,7 +2233,6 @@ class DSDocument():
         that it is either used without the Impressions panel, or it is used from the Online version
         where docuscope is not integrated into the Coherence visualization.
         """
-
         data = self.sections[self.current_section]['data']
 
         if data is None:
@@ -2138,7 +2241,9 @@ class DSDocument():
         total_paras = len(data['paragraphs'])
         html_str = ""
         pcount  = 1
-
+        li_tag = False
+        ol_tag = False
+        ul_tag = False 
         for para in data['paragraphs']: # for each paragraph
 
             if para_pos != -1 and (para_pos+1) != pcount:
@@ -2148,8 +2253,40 @@ class DSDocument():
             total_sents = len(para['sentences'])
 
             para_style = para['style']
-            font_size = font_info[para_style]            
-            html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+            font_size = font_info[para_style] 
+    
+            if li_tag: # previous li_tag
+                # If the prev tag was li, and the current tag is also li, do nothing.
+                # Otherwise, we need to close the ul tag.
+                if para_style == 'List Bullet' or para_style == 'List Number':
+                    pass
+                elif ul_tag:
+                    html_str += "</ul>"
+                    ul_tag = False
+                elif ol_tag:
+                    html_str += "</ol>"
+                    ol_tag = False
+
+            elif li_tag == False:
+                # If the prev tag was not li, and the current tag is li, we will fist add the ul tag.
+                if para_style == 'List Bullet':
+                    html_str += "<ul>"
+                    ul_tag = True
+                elif para_style == 'List Number':
+                    html_str += "<ol>"
+                    ol_tag = True    
+
+            li_tag = False
+
+            if para_style == 'Heading 1' or para_style == 'Heading 2':                
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size) 
+            elif para_style == 'Heading 3' or para_style == 'Heading 4':                 
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size) 
+            elif para_style == 'List Bullet' or para_style == 'List Number':
+                html_str += '<li class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
+                li_tag = True
+            else:
+                html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
 
             scount = 1
 
@@ -2161,7 +2298,7 @@ class DSDocument():
                 html_str += '<sent class=\'p{} s{}\'>'.format(pcount, scount)
 
                 while word_count < total_words:
-
+                    
                     w = sent['text_w_info'][word_count]
                     word  = w[WORD]         # ontopic word
                     lemma = w[LEMMA]        # lemma/topic
@@ -2183,7 +2320,7 @@ class DSDocument():
                         # Let's deal with hyphenations and words followed by a no-space units.
                         next_w = sent['text_w_info'][word_count+1]
                         next_next_w = None
-                        
+
                         if word_count+1 < total_words-1:
                             next_next_w = sent['text_w_info'][word_count+2]
 
@@ -2288,7 +2425,7 @@ class DSDocument():
 
                                     elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
                                                                          and temp_next_w[WORD] != ellipsis:
-                                        is_space = False                                        
+                                        is_space = False   
 
                                     else:
                                         is_space = True
@@ -2296,7 +2433,7 @@ class DSDocument():
                                     is_space = True
 
                                 word_count = temp_word_count # skip all the words in the hyphenated word
-                                is_space = True
+                                # is_space = True
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
@@ -2305,6 +2442,8 @@ class DSDocument():
                             elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
+                            elif next_w[POS] == 'PUNCT' and next_w[WORD] in end_puncts:
+                                is_space = False
                             else:
                                 is_space = True
 
@@ -2346,7 +2485,10 @@ class DSDocument():
 
             # sent
             pcount += 1
-            html_str += '</p>'   # Close the paragraph tag
+            if li_tag:
+                html_str += '</li>'   # Close the list tag
+            else:
+                html_str += '</p>'   # Close the paragraph tag
 
         html_str = "<html><body>\n" + html_str + "\n</body></html>"
 
@@ -2992,6 +3134,122 @@ class DSDocument():
                 r = p.add_run(text)
 
         return res_docx
+
+    def toXml(self):
+        """
+        This method is used to generate a XML tagged representation of the document. It's primary purpose
+        is to create a structured content that can be submitted to LLM for analysis.
+        """
+        data = self.sections[self.current_section]['data']
+
+        if data is None:
+            return ""
+
+        total_paras = len(data['paragraphs'])
+        xml_str = ""
+        pcount = 1
+        scount = 1
+        ul_tag = False
+        ol_tag = False
+        li_tag = False
+        title_tag = False
+        htag_level = 0
+
+        for para in data['paragraphs']: # for each paragraph
+
+            para_style = para['style']
+
+            if li_tag: # previous li_tag
+                # If the prev tag was li, and the current tag is also li, do nothing.
+                # Otherwise, we need to close the ul tag.
+                if para_style == 'List Bullet' or para_style == 'List Number':
+                    pass
+                elif ul_tag:
+                    xml_str += "</ul>\n\n"
+                    ul_tag = False
+                    pcount += 1                                       
+                elif ol_tag:
+                    xml_str += "</ol>\n\n"
+                    ol_tag = False
+                    pcount += 1                   
+            elif li_tag == False:
+                # If the prev tag was not li, and the current tag is li, we will fist add the ul tag.
+                if para_style == 'List Bullet':
+                    xml_str += f"<ul id=\"p{pcount}\">"
+                    ul_tag = True
+                    scount = 1
+                elif para_style == 'List Number':
+                    xml_str += f"<ol id=\"p{pcount}\">"
+                    ol_tag = True    
+                    scount = 1                    
+
+            li_tag = False
+            title_tag = False
+            htag_level = 0
+
+            if para_style == 'Title':
+                xml_str += f"<title id=\"p{pcount}\">"
+                title_tag = True
+            elif para_style == 'Heading 1':
+                xml_str += f"<h1 id=\"p{pcount}\">"
+                htag_level = 1
+            elif para_style == 'Heading 2':
+                xml_str += f"<h2 id=\"p{pcount}\">"
+                htag_level = 2
+            elif para_style == 'Heading 3':
+                xml_str += f"<h3 id=\"p{pcount}\">"
+                htag_level = 3
+            elif para_style == 'Heading 4':               
+                xml_str += f"<h4 id=\"p{pcount}\">"
+                htag_level = 4
+            elif para_style == 'Heading 5':
+                xml_str += f"<h5 id=\"p{pcount}\">"
+                htag_level = 5              
+            elif para_style == 'Heading 6':
+                xml_str += f"<h6 id=\"p{pcount}\">"
+                htag_level = 6                                       
+            elif para_style == 'List Bullet':
+                xml_str += '<li>'
+                li_tag = True
+            elif para_style == 'List Number':
+                xml_str += '<li>'
+                li_tag = True                
+            elif ol_tag != True and ul_tag != True:
+                xml_str += f'<p id=\"p{pcount}\">'
+
+            if ol_tag != True and ul_tag != True:
+                scount = 1
+
+            for sent in para['sentences']: # for each sentence
+
+                sent_text = sent['text']
+
+                if htag_level == 0:
+                    xml_str += f"<span id=\"p{pcount}s{scount}\">{sent_text}</span>"
+                else:
+                    # this text is inisde a heading tag. We do not mark it as a sentence.
+                    sent_text = sent['text']
+                    xml_str += sent_text
+
+                scount += 1
+            # sent
+
+            if htag_level > 0:
+                xml_str += f'</h{htag_level}>\n\n'
+                pcount += 1
+            elif title_tag:
+                xml_str += '</title>\n'
+            elif li_tag:
+                xml_str += '</li>\n'   
+            elif ol_tag != True and ul_tag != True:
+                xml_str += '</p>\n\n'  
+                pcount += 1
+
+        # xml_str = "<text>\n" + xml_str + "</text>"
+
+        return xml_str
+
+    ##        
 
     def getLocalTopicalProgData(self, selected_paragraphs):  
 
@@ -4109,7 +4367,7 @@ class DSDocument():
 
                 # get a list of numbers with thousand separator(s)
                 # num_list = re.findall("\"[0-9,.]+\"(?=,)", line) 
-                num_list = re.findall("\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
+                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
                 if num_list:
                     token_info = num_list + token_info[-3:]
             else:
@@ -4256,7 +4514,7 @@ class DSDocument():
                 # Get a list of numbers with thousand separator(s), followed by a comma separator
                 # This also captures patterns like N=2,000 etc.
                 # num_list = re.findall("\"[0-9,.]+\"(?=,)", line)  # old
-                num_list = re.findall("\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021               
+                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021               
                 if num_list:
                     token_info = num_list + token_info[-3:]
 
@@ -5700,3 +5958,77 @@ class DSDocument():
                 sent_pos += 1
 
         return res
+
+    def generateCSVString(self, vis_data):
+
+        if vis_data['data'] == []:
+            print("No global topics")
+            return
+
+        data       = vis_data['data']
+        num_paras  = vis_data['num_paras']
+        num_topics = vis_data['num_topics']
+
+        csv_str = ""
+
+        # Print paragraph IDs
+        line = "Topics,"
+        for i in range(1, num_paras+1):
+            line += f"{i},"
+
+        # print(line)
+        line += "\n"
+
+        csv_str += line
+
+        # For each data for a specific topic,
+        for topic_data in data:                                    
+            topic = topic_data['topic']
+            lemma = topic[LEMMA]
+            is_topic_cluster = topic_data['is_topic_cluster']
+            is_non_local = topic_data['is_non_local']
+
+            # if the paragraph data is not empty OR if the topic is a topic cluster
+            if topic_data['paragraphs'] != [] or is_topic_cluster:
+
+                # header section
+                line = f"{lemma},"
+
+                # Write a symbol for each paragraph.
+                # L = 'topic' appears on the left side of the main verb at least once.
+                # l = a topic cluster that is not a global topic.
+                # R = 'topic' appears on the right side of the main verb.
+                # r = a topic cluster that is not a global topic.
+                # * = topic sentence.
+                for para_data in topic_data['paragraphs']:
+                    if para_data is not None:
+                        para_pos = para_data['para_pos']
+                        is_left  = para_data['is_left']
+                        is_topic_sent = para_data['is_topic_sent']
+
+                        if is_left:                     # is 'topic' on the left side?
+                            c = 'L'
+                            if is_topic_sent:           # is 'topic' appear in a topic sentence?
+                                line += (c + "*")
+                            else:                      
+                                line += c
+                        else:
+                            c = 'R'
+
+                            if is_topic_sent:
+                                line += f"{c}*"
+                            else:
+                                line += c
+
+                        line += ","                                
+
+                    else:
+                        line += ","
+
+                # print(line)
+                line += "\n"
+
+                csv_str += line
+
+        return csv_str
+

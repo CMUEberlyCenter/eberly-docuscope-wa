@@ -79,7 +79,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       }
                       onExit={() => dispatch({ type: "unset" })}
                     >
-                      {support && (
+                      {support ? (
                         <div
                           className={classNames(
                             "p-3 pb-2",
@@ -89,8 +89,8 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                           <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
                           <span>{support}</span>
                         </div>
-                      )}
-                      {suggestions?.length && (
+                      ) : null}
+                      {!!suggestions?.length ? (
                         <div className="m-3 mt-2">
                           <h6>{t("arguments.suggestions")}</h6>
                           <ul>
@@ -99,7 +99,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                             ))}
                           </ul>
                         </div>
-                      )}
+                      ) : null}
                     </Accordion.Body>
                   </Accordion.Item>
                 )

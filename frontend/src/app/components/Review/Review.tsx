@@ -97,7 +97,7 @@ export const Review: FC = () => {
       if (ontopic_doc && ["sentences", "organization"].includes(tool)) {
         setProse(ontopic_doc);
       } else {
-        setProse(review.document);
+        setProse(review.segmented);
       }
     } else {
       setProse("");
