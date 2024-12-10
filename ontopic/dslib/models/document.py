@@ -526,7 +526,7 @@ class DSDocument():
     def setNounSubjectOptions(cls, options):
         DSDocument.noun_subject_options = options
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def setUserDefinedSynonyms(cls, synsets):
         # convert a list of synonyms into a dictionary for faster look up
         if synsets == [] or synsets == None:
@@ -556,14 +556,14 @@ class DSDocument():
 
             DSDocument.user_defined_synonym_names.append(lemma)
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def isUserDefinedSynonym(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             return True
         else:
             return False
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def isUserDefinedSynonymDefined(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             for synonym, name in DSDocument.user_defined_synonyms.items():
@@ -576,7 +576,7 @@ class DSDocument():
         else:
             return False            
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def setMultiwordTopics(cls, topics):
         if topics is None:
             DSDocument.multiword_topics = []
@@ -586,42 +586,42 @@ class DSDocument():
             DSDocument.deleted_multiword_topics = list(set(DSDocument.multiword_topics) - set(topics))
             DSDocument.multiword_topics = topics
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def setUserDefinedTopics(cls, topics):
         DSDocument.user_defined_topics = [t.lower().replace(' ', '_') for t in topics]
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def isUserDefinedTopic(cls, lemma):
         if lemma in DSDocument.user_defined_topics:
             return True
         else:
             return False
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def addUserDefinedTopic(cls, topic):
         if topic is not None and topic != '':
             lc_topic = topic.lower()
             if lc_topic not in DSDocument.user_defined_topics:
                 DSDocument.user_defined_topics.append(lc_topic)
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def deleteUserDefinedTopic(cls, topic_to_delete):
         if topic_to_delete in DSDocument.user_defined_topics.remove:
             DSDocument.user_defined_topics.remove(topic_to_delete)
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def clearUserDefinedTopics(cls):
         DSDocument.user_defined_topics = []
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def getUserDefinedTopics(cls):
         return DSDocument.user_defined_topics
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def getUserDefinedSynonyms(cls):
         return DSDocument.user_defined_synonym_names
 
-    @classmethod
+    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
     def clearUserDefinedSynonyms(cls):
         DSDocument.user_defined_synonym_names = []
 

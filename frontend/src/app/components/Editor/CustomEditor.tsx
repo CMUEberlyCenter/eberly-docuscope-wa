@@ -191,7 +191,10 @@ const CustomEditor: FC = () => {
   };
 
   const uploadFile = useCallback(async () => {
-    if ("showOpenFilePicker" in window) {
+    if (
+      "showOpenFilePicker" in window &&
+      typeof window.showOpenFilePicker === "function"
+    ) {
       try {
         const [handle]: FileSystemFileHandle[] =
           await window.showOpenFilePicker(loadSaveFileOps);
@@ -215,7 +218,10 @@ const CustomEditor: FC = () => {
   const lti = useLtiInfo();
   const saveAs = useCallback(async () => {
     if (content) {
-      if ("showSaveFilePicker" in window) {
+      if (
+        "showSaveFilePicker" in window &&
+        typeof window.showSaveFilePicker === "function"
+      ) {
         const rootname =
           upload?.name ||
           lti?.resource.title ||

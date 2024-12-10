@@ -19,6 +19,8 @@ fastapi = "*"
 hypercorn = "*"
 
 [dev-packages]
+pylint = "*"
+pycodestyle = "*"
 
 [requires]
 python_version = "3.12"

@@ -1,14 +1,14 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useEffect, useId, useState } from "react";
+import { Button } from "react-bootstrap";
 import { Translation } from "react-i18next";
+import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import {
   useSelectTaskAvailable,
   useWritingTask,
 } from "../../service/writing-task.service";
-import { Button } from "react-bootstrap";
-import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
-import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
+import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 
 /** Component for displaying the title of the globally selected outline. */
 export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
@@ -80,13 +80,13 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
             show={showTask}
             onHide={() => setShowTask(false)}
           />
-          {selectAvailable && (
+          {selectAvailable ? (
             <SelectWritingTask
               id={selectId}
               show={showSelect}
               onHide={() => setShowSelect(false)}
             />
-          )}
+          ) : null}
         </div>
       )}
     </Translation>
