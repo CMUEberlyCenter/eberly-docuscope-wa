@@ -143,7 +143,7 @@ export async function initDatabase(): Promise<void> {
       await timeout(sleep);
     }
   }
-  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  const collection = await client.db('docuscope').createCollection<Review>(REVIEW);
   // Add expire index if necessary.
   const ExpireIndexName = 'expire';
   const indx = (await collection.indexes()).find((idx) => 'created' in idx.key);
