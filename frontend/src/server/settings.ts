@@ -1,29 +1,19 @@
-import { Command, Option } from 'commander';
+import { Command } from 'commander';
 import { readFileSync } from 'fs';
-// import { fileURLToPath } from 'url';
 import 'dotenv/config';
 import { join } from 'path';
 import { version } from '../../package.json';
 import { LanguageSettingsRequest } from '../lib/Requests';
 
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = dirname(__filename);
-
 const program = new Command();
 program
   .description('Backend server for DocuScope Write and Audit.')
-  .version(version)
-  // .addOption(
-  //   new Option('-p --port <number>', 'Port to use for server.').env('PORT')
-  // )
-  .addOption(
-    new Option('--db <string>', 'Database name')
-      .env('MYSQL_DATABASE')
-      .default('dswa')
-  );
-// .addOption(new Option("--on-topic <uri>", "OnTopic server").env("DSWA_ONTOPIC_HOST")
+  .version(version);
+// .addOption(
+//   new Option('-p --port <number>', 'Port to use for server.').env('PORT')
+// )
 program.parse();
-const options = program.opts();
+// const options = program.opts();
 export const DEV = process.env.NODE_ENV !== 'production';
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
@@ -56,7 +46,7 @@ export const LTI_HOSTNAME = new URL(
   process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
 );
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
-const MONGO_DB = process.env.MONGO_DB ?? 'docuscope';
+const MONGO_DB = process.env.MONGO_DB ?? 'myprose';
 const MONGO_USER = fromEnvFile('MONGO_USER');
 const MONGO_PASSWORD = fromEnvFile('MONGO_PASSWORD');
 export const LTI_DB = {
@@ -78,29 +68,10 @@ export const LTI_OPTIONS = {
   },
 };
 
-const MYSQL_USER = fromEnvFile('MYSQL_USER');
-const MYSQL_PASSWORD = fromEnvFile('MYSQL_PASSWORD');
-const MYSQL_DB = options.db ?? 'dswa';
-const MYSQL_HOST = process.env.MYSQL_HOST ?? 'localhost';
-const MYSQL_PORT =
-  process.env.MYSQL_PORT && !isNaN(Number(process.env.MYSQL_PORT))
-    ? parseInt(process.env.MYSQL_PORT)
-    : 3306;
-export const MYSQL_POOL = {
-  host: MYSQL_HOST,
-  user: MYSQL_USER,
-  port: MYSQL_PORT,
-  password: MYSQL_PASSWORD,
-  database: MYSQL_DB,
-  waitForConnections: true,
-  timezone: 'Z', // makes TIMESTAMP work correctly
-};
 const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
 export const ONTOPIC_URL = new URL('api/v2/ontopic', ONTOPIC_SERVER);
 export const SEGMENT_URL = new URL('api/v2/segment', ONTOPIC_SERVER);
 
-export const OPENAI_API_KEY = fromEnvFile('OPENAI_API_KEY');
-export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
 export const ANTHROPIC_API_KEY = fromEnvFile('ANTHROPIC_API_KEY');
 export const ANTHROPIC_MODEL =
   process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';

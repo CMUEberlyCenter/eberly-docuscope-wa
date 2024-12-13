@@ -1,19 +1,14 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { readFile } from 'fs/promises';
-import OpenAI from 'openai';
 import format from 'string-format';
 import { PromptData, PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
-  OPENAI_API_KEY,
-  OPENAI_MODEL,
   SCRIBE_TEMPLATES,
 } from '../settings';
 
-const CLIENT: 'anthropic' | 'openai' = 'anthropic';
-const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 let prompts: PromptData;
@@ -65,27 +60,7 @@ export async function doChat(
   // TODO improve this logic
   let model: string;
   let response: string | object = '';
-  if (CLIENT === 'openai' && OPENAI_API_KEY) {
-    const chat = await openai.chat.completions.create({
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'system', content: role ?? 'You are a chatbot' },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: OPENAI_MODEL,
-      ...(json ? { response_format: { type: 'json_object' } } : {}),
-    });
-    // TODO handle openai error
-    const resp = chat.choices.at(0)?.message.content;
-    if (!resp) {
-      throw new Error('No content in OpenAI response.');
-    }
-    response = resp;
-    model = chat.model;
-  } else if (CLIENT === 'anthropic' && ANTHROPIC_API_KEY) {
+  if (ANTHROPIC_API_KEY) {
     const chat = await anthropic.messages.create({
       max_tokens: ANTHROPIC_MAX_TOKENS,
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),

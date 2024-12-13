@@ -58,7 +58,7 @@ export type KeyPointsResponse = {
       /** A brief but clear and actionable description of the suggestion. */
       elaboration_strategy: string;
       /** An explanation of how implementing the suggested change would strengthen the development of the central idea. */
-      explanation: string
+      explanation: string;
     }[];
     /** A list of span ids for the sentences from the text that are used to state the claim. */
     idea_sentences: string[];

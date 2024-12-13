@@ -59,11 +59,6 @@ services:
       - "./settings:/app/build/app/settings:ro"
       - "./private:/app/private:ro"
 
-volumes:
-  db-data:
-    labels:
-      edu.cmu.eberly.docuscope.description: "Database for DocuScope Write & Audit Scribe"
-
 secrets:
   anthropic_api_key:
     file: secrets/anthropic_api_key
