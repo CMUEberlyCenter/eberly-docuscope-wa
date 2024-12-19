@@ -649,7 +649,7 @@ class DSDocument():
         self.adv  = False
         self.prp  = False
 
-        self.max_paras        = 100
+        self.max_paras        = 500
         self.skip_paras       = 0
         
         self.is_collapsed         = True
