@@ -43,12 +43,12 @@ export const KeyIdeas: FC = () => {
                 {new Date(review.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
-            {review.response.central_idea && (
+            {/* {review.response.central_idea && (
               <>
                 <h5>{t("key_ideas.main_idea")}</h5>
                 <p>{review.response.central_idea}</p>
               </>
-            )}
+            )} // removed for #116 */}
             {"ideas" in review.response && review.response.ideas.length ? (
               <Accordion>
                 {review.response.ideas.map(

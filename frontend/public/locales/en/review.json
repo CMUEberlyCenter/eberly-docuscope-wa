@@ -44,13 +44,13 @@
     "null": "No feeback concerning logical progression could be generated from your draft."
   },
   "key_ideas": {
-    "entry": "List of Key Ideas",
-    "title": "Key Ideas found in the Text",
+    "entry": "List of Prominent Topics",
+    "title": "Prominent Topics found in the Text",
     "overview": "<p>This tool evaluates how well your writing <b>communicates its central idea</b>. It examines how each idea is presented, whether it includes sufficient details or clear explanations, and offers suggestions for revisions to enhance clarity.</p><p>First, review the central idea identified in your writing. If it’s inaccurate, revise your text for clarity. Then, analyze each supporting idea to ensure it aligns with your central idea. Click on each idea for tips on improving descriptions and how these changes reinforce your overall thesis.</p>",
     "main_idea": "Main Idea",
     "error": "Error reading Key Ideas data.",
     "no_sentences": "No relevant text addressing this idea was found in your draft.",
-    "idea": "Idea:",
+    "idea": "Topic:",
     "elaborations": "Elaboration Strategies",
     "sentences": "Sentences",
     "suggestions": "Suggestions",
