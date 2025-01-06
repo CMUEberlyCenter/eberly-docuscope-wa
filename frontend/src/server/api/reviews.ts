@@ -74,7 +74,7 @@ const doOnTopic = async (
 /**
  * Segments the given text into sentences.
  * @param text content of editor.
- * @returns HTML string.
+ * @returns HTML string or ''.
  */
 const segmentText = async (text: string): Promise<string> => {
   try {
@@ -90,13 +90,13 @@ const segmentText = async (text: string): Promise<string> => {
       console.error(
         `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
       );
-      return text;
+      return '';
     }
     const data = (await res.json()) as string;
     return data;
   } catch (err) {
     console.error(err); // fetch error, rare errors
-    return text;
+    return '';
   }
 };
 
