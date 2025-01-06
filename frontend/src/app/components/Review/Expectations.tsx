@@ -68,7 +68,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             />
           </Accordion.Header>
           <Accordion.Body
-            onEntering={() =>
+            onEntered={() =>
               isAllExpectationsData(expectation)
                 ? dispatch({
                     sentences: [expectation.response.sentences],
@@ -76,7 +76,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
                   })
                 : dispatch({ type: "unset" })
             }
-            onExiting={() => dispatch({ type: "unset" })}
+            onExit={() => dispatch({ type: "unset" })}
           >
             <h6>{t("suggestions")}</h6>
             <p key={`${id}-suggestion`}>
