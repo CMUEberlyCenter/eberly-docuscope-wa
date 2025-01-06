@@ -14,7 +14,13 @@ import logo from "../../assets/logo.svg";
 export const Logo: FC = () => (
   <Translation>
     {(t) => (
-      <img style={{ height: "1.1em" }} src={logo} alt={t("document.title")} />
+      <a
+        href="https://www.cmu.edu/dietrich/english/research-and-publications/myprose.html"
+        target="_blank"
+        rel="noreferrer noopener"
+      >
+        <img style={{ height: "1.1em" }} src={logo} alt={t("document.title")} />
+      </a>
     )}
   </Translation>
 );
