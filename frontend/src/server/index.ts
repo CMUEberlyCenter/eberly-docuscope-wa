@@ -58,7 +58,7 @@ async function __main__() {
     })
   );
 
-  Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
+  Provider.onConnect(async (token: IdToken, _req: Request, res: Response) => {
     if (token) {
       return res.sendFile(join(PUBLIC, 'index.html'));
     }
@@ -137,7 +137,7 @@ async function __main__() {
 
   console.log(`OnTopic: ${ONTOPIC_URL}`);
 
-  Provider.app.get('/lti/info', async (req: Request, res: Response) => {
+  Provider.app.get('/lti/info', async (_req: Request, res: Response) => {
     const token: IdToken | undefined = res.locals.token;
     const context = {
       instructor: isInstructor(token?.platformContext),

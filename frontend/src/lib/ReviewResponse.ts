@@ -27,11 +27,11 @@ export type Claim = {
   /** An explanation for the evidence supporting the claim. */
   support: string;
   /** List of span ids for sentences that support the claim. */
-  claim_sentences: string[];
+  claim_sentences?: string[];
   /** A List where the first entry is a suggestion and the second is an explanation of the suggestion. */
-  suggestions: string[];
+  suggestions?: string[];
   /** A list of span ids for sentences that provide evidence to support the claim. */
-  evidence_sentences: string[];
+  evidence_sentences?: string[];
 };
 
 /** JSON structure for the results of the arguments prompt. */

@@ -64,7 +64,8 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       <AlertIcon
                         message={t("arguments.no_sentences")}
                         show={
-                          claim_sentences.length + evidence_sentences.length ===
+                          (claim_sentences ?? []).length +
+                            (evidence_sentences ?? []).length ===
                           0
                         }
                       />
@@ -74,7 +75,10 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       onEntered={() =>
                         dispatch({
                           type: "set",
-                          sentences: [claim_sentences, evidence_sentences],
+                          sentences: [
+                            claim_sentences ?? [],
+                            evidence_sentences ?? [],
+                          ],
                         })
                       }
                       onExit={() => dispatch({ type: "unset" })}
@@ -83,14 +87,15 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         <div
                           className={classNames(
                             "p-3 pb-2",
-                            evidence_sentences.length && "highlight highlight-1"
+                            (evidence_sentences ?? []).length &&
+                              "highlight highlight-1"
                           )}
                         >
                           <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
                           <span>{support}</span>
                         </div>
                       ) : null}
-                      {!!suggestions?.length ? (
+                      {suggestions?.length ? (
                         <div className="m-3 mt-2">
                           <h6>{t("arguments.suggestions")}</h6>
                           <ul>
