@@ -649,7 +649,7 @@ class DSDocument():
         self.adv  = False
         self.prp  = False
 
-        self.max_paras        = 100
+        self.max_paras        = 500
         self.skip_paras       = 0
         
         self.is_collapsed         = True
@@ -3239,6 +3239,7 @@ class DSDocument():
                 pcount += 1
             elif title_tag:
                 xml_str += '</title>\n'
+                pcount += 1                
             elif li_tag:
                 xml_str += '</li>\n'   
             elif ol_tag != True and ul_tag != True:
