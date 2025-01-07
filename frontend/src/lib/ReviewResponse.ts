@@ -51,9 +51,9 @@ export type KeyPointsResponse = {
   central_idea: string;
   /** A list of span ids for the sentences that describe the central idea of this text.  */
   central_idea_sentences: string[];
-  ideas: {
+  topics: {
     /** A point or key idea of the text summarized in a single sentence. */
-    idea: string;
+    topic: string;
     elaborations: {
       /** A brief but clear and actionable description of the suggestion. */
       elaboration_strategy: string;
@@ -61,7 +61,7 @@ export type KeyPointsResponse = {
       explanation: string;
     }[];
     /** A list of span ids for the sentences from the text that are used to state the claim. */
-    idea_sentences: string[];
+    topic_sentences: string[];
     /** List of suggestions. */
     suggestions: string[];
     /** A list of span ids for the sentences from the text that provide the evidence used to support the claim. */

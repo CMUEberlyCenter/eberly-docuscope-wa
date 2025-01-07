@@ -50,15 +50,15 @@ export const KeyIdeas: FC = () => {
                 <p>{review.response.central_idea}</p>
               </>
             )} // removed for #116 */}
-            {"ideas" in review.response && review.response.ideas.length ? (
+            {"topics" in review.response && review.response.topics.length ? (
               <Accordion>
-                {review.response.ideas.map(
+                {review.response.topics.map(
                   (
                     {
-                      idea,
+                      topic,
                       elaborations,
                       suggestions,
-                      idea_sentences,
+                      topic_sentences,
                       elaboration_sentences,
                     },
                     i
@@ -67,11 +67,11 @@ export const KeyIdeas: FC = () => {
                       <Accordion.Header className="accordion-header-highlight">
                         <div className="flex-grow-1">
                           <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
-                          <span>{idea}</span>
+                          <span>{topic}</span>
                         </div>
                         <AlertIcon
                           show={
-                            idea_sentences.length +
+                            topic_sentences.length +
                               elaboration_sentences.length ===
                             0
                           }
@@ -83,7 +83,7 @@ export const KeyIdeas: FC = () => {
                         onEntered={() =>
                           dispatch({
                             type: "set",
-                            sentences: [idea_sentences, elaboration_sentences],
+                            sentences: [topic_sentences, elaboration_sentences],
                           })
                         }
                         onExit={() => dispatch({ type: "unset" })}
