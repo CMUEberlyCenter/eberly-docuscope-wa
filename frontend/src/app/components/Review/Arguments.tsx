@@ -123,6 +123,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
  */
 export const Arguments: FC = () => {
   const { t } = useTranslation("review");
+  const { t: ti } = useTranslation("instructions");
   const review = useArgumentsData();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
@@ -132,7 +133,7 @@ export const Arguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
-        <FadeContent htmlContent={t("arguments.overview")} />
+        <FadeContent htmlContent={ti("arguments")} />
         {!review ? (
           <Loading />
         ) : (

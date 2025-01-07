@@ -134,7 +134,8 @@
     "slate-react": "^0.112.0",
     "string-format": "^2.0.0",
     "swr": "^2.3.0",
-    "systeminformation": "^5.25.3"
+    "systeminformation": "^5.25.3",
+    "yaml": "^2.7.0"
   },
   "overrides": {
     "bluebird": "3.7.2",

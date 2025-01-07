@@ -3225,7 +3225,7 @@ class DSDocument():
                 sent_text = sent['text']
 
                 if htag_level == 0:
-                    xml_str += f"<span id=\"p{pcount}s{scount}\">{sent_text}</span>"
+                    xml_str += f"<span id=\"p{pcount}s{scount}\" class=\"sentence\">{sent_text}</span>"
                 else:
                     # this text is inisde a heading tag. We do not mark it as a sentence.
                     sent_text = sent['text']

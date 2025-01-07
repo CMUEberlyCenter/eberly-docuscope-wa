@@ -198,6 +198,7 @@ type SelectedRowCol = {
 } | null;
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
+  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
@@ -262,7 +263,7 @@ export const Organization: FC = () => {
     <ReviewReset>
       <div className="container-fluid organization">
         <h4>{t("organization.title")}</h4>
-        <FadeContent htmlContent={t("organization.overview")} />
+        <FadeContent htmlContent={ti("term_matrix")} />
         {!data ? (
           <Loading />
         ) : (

@@ -24,6 +24,7 @@ export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
 /** Component for displaying results of Key Ideas review results. */
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
+  const { t: ti } = useTranslation("instructions");
   const review = useKeyPointsData();
   const dispatch = useContext(ReviewDispatchContext);
 
@@ -31,7 +32,7 @@ export const KeyIdeas: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("key_ideas.title")}</h4>
-        <FadeContent htmlContent={t("key_ideas.overview")} />
+        <FadeContent htmlContent={ti("key_points")} />
         {!review ? (
           <Loading />
         ) : (

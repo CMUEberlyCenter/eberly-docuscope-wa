@@ -124,6 +124,7 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
 
 export const Expectations: FC = () => {
   const { t } = useTranslation("review");
+  const { t: ti } = useTranslation("instructions");
   const writingTask = useWritingTask();
   // const [expectations, setExpectations] = useState<Rule[]>([]);
   // useEffect(() => {
@@ -137,7 +138,7 @@ export const Expectations: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("expectations.title")}</h4>
-        <FadeContent htmlContent={t("expectations.overview")} />
+        <FadeContent htmlContent={ti("expectations")} />
         {!writingTask ? (
           <Loading />
         ) : (

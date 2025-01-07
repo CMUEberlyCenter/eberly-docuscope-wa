@@ -83,6 +83,7 @@ type TextData = {
 
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
+  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
   const review = useReview();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
@@ -98,7 +99,7 @@ export const Sentences: FC = () => {
   useEffect(() => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
-    setTextData({ plain: review.text, sentences: data?.response.clarity });
+    setTextData({ plain: review.segmented, sentences: data?.response.clarity });
   }, [review, data]);
 
   useEffect(() => {
@@ -131,7 +132,7 @@ export const Sentences: FC = () => {
     <ReviewReset>
       <div className="container-fluid sentences d-flex flex-column h-100">
         <h4>{t("sentences.title")}</h4>
-        <FadeContent htmlContent={t("sentences.overview")} />
+        <FadeContent htmlContent={ti("clarity")} />
         {!data ? (
           <Loading />
         ) : (
