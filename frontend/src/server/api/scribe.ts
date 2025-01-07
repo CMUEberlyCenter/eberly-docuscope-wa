@@ -6,7 +6,7 @@ import {
   NotesRequest,
   TextRequest,
 } from '../../lib/Requests';
-import { doChat } from '../data/chat';
+import { doChat, readTemplates } from '../data/chat';
 import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
@@ -93,3 +93,10 @@ scribe.post(
     }
   }
 );
+
+scribe.get('/templates/info',
+  async (_request: Request, response: Response) => {
+    const {info} = await readTemplates();
+    response.json(info);
+  }
+)

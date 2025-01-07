@@ -1,4 +1,13 @@
 {
+  "about": {
+    "overview": "Project Overview:",
+    "build": "Build:",
+    "version": "Version: {{version}} built on {{date}}",
+    "template": "Templates Information:",
+    "templates": "Templates built on {{date}}",
+    "task": "Writing Task:",
+    "task_name": "Name: {{name}}"
+  },
   "document.title": "myProse",
   "document.description": "myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.",
   "loading": "Processing...",
