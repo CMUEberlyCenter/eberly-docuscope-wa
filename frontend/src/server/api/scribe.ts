@@ -94,9 +94,7 @@ scribe.post(
   }
 );
 
-scribe.get('/templates/info',
-  async (_request: Request, response: Response) => {
-    const {info} = await readTemplates();
-    response.json(info);
-  }
-)
+scribe.get('/templates/info', async (_request: Request, response: Response) => {
+  const { info } = await readTemplates();
+  response.json(info);
+});

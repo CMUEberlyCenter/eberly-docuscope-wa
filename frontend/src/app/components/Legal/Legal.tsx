@@ -9,7 +9,7 @@ export const Legal: FC = () => (
         className="container-fluid border-top py-2 d-flex flex-row align-items-baseline justify-content-end"
         style={{ fontSize: "small" }}
       >
-        <About/>
+        <About />
         {/* <a className="px-1 border-end border-2" href="https://www.andrew.cmu.edu/" target="_blank">{t('legal.myprose')}</a> */}
         <a
           className="border-start border-end border-2 px-1"

@@ -201,11 +201,14 @@ const CustomEditor: FC = () => {
         const file = await handle.getFile();
         setUpload(file);
       } catch (err) {
+        console.error(err);
+        if (err instanceof DOMException && err.name === 'AbortError') {
+           return; // Skip cancel.
+        }
         if (err instanceof Error) {
           setErrors([{ type: "error", message: err.message, error: err }]);
           setShowErrors(true);
         }
-        console.error(err);
       }
     } else {
       setShowUpload(true);
@@ -381,7 +384,7 @@ const CustomEditor: FC = () => {
         onFile={setUpload}
       />
       <Toast
-        bg="danger"
+        bg="light"
         className="position-absolute start-50 bottom-0 translate-middle"
         show={showErrors}
         onClose={() => setShowErrors(!showErrors)}

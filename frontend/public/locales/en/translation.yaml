@@ -31,7 +31,7 @@ editor:
     file: File
     open: Open
     error:
-      title: 'Errors:'
+      title: 'File Import Issues:'
       fail: Single file selection only.
       not_docx: '{{file}} is not a docx file!'
       failed_write: Unable to save file.

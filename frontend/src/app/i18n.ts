@@ -14,6 +14,6 @@ i18n
     interpolation: { escapeValue: false },
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.yaml',
-      parse: (data: string) => parse(data)
-    }
+      parse: (data: string) => parse(data),
+    },
   });
