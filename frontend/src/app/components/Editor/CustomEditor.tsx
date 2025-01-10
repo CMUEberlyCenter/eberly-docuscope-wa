@@ -393,12 +393,14 @@ const CustomEditor: FC = () => {
           {t("editor.upload.error.title")}
         </Toast.Header>
         <Toast.Body>
+          <p>{t("editor.upload.error.overview")}</p>
           <ListGroup>
             {errors.map((msg, i) => (
               <ListGroup.Item
                 key={i}
                 variant={msg.type === "error" ? "danger" : "warning"}
               >
+                {msg.type === "error" ? t("editor.upload.error.error") : t("editor.upload.error.warning")}{" "}
                 {(msg.message === "Security Error" &&
                   t("editor.upload.error.security")) ||
                   (msg.message === "Failed Write" &&
