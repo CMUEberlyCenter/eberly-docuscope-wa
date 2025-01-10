@@ -32,7 +32,7 @@ editor:
     open: Open
     error:
       title: 'File Import Issues:'
-      overview: There are some issues trying to import the file.  Please check the following for details as errors likely indicate a loss of information while warnings usually indicate that the document might look different in this application.
+      overview: Check the details below: Warnings likely indicate display differences while errors may indicate information loss.
       error: 'Error:'
       warning: 'Warning:'
       fail: Single file selection only.
