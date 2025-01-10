@@ -32,7 +32,7 @@ editor:
     open: Open
     error:
       title: 'File Import Issues:'
-      overview: Check the details below: Warnings likely indicate display differences while errors may indicate information loss.
+      overview: 'Check the details below: Warnings likely indicate display differences while errors may indicate information loss.'
       error: 'Error:'
       warning: 'Warning:'
       fail: Single file selection only.
