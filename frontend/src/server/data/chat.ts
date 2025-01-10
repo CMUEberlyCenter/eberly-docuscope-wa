@@ -72,9 +72,13 @@ export async function doChat(
         },
       ],
       model: ANTHROPIC_MODEL,
+      // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
     });
     model = chat.model;
-    // TODO handle anthropic error
+    // TODO handle anthropic error https://docs.anthropic.com/en/api/errors
+    // handle server errors, 400-529, 413 in particular (request_too_large)
+    // handle response error: chat.type === 'error'
+    //   chat.error.type and chat.error.message
     const resp = chat.content.at(0);
     if (resp?.type === 'text') {
       response = resp.text;
@@ -84,6 +88,7 @@ export async function doChat(
   } else {
     throw new Error('No LLM configured.');
   }
+  // TODO catch json parsing errors, either here or in calling code
   response = json ? JSON.parse(response) : response;
   const finished = new Date();
   return {
