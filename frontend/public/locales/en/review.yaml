@@ -45,8 +45,8 @@ global_coherence:
     suggestions: 'Suggestions:'
   'null': No feeback concerning logical progression could be generated from your draft.
 key_ideas:
-  entry: List of Prominent Topics
-  title: Prominent Topics found in the Text
+  entry: Prominent Topics
+  title: Prominent Topics
   main_idea: Main Idea
   error: Error reading Prominent Topics data.
   no_sentences: No relevant text addressing this topic was found in your draft.
