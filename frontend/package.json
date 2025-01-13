@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "2.0.0-rc.2",
+  "version": "2.0.0",
   "description": "",
   "main": "src/app/index.tsx",
   "type": "module",
@@ -39,9 +39,9 @@
   ],
   "license": "CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL 4.0 INTERNATIONAL LICENSE",
   "bugs": {
-    "url": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki"
+    "url": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/issues"
   },
-  "homepage": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/wiki",
+  "homepage": "https://www.cmu.edu/dietrich/english/research-and-publications/myprose.html",
   "browserslist": [
     "defaults"
   ],
