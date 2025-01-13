@@ -19,29 +19,32 @@ const SETTINGS_URL = new URL(
   import.meta.url
 );
 
-// Defines the form of the json settings.
+/**
+ * Defines the form of the json settings.
+ * Setting for the global availability of various tools.
+ */
 interface Settings {
-  text2speech?: boolean;
-  scribe?: boolean; // global scribe availability
-  // scribe features
-  // Draft
-  notes2prose?: boolean;
-  notes2bullets?: boolean;
-  assess_expectation?: boolean;
-  assess_expectations?: boolean;
-  // Review
-  lines_of_arguments?: boolean;
-  key_ideas?: boolean;
-  logical_progression?: boolean;
+  text2speech?: boolean; // Text to speech widgets
+  scribe?: boolean; // global LLM tool availability, false disables all LLM tools
+  // Draft Tools
+  notes2prose?: boolean; // Notes to Prose LLM tool
+  notes2bullets?: boolean; // Notes to List LLM tool
+  assess_expectation?: boolean; // Assess Single Expectation LLM tool
+  // LLM Review Tools
+  assess_expectations?: boolean; // All Expectations review LLM tool
+  lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
+  key_ideas?: boolean; // Key Ideas review LLM tool
+  logical_progression?: boolean; // Logical Progression review LLM tool
+  // onTopic Review Tools
   term_matrix?: boolean;
   sentence_density?: boolean;
-  // Refine
-  flow?: boolean;
-  copyedit?: boolean;
+  // Refine Tool
+  flow?: boolean; // Flow LLM tool
+  copyedit?: boolean; // CopyEdit LLM tool
 
   // docuscope features
-  docuscope?: boolean; // global docuscope availability
-  impressions?: boolean;
+  docuscope?: boolean; // global docuscope availability, false disables all DocuScope tools
+  impressions?: boolean; // DocuScope impressions tool.
   common_dictionary: string; // URL.  Needed for impressions
   tagger: string; // URL. Needed for impressions
 }
@@ -51,25 +54,23 @@ const DEFAULT: Settings = {
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   text2speech: true,
-  scribe: true, // global scribe availability
-  // scribe features
-  // Draft
+  scribe: true,
+
   notes2prose: true,
   notes2bullets: true,
   assess_expectation: false,
+
   assess_expectations: true,
-  // Review
   lines_of_arguments: true,
   key_ideas: true,
   logical_progression: false,
   term_matrix: true,
   sentence_density: true,
-  // Refine
+
   flow: true,
   copyedit: true,
 
-  // docuscope features
-  docuscope: false, // global docuscope availability
+  docuscope: false,
   impressions: false,
 };
 
@@ -128,12 +129,12 @@ export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
 );
 
 export const [useGlobalFeatureCopyedit, globalFeatureCopyedit$] = bind(
-  settings$.pipe(map((settings) => !!settings.copyedit)),
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.copyedit)),
   false
 );
 
 export const [useGlobalFeatureFlow, globalFeatureFlow$] = bind(
-  settings$.pipe(map((settings) => !!settings.flow)),
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.flow)),
   false
 );
 
@@ -152,18 +153,22 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
 );
 
 export const [useGlobalFeatureArguments, globalFeatureArguments$] = bind(
-  settings$.pipe(map((settings) => !!settings.lines_of_arguments)),
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.lines_of_arguments)
+  ),
   false
 );
 export const [useGlobalFeatureKeyIdeas, globalFeatureKeyIdeas$] = bind(
-  settings$.pipe(map((settings) => !!settings.key_ideas)),
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.key_ideas)),
   false
 );
 export const [
   useGlobalFeatureLogicalProgression,
   globalFeatureLogicalProgression$,
 ] = bind(
-  settings$.pipe(map((settings) => !!settings.logical_progression)),
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.logical_progression)
+  ),
   false
 );
 export const [useGlobalFeatureTermMatrix, globalFeatureTermMatrix$] = bind(

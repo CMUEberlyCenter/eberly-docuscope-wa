@@ -8,13 +8,13 @@
 
 services:
   # redirect:
-  #   # Temporary redirect of main page.
+  #   # Temporary redirect of main page, quick way to disable access.
   #   image: morbz/docker-web-redirect
   #   ports:
   #     - 8888:80
   #   restart: always
   #   environment:
-  #     - REDIRECT_TARGET=https://www.cmu.edu/dietrich/english/research-and-publications/myscribe.html
+  #     - REDIRECT_TARGET=https://www.cmu.edu/dietrich/english/research-and-publications/myprose.html
   #     - REDIRECT_TYPE=redirect
   mongo:
     image: docker.io/mongo:latest
@@ -47,6 +47,7 @@ services:
       - token
     environment:
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
+      EXPIRE_REVIEW_SECONDS: 86400
       LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
       MONGO_DB: docuscope

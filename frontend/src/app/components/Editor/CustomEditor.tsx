@@ -202,8 +202,8 @@ const CustomEditor: FC = () => {
         setUpload(file);
       } catch (err) {
         console.error(err);
-        if (err instanceof DOMException && err.name === 'AbortError') {
-           return; // Skip cancel.
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return; // Skip cancel.
         }
         if (err instanceof Error) {
           setErrors([{ type: "error", message: err.message, error: err }]);
@@ -400,7 +400,9 @@ const CustomEditor: FC = () => {
                 key={i}
                 variant={msg.type === "error" ? "danger" : "warning"}
               >
-                {msg.type === "error" ? t("editor.upload.error.error") : t("editor.upload.error.warning")}{" "}
+                {msg.type === "error"
+                  ? t("editor.upload.error.error")
+                  : t("editor.upload.error.warning")}{" "}
                 {(msg.message === "Security Error" &&
                   t("editor.upload.error.security")) ||
                   (msg.message === "Failed Write" &&

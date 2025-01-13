@@ -9,7 +9,6 @@ The project code is supported and maintained by the [Eberly Center](https://www.
 # Setup
 
 This application requires several files in order to function:
-<!-- For current development, production still uses mysql and openai -->
 - Required sensitive information shared with the application via [Docker secrets](https://docs.docker.com/compose/how-tos/use-secrets/):
   - `secrets/anthropic_api_key`: API key provided by Anthropic (default model is claude-3-5-sonnet-20241022)
   - `secrets/mongo_user`: Username to use to access the MongoDB database.
