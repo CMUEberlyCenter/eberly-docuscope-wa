@@ -26,7 +26,7 @@ services:
       - mongo_user
       - mongo_pass
     volumes:
-      - db_data: /data/db
+      - db_data:/data/db
 
   ontopic:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
