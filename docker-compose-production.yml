@@ -49,7 +49,7 @@ services:
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
-      MONGO_DB: doscuscope
+      MONGO_DB: docuscope
       MONGO_HOST: mongo:27017
       MONGO_PASSWORD_FILE: /run/secrets/mongo_pass
       MONGO_USER_FILE: /run/secrets/mongo_user
