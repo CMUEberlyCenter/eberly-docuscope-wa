@@ -39,8 +39,8 @@ type ErrorMessage = {
   error: {
     type: string;
     message: string;
-  }
-}
+  };
+};
 
 /**
  * Given a template key and instantiating data, perform the chat operation with a LLM.
@@ -86,17 +86,24 @@ export async function doChat(
   });
   model = chat.model;
   // Handle anthropic error https://docs.anthropic.com/en/api/errors
-  if (chat.type !== "message") { // This likely should be in catch
+  if (chat.type !== 'message') {
+    // This likely should be in catch
     const err = chat as unknown as ErrorMessage; // typescript hack
-    console.error(`Error response from ${chat.model} for request ${chat._request_id}`);
+    console.error(
+      `Error response from ${chat.model} for request ${chat._request_id}`
+    );
     console.error(chat);
     throw new Error(err.error.message, { cause: chat });
   }
   switch (chat.stop_reason) {
-    case 'max_tokens': throw new Error("Token limit exceeded.", { cause: chat });
-    case 'tool_use': throw new Error("No tool_use handler.", { cause: chat }); // TODO when implementing tools (eg) json formatting.
-    case 'stop_sequence': throw new Error("No stop_sequence handler.", { cause: chat }); // Currently unused
-    case 'end_turn': break;
+    case 'max_tokens':
+      throw new Error('Token limit exceeded.', { cause: chat });
+    case 'tool_use':
+      throw new Error('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
+    case 'stop_sequence':
+      throw new Error('No stop_sequence handler.', { cause: chat }); // Currently unused
+    case 'end_turn':
+      break;
   }
   // TODO handle server errors, 400-529, 413 in particular (request_too_large)
   /* try {

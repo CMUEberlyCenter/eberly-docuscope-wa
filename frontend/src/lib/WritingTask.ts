@@ -88,7 +88,9 @@ function* leafRuleGenerator(rule: Rule): Generator<Rule> {
  * @returns Array of expectations, [] if task is not a WritingTask.
  */
 export function getExpectations(task: WritingTask | null) {
-  return isWritingTask(task) ? task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]) : [];
+  return isWritingTask(task)
+    ? task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)])
+    : [];
 }
 
 export type WritingTaskMetaData = {
