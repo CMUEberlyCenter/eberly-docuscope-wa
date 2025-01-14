@@ -1,10 +1,12 @@
 {
   "name": "myprose",
-  "version": "2.0.0",
-  "description": "",
-  "main": "src/app/index.tsx",
+  "version": "2.1.0",
+  "description": "An AI-enhanced online writing studio with a suite of generative and assessment tools supporting the writing process from initial-phase writing to the completion of the final draft.",
   "type": "module",
+  "private": true,
+  "browser": "./index.html",
   "scripts": {
+    "start": "npm run build:client && npx tsx src/server/index",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "build:client": "vite build",
@@ -16,7 +18,6 @@
     "dev": "npx concurrently \"npm run dev:server\" \"npm run watch:client\"",
     "watch:client": "NODE_ENV=development vite build --watch --mode development",
     "watch:server": "rollup -c --watch",
-    "express": "npm run build:client && npm run dev:server",
     "prettier": "npx prettier -c src/",
     "eslint": "npx eslint@^9 src",
     "precommit": "npm run prettier && npm run eslint && npm test",
@@ -24,20 +25,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CMUEberlyCenter/eberly-docuscope-wa"
+    "url": "git+https://github.com/CMUEberlyCenter/eberly-docuscope-wa",
+    "directory": "frontend"
   },
   "keywords": [
     "docuscope",
     "ontopic",
     "cmu",
+    "Carnegie Mellon University",
     "english",
     "writing"
   ],
-  "author": "Michael Ringenberg <Ringenberg@users.noreply.github.com>",
+  "author": "Michael Ringenberg <Ringenberg@users.noreply.github.com> (https://www.andrew.cmu.edu/user/mringenb/)",
   "contributors": [
     "Martin van Velsen"
   ],
-  "license": "CREATIVE COMMONS ATTRIBUTION-NONCOMMERCIAL 4.0 INTERNATIONAL LICENSE",
+  "license": "CC-BY-NC-4.0",
   "bugs": {
     "url": "https://github.com/CMUEberlyCenter/eberly-docuscope-wa/issues"
   },

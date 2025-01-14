@@ -1,3 +1,4 @@
+/** Test if the argument is an array of strings. */
 function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
 }
@@ -70,6 +71,7 @@ function isRule(rule: Rule | unknown): rule is Rule {
   );
 }
 
+/** Depth first generator for extracting leaf rules. */
 function* leafRuleGenerator(rule: Rule): Generator<Rule> {
   if (rule.children.length === 0) {
     yield rule;
@@ -79,10 +81,14 @@ function* leafRuleGenerator(rule: Rule): Generator<Rule> {
     }
   }
 }
+
+/**
+ * Extract the expectations from a writing task description.
+ * Expectations are defined as leaf rule of a WritingTask.
+ * @returns Array of expectations, [] if task is not a WritingTask.
+ */
 export function getExpectations(task: WritingTask | null) {
-  return task === null
-    ? []
-    : task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]);
+  return isWritingTask(task) ? task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]) : [];
 }
 
 export type WritingTaskMetaData = {
@@ -107,6 +113,7 @@ export type WritingTaskMetaData = {
   keywords?: string[];
 };
 
+/** Test if the given object is an instance of WritingTaskMetaData. */
 function isWritingTaskMetaData(
   info: WritingTaskMetaData | unknown
 ): info is WritingTaskMetaData {
@@ -128,6 +135,7 @@ function isWritingTaskMetaData(
   );
 }
 
+/** Extract all keywords from an array of writing task definitions. */
 function extractKeywords(tasks: WritingTask[]) {
   return tasks.flatMap((task) => task.info.keywords ?? []);
 }
@@ -179,6 +187,7 @@ export const ERROR_INFORMATION: WritingTaskMetaData = {
   filename: '',
 };
 
+/** Container for the list of rules for the writing task and its metadata. */
 type Rules = {
   /** Title of the rule set. */
   name: string;
@@ -233,6 +242,7 @@ export type WritingTask = {
   info: WritingTaskMetaData;
   /** Additional information that can be instantiated in the LLM prompts. */
   extra_instructions?: string;
+  /** Schema version. */
   wtd_version?: string;
   /** True if the task is listed in publicly available listings.  This is normally set by the server. */
   public?: boolean;

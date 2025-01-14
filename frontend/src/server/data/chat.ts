@@ -33,10 +33,19 @@ export async function readTemplates(): Promise<PromptData> {
 //   return !!data && typeof data === 'object' && 'type' in data && data.type === 'message';
 // }
 
+/** Anthropic error message schema. */
+type ErrorMessage = {
+  type: 'error';
+  error: {
+    type: string;
+    message: string;
+  }
+}
+
 /**
  * Given a template key and instantiating data, perform the chat operation with a LLM.
- * @param key Which prompt to use.
- * @param data Data used to instantiate prompt.
+ * @param key Which prompt to use, key value of an entry in the templates object.
+ * @param data Data used to instantiate the prompt.
  * @param json if true, returns a JSON object.
  * @returns a string unless json pramameter is truthy.
  */
@@ -45,6 +54,9 @@ export async function doChat(
   data: Record<string, string>,
   json?: boolean
 ) {
+  if (!ANTHROPIC_API_KEY) {
+    throw new Error('No LLM configured.');
+  }
   const started = new Date();
   const { templates } = await readTemplates();
   if (!(key in templates)) {
@@ -57,36 +69,54 @@ export async function doChat(
     throw new Error(`Malformed prompt for ${key}.`);
   }
   const content = format(prompt, data);
-  // TODO improve this logic
   let model: string;
   let response: string | object = '';
-  if (ANTHROPIC_API_KEY) {
-    const chat = await anthropic.messages.create({
-      max_tokens: ANTHROPIC_MAX_TOKENS,
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-      messages: [
-        { role: 'assistant', content: role ?? 'You are a chatbot' },
-        {
-          role: 'user',
-          content,
-        },
-      ],
-      model: ANTHROPIC_MODEL,
-      // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
-    });
-    model = chat.model;
-    // TODO handle anthropic error https://docs.anthropic.com/en/api/errors
-    // handle server errors, 400-529, 413 in particular (request_too_large)
-    // handle response error: chat.type === 'error'
-    //   chat.error.type and chat.error.message
-    const resp = chat.content.at(0);
-    if (resp?.type === 'text') {
-      response = resp.text;
+  const chat = await anthropic.messages.create({
+    max_tokens: ANTHROPIC_MAX_TOKENS,
+    temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+    messages: [
+      { role: 'assistant', content: role ?? 'You are a chatbot' },
+      {
+        role: 'user',
+        content,
+      },
+    ],
+    model: ANTHROPIC_MODEL,
+    // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
+  });
+  model = chat.model;
+  // Handle anthropic error https://docs.anthropic.com/en/api/errors
+  if (chat.type !== "message") { // This likely should be in catch
+    const err = chat as unknown as ErrorMessage; // typescript hack
+    console.error(`Error response from ${chat.model} for request ${chat._request_id}`);
+    console.error(chat);
+    throw new Error(err.error.message, { cause: chat });
+  }
+  switch (chat.stop_reason) {
+    case 'max_tokens': throw new Error("Token limit exceeded.", { cause: chat });
+    case 'tool_use': throw new Error("No tool_use handler.", { cause: chat }); // TODO when implementing tools (eg) json formatting.
+    case 'stop_sequence': throw new Error("No stop_sequence handler.", { cause: chat }); // Currently unused
+    case 'end_turn': break;
+  }
+  // TODO handle server errors, 400-529, 413 in particular (request_too_large)
+  /* try {
+  await anthropic..create({...});
+  } catch (err) {
+    if (err.response) {
+      // The request was made and the server responded with a status code 
+      // that falls out of the range of 2xx
+      console.error("API Error:", error.response.status, error.response.data);
+    } else if (err.request) {
+      // The request was made but no response was received
+      console.error("Network Error:", error.request);
     } else {
-      console.warn(resp);
-    }
+      // Something happened in setting up the request that triggered an Error
+      console.error("Error:", error.message);  }*/
+  const resp = chat.content.at(0);
+  if (resp?.type === 'text') {
+    response = resp.text;
   } else {
-    throw new Error('No LLM configured.');
+    console.warn(resp);
   }
   // TODO catch json parsing errors, either here or in calling code
   response = json ? JSON.parse(response) : response;

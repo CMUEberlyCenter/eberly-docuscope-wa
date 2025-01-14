@@ -39,17 +39,6 @@ export const KeyIdeas: FC = () => {
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            {/* {review.datetime && (
-              <Card.Subtitle className="text-center">
-                {new Date(review.datetime).toLocaleString()}
-              </Card.Subtitle>
-            )} */}
-            {/* {review.response.central_idea && (
-              <>
-                <h5>{t("key_ideas.main_idea")}</h5>
-                <p>{review.response.central_idea}</p>
-              </>
-            )} // removed for #116 */}
             {"topics" in review.response && review.response.topics.length ? (
               <Accordion>
                 {review.response.topics.map(

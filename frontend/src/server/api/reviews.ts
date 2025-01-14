@@ -122,75 +122,6 @@ const reviewData = ({
       : undefined) ?? '',
 });
 
-// Depricate
-reviews.get(
-  '/:id/expectations',
-  validate(param('id').isMongoId()),
-  async (request: Request, response: Response) => {
-    try {
-      const { id } = request.params;
-      const review = await findReviewById(id);
-
-      response.set({
-        'Cache-Control': 'no-cache',
-        'Content-Type': 'text/event-stream',
-        Connection: 'keep-alive',
-      });
-      response.flushHeaders();
-      response.on('close', () => response.end());
-      const { writing_task } = review;
-      response.write(`data: ${JSON.stringify(review)}\n\n`);
-      if (isWritingTask(writing_task)) {
-        // Filter out already analysed expectations.
-        const existing = new Set(
-          review.analysis
-            .filter(isAllExpectationsData)
-            .map(({ expectation }) => expectation)
-        );
-        const expectations = writing_task.rules.rules
-          .flatMap((rule) => (rule.is_group ? rule.children : [rule]))
-          .filter((rule) => !existing.has(rule.name));
-        await Promise.allSettled(
-          expectations.map(async (expectation) => {
-            const { response: data, finished: datetime } = await doChat(
-              'all_expectations',
-              {
-                ...reviewData(review),
-                expectation: expectation.name,
-                description: expectation.description,
-              },
-              true
-            );
-            if (!data) return; //FIXME add throw
-            const analysis: AllExpectationsData = {
-              tool: 'all_expectations',
-              datetime,
-              expectation: expectation.name,
-              response: data as AllExpectationsResponse,
-            };
-            const upd = await updateReviewByIdAddAnalysis(id, analysis);
-            if (!response.closed) {
-              response.write(`data: ${JSON.stringify(upd)}\n\n`);
-            }
-          })
-        );
-        if (!response.closed) {
-          const final = await findReviewById(id);
-          response.write(`data: ${JSON.stringify(final)}\n\n`);
-          response.end();
-        }
-      }
-    } catch (err) {
-      console.error(err);
-      if (err instanceof ReferenceError) {
-        response.status(404).send(FileNotFound(err));
-      } else {
-        response.status(500).send(InternalServerError(err));
-      }
-    }
-  }
-);
-
 /**
  * @route GET <reviews>/:id
  * @summary Retrieve review data.
@@ -252,29 +183,37 @@ reviews.get(
         );
         expectJobs.push(
           ...expectations.map(async ({ name: expectation, description }) => {
-            const { response, finished: datetime } = await doChat(
-              'all_expectations',
-              {
-                ...reviewData(review),
+            try {
+              const { response, finished: datetime } = await doChat(
+                'all_expectations',
+                {
+                  ...reviewData(review),
+                  expectation,
+                  description,
+                },
+                true
+              );
+              if (!response) return; // TODO throw null results
+              return updateAnalysis({
+                tool: 'all_expectations',
+                datetime,
                 expectation,
-                description,
-              },
-              true
-            );
-            if (!response) return; // TODO throw null results
-            return updateAnalysis({
-              tool: 'all_expectations',
-              datetime,
-              expectation,
-              response: response as AllExpectationsResponse,
-            });
+                response: response as AllExpectationsResponse,
+              });
+            } catch (err) {
+              console.error(err);
+              // TODO store error state
+              // TODO chat errors
+              // TODO json parse error
+              // TODO other errors
+            }
           })
         );
       }
       const chatJobs = analyses
         .filter((a): a is ReviewPrompt => ANALYSES.includes(a as ReviewPrompt))
         .map(async (key) => {
-          if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber
+          if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber // TODO check if error
           const { response, finished: datetime } = await doChat(
             key,
             reviewData(review),
@@ -291,6 +230,7 @@ reviews.get(
         if (!analyses.includes('ontopic')) return;
         if (review.analysis.some(({ tool }) => tool === 'ontopic')) return;
         const data = await doOnTopic(review);
+        // TODO check for errors
         if (!data) return;
         return updateAnalysis(data);
       });

@@ -1,6 +1,6 @@
 import { OnTopicData } from './OnTopicData';
 
-export type ReviewTool =
+type ReviewTool =
   | 'global_coherence'
   | 'all_expectations'
   | 'arguments'
@@ -36,21 +36,20 @@ export type Claim = {
 
 /** JSON structure for the results of the arguments prompt. */
 export type ArgumentsResponse = {
-  /** This is a sentence that summarizes the main argument. This is a setnence that describes the argumentation strategy and its assessment. */
+  /** This is a sentence that summarizes the main argument. This is a sentence that describes the argumentation strategy and its assessment. */
   thesis: string;
   /** List of span ids for sentences that present the central position of the text. */
   thesis_sentences: string[];
+  /** List of claims that supports the thesis */
   arguments: Claim[];
+  /** List of claims that challenge an aspect of the thesis or a supporting claim. */
   counter_arguments: Claim[];
+  /** List of claims that address their corresponding counterargument. */
   rebuttals: Claim[];
 };
 
 /** JSON structure for the results of the key_points prompt. */
 export type KeyPointsResponse = {
-  /** This is a sentence that summarizes the main argument. This is a sentence that describes the exposition strategy, along with its assessment. */
-  central_idea: string;
-  /** A list of span ids for the sentences that describe the central idea of this text.  */
-  central_idea_sentences: string[];
   topics: {
     /** A point or key idea of the text summarized in a single sentence. */
     topic: string;
