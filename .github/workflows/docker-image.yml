@@ -39,7 +39,7 @@ jobs:
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
     - name: Generate frontend artifact attestation
-      uses: actions/attest-build-provenance@v1
+      uses: actions/attest-build-provenance@v2
       with:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/myprose
         subject-digest: ${{ steps.push.outputs.digest }}
@@ -59,7 +59,7 @@ jobs:
         tags: ${{ steps.meta_ontopic.outputs.tags }}
         labels: ${{ steps.meta_ontopic.outputs.labels }}
     - name: Generate ontopic artifact attestation
-      uses: actions/attest-build-provenance@v1
+      uses: actions/attest-build-provenance@v2
       with:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/ontopic
         subject-digest: ${{ steps.push_ontopic.outputs.digest }}
