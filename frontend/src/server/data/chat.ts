@@ -6,7 +6,7 @@ import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
-  SCRIBE_TEMPLATES,
+  PROMPT_TEMPLATES_PATH,
 } from '../settings';
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
@@ -20,7 +20,7 @@ let prompts: PromptData;
 export async function readTemplates(): Promise<PromptData> {
   // TODO use fs.watch to detect file changes?
   if (!prompts) {
-    const file = await readFile(SCRIBE_TEMPLATES, 'utf8');
+    const file = await readFile(PROMPT_TEMPLATES_PATH, 'utf8');
     prompts = JSON.parse(file);
   }
   return prompts;

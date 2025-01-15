@@ -126,8 +126,9 @@ function timeout(ms: number | undefined): Promise<void> {
 
 /**
  * Make sure connection is possible and populate database with filesystem writing tasks.
+ * @returns database shutdown function.
  */
-export async function initDatabase(): Promise<void> {
+export async function initDatabase() {
   let retry = 30;
   const sleep = 5000; // 5 seconds
   while (retry > 0) {
@@ -157,6 +158,7 @@ export async function initDatabase(): Promise<void> {
     );
   }
   await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
+  return () => client.close();
 }
 
 /**

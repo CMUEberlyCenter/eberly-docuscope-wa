@@ -80,8 +80,8 @@ export const ANTHROPIC_MAX_TOKENS = envInt(
   1024
 );
 
-export const SCRIBE_TEMPLATES =
-  process.env['SCRIBE_TEMPLATES'] ?? join('private', 'templates.json');
+export const PROMPT_TEMPLATES_PATH =
+  process.env['PROMPT_TEMPLATES'] ?? join('private', 'templates.json');
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
 export const PLATFORMS_PATH =

@@ -47,7 +47,7 @@ const PUBLIC = join(__dirname, '../../build/app');
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
-  await initDatabase();
+  const shutdownDatabase = await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
@@ -212,8 +212,19 @@ async function __main__() {
 
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
-    app.listen(PORT, () =>
+    const server = app.listen(PORT, () =>
       console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
+    );
+    const shutdown = () => {
+      server.close(async () => {
+        console.log('HTTP server closed.');
+        // If you have database connections, close them here
+        await shutdownDatabase();
+        process.exit(0);
+      });
+    };
+    ['SIGTERM', 'SIGINT', 'SIGINT'].forEach((signal) =>
+      process.on(signal, shutdown)
     );
   } catch (err) {
     console.error(err);

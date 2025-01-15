@@ -101,6 +101,7 @@
     "@slate-serializers/html": "^2.2.2",
     "ajv": "^8.17.1",
     "bootstrap": "^5.3.3",
+    "chokidar": "^4.0.3",
     "classnames": "^2.5.1",
     "commander": "^13.0.0",
     "cors": "^2.8.5",
