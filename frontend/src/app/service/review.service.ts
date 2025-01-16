@@ -2,10 +2,10 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, Observable, scan } from 'rxjs';
 import {
-  AllExpectationsData,
+  ExpectationsData,
   ArgumentsData,
   GlobalCoherenceData,
-  KeyPointsData,
+  KeyIdeasData,
   OnTopicReviewData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
@@ -62,12 +62,10 @@ review$.subscribe((rev) => {
 const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
   null
 );
-const keyPointsAnalysis = new BehaviorSubject<KeyPointsData | null>(null);
+const keyPointsAnalysis = new BehaviorSubject<KeyIdeasData | null>(null);
 const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
 const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
-const expectationsAnalysis = new BehaviorSubject<AllExpectationsData | null>(
-  null
-);
+const expectationsAnalysis = new BehaviorSubject<ExpectationsData | null>(null);
 review$
   .pipe(
     filter((rev) => isReview(rev)),
@@ -112,8 +110,8 @@ export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(
     scan(
       (
-        acc: Map<string, AllExpectationsData>,
-        current: AllExpectationsData | null
+        acc: Map<string, ExpectationsData>,
+        current: ExpectationsData | null
       ) => {
         if (!current) {
           return acc;
@@ -122,7 +120,7 @@ export const [useExpectationsData, expectationsData$] = bind(
         m.set(current.expectation, current);
         return m;
       },
-      new Map<string, AllExpectationsData>()
+      new Map<string, ExpectationsData>()
     )
   ),
   null

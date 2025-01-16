@@ -1,55 +1,61 @@
 import { OnTopicData } from './OnTopicData';
 
 type ReviewTool =
-  | 'global_coherence'
-  | 'all_expectations'
-  | 'arguments'
-  | 'key_points'
+  | 'civil_tone'
+  | 'ethos'
+  | 'expectations'
+  | 'key_ideas'
+  | 'lines_of_arguments'
+  | 'logical_flow'
+  | 'pathos'
+  | 'professional_tone'
+  | 'sources'
+  // | 'global_coherence'
+  // | 'all_expectations'
+  // | 'arguments'
+  // | 'key_points'
   | 'ontopic'
   | 'docuscope';
 
-export type Suggestion = {
-  text: string; // reference
-  explanation: string; // evaluation
+type Assessment = {
+  assessment: {
+    /** A brief comment on the strenghts. */
+    strengths: string;
+    /** A brief comment on the weaknesses. */
+    weaknesses: string;
+  };
+};
+
+type SentenceToneIssue = {
+  sentence: string;
+  sentence_id: string;
+  assessment: string;
+  suggestion: string;
+};
+export type CivilToneOutput = {
+  issues: SentenceToneIssue[];
+} & Assessment;
+
+type SentenceIdsAssessmentSuggestion = {
+  sentence_ids: string[];
+  assessment: string;
+  suggestion: string;
+};
+export type EthosOutput = {
+  expertise_ethos: SentenceIdsAssessmentSuggestion[];
+  analytical_ethos: SentenceIdsAssessmentSuggestion[];
+  balanced_ethos: SentenceIdsAssessmentSuggestion[];
+} & Assessment;
+
+export type ExpectationsOutput = {
+  /** List of span ids */
+  sentences: string[];
+  /** An acknowledgment of how the text addresses the expectation followed by a brief summary of suggestions for better meeting the expectations. */
   suggestions: string;
-};
-export type GlobalCoherenceResponse = {
-  'Given New Contract Violation': Suggestion[];
-  'Sudden Shift in Topic': Suggestion[];
-  'Illogical Order': Suggestion[];
-  'Redundant Information': Suggestion[];
-  'Inconsistent Information': Suggestion[];
-};
-
-export type Claim = {
-  /** Summary of the claim written in a single sentence. */
-  claim: string;
-  /** An explanation for the evidence supporting the claim. */
-  support: string;
-  /** List of span ids for sentences that support the claim. */
-  claim_sentences?: string[];
-  /** A List where the first entry is a suggestion and the second is an explanation of the suggestion. */
-  suggestions?: string[];
-  /** A list of span ids for sentences that provide evidence to support the claim. */
-  evidence_sentences?: string[];
-};
-
-/** JSON structure for the results of the arguments prompt. */
-export type ArgumentsResponse = {
-  /** This is a sentence that summarizes the main argument. This is a sentence that describes the argumentation strategy and its assessment. */
-  thesis: string;
-  /** List of span ids for sentences that present the central position of the text. */
-  thesis_sentences: string[];
-  /** List of claims that supports the thesis */
-  arguments: Claim[];
-  /** List of claims that challenge an aspect of the thesis or a supporting claim. */
-  counter_arguments: Claim[];
-  /** List of claims that address their corresponding counterargument. */
-  rebuttals: Claim[];
 };
 
 /** JSON structure for the results of the key_points prompt. */
-export type KeyPointsResponse = {
+export type KeyIdeasOutput = {
   topics: {
     /** A point or key idea of the text summarized in a single sentence. */
     topic: string;
@@ -66,20 +72,104 @@ export type KeyPointsResponse = {
     /** A list of span ids for the sentences from the text that provide the evidence used to support the claim. */
     elaboration_sentences: string[];
   }[];
+} & Assessment;
+
+// export type Suggestion = {
+//   text: string; // reference
+//   explanation: string; // evaluation
+//   suggestions: string;
+// };
+// export type GlobalCoherenceResponse = {
+//   'Given New Contract Violation': Suggestion[];
+//   'Sudden Shift in Topic': Suggestion[];
+//   'Illogical Order': Suggestion[];
+//   'Redundant Information': Suggestion[];
+//   'Inconsistent Information': Suggestion[];
+// };
+
+export type Claim = {
+  /** Summary of the claim written in a single sentence. */
+  claim: string;
+  /** An explanation for the evidence supporting the claim. */
+  support: string;
+  /** List of span ids for sentences that support the claim. */
+  claim_sentences?: string[];
+  /** A List where the first entry is a suggestion and the second is an explanation of the suggestion. */
+  suggestions?: string[];
+  /** A list of span ids for sentences that provide evidence to support the claim. */
+  evidence_sentences?: string[];
 };
 
-export type AllExpectationsResponse = {
-  /** List of span ids */
+/** JSON structure for the results of the arguments prompt. */
+export type LinesOfArgumentsOutput = {
+  /** This is a sentence that summarizes the main argument. This is a sentence that describes the argumentation strategy and its assessment. */
+  thesis: string;
+  /** List of span ids for sentences that present the central position of the text. */
+  thesis_sentences: string[];
+  /** List of claims that supports the thesis */
+  arguments: Claim[];
+  /** List of claims that challenge an aspect of the thesis or a supporting claim. */
+  counter_arguments: Claim[];
+  /** List of claims that address their corresponding counterargument. */
+  rebuttals: Claim[];
+} & Assessment;
+
+export type LogicalFlowOutput = {
+  disruptions: {
+    explanation: string;
+    suggestions: string;
+    sentences: string[];
+    paragraphs: string[];
+  }[];
+} & Assessment;
+
+export type PathosOutput = {
+  situation_pathos: SentenceIdsAssessmentSuggestion[];
+  temporal_pathos: SentenceIdsAssessmentSuggestion[];
+  immersive_pathos: SentenceIdsAssessmentSuggestion[];
+  structural_pathos: SentenceIdsAssessmentSuggestion[];
+} & Assessment;
+
+export type ProfessionalToneOutput = {
+  sentiment: SentenceToneIssue[];
+  confidence: SentenceToneIssue[];
+  subjectivity: SentenceToneIssue[];
+} & Assessment;
+
+type Citation = {
+  /** Name(s) ofthe sources. */
+  names: string;
+  /** A brief assessment sentence. */
+  assessment: string;
+  /** List of span ids. */
   sentences: string[];
-  /** An acknowledgment of how the text addresses the expectation followed by a brief summary of suggestions for better meeting the expectations. */
-  suggestions: string;
 };
+export type SourcesOutput = {
+  supportive_citation: Citation[];
+  hedged_citation: Citation[];
+  alternative_citation: Citation[];
+  neutral_citation: Citation[];
+  citation_issues: {
+    description: string;
+    suggestion: string;
+    sentences: string[];
+  }[];
+} & Assessment;
 
 export type ReviewResponse =
-  | GlobalCoherenceResponse
-  | KeyPointsResponse
-  | AllExpectationsResponse
-  | ArgumentsResponse
+  | CivilToneOutput
+  | EthosOutput
+  | ExpectationsOutput
+  | KeyIdeasOutput
+  | LinesOfArgumentsOutput
+  | LogicalFlowOutput
+  | PathosOutput
+  | ProfessionalToneOutput
+  | SourcesOutput
+  // | GlobalCoherenceResponse
+  // | KeyPointsResponse
+  // | AllExpectationsResponse
+  // | ArgumentsResponse
   | OnTopicData;
 
 interface ReviewData<T extends ReviewResponse> {
@@ -87,35 +177,61 @@ interface ReviewData<T extends ReviewResponse> {
   datetime?: Date;
   response: T;
 }
-export interface GlobalCoherenceData
-  extends ReviewData<GlobalCoherenceResponse> {
-  tool: 'global_coherence';
+// export interface GlobalCoherenceData
+//   extends ReviewData<GlobalCoherenceResponse> {
+//   tool: 'global_coherence';
+// }
+export interface CivilToneData extends ReviewData<CivilToneOutput> {
+  tool: 'civil_tone';
 }
-export interface KeyPointsData extends ReviewData<KeyPointsResponse> {
-  tool: 'key_points';
+export interface EthosData extends ReviewData<EthosOutput> {
+  tool: 'ethos';
 }
-export interface AllExpectationsData
-  extends ReviewData<AllExpectationsResponse> {
-  tool: 'all_expectations';
+export interface ExpectationsData extends ReviewData<ExpectationsOutput> {
+  tool: 'expectations';
   expectation: string;
 }
-export const isAllExpectationsData = (
-  data: AllExpectationsData | unknown
-): data is AllExpectationsData =>
+
+export const isExpectationsData = (
+  data: ExpectationsData | unknown
+): data is ExpectationsData =>
   !!data &&
   typeof data === 'object' &&
   'tool' in data &&
   data.tool === 'all_expectations';
 
-export interface ArgumentsData extends ReviewData<ArgumentsResponse> {
-  tool: 'arguments';
+export interface KeyIdeasData extends ReviewData<KeyIdeasOutput> {
+  tool: 'key_ideas';
+}
+
+export interface ArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
+  tool: 'lines_of_arguments';
+}
+export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
+  tool: 'logical_flow';
+}
+export interface PathosData extends ReviewData<PathosOutput> {
+  tool: 'pathos';
+}
+export interface ProfessionalToneData
+  extends ReviewData<ProfessionalToneOutput> {
+  tool: 'professional_tone';
+}
+export interface SourcesData extends ReviewData<SourcesOutput> {
+  tool: 'sources';
 }
 export interface OnTopicReviewData extends ReviewData<OnTopicData> {
   tool: 'ontopic';
 }
 export type Analysis =
-  | GlobalCoherenceData
-  | KeyPointsData
-  | AllExpectationsData
+  // | GlobalCoherenceData
+  | CivilToneData
+  | EthosData
+  | ExpectationsData
+  | KeyIdeasData
   | ArgumentsData
+  | LogicalFlowData
+  | PathosData
+  | ProfessionalToneData
+  | SourcesData
   | OnTopicReviewData;

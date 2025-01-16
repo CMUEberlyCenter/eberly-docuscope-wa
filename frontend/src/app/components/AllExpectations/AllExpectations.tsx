@@ -6,7 +6,7 @@ import {
 } from "react-bootstrap/esm/AccordionContext";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { isAllExpectationsData } from "../../../lib/ReviewResponse";
+import { isExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
 import { isReview } from "../../../server/model/review";
 import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
@@ -50,14 +50,14 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
               key={`${id}-expectation-${j}`}
               eventKey={`${id}-expectation-${j}`}
             >
-              {isAllExpectationsData(expectation) &&
+              {isExpectationsData(expectation) &&
               isNone(expectation.response.suggestions) ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
                   <AlertIcon message={t("warning")} show />
                 </div>
               ) : null}
-              {isAllExpectationsData(expectation) &&
+              {isExpectationsData(expectation) &&
               !isNone(expectation.response.suggestions) ? (
                 <>
                   <Accordion.Header>
@@ -69,7 +69,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
                   </Accordion.Header>
                   <Accordion.Body
                     onEntering={() =>
-                      isAllExpectationsData(expectation)
+                      isExpectationsData(expectation)
                         ? dispatch({
                             sentences: expectation.response.sentences,
                             type: "set",
@@ -80,13 +80,13 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
                   >
                     <h6>{t("suggestions")}</h6>
                     <p key={`${id}-suggestion-${j}`}>
-                      {isAllExpectationsData(expectation) &&
+                      {isExpectationsData(expectation) &&
                         expectation.response.suggestions}
                     </p>
                   </Accordion.Body>
                 </>
               ) : null}
-              {!isAllExpectationsData(expectation) ||
+              {!isExpectationsData(expectation) ||
               !expectations?.has(expectation.expectation) ? (
                 <div className="fake-accordion-button">
                   <div className="flex-grow-1">{expectation.expectation}</div>
