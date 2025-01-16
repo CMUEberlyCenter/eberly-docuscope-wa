@@ -2,11 +2,7 @@ import { MongoClient, ObjectId } from 'mongodb';
 import { Analysis } from '../../lib/ReviewResponse';
 import { WritingTask } from '../../lib/WritingTask';
 import { Review } from '../model/review';
-import {
-  EXPIRE_REVIEW_SECONDS,
-  MONGO_CLIENT,
-  MONGO_DB
-} from '../settings';
+import { EXPIRE_REVIEW_SECONDS, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { initWritingTasks } from './writing_task_description';
 
 const client = new MongoClient(MONGO_CLIENT);
