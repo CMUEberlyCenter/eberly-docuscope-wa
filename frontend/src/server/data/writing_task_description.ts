@@ -1,17 +1,16 @@
 import { watch } from 'chokidar';
 import { readFile } from 'node:fs/promises';
-import { isWritingTask } from '../../lib/WritingTask';
+import { isWritingTask, WritingTask } from '../../lib/WritingTask';
 import { WRITING_TASKS_PATH } from '../settings';
-import { deleteWritingTaskByPath, upsertPublicWritingTask } from './mongo';
 
-export async function initWritingTasks() {
+export async function initWritingTasks(add: (path: string, task: WritingTask) => Promise<unknown>, remove: (path: string) => Promise<unknown>) {
   const wtds = watch(WRITING_TASKS_PATH, {
     ignored: (path, stats) => !!stats?.isFile() && !path.endsWith('.json'),
     persistent: true,
   });
   wtds.on('unlink', async (path) => {
     try {
-      await deleteWritingTaskByPath(path);
+      await remove(path);
     } catch (err) {
       console.error(err);
     }
@@ -23,7 +22,7 @@ export async function initWritingTasks() {
       if (!isWritingTask(json)) {
         throw new Error(`${path} is not a WTD`);
       }
-      await upsertPublicWritingTask(path, json);
+      await add(path, json);
     } catch (err) {
       console.error(err);
     }
@@ -35,7 +34,7 @@ export async function initWritingTasks() {
       if (!isWritingTask(json)) {
         throw new Error(`${path} is not a WTD`);
       }
-      await upsertPublicWritingTask(path, json);
+      await add(path, json);
     } catch (err) {
       console.error(err);
     }

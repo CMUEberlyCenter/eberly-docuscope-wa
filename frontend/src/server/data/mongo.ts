@@ -195,7 +195,7 @@ export async function initDatabase() {
     );
   }
   // await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
-  const wtdShutdown = await initWritingTasks();
+  const wtdShutdown = await initWritingTasks(upsertPublicWritingTask, deleteWritingTaskByPath);
   return async () => {
     await wtdShutdown();
     return client.close();
