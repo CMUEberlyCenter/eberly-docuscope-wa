@@ -1,15 +1,16 @@
 /**
  * @fileoverview Unit testing code for LockSwitch.
  */
-import { fireEvent, render, screen } from "@testing-library/react";
-import React from "react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import LockSwitch from "./LockSwitch";
 
 describe("LockSwitch", () => {
   afterEach(() => {
     vi.resetAllMocks();
+    cleanup();
   });
+
   test("render with label", () => {
     render(<LockSwitch label="foo" checked={false} />);
     expect(screen.getByText("foo").textContent).toBe("foo");

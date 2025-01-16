@@ -6,7 +6,7 @@ import {
   NotesRequest,
   TextRequest,
 } from '../../lib/Requests';
-import { doChat, readTemplates } from '../data/chat';
+import { doChat } from '../data/chat';
 import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
@@ -31,6 +31,7 @@ const scribeNotes =
       const chat = await doChat(key, {
         ...DEFAULT_LANGUAGE_SETTINGS,
         ...data,
+        role: 'You are a copy editor and expert in grammatical mechanics, usage, and readability.',
       });
       // TODO check for empty prose
       response.json(chat.response);
@@ -94,7 +95,7 @@ scribe.post(
   }
 );
 
-scribe.get('/templates/info', async (_request: Request, response: Response) => {
-  const { info } = await readTemplates();
-  response.json(info);
-});
+// scribe.get('/templates/info', async (_request: Request, response: Response) => {
+//   const { info } = await readTemplates();
+//   response.json(info);
+// });

@@ -1,18 +1,24 @@
 /**
  * @fileoverview Unit testing of the CateogryTree component.
  */
-import { vi } from "vitest";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  test,
+  vi,
+} from "vitest";
 import createFetchMock from "vitest-fetch-mock";
-const fetchMocker = createFetchMock(vi);
-fetchMocker.enableMocks();
-
-import { render, screen, waitFor } from "@testing-library/react";
-import React from "react";
-import { afterAll, beforeAll, describe, expect, test } from "vitest";
 import { currentTool } from "../../service/current-tool.service";
 import { editorText, setEditorState } from "../../service/editor-state.service";
 import { FAKE_COMMON_DICTIONARY } from "../../testing/fake-common-dictionary";
 import Impressions from "./Impressions";
+
+const fetchMocker = createFetchMock(vi);
+fetchMocker.enableMocks();
 
 beforeAll(() => {
   fetchMocker.mockIf(/settings.json$/, (_req) =>
@@ -31,6 +37,8 @@ afterAll(() => {
 });
 
 describe("Impressions", () => {
+  afterEach(() => cleanup());
+
   test("creation", async () => {
     /*const scheduler = new TestScheduler((actual, expected) => expect(actual).toBe(expected));
     scheduler.run(({cold, expectObservable}) => {

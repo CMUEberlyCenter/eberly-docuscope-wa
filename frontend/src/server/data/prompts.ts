@@ -34,8 +34,6 @@ export async function initPrompts() {
   return () => prompts.close();
 }
 
-export async function findPrompt(id: string) {
-  if (PROMPTS.has(id)) {
-    return PROMPTS.get(id);
-  }
+export async function findPromptById(id: string) {
+  return PROMPTS.get(id);
 }

@@ -1,30 +1,29 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { readFile } from 'fs/promises';
 import format from 'string-format';
-import { PromptData, PromptType } from '../model/prompt';
+import { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
-  PROMPT_TEMPLATES_PATH,
 } from '../settings';
+import { findPromptById } from './prompts';
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-let prompts: PromptData;
+// let prompts: PromptData;
 /**
  * Read the prompts from a file with content caching.
  * Note: server will need to be restarted to update prompts.
  * @returns The contents of the prompts json file.
  */
-export async function readTemplates(): Promise<PromptData> {
-  // TODO use fs.watch to detect file changes?
-  if (!prompts) {
-    const file = await readFile(PROMPT_TEMPLATES_PATH, 'utf8');
-    prompts = JSON.parse(file);
-  }
-  return prompts;
-}
+// export async function readTemplates(): Promise<PromptData> {
+//   // TODO use fs.watch to detect file changes?
+//   if (!prompts) {
+//     const file = await readFile(PROMPT_TEMPLATES_PATH, 'utf8');
+//     prompts = JSON.parse(file);
+//   }
+//   return prompts;
+// }
 
 // function isOpenAIResponse(data: ChatCompletion | unknown): data is ChatCompletion {
 //   return !!data && typeof data === 'object' && 'object' in data && data.object === 'chat.completion';
@@ -58,12 +57,17 @@ export async function doChat(
     throw new Error('No LLM configured.');
   }
   const started = new Date();
-  const { templates } = await readTemplates();
-  if (!(key in templates)) {
+  const template = await findPromptById(key);
+  if (!template) {
     console.error(`${key} is not a valid template.`);
     throw new ReferenceError(`${key} template not found.`);
   }
-  const { prompt, role, temperature } = templates[key];
+  // const { templates } = await readTemplates();
+  // if (!(key in templates)) {
+  //   console.error(`${key} is not a valid template.`);
+  //   throw new ReferenceError(`${key} template not found.`);
+  // }
+  const { prompt, role, temperature } = template;
   if (!prompt) {
     console.error(`Missing prompt for ${key} template.`);
     throw new Error(`Malformed prompt for ${key}.`);
@@ -75,7 +79,13 @@ export async function doChat(
     max_tokens: ANTHROPIC_MAX_TOKENS,
     temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
     messages: [
-      { role: 'assistant', content: role ?? 'You are a chatbot' },
+      {
+        role: 'assistant',
+        content:
+          role ??
+          data.roll ??
+          'You are a writing assistant for students engaged in a writing assignment.',
+      },
       {
         role: 'user',
         content,

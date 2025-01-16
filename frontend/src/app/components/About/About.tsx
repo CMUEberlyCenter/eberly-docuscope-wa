@@ -2,8 +2,8 @@ import { FC, HTMLProps, Suspense, use, useState } from "react";
 import { ListGroup, Modal, ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useWritingTask } from "../../service/writing-task.service";
-import { LoadingSmall } from "../Loading/LoadingSmall";
 import { Logo } from "../Logo/Logo";
+import { LoadingSmall } from "../Loading/LoadingSmall";
 
 type PromptInfo = { saved_at: string };
 async function fetchTemplateInfo() {
@@ -88,7 +88,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
           </dd>
         </dl>
         <p>
-          <a href="https://cmu.edu" target="_blank" rel="noreferrer noopener">
+          <a href="https://cmu.edu/" target="_blank" rel="noreferrer noopener">
             Carnegie Mellon University
           </a>
         </p>
