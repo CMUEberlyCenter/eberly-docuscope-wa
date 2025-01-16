@@ -24,6 +24,7 @@ import {
   initDatabase,
   insertWritingTask,
 } from './data/mongo';
+import { initPrompts } from './data/prompts';
 import {
   ContentItemType,
   IdToken,
@@ -49,6 +50,7 @@ async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDatabase = await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
+  const shutdownPrompts = await initPrompts();
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
   Provider.app.use(fileUpload({ createParentPath: true }));
@@ -220,6 +222,7 @@ async function __main__() {
         console.log('HTTP server closed.');
         // If you have database connections, close them here
         await shutdownDatabase();
+        await shutdownPrompts();
         process.exit(0);
       });
     };

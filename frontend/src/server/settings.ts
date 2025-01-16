@@ -1,6 +1,6 @@
 import { Command } from 'commander';
-import { readFileSync } from 'fs';
 import 'dotenv/config';
+import { readFileSync } from 'fs';
 import { join } from 'path';
 import { version } from '../../package.json';
 import { LanguageSettingsRequest } from '../lib/Requests';
@@ -46,7 +46,7 @@ export const LTI_HOSTNAME = new URL(
   process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
 );
 const MONGO_HOST = process.env.MONGO_HOST ?? 'localhost:27017';
-const MONGO_DB = process.env.MONGO_DB ?? 'myprose';
+export const MONGO_DB = process.env.MONGO_DB ?? 'myprose';
 const MONGO_USER = fromEnvFile('MONGO_USER');
 const MONGO_PASSWORD = fromEnvFile('MONGO_PASSWORD');
 export const LTI_DB = {

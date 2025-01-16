@@ -1,15 +1,13 @@
-import { PathLike } from 'fs';
-import { readFile, readdir, stat } from 'fs/promises';
 import { MongoClient, ObjectId } from 'mongodb';
-import { join } from 'path';
 import { Analysis } from '../../lib/ReviewResponse';
-import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import { WritingTask } from '../../lib/WritingTask';
 import { Review } from '../model/review';
 import {
   EXPIRE_REVIEW_SECONDS,
   MONGO_CLIENT,
-  WRITING_TASKS_PATH,
+  MONGO_DB
 } from '../settings';
+import { initWritingTasks } from './writing_task_description';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -17,6 +15,13 @@ const client = new MongoClient(MONGO_CLIENT);
 const WRITING_TASKS = 'writing_tasks';
 /** Database collection for storing reviews.  */
 const REVIEW = 'review';
+
+/** Extra information stored in database about the writing task */
+type WritingTaskDb = WritingTask & {
+  _id?: ObjectId;
+  path?: string;
+  modified?: Date;
+};
 
 /**
  * Retrieves a given writing task specification from the database.
@@ -26,10 +31,10 @@ const REVIEW = 'review';
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   try {
     const _id = new ObjectId(id);
-    const collection = client.db('docuscope').collection(WRITING_TASKS);
+    const collection = client.db(MONGO_DB).collection(WRITING_TASKS);
     const rules = await collection.findOne<WritingTask>(
       { _id },
-      { projection: { _id: 0 } }
+      { projection: { _id: 0, path: 0, modified: 0 } }
     );
     if (!rules) {
       throw new ReferenceError(`Expectation file ${id} not found.`);
@@ -50,9 +55,13 @@ export async function insertWritingTask(
   writing_task: WritingTask
 ): Promise<ObjectId> {
   const collection = client
-    .db('docuscope')
-    .collection<WritingTask>(WRITING_TASKS);
-  const ins = await collection.insertOne({ ...writing_task, public: false });
+    .db(MONGO_DB)
+    .collection<WritingTaskDb>(WRITING_TASKS);
+  const ins = await collection.insertOne({
+    ...writing_task,
+    public: false,
+    modified: new Date(),
+  });
   return ins.insertedId;
 }
 
@@ -65,9 +74,12 @@ export async function insertWritingTask(
 export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   try {
     const collection = client
-      .db('docuscope')
+      .db(MONGO_DB)
       .collection<WritingTask>(WRITING_TASKS);
-    const cursor = collection.find<WritingTask>({ public: true });
+    const cursor = collection.find<WritingTask>(
+      { public: true },
+      { projection: { path: 0, modified: 0 } }
+    );
     const ret: WritingTask[] = [];
     for await (const doc of cursor) {
       ret.push(doc);
@@ -79,45 +91,76 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   }
 }
 
+export async function upsertPublicWritingTask(path: string, data: WritingTask) {
+  const collection = client
+    .db(MONGO_DB)
+    .collection<WritingTaskDb>(WRITING_TASKS);
+  const ins = await collection.replaceOne(
+    {
+      'info.name': data.info.name,
+      'info.version': data.info.version,
+      path: path,
+    },
+    { ...data, public: true, path, modified: new Date() },
+    {
+      upsert: true,
+    }
+  );
+  return ins.upsertedId;
+}
+
+export async function deleteWritingTaskByPath(path: string) {
+  const del = await client
+    .db(MONGO_DB)
+    .collection(WRITING_TASKS)
+    .deleteOne({ path });
+  if (!del.acknowledged || del.deletedCount !== 1) {
+    throw new ReferenceError(
+      `Delete operation for Writing Task at '${path}' failed`
+    );
+  }
+  return del.acknowledged;
+}
+
 /**
  * Reread the public writing tasks from the file system in order to syncronize
  * the two sources.  File system is considered the authoritative source.
  */
-export async function updatePublicWritingTasks() {
-  try {
-    // filesystem tasks are considered public.
-    const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
-      (e) => ({ ...e, public: true })
-    );
-    const collection = client
-      .db('docuscope')
-      .collection<WritingTask>(WRITING_TASKS);
-    await collection.updateMany(
-      { public: true },
-      {
-        $set: {
-          public: false,
-        },
-      }
-    ); // make all public private to delist old but without breaking links.
-    // update record if name and version match (assuming that if it matches it is an edit, probably not a safe assumption) else insert.
-    await collection.bulkWrite(
-      expectations.map((data) => ({
-        replaceOne: {
-          filter: {
-            'info.name': data.info.name,
-            'info.version': data.info.version,
-          },
-          replacement: { ...data, public: true },
-          upsert: true,
-        },
-      }))
-    );
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
+// export async function updatePublicWritingTasks() {
+//   try {
+//     // filesystem tasks are considered public.
+//     const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
+//       (e) => ({ ...e, public: true })
+//     );
+//     const collection = client
+//       .db(MONGO_DB)
+//       .collection<WritingTask>(WRITING_TASKS);
+//     await collection.updateMany(
+//       { public: true },
+//       {
+//         $set: {
+//           public: false,
+//         },
+//       }
+//     ); // make all public private to delist old but without breaking links.
+//     // update record if name and version match (assuming that if it matches it is an edit, probably not a safe assumption) else insert.
+//     await collection.bulkWrite(
+//       expectations.map((data) => ({
+//         replaceOne: {
+//           filter: {
+//             'info.name': data.info.name,
+//             'info.version': data.info.version,
+//           },
+//           replacement: { ...data, public: true },
+//           upsert: true,
+//         },
+//       }))
+//     );
+//   } catch (err) {
+//     console.error(err);
+//     throw err;
+//   }
+// }
 
 // Simple setTimeout promise wrapper.
 function timeout(ms: number | undefined): Promise<void> {
@@ -144,9 +187,7 @@ export async function initDatabase() {
       await timeout(sleep);
     }
   }
-  const collection = await client
-    .db('docuscope')
-    .createCollection<Review>(REVIEW);
+  const collection = await client.db(MONGO_DB).createCollection<Review>(REVIEW);
   // Add expire index if necessary.
   const ExpireIndexName = 'expire';
   const indx = (await collection.indexes()).find((idx) => 'created' in idx.key);
@@ -157,8 +198,12 @@ export async function initDatabase() {
       { name: ExpireIndexName, expireAfterSeconds: EXPIRE_REVIEW_SECONDS }
     );
   }
-  await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
-  return () => client.close();
+  // await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
+  const wtdShutdown = await initWritingTasks();
+  return async () => {
+    await wtdShutdown();
+    return client.close();
+  };
 }
 
 /**
@@ -167,33 +212,33 @@ export async function initDatabase() {
  * @param dir directory where to look for writing task files.
  * @returns List of valid writing tasks.
  */
-async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
-  const ret: WritingTask[] = [];
-  try {
-    const files = await readdir(dir);
-    for (const file of files) {
-      const path = join(dir.toString(), file);
-      const stats = await stat(path);
-      if (stats.isFile() && file.endsWith('.json')) {
-        const content = await readFile(path, { encoding: 'utf8' });
-        const json = JSON.parse(content);
-        if (isWritingTask(json)) {
-          // only add valid writing tasks.
-          ret.push(json);
-        }
-      } else if (stats.isDirectory()) {
-        const subdir = await readPublicWritingTasks(path);
-        ret.push(...subdir);
-      }
-      // if not a directory or a json file, skip.
-      // this recursion is unneccessary once fs.glob(join(dir, '**/*.json)) is finalized.
-    }
-    return ret;
-  } catch (err) {
-    console.error(err);
-    return ret; // Should this return [] or current progress?
-  }
-}
+// async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
+//   const ret: WritingTask[] = [];
+//   try {
+//     const files = await readdir(dir);
+//     for (const file of files) {
+//       const path = join(dir.toString(), file);
+//       const stats = await stat(path);
+//       if (stats.isFile() && file.endsWith('.json')) {
+//         const content = await readFile(path, { encoding: 'utf8' });
+//         const json = JSON.parse(content);
+//         if (isWritingTask(json)) {
+//           // only add valid writing tasks.
+//           ret.push(json);
+//         }
+//       } else if (stats.isDirectory()) {
+//         const subdir = await readPublicWritingTasks(path);
+//         ret.push(...subdir);
+//       }
+//       // if not a directory or a json file, skip.
+//       // this recursion is unneccessary once fs.glob(join(dir, '**/*.json)) is finalized.
+//     }
+//     return ret;
+//   } catch (err) {
+//     console.error(err);
+//     return ret; // Should this return [] or current progress?
+//   }
+// }
 
 /**
  * Retrieves the stored review data.
@@ -204,7 +249,7 @@ async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
 export async function findReviewById(id: string) {
   try {
     const _id = new ObjectId(id);
-    const collection = client.db('docuscope').collection<Review>(REVIEW);
+    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
     const review = await collection.findOne<Review>({ _id });
     if (!review) {
       throw new ReferenceError(`Document ${id} not found.`);
@@ -234,7 +279,7 @@ export async function insertReview(
   assignment?: string
 ) {
   try {
-    const collection = client.db('docuscope').collection<Review>(REVIEW);
+    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
     const ins = await collection.insertOne({
       writing_task,
       assignment,
@@ -264,7 +309,7 @@ export async function updateReviewByIdAddAnalysis(
 ) {
   try {
     const _id = new ObjectId(id);
-    const collection = client.db('docuscope').collection<Review>(REVIEW);
+    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
     const result = await collection.findOneAndUpdate(
       { _id },
       { $push: { analysis: { $each: analyses } } }
@@ -284,7 +329,7 @@ export async function updateReviewByIdAddAnalysis(
  */
 export async function deleteReviewById(id: string) {
   const _id = new ObjectId(id);
-  const collection = client.db('docuscope').collection<Review>(REVIEW);
+  const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
   const result = await collection.deleteOne({ _id });
   if (!result.acknowledged || result.deletedCount !== 1) {
     throw new ReferenceError(`Deletion operation for Review ${id} failed.`);
@@ -292,7 +337,7 @@ export async function deleteReviewById(id: string) {
 }
 
 // export async function avgAnalysisTime() {
-//   const collection = client.db('docuscope').collection<Review>(REVIEW);
+//   const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
 //   const avg = await collection.aggregate([
 //     {
 //       '$unwind': {
