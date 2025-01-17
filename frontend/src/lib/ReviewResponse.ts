@@ -10,21 +10,22 @@ export type ReviewPrompt =
   | 'pathos'
   | 'professional_tone'
   | 'sources';
-// | 'global_coherence'
-// | 'all_expectations'
 
 type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
 
-export const ReviewTools: ReviewTool[] = ['civil_tone'
-  , 'ethos'
-  , 'expectations'
-  , 'key_ideas'
-  , 'lines_of_arguments'
-  , 'logical_flow'
-  , 'pathos'
-  , 'professional_tone'
-  , 'sources',
-  'ontopic', 'docuscope']
+export const ReviewTools: ReviewTool[] = [
+  'civil_tone',
+  'ethos',
+  'expectations',
+  'key_ideas',
+  'lines_of_arguments',
+  'logical_flow',
+  'pathos',
+  'professional_tone',
+  'sources',
+  'ontopic',
+  'docuscope',
+];
 
 type Assessment = {
   assessment: {
@@ -94,19 +95,6 @@ export type KeyIdeasOutput = {
     elaboration_sentences: string[];
   }[];
 } & Assessment;
-
-// export type Suggestion = {
-//   text: string; // reference
-//   explanation: string; // evaluation
-//   suggestions: string;
-// };
-// export type GlobalCoherenceResponse = {
-//   'Given New Contract Violation': Suggestion[];
-//   'Sudden Shift in Topic': Suggestion[];
-//   'Illogical Order': Suggestion[];
-//   'Redundant Information': Suggestion[];
-//   'Inconsistent Information': Suggestion[];
-// };
 
 export type Claim = {
   /** Summary of the claim written in a single sentence. */
@@ -187,10 +175,6 @@ export type ReviewResponse =
   | PathosOutput
   | ProfessionalToneOutput
   | SourcesOutput
-  // | GlobalCoherenceResponse
-  // | KeyPointsResponse
-  // | AllExpectationsResponse
-  // | ArgumentsResponse
   | OnTopicData;
 
 interface ReviewData<T extends ReviewResponse> {
@@ -198,10 +182,7 @@ interface ReviewData<T extends ReviewResponse> {
   datetime?: Date;
   response: T;
 }
-// export interface GlobalCoherenceData
-//   extends ReviewData<GlobalCoherenceResponse> {
-//   tool: 'global_coherence';
-// }
+
 export interface CivilToneData extends ReviewData<CivilToneOutput> {
   tool: 'civil_tone';
 }
@@ -262,7 +243,6 @@ export function isErrorData(data: unknown): data is ErrorData {
 }
 
 export type Analysis =
-  // | GlobalCoherenceData
   | CivilToneData
   | EthosData
   | ExpectationsData
