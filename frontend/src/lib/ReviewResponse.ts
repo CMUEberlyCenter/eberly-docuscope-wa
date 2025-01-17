@@ -12,10 +12,19 @@ export type ReviewPrompt =
   | 'sources';
 // | 'global_coherence'
 // | 'all_expectations'
-// | 'arguments'
-// | 'key_points'
 
 type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
+
+export const ReviewTools: ReviewTool[] = ['civil_tone'
+  , 'ethos'
+  , 'expectations'
+  , 'key_ideas'
+  , 'lines_of_arguments'
+  , 'logical_flow'
+  , 'pathos'
+  , 'professional_tone'
+  , 'sources',
+  'ontopic', 'docuscope']
 
 type Assessment = {
   assessment: {

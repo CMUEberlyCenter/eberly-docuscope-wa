@@ -31,10 +31,16 @@ interface Settings {
   notes2bullets?: boolean; // Notes to List LLM tool
   assess_expectation?: boolean; // Assess Single Expectation LLM tool
   // LLM Review Tools
-  assess_expectations?: boolean; // All Expectations review LLM tool
-  lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
+  overview?: boolean;
+  civil_tone?: boolean;
+  ethos?: boolean;
+  expectations?: boolean; // All Expectations review LLM tool
   key_ideas?: boolean; // Key Ideas review LLM tool
-  logical_progression?: boolean; // Logical Progression review LLM tool
+  lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
+  logical_flow?: boolean; // Logical Progression review LLM tool
+  pathos?: boolean;
+  professional_tone?: boolean;
+  sources?: boolean;
   // onTopic Review Tools
   term_matrix?: boolean;
   sentence_density?: boolean;
@@ -60,10 +66,10 @@ const DEFAULT: Settings = {
   notes2bullets: true,
   assess_expectation: false,
 
-  assess_expectations: true,
+  expectations: true,
   lines_of_arguments: true,
   key_ideas: true,
-  logical_progression: false,
+  logical_flow: false,
   term_matrix: true,
   sentence_density: true,
 
@@ -121,12 +127,6 @@ export const [useGlobalFeatureExpectation, globalFeatureExpectation$] = bind(
   ),
   false
 );
-export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.assess_expectations)
-  ),
-  false
-);
 
 export const [useGlobalFeatureCopyedit, globalFeatureCopyedit$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.copyedit)),
@@ -142,9 +142,17 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
   settings$.pipe(
     map(
       (settings) =>
-        !!settings.lines_of_arguments ||
+        !!settings.overview ||
+        !!settings.civil_tone ||
+        !!settings.ethos ||
+        !!settings.expectations ||
         !!settings.key_ideas ||
-        !!settings.logical_progression ||
+        !!settings.lines_of_arguments ||
+        !!settings.logical_flow ||
+        !!settings.pathos ||
+        !!settings.professional_tone ||
+        !!settings.sources ||
+
         !!settings.term_matrix ||
         !!settings.sentence_density
     )
@@ -152,9 +160,14 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
   false
 );
 
-export const [useGlobalFeatureArguments, globalFeatureArguments$] = bind(
+export const [useGlobalFeatureEthos, globalFeatureEthos] = bind(
   settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.lines_of_arguments)
+    map(settings => !!settings.scribe && !!settings.ethos)
+  ), false
+)
+export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.expectations)
   ),
   false
 );
@@ -162,15 +175,34 @@ export const [useGlobalFeatureKeyIdeas, globalFeatureKeyIdeas$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.key_ideas)),
   false
 );
-export const [
-  useGlobalFeatureLogicalProgression,
-  globalFeatureLogicalProgression$,
-] = bind(
+export const [useGlobalFeatureLinesOfArguments, globalFeatureLinesOfArguments$] = bind(
   settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.logical_progression)
+    map((settings) => !!settings.scribe && !!settings.lines_of_arguments)
   ),
   false
 );
+export const [
+  useGlobalFeatureLogicalFlow,
+  globalFeatureLogicalFlow$,
+] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.logical_flow)
+  ),
+  false
+);
+export const [useGlobalFeaturePathos, globalFeaturePathos$] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
+  false
+)
+export const [useGlobalFeatureProfessionalTone, globalFeatureProfessionalTone$] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
+  false
+)
+export const [useGlobalFeatureSources, globalFeatureSources$] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
+  false
+)
+
 export const [useGlobalFeatureTermMatrix, globalFeatureTermMatrix$] = bind(
   settings$.pipe(map((settings) => !!settings.term_matrix)),
   false

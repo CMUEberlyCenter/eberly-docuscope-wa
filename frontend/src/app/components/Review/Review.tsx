@@ -6,11 +6,11 @@ import { isReview } from "../../../server/model/review";
 // import { useUnload } from "../../service/beforeUnload.service";
 import { useReview } from "../../service/review.service";
 import {
-  useGlobalFeatureArguments,
+  useGlobalFeatureLinesOfArguments,
   useGlobalFeatureExpectations,
   useGlobalFeatureImpressions,
   useGlobalFeatureKeyIdeas,
-  useGlobalFeatureLogicalProgression,
+  useGlobalFeatureLogicalFlow,
   useGlobalFeatureSentenceDensity,
   useGlobalFeatureTermMatrix,
 } from "../../service/settings.service";
@@ -106,10 +106,10 @@ export const Review: FC = () => {
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
   const sentencesFeature = useGlobalFeatureSentenceDensity();
-  const coherenceFeature = useGlobalFeatureLogicalProgression();
+  const coherenceFeature = useGlobalFeatureLogicalFlow();
   const ideasFeature = useGlobalFeatureKeyIdeas();
   const impressionsFeature = useGlobalFeatureImpressions();
-  const argumentsFeature = useGlobalFeatureArguments();
+  const argumentsFeature = useGlobalFeatureLinesOfArguments();
   const expectationsFeature = useGlobalFeatureExpectations();
   const organizationFeature = useGlobalFeatureTermMatrix();
 

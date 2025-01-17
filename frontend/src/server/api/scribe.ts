@@ -7,9 +7,10 @@ import {
   TextRequest,
 } from '../../lib/Requests';
 import { doChat } from '../data/chat';
-import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
+import { NotesPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
+import { ReviewPrompt } from '../../lib/ReviewResponse';
 
 export const scribe = Router();
 
@@ -70,10 +71,12 @@ const validate_text = validate(body('text').isString());
 scribe.post('/proofread', validate_text, scribeText('grammar'));
 scribe.post('/copyedit', validate_text, scribeText('copyedit'));
 scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));
-scribe.post('/global_coherence', validate_text, scribeText('global_coherence'));
-scribe.post('/arguments', validate_text, scribeText('arguments'));
-scribe.post('/key_points', validate_text, scribeText('key_points'));
+// Following moved to Review
+// scribe.post('/global_coherence', validate_text, scribeText('global_coherence'));
+// scribe.post('/arguments', validate_text, scribeText('arguments'));
+// scribe.post('/key_points', validate_text, scribeText('key_points'));
 
+// @depricated - unused and to be removed
 scribe.post(
   '/assess_expectation',
   validate(
