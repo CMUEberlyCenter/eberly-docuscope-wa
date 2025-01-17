@@ -1,6 +1,6 @@
 import { OnTopicData } from './OnTopicData';
 
-type ReviewTool =
+export type ReviewPrompt =
   | 'civil_tone'
   | 'ethos'
   | 'expectations'
@@ -9,13 +9,13 @@ type ReviewTool =
   | 'logical_flow'
   | 'pathos'
   | 'professional_tone'
-  | 'sources'
-  // | 'global_coherence'
-  // | 'all_expectations'
-  // | 'arguments'
-  // | 'key_points'
-  | 'ontopic'
-  | 'docuscope';
+  | 'sources';
+// | 'global_coherence'
+// | 'all_expectations'
+// | 'arguments'
+// | 'key_points'
+
+type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
 
 type Assessment = {
   assessment: {
@@ -53,6 +53,18 @@ export type ExpectationsOutput = {
   /** An acknowledgment of how the text addresses the expectation followed by a brief summary of suggestions for better meeting the expectations. */
   suggestions: string;
 };
+export function isExpectationsOutput(
+  data: unknown
+): data is ExpectationsOutput {
+  return (
+    !!data &&
+    typeof data === 'object' &&
+    'sentences' in data &&
+    Array.isArray(data.sentences) &&
+    'suggestions' in data &&
+    typeof data.suggestions === 'string'
+  );
+}
 
 /** JSON structure for the results of the key_points prompt. */
 export type KeyIdeasOutput = {
@@ -198,7 +210,11 @@ export const isExpectationsData = (
   !!data &&
   typeof data === 'object' &&
   'tool' in data &&
-  data.tool === 'all_expectations';
+  data.tool === 'expectations' &&
+  'expectation' in data &&
+  typeof data.expectation === 'string' &&
+  'response' in data &&
+  isExpectationsOutput(data.response);
 
 export interface KeyIdeasData extends ReviewData<KeyIdeasOutput> {
   tool: 'key_ideas';
@@ -223,6 +239,19 @@ export interface SourcesData extends ReviewData<SourcesOutput> {
 export interface OnTopicReviewData extends ReviewData<OnTopicData> {
   tool: 'ontopic';
 }
+
+export type ErrorData = {
+  tool: ReviewTool;
+  datetime?: Date;
+  error: {
+    message: string;
+    details?: unknown;
+  };
+};
+export function isErrorData(data: unknown): data is ErrorData {
+  return !!data && typeof data === 'object' && 'error' in data && !!data.error;
+}
+
 export type Analysis =
   // | GlobalCoherenceData
   | CivilToneData
@@ -234,4 +263,5 @@ export type Analysis =
   | PathosData
   | ProfessionalToneData
   | SourcesData
-  | OnTopicReviewData;
+  | OnTopicReviewData
+  | ErrorData;

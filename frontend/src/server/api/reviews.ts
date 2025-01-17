@@ -8,11 +8,11 @@ import {
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
-  AllExpectationsData,
-  AllExpectationsResponse,
   Analysis,
-  isAllExpectationsData,
+  isExpectationsData,
+  isExpectationsOutput,
   OnTopicReviewData,
+  ReviewPrompt,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
@@ -27,77 +27,74 @@ import {
   updateReviewByIdAddAnalysis,
 } from '../data/mongo';
 import { IdToken } from '../model/lti';
-import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
 
 export const reviews = Router();
 
-const ANALYSES: ReviewPrompt[] = [
-  // 'global_coherence',
-  'key_points',
-  'arguments',
-];
+const ANALYSES: ReviewPrompt[] = ['key_ideas', 'lines_of_arguments'];
 
+/**
+ * Submit data to onTopic for processing.
+ * @param review Review data to be sent to onTopic
+ * @returns Processed data.
+ * @throws fetch errors
+ * @throws Bad onTopic response status
+ * @throws JSON.parse errors
+ */
 const doOnTopic = async (
   review: Review
 ): Promise<OnTopicReviewData | undefined> => {
-  try {
-    const res = await fetch(ONTOPIC_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        base: review.document,
-      }),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      console.error(
-        `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
-      );
-      return;
-    }
-    const data = (await res.json()) as OnTopicData;
-    return {
-      tool: 'ontopic',
-      datetime: new Date(),
-      response: data,
-    };
-  } catch (err) {
-    console.error(err);
+  const res = await fetch(ONTOPIC_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      base: review.document,
+    }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    console.error(
+      `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
+    );
+    throw new Error(`onTopic Response status: ${res.status}`);
   }
+  const data = (await res.json()) as OnTopicData;
+  return {
+    tool: 'ontopic',
+    datetime: new Date(),
+    response: data,
+  };
 };
 
 /**
  * Segments the given text into sentences.
  * @param text content of editor.
- * @returns HTML string or ''.
+ * @returns HTML string.
+ * @throws Error on bad service status.
+ * @throws Network errors.
+ * @throws JSON parse errors.
  */
 const segmentText = async (text: string): Promise<string> => {
-  try {
-    const res = await fetch(SEGMENT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      console.error(
-        `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
-      );
-      return '';
-    }
-    const data = (await res.json()) as string;
-    return data;
-  } catch (err) {
-    console.error(err); // fetch error, rare errors
-    return '';
+  const res = await fetch(SEGMENT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    console.error(
+      `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
+    );
+    throw new Error(`Bad service response from 'segment': ${res.status}`);
   }
+  const data = (await res.json()) as string;
+  return data.trim();
 };
 
 /**
@@ -175,7 +172,7 @@ reviews.get(
       ) {
         const existing = new Set(
           review.analysis
-            .filter(isAllExpectationsData)
+            .filter(isExpectationsData)
             .map(({ expectation }) => expectation)
         );
         const expectations = getExpectations(review.writing_task).filter(
@@ -185,7 +182,7 @@ reviews.get(
           ...expectations.map(async ({ name: expectation, description }) => {
             try {
               const { response, finished: datetime } = await doChat(
-                'all_expectations',
+                'expectations',
                 {
                   ...reviewData(review),
                   expectation,
@@ -193,19 +190,28 @@ reviews.get(
                 },
                 true
               );
-              if (!response) return; // TODO throw null results
+              if (!response) throw new Error(`NULL results for ${expectation}`);
+              if (!isExpectationsOutput(response)) {
+                console.error(`Malformed results for ${expectation}`, response);
+                throw new Error(`Malformed results for ${expectation}`);
+              }
               return updateAnalysis({
-                tool: 'all_expectations',
+                tool: 'expectations',
                 datetime,
                 expectation,
-                response: response as AllExpectationsResponse,
+                response: response,
               });
             } catch (err) {
               console.error(err);
-              // TODO store error state
-              // TODO chat errors
-              // TODO json parse error
-              // TODO other errors
+              return updateAnalysis({
+                tool: 'expectations',
+                datetime: new Date(),
+                expectation,
+                error: {
+                  message: err instanceof Error ? err.message : `${err}`,
+                  details: err, // TODO remove this in production.
+                },
+              });
             }
           })
         );
@@ -214,25 +220,49 @@ reviews.get(
         .filter((a): a is ReviewPrompt => ANALYSES.includes(a as ReviewPrompt))
         .map(async (key) => {
           if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber // TODO check if error
-          const { response, finished: datetime } = await doChat(
-            key,
-            reviewData(review),
-            true
-          );
-          if (!response) return;
-          return updateAnalysis({
-            tool: key,
-            datetime,
-            response,
-          } as Analysis); // FIXME typescript shenanigans
+          try {
+            const { response, finished: datetime } = await doChat(
+              key,
+              reviewData(review),
+              true
+            );
+            if (!response) throw new Error(`NULL chat response for ${key}`);
+            return updateAnalysis({
+              tool: key,
+              datetime,
+              response,
+            } as Analysis); // FIXME typescript shenanigans
+          } catch (err) {
+            console.error(err);
+            return updateAnalysis({
+              tool: key,
+              datetime: new Date(),
+              error: {
+                message: err instanceof Error ? err.message : `${err}`,
+                details: err, // TODO remove this in production.
+              },
+            });
+          }
         });
       const ontopicJobs = ['ontopic'].map(async () => {
         if (!analyses.includes('ontopic')) return;
         if (review.analysis.some(({ tool }) => tool === 'ontopic')) return;
-        const data = await doOnTopic(review);
-        // TODO check for errors
-        if (!data) return;
-        return updateAnalysis(data);
+        try {
+          const data = await doOnTopic(review);
+          // TODO check for errors
+          if (!data) throw new Error(`NULL onTopic results.`);
+          return updateAnalysis(data);
+        } catch (err) {
+          console.error(err);
+          return updateAnalysis({
+            tool: 'ontopic',
+            datetime: new Date(),
+            error: {
+              message: err instanceof Error ? err.message : `${err}`,
+              details: err,
+            },
+          });
+        }
       });
       await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {
