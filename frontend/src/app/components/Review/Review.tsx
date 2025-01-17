@@ -17,7 +17,7 @@ import {
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
-import { Arguments, ArgumentsTitle } from "./Arguments";
+import { LinesOfArguments, LinesOfArgumentsTitle } from "./LinesOfArguments";
 import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
 import { Organization, OrganizationTitle } from "./Organization";
@@ -25,6 +25,7 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesTitle } from "./Sentences";
 import { Expectations, ExpectationsTitle } from "./Expectations";
+import { isOnTopicReviewData } from "../../../lib/ReviewResponse";
 
 type Tool =
   | "null"
@@ -52,7 +53,7 @@ const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
     case "key_ideas":
       return <KeyIdeasTitle {...props} />;
     case "arguments":
-      return <ArgumentsTitle {...props} />;
+      return <LinesOfArgumentsTitle {...props} />;
     case "expectations":
       return <ExpectationsTitle {...props} />;
     case "organization":
@@ -91,11 +92,11 @@ export const Review: FC = () => {
   }, [t]);
   useEffect(() => {
     if (isReview(review)) {
-      const ontopic_doc = review.analysis.find(
-        (analysis) => analysis.tool === "ontopic"
-      )?.response.html;
-      if (ontopic_doc && ["sentences", "organization"].includes(tool)) {
-        setProse(ontopic_doc);
+      const ontopic_analysis = review.analysis.find(
+        (analysis) => isOnTopicReviewData(analysis)
+      );
+      if (ontopic_analysis && ontopic_analysis.response?.html && ["sentences", "organization"].includes(tool)) {
+        setProse(ontopic_analysis.response.html);
       } else {
         setProse(review.segmented);
       }
@@ -192,7 +193,7 @@ export const Review: FC = () => {
           </Dropdown>
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
-            {tool === "arguments" && <Arguments />}
+            {tool === "arguments" && <LinesOfArguments />}
             {tool === "expectations" && <Expectations />}
             {tool === "global_coherence" && <GlobalCoherence />}
             {tool === "impressions" && <NullTool />}

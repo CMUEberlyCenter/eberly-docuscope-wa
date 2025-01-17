@@ -16,7 +16,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import classNames from "classnames";
 
 /** Lines of Arguments title component for use in selection menu. */
-export const ArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
+export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
@@ -121,7 +121,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
  * Component for displaying the results of Lines of Arguments review.
  * @returns
  */
-export const Arguments: FC = () => {
+export const LinesOfArguments: FC = () => {
   const { t } = useTranslation("review");
   const { t: ti } = useTranslation("instructions");
   const review = useArgumentsData();
