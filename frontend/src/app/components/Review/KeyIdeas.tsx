@@ -3,7 +3,7 @@ import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
-import { useKeyPointsData } from "../../service/review.service";
+import { useKeyIdeasData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
@@ -25,7 +25,7 @@ export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
   const { t: ti } = useTranslation("instructions");
-  const review = useKeyPointsData();
+  const review = useKeyIdeasData();
   const dispatch = useContext(ReviewDispatchContext);
 
   return (
@@ -39,7 +39,12 @@ export const KeyIdeas: FC = () => {
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            {"topics" in review.response && review.response.topics.length ? (
+            {"error" in review ? (
+              <Alert variant="danger">
+                {review.error.message}
+                {/* TODO replace with general message in production */}
+              </Alert>
+            ) : review.response.topics.length ? (
               <Accordion>
                 {review.response.topics.map(
                   (

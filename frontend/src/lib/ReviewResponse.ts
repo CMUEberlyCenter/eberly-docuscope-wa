@@ -46,15 +46,15 @@ export type CivilToneOutput = {
   issues: SentenceToneIssue[];
 } & Assessment;
 
-type SentenceIdsAssessmentSuggestion = {
+export type SentenceAssessment = {
   sentence_ids: string[];
   assessment: string;
   suggestion: string;
 };
 export type EthosOutput = {
-  expertise_ethos: SentenceIdsAssessmentSuggestion[];
-  analytical_ethos: SentenceIdsAssessmentSuggestion[];
-  balanced_ethos: SentenceIdsAssessmentSuggestion[];
+  expertise_ethos: SentenceAssessment[];
+  analytical_ethos: SentenceAssessment[];
+  balanced_ethos: SentenceAssessment[];
 } & Assessment;
 
 export type ExpectationsOutput = {
@@ -133,10 +133,10 @@ export type LogicalFlowOutput = {
 } & Assessment;
 
 export type PathosOutput = {
-  situation_pathos: SentenceIdsAssessmentSuggestion[];
-  temporal_pathos: SentenceIdsAssessmentSuggestion[];
-  immersive_pathos: SentenceIdsAssessmentSuggestion[];
-  structural_pathos: SentenceIdsAssessmentSuggestion[];
+  situation_pathos: SentenceAssessment[];
+  temporal_pathos: SentenceAssessment[];
+  immersive_pathos: SentenceAssessment[];
+  structural_pathos: SentenceAssessment[];
 } & Assessment;
 
 export type ProfessionalToneOutput = {
@@ -210,7 +210,8 @@ export interface KeyIdeasData extends ReviewData<KeyIdeasOutput> {
   tool: 'key_ideas';
 }
 
-export interface ArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
+export interface LinesOfArgumentsData
+  extends ReviewData<LinesOfArgumentsOutput> {
   tool: 'lines_of_arguments';
 }
 export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
@@ -231,7 +232,12 @@ export interface OnTopicReviewData extends ReviewData<OnTopicData> {
 }
 
 export function isOnTopicReviewData(data: unknown): data is OnTopicReviewData {
-  return !!data && typeof data === 'object' && 'tool' in data && data.tool==='ontopic';
+  return (
+    !!data &&
+    typeof data === 'object' &&
+    'tool' in data &&
+    data.tool === 'ontopic'
+  );
 }
 
 export type ErrorData = {
@@ -251,7 +257,7 @@ export type Analysis =
   | EthosData
   | ExpectationsData
   | KeyIdeasData
-  | ArgumentsData
+  | LinesOfArgumentsData
   | LogicalFlowData
   | PathosData
   | ProfessionalToneData

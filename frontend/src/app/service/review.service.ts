@@ -3,10 +3,17 @@ import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, Observable, scan } from 'rxjs';
 import {
   ExpectationsData,
-  ArgumentsData,
-  GlobalCoherenceData,
+  LinesOfArgumentsData,
   KeyIdeasData,
   OnTopicReviewData,
+  ErrorData,
+  EthosData,
+  CivilToneData,
+  LogicalFlowData,
+  PathosData,
+  ProfessionalToneData,
+  SourcesData,
+  isErrorData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { isReview, Review } from '../../server/model/review';
@@ -59,13 +66,32 @@ review$.subscribe((rev) => {
   }
 });
 
-const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
+// const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
+//   null
+// );
+type OptionalError<T> = T | ErrorData | null;
+const civilToneAnalysis = new BehaviorSubject<OptionalError<CivilToneData>>(
   null
 );
-const keyPointsAnalysis = new BehaviorSubject<KeyIdeasData | null>(null);
-const argumentsAnalysis = new BehaviorSubject<ArgumentsData | null>(null);
-const ontopicAnalysis = new BehaviorSubject<OnTopicReviewData | null>(null);
-const expectationsAnalysis = new BehaviorSubject<ExpectationsData | null>(null);
+const ethosAnalysis = new BehaviorSubject<OptionalError<EthosData>>(null);
+const keyIdeasAnalysis = new BehaviorSubject<OptionalError<KeyIdeasData>>(null);
+const linesOfArgumentsAnalysis = new BehaviorSubject<
+  OptionalError<LinesOfArgumentsData>
+>(null);
+const logicalFlowAnalysis = new BehaviorSubject<OptionalError<LogicalFlowData>>(
+  null
+);
+const pathosAnalysis = new BehaviorSubject<OptionalError<PathosData>>(null);
+const professionalToneAnalysis = new BehaviorSubject<
+  OptionalError<ProfessionalToneData>
+>(null);
+const sourcesAnalysis = new BehaviorSubject<OptionalError<SourcesData>>(null);
+const ontopicAnalysis = new BehaviorSubject<OptionalError<OnTopicReviewData>>(
+  null
+);
+const expectationsAnalysis = new BehaviorSubject<
+  OptionalError<ExpectationsData>
+>(null);
 review$
   .pipe(
     filter((rev) => isReview(rev)),
@@ -76,21 +102,37 @@ review$
       // const expectations = new Map<string, AllExpectationsData>();
       switch (analysis.tool) {
         // TODO add shape checks
-        case 'global_coherence':
-          globalCoherenceAnalysis.next(analysis);
+        case 'civil_tone':
+          civilToneAnalysis.next(analysis);
           break;
-        case 'key_points':
-          keyPointsAnalysis.next(analysis);
+        case 'ethos':
+          ethosAnalysis.next(analysis);
           break;
-        case 'arguments':
-          argumentsAnalysis.next(analysis);
+        case 'expectations':
+          expectationsAnalysis.next(analysis);
+          break;
+        case 'key_ideas':
+          keyIdeasAnalysis.next(analysis);
+          break;
+        case 'lines_of_arguments':
+          linesOfArgumentsAnalysis.next(analysis);
+          break;
+        case 'logical_flow':
+          logicalFlowAnalysis.next(analysis);
+          break;
+        case 'pathos':
+          pathosAnalysis.next(analysis);
+          break;
+        case 'professional_tone':
+          professionalToneAnalysis.next(analysis);
+          break;
+        case 'sources':
+          sourcesAnalysis.next(analysis);
           break;
         case 'ontopic':
           ontopicAnalysis.next(analysis);
           break;
-        case 'all_expectations':
-          expectationsAnalysis.next(analysis);
-          break;
+        case 'docuscope':
         default:
           // expectations.set(analysis.expectation, analysis);
           break;
@@ -99,25 +141,43 @@ review$
     })
   );
 
-export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
-  globalCoherenceAnalysis,
+// export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
+//   globalCoherenceAnalysis,
+//   null
+// );
+export const [useCivilToneData, civilToneData$] = bind(civilToneAnalysis, null);
+export const [useEthosData, ethosData$] = bind(ethosAnalysis, null);
+export const [useKeyIdeasData, keyPointsData$] = bind(keyIdeasAnalysis, null);
+export const [useLinesOfArgumentsData, argumentsData$] = bind(
+  linesOfArgumentsAnalysis,
   null
 );
-export const [useKeyPointsData, keyPointsData$] = bind(keyPointsAnalysis, null);
-export const [useArgumentsData, argumentsData$] = bind(argumentsAnalysis, null);
+export const [useLogicalFlowData, logicalFlowData$] = bind(
+  logicalFlowAnalysis,
+  null
+);
+export const [usePathosData, pathosData$] = bind(pathosAnalysis, null);
+export const [useProfessionalToneData, professionalToneData$] = bind(
+  professionalToneAnalysis,
+  null
+);
+export const [useSourcesData, sourcesData$] = bind(sourcesAnalysis, null);
 export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);
 export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(
     scan(
       (
         acc: Map<string, ExpectationsData>,
-        current: ExpectationsData | null
+        current: OptionalError<ExpectationsData>
       ) => {
         if (!current) {
           return acc;
         }
         const m = new Map(acc);
-        m.set(current.expectation, current);
+        if (!isErrorData(current)) {
+          // TODO handle error.
+          m.set(current.expectation, current);
+        }
         return m;
       },
       new Map<string, ExpectationsData>()

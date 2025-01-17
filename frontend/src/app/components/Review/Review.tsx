@@ -13,6 +13,7 @@ import {
   useGlobalFeatureLogicalFlow,
   useGlobalFeatureSentenceDensity,
   useGlobalFeatureTermMatrix,
+  useGlobalFeatureEthos,
 } from "../../service/settings.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
@@ -35,7 +36,8 @@ type Tool =
   | "arguments"
   | "expectations"
   | "organization"
-  | "impressions";
+  | "impressions"
+  | "ethos"
 
 const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -92,10 +94,14 @@ export const Review: FC = () => {
   }, [t]);
   useEffect(() => {
     if (isReview(review)) {
-      const ontopic_analysis = review.analysis.find(
-        (analysis) => isOnTopicReviewData(analysis)
+      const ontopic_analysis = review.analysis.find((analysis) =>
+        isOnTopicReviewData(analysis)
       );
-      if (ontopic_analysis && ontopic_analysis.response?.html && ["sentences", "organization"].includes(tool)) {
+      if (
+        ontopic_analysis &&
+        ontopic_analysis.response?.html &&
+        ["sentences", "organization"].includes(tool)
+      ) {
         setProse(ontopic_analysis.response.html);
       } else {
         setProse(review.segmented);
@@ -113,6 +119,7 @@ export const Review: FC = () => {
   const argumentsFeature = useGlobalFeatureLinesOfArguments();
   const expectationsFeature = useGlobalFeatureExpectations();
   const organizationFeature = useGlobalFeatureTermMatrix();
+  const ethosFeature = useGlobalFeatureEthos();
 
   const onSelect = (id: Tool) => {
     setTool(id);
@@ -186,6 +193,11 @@ export const Review: FC = () => {
               {impressionsFeature && (
                 <Dropdown.Item onClick={() => onSelect("impressions")}>
                   <ToolTitle tool="impressions" className="text-primary" />
+                </Dropdown.Item>
+              )}
+              {ethosFeature && (
+                <Dropdown.Item onClick={() => onSelect("ethos")}>
+                  <ToolTitle tool="ethos" className="text-primary" />
                 </Dropdown.Item>
               )}
               {/* Add tool title select option here. */}
