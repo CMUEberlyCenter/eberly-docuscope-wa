@@ -6,7 +6,7 @@ import {
 } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { Claim as ClaimProps } from "../../../lib/ReviewResponse";
+import { Claim as ClaimProps, isErrorData } from "../../../lib/ReviewResponse";
 import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useLinesOfArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
@@ -14,6 +14,7 @@ import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import classNames from "classnames";
+import { ReviewErrorData } from "./ReviewError";
 
 /** Lines of Arguments title component for use in selection menu. */
 export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (
@@ -125,7 +126,6 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
  */
 export const LinesOfArguments: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const review = useLinesOfArgumentsData();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
@@ -135,7 +135,9 @@ export const LinesOfArguments: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("arguments.title")}</h4>
-        <FadeContent htmlContent={ti("arguments")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("arguments")} />}
+        </Translation>
         {!review ? (
           <Loading />
         ) : (
@@ -147,12 +149,7 @@ export const LinesOfArguments: FC = () => {
               {new Date(review.datetime).toLocaleString()}
             </Card.Subtitle>
           )} */}
-            {"error" in review ? (
-              <Alert variant="danger">
-                {review.error.message}
-                {/* TODO replace with general message in production */}
-              </Alert>
-            ) : null}
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             {"response" in review && review.response.thesis ? (
               <article className="mt-3">
                 <h5>{t("arguments.main")}</h5>

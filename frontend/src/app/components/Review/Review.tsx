@@ -37,7 +37,7 @@ type Tool =
   | "expectations"
   | "organization"
   | "impressions"
-  | "ethos"
+  | "ethos";
 
 const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>

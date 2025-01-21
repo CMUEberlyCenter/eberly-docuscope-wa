@@ -6,8 +6,9 @@ import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ErrorBoundary } from "react-error-boundary";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
-import { SentenceAssessment } from "../../../lib/ReviewResponse";
+import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { ReviewErrorData } from "./ReviewError";
 
 export const EthosTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -69,26 +70,22 @@ const SentenceAssessments: FC<
 
 export const Ethos: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const review = useEthosData();
 
   return (
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("ethos.title")}</h4>
-        <FadeContent htmlContent={ti("ethos")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("ethos")} />}
+        </Translation>
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("ethos.error")}</Alert>}
           >
-            {"error" in review ? (
-              <Alert variant="danger">
-                {review.error.message}
-                {/* TODO replace with general message in production */}
-              </Alert>
-            ) : null}
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             {"response" in review ? (
               <>
                 <h5>{t("ethos.expertise")}</h5>

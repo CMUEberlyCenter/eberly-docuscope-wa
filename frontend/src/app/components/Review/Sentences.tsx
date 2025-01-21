@@ -14,6 +14,8 @@ import { Loading } from "../Loading/Loading";
 import { ReviewReset } from "./ReviewContext";
 import "./Sentences.scss";
 import { FadeContent } from "../FadeContent/FadeContent";
+import { isErrorData } from "../../../lib/ReviewResponse";
+import { ReviewErrorData } from "./ReviewError";
 
 export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -83,7 +85,6 @@ type TextData = {
 
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
   const review = useReview();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
@@ -91,7 +92,10 @@ export const Sentences: FC = () => {
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
   const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
   useEffect(
-    () => setHtmlSentences(cleanAndRepairSentenceData(data?.response)),
+    () =>
+      setHtmlSentences(
+        !isErrorData(data) ? cleanAndRepairSentenceData(data?.response) : null
+      ),
     [data]
   );
   const [textData, setTextData] = useState<TextData>({ plain: "" });
@@ -99,7 +103,10 @@ export const Sentences: FC = () => {
   useEffect(() => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
-    setTextData({ plain: review.segmented, sentences: data?.response.clarity });
+    setTextData({
+      plain: review.segmented,
+      sentences: !isErrorData(data) ? data?.response.clarity : undefined,
+    });
   }, [review, data]);
 
   useEffect(() => {
@@ -132,7 +139,9 @@ export const Sentences: FC = () => {
     <ReviewReset>
       <div className="container-fluid sentences d-flex flex-column h-100">
         <h4>{t("sentences.title")}</h4>
-        <FadeContent htmlContent={ti("clarity")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("clarity")} />}
+        </Translation>
         {!data ? (
           <Loading />
         ) : (
@@ -142,6 +151,7 @@ export const Sentences: FC = () => {
                 {new Date(data.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
+            {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
             <Legend />
             <div className="py-1 overflow-auto sentence-display mb-1">
               {sentenceDetails ? (

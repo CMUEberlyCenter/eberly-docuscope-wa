@@ -2,18 +2,17 @@ import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, Observable, scan } from 'rxjs';
 import {
-  ExpectationsData,
-  LinesOfArgumentsData,
-  KeyIdeasData,
-  OnTopicReviewData,
+  CivilToneData,
   ErrorData,
   EthosData,
-  CivilToneData,
+  ExpectationsData,
+  KeyIdeasData,
+  LinesOfArgumentsData,
   LogicalFlowData,
+  OnTopicReviewData,
   PathosData,
   ProfessionalToneData,
   SourcesData,
-  isErrorData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { isReview, Review } from '../../server/model/review';
@@ -28,6 +27,7 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
   new Observable((subscriber) => {
     subscriber.next(SUSPENSE);
     const ctrl = new AbortController();
+    // TODO: add tool query parameter based on configured available.
     fetchEventSource(`/api/v2/reviews/${id}`, {
       ...getLtiRequest,
       signal: ctrl.signal,
@@ -89,9 +89,11 @@ const sourcesAnalysis = new BehaviorSubject<OptionalError<SourcesData>>(null);
 const ontopicAnalysis = new BehaviorSubject<OptionalError<OnTopicReviewData>>(
   null
 );
-const expectationsAnalysis = new BehaviorSubject<
-  OptionalError<ExpectationsData>
->(null);
+export type OptionalExpectations =
+  | ExpectationsData
+  | (ErrorData & { expectation: string })
+  | null;
+const expectationsAnalysis = new BehaviorSubject<OptionalExpectations>(null);
 review$
   .pipe(
     filter((rev) => isReview(rev)),
@@ -109,7 +111,8 @@ review$
           ethosAnalysis.next(analysis);
           break;
         case 'expectations':
-          expectationsAnalysis.next(analysis);
+          if ('expectation' in analysis) expectationsAnalysis.next(analysis);
+          else console.warn('No expectation is expectation response!');
           break;
         case 'key_ideas':
           keyIdeasAnalysis.next(analysis);
@@ -167,20 +170,17 @@ export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(
     scan(
       (
-        acc: Map<string, ExpectationsData>,
-        current: OptionalError<ExpectationsData>
+        acc: Map<string, OptionalExpectations>,
+        current: OptionalExpectations
       ) => {
         if (!current) {
           return acc;
         }
         const m = new Map(acc);
-        if (!isErrorData(current)) {
-          // TODO handle error.
-          m.set(current.expectation, current);
-        }
+        m.set(current.expectation, current);
         return m;
       },
-      new Map<string, ExpectationsData>()
+      new Map<string, OptionalExpectations>()
     )
   ),
   null

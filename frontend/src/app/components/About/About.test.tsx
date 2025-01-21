@@ -1,4 +1,4 @@
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterAll, afterEach, beforeAll, describe, test, vi } from "vitest";
 // import { About } from "./About"; // react 19 use pattern causes error in tests as location.href is not set.
 

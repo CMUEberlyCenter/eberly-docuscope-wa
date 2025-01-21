@@ -9,6 +9,8 @@ import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { FadeContent } from "../FadeContent/FadeContent";
 import classNames from "classnames";
+import { isErrorData } from "../../../lib/ReviewResponse";
+import { ReviewErrorData } from "./ReviewError";
 
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -24,7 +26,6 @@ export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
 /** Component for displaying results of Key Ideas review results. */
 export const KeyIdeas: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const review = useKeyIdeasData();
   const dispatch = useContext(ReviewDispatchContext);
 
@@ -32,18 +33,17 @@ export const KeyIdeas: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("key_ideas.title")}</h4>
-        <FadeContent htmlContent={ti("key_points")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("key_points")} />}
+        </Translation>
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            {"error" in review ? (
-              <Alert variant="danger">
-                {review.error.message}
-                {/* TODO replace with general message in production */}
-              </Alert>
+            {isErrorData(review) ? (
+              <ReviewErrorData data={review} />
             ) : review.response.topics.length ? (
               <Accordion>
                 {review.response.topics.map(

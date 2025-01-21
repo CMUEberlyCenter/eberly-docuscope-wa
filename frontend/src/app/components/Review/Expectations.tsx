@@ -1,3 +1,4 @@
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
 import { Accordion, AccordionItemProps, AccordionProps } from "react-bootstrap";
 import {
@@ -5,20 +6,21 @@ import {
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
-import {
-  ExpectationsData,
-  isExpectationsData,
-} from "../../../lib/ReviewResponse";
+import { isErrorData, isExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
 import AllExpectationsIcon from "../../assets/icons/check_all_expectations_icon.svg?react";
-import { useExpectationsData } from "../../service/review.service";
+import {
+  OptionalExpectations,
+  useExpectationsData,
+} from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import "../AllExpectations/AllExpectations.scss";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
+import { ReviewErrorData } from "./ReviewError";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
@@ -41,7 +43,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   const expectations = useExpectationsData();
   const { t } = useTranslation("expectations");
   const id = useId();
-  const [expectation, setExpectation] = useState<ExpectationsData | null>(null);
+  const [expectation, setExpectation] = useState<OptionalExpectations>(null);
   useEffect(() => {
     setExpectation(expectations?.get(rule.name) ?? null);
   }, [expectations, rule]);
@@ -84,12 +86,28 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
           </Accordion.Body>
         </>
       ) : null}
-      {!isExpectationsData(expectation) ||
-      !expectations?.has(expectation.expectation) ? (
+      {expectation && !expectations?.has(expectation.expectation) ? (
         <div className="fake-accordion-button">
           <div className="flex-grow-1">{rule.name}</div>
           <LoadingSmall />
         </div>
+      ) : null}
+      {isErrorData(expectation) ? (
+        <>
+          <Accordion.Header className="accordion-header-highlight">
+            <div className="flex-grow-1">{expectation.expectation}</div>
+            <FontAwesomeIcon
+              icon="circle-exclamation"
+              className="text-danger"
+            />
+          </Accordion.Header>
+          <Accordion.Body
+            onEntered={() => dispatch({ type: "unset" })}
+            onExit={() => dispatch({ type: "unset" })}
+          >
+            <ReviewErrorData data={expectation} />
+          </Accordion.Body>
+        </>
       ) : null}
     </Accordion.Item>
   );
@@ -122,7 +140,6 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
 
 export const Expectations: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const writingTask = useWritingTask();
   // const [expectations, setExpectations] = useState<Rule[]>([]);
   // useEffect(() => {
@@ -136,7 +153,9 @@ export const Expectations: FC = () => {
     <ReviewReset>
       <div className="container-fluid overflow-auto">
         <h4>{t("expectations.title")}</h4>
-        <FadeContent htmlContent={ti("expectations")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("expectations")} />}
+        </Translation>
         {!writingTask ? (
           <Loading />
         ) : (

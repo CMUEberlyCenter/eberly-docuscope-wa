@@ -34,10 +34,12 @@ import { Translation, useTranslation } from "react-i18next";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { useOnTopicData } from "../../service/review.service";
 import { clearAllHighlights } from "../../service/topic.service";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import "./Organization.scss";
 import { ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
+import { isErrorData } from "../../../lib/ReviewResponse";
+import { ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);
 
@@ -198,7 +200,6 @@ type SelectedRowCol = {
 } | null;
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
@@ -208,9 +209,13 @@ export const Organization: FC = () => {
   // const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
 
   useEffect(() => {
-    setParagraphRange([
-      ...Array(data?.response.coherence?.num_paras ?? 0).keys(),
-    ]);
+    if (data && "response" in data) {
+      setParagraphRange([
+        ...Array(data.response.coherence?.num_paras ?? 0).keys(),
+      ]);
+    } else {
+      setParagraphRange([]);
+    }
     setSelected(null);
   }, [data]);
 
@@ -263,7 +268,9 @@ export const Organization: FC = () => {
     <ReviewReset>
       <div className="container-fluid organization">
         <h4>{t("organization.title")}</h4>
-        <FadeContent htmlContent={ti("term_matrix")} />
+        <Translation ns="instructions">
+          {(t) => <FadeContent htmlContent={t("term_matrix")} />}
+        </Translation>
         {!data ? (
           <Loading />
         ) : (
@@ -298,7 +305,8 @@ export const Organization: FC = () => {
                 </div> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
               <div className="mt-1 mw-100 flex-grow-1">
-                {paragraphRange.length > 0 && (
+                {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
+                {"response" in data && paragraphRange.length > 0 && (
                   <DataTable
                     options={{
                       paging: false,

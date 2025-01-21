@@ -73,7 +73,6 @@ export async function doChat(
     throw new Error(`Malformed prompt for ${key}.`);
   }
   const content = format(prompt, data);
-  let model: string;
   let response: string | object = '';
   const chat = await anthropic.messages.create({
     max_tokens: ANTHROPIC_MAX_TOKENS,
@@ -94,7 +93,7 @@ export async function doChat(
     model: ANTHROPIC_MODEL,
     // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
   });
-  model = chat.model;
+  const model = chat.model;
   // Handle anthropic error https://docs.anthropic.com/en/api/errors
   if (chat.type !== 'message') {
     // This likely should be in catch
