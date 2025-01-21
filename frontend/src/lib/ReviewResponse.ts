@@ -36,7 +36,7 @@ type Assessment = {
   };
 };
 
-type SentenceToneIssue = {
+export type SentenceToneIssue = {
   sentence: string;
   sentence_id: string;
   assessment: string;
@@ -145,8 +145,8 @@ export type ProfessionalToneOutput = {
   subjectivity: SentenceToneIssue[];
 } & Assessment;
 
-type Citation = {
-  /** Name(s) ofthe sources. */
+export type Citation = {
+  /** Name(s) of the sources. */
   names: string;
   /** A brief assessment sentence. */
   assessment: string;
