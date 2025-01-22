@@ -4,29 +4,29 @@ import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 // import { useUnload } from "../../service/beforeUnload.service";
+import { isOnTopicReviewData } from "../../../lib/ReviewResponse";
 import { useReview } from "../../service/review.service";
 import {
-  useGlobalFeatureLinesOfArguments,
+  useGlobalFeatureEthos,
   useGlobalFeatureExpectations,
   useGlobalFeatureImpressions,
   useGlobalFeatureKeyIdeas,
+  useGlobalFeatureLinesOfArguments,
   useGlobalFeatureLogicalFlow,
   useGlobalFeatureSentenceDensity,
   useGlobalFeatureTermMatrix,
-  useGlobalFeatureEthos,
 } from "../../service/settings.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
-import { LinesOfArguments, LinesOfArgumentsTitle } from "./LinesOfArguments";
-import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
+import { Expectations, ExpectationsTitle } from "./Expectations";
+// import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
+import { LinesOfArguments, LinesOfArgumentsTitle } from "./LinesOfArguments";
 import { Organization, OrganizationTitle } from "./Organization";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesTitle } from "./Sentences";
-import { Expectations, ExpectationsTitle } from "./Expectations";
-import { isOnTopicReviewData } from "../../../lib/ReviewResponse";
 
 type Tool =
   | "null"
@@ -50,8 +50,8 @@ const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
   switch (tool) {
     case "sentences":
       return <SentencesTitle {...props} />;
-    case "global_coherence":
-      return <GlobalCoherenceTitle {...props} />;
+    // case "global_coherence":
+    //   return <GlobalCoherenceTitle {...props} />;
     case "key_ideas":
       return <KeyIdeasTitle {...props} />;
     case "arguments":
@@ -207,7 +207,7 @@ export const Review: FC = () => {
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <LinesOfArguments />}
             {tool === "expectations" && <Expectations />}
-            {tool === "global_coherence" && <GlobalCoherence />}
+            {/* {tool === "global_coherence" && <GlobalCoherence />} */}
             {tool === "impressions" && <NullTool />}
             {tool === "key_ideas" && <KeyIdeas />}
             {tool === "organization" && <Organization />}

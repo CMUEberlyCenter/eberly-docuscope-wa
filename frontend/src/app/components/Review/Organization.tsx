@@ -31,6 +31,7 @@ import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import { isErrorData } from "../../../lib/ReviewResponse";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { useOnTopicData } from "../../service/review.service";
 import { clearAllHighlights } from "../../service/topic.service";
@@ -38,7 +39,6 @@ import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import "./Organization.scss";
 import { ReviewReset } from "./ReviewContext";
-import { isErrorData } from "../../../lib/ReviewResponse";
 import { ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);

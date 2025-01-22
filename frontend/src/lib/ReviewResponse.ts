@@ -11,7 +11,7 @@ export type ReviewPrompt =
   | 'professional_tone'
   | 'sources';
 
-type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
+export type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
 
 export const ReviewTools: ReviewTool[] = [
   'civil_tone',
@@ -27,7 +27,7 @@ export const ReviewTools: ReviewTool[] = [
   'docuscope',
 ];
 
-type Assessment = {
+export type GeneralAssessment = {
   assessment: {
     /** A brief comment on the strenghts. */
     strengths: string;
@@ -35,6 +35,18 @@ type Assessment = {
     weaknesses: string;
   };
 };
+
+export function isAssessment(data: unknown): data is GeneralAssessment {
+  return (
+    !!data &&
+    typeof data === 'object' &&
+    'assessment' in data &&
+    !!data.assessment &&
+    typeof data.assessment === 'object' &&
+    'strengths' in data.assessment &&
+    'weakness' in data.assessment
+  );
+}
 
 export type SentenceToneIssue = {
   sentence: string;
@@ -44,7 +56,7 @@ export type SentenceToneIssue = {
 };
 export type CivilToneOutput = {
   issues: SentenceToneIssue[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type SentenceAssessment = {
   sentence_ids: string[];
@@ -55,7 +67,7 @@ export type EthosOutput = {
   expertise_ethos: SentenceAssessment[];
   analytical_ethos: SentenceAssessment[];
   balanced_ethos: SentenceAssessment[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type ExpectationsOutput = {
   /** List of span ids */
@@ -94,7 +106,7 @@ export type KeyIdeasOutput = {
     /** A list of span ids for the sentences from the text that provide the evidence used to support the claim. */
     elaboration_sentences: string[];
   }[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type Claim = {
   /** Summary of the claim written in a single sentence. */
@@ -121,7 +133,7 @@ export type LinesOfArgumentsOutput = {
   counter_arguments: Claim[];
   /** List of claims that address their corresponding counterargument. */
   rebuttals: Claim[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type LogicalFlowOutput = {
   disruptions: {
@@ -130,20 +142,20 @@ export type LogicalFlowOutput = {
     sentences: string[];
     paragraphs: string[];
   }[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type PathosOutput = {
   situation_pathos: SentenceAssessment[];
   temporal_pathos: SentenceAssessment[];
   immersive_pathos: SentenceAssessment[];
   structural_pathos: SentenceAssessment[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type ProfessionalToneOutput = {
   sentiment: SentenceToneIssue[];
   confidence: SentenceToneIssue[];
   subjectivity: SentenceToneIssue[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type Citation = {
   /** Name(s) of the sources. */
@@ -163,7 +175,7 @@ export type SourcesOutput = {
     suggestion: string;
     sentences: string[];
   }[];
-} & Assessment;
+} & GeneralAssessment;
 
 export type ReviewResponse =
   | CivilToneOutput

@@ -7,15 +7,15 @@ import {
   ClarityData,
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
+import { isErrorData } from "../../../lib/ReviewResponse";
 import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
 import { useOnTopicData, useReview } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewReset } from "./ReviewContext";
-import "./Sentences.scss";
-import { FadeContent } from "../FadeContent/FadeContent";
-import { isErrorData } from "../../../lib/ReviewResponse";
 import { ReviewErrorData } from "./ReviewError";
+import "./Sentences.scss";
 
 export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>

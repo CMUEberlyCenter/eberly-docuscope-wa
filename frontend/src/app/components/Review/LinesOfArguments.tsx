@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { FC, HTMLProps, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import {
@@ -13,7 +14,6 @@ import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import classNames from "classnames";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Lines of Arguments title component for use in selection menu. */

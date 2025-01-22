@@ -1,15 +1,15 @@
+import classNames from "classnames";
 import { FC, HTMLProps, useContext } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import { isErrorData } from "../../../lib/ReviewResponse";
 import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { useKeyIdeasData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
-import classNames from "classnames";
-import { isErrorData } from "../../../lib/ReviewResponse";
 import { ReviewErrorData } from "./ReviewError";
 
 /** List of Key Ideas title component for use in selection menu. */

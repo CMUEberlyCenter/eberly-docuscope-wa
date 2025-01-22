@@ -1,13 +1,13 @@
 import { FC, HTMLProps, useContext, useId } from "react";
+import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
 import { useEthosData } from "../../service/review.service";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import { ErrorBoundary } from "react-error-boundary";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
-import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
-import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 export const EthosTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -69,6 +69,7 @@ const SentenceAssessments: FC<
 };
 
 export const Ethos: FC = () => {
+  // credibility
   const { t } = useTranslation("review");
   const review = useEthosData();
 

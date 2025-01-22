@@ -9,9 +9,9 @@ import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
 import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?react";
 import { useGlobalCoherenceData } from "../../service/review.service";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (

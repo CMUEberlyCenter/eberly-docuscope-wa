@@ -1,14 +1,14 @@
 import { FC, HTMLProps, useContext, useId } from "react";
+import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
 import { usePathosData } from "../../service/review.service";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import { ErrorBoundary } from "react-error-boundary";
-import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { AlertIcon } from "../AlertIcon/AlertIcon";
 
 export const PathosTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns="review">
