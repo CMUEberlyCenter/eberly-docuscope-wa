@@ -1,4 +1,4 @@
-# DocuScope Write & Audit
+# myProse
 
 # Administration and Support
 

@@ -25,7 +25,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CMUEberlyCenter/eberly-docuscope-wa",
+    "url": "git+https://github.com/CMUEberlyCenter/eberly-docuscope-wa.git",
     "directory": "frontend"
   },
   "keywords": [
@@ -90,7 +90,7 @@
     "vitest-fetch-mock": "^0.4.3"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.33.1",
+    "@anthropic-ai/sdk": "^0.35.0",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
@@ -145,7 +145,7 @@
     "bluebird": "3.7.2",
     "glob": "^9",
     "ltijs": {
-      "mongoose": ">=8.8.3",
+      "mongoose": ">=8.9.5",
       "mongodb": "$mongodb"
     },
     "swr": {
