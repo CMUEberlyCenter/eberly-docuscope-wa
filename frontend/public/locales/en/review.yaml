@@ -9,11 +9,17 @@ error:
 civil_tone:
   entry: Civil Tone
   title: Civil Tone
-  error: 'Error loading Civil Tone data:'
-  
+  error: Error displaying Civil Tone tool.
+ethos:
+  entry: Credibility
+  title: Credibility
+  error: Error displaying Credibilty tool.
+  assessment: Assessment
+  no_sentences: No relevant text found in your draft.
+  'null': No feedback.
 sentences:
   title: Sentence Density
-  error: 'Error loading Sentence data:'
+  error: 'Error displaying Sentence data:'
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
@@ -74,6 +80,11 @@ arguments:
   sentences: Sentences
   suggestions: Suggestions
   'null': No lines of arguments were detected in your draft.
+logical_flow:
+  entry: Logical Flow
+  title: Logical Flow
+  error: Error displaying Logical Flow tool.
+  no_sentences: No relevant sentences were found in your draft.
 expectations:
   title: Check Content Expectations
   error:
@@ -110,6 +121,34 @@ organization:
     paragraphs: Topic
     sentences_in_paragraph: 'Coherence across sentences in paragraph: {{paragraph}}'
     sentences: 'Sentences:'
+pathos:
+  entry: Emotional Appeal
+  title: Emotional Appeal
+  error: Error displaying Emotional Appeal tool.
+  assessment: Assessment
+  no_sentences: No relavent text was detected in your draft.
+  situation: Situational Pathos
+  temporal: Temporal Pathos
+  immersive: Immersive Pathos
+  structural: Structural Pathos
+  'null': No feedback.
+professional_tone:
+  entry: Professional Tone
+  title: Professional Tone
+  error: Error displaying Professional Tone tool.
+  sentiment: Sentiment
+  confidence: Confidence
+  subjectivity: Subjectivity
+  'null': No feedback.
+sources:
+  entry: Sources
+  title: Sources
+  error: Error displaying Sources tool.
+  supportive: Supportive Citation
+  hedged: Hedged Citation
+  alternative: Alternative Citation
+  neutral: Neutral Citation
+  issues: 'Citation Issues:'
 impressions:
   title: Impressions
 'null':
