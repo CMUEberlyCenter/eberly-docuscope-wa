@@ -27,6 +27,9 @@ const SentenceToneIssues: FC<
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
 
+  if (issues.length <= 0) {
+    return (<Alert variant="info">{t("professional_tone.null")}</Alert>);
+  }
   return (
     <Accordion {...props}>
       {issues.map((sent, i) => (
