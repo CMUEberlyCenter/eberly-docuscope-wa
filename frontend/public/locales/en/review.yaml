@@ -149,6 +149,8 @@ sources:
   alternative: Alternative Citation
   neutral: Neutral Citation
   issues: 'Citation Issues:'
+  no_issues: No significant citation issues were found in your draft.
+  'null': No feedback.
 impressions:
   title: Impressions
 'null':
