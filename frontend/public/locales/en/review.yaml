@@ -6,6 +6,11 @@ error:
   header: Error Loading Review!
   content: There was an error retrieving the review data.
   details: 'Details: {{message}}'
+civil_tone:
+  entry: Civil Tone
+  title: Civil Tone
+  error: 'Error loading Civil Tone data:'
+  
 sentences:
   title: Sentence Density
   error: 'Error loading Sentence data:'
