@@ -26,6 +26,9 @@ const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
 
+  if (citations.length <= 0) {
+    return (<Alert variant="info">{t("sources.null")}</Alert>);
+  }
   return (
     <Accordion {...props}>
       {citations.map(({ names, assessment, sentences }, i) => (
@@ -73,6 +76,8 @@ export const Sources: FC = () => {
               <h5>{t("sources.neutral")}</h5>
               <Citations citations={review.response.neutral_citation} />
               <h5>{t("sources.issues")}</h5>
+              {review.response.citation_issues.length <= 0 ? 
+                <Alert variant="info">{t("sources.no_issues")}</Alert> : (
               <Accordion>
                 {review.response.citation_issues.map(
                   ({ description, suggestion, sentences }, i) => (
@@ -89,7 +94,7 @@ export const Sources: FC = () => {
                     </Accordion.Item>
                   )
                 )}
-              </Accordion>
+              </Accordion>)}
             </>
           ) : null}
         </ErrorBoundary>
