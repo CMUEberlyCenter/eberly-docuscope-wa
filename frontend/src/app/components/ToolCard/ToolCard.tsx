@@ -601,7 +601,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 regenerate={retry}
                 text={currentTool.result?.explanation}
               >
-                {currentTool.result ? (
+                {currentTool.result?.clean_revision ||
+                currentTool.result?.explanation ||
+                currentTool.result?.revision ? (
                   <>
                     <h4>{t("tool.suggestion")}</h4>
                     <div
@@ -687,7 +689,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 }
                 regenerate={retry}
               >
-                {currentTool.result ? (
+                {currentTool.result?.issues.length ||
+                currentTool.result?.general_assessment ? (
                   <>
                     {currentTool.result.rating ? (
                       <Rating value={currentTool.result.rating} />
