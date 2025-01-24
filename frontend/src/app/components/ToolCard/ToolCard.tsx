@@ -478,7 +478,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />} // TODO post as list
+              actions={<ToolDisplay.Paste text={currentTool.result} />}
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
