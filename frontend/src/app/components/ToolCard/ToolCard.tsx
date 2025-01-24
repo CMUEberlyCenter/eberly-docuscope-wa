@@ -478,7 +478,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />} // TODO post as list
+              actions={<ToolDisplay.Paste text={currentTool.result} />}
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
@@ -487,15 +487,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 text={currentTool.result ?? ""}
               >
                 {currentTool.result ? (
-                  <ul>
-                    {currentTool.result
-                      .split(/\s*-\s+/)
-                      .filter((b) => b.trim() !== "")
-                      .map((b, i) => (
-                        <li key={`list-item-${i}`}>{b}</li>
-                      ))}
-                  </ul>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: currentTool.result,
+                    }}
+                  >
+                    {/* For #135, use results directly. */}
+                  </div>
                 ) : (
+                  // <ul>
+                  //   {currentTool.result
+                  //     .split(/\s*-\s+/)
+                  //     .filter((b) => b.trim() !== "")
+                  //     .map((b, i) => (
+                  //       <li key={`list-item-${i}`}>{b}</li>
+                  //     ))}
+                  // </ul>
                   <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
