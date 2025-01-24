@@ -18,12 +18,12 @@ import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
+import { deserializeHtmlText } from "../../lib/slate";
 import { ToolResult } from "../../lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../scribe/TextToSpeech";
-import { jsx } from "slate-hyperscript";
 
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
@@ -180,19 +180,22 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
         const nodes: Node[] = [];
         if (text.match(/<p.*>/)) {
           // is html
-          nodes.push(
-            ...[...text.matchAll(/<p>(.*)<\/p>/gi)]
-              .filter((p) => p.at(0) && p.at(1))
-              .map((element) =>
-                jsx(
-                  "element",
-                  {
-                    type: "paragraph",
-                  },
-                  jsx("text", {}, element.at(1) ?? "")
-                )
-              )
-          );
+          nodes.push(...(deserializeHtmlText(text) ?? []));
+          // nodes.push(
+          //   ...[...text.matchAll(/<p>(.*)<\/p>/gi)]
+          //     .filter((p) => p.at(0) && p.at(1))
+          //     .map((element) =>
+          //       jsx(
+          //         "element",
+          //         {
+          //           type: "paragraph",
+          //         },
+          //         jsx("text", {}, element.at(1) ?? "")
+          //       )
+          //     )
+          // );
+        } else if (text.match(/^\s*<ul/)) {
+          nodes.push(...(deserializeHtmlText(text) ?? []));
         } else if (text.match(/^\w*-/)) {
           [...text.matchAll(/^\s*-\s*(.*)$/g)].forEach(console.log);
           // is a list

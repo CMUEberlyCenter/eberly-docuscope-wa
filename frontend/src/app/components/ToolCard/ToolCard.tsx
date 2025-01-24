@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import {
+  Alert,
   Button,
   ButtonGroup,
   ButtonToolbar,
@@ -477,7 +478,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               title={t("tool.button.bullets.tooltip")}
               tool={currentTool}
               onBookmark={onBookmark}
-              actions={<ToolDisplay.Paste text={currentTool.result} />} // TODO post as list
+              actions={<ToolDisplay.Paste text={currentTool.result} />}
             >
               <ToolDisplay.Input tool={currentTool} />
               <ToolDisplay.Response
@@ -485,15 +486,24 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 regenerate={retry}
                 text={currentTool.result ?? ""}
               >
-                {currentTool.result && (
-                  <ul>
-                    {currentTool.result
-                      .split(/\s*-\s+/)
-                      .filter((b) => b.trim() !== "")
-                      .map((b, i) => (
-                        <li key={`list-item-${i}`}>{b}</li>
-                      ))}
-                  </ul>
+                {currentTool.result ? (
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: currentTool.result,
+                    }}
+                  >
+                    {/* For #135, use results directly. */}
+                  </div>
+                ) : (
+                  // <ul>
+                  //   {currentTool.result
+                  //     .split(/\s*-\s+/)
+                  //     .filter((b) => b.trim() !== "")
+                  //     .map((b, i) => (
+                  //       <li key={`list-item-${i}`}>{b}</li>
+                  //     ))}
+                  // </ul>
+                  <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
@@ -549,11 +559,11 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       .join("\n\n")
                   }
                 >
-                  {currentTool.result && (
+                  {currentTool.result ? (
                     <ErrorBoundary fallback={<div>{t("error.unknown")}</div>}>
-                      {currentTool.result.rating && (
+                      {currentTool.result.rating ? (
                         <Rating value={currentTool.result.rating} />
-                      )}
+                      ) : null}
                       <p>{currentTool.result.general_assessment}</p>
                       <dl>
                         {currentTool.result.issues.map(
@@ -574,6 +584,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         )}
                       </dl>
                     </ErrorBoundary>
+                  ) : (
+                    <Alert variant="danger">{t("error.no_results")}</Alert>
                   )}
                 </ToolDisplay.Response>
               )}
@@ -596,7 +608,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 regenerate={retry}
                 text={currentTool.result?.explanation}
               >
-                {currentTool.result && (
+                {currentTool.result?.clean_revision ||
+                currentTool.result?.explanation ||
+                currentTool.result?.revision ? (
                   <>
                     <h4>{t("tool.suggestion")}</h4>
                     <div
@@ -618,6 +632,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       }}
                     ></div>
                   </>
+                ) : (
+                  <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
@@ -637,7 +653,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 tool={currentTool}
                 text={currentTool.result?.explanation}
               >
-                {currentTool.result && (
+                {currentTool.result ? (
                   <>
                     <h3>{t("tool.suggestion")}</h3>
                     <div
@@ -652,6 +668,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       }}
                     ></div>
                   </>
+                ) : (
+                  <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
@@ -678,11 +696,12 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 }
                 regenerate={retry}
               >
-                {currentTool.result && (
+                {currentTool.result?.issues.length ||
+                currentTool.result?.general_assessment ? (
                   <>
-                    {currentTool.result.rating && (
+                    {currentTool.result.rating ? (
                       <Rating value={currentTool.result.rating} />
-                    )}
+                    ) : null}
                     <p>{currentTool.result.general_assessment}</p>
                     <ul className="no-bullets">
                       {currentTool.result.issues.map(
@@ -706,6 +725,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                       )}
                     </ul>
                   </>
+                ) : (
+                  <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
