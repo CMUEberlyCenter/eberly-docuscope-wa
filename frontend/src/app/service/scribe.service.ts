@@ -74,7 +74,7 @@ export async function postConvertNotes(
   { text }: SelectedText,
   output: 'prose' | 'bullets' = 'prose',
   writing_task?: WritingTask | null
-) {
+): Promise<string> {
   const endpoint =
     output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
   const { user_lang, target_lang } = writing_task?.info ?? {};

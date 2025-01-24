@@ -110,6 +110,7 @@ error:
     prose: It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable paragraph.
     bullets: It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable list.
     default: No text is selected. Highlight text first.
+  no_results: No valid results.
 expectation:
   title: Select an Expectation
 flow:

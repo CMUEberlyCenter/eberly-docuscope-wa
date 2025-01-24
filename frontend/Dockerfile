@@ -1,4 +1,4 @@
-FROM docker.io/node:22 AS base
+FROM docker.io/node:23 AS base
 RUN mkdir -p /app
 
 FROM base AS build
