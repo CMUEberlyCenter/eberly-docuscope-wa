@@ -487,15 +487,22 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 text={currentTool.result ?? ""}
               >
                 {currentTool.result ? (
-                  <ul>
-                    {currentTool.result
-                      .split(/\s*-\s+/)
-                      .filter((b) => b.trim() !== "")
-                      .map((b, i) => (
-                        <li key={`list-item-${i}`}>{b}</li>
-                      ))}
-                  </ul>
+                  <div
+                    dangerouslySetInnerHTML={{
+                      __html: currentTool.result,
+                    }}
+                  >
+                    {/* For #135, use results directly. */}
+                  </div>
                 ) : (
+                  // <ul>
+                  //   {currentTool.result
+                  //     .split(/\s*-\s+/)
+                  //     .filter((b) => b.trim() !== "")
+                  //     .map((b, i) => (
+                  //       <li key={`list-item-${i}`}>{b}</li>
+                  //     ))}
+                  // </ul>
                   <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
