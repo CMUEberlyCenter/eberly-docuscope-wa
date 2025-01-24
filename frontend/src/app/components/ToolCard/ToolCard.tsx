@@ -554,9 +554,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 >
                   {currentTool.result ? (
                     <ErrorBoundary fallback={<div>{t("error.unknown")}</div>}>
-                      {currentTool.result.rating && (
+                      {currentTool.result.rating ? (
                         <Rating value={currentTool.result.rating} />
-                      )}
+                      ) : null}
                       <p>{currentTool.result.general_assessment}</p>
                       <dl>
                         {currentTool.result.issues.map(
@@ -689,9 +689,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               >
                 {currentTool.result ? (
                   <>
-                    {currentTool.result.rating && (
+                    {currentTool.result.rating ? (
                       <Rating value={currentTool.result.rating} />
-                    )}
+                    ) : null}
                     <p>{currentTool.result.general_assessment}</p>
                     <ul className="no-bullets">
                       {currentTool.result.issues.map(
