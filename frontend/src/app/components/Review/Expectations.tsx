@@ -78,11 +78,22 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <h6>{t("suggestions")}</h6>
-            <p key={`${id}-suggestion`}>
-              {isExpectationsData(expectation) &&
-                expectation.response.suggestions}
-            </p>
+            {isExpectationsData(expectation) &&
+            expectation.response.assessment ? (
+              <div>
+                <h6 className="d-inline">{t("assessment")}</h6>{" "}
+                <span key={`${id}-assessment`}>
+                  {expectation.response.assessment}
+                </span>
+              </div>
+            ) : null}
+            <div>
+              <h6 className="d-inline">{t("suggestions")}</h6>{" "}
+              <span key={`${id}-suggestion`}>
+                {isExpectationsData(expectation) &&
+                  expectation.response.suggestions}
+              </span>
+            </div>
           </Accordion.Body>
         </>
       ) : null}

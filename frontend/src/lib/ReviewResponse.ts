@@ -72,7 +72,9 @@ export type EthosOutput = {
 export type ExpectationsOutput = {
   /** List of span ids */
   sentences: string[];
-  /** An acknowledgment of how the text addresses the expectation followed by a brief summary of suggestions for better meeting the expectations. */
+  /** An acknowledgment of what's working and possible issues, if any. */
+  assessment?: string;
+  /** A brief summary of suggestions for better meeting the expectations. */
   suggestions: string;
 };
 export function isExpectationsOutput(
@@ -165,6 +167,7 @@ export type Citation = {
   /** List of span ids. */
   sentences: string[];
 };
+
 export type SourcesOutput = {
   supportive_citation: Citation[];
   hedged_citation: Citation[];
