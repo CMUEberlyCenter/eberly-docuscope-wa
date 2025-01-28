@@ -66,12 +66,17 @@ const DEFAULT: Settings = {
   notes2bullets: true,
   assess_expectation: false,
 
+  civil_tone: true,
+  ethos: true,
   expectations: true,
-  lines_of_arguments: true,
   key_ideas: true,
-  logical_flow: false,
+  lines_of_arguments: true,
+  logical_flow: true,
+  pathos: true,
+  professional_tone: true,
   term_matrix: true,
   sentence_density: true,
+  sources: true,
 
   flow: true,
   copyedit: true,
@@ -159,6 +164,10 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
   false
 );
 
+export const [useGlobalFeatureCivilTone, globalFeatureCivilTone] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.civil_tone)),
+  false
+);
 export const [useGlobalFeatureEthos, globalFeatureEthos] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.ethos)),
   false

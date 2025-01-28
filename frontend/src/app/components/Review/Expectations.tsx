@@ -162,15 +162,17 @@ export const Expectations: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("expectations.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("expectations")} />}
-        </Translation>
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("expectations.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("expectations")} />}
+          </Translation>
+        </header>
         {!writingTask ? (
           <Loading />
         ) : (
-          <div className="container-fluid overflow-auto position-relative flex-grow-1">
+          <section className="container-fluid overflow-auto position-relative flex-grow-1">
             {writingTask?.rules.rules.map((rule, i) => (
               <ExpectationRules
                 key={`rule-${i}`}
@@ -179,9 +181,9 @@ export const Expectations: FC = () => {
                 activeKey={current}
               />
             ))}
-          </div>
+          </section>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

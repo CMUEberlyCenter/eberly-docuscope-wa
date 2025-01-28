@@ -27,7 +27,11 @@ const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
   const id = useId();
 
   if (citations.length <= 0) {
-    return (<Alert variant="info">{t("sources.null")}</Alert>);
+    return (
+      <Translation ns={"review"}>
+        {(t) => <Alert variant="info">{t("sources.null")}</Alert>}
+      </Translation>
+    );
   }
   return (
     <Accordion {...props}>
@@ -52,53 +56,74 @@ export const Sources: FC = () => {
   const dispatch = useContext(ReviewDispatchContext);
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("sources.title")}</h4>
-      </div>
-      <Translation ns="instructions">
-        {(t) => <FadeContent htmlContent={t("sources")} />}
-      </Translation>
-      {!review ? (
-        <Loading />
-      ) : (
-        <ErrorBoundary
-          fallback={<Alert variant="danger">{t("sources.error")}</Alert>}
-        >
-          {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-          {"response" in review ? (
-            <>
-              <h5>{t("sources.supportive")}</h5>
-              <Citations citations={review.response.supportive_citation} />
-              <h5>{t("sources.hedged")}</h5>
-              <Citations citations={review.response.hedged_citation} />
-              <h5>{t("sources.alternative")}</h5>
-              <Citations citations={review.response.alternative_citation} />
-              <h5>{t("sources.neutral")}</h5>
-              <Citations citations={review.response.neutral_citation} />
-              <h5>{t("sources.issues")}</h5>
-              {review.response.citation_issues.length <= 0 ? 
-                <Alert variant="info">{t("sources.no_issues")}</Alert> : (
-              <Accordion>
-                {review.response.citation_issues.map(
-                  ({ description, suggestion, sentences }, i) => (
-                    <Accordion.Item key={`${i}`} eventKey={`${i}`}>
-                      <Accordion.Header>{description}</Accordion.Header>
-                      <Accordion.Body
-                        onEntered={() =>
-                          dispatch({ type: "set", sentences: [sentences] })
-                        }
-                        onExit={() => dispatch({ type: "unset" })}
-                      >
-                        {suggestion}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  )
-                )}
-              </Accordion>)}
-            </>
-          ) : null}
-        </ErrorBoundary>
-      )}
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("sources.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("sources")} />}
+          </Translation>
+        </header>
+        {!review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("sources.error")}</Alert>}
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("sources.insights")}</p>
+                </header>
+                <section>
+                  <h5>{t("sources.supportive")}</h5>
+                  <Citations citations={review.response.supportive_citation} />
+                </section>
+                <section>
+                  <h5>{t("sources.hedged")}</h5>
+                  <Citations citations={review.response.hedged_citation} />
+                </section>
+                <section>
+                  <h5>{t("sources.alternative")}</h5>
+                  <Citations citations={review.response.alternative_citation} />
+                </section>
+                <section>
+                  <h5>{t("sources.neutral")}</h5>
+                  <Citations citations={review.response.neutral_citation} />
+                </section>
+                <section>
+                  <h5>{t("sources.issues")}</h5>
+                  {review.response.citation_issues.length <= 0 ? (
+                    <Alert variant="info">{t("sources.no_issues")}</Alert>
+                  ) : (
+                    <Accordion>
+                      {review.response.citation_issues.map(
+                        ({ description, suggestion, sentences }, i) => (
+                          <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                            <Accordion.Header>{description}</Accordion.Header>
+                            <Accordion.Body
+                              onEntered={() =>
+                                dispatch({
+                                  type: "set",
+                                  sentences: [sentences],
+                                })
+                              }
+                              onExit={() => dispatch({ type: "unset" })}
+                            >
+                              {suggestion}
+                            </Accordion.Body>
+                          </Accordion.Item>
+                        )
+                      )}
+                    </Accordion>
+                  )}
+                </section>
+              </section>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </article>
     </ReviewReset>
   );
 };

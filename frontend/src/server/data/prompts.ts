@@ -20,10 +20,12 @@ export async function initPrompts() {
     ignored: (path, stats) => !!stats?.isFile() && !path.endsWith('.md'), // only watch md files
     persistent: true,
   });
+  console.log(`watchin ${PROMPT_TEMPLATES_PATH}`);
   prompts.on('unlink', (path) => PROMPTS.delete(keyFromFilename(path)));
   prompts.on('add', async (path) => {
     const prompt = await readFile(path, { encoding: 'utf8' });
     PROMPTS.set(keyFromFilename(path), { prompt, temperature: 0.0 });
+    console.log(`adding ${keyFromFilename(path)}`);
   });
   prompts.on('change', async (path) => {
     const prompt = await readFile(path, { encoding: 'utf8' });

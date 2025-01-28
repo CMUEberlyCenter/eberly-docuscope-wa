@@ -7,6 +7,7 @@ import { useEthosData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -75,11 +76,13 @@ export const Ethos: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("ethos.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("ethos")} />}
-        </Translation>
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("ethos.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("ethos")} />}
+          </Translation>
+        </header>
         {!review ? (
           <Loading />
         ) : (
@@ -87,27 +90,38 @@ export const Ethos: FC = () => {
             fallback={<Alert variant="danger">{t("ethos.error")}</Alert>}
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
             {"response" in review ? (
-              <>
-                <h5>{t("ethos.expertise")}</h5>
-                <SentenceAssessments
-                  assessments={review.response.expertise_ethos}
-                />
-                <h5>{t("ethos.analytical")}</h5>
-                <SentenceAssessments
-                  assessments={review.response.analytical_ethos}
-                />
-                <h5>{t("ethos.ballanced")}</h5>
-                <SentenceAssessments
-                  assessments={review.response.balanced_ethos}
-                />
-              </>
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("ethos.insights")}</p>
+                </header>
+                <section>
+                  <h5>{t("ethos.expertise")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.expertise_ethos}
+                  />
+                </section>
+                <section>
+                  <h5>{t("ethos.analytical")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.analytical_ethos}
+                  />
+                </section>
+                <section>
+                  <h5>{t("ethos.balanced")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.balanced_ethos}
+                  />
+                </section>
+              </section>
             ) : (
               <Alert variant="warning">{t("ethos.null")}</Alert>
             )}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

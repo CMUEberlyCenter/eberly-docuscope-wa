@@ -6,6 +6,7 @@ import { isErrorData, SentenceToneIssue } from "../../../lib/ReviewResponse";
 import { useProfessionalToneData } from "../../service/review.service";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -28,7 +29,11 @@ const SentenceToneIssues: FC<
   const id = useId();
 
   if (issues.length <= 0) {
-    return (<Alert variant="info">{t("professional_tone.null")}</Alert>);
+    return (
+      <Translation ns={"review"}>
+        {(t) => <Alert variant="info">{t("professional_tone.null")}</Alert>}
+      </Translation>
+    );
   }
   return (
     <Accordion {...props}>
@@ -62,33 +67,46 @@ export const ProfessionalTone: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("professional_tone.title")}</h4>
-      </div>
-      <Translation ns="instructions">
-        {(t) => <FadeContent htmlContent={t("professional_tone")} />}
-      </Translation>
-      {!review ? (
-        <Loading />
-      ) : (
-        <ErrorBoundary
-          fallback={
-            <Alert variant="danger">{t("professional_tone.error")}</Alert>
-          }
-        >
-          {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-          {"response" in review ? (
-            <>
-              <h5>{t("professional_tone.sentiment")}</h5>
-              <SentenceToneIssues issues={review.response.sentiment} />
-              <h5>{t("professional_tone.confidence")}</h5>
-              <SentenceToneIssues issues={review.response.confidence} />
-              <h5>{t("professional_tone.subjectivity")}</h5>
-              <SentenceToneIssues issues={review.response.subjectivity} />
-            </>
-          ) : null}
-        </ErrorBoundary>
-      )}
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("professional_tone.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("prof_tone")} />}
+          </Translation>
+        </header>
+        {!review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">{t("professional_tone.error")}</Alert>
+            }
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("professional_tone.insights")}</p>
+                </header>
+                <section>
+                  <h5>{t("professional_tone.sentiment")}</h5>
+                  <SentenceToneIssues issues={review.response.sentiment} />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.confidence")}</h5>
+                  <SentenceToneIssues issues={review.response.confidence} />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.subjectivity")}</h5>
+                  <SentenceToneIssues issues={review.response.subjectivity} />
+                </section>
+              </section>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </article>
     </ReviewReset>
   );
 };

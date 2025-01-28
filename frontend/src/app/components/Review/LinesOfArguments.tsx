@@ -13,6 +13,7 @@ import { useLinesOfArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -133,11 +134,13 @@ export const LinesOfArguments: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("arguments.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("arguments")} />}
-        </Translation>
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("arguments.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("arguments")} />}
+          </Translation>
+        </header>
         {!review ? (
           <Loading />
         ) : (
@@ -150,47 +153,57 @@ export const LinesOfArguments: FC = () => {
             </Card.Subtitle>
           )} */}
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            {"response" in review && review.response.thesis ? (
-              <article className="mt-3">
-                <h5>{t("arguments.main")}</h5>
-                <p>{review.response.thesis}</p>
-                <Claims
-                  onSelect={onSelect}
-                  activeKey={current}
-                  claims={review.response.arguments}
-                />
-              </article>
-            ) : null}
-            {"response" in review &&
-            review.response.counter_arguments?.length ? (
-              <article className="mt-3">
-                <h5>{t("arguments.counter_examples")}</h5>
-                <Claims
-                  onSelect={onSelect}
-                  activeKey={current}
-                  claims={review.response.counter_arguments}
-                />
-              </article>
-            ) : null}
-            {"response" in review && review.response.rebuttals?.length ? (
-              <article className="mt-3">
-                <h5>{t("arguments.rebuttals")}</h5>
-                <Claims
-                  onSelect={onSelect}
-                  activeKey={current}
-                  claims={review.response.rebuttals}
-                />
-              </article>
-            ) : null}
-            {"response" in review &&
-            !review.response.thesis &&
-            !review.response.counter_arguments?.length &&
-            !review.response.rebuttals?.length ? (
-              <Alert variant="warning">{t("arguments.null")}</Alert>
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("arguments.insights")}</p>
+                </header>
+                {review.response.thesis ? (
+                  <section className="mt-3">
+                    <h6 className="d-inline">{t("arguments.main")}</h6>
+                    <p>{review.response.thesis}</p>
+                    <Claims
+                      onSelect={onSelect}
+                      activeKey={current}
+                      claims={review.response.arguments}
+                    />
+                  </section>
+                ) : null}
+                <section className="mt-3">
+                  <h5>{t("arguments.counter_examples")}</h5>
+                  {review.response.counter_arguments?.length ? (
+                    <Claims
+                      onSelect={onSelect}
+                      activeKey={current}
+                      claims={review.response.counter_arguments}
+                    />
+                  ) : (
+                    <span>{t("arguments.no_counter_examples")}</span>
+                  )}
+                </section>
+                {review.response.rebuttals?.length ? (
+                  <section className="mt-3">
+                    <h5>{t("arguments.rebuttals")}</h5>
+                    <Claims
+                      onSelect={onSelect}
+                      activeKey={current}
+                      claims={review.response.rebuttals}
+                    />
+                  </section>
+                ) : null}
+                {"response" in review &&
+                !review.response.thesis &&
+                !review.response.counter_arguments?.length &&
+                !review.response.rebuttals?.length ? (
+                  <Alert variant="warning">{t("arguments.null")}</Alert>
+                ) : null}
+              </section>
             ) : null}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

@@ -7,6 +7,7 @@ import { usePathosData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -74,41 +75,56 @@ export const Pathos: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("pathos.title")}</h4>
-      </div>
-      <Translation ns="instructions">
-        {(t) => <FadeContent htmlContent={t("pathos")} />}
-      </Translation>
-      {!review ? (
-        <Loading />
-      ) : (
-        <ErrorBoundary
-          fallback={<Alert variant="danger">{t("pathos.error")}</Alert>}
-        >
-          {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-          {"response" in review ? (
-            <>
-              <h5>{t("pathos.situation")}</h5>
-              <SentenceAssessments
-                assessments={review.response.situation_pathos}
-              />
-              <h5>{t("pathos.temporal")}</h5>
-              <SentenceAssessments
-                assessments={review.response.temporal_pathos}
-              />
-              <h5>{t("pathos.immersive")}</h5>
-              <SentenceAssessments
-                assessments={review.response.immersive_pathos}
-              />
-              <h5>{t("pathos.structural")}</h5>
-              <SentenceAssessments
-                assessments={review.response.structural_pathos}
-              />
-            </>
-          ) : null}
-        </ErrorBoundary>
-      )}
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("pathos.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("pathos")} />}
+          </Translation>
+        </header>
+        {!review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("pathos.error")}</Alert>}
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("ethos.insights")}</p>
+                </header>
+                <section>
+                  <h5>{t("pathos.situation")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.situation_pathos}
+                  />
+                </section>
+                <section>
+                  <h5>{t("pathos.temporal")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.temporal_pathos}
+                  />
+                </section>
+                <section>
+                  <h5>{t("pathos.immersive")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.immersive_pathos}
+                  />
+                </section>
+                <section>
+                  <h5>{t("pathos.structural")}</h5>
+                  <SentenceAssessments
+                    assessments={review.response.structural_pathos}
+                  />
+                </section>
+              </section>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </article>
     </ReviewReset>
   );
 };

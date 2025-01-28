@@ -44,7 +44,7 @@ export function isAssessment(data: unknown): data is GeneralAssessment {
     !!data.assessment &&
     typeof data.assessment === 'object' &&
     'strengths' in data.assessment &&
-    'weakness' in data.assessment
+    'weaknesses' in data.assessment
   );
 }
 

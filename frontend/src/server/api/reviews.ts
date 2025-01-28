@@ -33,7 +33,16 @@ import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
 
 export const reviews = Router();
 
-const ANALYSES: ReviewPrompt[] = ['key_ideas', 'lines_of_arguments'];
+const ANALYSES: ReviewPrompt[] = [
+  'key_ideas',
+  'lines_of_arguments',
+  'logical_flow',
+  'ethos',
+  'civil_tone',
+  'pathos',
+  'professional_tone',
+  'sources',
+];
 
 /**
  * Submit data to onTopic for processing.

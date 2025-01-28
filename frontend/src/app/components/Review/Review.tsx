@@ -7,13 +7,17 @@ import { isReview } from "../../../server/model/review";
 import { isOnTopicReviewData } from "../../../lib/ReviewResponse";
 import { useReview } from "../../service/review.service";
 import {
+  useGlobalFeatureCivilTone,
   useGlobalFeatureEthos,
   useGlobalFeatureExpectations,
   useGlobalFeatureImpressions,
   useGlobalFeatureKeyIdeas,
   useGlobalFeatureLinesOfArguments,
   useGlobalFeatureLogicalFlow,
+  useGlobalFeaturePathos,
+  useGlobalFeatureProfessionalTone,
   useGlobalFeatureSentenceDensity,
+  useGlobalFeatureSources,
   useGlobalFeatureTermMatrix,
 } from "../../service/settings.service";
 import { Legal } from "../Legal/Legal";
@@ -21,23 +25,34 @@ import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { Expectations, ExpectationsTitle } from "./Expectations";
 // import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
+import { CivilTone, CivilToneTitle } from "./CivilTone";
+import { Ethos, EthosTitle } from "./Ethos";
 import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
 import { LinesOfArguments, LinesOfArgumentsTitle } from "./LinesOfArguments";
+import { LogicalFlow, LogicalFlowTitle } from "./LogicalFlow";
 import { Organization, OrganizationTitle } from "./Organization";
+import { Pathos, PathosTitle } from "./Pathos";
+import { ProfessionalTone, ProfessionalToneTitle } from "./ProfessionalTone";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesTitle } from "./Sentences";
+import { Sources, SourcesTitle } from "./Sources";
 
 type Tool =
-  | "null"
-  | "sentences"
+  | "civil_tone"
+  | "ethos"
+  | "expectations"
   | "global_coherence"
   | "key_ideas"
   | "arguments"
-  | "expectations"
+  | "logical_flow"
   | "organization"
+  | "pathos"
+  | "professional_tone"
+  | "sentences"
+  | "sources"
   | "impressions"
-  | "ethos";
+  | "null";
 
 const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -48,6 +63,18 @@ const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
 type ToolProps = HTMLProps<HTMLSpanElement> & { tool: Tool };
 const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
   switch (tool) {
+    case "civil_tone":
+      return <CivilToneTitle {...props} />;
+    case "logical_flow":
+      return <LogicalFlowTitle {...props} />;
+    case "pathos":
+      return <PathosTitle {...props} />;
+    case "professional_tone":
+      return <ProfessionalToneTitle {...props} />;
+    case "sources":
+      return <SourcesTitle {...props} />;
+    case "ethos":
+      return <EthosTitle {...props} />;
     case "sentences":
       return <SentencesTitle {...props} />;
     // case "global_coherence":
@@ -112,14 +139,18 @@ export const Review: FC = () => {
   }, [review, tool]);
 
   /* <!-- TODO limit tool availability based on writing task/settings --> */
-  const sentencesFeature = useGlobalFeatureSentenceDensity();
-  const coherenceFeature = useGlobalFeatureLogicalFlow();
-  const ideasFeature = useGlobalFeatureKeyIdeas();
-  const impressionsFeature = useGlobalFeatureImpressions();
-  const argumentsFeature = useGlobalFeatureLinesOfArguments();
-  const expectationsFeature = useGlobalFeatureExpectations();
-  const organizationFeature = useGlobalFeatureTermMatrix();
+  const civilToneFeature = useGlobalFeatureCivilTone();
   const ethosFeature = useGlobalFeatureEthos();
+  const expectationsFeature = useGlobalFeatureExpectations();
+  const ideasFeature = useGlobalFeatureKeyIdeas();
+  const argumentsFeature = useGlobalFeatureLinesOfArguments();
+  const logicalFlowFeature = useGlobalFeatureLogicalFlow();
+  const pathosFeature = useGlobalFeaturePathos();
+  const professionalToneFeature = useGlobalFeatureProfessionalTone();
+  const sentencesFeature = useGlobalFeatureSentenceDensity();
+  const sourcesFeature = useGlobalFeatureSources();
+  const impressionsFeature = useGlobalFeatureImpressions();
+  const organizationFeature = useGlobalFeatureTermMatrix();
 
   const onSelect = (id: Tool) => {
     setTool(id);
@@ -175,9 +206,9 @@ export const Review: FC = () => {
                   <ToolTitle tool="key_ideas" className="text-primary" />
                 </Dropdown.Item>
               )}
-              {coherenceFeature && (
-                <Dropdown.Item onClick={() => onSelect("global_coherence")}>
-                  <ToolTitle tool="global_coherence" className="text-primary" />
+              {logicalFlowFeature && (
+                <Dropdown.Item onClick={() => onSelect("logical_flow")}>
+                  <ToolTitle tool="logical_flow" className="text-primary" />
                 </Dropdown.Item>
               )}
               {organizationFeature && (
@@ -195,9 +226,32 @@ export const Review: FC = () => {
                   <ToolTitle tool="impressions" className="text-primary" />
                 </Dropdown.Item>
               )}
+              {pathosFeature && (
+                <Dropdown.Item onClick={() => onSelect("pathos")}>
+                  <ToolTitle tool="pathos" className="text-primary" />
+                </Dropdown.Item>
+              )}
               {ethosFeature && (
                 <Dropdown.Item onClick={() => onSelect("ethos")}>
                   <ToolTitle tool="ethos" className="text-primary" />
+                </Dropdown.Item>
+              )}
+              {civilToneFeature && (
+                <Dropdown.Item onClick={() => onSelect("civil_tone")}>
+                  <ToolTitle tool="civil_tone" className="text-primary" />
+                </Dropdown.Item>
+              )}
+              {professionalToneFeature && (
+                <Dropdown.Item onClick={() => onSelect("professional_tone")}>
+                  <ToolTitle
+                    tool="professional_tone"
+                    className="text-primary"
+                  />
+                </Dropdown.Item>
+              )}
+              {sourcesFeature && (
+                <Dropdown.Item onClick={() => onSelect("sources")}>
+                  <ToolTitle tool="sources" className="text-primary" />
                 </Dropdown.Item>
               )}
               {/* Add tool title select option here. */}
@@ -206,12 +260,18 @@ export const Review: FC = () => {
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <LinesOfArguments />}
+            {tool === "logical_flow" && <LogicalFlow />}
+            {tool === "civil_tone" && <CivilTone />}
+            {tool === "ethos" && <Ethos />}
             {tool === "expectations" && <Expectations />}
             {/* {tool === "global_coherence" && <GlobalCoherence />} */}
             {tool === "impressions" && <NullTool />}
             {tool === "key_ideas" && <KeyIdeas />}
             {tool === "organization" && <Organization />}
             {tool === "sentences" && <Sentences />}
+            {tool === "pathos" && <Pathos />}
+            {tool === "professional_tone" && <ProfessionalTone />}
+            {tool === "sources" && <Sources />}
             {/* Add more tool displays here. */}
           </div>
           <Legal />

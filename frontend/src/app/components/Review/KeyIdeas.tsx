@@ -11,6 +11,7 @@ import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { Summary } from "../Summary/Summary";
 
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -31,104 +32,118 @@ export const KeyIdeas: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
-        <h4>{t("key_ideas.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("key_points")} />}
-        </Translation>
+      <article className="container-fluid overflow-auto">
+        <header>
+          <h4>{t("key_ideas.title")}</h4>
+          <Translation ns="instructions">
+            {(t) => <FadeContent htmlContent={t("key_points")} />}
+          </Translation>
+        </header>
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
             fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
           >
-            {isErrorData(review) ? (
-              <ReviewErrorData data={review} />
-            ) : review.response.topics.length ? (
-              <Accordion>
-                {review.response.topics.map(
-                  (
-                    {
-                      topic,
-                      elaborations,
-                      suggestions,
-                      topic_sentences,
-                      elaboration_sentences,
-                    },
-                    i
-                  ) => (
-                    <Accordion.Item key={`${i}`} eventKey={`${i}`}>
-                      <Accordion.Header className="accordion-header-highlight">
-                        <div className="flex-grow-1">
-                          <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
-                          <span>{topic}</span>
-                        </div>
-                        <AlertIcon
-                          show={
-                            topic_sentences.length +
-                              elaboration_sentences.length ===
-                            0
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review && review.response.topics.length ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <p>{t("key_ideas.insights")}</p>
+                </header>
+                <Accordion>
+                  {review.response.topics.map(
+                    (
+                      {
+                        topic,
+                        elaborations,
+                        suggestions,
+                        topic_sentences,
+                        elaboration_sentences,
+                      },
+                      i
+                    ) => (
+                      <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                        <Accordion.Header className="accordion-header-highlight">
+                          <div className="flex-grow-1">
+                            <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
+                            <span>{topic}</span>
+                          </div>
+                          <AlertIcon
+                            show={
+                              topic_sentences.length +
+                                elaboration_sentences.length ===
+                              0
+                            }
+                            message={t("key_ideas.no_sentences")}
+                          />
+                        </Accordion.Header>
+                        <Accordion.Body
+                          className="p-0 pb-3"
+                          onEntered={() =>
+                            dispatch({
+                              type: "set",
+                              sentences: [
+                                topic_sentences,
+                                elaboration_sentences,
+                              ],
+                            })
                           }
-                          message={t("key_ideas.no_sentences")}
-                        />
-                      </Accordion.Header>
-                      <Accordion.Body
-                        className="p-0 pb-3"
-                        onEntered={() =>
-                          dispatch({
-                            type: "set",
-                            sentences: [topic_sentences, elaboration_sentences],
-                          })
-                        }
-                        onExit={() => dispatch({ type: "unset" })}
-                      >
-                        {elaborations?.length ? (
-                          <div
-                            className={classNames(
-                              "pt-3 px-3 pb-0",
-                              elaboration_sentences.length &&
-                                "highlight highlight-1"
-                            )}
-                          >
-                            <h6>{t("key_ideas.elaborations")}</h6>
-                            <ul>
-                              {elaborations.map(
-                                ({ elaboration_strategy, explanation }, k) => (
-                                  <li key={`elaboration-${i}-${k}`}>
-                                    <h6 className="d-inline">
-                                      {elaboration_strategy}
-                                    </h6>
-                                    {"  "}
-                                    <span>{explanation}</span>
-                                  </li>
-                                )
+                          onExit={() => dispatch({ type: "unset" })}
+                        >
+                          {elaborations?.length ? (
+                            <div
+                              className={classNames(
+                                "pt-3 px-3 pb-0",
+                                elaboration_sentences.length &&
+                                  "highlight highlight-1"
                               )}
-                            </ul>
-                          </div>
-                        ) : null}
-                        {suggestions?.length ? (
-                          <div className="m-3 mt-2">
-                            <h6>{t("key_ideas.suggestions")}</h6>
-                            <ul>
-                              {suggestions.map((suggestion, k) => (
-                                <li key={`suggestion-${i}-${k}`}>
-                                  {suggestion}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        ) : null}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  )
-                )}
-              </Accordion>
+                            >
+                              <h6>{t("key_ideas.elaborations")}</h6>
+                              <ul>
+                                {elaborations.map(
+                                  (
+                                    { elaboration_strategy, explanation },
+                                    k
+                                  ) => (
+                                    <li key={`elaboration-${i}-${k}`}>
+                                      <h6 className="d-inline">
+                                        {elaboration_strategy}
+                                      </h6>
+                                      {"  "}
+                                      <span>{explanation}</span>
+                                    </li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          ) : null}
+                          {suggestions?.length ? (
+                            <div className="m-3 mt-2">
+                              <h6>{t("key_ideas.suggestions")}</h6>
+                              <ul>
+                                {suggestions.map((suggestion, k) => (
+                                  <li key={`suggestion-${i}-${k}`}>
+                                    {suggestion}
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : null}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    )
+                  )}
+                </Accordion>
+              </section>
             ) : (
               <Alert variant="warning">{t("key_ideas.null")}</Alert>
             )}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };
