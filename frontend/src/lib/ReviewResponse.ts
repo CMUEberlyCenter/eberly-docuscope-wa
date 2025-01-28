@@ -72,7 +72,9 @@ export type KeyPointsResponse = {
 export type AllExpectationsResponse = {
   /** List of span ids */
   sentences: string[];
-  /** An acknowledgment of how the text addresses the expectation followed by a brief summary of suggestions for better meeting the expectations. */
+  /** An acknowledgment of what's working and possible issues, if any. */
+  assessment?: string;
+  /** A brief summary of suggestions for better meeting the expectations. */
   suggestions: string;
 };
 

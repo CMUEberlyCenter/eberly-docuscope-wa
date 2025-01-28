@@ -89,6 +89,10 @@ export async function updatePublicWritingTasks() {
     const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
       (e) => ({ ...e, public: true })
     );
+    if (expectations.length === 0) {
+      console.error(`No writing tasks found in ${WRITING_TASKS_PATH}`);
+      throw new Error(`No writing tasks found in ${WRITING_TASKS_PATH}`);
+    }
     const collection = client
       .db('docuscope')
       .collection<WritingTask>(WRITING_TASKS);

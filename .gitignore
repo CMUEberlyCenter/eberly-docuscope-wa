@@ -34,4 +34,6 @@ deps.txt
 /env
 dswadb
 .env
+.env.fish
 /secrets/
+/private/
