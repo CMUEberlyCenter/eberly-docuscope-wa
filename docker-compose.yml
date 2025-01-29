@@ -52,6 +52,7 @@ services:
       OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
       PORT: 8888
       SCRIBE_TEMPLATES: /app/private/templates.json
+      PROMPT_TEMPLATES: /app/private/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
       WRITING_TASKS: /app/private/writing_tasks
     restart: always
