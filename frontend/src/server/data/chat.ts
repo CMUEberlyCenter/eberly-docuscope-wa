@@ -89,7 +89,14 @@ export async function doChat(
     throw new Error('No LLM configured.');
   }
   // TODO catch json parsing errors, either here or in calling code
-  response = json ? JSON.parse(response) : response;
+  try {
+    response = json ? JSON.parse(response) : response;
+  } catch (err) {
+    // Output the json that failed to parse.
+    console.error(err); // Most likely a SyntaxError
+    console.error(response);
+    throw err;
+  }
   const finished = new Date();
   return {
     key,
