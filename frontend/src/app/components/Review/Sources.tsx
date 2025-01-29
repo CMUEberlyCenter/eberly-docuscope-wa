@@ -25,19 +25,18 @@ const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
 }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
+  const { t } = useTranslation("review");
 
-  if (citations.length <= 0) {
-    return (
-      <Translation ns={"review"}>
-        {(t) => <Alert variant="info">{t("sources.null")}</Alert>}
-      </Translation>
-    );
-  }
   return (
     <Accordion {...props}>
       {citations.map(({ names, assessment, sentences }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
-          <Accordion.Header>{names}</Accordion.Header>
+          <Accordion.Header className="accordion-header-highlight">
+            <div className="flex-grow-1">
+              <strong className="d-inline">{t("sources.source")}</strong>{" "}
+              <span>{names}</span>
+            </div>
+          </Accordion.Header>
           <Accordion.Body
             onEntered={() => dispatch({ type: "set", sentences: [sentences] })}
             onExit={() => dispatch({ type: "unset" })}
@@ -71,52 +70,92 @@ export const Sources: FC = () => {
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             {"response" in review ? (
-              <section>
+              <section className="mb-3">
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
                   <p>{t("sources.insights")}</p>
                 </header>
+                {review.response.citation_issues.length <= 0 ? (
+                  <Alert variant="info">{t("sources.no_issues")}</Alert>
+                ) : (
+                  <Accordion>
+                    {review.response.citation_issues.map(
+                      ({ description, suggestion, sentences }, i) => (
+                        <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                          <Accordion.Header className="accordion-header-highlight">
+                            <div>
+                              <strong className="d-inline">
+                                {t("sources.issue")}
+                              </strong>{" "}
+                              <span>{description}</span>
+                            </div>
+                          </Accordion.Header>
+                          <Accordion.Body
+                            onEntered={() =>
+                              dispatch({
+                                type: "set",
+                                sentences: [sentences],
+                              })
+                            }
+                            onExit={() => dispatch({ type: "unset" })}
+                          >
+                            {suggestion}
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      )
+                    )}
+                  </Accordion>
+                )}
+              </section>
+            ) : null}
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("sources.types.title")}</h5>
+                  <p>{t("sources.types.subtitle")}</p>
+                </header>
                 <section>
-                  <h5>{t("sources.supportive")}</h5>
-                  <Citations citations={review.response.supportive_citation} />
-                </section>
-                <section>
-                  <h5>{t("sources.hedged")}</h5>
-                  <Citations citations={review.response.hedged_citation} />
-                </section>
-                <section>
-                  <h5>{t("sources.alternative")}</h5>
-                  <Citations citations={review.response.alternative_citation} />
-                </section>
-                <section>
-                  <h5>{t("sources.neutral")}</h5>
-                  <Citations citations={review.response.neutral_citation} />
-                </section>
-                <section>
-                  <h5>{t("sources.issues")}</h5>
-                  {review.response.citation_issues.length <= 0 ? (
-                    <Alert variant="info">{t("sources.no_issues")}</Alert>
+                  <h6>{t("sources.supportive.title")}</h6>
+                  {review.response.supportive_citation.length <= 0 ? (
+                    <p>{t("sources.supportive.null")}</p>
                   ) : (
-                    <Accordion>
-                      {review.response.citation_issues.map(
-                        ({ description, suggestion, sentences }, i) => (
-                          <Accordion.Item key={`${i}`} eventKey={`${i}`}>
-                            <Accordion.Header>{description}</Accordion.Header>
-                            <Accordion.Body
-                              onEntered={() =>
-                                dispatch({
-                                  type: "set",
-                                  sentences: [sentences],
-                                })
-                              }
-                              onExit={() => dispatch({ type: "unset" })}
-                            >
-                              {suggestion}
-                            </Accordion.Body>
-                          </Accordion.Item>
-                        )
-                      )}
-                    </Accordion>
+                    <Citations
+                      className="mb-3"
+                      citations={review.response.supportive_citation}
+                    />
+                  )}
+                </section>
+                <section>
+                  <h6>{t("sources.hedged.title")}</h6>
+                  {review.response.hedged_citation.length <= 0 ? (
+                    <p>{t("sources.hedged.null")}</p>
+                  ) : (
+                    <Citations
+                      className="mb-3"
+                      citations={review.response.hedged_citation}
+                    />
+                  )}
+                </section>
+                <section>
+                  <h6>{t("sources.alternative.title")}</h6>
+                  {review.response.alternative_citation.length <= 0 ? (
+                    <p>{t("sources.alternative.null")}</p>
+                  ) : (
+                    <Citations
+                      className="mb-3"
+                      citations={review.response.alternative_citation}
+                    />
+                  )}
+                </section>
+                <section>
+                  <h6>{t("sources.neutral.title")}</h6>
+                  {review.response.neutral_citation.length <= 0 ? (
+                    <p>{t("sources.neutral.null")}</p>
+                  ) : (
+                    <Citations
+                      className="mb-3"
+                      citations={review.response.neutral_citation}
+                    />
                   )}
                 </section>
               </section>

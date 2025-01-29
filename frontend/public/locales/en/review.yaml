@@ -162,13 +162,25 @@ sources:
   title: Sources
   error: Error displaying Sources tool.
   insights: Check how your text develops its argument.
-  supportive: Supportive Citation
-  hedged: Hedged Citation
-  alternative: Alternative Citation
-  neutral: Neutral Citation
-  issues: 'Citation Issues:'
+  issue: "Issue:"
+  source: "Source(s):"
+  supportive:
+    title: Supportive Citation
+    "null": No supportive style of citation is used in this draft.
+  hedged:
+    title: Hedged Citation
+    "null": No hedged style of citation is used in this draft.
+  alternative:
+    title: Alternative Citation
+    "null": No alternative style of citation is used in this draft.
+  neutral:
+    title: Neutral Citation
+    "null": No neutral style of citation is used in this draft.
   no_issues: No significant citation issues were found in your draft.
   'null': No feedback.
+  types:
+    title: Types of Sources
+    subtitle: The following types of sources are found in this draft.
 impressions:
   title: Impressions
 'null':
