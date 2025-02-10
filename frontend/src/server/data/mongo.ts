@@ -177,7 +177,7 @@ export async function initDatabase() {
     } catch (err) {
       const { message } = err as Error;
       console.warn(
-        `Failed to connect to database: ${message}, retrying in ${sleep}ms (${retry} attempts left)...`
+        `Failed to connect to database: ${message}  Retrying in ${sleep}ms (${retry} attempts left)...`
       );
       retry -= 1;
       await timeout(sleep);

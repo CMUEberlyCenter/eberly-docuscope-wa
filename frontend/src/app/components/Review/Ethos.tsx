@@ -5,9 +5,9 @@ import { Translation, useTranslation } from "react-i18next";
 import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
 import { useEthosData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -77,12 +77,7 @@ export const Ethos: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("ethos.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("ethos")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("ethos.title")} instructionsKey="ethos" />
         {!review ? (
           <Loading />
         ) : (

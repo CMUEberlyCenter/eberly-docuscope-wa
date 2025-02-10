@@ -4,8 +4,8 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Citation, isErrorData } from "../../../lib/ReviewResponse";
 import { useSourcesData } from "../../service/review.service";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -56,12 +56,7 @@ export const Sources: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("sources.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("sources")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("sources.title")} instructionsKey="sources" />
         {!review ? (
           <Loading />
         ) : (

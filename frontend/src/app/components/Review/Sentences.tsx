@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
@@ -8,20 +8,28 @@ import {
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
 import { isErrorData } from "../../../lib/ReviewResponse";
-import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
+import Icon from "../../assets/icons/show_sentence_density_icon.svg?react";
 import { useOnTopicData, useReview } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
+export const SentencesButton: FC<ButtonProps> = (props) => (
+  <Translation ns={"review"}>
+    {(t) => (
+      <ToolButton {...props} title={t("sentences.title")} tooltip={t("sentences.tooltip")} icon={<Icon />} />
+    )}
+  </Translation>
+)
 export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
-        <SentencesIcon /> {t("sentences.title")}
+        <Icon /> {t("sentences.title")}
       </span>
     )}
   </Translation>
@@ -137,11 +145,8 @@ export const Sentences: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid sentences d-flex flex-column h-100">
-        <h4>{t("sentences.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("clarity")} />}
-        </Translation>
+      <article className="container-fluid sentences d-flex flex-column h-100">
+        <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
         {!data ? (
           <Loading />
         ) : (
@@ -264,7 +269,7 @@ export const Sentences: FC = () => {
             </Card> */}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

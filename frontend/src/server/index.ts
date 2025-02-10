@@ -137,8 +137,6 @@ async function __main__() {
     }
   );
 
-  console.log(`OnTopic: ${ONTOPIC_URL}`);
-
   Provider.app.get('/lti/info', async (_req: Request, res: Response) => {
     const token: IdToken | undefined = res.locals.token;
     const context = {

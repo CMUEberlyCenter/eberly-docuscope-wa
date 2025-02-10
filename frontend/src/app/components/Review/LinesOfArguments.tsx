@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useId, useState } from "react";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import {
   AccordionEventKey,
   AccordionSelectCallback,
@@ -8,14 +8,23 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { Claim as ClaimProps, isErrorData } from "../../../lib/ReviewResponse";
-import ArgumentsIcon from "../../assets/icons/list_arguments_icon.svg?react";
+import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useLinesOfArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+
+export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => (
+  <Translation ns={"review"}>
+    {(t) => (
+      <ToolButton {...props} title={t("arguments.title")} tooltip={t("arguments.tooltip")} icon={<Icon />} />
+    )}
+  </Translation>
+)
 
 /** Lines of Arguments title component for use in selection menu. */
 export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (
@@ -24,7 +33,7 @@ export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (
   <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
-        <ArgumentsIcon /> {t("arguments.entry")}
+        <Icon /> {t("arguments.entry")}
       </span>
     )}
   </Translation>
@@ -68,7 +77,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("arguments.no_sentences")}
                       show={
                         (claim_sentences ?? []).length +
-                          (evidence_sentences ?? []).length ===
+                        (evidence_sentences ?? []).length ===
                         0
                       }
                     />
@@ -91,7 +100,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (evidence_sentences ?? []).length &&
-                            "highlight highlight-1"
+                          "highlight highlight-1"
                         )}
                       >
                         <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
@@ -135,12 +144,7 @@ export const LinesOfArguments: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("arguments.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("arguments")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("arguments.title")} instructionsKey="arguments" />
         {!review ? (
           <Loading />
         ) : (
@@ -194,9 +198,9 @@ export const LinesOfArguments: FC = () => {
                   </section>
                 ) : null}
                 {"response" in review &&
-                !review.response.thesis &&
-                !review.response.counter_arguments?.length &&
-                !review.response.rebuttals?.length ? (
+                  !review.response.thesis &&
+                  !review.response.counter_arguments?.length &&
+                  !review.response.rebuttals?.length ? (
                   <Alert variant="warning">{t("arguments.null")}</Alert>
                 ) : null}
               </section>

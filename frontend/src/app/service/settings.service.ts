@@ -38,6 +38,7 @@ interface Settings {
   key_ideas?: boolean; // Key Ideas review LLM tool
   lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
   logical_flow?: boolean; // Logical Progression review LLM tool
+  paragraph_clarity?: boolean;
   pathos?: boolean;
   professional_tone?: boolean;
   sources?: boolean;
@@ -72,6 +73,7 @@ const DEFAULT: Settings = {
   key_ideas: true,
   lines_of_arguments: true,
   logical_flow: true,
+  paragraph_clarity: true,
   pathos: true,
   professional_tone: true,
   term_matrix: true,
@@ -197,6 +199,12 @@ export const [useGlobalFeatureLogicalFlow, globalFeatureLogicalFlow$] = bind(
   ),
   false
 );
+export const [useGlobalFeatureParagraphClarity, globalFeatureParagraphClarity$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.paragraph_clarity)
+  ),
+  false
+)
 export const [useGlobalFeaturePathos, globalFeaturePathos$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
   false

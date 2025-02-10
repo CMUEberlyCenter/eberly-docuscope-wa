@@ -1,14 +1,24 @@
 import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData, SentenceToneIssue } from "../../../lib/ReviewResponse";
+import Icon from "../../assets/icons/check_all_expectations_icon.svg?react";
 import { useProfessionalToneData } from "../../service/review.service";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+
+export const ProfessionalToneButton: FC<ButtonProps> = (props) => (
+  <Translation ns={"review"}>
+    {(t) => (
+      <ToolButton {...props} title={t("professional_tone.title")} tooltip={t("professional_tone.tooltip")} icon={<Icon />} />
+    )}
+  </Translation>
+)
 
 export const ProfessionalToneTitle: FC<HTMLProps<HTMLSpanElement>> = (
   props
@@ -68,12 +78,7 @@ export const ProfessionalTone: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("professional_tone.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("prof_tone")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("professional_tone.title")} instructionsKey="prof_tone" />
         {!review ? (
           <Loading />
         ) : (

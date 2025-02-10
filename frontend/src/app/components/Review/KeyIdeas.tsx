@@ -1,24 +1,32 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext } from "react";
-import { Accordion, Alert } from "react-bootstrap";
+import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
-import KeyIdeasIcon from "../../assets/icons/list_key_ideas_icon.svg?react";
+import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { useKeyIdeasData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { Summary } from "../Summary/Summary";
+import { ToolButton } from "../ToolButton/ToolButton";
 
+export const KeyIdeasButton: FC<ButtonProps> = (props) => (
+  <Translation ns={"review"}>
+    {(t) => (
+      <ToolButton {...props} title={t("key_ideas.title")} tooltip={t("key_ideas.tooltip")} icon={<Icon />} />
+    )}
+  </Translation>
+)
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
-        <KeyIdeasIcon /> {t("key_ideas.entry")}
+        <Icon /> {t("key_ideas.entry")}
       </span>
     )}
   </Translation>
@@ -33,12 +41,7 @@ export const KeyIdeas: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("key_ideas.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("key_points")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("key_ideas.title")} instructionsKey="key_points" />
         {!review ? (
           <Loading />
         ) : (
@@ -74,7 +77,7 @@ export const KeyIdeas: FC = () => {
                           <AlertIcon
                             show={
                               topic_sentences.length +
-                                elaboration_sentences.length ===
+                              elaboration_sentences.length ===
                               0
                             }
                             message={t("key_ideas.no_sentences")}
@@ -98,7 +101,7 @@ export const KeyIdeas: FC = () => {
                               className={classNames(
                                 "pt-3 px-3 pb-0",
                                 elaboration_sentences.length &&
-                                  "highlight highlight-1"
+                                "highlight highlight-1"
                               )}
                             >
                               <h6>{t("key_ideas.elaborations")}</h6>

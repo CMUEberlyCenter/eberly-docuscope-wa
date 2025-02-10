@@ -1,5 +1,5 @@
-import { FC, HTMLProps, useEffect, useState } from "react";
-import { Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
+import { FC, useEffect, useState } from "react";
+import { ButtonGroup, ButtonToolbar, Dropdown, Nav, Navbar, OverlayTrigger, Stack, Tab, Tabs, Tooltip } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
@@ -14,6 +14,7 @@ import {
   useGlobalFeatureKeyIdeas,
   useGlobalFeatureLinesOfArguments,
   useGlobalFeatureLogicalFlow,
+  useGlobalFeatureParagraphClarity,
   useGlobalFeaturePathos,
   useGlobalFeatureProfessionalTone,
   useGlobalFeatureSentenceDensity,
@@ -23,20 +24,21 @@ import {
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
-import { Expectations, ExpectationsTitle } from "./Expectations";
+import { Expectations, ExpectationsButton } from "./Expectations";
 // import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
-import { CivilTone, CivilToneTitle } from "./CivilTone";
-import { Ethos, EthosTitle } from "./Ethos";
-import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
-import { LinesOfArguments, LinesOfArgumentsTitle } from "./LinesOfArguments";
-import { LogicalFlow, LogicalFlowTitle } from "./LogicalFlow";
-import { Organization, OrganizationTitle } from "./Organization";
-import { Pathos, PathosTitle } from "./Pathos";
-import { ProfessionalTone, ProfessionalToneTitle } from "./ProfessionalTone";
+import { CivilTone } from "./CivilTone";
+import { Ethos } from "./Ethos";
+import { KeyIdeas, KeyIdeasButton } from "./KeyIdeas";
+import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
+import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import { Organization } from "./Organization";
+import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
+import { Pathos } from "./Pathos";
+import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
-import { Sentences, SentencesTitle } from "./Sentences";
-import { Sources, SourcesTitle } from "./Sources";
+import { Sentences, SentencesButton } from "./Sentences";
+import { Sources } from "./Sources";
 
 type Tool =
   | "civil_tone"
@@ -47,57 +49,13 @@ type Tool =
   | "arguments"
   | "logical_flow"
   | "organization"
+  | "paragraph_clarity"
   | "pathos"
   | "professional_tone"
   | "sentences"
   | "sources"
   | "impressions"
   | "null";
-
-const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => <span {...props}>{t("null.title")}</span>}
-  </Translation>
-);
-
-type ToolProps = HTMLProps<HTMLSpanElement> & { tool: Tool };
-const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
-  switch (tool) {
-    case "civil_tone":
-      return <CivilToneTitle {...props} />;
-    case "logical_flow":
-      return <LogicalFlowTitle {...props} />;
-    case "pathos":
-      return <PathosTitle {...props} />;
-    case "professional_tone":
-      return <ProfessionalToneTitle {...props} />;
-    case "sources":
-      return <SourcesTitle {...props} />;
-    case "ethos":
-      return <EthosTitle {...props} />;
-    case "sentences":
-      return <SentencesTitle {...props} />;
-    // case "global_coherence":
-    //   return <GlobalCoherenceTitle {...props} />;
-    case "key_ideas":
-      return <KeyIdeasTitle {...props} />;
-    case "arguments":
-      return <LinesOfArgumentsTitle {...props} />;
-    case "expectations":
-      return <ExpectationsTitle {...props} />;
-    case "organization":
-      return <OrganizationTitle {...props} />;
-    case "impressions":
-      return (
-        <Translation ns={"review"}>
-          {(t) => <span {...props}>{t("impressions.title")}</span>}
-        </Translation>
-      );
-    case "null":
-    default:
-      return <NullTitle {...props} />;
-  }
-};
 
 const NullTool: FC = () => (
   <Stack className="position-absolute start-50 top-50 translate-middle">
@@ -145,16 +103,13 @@ export const Review: FC = () => {
   const ideasFeature = useGlobalFeatureKeyIdeas();
   const argumentsFeature = useGlobalFeatureLinesOfArguments();
   const logicalFlowFeature = useGlobalFeatureLogicalFlow();
+  const paragraphClarityFeature = useGlobalFeatureParagraphClarity();
   const pathosFeature = useGlobalFeaturePathos();
   const professionalToneFeature = useGlobalFeatureProfessionalTone();
   const sentencesFeature = useGlobalFeatureSentenceDensity();
   const sourcesFeature = useGlobalFeatureSources();
   const impressionsFeature = useGlobalFeatureImpressions();
   const organizationFeature = useGlobalFeatureTermMatrix();
-
-  const onSelect = (id: Tool) => {
-    setTool(id);
-  };
 
   return (
     <ReviewProvider>
@@ -178,85 +133,83 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Navbar>
           </header>
-          <Dropdown className="d-flex justify-content-start mx-2 mb-2">
-            <Dropdown.Toggle
-              variant="primary"
-              className="select-button shadow-sm"
-            >
-              <div>
-                <ToolTitle tool={tool} />
-              </div>
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Header>
-                <NullTitle />
-              </Dropdown.Header>
-              {expectationsFeature && (
-                <Dropdown.Item onClick={() => onSelect("expectations")}>
-                  <ToolTitle tool="expectations" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {argumentsFeature && (
-                <Dropdown.Item onClick={() => onSelect("arguments")}>
-                  <ToolTitle tool="arguments" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {ideasFeature && (
-                <Dropdown.Item onClick={() => onSelect("key_ideas")}>
-                  <ToolTitle tool="key_ideas" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {logicalFlowFeature && (
-                <Dropdown.Item onClick={() => onSelect("logical_flow")}>
-                  <ToolTitle tool="logical_flow" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {organizationFeature && (
-                <Dropdown.Item onClick={() => onSelect("organization")}>
-                  <ToolTitle tool="organization" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {sentencesFeature && (
-                <Dropdown.Item onClick={() => onSelect("sentences")}>
-                  <ToolTitle tool="sentences" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {impressionsFeature && (
-                <Dropdown.Item onClick={() => onSelect("impressions")}>
-                  <ToolTitle tool="impressions" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {pathosFeature && (
-                <Dropdown.Item onClick={() => onSelect("pathos")}>
-                  <ToolTitle tool="pathos" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {ethosFeature && (
-                <Dropdown.Item onClick={() => onSelect("ethos")}>
-                  <ToolTitle tool="ethos" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {civilToneFeature && (
-                <Dropdown.Item onClick={() => onSelect("civil_tone")}>
-                  <ToolTitle tool="civil_tone" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {professionalToneFeature && (
-                <Dropdown.Item onClick={() => onSelect("professional_tone")}>
-                  <ToolTitle
-                    tool="professional_tone"
-                    className="text-primary"
-                  />
-                </Dropdown.Item>
-              )}
-              {sourcesFeature && (
-                <Dropdown.Item onClick={() => onSelect("sources")}>
-                  <ToolTitle tool="sources" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {/* Add tool title select option here. */}
-            </Dropdown.Menu>
-          </Dropdown>
+          <Tabs variant="underline" className="justify-content-around">
+            {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
+              <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
+                <ButtonToolbar className="m-3 d-flex justify-content-around">
+                  {expectationsFeature ? (
+                    <ExpectationsButton active={tool === 'expectations'} onClick={() => setTool('expectations')} />
+                  ) : null}
+                  {ideasFeature ? (
+                    <KeyIdeasButton active={tool === 'key_ideas'} onClick={() => setTool('key_ideas')} />
+                  ) : null}
+                  {argumentsFeature ? (
+                    <LinesOfArgumentsButton active={tool === 'arguments'} onClick={() => setTool('arguments')} />
+                  ) : null}
+                  {logicalFlowFeature ? (
+                    <LogicalFlowButton active={tool === 'logical_flow'} onClick={() => setTool('logical_flow')} />
+                  ) : null}
+                </ButtonToolbar>
+              </Tab>
+            ) : null}
+            {true ? (
+              <Tab eventKey="fine_tuning" title={t("tabs.fine_tuning")}>
+                <ButtonToolbar className="m-3 d-flex justify-content-around">
+                  {paragraphClarityFeature ? (<ParagraphClarityButton active={tool === 'paragraph_clarity'} onClick={() => setTool('paragraph_clarity')} />) : null}
+                  {sentencesFeature ? (<SentencesButton active={tool === "sentences"} onClick={() => setTool('sentences')} />) : null}
+                  {professionalToneFeature ? (<ProfessionalToneButton active={tool === "professional_tone"} onClick={() => setTool('professional_tone')} />) : null}
+                  <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
+                    <OverlayTrigger placement="bottom" overlay={<Tooltip>{t("additional_tools.tooltip")}</Tooltip>}>
+                      <Dropdown.Toggle variant="outline-primary">
+                        <Stack>
+                          {null}
+                          <span>{t("additional_tools.title")}</span>
+                        </Stack>
+                      </Dropdown.Toggle>
+                    </OverlayTrigger>
+                    <Dropdown.Menu>
+                      {sourcesFeature ? (
+                        <Dropdown.Item onClick={() => setTool('sources')} active={tool === 'sources'}>
+                          <h6 className="text-primary">{t("sources.title")}</h6>
+                          <div className="text-wrap">{t("sources.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {ethosFeature ? (
+                        <Dropdown.Item onClick={() => setTool('ethos')} active={tool === 'ethos'}>
+                          <h6 className="text-primary">{t("ethos.title")}</h6>
+                          <div className="text-wrap">{t("ethos.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {pathosFeature ? (
+                        <Dropdown.Item onClick={() => setTool('pathos')} active={tool === 'pathos'}>
+                          <h6 className="text-primary">{t("pathos.title")}</h6>
+                          <div className="text-wrap">{t("pathos.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {organizationFeature ? (
+                        <Dropdown.Item onClick={() => setTool('organization')} active={tool === 'organization'}>
+                          <h6 className="text-primary">{t("organization.title")}</h6>
+                          <div className="text-wrap">{t("organization.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {civilToneFeature ? (
+                        <Dropdown.Item onClick={() => setTool('civil_tone')} active={tool === 'civil_tone'}>
+                          <h6 className="text-primary">{t("civil_tone.title")}</h6>
+                          <div className="text-wrap">{t("civil_tone.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {impressionsFeature ? (
+                        <Dropdown.Item onClick={() => setTool('impressions')} active={tool === 'impressions'}>
+                          <h6 className="text-primary">{t("impressions.title")}</h6>
+                          <div className="text-wrap">{t("impressions.tooltip")}</div>
+                        </Dropdown.Item>
+                      ) : null}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </ButtonToolbar>
+              </Tab>
+            ) : null}
+          </Tabs>
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "arguments" && <LinesOfArguments />}
@@ -269,6 +222,7 @@ export const Review: FC = () => {
             {tool === "key_ideas" && <KeyIdeas />}
             {tool === "organization" && <Organization />}
             {tool === "sentences" && <Sentences />}
+            {tool === "paragraph_clarity" && <ParagraphClarity />}
             {tool === "pathos" && <Pathos />}
             {tool === "professional_tone" && <ProfessionalTone />}
             {tool === "sources" && <Sources />}

@@ -47,7 +47,7 @@ civil_tone: >
   <p>Refining tone ensures your message promotes understanding and collaborative dialogue while respecting diverse perspectives.</p>
 
 clarity: >
-  <p>Identify sentences that may be difficult to read using the visualization. Focus on sentences with many noun phrases and revise as needed.</p>  
+  <p>Identify sentences that may be difficult to read using the visualization. Focus on sentences with many noun phrases and revise as needed.</p>
   <p>Improving sentence clarity enhances readability and ensures your ideas are communicated effectively.</p>
 
 situational_pathos: >
@@ -83,3 +83,6 @@ topics: >
 tone: >
   Expand this section to assess whether your text maintains a professional and civil tone.
 
+paragraph_clarity: >
+  <p>Review your paragraphs with flow issues.</p>
+  <p>Improving flow within each paragraph enhances readability and ensures your ideas are communicated effectively.</p>

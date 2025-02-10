@@ -7,6 +7,7 @@ export type ReviewPrompt =
   | 'key_ideas'
   | 'lines_of_arguments'
   | 'logical_flow'
+  | 'paragraph_clarity'
   | 'pathos'
   | 'professional_tone'
   | 'sources';
@@ -20,6 +21,7 @@ export const ReviewTools: ReviewTool[] = [
   'key_ideas',
   'lines_of_arguments',
   'logical_flow',
+  'paragraph_clarity',
   'pathos',
   'professional_tone',
   'sources',
@@ -146,6 +148,15 @@ export type LogicalFlowOutput = {
   }[];
 } & GeneralAssessment;
 
+export type ParagraphClarityOutput = {
+  paragraphs: {
+    paragraph_id: string;
+    sentence_ids: string[];
+    explanation: string;
+    suggestions: string;
+  }[]
+} & GeneralAssessment;
+
 export type PathosOutput = {
   situation_pathos: SentenceAssessment[];
   temporal_pathos: SentenceAssessment[];
@@ -187,6 +198,7 @@ export type ReviewResponse =
   | KeyIdeasOutput
   | LinesOfArgumentsOutput
   | LogicalFlowOutput
+  | ParagraphClarityOutput
   | PathosOutput
   | ProfessionalToneOutput
   | SourcesOutput
@@ -232,6 +244,9 @@ export interface LinesOfArgumentsData
 export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
   tool: 'logical_flow';
 }
+export interface ParagraphClarityData extends ReviewData<ParagraphClarityOutput> {
+  tool: 'paragraph_clarity';
+}
 export interface PathosData extends ReviewData<PathosOutput> {
   tool: 'pathos';
 }
@@ -274,6 +289,7 @@ export type Analysis =
   | KeyIdeasData
   | LinesOfArgumentsData
   | LogicalFlowData
+  | ParagraphClarityData
   | PathosData
   | ProfessionalToneData
   | SourcesData

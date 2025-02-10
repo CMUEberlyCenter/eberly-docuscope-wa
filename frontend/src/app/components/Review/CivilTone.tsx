@@ -4,9 +4,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
 import { useCivilToneData } from "../../service/review.service";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -30,12 +30,7 @@ export const CivilTone: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("civil_tone.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("civil_tone")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("civil_tone.title")} instructionsKey="civil_tone" />
         {!review ? (
           <Loading />
         ) : (

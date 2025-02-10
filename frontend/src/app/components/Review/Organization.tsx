@@ -3,7 +3,7 @@
 
       Disc — At least one sentence in the paragraph includes the word (topic) on the left side of the main verb of the sentence.
       Hollow circle — All of the instances of the word (topic) in the paragraph are on the right side of the sentences.
-      Dot on the shoulder — If the word (topic) appears in the first sentence of the paragraph a small dot is added to the icon. The dot can bee added to (1) or (2) above. 
+      Dot on the shoulder — If the word (topic) appears in the first sentence of the paragraph a small dot is added to the icon. The dot can bee added to (1) or (2) above.
 
   So, there are 4 possible icons.
 
@@ -15,12 +15,12 @@
 
       it appears in 2 or more paragraphs, AND
       it appears at least once on the left side of the main verb in a sentence, AND
-      it is also a Local Topic. 
+      it is also a Local Topic.
 
   A topic is a local topic in a given paragraph if:
 
       it appears in 2 or more sentences within the paragraph, AND
-      it appears at least once on the left side of the main verb in a sentence within the paragraph. 
+      it appears at least once on the left side of the main verb in a sentence within the paragraph.
 
  */
 import classNames from "classnames";
@@ -35,8 +35,8 @@ import { isErrorData } from "../../../lib/ReviewResponse";
 import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
 import { useOnTopicData } from "../../service/review.service";
 import { clearAllHighlights } from "../../service/topic.service";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
 import { ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
@@ -266,11 +266,8 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid organization">
-        <h4>{t("organization.title")}</h4>
-        <Translation ns="instructions">
-          {(t) => <FadeContent htmlContent={t("term_matrix")} />}
-        </Translation>
+      <article className="container-fluid organization">
+        <ToolHeader title={t("organization.title")} instructionsKey="term_matrix" />
         {!data ? (
           <Loading />
         ) : (
@@ -351,79 +348,78 @@ export const Organization: FC = () => {
                       {data?.response.coherence?.error
                         ? null
                         : data?.response.coherence?.data
-                            .filter(
-                              ({ is_topic_cluster }) =>
-                                is_topic_cluster || !showToggle
-                            )
-                            .map(
-                              (
-                                { topic, is_non_local, paragraphs, sent_count },
-                                i
-                              ) => {
-                                const topi =
-                                  topic.at(2)?.replaceAll("_", " ") ?? "";
-                                const [left, right] = ["l", "r"].map((lr) =>
-                                  is_non_local ? lr : lr.toUpperCase()
-                                );
-                                const paraIconClass = is_non_local
-                                  ? "topic-icon-small"
-                                  : "topic-icon-large";
-                                return (
-                                  <tr
-                                    key={`topic-paragraph-key-${i}`}
-                                    className={
-                                      topic === selected?.topic
-                                        ? "bg-highlight"
-                                        : ""
-                                    }
+                          .filter(
+                            ({ is_topic_cluster }) =>
+                              is_topic_cluster || !showToggle
+                          )
+                          .map(
+                            (
+                              { topic, is_non_local, paragraphs, sent_count },
+                              i
+                            ) => {
+                              const topi =
+                                topic.at(2)?.replaceAll("_", " ") ?? "";
+                              const [left, right] = ["l", "r"].map((lr) =>
+                                is_non_local ? lr : lr.toUpperCase()
+                              );
+                              const paraIconClass = is_non_local
+                                ? "topic-icon-small"
+                                : "topic-icon-large";
+                              return (
+                                <tr
+                                  key={`topic-paragraph-key-${i}`}
+                                  className={
+                                    topic === selected?.topic
+                                      ? "bg-highlight"
+                                      : ""
+                                  }
+                                >
+                                  <td
+                                    data-search={topi}
+                                    data-order={sent_count}
+                                    className="p-0"
                                   >
-                                    <td
-                                      data-search={topi}
-                                      data-order={sent_count}
-                                      className="p-0"
+                                    <Button
+                                      className="w-100 text-primary text-start"
+                                      variant="none"
+                                      active={topic === selected?.topic}
+                                      onClick={() => onSelectTopic(topic)}
                                     >
-                                      <Button
-                                        className="w-100 text-primary text-start"
-                                        variant="none"
-                                        active={topic === selected?.topic}
-                                        onClick={() => onSelectTopic(topic)}
-                                      >
-                                        {topi}
-                                      </Button>
-                                    </td>
-                                    {paragraphs.map((paraType, j) => {
-                                      const paraContent = `${
-                                        paraType?.is_left ? left : right
+                                      {topi}
+                                    </Button>
+                                  </td>
+                                  {paragraphs.map((paraType, j) => {
+                                    const paraContent = `${paraType?.is_left ? left : right
                                       }${paraType?.is_topic_sent ? "" : "*"}`;
-                                      return (
-                                        <td
-                                          key={`topic-key-${i}-${j}`}
-                                          className={classNames(
-                                            "p-0 text-center",
-                                            selected?.paragraph === j
-                                              ? "bg-highlight"
-                                              : ""
-                                          )}
-                                        >
-                                          {paraType ? (
-                                            <Button
-                                              variant="icon"
-                                              title={paraContent}
-                                              className={paraIconClass}
-                                              onClick={() =>
-                                                onSelectCell(topic, j)
-                                              }
-                                            >
-                                              <IndicatorIcon unit={paraType} />
-                                            </Button>
-                                          ) : null}
-                                        </td>
-                                      );
-                                    })}
-                                  </tr>
-                                );
-                              }
-                            )}
+                                    return (
+                                      <td
+                                        key={`topic-key-${i}-${j}`}
+                                        className={classNames(
+                                          "p-0 text-center",
+                                          selected?.paragraph === j
+                                            ? "bg-highlight"
+                                            : ""
+                                        )}
+                                      >
+                                        {paraType ? (
+                                          <Button
+                                            variant="icon"
+                                            title={paraContent}
+                                            className={paraIconClass}
+                                            onClick={() =>
+                                              onSelectCell(topic, j)
+                                            }
+                                          >
+                                            <IndicatorIcon unit={paraType} />
+                                          </Button>
+                                        ) : null}
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              );
+                            }
+                          )}
                     </tbody>
                   </DataTable>
                 )}
@@ -527,7 +523,7 @@ export const Organization: FC = () => {
             </ErrorBoundary>
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

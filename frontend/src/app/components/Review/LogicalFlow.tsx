@@ -1,21 +1,32 @@
 import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, Alert } from "react-bootstrap";
+import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
+import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { useLogicalFlowData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+
+
+export const LogicalFlowButton: FC<ButtonProps> = (props) => (
+  <Translation ns={"review"}>
+    {(t) => (
+      <ToolButton {...props} title={t("logical_flow.title")} tooltip={t("logical_flow.tooltip")} icon={<Icon />} />
+    )}
+  </Translation>
+)
 
 export const LogicalFlowTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns="review">
     {(t) => (
       <span {...props}>
-        {/* TODO icon */} {t("logical_flow.entry")}
+        <Icon /> {t("logical_flow.entry")}
       </span>
     )}
   </Translation>
@@ -30,12 +41,7 @@ export const LogicalFlow: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <header>
-          <h4>{t("logical_flow.title")}</h4>
-          <Translation ns="instructions">
-            {(t) => <FadeContent htmlContent={t("logical_flow")} />}
-          </Translation>
-        </header>
+        <ToolHeader title={t("logical_flow.title")} instructionsKey="logical_flow" />
         {!review ? (
           <Loading />
         ) : (

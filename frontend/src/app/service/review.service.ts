@@ -10,6 +10,7 @@ import {
   LinesOfArgumentsData,
   LogicalFlowData,
   OnTopicReviewData,
+  ParagraphClarityData,
   PathosData,
   ProfessionalToneData,
   SourcesData,
@@ -81,6 +82,7 @@ const linesOfArgumentsAnalysis = new BehaviorSubject<
 const logicalFlowAnalysis = new BehaviorSubject<OptionalError<LogicalFlowData>>(
   null
 );
+const paragraphClarityAnalysis = new BehaviorSubject<OptionalError<ParagraphClarityData>>(null);
 const pathosAnalysis = new BehaviorSubject<OptionalError<PathosData>>(null);
 const professionalToneAnalysis = new BehaviorSubject<
   OptionalError<ProfessionalToneData>
@@ -94,6 +96,7 @@ export type OptionalExpectations =
   | (ErrorData & { expectation: string })
   | null;
 const expectationsAnalysis = new BehaviorSubject<OptionalExpectations>(null);
+
 review$
   .pipe(
     filter((rev) => isReview(rev)),
@@ -122,6 +125,9 @@ review$
           break;
         case 'logical_flow':
           logicalFlowAnalysis.next(analysis);
+          break;
+        case 'paragraph_clarity':
+          paragraphClarityAnalysis.next(analysis);
           break;
         case 'pathos':
           pathosAnalysis.next(analysis);
@@ -159,6 +165,7 @@ export const [useLogicalFlowData, logicalFlowData$] = bind(
   logicalFlowAnalysis,
   null
 );
+export const [useParagraphClarityData, paragraphClarityData$] = bind(paragraphClarityAnalysis, null);
 export const [usePathosData, pathosData$] = bind(pathosAnalysis, null);
 export const [useProfessionalToneData, professionalToneData$] = bind(
   professionalToneAnalysis,

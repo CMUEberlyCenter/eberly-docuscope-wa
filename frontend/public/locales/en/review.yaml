@@ -2,6 +2,9 @@
 document.title: myProse Review
 title: Review
 select_tool: Select a tool
+tabs:
+  big_picture: Big Picture
+  fine_tuning: Fine Tuning
 summary:
   title: Summary
   strengths: "What's working:"
@@ -11,9 +14,13 @@ error:
   header: Error Loading Review!
   content: There was an error retrieving the review data.
   details: 'Details: {{message}}'
+additional_tools:
+  title: Additional Tools
+  tooltip: Refine your draft with additional review.
 civil_tone:
   entry: Civil Tone
   title: Civil Tone
+  tooltip: Using respectful and balanced language promotes collaborative dialogue.
   error: Error displaying Civil Tone tool.
   insights: Check for any uncivil language.
   'null': No issues found.
@@ -21,6 +28,7 @@ civil_tone:
 ethos:
   entry: Credibility (Ethos)
   title: Credibility (Ethos)
+  tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
   error: Error displaying Credibilty tool.
   insights: Check how your text establishes credibility (ethos).
   expertise: Expertise Ethos
@@ -32,6 +40,7 @@ ethos:
 sentences:
   title: Sentence Density
   error: 'Error displaying Sentence data:'
+  tooltip: Simplifying complex sentences improves readability and communication.
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
@@ -80,8 +89,9 @@ key_ideas:
   suggestions: Suggestions
   'null': No topics were found in your draft.
 arguments:
-  entry: Lines of Arguments
-  title: Review Lines of Arguments
+  entry: Lines of Argument
+  title: Lines of Argument
+  tooltip: Developing well-supported claims and addressing counterarguments.
   error: Error reading Lines of Arguements data.
   no_sentences: No sentences to support this claim were found in your draft.
   insights: Check how your text develops its arguement.
@@ -96,13 +106,15 @@ arguments:
   suggestions: Suggestions
   'null': No lines of arguments were detected in your draft.
 logical_flow:
-  entry: Logical Flow
-  title: Logical Flow
-  error: Error displaying Logical Flow tool.
+  entry: Logical Flow Issues
+  title: Logical Flow Issues
+  tooltip: Organizing ideas coherently enhances readability and reader comprehension.
+  error: Error displaying Logical Flow Issues tool.
   insights: Check for potential flow issues.
   no_sentences: No relevant sentences were found in your draft.
 expectations:
-  title: Check Content Expectations
+  title: Content Expectations
+  tooltip: Addressing content gaps ensures your writing meets readers' expectations.
   error:
     no_task: No text type specified!
   sentences: 'Sentences:'
@@ -110,8 +122,9 @@ expectations:
   warning: This expectation is not addressed in your draft.
   no_sentences: No relevant text was located in your draft.
 organization:
-  title: Organization (Term Matrix)
-  error: 'Error loading Organization data:'
+  title: Topical Progression
+  tooltip: Refining the topical structure ensures greater cohesiveness in your writting.
+  error: 'Error loading Topical Progression data:'
   legend:
     before_verb: Topic before the main verb.
     solid_circle: A filled circle.
@@ -137,9 +150,15 @@ organization:
     paragraphs: Topic
     sentences_in_paragraph: 'Coherence across sentences in paragraph: {{paragraph}}'
     sentences: 'Sentences:'
+paragraph_clarity:
+  title: Paragraph Clarity
+  tooltip: Improving paragraph flow enhances readability and effective communication.
+  error: Error displaying Paragraph Clarity tool.
+  insights: Check for paragraphs with flow problems.
 pathos:
   entry: Emotional Appeal (Pathos)
   title: Emotional Appeal (Pathos)
+  tooltip: Creating emotional resonance and meaningful connections strengthens your writing.
   error: Error displaying Emotional Appeal tool.
   assessment: "Observation:"
   no_sentences: No relavent text was detected in your draft.
@@ -151,6 +170,7 @@ pathos:
 professional_tone:
   entry: Professional Tone
   title: Professional Tone
+  tooltip: Maintaining appropriate language features helps your writing meet professional standards.
   error: Error displaying Professional Tone tool.
   insights: Check for professional tone concerns.
   sentiment: Sentiment
@@ -160,6 +180,7 @@ professional_tone:
 sources:
   entry: Sources
   title: Sources
+  tooltip: Integrating and citing sources appropriately strengthens your text's credibility and supporting evidence.
   error: Error displaying Sources tool.
   insights: Check how your text develops its argument.
   issue: "Issue:"
@@ -184,5 +205,4 @@ sources:
 impressions:
   title: Impressions
 'null':
-  title: Select a tool...
-  content: Select a review tool from the above selection box.
+  content: Select a review tool from the above buttons.
