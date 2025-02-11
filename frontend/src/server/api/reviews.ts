@@ -39,6 +39,7 @@ const ANALYSES: ReviewPrompt[] = [
   'logical_flow',
   'ethos',
   'civil_tone',
+  'paragraph_clarity',
   'pathos',
   'professional_tone',
   'sources',

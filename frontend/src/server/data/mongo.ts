@@ -42,6 +42,20 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
   }
 }
 
+async function privatizeWritingTasks() {
+  return client
+    .db(MONGO_DB)
+    .collection<WritingTaskDb>(WRITING_TASKS)
+    .updateMany(
+      { public: true },
+      {
+        $set: {
+          public: false,
+        },
+      }
+    );
+}
+
 /**
  * Insert a non-public writing task into database.
  * @param writing_task
@@ -195,6 +209,7 @@ export async function initDatabase() {
     );
   }
   // await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
+  await privatizeWritingTasks();
   const wtdShutdown = await initWritingTasks(
     upsertPublicWritingTask,
     deleteWritingTaskByPath
