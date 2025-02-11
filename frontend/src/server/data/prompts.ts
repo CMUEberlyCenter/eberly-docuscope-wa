@@ -9,29 +9,24 @@ const PROMPTS = new Map<string, Prompt>();
 const keyFromFilename = (path: string) => basename(path, '.md');
 
 export async function initPrompts() {
-  // initialize by reading from filesystem. Unnecessary as watch handles it.
-  //   for await (const entry of glob(`${PROMPT_TEMPLATES_PATH}/*.md`)) {
-  //     console.log('initial', entry)
-  //     const prompt = await readFile(entry, { encoding: 'utf8' });
-  //     PROMPTS.set(keyFromFilename(entry), { prompt, temperature: 0.0 }); // role
-  //   }
   // update on file changes.
   const prompts = watch(PROMPT_TEMPLATES_PATH, {
     ignored: (path, stats) => !!stats?.isFile() && !path.endsWith('.md'), // only watch md files
     persistent: true,
   });
-  console.log(`watchin ${PROMPT_TEMPLATES_PATH}`);
+  console.log(`Prompts location: ${PROMPT_TEMPLATES_PATH}`);
   prompts.on('unlink', (path) => PROMPTS.delete(keyFromFilename(path)));
   prompts.on('add', async (path) => {
     const prompt = await readFile(path, { encoding: 'utf8' });
     PROMPTS.set(keyFromFilename(path), { prompt, temperature: 0.0 });
-    console.log(`adding ${keyFromFilename(path)}`);
+    console.log(`Adding prompt "${keyFromFilename(path)}"`);
   });
   prompts.on('change', async (path) => {
     const prompt = await readFile(path, { encoding: 'utf8' });
     const key = keyFromFilename(path);
     const prev = PROMPTS.get(key);
     PROMPTS.set(key, { ...prev, prompt });
+    console.log(`Updating prompt "${key}"`);
   });
   return () => prompts.close();
 }

@@ -82,7 +82,9 @@ const linesOfArgumentsAnalysis = new BehaviorSubject<
 const logicalFlowAnalysis = new BehaviorSubject<OptionalError<LogicalFlowData>>(
   null
 );
-const paragraphClarityAnalysis = new BehaviorSubject<OptionalError<ParagraphClarityData>>(null);
+const paragraphClarityAnalysis = new BehaviorSubject<
+  OptionalError<ParagraphClarityData>
+>(null);
 const pathosAnalysis = new BehaviorSubject<OptionalError<PathosData>>(null);
 const professionalToneAnalysis = new BehaviorSubject<
   OptionalError<ProfessionalToneData>
@@ -165,7 +167,10 @@ export const [useLogicalFlowData, logicalFlowData$] = bind(
   logicalFlowAnalysis,
   null
 );
-export const [useParagraphClarityData, paragraphClarityData$] = bind(paragraphClarityAnalysis, null);
+export const [useParagraphClarityData, paragraphClarityData$] = bind(
+  paragraphClarityAnalysis,
+  null
+);
 export const [usePathosData, pathosData$] = bind(pathosAnalysis, null);
 export const [useProfessionalToneData, professionalToneData$] = bind(
   professionalToneAnalysis,

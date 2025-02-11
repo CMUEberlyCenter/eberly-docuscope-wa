@@ -17,10 +17,15 @@ import { ToolButton } from "../ToolButton/ToolButton";
 export const KeyIdeasButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("key_ideas.title")} tooltip={t("key_ideas.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("key_ideas.title")}
+        tooltip={t("key_ideas.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 /** List of Key Ideas title component for use in selection menu. */
 export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -77,7 +82,7 @@ export const KeyIdeas: FC = () => {
                           <AlertIcon
                             show={
                               topic_sentences.length +
-                              elaboration_sentences.length ===
+                                elaboration_sentences.length ===
                               0
                             }
                             message={t("key_ideas.no_sentences")}
@@ -101,7 +106,7 @@ export const KeyIdeas: FC = () => {
                               className={classNames(
                                 "pt-3 px-3 pb-0",
                                 elaboration_sentences.length &&
-                                "highlight highlight-1"
+                                  "highlight highlight-1"
                               )}
                             >
                               <h6>{t("key_ideas.elaborations")}</h6>

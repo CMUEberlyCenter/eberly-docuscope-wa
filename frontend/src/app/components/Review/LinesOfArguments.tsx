@@ -21,10 +21,15 @@ import { ReviewErrorData } from "./ReviewError";
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("arguments.title")} tooltip={t("arguments.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("arguments.title")}
+        tooltip={t("arguments.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 
 /** Lines of Arguments title component for use in selection menu. */
 export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (
@@ -77,7 +82,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("arguments.no_sentences")}
                       show={
                         (claim_sentences ?? []).length +
-                        (evidence_sentences ?? []).length ===
+                          (evidence_sentences ?? []).length ===
                         0
                       }
                     />
@@ -100,7 +105,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (evidence_sentences ?? []).length &&
-                          "highlight highlight-1"
+                            "highlight highlight-1"
                         )}
                       >
                         <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
@@ -198,9 +203,9 @@ export const LinesOfArguments: FC = () => {
                   </section>
                 ) : null}
                 {"response" in review &&
-                  !review.response.thesis &&
-                  !review.response.counter_arguments?.length &&
-                  !review.response.rebuttals?.length ? (
+                !review.response.thesis &&
+                !review.response.counter_arguments?.length &&
+                !review.response.rebuttals?.length ? (
                   <Alert variant="warning">{t("arguments.null")}</Alert>
                 ) : null}
               </section>

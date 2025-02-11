@@ -1,27 +1,26 @@
-import { FC, HTMLProps, Suspense, use, useState } from "react";
+import { FC, HTMLProps, useState } from "react";
 import { ListGroup, Modal, ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
-import { LoadingSmall } from "../Loading/LoadingSmall";
 
-type PromptInfo = { saved_at: string };
-async function fetchTemplateInfo() {
-  const response = await fetch("/api/v2/scribe/templates/info");
-  if (!response.ok) {
-    console.error("Failed to fetch template info.", response);
-    return null;
-  }
-  return response.json() as Promise<PromptInfo>;
-}
+// type PromptInfo = { saved_at: string };
+// async function fetchTemplateInfo() {
+//   const response = await fetch("/api/v2/scribe/templates/info");
+//   if (!response.ok) {
+//     console.error("Failed to fetch template info.", response);
+//     return null;
+//   }
+//   return response.json() as Promise<PromptInfo>;
+// }
 
-const templatesInfo = fetchTemplateInfo();
+// const templatesInfo = fetchTemplateInfo();
 
 export const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;
   const build_date = new Date(__BUILD_DATE__);
-  const template_info = use(templatesInfo);
+  // const template_info = use(templatesInfo);
   const task = useWritingTask();
 
   return (
@@ -48,7 +47,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
           <dd>
             {t("about.version", { version, date: build_date.toLocaleString() })}
           </dd>
-          <dt>{t("about.template")}</dt>
+          {/* <dt>{t("about.template")}</dt>
           <dd>
             <Suspense fallback={<LoadingSmall />}>
               {template_info
@@ -57,7 +56,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
                   })
                 : null}
             </Suspense>
-          </dd>
+          </dd> */}
           {task && (
             <>
               <dt>{t("about.task")}</dt>

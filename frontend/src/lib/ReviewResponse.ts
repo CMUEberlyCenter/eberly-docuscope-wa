@@ -154,7 +154,7 @@ export type ParagraphClarityOutput = {
     sentence_ids: string[];
     explanation: string;
     suggestions: string;
-  }[]
+  }[];
 } & GeneralAssessment;
 
 export type PathosOutput = {
@@ -244,7 +244,8 @@ export interface LinesOfArgumentsData
 export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
   tool: 'logical_flow';
 }
-export interface ParagraphClarityData extends ReviewData<ParagraphClarityOutput> {
+export interface ParagraphClarityData
+  extends ReviewData<ParagraphClarityOutput> {
   tool: 'paragraph_clarity';
 }
 export interface PathosData extends ReviewData<PathosOutput> {

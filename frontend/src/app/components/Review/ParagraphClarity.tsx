@@ -16,10 +16,15 @@ import { ReviewErrorData } from "./ReviewError";
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("paragraph_clarity.title")} tooltip={t("paragraph_clarity.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("paragraph_clarity.title")}
+        tooltip={t("paragraph_clarity.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 
 export const ParagraphClarity: FC = () => {
   const { t } = useTranslation("review");
@@ -30,12 +35,18 @@ export const ParagraphClarity: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("paragraph_clarity.title")} instructionsKey="paragraph_clarity" />
-        {!review ? (<Loading />) : (
+        <ToolHeader
+          title={t("paragraph_clarity.title")}
+          instructionsKey="paragraph_clarity"
+        />
+        {!review ? (
+          <Loading />
+        ) : (
           <ErrorBoundary
             fallback={
               <Alert variant="danger">{t("paragraph_clarity.error")}</Alert>
-            }>
+            }
+          >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             <Summary review={review} />
             <section>
@@ -45,36 +56,36 @@ export const ParagraphClarity: FC = () => {
               </header>
               {"response" in review ? (
                 <Accordion>
-                  {review.response.paragraphs.map((
-                    { explanation, suggestions, sentence_ids, paragraph_id },
-                    i
-                  ) => (
-                    <Accordion.Item
-                      key={`${id}-${i}`}
-                      eventKey={`${id}-${i}`}
-                    >
-                      <Accordion.Header className="accordion-header-highlight">
-                        <div className="flex-grow-1">{explanation}</div>
-                        <AlertIcon
-                          show={sentence_ids.length === 0 && !paragraph_id}
-                          message={t("logical_flow.no_sentences")}
-                        />
-                      </Accordion.Header>
-                      <Accordion.Body
-                        onEntered={() =>
-                          dispatch({
-                            type: "set",
-                            sentences: [sentence_ids, [paragraph_id]],
-                          })
-                        }
-                        onExit={() => dispatch({ type: "unset" })}
+                  {review.response.paragraphs.map(
+                    (
+                      { explanation, suggestions, sentence_ids, paragraph_id },
+                      i
+                    ) => (
+                      <Accordion.Item
+                        key={`${id}-${i}`}
+                        eventKey={`${id}-${i}`}
                       >
-                        {suggestions}
-                      </Accordion.Body>
-                    </Accordion.Item>
-                  )
+                        <Accordion.Header className="accordion-header-highlight">
+                          <div className="flex-grow-1">{explanation}</div>
+                          <AlertIcon
+                            show={sentence_ids.length === 0 && !paragraph_id}
+                            message={t("logical_flow.no_sentences")}
+                          />
+                        </Accordion.Header>
+                        <Accordion.Body
+                          onEntered={() =>
+                            dispatch({
+                              type: "set",
+                              sentences: [sentence_ids, [paragraph_id]],
+                            })
+                          }
+                          onExit={() => dispatch({ type: "unset" })}
+                        >
+                          {suggestions}
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    )
                   )}
-
                 </Accordion>
               ) : null}
             </section>
@@ -82,5 +93,5 @@ export const ParagraphClarity: FC = () => {
         )}
       </article>
     </ReviewReset>
-  )
-}
+  );
+};

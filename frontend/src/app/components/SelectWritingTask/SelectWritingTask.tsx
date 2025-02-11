@@ -12,19 +12,14 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import {
-  WritingTask,
-  hasKeywords,
-  isWritingTask,
-} from "../../../lib/WritingTask";
+import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   useWritingTask,
-  useWritingTasks,
   writingTask,
 } from "../../service/writing-task.service";
-import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
@@ -34,7 +29,7 @@ import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
  */
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  const { data: writingTasks } = useWritingTasks(); // all public tasks
+  // const { data: writingTasks } = useWritingTasks(); // all public tasks
   const writing_task = useWritingTask(); // current task
   const inLti = useLti(); // in LTI context
   const ltiInfo = useLtiInfo(); // Information from LTI
@@ -44,7 +39,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
-  const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
+  const [data, setData] = useState<WritingTask[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -77,25 +72,19 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           className="d-flex flex-row align-items-stretch position-relative gap-3"
           style={{ maxHeight: "75vh" }}
         >
-          <WritingTaskFilter className="w-100" update={setActiveKeywords} />
+          <WritingTaskFilter className="w-100" update={setData} />
           <div className="w-100 h-0">
             <ListGroup className="overflow-auto w-100 mh-100">
-              {writingTasks
-                ?.filter(
-                  (task) =>
-                    activeKeywords.length === 0 ||
-                    hasKeywords(task, activeKeywords)
-                )
-                .map((task) => (
-                  <ListGroup.Item
-                    key={task.info.name}
-                    active={selected === task}
-                    action
-                    onClick={() => setSelected(task)}
-                  >
-                    {task.info.name}
-                  </ListGroup.Item>
-                ))}
+              {data.map((task) => (
+                <ListGroup.Item
+                  key={task.info.name}
+                  active={selected === task}
+                  action
+                  onClick={() => setSelected(task)}
+                >
+                  {task.info.name}
+                </ListGroup.Item>
+              ))}
               {custom && (
                 <ListGroup.Item
                   action

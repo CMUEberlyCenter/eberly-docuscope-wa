@@ -21,10 +21,15 @@ import "./Sentences.scss";
 export const SentencesButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("sentences.title")} tooltip={t("sentences.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("sentences.title")}
+        tooltip={t("sentences.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (

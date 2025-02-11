@@ -138,46 +138,30 @@ function isWritingTaskMetaData(
 }
 
 /** Extract all keywords from an array of writing task definitions. */
-function extractKeywords(tasks: WritingTask[]) {
-  return tasks.flatMap((task) => task.info.keywords ?? []);
+export function extractKeywords(tasks: WritingTask[]) {
+  return [
+    ...new Set(tasks.flatMap((task) => task.info.keywords ?? [])),
+  ].toSorted((a, b) => a.localeCompare(b));
 }
+
 /**
- * Given a set of writing tasks, generate a mapping of categories
- * to co-occuring keywords.
- * @param tasks A list of writing task specifications.
- * @returns An object that maps "category:..." keywords to an array
- * of keywords that cooccur with that category.
+ * Checks if the given task contains an intersection of the keyword types.
+ * @param task a writing task definition
+ * @param keywords list of keywords to check against
+ * @returns true if the tasks keywords has some of each keyword type's keys.
  */
-export function keywordsByCategory(tasks: WritingTask[]): {
-  [k: string]: string[];
-} {
-  const acc = tasks.reduce(
-    (acc, task) => {
-      const { category, keyword } = categoryKeywords([task]);
-      const keywords = new Set(keyword);
-      category?.forEach((cat: string) => {
-        acc[cat] = cat in acc ? acc[cat].union(keywords) : new Set(keyword);
-      });
-      acc.ALL = acc.ALL.union(keywords);
-      return acc;
-    },
-    { ALL: new Set() } as Record<string, Set<string>>
-  );
-  return Object.fromEntries(
-    Object.entries(acc).map(([key, val]) => [key, [...val].toSorted()])
-  );
-}
-export function categoryKeywords(tasks: WritingTask[]) {
-  return Object.groupBy(
-    extractKeywords(tasks),
-    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
-  );
-}
 export function hasKeywords(task: WritingTask, keywords: string[]) {
   if (!task.info.keywords) return false;
   if (keywords.length === 0) return false;
-  const keys = new Set(task.info.keywords);
-  return keywords.some((key) => keys.has(key));
+  const catKeys = Object.groupBy(
+    keywords,
+    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
+  );
+  return Object.entries(catKeys).every(([_, keys]) => {
+    if (!keys) return true;
+    const kw = new Set(keys);
+    return task.info.keywords?.some((key) => kw.has(key));
+  }); // Intersection between types of keywords.
 }
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {

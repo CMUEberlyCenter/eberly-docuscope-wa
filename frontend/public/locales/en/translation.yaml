@@ -117,7 +117,13 @@ flow:
   issue: 'Issue:'
   suggestions: 'Suggestions:'
 select_task:
-  title: Select Text Type
+  title: Select Writing Type
+  filters: Filters
+  label: Text Search
+  placeholder: Enter title or keywords...
+  search: Search
+  context: Context
+  mode: Primary Mode
   upload: Upload Custom Text Type
   invalid_upload: Uploaded file is not a valid text type specificaton!
   "null": No Text Type

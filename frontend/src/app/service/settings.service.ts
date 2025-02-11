@@ -199,12 +199,15 @@ export const [useGlobalFeatureLogicalFlow, globalFeatureLogicalFlow$] = bind(
   ),
   false
 );
-export const [useGlobalFeatureParagraphClarity, globalFeatureParagraphClarity$] = bind(
+export const [
+  useGlobalFeatureParagraphClarity,
+  globalFeatureParagraphClarity$,
+] = bind(
   settings$.pipe(
     map((settings) => !!settings.scribe && !!settings.paragraph_clarity)
   ),
   false
-)
+);
 export const [useGlobalFeaturePathos, globalFeaturePathos$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
   false

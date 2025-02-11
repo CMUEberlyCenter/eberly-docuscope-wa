@@ -13,14 +13,18 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-
 export const LogicalFlowButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("logical_flow.title")} tooltip={t("logical_flow.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("logical_flow.title")}
+        tooltip={t("logical_flow.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 
 export const LogicalFlowTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns="review">
@@ -41,7 +45,10 @@ export const LogicalFlow: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("logical_flow.title")} instructionsKey="logical_flow" />
+        <ToolHeader
+          title={t("logical_flow.title")}
+          instructionsKey="logical_flow"
+        />
         {!review ? (
           <Loading />
         ) : (

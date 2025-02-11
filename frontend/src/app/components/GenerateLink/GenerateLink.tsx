@@ -2,11 +2,7 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { validateWritingTask } from "../../../lib/schemaValidate";
-import {
-  hasKeywords,
-  isWritingTask,
-  WritingTask,
-} from "../../../lib/WritingTask";
+import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { Loading } from "../Loading/Loading";
@@ -18,7 +14,7 @@ type IdWritingTask = WritingTask & { _id?: string };
 export const GenerateLink: FC = () => {
   const { t } = useTranslation();
   /** List of publicly available writing tasks and loading status. */
-  const { data, isLoading } = useWritingTasks();
+  const { isLoading } = useWritingTasks();
   /** Currently selected writing task. */
   const [selected, setSelected] = useState<IdWritingTask | null>(null);
   const [custom, setCustom] = useState<IdWritingTask | null>(null); // Uploaded file content.
@@ -26,7 +22,7 @@ export const GenerateLink: FC = () => {
   const [error, setError] = useState(""); // Error messages for uploaded file.
   const hostname = new URL("/index.html", window.location.href); // base url for link
   const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
-  const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
+  const [data, setData] = useState<WritingTask[]>([]);
 
   useEffect(() => {
     window.document.title = t("genlink.title");
@@ -102,24 +98,18 @@ export const GenerateLink: FC = () => {
               className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
               style={{ minHeight: 0 }}
             >
-              <WritingTaskFilter className="w-100" update={setActiveKeywords} />
+              <WritingTaskFilter className="w-100" update={setData} />
               <ListGroup className="overflow-auto w-100 mh-100">
-                {data
-                  ?.filter(
-                    (task) =>
-                      activeKeywords.length === 0 ||
-                      hasKeywords(task, activeKeywords)
-                  )
-                  .map((task) => (
-                    <ListGroup.Item
-                      key={task.info.name}
-                      active={selected === task}
-                      action
-                      onClick={() => setSelected(task)}
-                    >
-                      {task.info.name}
-                    </ListGroup.Item>
-                  ))}
+                {data.map((task) => (
+                  <ListGroup.Item
+                    key={task.info.name}
+                    active={selected === task}
+                    action
+                    onClick={() => setSelected(task)}
+                  >
+                    {task.info.name}
+                  </ListGroup.Item>
+                ))}
                 {custom && (
                   <ListGroup.Item
                     key="custom"

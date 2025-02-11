@@ -1,6 +1,11 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
-import { Accordion, AccordionItemProps, AccordionProps, ButtonProps } from "react-bootstrap";
+import {
+  Accordion,
+  AccordionItemProps,
+  AccordionProps,
+  ButtonProps,
+} from "react-bootstrap";
 import {
   AccordionEventKey,
   AccordionSelectCallback,
@@ -30,10 +35,15 @@ const isNone = (suggestion: string): boolean =>
 export const ExpectationsButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("expectations.title")} tooltip={t("expectations.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("expectations.title")}
+        tooltip={t("expectations.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 
 export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
@@ -60,14 +70,14 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   return (
     <Accordion.Item {...props}>
       {isExpectationsData(expectation) &&
-        isNone(expectation.response.suggestions) ? (
+      isNone(expectation.response.suggestions) ? (
         <div className="fake-accordion-button">
           <div className="flex-grow-1">{expectation.expectation}</div>
           <AlertIcon message={t("warning")} show />
         </div>
       ) : null}
       {isExpectationsData(expectation) &&
-        !isNone(expectation.response.suggestions) ? (
+      !isNone(expectation.response.suggestions) ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
@@ -80,15 +90,15 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             onEntered={() =>
               isExpectationsData(expectation)
                 ? dispatch({
-                  sentences: [expectation.response.sentences],
-                  type: "set",
-                })
+                    sentences: [expectation.response.sentences],
+                    type: "set",
+                  })
                 : dispatch({ type: "unset" })
             }
             onExit={() => dispatch({ type: "unset" })}
           >
             {isExpectationsData(expectation) &&
-              expectation.response.assessment ? (
+            expectation.response.assessment ? (
               <div>
                 <h6 className="d-inline">{t("assessment")}</h6>{" "}
                 <span key={`${id}-assessment`}>
@@ -172,7 +182,10 @@ export const Expectations: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("expectations.title")} instructionsKey="expectations" />
+        <ToolHeader
+          title={t("expectations.title")}
+          instructionsKey="expectations"
+        />
         {!writingTask ? (
           <Loading />
         ) : (

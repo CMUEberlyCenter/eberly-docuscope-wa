@@ -30,7 +30,10 @@ export const CivilTone: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("civil_tone.title")} instructionsKey="civil_tone" />
+        <ToolHeader
+          title={t("civil_tone.title")}
+          instructionsKey="civil_tone"
+        />
         {!review ? (
           <Loading />
         ) : (

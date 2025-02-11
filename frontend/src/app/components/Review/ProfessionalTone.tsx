@@ -15,10 +15,15 @@ import { ReviewErrorData } from "./ReviewError";
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <ToolButton {...props} title={t("professional_tone.title")} tooltip={t("professional_tone.tooltip")} icon={<Icon />} />
+      <ToolButton
+        {...props}
+        title={t("professional_tone.title")}
+        tooltip={t("professional_tone.tooltip")}
+        icon={<Icon />}
+      />
     )}
   </Translation>
-)
+);
 
 export const ProfessionalToneTitle: FC<HTMLProps<HTMLSpanElement>> = (
   props
@@ -78,7 +83,10 @@ export const ProfessionalTone: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("professional_tone.title")} instructionsKey="prof_tone" />
+        <ToolHeader
+          title={t("professional_tone.title")}
+          instructionsKey="prof_tone"
+        />
         {!review ? (
           <Loading />
         ) : (
