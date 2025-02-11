@@ -42,6 +42,7 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
   }
 }
 
+/** Make all public writing tasks private. */
 async function privatizeWritingTasks() {
   return client
     .db(MONGO_DB)
@@ -101,6 +102,12 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
   }
 }
 
+/**
+ * Insert or update a public writing task description.
+ * @param path path on the host filesystem (secondary identifier).
+ * @param data JSON read from filesystem.
+ * @returns id of the writing task in the database.
+ */
 export async function upsertPublicWritingTask(path: string, data: WritingTask) {
   const collection = client
     .db(MONGO_DB)
@@ -119,6 +126,11 @@ export async function upsertPublicWritingTask(path: string, data: WritingTask) {
   return ins.upsertedId;
 }
 
+/**
+ * Delete a writing task based on the path in the host filesystem.
+ * @param path path on the host filesystem (secondary identifier).
+ * @returns true if deletion is acknowledged.
+ */
 export async function deleteWritingTaskByPath(path: string) {
   const del = await client
     .db(MONGO_DB)
@@ -131,46 +143,6 @@ export async function deleteWritingTaskByPath(path: string) {
   }
   return del.acknowledged;
 }
-
-/**
- * Reread the public writing tasks from the file system in order to syncronize
- * the two sources.  File system is considered the authoritative source.
- */
-// export async function updatePublicWritingTasks() {
-//   try {
-//     // filesystem tasks are considered public.
-//     const expectations = (await readPublicWritingTasks(WRITING_TASKS_PATH)).map(
-//       (e) => ({ ...e, public: true })
-//     );
-//     const collection = client
-//       .db(MONGO_DB)
-//       .collection<WritingTask>(WRITING_TASKS);
-//     await collection.updateMany(
-//       { public: true },
-//       {
-//         $set: {
-//           public: false,
-//         },
-//       }
-//     ); // make all public private to delist old but without breaking links.
-//     // update record if name and version match (assuming that if it matches it is an edit, probably not a safe assumption) else insert.
-//     await collection.bulkWrite(
-//       expectations.map((data) => ({
-//         replaceOne: {
-//           filter: {
-//             'info.name': data.info.name,
-//             'info.version': data.info.version,
-//           },
-//           replacement: { ...data, public: true },
-//           upsert: true,
-//         },
-//       }))
-//     );
-//   } catch (err) {
-//     console.error(err);
-//     throw err;
-//   }
-// }
 
 // Simple setTimeout promise wrapper.
 function timeout(ms: number | undefined): Promise<void> {
@@ -208,8 +180,8 @@ export async function initDatabase() {
       { name: ExpireIndexName, expireAfterSeconds: EXPIRE_REVIEW_SECONDS }
     );
   }
-  // await updatePublicWritingTasks(); // Maybe not best to regenerate public records on startup for production.
-  await privatizeWritingTasks();
+  await privatizeWritingTasks(); // "expire" old tasks from public listings without deleting them.
+  // Want to keep old ones around so that already distributed links do not break.
   const wtdShutdown = await initWritingTasks(
     upsertPublicWritingTask,
     deleteWritingTaskByPath

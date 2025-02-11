@@ -1,6 +1,6 @@
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChangeEvent, FC, useEffect, useState } from "react";
+import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
 import {
   Button,
   CloseButton,
@@ -12,14 +12,20 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { Transforms } from "slate";
+import { useSlate } from "slate-react";
 import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
+  taskToClipboard,
+  taskToEditor,
   useWritingTask,
   writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
+import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
+import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
@@ -39,7 +45,10 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
-  const [data, setData] = useState<WritingTask[]>([]);
+  const [data, setData] = useState<WritingTask[]>([]); // filtered list of tasks.
+  const [showDetails, setShowDetails] = useState(false);
+  const [includeDetails, setIncludeDetails] = useState(false);
+
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -64,13 +73,34 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
     }
   };
 
+  const hide = useCallback(() => {
+    setShowDetails(false);
+    setSelected(null);
+    onHide?.();
+  }, [onHide]);
+  const commit = useCallback(() => {
+    writingTask.next(selected);
+    hide();
+  }, [hide, selected]);
+  const editor = useSlate();
+  const insert = useCallback(() => {
+    if (selected) {
+      Transforms.insertNodes(editor, taskToEditor(selected, includeDetails));
+      commit();
+    }
+  }, [editor, selected, includeDetails, commit]);
+
   return (
-    <Modal show={show} onHide={onHide} size="xl" {...props}>
-      <Modal.Header closeButton>{t("select_task.title")}</Modal.Header>
+    <Modal show={show} onHide={hide} size="xl" {...props}>
+      <Modal.Header closeButton>
+        {showDetails ? <Button variant="secondary" onClick={() => setShowDetails(false)} className="me-5"><FontAwesomeIcon icon={faArrowLeft} /></Button> : null}
+        {t("select_task.title")}
+        {showDetails && selected ? <WritingTaskTitle task={selected} className="ms-5" /> : null}
+      </Modal.Header>
       <Modal.Body>
-        <div
+        {showDetails && selected ? <WritingTaskRulesTree style={{ maxHeight: "72vh", height: "72vh" }} task={selected} /> : <div
           className="d-flex flex-row align-items-stretch position-relative gap-3"
-          style={{ maxHeight: "75vh" }}
+          style={{ maxHeight: "75vh", height: "75vh" }}
         >
           <WritingTaskFilter className="w-100" update={setData} />
           <div className="w-100 h-0">
@@ -107,55 +137,85 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
             <WritingTaskInfo task={selected} />
           </div>
         </div>
+        }
       </Modal.Body>
-      <Modal.Footer>
-        {(!inLti || ltiInfo?.instructor) && (
-          <OverlayTrigger
-            onToggle={(nextShow) => setShowFile(nextShow)}
-            show={showFile}
-            trigger="click"
-            placement="top"
-            overlay={
-              <Popover>
-                <Popover.Header className="d-flex justify-content-between">
-                  <div>{t("select_task.upload")}</div>
-                  <CloseButton onClick={() => setShowFile(false)} />
-                </Popover.Header>
-                <Popover.Body>
-                  <Form noValidate>
-                    <Form.Group>
-                      <Form.Control
-                        type="file"
-                        onChange={onFileChange}
-                        isInvalid={!valid}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {t("select_task.invalid_upload")}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Form>
-                </Popover.Body>
-              </Popover>
+      {showDetails ? (
+        <Modal.Footer>
+          <Form.Check
+            type="checkbox"
+            label={t("details.include")}
+            disabled={!writingTask}
+            checked={includeDetails}
+            onChange={() => setIncludeDetails(!includeDetails)}
+          />
+          <Button
+            variant="secondary"
+            disabled={!writingTask}
+            onClick={async () =>
+              await navigator.clipboard.writeText(
+                taskToClipboard(selected, includeDetails)
+              )
             }
           >
-            <Button className="me-auto">
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </OverlayTrigger>
-        )}
-        <Button variant="secondary" onClick={onHide}>
-          {t("cancel")}
-        </Button>
-        <Button
-          variant="primary"
-          onClick={() => {
-            writingTask.next(selected);
-            onHide?.();
-          }}
-        >
-          {t("select")}
-        </Button>
-      </Modal.Footer>
+            {t("clipboard")}
+          </Button>
+          <Button variant="secondary" disabled={!writingTask} onClick={insert}>
+            {t("select_insert")}
+          </Button>
+          <Button variant="primary" disabled={!selected} onClick={commit}>
+            {t("select")}
+          </Button>
+        </Modal.Footer>
+      ) : (
+        <Modal.Footer>
+          {(!inLti || ltiInfo?.instructor) && (
+            <OverlayTrigger
+              onToggle={(nextShow) => setShowFile(nextShow)}
+              show={showFile}
+              trigger="click"
+              placement="top"
+              overlay={
+                <Popover>
+                  <Popover.Header className="d-flex justify-content-between">
+                    <div>{t("select_task.upload")}</div>
+                    <CloseButton onClick={() => setShowFile(false)} />
+                  </Popover.Header>
+                  <Popover.Body>
+                    <Form noValidate>
+                      <Form.Group>
+                        <Form.Control
+                          type="file"
+                          onChange={onFileChange}
+                          isInvalid={!valid}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {t("select_task.invalid_upload")}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Form>
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Button className="me-auto">
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </OverlayTrigger>
+          )}
+          <Button variant="secondary" onClick={hide}>
+            {t("cancel")}
+          </Button>
+          <Button
+            variant="primary"
+            disabled={!selected}
+            onClick={() => {
+              setShowDetails(true);
+            }}
+          >
+            {t("next")}
+          </Button>
+        </Modal.Footer>
+      )}
     </Modal>
   );
 };

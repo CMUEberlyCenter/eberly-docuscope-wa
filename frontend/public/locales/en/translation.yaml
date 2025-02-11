@@ -136,6 +136,8 @@ select_task:
   all_category: All
 cancel: Cancel
 select: Select
+next: Next
+select_insert: Select and Insert
 details:
   include: Include Details
   insert: Insert
