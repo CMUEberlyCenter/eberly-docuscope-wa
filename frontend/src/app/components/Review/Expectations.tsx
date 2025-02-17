@@ -116,7 +116,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
           </Accordion.Body>
         </>
       ) : null}
-      {expectation && !expectations?.has(expectation.expectation) ? (
+      {!expectation ? (
         <div className="fake-accordion-button">
           <div className="flex-grow-1">{rule.name}</div>
           <LoadingSmall />
