@@ -93,6 +93,15 @@ export function getExpectations(task: WritingTask | null) {
     : [];
 }
 
+type ToolConfig = {
+  /** Tool identifier */
+  tool: string;
+  /** Organizational information */
+  category?: string;
+  /** If tool is enabled for this writing task. */
+  enabled: boolean;
+};
+
 export type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
   name: string;
@@ -106,6 +115,7 @@ export type WritingTaskMetaData = {
   saved: string; // DateTime
   /** OS filename */
   filename: string;
+  /** Optional dictionary location. (UNUSED) */
   dict_path?: string;
   /** Optionally specify the input language for LLM templates. (Default configured in server settings) */
   user_lang?: string;
@@ -113,6 +123,10 @@ export type WritingTaskMetaData = {
   target_lang?: string;
   /** Keywords, optionally prefixed with a special tag like "category:" */
   keywords?: string[];
+  /** Additional descriptive notes from the author. */
+  author_notes?: string;
+  /** Per writing task tool configurations. */
+  review_tools?: ToolConfig[];
 };
 
 /** Test if the given object is an instance of WritingTaskMetaData. */
@@ -162,6 +176,20 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
     const kw = new Set(keys);
     return task.info.keywords?.some((key) => kw.has(key));
   }); // Intersection between types of keywords.
+}
+
+/**
+ * Test if a given tool is available according to the writing task definition.
+ * @param task a writing task definition.
+ * @param toolId tool identifier, often corresponds to prompt filename.
+ * @returns true if the given tool is enabled for the writing task.
+ */
+export function isEnabled(task: WritingTask, toolId: string): boolean {
+  return (
+    task.info.review_tools?.some(
+      ({ tool, enabled }) => tool === toolId && enabled
+    ) ?? false
+  );
 }
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {
@@ -223,7 +251,8 @@ export type WritingTask = {
   rules: Rules;
   /** Extra information for Impressions tool. */
   impressions: Impressions;
-  values: unknown;
+  /** Extra value information, currently unused but reserved for future use. */
+  values?: Record<string, string>;
   /** Metadata about the task. */
   info: WritingTaskMetaData;
   /** Additional information that can be instantiated in the LLM prompts. */

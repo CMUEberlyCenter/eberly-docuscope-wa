@@ -3,7 +3,11 @@ import { Button, Form, Modal, ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
-import { taskToClipboard, taskToEditor, useWritingTask } from "../../service/writing-task.service";
+import {
+  taskToClipboard,
+  taskToEditor,
+  useWritingTask,
+} from "../../service/writing-task.service";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 

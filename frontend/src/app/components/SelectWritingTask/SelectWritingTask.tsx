@@ -49,7 +49,6 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [includeDetails, setIncludeDetails] = useState(false);
 
-
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
@@ -93,51 +92,67 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   return (
     <Modal show={show} onHide={hide} size="xl" {...props}>
       <Modal.Header closeButton>
-        {showDetails ? <Button variant="secondary" onClick={() => setShowDetails(false)} className="me-5"><FontAwesomeIcon icon={faArrowLeft} /></Button> : null}
+        {showDetails ? (
+          <Button
+            variant="secondary"
+            onClick={() => setShowDetails(false)}
+            className="me-5"
+          >
+            <FontAwesomeIcon icon={faArrowLeft} />
+          </Button>
+        ) : null}
         {t("select_task.title")}
-        {showDetails && selected ? <WritingTaskTitle task={selected} className="ms-5" /> : null}
+        {showDetails && selected ? (
+          <WritingTaskTitle task={selected} className="ms-5" />
+        ) : null}
       </Modal.Header>
       <Modal.Body>
-        {showDetails && selected ? <WritingTaskRulesTree style={{ maxHeight: "72vh", height: "72vh" }} task={selected} /> : <div
-          className="d-flex flex-row align-items-stretch position-relative gap-3"
-          style={{ maxHeight: "75vh", height: "75vh" }}
-        >
-          <WritingTaskFilter className="w-100" update={setData} />
-          <div className="w-100 h-0">
-            <ListGroup className="overflow-auto w-100 mh-100">
-              {data.map((task) => (
+        {showDetails && selected ? (
+          <WritingTaskRulesTree
+            style={{ maxHeight: "72vh", height: "72vh" }}
+            task={selected}
+          />
+        ) : (
+          <div
+            className="d-flex flex-row align-items-stretch position-relative gap-3"
+            style={{ maxHeight: "75vh", height: "75vh" }}
+          >
+            <WritingTaskFilter className="w-100" update={setData} />
+            <div className="w-100 h-0">
+              <ListGroup className="overflow-auto w-100 mh-100">
+                {data.map((task) => (
+                  <ListGroup.Item
+                    key={task.info.name}
+                    active={selected === task}
+                    action
+                    onClick={() => setSelected(task)}
+                  >
+                    {task.info.name}
+                  </ListGroup.Item>
+                ))}
+                {custom && (
+                  <ListGroup.Item
+                    action
+                    active={selected === custom}
+                    onClick={() => setSelected(custom)}
+                  >
+                    {custom.info.name}
+                  </ListGroup.Item>
+                )}
                 <ListGroup.Item
-                  key={task.info.name}
-                  active={selected === task}
                   action
-                  onClick={() => setSelected(task)}
+                  variant="warning"
+                  onClick={() => setSelected(null)}
                 >
-                  {task.info.name}
+                  {t("select_task.null")}
                 </ListGroup.Item>
-              ))}
-              {custom && (
-                <ListGroup.Item
-                  action
-                  active={selected === custom}
-                  onClick={() => setSelected(custom)}
-                >
-                  {custom.info.name}
-                </ListGroup.Item>
-              )}
-              <ListGroup.Item
-                action
-                variant="warning"
-                onClick={() => setSelected(null)}
-              >
-                {t("select_task.null")}
-              </ListGroup.Item>
-            </ListGroup>
+              </ListGroup>
+            </div>
+            <div className="w-100 h-0">
+              <WritingTaskInfo task={selected} />
+            </div>
           </div>
-          <div className="w-100 h-0">
-            <WritingTaskInfo task={selected} />
-          </div>
-        </div>
-        }
+        )}
       </Modal.Body>
       {showDetails ? (
         <Modal.Footer>

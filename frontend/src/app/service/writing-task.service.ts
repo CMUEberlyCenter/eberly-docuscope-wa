@@ -1,8 +1,8 @@
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, filter, map, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import sanitizeHtml from "sanitize-html";
-import { Node } from "slate";
+import sanitizeHtml from 'sanitize-html';
+import { Node } from 'slate';
 import useSWR from 'swr';
 import { WritingTask } from '../../lib/WritingTask';
 import { fetcher } from './fetcher';
@@ -65,30 +65,30 @@ const descriptionToSlate = (description: string): string => {
 export const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
   // { type: "heading-one", children: [{ text: task.info.name }] },
   ...(details
-    ? [{ type: "paragraph", children: [{ text: task.rules.overview }] }]
+    ? [{ type: 'paragraph', children: [{ text: task.rules.overview }] }]
     : []),
   ...task.rules.rules.flatMap((rule) => [
     {
-      type: "heading-five",
+      type: 'heading-five',
       children: [{ text: rule.name }],
     },
     ...(details
       ? [
-        {
-          type: "paragraph",
-          children: [{ text: descriptionToSlate(rule.description) }],
-        },
-      ]
-      : []),
-    ...rule.children.flatMap((child) => [
-      { type: "heading-six", children: [{ text: child.name }] },
-      ...(details
-        ? [
           {
-            type: "paragraph",
-            children: [{ text: descriptionToSlate(child.description) }],
+            type: 'paragraph',
+            children: [{ text: descriptionToSlate(rule.description) }],
           },
         ]
+      : []),
+    ...rule.children.flatMap((child) => [
+      { type: 'heading-six', children: [{ text: child.name }] },
+      ...(details
+        ? [
+            {
+              type: 'paragraph',
+              children: [{ text: descriptionToSlate(child.description) }],
+            },
+          ]
         : []),
     ]),
   ]),
@@ -99,17 +99,17 @@ export const taskToClipboard = (
   task: WritingTask | null,
   includeDetails: boolean
 ): string => {
-  if (!task) return "";
+  if (!task) return '';
   const lines = includeDetails ? [task.rules.overview] : [];
   lines.push(
     ...task.rules.rules.flatMap((rule) => [
       rule.name,
       ...(includeDetails ? [descriptionToSlate(rule.description)] : []),
       ...rule.children.flatMap((cluster) => [
-        "\t" + cluster.name,
+        '\t' + cluster.name,
         ...(includeDetails ? [descriptionToSlate(cluster.description)] : []),
       ]),
     ])
   );
-  return lines.join("\n\n");
+  return lines.join('\n\n');
 };
