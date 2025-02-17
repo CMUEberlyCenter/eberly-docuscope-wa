@@ -154,7 +154,19 @@ reviews.get(
         );
       }
     );
+
+    const updateAnalysis = async (analysis: Analysis | undefined) => {
+      if (analysis) {
+        const upd = await updateReviewByIdAddAnalysis(id, analysis);
+        if (!response.closed) {
+          response.write(`data: ${JSON.stringify(upd)}\n\n`);
+        }
+      }
+      return analysis;
+    };
+
     try {
+      console.log(`Looking up ${id}`);
       const review = await findReviewById(id);
       response.set({
         'Cache-Control': 'no-cache',
@@ -164,16 +176,6 @@ reviews.get(
       response.flushHeaders();
       response.on('close', () => response.end());
       response.write(`data: ${JSON.stringify(review)}\n\n`);
-
-      const updateAnalysis = async (analysis: Analysis | undefined) => {
-        if (analysis) {
-          const upd = await updateReviewByIdAddAnalysis(id, analysis);
-          if (!response.closed) {
-            response.write(`data: ${JSON.stringify(upd)}\n\n`);
-          }
-        }
-        return analysis;
-      };
 
       const expectJobs: Promise<Analysis | undefined>[] = [];
       if (
@@ -191,25 +193,31 @@ reviews.get(
         expectJobs.push(
           ...expectations.map(async ({ name: expectation, description }) => {
             try {
-              const { response, finished: datetime } = await doChat(
-                'expectations',
-                {
-                  ...reviewData(review),
-                  expectation,
-                  description,
-                },
-                true
-              );
-              if (!response) throw new Error(`NULL results for ${expectation}`);
-              if (!isExpectationsOutput(response)) {
-                console.error(`Malformed results for ${expectation}`, response);
+              if (response.closed) return;
+              const { response: chat_response, finished: datetime } =
+                await doChat(
+                  'expectations',
+                  {
+                    ...reviewData(review),
+                    expectation,
+                    description,
+                  },
+                  true
+                );
+              if (!chat_response)
+                throw new Error(`NULL results for ${expectation}`);
+              if (!isExpectationsOutput(chat_response)) {
+                console.error(
+                  `Malformed results for ${expectation}`,
+                  chat_response
+                );
                 throw new Error(`Malformed results for ${expectation}`);
               }
               return updateAnalysis({
                 tool: 'expectations',
                 datetime,
                 expectation,
-                response: response,
+                response: chat_response,
               });
             } catch (err) {
               console.error(err);
@@ -231,16 +239,15 @@ reviews.get(
         .map(async (key) => {
           if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber // TODO check if error
           try {
-            const { response, finished: datetime } = await doChat(
-              key,
-              reviewData(review),
-              true
-            );
-            if (!response) throw new Error(`NULL chat response for ${key}`);
+            if (response.closed) return;
+            const { response: chat_response, finished: datetime } =
+              await doChat(key, reviewData(review), true);
+            if (!chat_response)
+              throw new Error(`NULL chat response for ${key}`);
             return updateAnalysis({
               tool: key,
               datetime,
-              response,
+              response: chat_response,
             } as Analysis); // FIXME typescript shenanigans
           } catch (err) {
             console.error(err);
@@ -276,6 +283,7 @@ reviews.get(
       });
       await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {
+        console.log(`Looking up final ${id}`);
         const final = await findReviewById(id);
         response.write(`data: ${JSON.stringify(final)}\n\n`);
         response.end();
