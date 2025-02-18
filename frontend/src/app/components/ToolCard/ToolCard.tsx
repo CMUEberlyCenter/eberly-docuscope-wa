@@ -24,7 +24,6 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { Rule } from "../../../lib/WritingTask";
-import AllExpectationsIcon from "../../assets/icons/check_all_expectations_new_win_icon.svg?react";
 import CheckExpectationIcon from "../../assets/icons/check_expectation_icon.svg?react";
 import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
@@ -77,7 +76,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
     const expectationFeature = useGlobalFeatureExpectation();
-    const expectationsFeature = false; //useGlobalFeatureExpectations();
     const [showSelectExpectation, setShowSelectExpectation] = useState(false);
 
     const editor = useSlate();
@@ -247,38 +245,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       );
     }, [writingTask, editor]);
 
-    const onExpectations = useCallback(async () => {
-      const text = serialize(editor.children);
-      if (!text) {
-        // TODO error message about no content.
-        return;
-      }
-      const resp = await fetch("/api/v2/reviews/", {
-        method: "POST",
-        credentials: "same-origin",
-        redirect: "manual",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text, // plain text
-          document: serializeHtml(editor.children),
-          writing_task: writingTask,
-        }),
-      });
-      if (resp.redirected) {
-        return window.open(resp.url, "_blank", "scrollbars=no,resizable=yes");
-      }
-      if (!resp.ok) {
-        console.error(resp.status);
-        return; // TODO better error reporting
-      }
-      const reviewId = await resp.json();
-      return window.open(
-        `/expectations.html?id=${reviewId}`,
-        "_blank",
-        "scrollbars=no,resizable=yes"
-      );
-    }, [writingTask, editor]);
-
     return (
       <aside
         className={classNames(
@@ -298,8 +264,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Nav>
                 {(notes2proseFeature ||
                   bulletsFeature ||
-                  expectationFeature ||
-                  expectationsFeature) && (
+                  expectationFeature) && (
                   <Nav.Item className="ms-3">
                     <Nav.Link
                       eventKey="generate"
@@ -375,7 +340,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         )}
                       </ButtonGroup>
                     )}
-                    {(expectationFeature || expectationsFeature) && (
+                    {expectationFeature && (
                       <ButtonGroup className="bg-white shadow-sm tools ms-2">
                         {expectationFeature && (
                           <ToolButton
@@ -384,29 +349,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             icon={<CheckExpectationIcon />}
                             disabled={!scribe || !writingTask}
                             onClick={() => onTool("expectation")}
-                          />
-                        )}
-                        {expectationsFeature && (
-                          <ToolButton
-                            tooltip={t("tool.button.expectations.tooltip")}
-                            disabled={!scribe || !writingTask}
-                            onClick={() => onExpectations()}
-                            icon={
-                              <div className="d-flex justify-content-center align-items-end">
-                                <AllExpectationsIcon
-                                  style={{ width: "auto" }}
-                                />
-                                {/* <FontAwesomeIcon
-                                    style={{
-                                      height: ".75rem",
-                                      width: ".75rem",
-                                    }}
-                                    className="mx-1"
-                                    icon={faArrowUpRightFromSquare}
-                                  /> */}
-                              </div>
-                            }
-                            title={t("tool.button.expectations.title")}
                           />
                         )}
                       </ButtonGroup>

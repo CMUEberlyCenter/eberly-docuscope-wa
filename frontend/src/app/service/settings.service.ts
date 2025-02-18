@@ -166,11 +166,11 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
   false
 );
 
-export const [useGlobalFeatureCivilTone, globalFeatureCivilTone] = bind(
+export const [useGlobalFeatureCivilTone, globalFeatureCivilTone$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.civil_tone)),
   false
 );
-export const [useGlobalFeatureEthos, globalFeatureEthos] = bind(
+export const [useGlobalFeatureEthos, globalFeatureEthos$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.ethos)),
   false
 );

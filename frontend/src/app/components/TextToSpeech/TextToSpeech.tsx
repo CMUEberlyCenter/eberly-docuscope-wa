@@ -35,7 +35,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
-  const settings = useGlobalFeatureTextToSpeech();
+  const enabled = useGlobalFeatureTextToSpeech();
 
   useEffect(() => {
     return () => {
@@ -85,7 +85,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
     window.speechSynthesis.cancel();
   };
 
-  return settings ? (
+  return enabled ? (
     <ButtonGroup>
       <Collapse in={open} dimension={"width"}>
         <ButtonGroup>

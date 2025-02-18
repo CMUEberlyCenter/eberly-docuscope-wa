@@ -1,5 +1,5 @@
 import { bind } from '@react-rxjs/core';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   AssessExpectationRequest,
   NotesRequest,
@@ -13,62 +13,16 @@ import {
   SelectedText,
 } from '../lib/ToolResults';
 
-// TODO: per assignment feature settings.
-
-// Show the myScribe warning and setting dialog.
-const showAtStartup =
-  sessionStorage.getItem('show_scribe') !== false.toString();
-const show_scribe_option = new BehaviorSubject<boolean>(showAtStartup);
-export const hideScribeOption = () => show_scribe_option.next(false);
-export const showScribeOption = () => show_scribe_option.next(true);
-export const [useShowScribeOption, showScribeOption$] = bind(
-  show_scribe_option.pipe(distinctUntilChanged()),
-  showAtStartup
-);
-show_scribe_option.subscribe((save) =>
-  sessionStorage.setItem('show_scribe', save.toString())
-);
-
 // If scribe is currently enabled by user.
 const optIn = true; // sessionStorage.getItem('enable_scribe') === true.toString();
 const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
-export const enableScribe = (enable: boolean) => scribe.next(enable);
+// export const enableScribe = (enable: boolean) => scribe.next(enable);
 export const [useScribe, scribe$] = bind(scribe, optIn);
-scribe.subscribe((enable) =>
-  sessionStorage.setItem('enable_scribe', enable.toString())
-);
+// scribe.subscribe((enable) =>
+//   sessionStorage.setItem('enable_scribe', enable.toString())
+// );
 
 /*** Notes to Prose ***/
-
-const NOTES_TO_PROSE = 'notes2prose';
-// function logCovertNotes(notes: string, prose: ChatCompletion) {
-//   const data = JSON.parse(retrieveConvertLog());
-//   sessionStorage.setItem(
-//     NOTES_TO_PROSE,
-//     JSON.stringify([...data, { notes, prose }])
-//   );
-// }
-export function retrieveConvertLog() {
-  return sessionStorage.getItem(NOTES_TO_PROSE) ?? '[]';
-}
-export function downloadHistory(): void {
-  // file object
-  const file = new Blob([retrieveConvertLog()], { type: 'application/json' });
-
-  // anchor link
-  const element = document.createElement('a');
-  element.href = URL.createObjectURL(file);
-  element.style.display = 'none';
-  element.download = `myScribeHistory-${Date.now()}.json`;
-
-  // simulate link click
-  document.body.appendChild(element); // Required for this to work in FireFox
-  element.click();
-  // remove element?
-  element.remove();
-}
-
-// type ChatResponse = { error: boolean; message: string } | ChatCompletion;
 
 export async function postConvertNotes(
   { text }: SelectedText,

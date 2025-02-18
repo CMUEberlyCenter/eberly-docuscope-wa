@@ -20,7 +20,7 @@ import {
 } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import "../AllExpectations/AllExpectations.scss";
+import style from "./Expectations.module.scss";
 import { Loading } from "../Loading/Loading";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -71,7 +71,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
     <Accordion.Item {...props}>
       {isExpectationsData(expectation) &&
       isNone(expectation.response.suggestions) ? (
-        <div className="fake-accordion-button">
+        <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{expectation.expectation}</div>
           <AlertIcon message={t("warning")} show />
         </div>
@@ -117,7 +117,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
         </>
       ) : null}
       {!expectation ? (
-        <div className="fake-accordion-button">
+        <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{rule.name}</div>
           <LoadingSmall />
         </div>

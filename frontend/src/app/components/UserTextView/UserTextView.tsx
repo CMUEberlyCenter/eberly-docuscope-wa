@@ -2,7 +2,6 @@ import classNames from "classnames";
 import { FC, HTMLProps, useContext, useEffect } from "react";
 import { Placeholder } from "react-bootstrap";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
-import { useReview } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
@@ -21,7 +20,6 @@ export const UserTextView: FC<UserTextViewProps> = ({
   className,
   ...props
 }) => {
-  const review = useReview();
   const ctx = useContext(ReviewContext);
   const cl = classNames(className, "d-flex flex-column");
   // TODO make this so that it is aware of the previous number of levels and
@@ -60,7 +58,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
         <NoEditIcon />
       </header>
       <article className="overflow-auto border-top">
-        {typeof review !== "object" ? (
+        {prose.trim() === "" ? (
           <Placeholder></Placeholder>
         ) : (
           <div

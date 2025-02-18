@@ -23,7 +23,7 @@ import { ToolResult } from "../../lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import { TextToSpeech } from "../scribe/TextToSpeech";
+import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
 
 type ToolButtonProps = ButtonProps & {
   tooltip: string;

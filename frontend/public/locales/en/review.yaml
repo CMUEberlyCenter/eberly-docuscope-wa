@@ -79,6 +79,7 @@ global_coherence:
 key_ideas:
   entry: Prominent Topics
   title: Prominent Topics
+  tooltip: Elaborating on prominent topics with sufficient detail helps readers grasp key ideas.
   insights: Check which topics are prominent in your text and how they are elaborated.
   main_idea: Main Idea
   error: Error reading Prominent Topics data.

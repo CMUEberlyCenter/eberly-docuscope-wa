@@ -84,7 +84,7 @@ function* leafRuleGenerator(rule: Rule): Generator<Rule> {
 
 /**
  * Extract the expectations from a writing task description.
- * Expectations are defined as leaf rule of a WritingTask.
+ * Expectations are defined as leaf rules of a WritingTask.
  * @returns Array of expectations, [] if task is not a WritingTask.
  */
 export function getExpectations(task: WritingTask | null) {
