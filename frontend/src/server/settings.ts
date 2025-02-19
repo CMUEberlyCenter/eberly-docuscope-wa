@@ -80,13 +80,17 @@ export const ANTHROPIC_MAX_TOKENS = envInt(
   1024
 );
 
+// Path to prompts json file // depricated
 export const PROMPT_TEMPLATES_PATH =
   process.env['PROMPT_TEMPLATES'] ?? join('private', 'templates.json');
+// Path to writing task definition files
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
+// LTI platform configuration files path
 export const PLATFORMS_PATH =
   process.env['PLATFORMS'] ?? join('private', 'platforms');
 
+// Default language to use in prompts for user_lang and target_lang
 export const DEFAULT_LANGUAGE = process.env.DEFAULT_LANGUAGE ?? 'English';
 export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = {
   user_lang: DEFAULT_LANGUAGE,
@@ -98,3 +102,6 @@ export const EXPIRE_REVIEW_SECONDS = envInt(
   process.env.EXPIRE_REVIEW_SECONDS,
   SIX_MONTHS
 );
+
+// Identifier for the info.access category in writing task definitions that are treated as public
+export const ACCESS_LEVEL = process.env.ACCESS_LEVEL ?? 'Public';

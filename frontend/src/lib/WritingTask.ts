@@ -128,7 +128,7 @@ export type WritingTaskMetaData = {
   /** Per writing task tool configurations. */
   review_tools?: ToolConfig[];
   /** Optionally set the task as private. */
-  private?: boolean;
+  access?: string;
 };
 
 /** Test if the given object is an instance of WritingTaskMetaData. */

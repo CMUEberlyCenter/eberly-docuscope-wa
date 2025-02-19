@@ -106,6 +106,10 @@
         "info": {
             "description": "Metadata about the task.",
             "properties": {
+                "access": {
+                    "description": "Optionally set the task as private.",
+                    "type": "string"
+                },
                 "author": {
                     "description": "Author of the outline.",
                     "type": "string"
@@ -136,10 +140,6 @@
                 "name": {
                     "description": "Title of the Writing Task/Outline",
                     "type": "string"
-                },
-                "private": {
-                    "description": "Optionally set the task as private.",
-                    "type": "boolean"
                 },
                 "review_tools": {
                     "description": "Per writing task tool configurations.",
