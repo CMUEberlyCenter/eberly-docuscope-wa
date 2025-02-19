@@ -52,7 +52,9 @@ export const [useExpectationsEnabled, expectationsEnabled$] = bind(
 
 export const [useProminentTopicsEnabled, prominentTopicsEnabled$] = bind(
   combineLatest([globalFeatureProminentTopics$, writingTask$]).pipe(
-    map(([settings, task]) => settings && existsEnabled(task, 'prominent_topics'))
+    map(
+      ([settings, task]) => settings && existsEnabled(task, 'prominent_topics')
+    )
   ),
   false
 );

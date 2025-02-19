@@ -5,7 +5,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
-import { useKeyIdeasData } from "../../service/review.service";
+import { useProminentTopicsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -14,7 +14,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import { ToolButton } from "../ToolButton/ToolButton";
 
-export const KeyIdeasButton: FC<ButtonProps> = (props) => (
+export const ProminentTopicsButton: FC<ButtonProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
       <ToolButton
@@ -27,7 +27,7 @@ export const KeyIdeasButton: FC<ButtonProps> = (props) => (
   </Translation>
 );
 /** List of Key Ideas title component for use in selection menu. */
-export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
+export const ProminentTopicsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
       <span {...props}>
@@ -38,9 +38,9 @@ export const KeyIdeasTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
 );
 
 /** Component for displaying results of Key Ideas review results. */
-export const KeyIdeas: FC = () => {
+export const ProminentTopics: FC = () => {
   const { t } = useTranslation("review");
-  const review = useKeyIdeasData();
+  const review = useProminentTopicsData();
   const dispatch = useContext(ReviewDispatchContext);
 
   return (

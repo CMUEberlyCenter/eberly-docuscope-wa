@@ -39,13 +39,13 @@ import {
 } from "../../service/review-tools.service";
 import { CivilTone } from "./CivilTone";
 import { Ethos } from "./Ethos";
-import { KeyIdeas, KeyIdeasButton } from "./KeyIdeas";
 import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
 import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
 import { Organization } from "./Organization";
 import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
 import { Pathos } from "./Pathos";
 import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
+import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
@@ -138,7 +138,7 @@ export const Review: FC = () => {
                     />
                   ) : null}
                   {ideasFeature ? (
-                    <KeyIdeasButton
+                    <ProminentTopicsButton
                       active={tool === "prominent_topics"}
                       onClick={() => setTool("prominent_topics")}
                     />
@@ -280,7 +280,7 @@ export const Review: FC = () => {
             {tool === "expectations" && <Expectations />}
             {/* {tool === "global_coherence" && <GlobalCoherence />} */}
             {tool === "impressions" && <NullTool />}
-            {tool === "prominent_topics" && <KeyIdeas />}
+            {tool === "prominent_topics" && <ProminentTopics />}
             {tool === "organization" && <Organization />}
             {tool === "sentence_density" && <Sentences />}
             {tool === "paragraph_clarity" && <ParagraphClarity />}

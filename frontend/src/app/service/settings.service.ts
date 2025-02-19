@@ -180,10 +180,13 @@ export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
   ),
   false
 );
-export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.prominent_topics)),
-  false
-);
+export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] =
+  bind(
+    settings$.pipe(
+      map((settings) => !!settings.scribe && !!settings.prominent_topics)
+    ),
+    false
+  );
 export const [
   useGlobalFeatureLinesOfArguments,
   globalFeatureLinesOfArguments$,

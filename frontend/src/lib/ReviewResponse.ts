@@ -13,10 +13,15 @@ export type ReviewPrompt =
   | 'prominent_topics'
   | 'revision_plan'
   //| 'sentence_density'
-  | 'sources'
-  // | 'term_matrix'; // All prompts
+  | 'sources';
+// | 'term_matrix'; // All prompts
 
-export type ReviewTool = ReviewPrompt | 'sentence_density' | 'term_matrix' | 'ontopic' | 'docuscope';
+export type ReviewTool =
+  | ReviewPrompt
+  | 'sentence_density'
+  | 'term_matrix'
+  | 'ontopic'
+  | 'docuscope';
 
 // export const ReviewTools: ReviewTool[] = [
 //   'civil_tone',
@@ -97,7 +102,7 @@ export function isExpectationsOutput(
 }
 
 /** JSON structure for the results of the prominent_topics prompt. */
-export type KeyIdeasOutput = {
+export type ProminentTopicsOutput = {
   topics: {
     /** A point or key idea of the text summarized in a single sentence. */
     topic: string;
@@ -199,7 +204,7 @@ export type ReviewResponse =
   | CivilToneOutput
   | EthosOutput
   | ExpectationsOutput
-  | KeyIdeasOutput
+  | ProminentTopicsOutput
   | LinesOfArgumentsOutput
   | LogicalFlowOutput
   | ParagraphClarityOutput
@@ -237,7 +242,7 @@ export const isExpectationsData = (
   'response' in data &&
   isExpectationsOutput(data.response);
 
-export interface KeyIdeasData extends ReviewData<KeyIdeasOutput> {
+export interface ProminentTopicsData extends ReviewData<ProminentTopicsOutput> {
   tool: 'prominent_topics';
 }
 
@@ -291,7 +296,7 @@ export type Analysis =
   | CivilToneData
   | EthosData
   | ExpectationsData
-  | KeyIdeasData
+  | ProminentTopicsData
   | LinesOfArgumentsData
   | LogicalFlowData
   | ParagraphClarityData

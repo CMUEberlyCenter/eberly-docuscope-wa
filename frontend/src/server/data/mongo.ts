@@ -2,7 +2,12 @@ import { MongoClient, ObjectId } from 'mongodb';
 import { Analysis } from '../../lib/ReviewResponse';
 import { WritingTask } from '../../lib/WritingTask';
 import { Review } from '../model/review';
-import { ACCESS_LEVEL, EXPIRE_REVIEW_SECONDS, MONGO_CLIENT, MONGO_DB } from '../settings';
+import {
+  ACCESS_LEVEL,
+  EXPIRE_REVIEW_SECONDS,
+  MONGO_CLIENT,
+  MONGO_DB,
+} from '../settings';
 import { initWritingTasks } from './writing_task_description';
 
 const client = new MongoClient(MONGO_CLIENT);
@@ -118,7 +123,12 @@ export async function upsertPublicWritingTask(path: string, data: WritingTask) {
       'info.version': data.info.version,
       path: path,
     },
-    { ...data, public: data.info.access === ACCESS_LEVEL, path, modified: new Date() },
+    {
+      ...data,
+      public: data.info.access === ACCESS_LEVEL,
+      path,
+      modified: new Date(),
+    },
     {
       upsert: true,
     }

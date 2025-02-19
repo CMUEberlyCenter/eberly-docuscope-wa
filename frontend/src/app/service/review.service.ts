@@ -6,13 +6,13 @@ import {
   ErrorData,
   EthosData,
   ExpectationsData,
-  KeyIdeasData,
   LinesOfArgumentsData,
   LogicalFlowData,
   OnTopicReviewData,
   ParagraphClarityData,
   PathosData,
   ProfessionalToneData,
+  ProminentTopicsData,
   SourcesData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
@@ -86,7 +86,9 @@ const civilToneAnalysis = new BehaviorSubject<OptionalError<CivilToneData>>(
   null
 );
 const ethosAnalysis = new BehaviorSubject<OptionalError<EthosData>>(null);
-const keyIdeasAnalysis = new BehaviorSubject<OptionalError<KeyIdeasData>>(null);
+const prominentTopicsAnalysis = new BehaviorSubject<
+  OptionalError<ProminentTopicsData>
+>(null);
 const linesOfArgumentsAnalysis = new BehaviorSubject<
   OptionalError<LinesOfArgumentsData>
 >(null);
@@ -131,7 +133,7 @@ review$
           else console.warn('No expectation is expectation response!');
           break;
         case 'prominent_topics':
-          keyIdeasAnalysis.next(analysis);
+          prominentTopicsAnalysis.next(analysis);
           break;
         case 'lines_of_arguments':
           linesOfArgumentsAnalysis.next(analysis);
@@ -169,7 +171,10 @@ review$
 // );
 export const [useCivilToneData, civilToneData$] = bind(civilToneAnalysis, null);
 export const [useEthosData, ethosData$] = bind(ethosAnalysis, null);
-export const [useKeyIdeasData, keyPointsData$] = bind(keyIdeasAnalysis, null);
+export const [useProminentTopicsData, prominentTopicsData$] = bind(
+  prominentTopicsAnalysis,
+  null
+);
 export const [useLinesOfArgumentsData, argumentsData$] = bind(
   linesOfArgumentsAnalysis,
   null

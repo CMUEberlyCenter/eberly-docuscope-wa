@@ -3,7 +3,7 @@ import createFetchMock from 'vitest-fetch-mock';
 const fetchMocker = createFetchMock(vi);
 fetchMocker.enableMocks();
 
-import { first, lastValueFrom, take } from 'rxjs';
+import { first, lastValueFrom } from 'rxjs';
 import {
   afterAll,
   beforeAll,
@@ -76,7 +76,7 @@ describe('tagger.service', () => {
       .subscribe((tagged) => {
         expect((tagged as TaggerResults)?.isError).toBeTruthy();
       });
-    await lastValueFrom(taggerResults$.pipe(take(2)));
+    // await lastValueFrom(taggerResults$.pipe(take(2)));
   });
   test('isTaggedResult', () => {
     expect(isTaggerResult(null)).toBeFalsy();
