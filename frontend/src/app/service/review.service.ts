@@ -130,7 +130,7 @@ review$
           if ('expectation' in analysis) expectationsAnalysis.next(analysis);
           else console.warn('No expectation is expectation response!');
           break;
-        case 'key_ideas':
+        case 'prominent_topics':
           keyIdeasAnalysis.next(analysis);
           break;
         case 'lines_of_arguments':

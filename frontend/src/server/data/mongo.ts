@@ -118,7 +118,7 @@ export async function upsertPublicWritingTask(path: string, data: WritingTask) {
       'info.version': data.info.version,
       path: path,
     },
-    { ...data, public: true, path, modified: new Date() },
+    { ...data, public: !data.info.private, path, modified: new Date() },
     {
       upsert: true,
     }

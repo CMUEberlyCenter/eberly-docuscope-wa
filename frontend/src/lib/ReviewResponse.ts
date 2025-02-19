@@ -4,13 +4,13 @@ export type ReviewPrompt =
   | 'civil_tone'
   | 'ethos'
   | 'expectations'
-  | 'key_ideas'
   | 'lines_of_arguments'
   // | 'local_coherence'
   | 'logical_flow'
   | 'paragraph_clarity'
   | 'pathos'
   | 'professional_tone'
+  | 'prominent_topics'
   | 'revision_plan'
   //| 'sentence_density'
   | 'sources'
@@ -96,7 +96,7 @@ export function isExpectationsOutput(
   );
 }
 
-/** JSON structure for the results of the key_points prompt. */
+/** JSON structure for the results of the prominent_topics prompt. */
 export type KeyIdeasOutput = {
   topics: {
     /** A point or key idea of the text summarized in a single sentence. */
@@ -238,7 +238,7 @@ export const isExpectationsData = (
   isExpectationsOutput(data.response);
 
 export interface KeyIdeasData extends ReviewData<KeyIdeasOutput> {
-  tool: 'key_ideas';
+  tool: 'prominent_topics';
 }
 
 export interface LinesOfArgumentsData

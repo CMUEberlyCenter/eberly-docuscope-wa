@@ -100,7 +100,7 @@
                 "enabled": true
             },
             {
-                "tool": "key_points",
+                "tool": "prominent_topics",
                 "category": "Big Picture",
                 "enabled": false
             },
@@ -120,7 +120,7 @@
                 "enabled": true
             },
             {
-                "tool": "prof_tone",
+                "tool": "professional_tone",
                 "category": "Fine Tuning",
                 "enabled": true
             },

@@ -5,7 +5,7 @@ import {
   globalFeatureCivilTone$,
   globalFeatureEthos$,
   globalFeatureExpectations$,
-  globalFeatureKeyIdeas$,
+  globalFeatureProminentTopics$,
   globalFeatureLinesOfArguments$,
   globalFeatureLogicalFlow$,
   globalFeaturePathos$,
@@ -50,9 +50,9 @@ export const [useExpectationsEnabled, expectationsEnabled$] = bind(
   false
 );
 
-export const [useKeyIdeasEnabled, keyIdeasEnabled$] = bind(
-  combineLatest([globalFeatureKeyIdeas$, writingTask$]).pipe(
-    map(([settings, task]) => settings && existsEnabled(task, 'key_ideas'))
+export const [useProminentTopicsEnabled, prominentTopicsEnabled$] = bind(
+  combineLatest([globalFeatureProminentTopics$, writingTask$]).pipe(
+    map(([settings, task]) => settings && existsEnabled(task, 'prominent_topics'))
   ),
   false
 );

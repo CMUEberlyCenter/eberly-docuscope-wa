@@ -35,7 +35,7 @@ interface Settings {
   civil_tone?: boolean;
   ethos?: boolean;
   expectations?: boolean; // All Expectations review LLM tool
-  key_ideas?: boolean; // Key Ideas review LLM tool
+  prominent_topics?: boolean; // Key Ideas review LLM tool
   lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
   logical_flow?: boolean; // Logical Progression review LLM tool
   paragraph_clarity?: boolean;
@@ -70,7 +70,7 @@ const DEFAULT: Settings = {
   civil_tone: true,
   ethos: true,
   expectations: true,
-  key_ideas: true,
+  prominent_topics: true,
   lines_of_arguments: true,
   logical_flow: true,
   paragraph_clarity: true,
@@ -153,7 +153,7 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
         !!settings.civil_tone ||
         !!settings.ethos ||
         !!settings.expectations ||
-        !!settings.key_ideas ||
+        !!settings.prominent_topics ||
         !!settings.lines_of_arguments ||
         !!settings.logical_flow ||
         !!settings.pathos ||
@@ -180,8 +180,8 @@ export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
   ),
   false
 );
-export const [useGlobalFeatureKeyIdeas, globalFeatureKeyIdeas$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.key_ideas)),
+export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] = bind(
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.prominent_topics)),
   false
 );
 export const [

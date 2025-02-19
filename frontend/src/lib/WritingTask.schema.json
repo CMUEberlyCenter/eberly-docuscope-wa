@@ -137,6 +137,10 @@
                     "description": "Title of the Writing Task/Outline",
                     "type": "string"
                 },
+                "private": {
+                    "description": "Optionally set the task as private.",
+                    "type": "boolean"
+                },
                 "review_tools": {
                     "description": "Per writing task tool configurations.",
                     "items": {

@@ -102,8 +102,8 @@ describe('isEnabled', () => {
     // test if enabled then true.
     expect(isEnabled(CoverLetter, 'expectations')).toBeTruthy();
   });
-  test('given CoverLetter and "key_points" then false', () => {
+  test('given CoverLetter and "prominent_topics" then false', () => {
     // test if disabled then false.
-    expect(isEnabled(CoverLetter, 'key_points')).toBeFalsy();
+    expect(isEnabled(CoverLetter, 'prominent_topics')).toBeFalsy();
   });
 });

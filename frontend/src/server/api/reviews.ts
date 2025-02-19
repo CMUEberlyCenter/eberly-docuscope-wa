@@ -39,12 +39,12 @@ export const reviews = Router();
 const ANALYSES: ReviewPrompt[] = [
   'civil_tone',
   'ethos',
-  'key_ideas',
   'lines_of_arguments',
   'logical_flow',
   'paragraph_clarity',
   'pathos',
   'professional_tone',
+  'prominent_topics',
   'revision_plan',
   // 'sentence_density', // ontopic
   'sources',

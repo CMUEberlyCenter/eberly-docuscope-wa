@@ -28,11 +28,11 @@ import {
   useEthosEnabled,
   useExpectationsEnabled,
   useImpressionsEnabled,
-  useKeyIdeasEnabled,
   useLogicalFlowEnabled,
   useParagraphClarityEnabled,
   usePathosEnabled,
   useProfessionalToneEnabled,
+  useProminentTopicsEnabled,
   useSentenceDensityEnabled,
   useSourcesEnabled,
   useTermMatrixEnabled,
@@ -94,7 +94,7 @@ export const Review: FC = () => {
   const civilToneFeature = useCivilToneEnabled();
   const ethosFeature = useEthosEnabled();
   const expectationsFeature = useExpectationsEnabled();
-  const ideasFeature = useKeyIdeasEnabled();
+  const ideasFeature = useProminentTopicsEnabled();
   const argumentsFeature = useArgumentsEnabled();
   const logicalFlowFeature = useLogicalFlowEnabled();
   const paragraphClarityFeature = useParagraphClarityEnabled();
@@ -139,8 +139,8 @@ export const Review: FC = () => {
                   ) : null}
                   {ideasFeature ? (
                     <KeyIdeasButton
-                      active={tool === "key_ideas"}
-                      onClick={() => setTool("key_ideas")}
+                      active={tool === "prominent_topics"}
+                      onClick={() => setTool("prominent_topics")}
                     />
                   ) : null}
                   {argumentsFeature ? (
@@ -280,7 +280,7 @@ export const Review: FC = () => {
             {tool === "expectations" && <Expectations />}
             {/* {tool === "global_coherence" && <GlobalCoherence />} */}
             {tool === "impressions" && <NullTool />}
-            {tool === "key_ideas" && <KeyIdeas />}
+            {tool === "prominent_topics" && <KeyIdeas />}
             {tool === "organization" && <Organization />}
             {tool === "sentence_density" && <Sentences />}
             {tool === "paragraph_clarity" && <ParagraphClarity />}
