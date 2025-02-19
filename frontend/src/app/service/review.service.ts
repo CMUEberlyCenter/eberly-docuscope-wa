@@ -24,40 +24,51 @@ const searchParams = new URLSearchParams(window.location.search);
 const id = searchParams.get('id');
 // class FatalError extends Error {}
 
-export const [useReview, review$] = bind<SUSPENSE | Review>(
+const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
   new Observable((subscriber) => {
     subscriber.next(SUSPENSE);
     const ctrl = new AbortController();
+
+    const toolParam = new URLSearchParams();
+    if (tool) {
+      toolParam.append('tool', tool);
+    }
     // TODO: add tool query parameter based on configured available.
-    fetchEventSource(`/api/v2/reviews/${id}`, {
-      ...getLtiRequest,
-      signal: ctrl.signal,
-      // async onopen(response) {
-      //   if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
-      //     return;
-      //   }
-      //   if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-      //     throw new FatalError(`Bad return status: ${response.status}`);
-      //   }
-      //   throw new Error();
-      // },
-      onerror(err) {
-        console.error(err);
-        subscriber.error(new Error(err));
-        // if (err instanceof FatalError) {
-        //   throw err;
-        // }
-        // else retry
-      },
-      onmessage(msg) {
-        subscriber.next(JSON.parse(msg.data));
-      },
-      onclose() {
-        subscriber.complete();
-      },
-    });
+    fetchEventSource(
+      `/api/v2/reviews/${id}${tool ? '?' + toolParam.toString() : ''}`,
+      {
+        ...getLtiRequest,
+        signal: ctrl.signal,
+        // async onopen(response) {
+        //   if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+        //     return;
+        //   }
+        //   if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+        //     throw new FatalError(`Bad return status: ${response.status}`);
+        //   }
+        //   throw new Error();
+        // },
+        onerror(err) {
+          console.error(err);
+          subscriber.error(new Error(err));
+          // if (err instanceof FatalError) {
+          //   throw err;
+          // }
+          // else retry
+        },
+        onmessage(msg) {
+          subscriber.next(JSON.parse(msg.data));
+        },
+        onclose() {
+          subscriber.complete();
+        },
+      }
+    );
     return () => ctrl.abort();
-  }),
+  });
+
+export const [useReview, review$] = bind<SUSPENSE | Review>(
+  fetchObservable(),
   SUSPENSE
 );
 

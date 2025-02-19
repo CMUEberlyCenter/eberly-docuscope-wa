@@ -9,13 +9,16 @@ import {
 } from '../../lib/ProblemDetails';
 import {
   Analysis,
+  ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
   OnTopicReviewData,
   ReviewPrompt,
+  ReviewResponse,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
+  isEnabled,
   isWritingTask,
   WritingTask,
 } from '../../lib/WritingTask';
@@ -34,15 +37,18 @@ import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
 export const reviews = Router();
 
 const ANALYSES: ReviewPrompt[] = [
+  'civil_tone',
+  'ethos',
   'key_ideas',
   'lines_of_arguments',
   'logical_flow',
-  'ethos',
-  'civil_tone',
   'paragraph_clarity',
   'pathos',
   'professional_tone',
+  'revision_plan',
+  // 'sentence_density', // ontopic
   'sources',
+  // 'term_matrix', // ontopic
 ];
 
 /**
@@ -54,7 +60,8 @@ const ANALYSES: ReviewPrompt[] = [
  * @throws JSON.parse errors
  */
 const doOnTopic = async (
-  review: Review
+  review: Review,
+  signal?: AbortSignal
 ): Promise<OnTopicReviewData | undefined> => {
   const res = await fetch(ONTOPIC_URL, {
     method: 'POST',
@@ -65,6 +72,7 @@ const doOnTopic = async (
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
+    signal,
   });
   if (!res.ok) {
     console.error(
@@ -129,6 +137,25 @@ const reviewData = ({
       : undefined) ?? '',
 });
 
+reviews.get(
+  '/:id/text',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    try {
+      const { id } = request.params;
+      const review = await findReviewById(id);
+      response.json(review.segmented);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+
 /**
  * @route GET <reviews>/:id
  * @summary Retrieve review data.
@@ -143,6 +170,11 @@ reviews.get(
   '/:id',
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+
     const { id } = request.params;
     const tool = request.query.tool; // use query to specify subset
     const analyses = [...ANALYSES, 'ontopic', 'expectations'].filter(
@@ -157,6 +189,7 @@ reviews.get(
 
     const updateAnalysis = async (analysis: Analysis | undefined) => {
       if (analysis) {
+        console.log(`updating ${id}`);
         const upd = await updateReviewByIdAddAnalysis(id, analysis);
         if (!response.closed) {
           response.write(`data: ${JSON.stringify(upd)}\n\n`);
@@ -177,9 +210,10 @@ reviews.get(
       response.on('close', () => response.end());
       response.write(`data: ${JSON.stringify(review)}\n\n`);
 
-      const expectJobs: Promise<Analysis | undefined>[] = [];
+      // const expectJobs: Promise<Analysis | undefined>[] = [];
       if (
         isWritingTask(review.writing_task) &&
+        isEnabled(review.writing_task, 'expectations') &&
         analyses.includes('expectations')
       ) {
         const existing = new Set(
@@ -190,88 +224,114 @@ reviews.get(
         const expectations = getExpectations(review.writing_task).filter(
           (rule) => !existing.has(rule.name)
         );
-        expectJobs.push(
-          ...expectations.map(async ({ name: expectation, description }) => {
-            try {
-              if (response.closed) return;
-              const { response: chat_response, finished: datetime } =
-                await doChat(
-                  'expectations',
-                  {
-                    ...reviewData(review),
-                    expectation,
-                    description,
-                  },
-                  true
-                );
-              if (!chat_response)
-                throw new Error(`NULL results for ${expectation}`);
-              if (!isExpectationsOutput(chat_response)) {
-                console.error(
-                  `Malformed results for ${expectation}`,
-                  chat_response
-                );
-                throw new Error(`Malformed results for ${expectation}`);
-              }
-              return updateAnalysis({
-                tool: 'expectations',
-                datetime,
-                expectation,
-                response: chat_response,
-              });
-            } catch (err) {
-              console.error(err);
-              return updateAnalysis({
-                tool: 'expectations',
-                datetime: new Date(),
-                expectation,
-                error: {
-                  message: err instanceof Error ? err.message : `${err}`,
-                  details: err, // TODO remove this in production.
-                },
-              });
-            }
-          })
-        );
-      }
-      const chatJobs = analyses
-        .filter((a): a is ReviewPrompt => ANALYSES.includes(a as ReviewPrompt))
-        .map(async (key) => {
-          if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber // TODO check if error
+        for (const { name: expectation, description } of expectations) {
+          if (response.closed) break;
+          // }
+          // expectJobs.push(
+          //   ...expectations.map(async ({ name: expectation, description }) => {
+          // if (response.closed) return;
           try {
-            if (response.closed) return;
+            console.log(`starting expectation ${expectation}`);
+            performance.mark('expectation');
             const { response: chat_response, finished: datetime } =
-              await doChat(key, reviewData(review), true);
+              await doChat<ExpectationsOutput>(
+                'expectations',
+                {
+                  ...reviewData(review),
+                  expectation,
+                  description,
+                },
+                controller.signal,
+                true,
+                true
+              );
+            console.log(
+              `finished expectation: ${expectation}`,
+              performance.measure('expectation to Now', 'expectation')
+            );
             if (!chat_response)
-              throw new Error(`NULL chat response for ${key}`);
-            return updateAnalysis({
-              tool: key,
+              throw new Error(`NULL results for ${expectation}`);
+            if (!isExpectationsOutput(chat_response)) {
+              console.error(
+                `Malformed results for ${expectation}`,
+                chat_response
+              );
+              throw new Error(`Malformed results for ${expectation}`);
+            }
+            await updateAnalysis({
+              tool: 'expectations',
               datetime,
+              expectation,
               response: chat_response,
-            } as Analysis); // FIXME typescript shenanigans
+            });
           } catch (err) {
             console.error(err);
-            return updateAnalysis({
-              tool: key,
+            await updateAnalysis({
+              tool: 'expectations',
               datetime: new Date(),
+              expectation,
               error: {
                 message: err instanceof Error ? err.message : `${err}`,
                 details: err, // TODO remove this in production.
               },
             });
           }
-        });
-      const ontopicJobs = ['ontopic'].map(async () => {
-        if (!analyses.includes('ontopic')) return;
-        if (review.analysis.some(({ tool }) => tool === 'ontopic')) return;
+          // })
+          // );
+        }
+      }
+      const chatJobs = analyses.filter(
+        (a): a is ReviewPrompt =>
+          ANALYSES.includes(a as ReviewPrompt) &&
+          isWritingTask(review.writing_task) &&
+          isEnabled(review.writing_task, a) &&
+          !review.analysis.some(({ tool }) => tool === a) // do not clobber // TODO check if error
+      );
+      for (const key of chatJobs) {
+        // .map(async (key) => {
+        if (response.closed) break; // abort on closed response
+        // if (review.analysis.some(({ tool }) => tool === key)) continue; // do not clobber // TODO check if error
         try {
-          const data = await doOnTopic(review);
-          // TODO check for errors
-          if (!data) throw new Error(`NULL onTopic results.`);
-          return updateAnalysis(data);
+          const { response: chat_response, finished: datetime } =
+            await doChat<ReviewResponse>(
+              key,
+              reviewData(review),
+              controller.signal,
+              true,
+              true
+            );
+          if (!chat_response) throw new Error(`NULL chat response for ${key}`);
+          await updateAnalysis({
+            tool: key,
+            datetime,
+            response: chat_response,
+          } as Analysis); // FIXME typescript shenanigans
         } catch (err) {
           console.error(err);
-          return updateAnalysis({
+          await updateAnalysis({
+            tool: key,
+            datetime: new Date(),
+            error: {
+              message: err instanceof Error ? err.message : `${err}`,
+              details: err, // TODO remove this in production.
+            },
+          });
+        }
+      } //);
+      //const ontopicJobs = ['ontopic'].map(async () => {
+      if (
+        !request.closed &&
+        analyses.includes('ontopic') &&
+        !review.analysis.some(({ tool }) => tool === 'ontopic')
+      ) {
+        try {
+          const data = await doOnTopic(review, controller.signal);
+          // TODO check for errors
+          if (!data) throw new Error(`NULL onTopic results.`);
+          await updateAnalysis(data);
+        } catch (err) {
+          console.error(err);
+          await updateAnalysis({
             tool: 'ontopic',
             datetime: new Date(),
             error: {
@@ -280,8 +340,9 @@ reviews.get(
             },
           });
         }
-      });
-      await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
+      }
+      // });
+      // await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {
         console.log(`Looking up final ${id}`);
         const final = await findReviewById(id);

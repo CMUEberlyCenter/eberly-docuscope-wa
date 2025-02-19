@@ -52,6 +52,10 @@ scribe.post(
 export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
   async (request: Request, response: Response) => {
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
     const data = request.body as TextRequest;
     try {
       const chat = await doChat(
@@ -60,6 +64,7 @@ export const scribeText =
           ...DEFAULT_LANGUAGE_SETTINGS,
           ...data,
         },
+        controller.signal,
         true
       );
       response.json(chat.response);
@@ -68,7 +73,7 @@ export const scribeText =
     }
   };
 const validate_text = validate(body('text').isString());
-scribe.post('/proofread', validate_text, scribeText('grammar'));
+// scribe.post('/proofread', validate_text, scribeText('grammar')); // no prompt for this anymore
 scribe.post('/copyedit', validate_text, scribeText('copyedit'));
 scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));
 
@@ -93,8 +98,3 @@ scribe.post(
     }
   }
 );
-
-// scribe.get('/templates/info', async (_request: Request, response: Response) => {
-//   const { info } = await readTemplates();
-//   response.json(info);
-// });

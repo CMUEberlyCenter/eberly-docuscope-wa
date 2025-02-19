@@ -15,28 +15,28 @@ import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
 // import { useUnload } from "../../service/beforeUnload.service";
-import { isOnTopicReviewData } from "../../../lib/ReviewResponse";
+import { isOnTopicReviewData, ReviewTool } from "../../../lib/ReviewResponse";
 import { useReview } from "../../service/review.service";
-import {
-  useGlobalFeatureCivilTone,
-  useGlobalFeatureEthos,
-  useGlobalFeatureExpectations,
-  useGlobalFeatureImpressions,
-  useGlobalFeatureKeyIdeas,
-  useGlobalFeatureLinesOfArguments,
-  useGlobalFeatureLogicalFlow,
-  useGlobalFeatureParagraphClarity,
-  useGlobalFeaturePathos,
-  useGlobalFeatureProfessionalTone,
-  useGlobalFeatureSentenceDensity,
-  useGlobalFeatureSources,
-  useGlobalFeatureTermMatrix,
-} from "../../service/settings.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { Expectations, ExpectationsButton } from "./Expectations";
 // import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
+import {
+  useArgumentsEnabled,
+  useCivilToneEnabled,
+  useEthosEnabled,
+  useExpectationsEnabled,
+  useImpressionsEnabled,
+  useKeyIdeasEnabled,
+  useLogicalFlowEnabled,
+  useParagraphClarityEnabled,
+  usePathosEnabled,
+  useProfessionalToneEnabled,
+  useSentenceDensityEnabled,
+  useSourcesEnabled,
+  useTermMatrixEnabled,
+} from "../../service/review-tools.service";
 import { CivilTone } from "./CivilTone";
 import { Ethos } from "./Ethos";
 import { KeyIdeas, KeyIdeasButton } from "./KeyIdeas";
@@ -51,22 +51,7 @@ import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
 
-type Tool =
-  | "civil_tone"
-  | "ethos"
-  | "expectations"
-  | "global_coherence"
-  | "key_ideas"
-  | "arguments"
-  | "logical_flow"
-  | "organization"
-  | "paragraph_clarity"
-  | "pathos"
-  | "professional_tone"
-  | "sentences"
-  | "sources"
-  | "impressions"
-  | "null";
+type Tool = ReviewTool | "organization" | "impressions" | "null";
 
 const NullTool: FC = () => (
   <Stack className="position-absolute start-50 top-50 translate-middle">
@@ -79,7 +64,6 @@ const NullTool: FC = () => (
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
-  // const settings = useSettings();
   const review = useReview();
   const [tool, setTool] = useState<Tool>("expectations");
   const [prose, setProse] = useState<string>("");
@@ -107,20 +91,19 @@ export const Review: FC = () => {
     }
   }, [review, tool]);
 
-  /* <!-- TODO limit tool availability based on writing task/settings --> */
-  const civilToneFeature = useGlobalFeatureCivilTone();
-  const ethosFeature = useGlobalFeatureEthos();
-  const expectationsFeature = useGlobalFeatureExpectations();
-  const ideasFeature = useGlobalFeatureKeyIdeas();
-  const argumentsFeature = useGlobalFeatureLinesOfArguments();
-  const logicalFlowFeature = useGlobalFeatureLogicalFlow();
-  const paragraphClarityFeature = useGlobalFeatureParagraphClarity();
-  const pathosFeature = useGlobalFeaturePathos();
-  const professionalToneFeature = useGlobalFeatureProfessionalTone();
-  const sentencesFeature = useGlobalFeatureSentenceDensity();
-  const sourcesFeature = useGlobalFeatureSources();
-  const impressionsFeature = useGlobalFeatureImpressions();
-  const organizationFeature = useGlobalFeatureTermMatrix();
+  const civilToneFeature = useCivilToneEnabled();
+  const ethosFeature = useEthosEnabled();
+  const expectationsFeature = useExpectationsEnabled();
+  const ideasFeature = useKeyIdeasEnabled();
+  const argumentsFeature = useArgumentsEnabled();
+  const logicalFlowFeature = useLogicalFlowEnabled();
+  const paragraphClarityFeature = useParagraphClarityEnabled();
+  const pathosFeature = usePathosEnabled();
+  const professionalToneFeature = useProfessionalToneEnabled();
+  const sentencesFeature = useSentenceDensityEnabled();
+  const sourcesFeature = useSourcesEnabled();
+  const impressionsFeature = useImpressionsEnabled();
+  const organizationFeature = useTermMatrixEnabled();
 
   return (
     <ReviewProvider>
@@ -162,8 +145,8 @@ export const Review: FC = () => {
                   ) : null}
                   {argumentsFeature ? (
                     <LinesOfArgumentsButton
-                      active={tool === "arguments"}
-                      onClick={() => setTool("arguments")}
+                      active={tool === "lines_of_arguments"}
+                      onClick={() => setTool("lines_of_arguments")}
                     />
                   ) : null}
                   {logicalFlowFeature ? (
@@ -186,8 +169,8 @@ export const Review: FC = () => {
                   ) : null}
                   {sentencesFeature ? (
                     <SentencesButton
-                      active={tool === "sentences"}
-                      onClick={() => setTool("sentences")}
+                      active={tool === "sentence_density"}
+                      onClick={() => setTool("sentence_density")}
                     />
                   ) : null}
                   {professionalToneFeature ? (
@@ -290,7 +273,7 @@ export const Review: FC = () => {
           </Tabs>
           <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
-            {tool === "arguments" && <LinesOfArguments />}
+            {tool === "lines_of_arguments" && <LinesOfArguments />}
             {tool === "logical_flow" && <LogicalFlow />}
             {tool === "civil_tone" && <CivilTone />}
             {tool === "ethos" && <Ethos />}
@@ -299,7 +282,7 @@ export const Review: FC = () => {
             {tool === "impressions" && <NullTool />}
             {tool === "key_ideas" && <KeyIdeas />}
             {tool === "organization" && <Organization />}
-            {tool === "sentences" && <Sentences />}
+            {tool === "sentence_density" && <Sentences />}
             {tool === "paragraph_clarity" && <ParagraphClarity />}
             {tool === "pathos" && <Pathos />}
             {tool === "professional_tone" && <ProfessionalTone />}

@@ -7,6 +7,10 @@ import {
   ANTHROPIC_MODEL,
 } from '../settings';
 import { findPromptById } from './prompts';
+import {
+  MessageParam,
+  TextBlockParam,
+} from '@anthropic-ai/sdk/resources/index.mjs';
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
@@ -48,10 +52,12 @@ type ErrorMessage = {
  * @param json if true, returns a JSON object.
  * @returns a string unless json pramameter is truthy.
  */
-export async function doChat(
+export async function doChat<T>(
   key: PromptType,
   data: Record<string, string>,
-  json?: boolean
+  signal?: AbortSignal,
+  json?: boolean,
+  cache?: boolean
 ) {
   if (!ANTHROPIC_API_KEY) {
     throw new Error('No LLM configured.');
@@ -73,26 +79,54 @@ export async function doChat(
     throw new Error(`Malformed prompt for ${key}.`);
   }
   const content = format(prompt, data);
-  let response: string | object = '';
-  const chat = await anthropic.messages.create({
-    max_tokens: ANTHROPIC_MAX_TOKENS,
-    temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
-    messages: [
-      {
-        role: 'assistant',
-        content:
-          role ??
-          data.roll ??
-          'You are a writing assistant for students engaged in a writing assignment.',
-      },
-      {
-        role: 'user',
-        content,
-      },
-    ],
-    model: ANTHROPIC_MODEL,
-    // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
-  });
+  let response: string | T = '';
+  const json_assistant: MessageParam = {
+    role: 'assistant',
+    content: '{',
+  };
+  const caching: TextBlockParam[] = [];
+  if (cache) {
+    const inputTemplate = await findPromptById('input_text');
+    if (!inputTemplate) {
+      console.error('Unable to locate input_text template.');
+      throw new ReferenceError('Unable to locate input_text template.');
+    }
+
+    const text_cache: TextBlockParam = {
+      type: 'text',
+      text: format(inputTemplate.prompt, data),
+      cache_control: { type: 'ephemeral' },
+    };
+    caching.push(text_cache);
+  }
+  const chat = await anthropic.messages.create(
+    {
+      max_tokens: ANTHROPIC_MAX_TOKENS,
+      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      system: [
+        {
+          type: 'text',
+          text:
+            role ?? // if loaded from templates.json (old style)
+            data.roll ?? // set by calling function (used by notes_to_* tools)
+            'You are a writing assistant for students engaged in a writing assignment.',
+        },
+        ...caching,
+      ],
+      messages: [
+        ...(json ? [json_assistant] : []),
+        {
+          role: 'user',
+          content,
+        },
+      ],
+      model: ANTHROPIC_MODEL,
+      // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
+    },
+    {
+      signal,
+    }
+  );
   const model = chat.model;
   // Handle anthropic error https://docs.anthropic.com/en/api/errors
   if (chat.type !== 'message') {
@@ -119,7 +153,7 @@ export async function doChat(
   await anthropic..create({...});
   } catch (err) {
     if (err.response) {
-      // The request was made and the server responded with a status code 
+      // The request was made and the server responded with a status code
       // that falls out of the range of 2xx
       console.error("API Error:", error.response.status, error.response.data);
     } else if (err.request) {
@@ -131,12 +165,13 @@ export async function doChat(
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
+    console.log(response);
   } else {
     console.warn(resp);
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? JSON.parse(response) : response;
+    response = json ? (JSON.parse(response) as T) : response;
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError

@@ -6,28 +6,32 @@ export type ReviewPrompt =
   | 'expectations'
   | 'key_ideas'
   | 'lines_of_arguments'
+  // | 'local_coherence'
   | 'logical_flow'
   | 'paragraph_clarity'
   | 'pathos'
   | 'professional_tone'
-  | 'sources';
+  | 'revision_plan'
+  //| 'sentence_density'
+  | 'sources'
+  // | 'term_matrix'; // All prompts
 
-export type ReviewTool = ReviewPrompt | 'ontopic' | 'docuscope';
+export type ReviewTool = ReviewPrompt | 'sentence_density' | 'term_matrix' | 'ontopic' | 'docuscope';
 
-export const ReviewTools: ReviewTool[] = [
-  'civil_tone',
-  'ethos',
-  'expectations',
-  'key_ideas',
-  'lines_of_arguments',
-  'logical_flow',
-  'paragraph_clarity',
-  'pathos',
-  'professional_tone',
-  'sources',
-  'ontopic',
-  'docuscope',
-];
+// export const ReviewTools: ReviewTool[] = [
+//   'civil_tone',
+//   'ethos',
+//   'expectations',
+//   'key_ideas',
+//   'lines_of_arguments',
+//   'logical_flow',
+//   'paragraph_clarity',
+//   'pathos',
+//   'professional_tone',
+//   'sources',
+//   'ontopic',
+//   'docuscope',
+// ];
 
 export type GeneralAssessment = {
   assessment: {
