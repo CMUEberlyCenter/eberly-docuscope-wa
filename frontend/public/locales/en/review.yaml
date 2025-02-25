@@ -122,7 +122,7 @@ organization:
     empty_circle: An empty circle.
     after_topic: Topic after the main verb of a topic sentence.
     dot_outline_circle: A empty circle with a small circle in the upper left corner.
-    location: Paragraph/Sentence number.
+    location: Paragraph number.
     boxed_number: A boxed number.
   description: The Coherence Panel charts the flow of your topic clusters across and
     within paragraphs. Dark circles indicate that a particular topic cluster is prominently
