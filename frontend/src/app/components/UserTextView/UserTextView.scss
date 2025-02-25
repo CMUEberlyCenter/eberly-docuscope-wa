@@ -29,5 +29,5 @@
     font-weight: bolder;
   }
 
-  @include meta.load-css("./myprose_styles")
+  @include meta.load-css("./myprose_styles");
 }

@@ -1,5 +1,7 @@
 div[role="textbox"]:focus {
-  outline-color: var(--bs-border-color); // change focus outline despite accessability issues.
+  outline-color: var(
+    --bs-border-color
+  ); // change focus outline despite accessability issues.
 }
 
 .user-text {
