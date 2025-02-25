@@ -14,14 +14,12 @@ import {
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
 import { isReview } from "../../../server/model/review";
-// import { useUnload } from "../../service/beforeUnload.service";
 import { isOnTopicReviewData, ReviewTool } from "../../../lib/ReviewResponse";
 import { useReview } from "../../service/review.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { Expectations, ExpectationsButton } from "./Expectations";
-// import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
 import {
   useArgumentsEnabled,
   useCivilToneEnabled,
@@ -52,7 +50,7 @@ import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 
-type Tool = ReviewTool | "organization" | "impressions" | "null";
+type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 const NullTool: FC = () => (
   <Stack className="position-absolute start-50 top-50 translate-middle">
@@ -171,8 +169,8 @@ export const Review: FC = () => {
                   ) : null}
                   {sentencesFeature ? (
                     <SentencesButton
-                      active={tool === "sentence_density"}
-                      onClick={() => setTool("sentence_density")}
+                      active={tool === "sentences"}
+                      onClick={() => setTool("sentences")}
                     />
                   ) : null}
                   {professionalToneFeature ? (
@@ -288,7 +286,7 @@ export const Review: FC = () => {
             {tool === "impressions" && <NullTool />}
             {tool === "prominent_topics" && <ProminentTopics />}
             {tool === "organization" && <Organization />}
-            {tool === "sentence_density" && <Sentences />}
+            {tool === "sentences" && <Sentences />}
             {tool === "paragraph_clarity" && <ParagraphClarity />}
             {tool === "pathos" && <Pathos />}
             {tool === "professional_tone" && <ProfessionalTone />}
