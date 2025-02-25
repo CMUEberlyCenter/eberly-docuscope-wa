@@ -139,6 +139,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
             )
             .map((key, i) => (
               <Form.Check
+                id={`context-checkbox-${i}`}
                 type="checkbox"
                 label={key.substring("context:".length)}
                 data-keyword={key}
@@ -170,6 +171,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
             )
             .map((key, i) => (
               <Form.Check
+                id={`mode-checkbox-${i}`}
                 type="checkbox"
                 label={key.substring("mode:".length)}
                 data-keyword={key}
