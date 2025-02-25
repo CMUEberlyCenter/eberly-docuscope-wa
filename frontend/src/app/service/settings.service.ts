@@ -80,8 +80,8 @@ const DEFAULT: Settings = {
   sentence_density: true,
   sources: true,
 
-  flow: true,
-  copyedit: true,
+  flow: false,
+  copyedit: false,
 
   docuscope: false,
   impressions: false,
