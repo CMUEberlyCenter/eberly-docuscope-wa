@@ -13,7 +13,7 @@ import {
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData, isExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
-import Icon from "../../assets/icons/check_all_expectations_icon.svg?react";
+import Icon from "../../assets/icons/expectations_icon.svg?react";
 import {
   OptionalExpectations,
   useExpectationsData,

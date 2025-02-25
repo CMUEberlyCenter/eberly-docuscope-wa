@@ -3,7 +3,7 @@ import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
-import Icon from "../../assets/icons/Clarity.svg?react";
+import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
 import { useParagraphClarityData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
