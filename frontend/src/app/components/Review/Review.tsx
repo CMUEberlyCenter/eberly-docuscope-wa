@@ -50,6 +50,7 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
+import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 
 type Tool = ReviewTool | "organization" | "impressions" | "null";
 
@@ -190,9 +191,9 @@ export const Review: FC = () => {
                         <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
                       }
                     >
-                      <Dropdown.Toggle variant="outline-primary">
+                      <Dropdown.Toggle variant="outline-primary" className="tool_button">
                         <Stack>
-                          {null}
+                          <AdditionalToolsIcon/>
                           <span>{t("additional_tools.title")}</span>
                         </Stack>
                       </Dropdown.Toggle>

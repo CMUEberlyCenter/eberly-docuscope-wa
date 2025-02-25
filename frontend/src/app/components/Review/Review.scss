@@ -1,3 +1,5 @@
+@use "sass:meta";
+
 .review {
   --highlight-1-bg: #e4ff92;
   --highlight-1-text: black;
@@ -45,4 +47,7 @@
   .accordion-header-highlight {
     --bs-accordion-active-bg: var(--bs-highlight);
   }
+
+  @include meta.load-css("../ToolButton/ToolButton.module");
+
 }
