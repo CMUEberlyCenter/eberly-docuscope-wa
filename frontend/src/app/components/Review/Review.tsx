@@ -127,7 +127,7 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Navbar>
           </header>
-          <Tabs variant="underline" className="justify-content-around">
+          <Tabs variant="underline" className="justify-content-around inverse-color">
             {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
               <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
                 <ButtonToolbar className="m-3 d-flex justify-content-around">
