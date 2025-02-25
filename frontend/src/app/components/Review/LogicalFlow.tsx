@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, useContext, useId } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -13,28 +13,18 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-export const LogicalFlowButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("logical_flow.title")}
-        tooltip={t("logical_flow.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
-
-export const LogicalFlowTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns="review">
-    {(t) => (
-      <span {...props}>
-        <Icon /> {t("logical_flow.entry")}
-      </span>
-    )}
-  </Translation>
-);
+export const LogicalFlowButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("logical_flow.title")}
+      tooltip={it("logical_flow_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 export const LogicalFlow: FC = () => {
   const { t } = useTranslation("review");
@@ -60,7 +50,9 @@ export const LogicalFlow: FC = () => {
             <section>
               <header>
                 <h5 className="text-primary">{t("insights")}</h5>
-                <p>{t("arguments.insights")}</p>
+                <Translation ns="instructions">
+                  {(t) => <p>{t("logical_flow_insights")}</p>}
+                </Translation>
               </header>
               {"response" in review ? (
                 <Accordion>

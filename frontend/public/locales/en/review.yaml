@@ -18,19 +18,15 @@ additional_tools:
   title: Additional Tools
   tooltip: Refine your draft with additional review.
 civil_tone:
-  entry: Civil Tone
   title: Civil Tone
   tooltip: Using respectful and balanced language promotes collaborative dialogue.
   error: Error displaying Civil Tone tool.
-  insights: Check for any uncivil language.
   'null': No issues found.
   prefix: 'Your Sentence:'
 ethos:
-  entry: Credibility (Ethos)
   title: Credibility (Ethos)
   tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
   error: Error displaying Credibilty tool.
-  insights: Check how your text establishes credibility (ethos).
   expertise: Expertise Ethos
   analytical: Analytical Ethos
   balanced: Balanced Ethos
@@ -40,7 +36,6 @@ ethos:
 sentences:
   title: Sentence Density
   error: 'Error displaying Sentence data:'
-  tooltip: Simplifying complex sentences improves readability and communication.
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
@@ -76,11 +71,9 @@ global_coherence:
     explanation: 'Issue(s):'
     suggestions: 'Suggestions:'
   'null': No feeback concerning logical progression could be generated from your draft.
-key_ideas:
-  entry: Prominent Topics
+prominent_topics:
   title: Prominent Topics
   tooltip: Elaborating on prominent topics with sufficient detail helps readers grasp key ideas.
-  insights: Check which topics are prominent in your text and how they are elaborated.
   main_idea: Main Idea
   error: Error reading Prominent Topics data.
   no_sentences: No relevant text addressing this topic was found in your draft.
@@ -89,17 +82,14 @@ key_ideas:
   sentences: Sentences
   suggestions: Suggestions
   'null': No topics were found in your draft.
-arguments:
-  entry: Lines of Argument
+lines_of_arguments:
   title: Lines of Argument
-  tooltip: Developing well-supported claims and addressing counterarguments.
   error: Error reading Lines of Arguements data.
   no_sentences: No sentences to support this claim were found in your draft.
-  insights: Check how your text develops its arguement.
   main: Thesis
   arguments: Arguments
   counter_examples: Counter Argument
-  no_counter_examples: No obvious counter arguments are found.
+  no_counter_examples: No obvious counterarguments are found.
   rebuttals: Rebuttals
   claim: 'Claim:'
   support: 'Support:'
@@ -107,15 +97,12 @@ arguments:
   suggestions: Suggestions
   'null': No lines of arguments were detected in your draft.
 logical_flow:
-  entry: Logical Flow Issues
   title: Logical Flow Issues
   tooltip: Organizing ideas coherently enhances readability and reader comprehension.
   error: Error displaying Logical Flow Issues tool.
-  insights: Check for potential flow issues.
   no_sentences: No relevant sentences were found in your draft.
 expectations:
   title: Content Expectations
-  tooltip: Addressing content gaps ensures your writing meets readers' expectations.
   error:
     no_task: No text type specified!
   sentences: 'Sentences:'
@@ -124,7 +111,6 @@ expectations:
   no_sentences: No relevant text was located in your draft.
 organization:
   title: Topical Progression
-  tooltip: Refining the topical structure ensures greater cohesiveness in your writting.
   error: 'Error loading Topical Progression data:'
   legend:
     before_verb: Topic before the main verb.
@@ -155,9 +141,7 @@ paragraph_clarity:
   title: Paragraph Clarity
   tooltip: Improving paragraph flow enhances readability and effective communication.
   error: Error displaying Paragraph Clarity tool.
-  insights: Check for paragraphs with flow problems.
 pathos:
-  entry: Emotional Appeal (Pathos)
   title: Emotional Appeal (Pathos)
   tooltip: Creating emotional resonance and meaningful connections strengthens your writing.
   error: Error displaying Emotional Appeal tool.
@@ -169,21 +153,16 @@ pathos:
   structural: Structural Pathos
   'null': No feedback.
 professional_tone:
-  entry: Professional Tone
   title: Professional Tone
   tooltip: Maintaining appropriate language features helps your writing meet professional standards.
   error: Error displaying Professional Tone tool.
-  insights: Check for professional tone concerns.
   sentiment: Sentiment
   confidence: Confidence
   subjectivity: Subjectivity
   'null': No feedback.
 sources:
-  entry: Sources
   title: Sources
-  tooltip: Integrating and citing sources appropriately strengthens your text's credibility and supporting evidence.
   error: Error displaying Sources tool.
-  insights: Check how your text develops its argument.
   issue: "Issue:"
   source: "Source(s):"
   supportive:

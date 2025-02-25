@@ -13,18 +13,18 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-export const ParagraphClarityButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("paragraph_clarity.title")}
-        tooltip={t("paragraph_clarity.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
+export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("paragraph_clarity.title")}
+      tooltip={it("paragraph_clarity_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 export const ParagraphClarity: FC = () => {
   const { t } = useTranslation("review");
@@ -52,7 +52,9 @@ export const ParagraphClarity: FC = () => {
             <section>
               <header>
                 <h5 className="text-primary">{t("insights")}</h5>
-                <p>{t("paragraph_clarity.insights")}</p>
+                <Translation ns="instructions">
+                  {(t) => <p>{t("paragraph_clarity_insights")}</p>}
+                </Translation>
               </header>
               {"response" in review ? (
                 <Accordion>

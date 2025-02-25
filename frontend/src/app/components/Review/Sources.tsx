@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -8,16 +8,6 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-
-export const SourcesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns="review">
-    {(t) => (
-      <span {...props}>
-        {/* TODO icon */} {t("sources.entry")}
-      </span>
-    )}
-  </Translation>
-);
 
 const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
   citations,
@@ -68,7 +58,9 @@ export const Sources: FC = () => {
               <section className="mb-3">
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("sources.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("sources_insights")}</p>}
+                  </Translation>
                 </header>
                 {review.response.citation_issues.length <= 0 ? (
                   <Alert variant="info">{t("sources.no_issues")}</Alert>

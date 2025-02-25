@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -10,16 +10,6 @@ import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-
-export const PathosTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns="review">
-    {(t) => (
-      <span {...props}>
-        {/* TODO icon */} {t("pathos.entry")}
-      </span>
-    )}
-  </Translation>
-);
 
 const SentenceAssessments: FC<
   AccordionProps & { assessments?: SentenceAssessment[] }
@@ -89,7 +79,9 @@ export const Pathos: FC = () => {
               <section>
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("ethos.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("pathos_insights")}</p>}
+                  </Translation>
                 </header>
                 <section>
                   <h5>{t("pathos.situation")}</h5>

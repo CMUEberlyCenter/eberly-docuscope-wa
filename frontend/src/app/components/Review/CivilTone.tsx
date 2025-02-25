@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, useContext, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -9,17 +9,6 @@ import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-
-export const CivilToneTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        {/* TODO icon */}
-        {t("civil_tone.entry")}
-      </span>
-    )}
-  </Translation>
-);
 
 export const CivilTone: FC = () => {
   const { t } = useTranslation("review");
@@ -46,7 +35,9 @@ export const CivilTone: FC = () => {
               <section>
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("civil_tone.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("civil_tone_insights")}</p>}
+                  </Translation>
                 </header>
                 {review.response.issues.length ? (
                   <Accordion>

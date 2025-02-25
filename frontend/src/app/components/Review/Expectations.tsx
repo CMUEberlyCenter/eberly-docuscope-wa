@@ -20,11 +20,11 @@ import {
 } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import style from "./Expectations.module.scss";
 import { Loading } from "../Loading/Loading";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import style from "./Expectations.module.scss";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -32,18 +32,18 @@ import { ReviewErrorData } from "./ReviewError";
 const isNone = (suggestion: string): boolean =>
   suggestion.match(/^none/i) !== null;
 
-export const ExpectationsButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("expectations.title")}
-        tooltip={t("expectations.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
+export const ExpectationsButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("expectations.title")}
+      tooltip={it("expectations_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
   <Translation ns={"review"}>

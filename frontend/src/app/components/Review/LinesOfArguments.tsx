@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId, useState } from "react";
+import { FC, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -18,31 +18,18 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("arguments.title")}
-        tooltip={t("arguments.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
-
-/** Lines of Arguments title component for use in selection menu. */
-export const LinesOfArgumentsTitle: FC<HTMLProps<HTMLSpanElement>> = (
-  props
-) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <Icon /> {t("arguments.entry")}
-      </span>
-    )}
-  </Translation>
-);
+export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("lines_of_arguments.title")}
+      tooltip={it("lines_of_arguments_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 type ClaimsProps = AccordionProps & {
   claims?: ClaimProps[] | null;
@@ -75,11 +62,13 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 >
                   <Accordion.Header className="accordion-header-highlight">
                     <div className="flex-grow-1">
-                      <h6 className="d-inline">{t("arguments.claim")}</h6>{" "}
+                      <h6 className="d-inline">
+                        {t("lines_of_arguments.claim")}
+                      </h6>{" "}
                       <span>{claim}</span>
                     </div>
                     <AlertIcon
-                      message={t("arguments.no_sentences")}
+                      message={t("lines_of_arguments.no_sentences")}
                       show={
                         (claim_sentences ?? []).length +
                           (evidence_sentences ?? []).length ===
@@ -108,13 +97,15 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                             "highlight highlight-1"
                         )}
                       >
-                        <h6 className="d-inline">{t("arguments.support")}</h6>{" "}
+                        <h6 className="d-inline">
+                          {t("lines_of_arguments.support")}
+                        </h6>{" "}
                         <span>{support}</span>
                       </div>
                     ) : null}
                     {suggestions?.length ? (
                       <div className="m-3 mt-2">
-                        <h6>{t("arguments.suggestions")}</h6>
+                        <h6>{t("lines_of_arguments.suggestions")}</h6>
                         <ul>
                           {suggestions.map((suggestion, k) => (
                             <li key={`${i}-${k}`}>{suggestion}</li>
@@ -128,7 +119,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
             )}
           </Accordion>
         ) : (
-          <Alert variant="warning">{t("arguments.null")}</Alert>
+          <Alert variant="warning">{t("lines_of_arguments.null")}</Alert>
         )
       }
     </Translation>
@@ -149,12 +140,17 @@ export const LinesOfArguments: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("arguments.title")} instructionsKey="arguments" />
+        <ToolHeader
+          title={t("lines_of_arguments.title")}
+          instructionsKey="lines_of_arguments"
+        />
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
-            fallback={<Alert variant="danger">{t("arguments.error")}</Alert>}
+            fallback={
+              <Alert variant="danger">{t("lines_of_arguments.error")}</Alert>
+            }
           >
             {/* {review.datetime && (
             <Card.Subtitle className="text-center">
@@ -167,11 +163,14 @@ export const LinesOfArguments: FC = () => {
               <section>
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("arguments.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("lines_of_arguments_insights")}</p>}
+                  </Translation>
+                  <p>{t("lines_of_arguments.insights")}</p>
                 </header>
                 {review.response.thesis ? (
                   <section className="mt-3">
-                    <h6 className="d-inline">{t("arguments.main")}</h6>
+                    <h6 className="d-inline">{t("lines_of_arguments.main")}</h6>
                     <p>{review.response.thesis}</p>
                     <Claims
                       onSelect={onSelect}
@@ -181,7 +180,7 @@ export const LinesOfArguments: FC = () => {
                   </section>
                 ) : null}
                 <section className="mt-3">
-                  <h5>{t("arguments.counter_examples")}</h5>
+                  <h5>{t("lines_of_arguments.counter_examples")}</h5>
                   {review.response.counter_arguments?.length ? (
                     <Claims
                       onSelect={onSelect}
@@ -189,12 +188,12 @@ export const LinesOfArguments: FC = () => {
                       claims={review.response.counter_arguments}
                     />
                   ) : (
-                    <span>{t("arguments.no_counter_examples")}</span>
+                    <span>{t("lines_of_arguments.no_counter_examples")}</span>
                   )}
                 </section>
                 {review.response.rebuttals?.length ? (
                   <section className="mt-3">
-                    <h5>{t("arguments.rebuttals")}</h5>
+                    <h5>{t("lines_of_arguments.rebuttals")}</h5>
                     <Claims
                       onSelect={onSelect}
                       activeKey={current}
@@ -206,7 +205,9 @@ export const LinesOfArguments: FC = () => {
                 !review.response.thesis &&
                 !review.response.counter_arguments?.length &&
                 !review.response.rebuttals?.length ? (
-                  <Alert variant="warning">{t("arguments.null")}</Alert>
+                  <Alert variant="warning">
+                    {t("lines_of_arguments.null")}
+                  </Alert>
                 ) : null}
               </section>
             ) : null}

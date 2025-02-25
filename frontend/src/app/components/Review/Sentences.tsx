@@ -2,7 +2,7 @@ import classNames from "classnames";
 import { FC, HTMLProps, useEffect, useState } from "react";
 import { Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import {
   ClarityData,
   cleanAndRepairSentenceData,
@@ -18,27 +18,18 @@ import { ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
-export const SentencesButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("sentences.title")}
-        tooltip={t("sentences.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
-export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <Icon /> {t("sentences.title")}
-      </span>
-    )}
-  </Translation>
-);
+export const SentencesButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("sentences.title")}
+      tooltip={it("sentence_density_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 /** Error feedback component for clarity tool. */
 const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {

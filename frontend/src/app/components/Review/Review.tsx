@@ -64,6 +64,7 @@ const NullTool: FC = () => (
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
+  const { t: inst } = useTranslation("instructions");
   const review = useReview();
   const [tool, setTool] = useState<Tool>("expectations");
   const [prose, setProse] = useState<string>("");
@@ -204,7 +205,7 @@ export const Review: FC = () => {
                         >
                           <h6 className="text-primary">{t("sources.title")}</h6>
                           <div className="text-wrap">
-                            {t("sources.tooltip")}
+                            {inst("sources_scope_note")}
                           </div>
                         </Dropdown.Item>
                       ) : null}
@@ -214,7 +215,9 @@ export const Review: FC = () => {
                           active={tool === "ethos"}
                         >
                           <h6 className="text-primary">{t("ethos.title")}</h6>
-                          <div className="text-wrap">{t("ethos.tooltip")}</div>
+                          <div className="text-wrap">
+                            {inst("ethos_scope_note")}
+                          </div>
                         </Dropdown.Item>
                       ) : null}
                       {pathosFeature ? (
@@ -223,7 +226,9 @@ export const Review: FC = () => {
                           active={tool === "pathos"}
                         >
                           <h6 className="text-primary">{t("pathos.title")}</h6>
-                          <div className="text-wrap">{t("pathos.tooltip")}</div>
+                          <div className="text-wrap">
+                            {inst("pathos_scope_note")}
+                          </div>
                         </Dropdown.Item>
                       ) : null}
                       {organizationFeature ? (
@@ -235,7 +240,7 @@ export const Review: FC = () => {
                             {t("organization.title")}
                           </h6>
                           <div className="text-wrap">
-                            {t("organization.tooltip")}
+                            {inst("term_matrix_scope_note")}
                           </div>
                         </Dropdown.Item>
                       ) : null}
@@ -248,7 +253,7 @@ export const Review: FC = () => {
                             {t("civil_tone.title")}
                           </h6>
                           <div className="text-wrap">
-                            {t("civil_tone.tooltip")}
+                            {inst("civil_tone_scope_note")}
                           </div>
                         </Dropdown.Item>
                       ) : null}

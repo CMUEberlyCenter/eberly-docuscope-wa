@@ -1,15 +1,24 @@
 ---
 
-overview: >
-  <p>Review the strengths and areas for improvement in your writing using myProse's review tools.</p>
-  <p>Click the "View Details" button to access individual review tools and receive specific feedback.</p>
-  <p>Pinpointing and addressing specific issues improves clarity and overall quality.</p>
+#
+# Main instructions for Tools
+#
+revision_plan: >
+  <p>Here are the steps to review and revise your draft:</p>
+  <ol>
+  <li>Begin your review by examining <b>content expectations</b>, as this forms the foundation of effective writing feedback.</li>
+  <li>Once content is assessed, examine <b>global structure and logic</b>, analyzing how arguments flow and how effectively ideas connect across sections.</li>
+  <li>Then, evaluate the use of <b>evidence and writing strategies that build trust</b> with readers.</li>
+  <li>Next, moving to a finer level, review <b>paragraph and sentence clarity</b>.</li>
+  <li>Finally, refine the <b>writing style and tone</b> to polish your work.</li>
+  </ol>
+  <p>Remember to focuses on big-picture improvements before fine-tuning sentences and language details.</p>
 
 expectations: >
   <p>Check whether your writing includes all the information readers expect to find in your text, and incorporate missing elements before addressing other issues.</p>
   <p>Addressing content gaps first ensures your writing meets readers' expectations and achieves its purpose effectively.</p>
 
-arguments: >
+lines_of_arguments: >
   <p>Evaluate how effectively your writing develops its thesis through claims, evidence, counterarguments, and rebuttals to create a cohesive and persuasive argument.</p>
   <p>Strengthening your thesis and aligning claims enhances the persuasiveness and cohesion of your argument.</p>
 
@@ -21,7 +30,7 @@ ethos: >
   <p>Review your communication for elements that establish and maintain credibility and ethical character (<i>i.e.,</i> ethos).</p>
   <p>Refining credibility ensures your message carries the weight of authority while demonstrating integrity and trustworthiness. The goal is not merely to showcase credentials, but to build genuine trust.<p>
 
-key_points: >
+prominent_topics: >
   <p>Examine the prominent topics found in your writing and assess whether you elaborated them with sufficient details.</p>
   <p>Well-elaborated topics engage readers and leave a lasting impression by providing clear understanding and meaningful insights.</p>
 
@@ -38,7 +47,7 @@ sources: >
   <p>Review the issues associated with how sources are referenced. Also, verify whether source credibility is assigned appropriately by reviewing how each source is used in your draft.</p>
   <p>Integrating sources appropriately strengthens the credibility and support for your text.</p>
 
-prof_tone: >
+professional_tone: >
   <p>Review sentences with language features that may detract from an appropriate tone.</p>
   <p>Refining tone ensures your writing meets the standards of academic and professional contexts.</p>
 
@@ -47,9 +56,21 @@ civil_tone: >
   <p>Refining tone ensures your message promotes understanding and collaborative dialogue while respecting diverse perspectives.</p>
 
 clarity: >
-  <p>Identify sentences that may be difficult to read using the visualization. Focus on sentences with many noun phrases and revise as needed.</p>
+  <p>Review sentences with many noun phrases, as these longer sentences with potentially complex structures may reduce readability.</p>  
   <p>Improving sentence clarity enhances readability and ensures your ideas are communicated effectively.</p>
 
+sentence_density: >
+  <p>Identify sentences that may be difficult to read using the visualization. Focus on sentences with many noun phrases and revise as needed.</p>  
+  <p>Improving sentence clarity enhances readability and ensures your ideas are communicated effectively.</p>
+
+paragraph_clarity: >
+  <p>Review your paragraphs with flow issues.</p>
+  <p>Improving flows within each paragraph enhance readability and ensures your ideas are communicated effectively.</p>
+
+
+#
+# Instructions for specific pathos and ethos, used by the pathos/ethos review panel.
+#
 situational_pathos: >
   The emotional impact created through carefully constructed scenarios and contexts.
 
@@ -74,15 +95,101 @@ balanced_ethos: >
 experiential_ethos: >
   The credibility a writer builds through relevant personal or professional experience.
 
-persuasion: >
-  Expand this section to review the persuasiveness of your text by examining your arguments, emotional appeals, and strategies for establishing credibility.
+#
+# Instructions for Review Insights within each Review Tool
+#
+lines_of_arguments_insights: >
+  Check how your text develops its argument.
 
-topics: >
-  Expand this section to review how effectively you elaborate your key topics and cite your sources.
+ethos_insights: >
+  Check how your text establishes credibility (ethos).
 
-tone: >
-  Expand this section to assess whether your text maintains a professional and civil tone.
+pathos_insights: >
+  Check how your text uses emotional appeal (pathos).
 
-paragraph_clarity: >
-  <p>Review your paragraphs with flow issues.</p>
-  <p>Improving flow within each paragraph enhances readability and ensures your ideas are communicated effectively.</p>
+prominent_topics_insights: >
+  Check which topics are prominent in your text and how they are elaborated.
+
+logical_flow_insights: >
+  Check for potential flow issues across paragraphs.
+
+sources_insights: >
+  Check how your text use sources.
+
+professional_tone_insights: >
+  Check for professional tone concerns.
+
+civil_tone_insights: >
+  Check for any uncivil language.  
+
+paragraph_clarity_insights: >
+  Check for paragraphs with flow problems.
+
+sentence_density_insights: >
+  Check for sentences that may be difficult to read.
+
+#
+# Scope notes used by menu items for review tools.
+#
+guide_scope_note: >
+  Creating a revision plan ensures effective communication
+
+expectations_scope_note: >
+  Addressing content gaps ensures your writing meets readers' expectations 
+
+lines_of_arguments_scope_note: >
+  Developing well-supported claims and addressing counterarguments strengthens your persuasiveness
+
+ethos_scope_note: >
+  Establishing credibility and ethical character builds genuine trust and authority with your audience
+
+pathos_scope_note: >
+  Creating emotional resonance and meaningful connections strengthens audience engagement
+
+term_matrix_scope_note: >
+  Refining the topical structure ensures greater cohesiveness in your writing.
+
+prominent_topics_scope_note: >
+  Elaborating on prominent topics with sufficient detail helps readers grasp key ideas
+
+logical_flow_scope_note: >
+  Organizing ideas coherently enhances readability and reader comprehension
+
+sources_scope_note: >
+  Integrating and citing sources appropriately strengthens your text's credibility and supporting evidence
+
+professional_tone_scope_note: >
+  Maintaining appropriate language features helps your writing meet professional standards
+
+civil_tone_scope_note: >
+  Using respectful and balanced language promotes collaborative dialogue across diverse perspectives
+
+paragraph_clarity_scope_note: >
+  Improving paragraph flow enhances readability and effective communication of ideas
+
+sentence_density_scope_note: >
+  Simplifying complex sentences improves readability and communication effectiveness
+
+notes_to_prose_scope_note: >
+  Genreate prose from your notes for a paragrpah.
+
+notes_to_bullets_scope_note: >
+  Genreate a bulleted list from your notes
+
+copyedit_scope_note: >
+  Copyedit your draft for clarity and grammar
+
+additional_tools_scope_note: >
+  Refine your draft with additional review tools
+
+disabled_scope_note: >
+  This review tool is not applicable to the current writing type
+
+# Instructions used after the general feedback (i.e., after 'What's working' and 'Revision opportunities')
+guide: >
+  <p><b>Ready to revise?</b> Remember to review content expectations first; then work on big-picture improvements before fine-tuning sentences and language details.</p>
+
+# Message shown in the guide panel when a specific review tool is disabled.
+disabled_tool: >
+  <p>This review tool is not applicable to the current writing type.</p>
+

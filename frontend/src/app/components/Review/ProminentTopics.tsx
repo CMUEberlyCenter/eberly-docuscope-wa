@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext } from "react";
+import { FC, useContext } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -9,33 +9,23 @@ import { useProminentTopicsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
+import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { ToolButton } from "../ToolButton/ToolButton";
 
-export const ProminentTopicsButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("key_ideas.title")}
-        tooltip={t("key_ideas.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
-/** List of Key Ideas title component for use in selection menu. */
-export const ProminentTopicsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <Icon /> {t("key_ideas.entry")}
-      </span>
-    )}
-  </Translation>
-);
+export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("prominent_topics.title")}
+      tooltip={it("prominent_topics_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 /** Component for displaying results of Key Ideas review results. */
 export const ProminentTopics: FC = () => {
@@ -46,12 +36,17 @@ export const ProminentTopics: FC = () => {
   return (
     <ReviewReset>
       <article className="container-fluid overflow-auto">
-        <ToolHeader title={t("key_ideas.title")} instructionsKey="key_points" />
+        <ToolHeader
+          title={t("prominent_topics.title")}
+          instructionsKey="prominent_topics"
+        />
         {!review ? (
           <Loading />
         ) : (
           <ErrorBoundary
-            fallback={<Alert variant="danger">{t("key_ideas.error")}</Alert>}
+            fallback={
+              <Alert variant="danger">{t("prominent_topics.error")}</Alert>
+            }
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             <Summary review={review} />
@@ -59,7 +54,9 @@ export const ProminentTopics: FC = () => {
               <section>
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("key_ideas.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("prominent_topics_insights")}</p>}
+                  </Translation>
                 </header>
                 <Accordion>
                   {review.response.topics.map(
@@ -76,7 +73,9 @@ export const ProminentTopics: FC = () => {
                       <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                         <Accordion.Header className="accordion-header-highlight">
                           <div className="flex-grow-1">
-                            <h6 className="d-inline">{t("key_ideas.idea")}</h6>{" "}
+                            <h6 className="d-inline">
+                              {t("prominent_topics.idea")}
+                            </h6>{" "}
                             <span>{topic}</span>
                           </div>
                           <AlertIcon
@@ -85,7 +84,7 @@ export const ProminentTopics: FC = () => {
                                 elaboration_sentences.length ===
                               0
                             }
-                            message={t("key_ideas.no_sentences")}
+                            message={t("prominent_topics.no_sentences")}
                           />
                         </Accordion.Header>
                         <Accordion.Body
@@ -109,7 +108,7 @@ export const ProminentTopics: FC = () => {
                                   "highlight highlight-1"
                               )}
                             >
-                              <h6>{t("key_ideas.elaborations")}</h6>
+                              <h6>{t("prominent_topics.elaborations")}</h6>
                               <ul>
                                 {elaborations.map(
                                   (
@@ -130,7 +129,7 @@ export const ProminentTopics: FC = () => {
                           ) : null}
                           {suggestions?.length ? (
                             <div className="m-3 mt-2">
-                              <h6>{t("key_ideas.suggestions")}</h6>
+                              <h6>{t("prominent_topics.suggestions")}</h6>
                               <ul>
                                 {suggestions.map((suggestion, k) => (
                                   <li key={`suggestion-${i}-${k}`}>
@@ -147,7 +146,7 @@ export const ProminentTopics: FC = () => {
                 </Accordion>
               </section>
             ) : (
-              <Alert variant="warning">{t("key_ideas.null")}</Alert>
+              <Alert variant="warning">{t("prominent_topics.null")}</Alert>
             )}
           </ErrorBoundary>
         )}

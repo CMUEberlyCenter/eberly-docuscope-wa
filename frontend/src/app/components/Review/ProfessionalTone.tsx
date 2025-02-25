@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -12,30 +12,18 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-export const ProfessionalToneButton: FC<ButtonProps> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <ToolButton
-        {...props}
-        title={t("professional_tone.title")}
-        tooltip={t("professional_tone.tooltip")}
-        icon={<Icon />}
-      />
-    )}
-  </Translation>
-);
-
-export const ProfessionalToneTitle: FC<HTMLProps<HTMLSpanElement>> = (
-  props
-) => (
-  <Translation ns="review">
-    {(t) => (
-      <span {...props}>
-        {/* TODO icon */} {t("professional_tone.entry")}
-      </span>
-    )}
-  </Translation>
-);
+export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("professional_tone.title")}
+      tooltip={it("professional_tone_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 const SentenceToneIssues: FC<
   AccordionProps & { issues: SentenceToneIssue[] }
@@ -85,7 +73,7 @@ export const ProfessionalTone: FC = () => {
       <article className="container-fluid overflow-auto">
         <ToolHeader
           title={t("professional_tone.title")}
-          instructionsKey="prof_tone"
+          instructionsKey="professional_tone"
         />
         {!review ? (
           <Loading />
@@ -101,7 +89,9 @@ export const ProfessionalTone: FC = () => {
               <section>
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
-                  <p>{t("professional_tone.insights")}</p>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("professional_tone_insights")}</p>}
+                  </Translation>
                 </header>
                 <section>
                   <h5>{t("professional_tone.sentiment")}</h5>
