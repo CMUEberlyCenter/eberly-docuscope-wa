@@ -34,7 +34,7 @@ ethos:
   no_sentences: No relevant text found in your draft.
   'null': No feedback.
 sentences:
-  title: Sentence Density
+  title: Sentence Clarity
   error: 'Error displaying Sentence data:'
   select: Select a sentence to see its composition.
   legend:

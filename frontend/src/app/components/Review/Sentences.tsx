@@ -8,7 +8,7 @@ import {
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
 import { isErrorData } from "../../../lib/ReviewResponse";
-import Icon from "../../assets/icons/show_sentence_density_icon.svg?react";
+import Icon from "../../assets/icons/sentence_density_icon.svg?react";
 import { useOnTopicData, useReview } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
