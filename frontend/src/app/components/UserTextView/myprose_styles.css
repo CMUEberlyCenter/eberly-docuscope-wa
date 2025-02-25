@@ -1,0 +1,56 @@
+/*
+ * Style sheet for myProse Editor
+ * Last updated: 2025-02-20
+ */
+
+/* Base text elements */
+p,
+li {
+  margin: 0 0 6pt 0;
+  font-size: 11pt;
+  color: #303030;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 400;
+}
+
+/* Headings */
+h1,
+h2,
+h3,
+h4 {
+  margin: 12pt 0 3pt 0;
+  page-break-after: avoid;
+  font-family: "Open Sans", sans-serif;
+  color: #303030;
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 16pt;
+  margin-bottom: 6pt;
+}
+
+h2 {
+  font-size: 13pt;
+}
+
+h3,
+h4 {
+  font-size: 11pt;
+}
+
+h4 {
+  font-style: italic;
+}
+
+/* Bold text */
+b {
+  font-weight: 600;
+  font-family: "Open Sans", sans-serif;
+}
+
+/* Lists */
+ol,
+ul {
+  margin-bottom: 9pt;
+}

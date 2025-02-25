@@ -368,7 +368,7 @@ const CustomEditor: FC = () => {
           </ButtonToolbar>
           <Editable
             aria-label="user text"
-            className="p-2 flex-grow-1 overflow-auto"
+            className="p-2 flex-grow-1 overflow-auto user-text"
             style={{ fontSize: `${zoom}%` }}
             renderElement={renderElement}
             renderLeaf={renderLeaf}

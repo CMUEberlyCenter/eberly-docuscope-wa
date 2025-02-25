@@ -1,3 +1,5 @@
+@use "sass:meta";
+
 .user-text {
   span.sentence {
     // fix for #117 - sentence spacing
@@ -26,4 +28,6 @@
     // background: #f7f7f7;
     font-weight: bolder;
   }
+
+  @include meta.load-css("./myprose_styles")
 }
