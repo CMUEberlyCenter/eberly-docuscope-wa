@@ -127,7 +127,10 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Navbar>
           </header>
-          <Tabs variant="underline" className="justify-content-around inverse-color">
+          <Tabs
+            variant="underline"
+            className="justify-content-around inverse-color"
+          >
             {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
               <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
                 <ButtonToolbar className="m-3 d-flex justify-content-around">
@@ -189,9 +192,12 @@ export const Review: FC = () => {
                         <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
                       }
                     >
-                      <Dropdown.Toggle variant="outline-primary" className="tool_button">
+                      <Dropdown.Toggle
+                        variant="outline-primary"
+                        className="tool_button"
+                      >
                         <Stack>
-                          <AdditionalToolsIcon/>
+                          <AdditionalToolsIcon />
                           <span>{t("additional_tools.title")}</span>
                         </Stack>
                       </Dropdown.Toggle>
