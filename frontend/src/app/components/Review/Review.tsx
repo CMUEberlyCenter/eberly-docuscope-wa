@@ -219,7 +219,7 @@ export const Review: FC = () => {
                           </Stack>
                         </Dropdown.Toggle>
                       </OverlayTrigger>
-                      <Dropdown.Menu>
+                      <Dropdown.Menu className="additional-tools-menu">
                         {sourcesFeature ? (
                           <Dropdown.Item
                             onClick={() => setOtherTool("sources")}
