@@ -46,7 +46,7 @@ const SentenceToneIssues: FC<
             &quot;{sent.sentence}&quot;
           </Accordion.Header>
           <Accordion.Body
-            className="p-0 pb-3"
+            className="pb-3"
             onEntered={() =>
               dispatch({
                 type: "set",
