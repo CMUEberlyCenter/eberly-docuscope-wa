@@ -18,11 +18,12 @@
   }
 
   span {
-    font-size: x-small;
+    font-size: small;
     font-weight: 500;
+    line-height: 1;
     text-wrap: balance;
     display: block;
     white-space: normal;
-    max-width: 64px;
+    max-width: 74px;
   }
 }

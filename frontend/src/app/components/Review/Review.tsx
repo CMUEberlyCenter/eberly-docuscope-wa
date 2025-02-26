@@ -133,7 +133,7 @@ export const Review: FC = () => {
           >
             {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
               <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
-                <ButtonToolbar className="m-3 d-flex justify-content-center gap-5">
+                <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                   {expectationsFeature ? (
                     <ExpectationsButton
                       active={tool === "expectations"}
@@ -163,7 +163,7 @@ export const Review: FC = () => {
             ) : null}
             {true ? (
               <Tab eventKey="fine_tuning" title={t("tabs.fine_tuning")}>
-                <ButtonToolbar className="m-3 d-flex justify-content-center gap-5">
+                <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                   {paragraphClarityFeature ? (
                     <ParagraphClarityButton
                       active={tool === "paragraph_clarity"}
