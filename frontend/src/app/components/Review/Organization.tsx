@@ -27,7 +27,7 @@ import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -55,18 +55,34 @@ const IndicatorIcon: FC<IndicatorIconProps> = ({
 }: IndicatorIconProps) => {
   if (unit === null) return undefined;
   if (unit.is_left) {
-    return unit.is_topic_sent ? <DotSolidCircle /> : <SolidCircle />;
+    return unit.is_topic_sent ? (
+      <DotSolidCircle />
+    ) : (
+      <SolidCircle style={{ marginLeft: "0.3rem" }} />
+    );
   }
-  return unit.is_topic_sent ? <DotOutlineCircle /> : <OutlineCircle />;
+  return unit.is_topic_sent ? (
+    <DotOutlineCircle />
+  ) : (
+    <OutlineCircle style={{ marginLeft: "0.3rem" }} />
+  );
 };
 
 /** Solid circle icon component. */
-const SolidCircle: FC = () => (
+const SolidCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  style,
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <i
-        className="fa-solid fa-circle text-organization"
-        style={{ fontSize: "1rem" }}
+        {...props}
+        className={classNames(
+          "fa-solid fa-circle text-organization",
+          className
+        )}
+        style={{ ...style, fontSize: "1rem" }}
         title={t("organization.legend.before_verb")}
         aria-description={t("organization.legend.solid_circle")}
       ></i>
@@ -75,11 +91,15 @@ const SolidCircle: FC = () => (
 );
 
 /** Solid cirle with annotation dot icon component. */
-const DotSolidCircle: FC = () => (
+const DotSolidCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <span
-        className="text-nowrap text-organization"
+        {...props}
+        className={classNames("text-nowrap text-organization", className)}
         title={t("organization.legend.before_topic")}
         aria-description={t("organization.legend.dot_solid_circle")}
       >
@@ -94,12 +114,20 @@ const DotSolidCircle: FC = () => (
 );
 
 /** Circle outline icon component. */
-const OutlineCircle: FC = () => (
+const OutlineCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  style,
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <i
-        className="fa-regular fa-circle text-organization"
-        style={{ fontSize: "1rem" }}
+        {...props}
+        className={classNames(
+          "fa-regular fa-circle text-organization",
+          className
+        )}
+        style={{ ...style, fontSize: "1rem" }}
         title={t("organization.legend.after_verb")}
         aria-description={t("organization.legend.empty_circle")}
       ></i>
@@ -108,11 +136,15 @@ const OutlineCircle: FC = () => (
 );
 
 /** Circle outline with annotation dot icon component. */
-const DotOutlineCircle: FC = () => (
+const DotOutlineCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <span
-        className="text-nowrap text-organization"
+        {...props}
+        className={classNames("text-nowrap text-organization", className)}
         title={t("organization.legend.after_topic")}
         aria-description={t("organization.legend.dot_outline_circle")}
       >
