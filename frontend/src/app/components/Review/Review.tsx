@@ -13,13 +13,9 @@ import {
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
-import { isReview } from "../../../server/model/review";
 import { isOnTopicReviewData, ReviewTool } from "../../../lib/ReviewResponse";
-import { useReview } from "../../service/review.service";
-import { Legal } from "../Legal/Legal";
-import { Logo } from "../Logo/Logo";
-import { UserTextView } from "../UserTextView/UserTextView";
-import { Expectations, ExpectationsButton } from "./Expectations";
+import { isReview } from "../../../server/model/review";
+import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import {
   useArgumentsEnabled,
   useCivilToneEnabled,
@@ -35,8 +31,13 @@ import {
   useSourcesEnabled,
   useTermMatrixEnabled,
 } from "../../service/review-tools.service";
+import { useReview } from "../../service/review.service";
+import { Legal } from "../Legal/Legal";
+import { Logo } from "../Logo/Logo";
+import { UserTextView } from "../UserTextView/UserTextView";
 import { CivilTone } from "./CivilTone";
 import { Ethos } from "./Ethos";
+import { Expectations, ExpectationsButton } from "./Expectations";
 import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
 import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
 import { Organization } from "./Organization";
@@ -48,7 +49,6 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
-import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
@@ -66,6 +66,7 @@ export const Review: FC = () => {
   const { t: inst } = useTranslation("instructions");
   const review = useReview();
   const [tool, setTool] = useState<Tool>("expectations");
+  const [otherTool, setOtherTool] = useState<Tool>("paragraph_clarity");
   const [prose, setProse] = useState<string>("");
 
   // useUnload();
@@ -73,6 +74,7 @@ export const Review: FC = () => {
     window.document.title = t("document.title");
   }, [t]);
   useEffect(() => {
+    // FIXME this causes redraw on review update
     if (isReview(review)) {
       const ontopic_analysis = review.analysis.find((analysis) =>
         isOnTopicReviewData(analysis)
@@ -133,172 +135,204 @@ export const Review: FC = () => {
           >
             {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
               <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
-                <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                  {expectationsFeature ? (
-                    <ExpectationsButton
-                      active={tool === "expectations"}
-                      onClick={() => setTool("expectations")}
-                    />
-                  ) : null}
-                  {ideasFeature ? (
-                    <ProminentTopicsButton
-                      active={tool === "prominent_topics"}
-                      onClick={() => setTool("prominent_topics")}
-                    />
-                  ) : null}
-                  {argumentsFeature ? (
-                    <LinesOfArgumentsButton
-                      active={tool === "lines_of_arguments"}
-                      onClick={() => setTool("lines_of_arguments")}
-                    />
-                  ) : null}
-                  {logicalFlowFeature ? (
-                    <LogicalFlowButton
-                      active={tool === "logical_flow"}
-                      onClick={() => setTool("logical_flow")}
-                    />
-                  ) : null}
-                </ButtonToolbar>
+                <div className="overflow-hidden h-100 d-flex flex-column">
+                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                    {expectationsFeature ? (
+                      <ExpectationsButton
+                        active={tool === "expectations"}
+                        onClick={() => setTool("expectations")}
+                      />
+                    ) : null}
+                    {ideasFeature ? (
+                      <ProminentTopicsButton
+                        active={tool === "prominent_topics"}
+                        onClick={() => setTool("prominent_topics")}
+                      />
+                    ) : null}
+                    {argumentsFeature ? (
+                      <LinesOfArgumentsButton
+                        active={tool === "lines_of_arguments"}
+                        onClick={() => setTool("lines_of_arguments")}
+                      />
+                    ) : null}
+                    {logicalFlowFeature ? (
+                      <LogicalFlowButton
+                        active={tool === "logical_flow"}
+                        onClick={() => setTool("logical_flow")}
+                      />
+                    ) : null}
+                  </ButtonToolbar>
+                  {/* <div className="position-relative flex-grow-1 overflow-auto"> */}
+                  {(!tool || tool === "null") && <NullTool />}
+                  {tool === "expectations" && <Expectations />}
+                  {tool === "prominent_topics" && <ProminentTopics />}
+                  {tool === "lines_of_arguments" && <LinesOfArguments />}
+                  {tool === "logical_flow" && <LogicalFlow />}
+                  {/* Add Big Picture tools here. */}
+                  {/* </div> */}
+                </div>
               </Tab>
             ) : null}
             {true ? (
-              <Tab eventKey="fine_tuning" title={t("tabs.fine_tuning")}>
-                <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                  {paragraphClarityFeature ? (
-                    <ParagraphClarityButton
-                      active={tool === "paragraph_clarity"}
-                      onClick={() => setTool("paragraph_clarity")}
-                    />
-                  ) : null}
-                  {sentencesFeature ? (
-                    <SentencesButton
-                      active={tool === "sentences"}
-                      onClick={() => setTool("sentences")}
-                    />
-                  ) : null}
-                  {professionalToneFeature ? (
-                    <ProfessionalToneButton
-                      active={tool === "professional_tone"}
-                      onClick={() => setTool("professional_tone")}
-                    />
-                  ) : null}
-                  <Dropdown
-                    as={ButtonGroup}
-                    className="bg-white shadow-sm rounded-2"
-                  >
-                    <OverlayTrigger
-                      placement="bottom"
-                      overlay={
-                        <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
-                      }
+              <Tab
+                eventKey="fine_tuning"
+                title={t("tabs.fine_tuning")}
+                className="overflow-hidden"
+              >
+                <div className="overflow-hidden h-100 d-flex flex-column">
+                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                    {paragraphClarityFeature ? (
+                      <ParagraphClarityButton
+                        active={otherTool === "paragraph_clarity"}
+                        onClick={() => setOtherTool("paragraph_clarity")}
+                      />
+                    ) : null}
+                    {sentencesFeature ? (
+                      <SentencesButton
+                        active={otherTool === "sentences"}
+                        onClick={() => setOtherTool("sentences")}
+                      />
+                    ) : null}
+                    {professionalToneFeature ? (
+                      <ProfessionalToneButton
+                        active={otherTool === "professional_tone"}
+                        onClick={() => setOtherTool("professional_tone")}
+                      />
+                    ) : null}
+                    <Dropdown
+                      as={ButtonGroup}
+                      className="bg-white shadow-sm rounded-2"
                     >
-                      <Dropdown.Toggle
-                        variant="outline-primary"
-                        className="tool_button"
+                      <OverlayTrigger
+                        placement="bottom"
+                        overlay={
+                          <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
+                        }
                       >
-                        <Stack>
-                          <AdditionalToolsIcon />
-                          <span>{t("additional_tools.title")}</span>
-                        </Stack>
-                      </Dropdown.Toggle>
-                    </OverlayTrigger>
-                    <Dropdown.Menu>
-                      {sourcesFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("sources")}
-                          active={tool === "sources"}
+                        <Dropdown.Toggle
+                          variant="outline-primary"
+                          className="tool_button"
                         >
-                          <h6 className="text-primary">{t("sources.title")}</h6>
-                          <div className="text-wrap">
-                            {inst("sources_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {ethosFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("ethos")}
-                          active={tool === "ethos"}
-                        >
-                          <h6 className="text-primary">{t("ethos.title")}</h6>
-                          <div className="text-wrap">
-                            {inst("ethos_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {pathosFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("pathos")}
-                          active={tool === "pathos"}
-                        >
-                          <h6 className="text-primary">{t("pathos.title")}</h6>
-                          <div className="text-wrap">
-                            {inst("pathos_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {organizationFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("organization")}
-                          active={tool === "organization"}
-                        >
-                          <h6 className="text-primary">
-                            {t("organization.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {inst("term_matrix_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {civilToneFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("civil_tone")}
-                          active={tool === "civil_tone"}
-                        >
-                          <h6 className="text-primary">
-                            {t("civil_tone.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {inst("civil_tone_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {impressionsFeature ? (
-                        <Dropdown.Item
-                          onClick={() => setTool("impressions")}
-                          active={tool === "impressions"}
-                        >
-                          <h6 className="text-primary">
-                            {t("impressions.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {t("impressions.tooltip")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </ButtonToolbar>
+                          <Stack>
+                            <AdditionalToolsIcon />
+                            <span>{t("additional_tools.title")}</span>
+                          </Stack>
+                        </Dropdown.Toggle>
+                      </OverlayTrigger>
+                      <Dropdown.Menu>
+                        {sourcesFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("sources")}
+                            active={otherTool === "sources"}
+                          >
+                            <h6 className="text-primary">
+                              {t("sources.title")}
+                            </h6>
+                            <div className="text-wrap">
+                              {inst("sources_scope_note")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                        {ethosFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("ethos")}
+                            active={otherTool === "ethos"}
+                          >
+                            <h6 className="text-primary">{t("ethos.title")}</h6>
+                            <div className="text-wrap">
+                              {inst("ethos_scope_note")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                        {pathosFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("pathos")}
+                            active={otherTool === "pathos"}
+                          >
+                            <h6 className="text-primary">
+                              {t("pathos.title")}
+                            </h6>
+                            <div className="text-wrap">
+                              {inst("pathos_scope_note")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                        {organizationFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("organization")}
+                            active={otherTool === "organization"}
+                          >
+                            <h6 className="text-primary">
+                              {t("organization.title")}
+                            </h6>
+                            <div className="text-wrap">
+                              {inst("term_matrix_scope_note")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                        {civilToneFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("civil_tone")}
+                            active={otherTool === "civil_tone"}
+                          >
+                            <h6 className="text-primary">
+                              {t("civil_tone.title")}
+                            </h6>
+                            <div className="text-wrap">
+                              {inst("civil_tone_scope_note")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                        {impressionsFeature ? (
+                          <Dropdown.Item
+                            onClick={() => setOtherTool("impressions")}
+                            active={otherTool === "impressions"}
+                          >
+                            <h6 className="text-primary">
+                              {t("impressions.title")}
+                            </h6>
+                            <div className="text-wrap">
+                              {t("impressions.tooltip")}
+                            </div>
+                          </Dropdown.Item>
+                        ) : null}
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </ButtonToolbar>
+                  {(!otherTool || otherTool === "null") && <NullTool />}
+                  {otherTool === "logical_flow" && <LogicalFlow />}
+                  {otherTool === "civil_tone" && <CivilTone />}
+                  {otherTool === "ethos" && <Ethos />}
+                  {otherTool === "impressions" && <NullTool />}
+                  {otherTool === "organization" && <Organization />}
+                  {otherTool === "sentences" && <Sentences />}
+                  {otherTool === "paragraph_clarity" && <ParagraphClarity />}
+                  {otherTool === "pathos" && <Pathos />}
+                  {otherTool === "professional_tone" && <ProfessionalTone />}
+                  {otherTool === "sources" && <Sources />}
+                  {/* Add more tool displays here. */}
+                </div>
               </Tab>
             ) : null}
           </Tabs>
-          <div className="position-relative flex-grow-1 overflow-auto">
+          {/* <div className="position-relative flex-grow-1 overflow-auto">
             {(!tool || tool === "null") && <NullTool />}
             {tool === "lines_of_arguments" && <LinesOfArguments />}
             {tool === "logical_flow" && <LogicalFlow />}
             {tool === "civil_tone" && <CivilTone />}
             {tool === "ethos" && <Ethos />}
-            {tool === "expectations" && <Expectations />}
-            {/* {tool === "global_coherence" && <GlobalCoherence />} */}
-            {tool === "impressions" && <NullTool />}
+            {tool === "expectations" && <Expectations />} */}
+          {/* {tool === "global_coherence" && <GlobalCoherence />} */}
+          {/* {tool === "impressions" && <NullTool />}
             {tool === "prominent_topics" && <ProminentTopics />}
             {tool === "organization" && <Organization />}
             {tool === "sentences" && <Sentences />}
             {tool === "paragraph_clarity" && <ParagraphClarity />}
             {tool === "pathos" && <Pathos />}
             {tool === "professional_tone" && <ProfessionalTone />}
-            {tool === "sources" && <Sources />}
-            {/* Add more tool displays here. */}
-          </div>
+            {tool === "sources" && <Sources />} */}
+          {/* Add more tool displays here. */}
+          {/* </div> */}
           <Legal />
         </aside>
       </Split>
