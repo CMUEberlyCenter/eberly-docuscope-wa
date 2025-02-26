@@ -360,7 +360,7 @@ export const Organization: FC = () => {
                               size="sm"
                               variant="outline-primary"
                               active={i === selected?.paragraph}
-                            // onClick={() => onSelectParagraph(i)}
+                              // onClick={() => onSelectParagraph(i)}
                             >
                               {`${i + 1}`}
                             </Button>
@@ -373,78 +373,79 @@ export const Organization: FC = () => {
                       {data?.response.coherence?.error
                         ? null
                         : data?.response.coherence?.data
-                          .filter(
-                            ({ is_topic_cluster }) =>
-                              is_topic_cluster || !showToggle
-                          )
-                          .map(
-                            (
-                              { topic, is_non_local, paragraphs, sent_count },
-                              i
-                            ) => {
-                              const topi =
-                                topic.at(2)?.replaceAll("_", " ") ?? "";
-                              const [left, right] = ["l", "r"].map((lr) =>
-                                is_non_local ? lr : lr.toUpperCase()
-                              );
-                              const paraIconClass = is_non_local
-                                ? "topic-icon-small"
-                                : "topic-icon-large";
-                              return (
-                                <tr
-                                  key={`topic-paragraph-key-${i}`}
-                                  className={
-                                    topic === selected?.topic
-                                      ? "bg-highlight"
-                                      : ""
-                                  }
-                                >
-                                  <td
-                                    data-search={topi}
-                                    data-order={sent_count}
-                                    className="p-0"
+                            .filter(
+                              ({ is_topic_cluster }) =>
+                                is_topic_cluster || !showToggle
+                            )
+                            .map(
+                              (
+                                { topic, is_non_local, paragraphs, sent_count },
+                                i
+                              ) => {
+                                const topi =
+                                  topic.at(2)?.replaceAll("_", " ") ?? "";
+                                const [left, right] = ["l", "r"].map((lr) =>
+                                  is_non_local ? lr : lr.toUpperCase()
+                                );
+                                const paraIconClass = is_non_local
+                                  ? "topic-icon-small"
+                                  : "topic-icon-large";
+                                return (
+                                  <tr
+                                    key={`topic-paragraph-key-${i}`}
+                                    className={
+                                      topic === selected?.topic
+                                        ? "bg-highlight"
+                                        : ""
+                                    }
                                   >
-                                    <Button
-                                      className="w-100 text-primary text-start"
-                                      variant="none"
-                                      active={topic === selected?.topic}
-                                      onClick={() => onSelectTopic(topic)}
+                                    <td
+                                      data-search={topi}
+                                      data-order={sent_count}
+                                      className="p-0"
                                     >
-                                      {topi}
-                                    </Button>
-                                  </td>
-                                  {paragraphs.map((paraType, j) => {
-                                    const paraContent = `${paraType?.is_left ? left : right
-                                      }${paraType?.is_topic_sent ? "" : "*"}`;
-                                    return (
-                                      <td
-                                        key={`topic-key-${i}-${j}`}
-                                        className={classNames(
-                                          "p-0 text-center",
-                                          selected?.paragraph === j
-                                            ? "bg-highlight"
-                                            : ""
-                                        )}
+                                      <Button
+                                        className="w-100 text-primary text-start"
+                                        variant="none"
+                                        active={topic === selected?.topic}
+                                        onClick={() => onSelectTopic(topic)}
                                       >
-                                        {paraType ? (
-                                          <Button
-                                            variant="icon"
-                                            title={paraContent}
-                                            className={paraIconClass}
-                                            onClick={() =>
-                                              onSelectCell(topic, j)
-                                            }
-                                          >
-                                            <IndicatorIcon unit={paraType} />
-                                          </Button>
-                                        ) : null}
-                                      </td>
-                                    );
-                                  })}
-                                </tr>
-                              );
-                            }
-                          )}
+                                        {topi}
+                                      </Button>
+                                    </td>
+                                    {paragraphs.map((paraType, j) => {
+                                      const paraContent = `${
+                                        paraType?.is_left ? left : right
+                                      }${paraType?.is_topic_sent ? "" : "*"}`;
+                                      return (
+                                        <td
+                                          key={`topic-key-${i}-${j}`}
+                                          className={classNames(
+                                            "p-0 text-center",
+                                            selected?.paragraph === j
+                                              ? "bg-highlight"
+                                              : ""
+                                          )}
+                                        >
+                                          {paraType ? (
+                                            <Button
+                                              variant="icon"
+                                              title={paraContent}
+                                              className={paraIconClass}
+                                              onClick={() =>
+                                                onSelectCell(topic, j)
+                                              }
+                                            >
+                                              <IndicatorIcon unit={paraType} />
+                                            </Button>
+                                          ) : null}
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                );
+                              }
+                            )}
                     </tbody>
                   </DataTable>
                 )}

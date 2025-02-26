@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import * as CoverLetter from '../../test/CoverLetter.json';
 import {
   extractKeywords,
   getExpectations,
@@ -6,7 +7,6 @@ import {
   isEnabled,
   isWritingTask,
 } from './WritingTask';
-import * as CoverLetter from '../../test/CoverLetter.json';
 
 describe('isWritingTask', () => {
   test('given null then false', () => {
@@ -82,17 +82,14 @@ describe('hasKeywords', () => {
 });
 
 describe('isEnabled', () => {
-  test('given CoverLetter without tools then false', () => {
-    // testing null review_tools always returns false.
-    expect(
-      isEnabled(
-        {
-          ...CoverLetter,
-          ...{ info: { ...CoverLetter.info, review_tools: undefined } },
-        },
-        'expectations'
-      )
-    ).toBeFalsy();
+  test('given CoverLetter without tools then true if not prominent_topics', () => {
+    // testing null review_tools returns true for most things to support old WTDs
+    const nulled_tools = {
+      ...CoverLetter,
+      ...{ info: { ...CoverLetter.info, review_tools: undefined } },
+    };
+    expect(isEnabled(nulled_tools, 'expectations')).toBeTruthy();
+    expect(isEnabled(nulled_tools, 'prominent_topics')).toBeFalsy();
   });
   test('given CoverLetter and invalid then false', () => {
     // test if no match then false.

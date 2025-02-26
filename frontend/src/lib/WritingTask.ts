@@ -187,6 +187,10 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
  * @returns true if the given tool is enabled for the writing task.
  */
 export function isEnabled(task: WritingTask, toolId: string): boolean {
+  // patch for #151 to support old WTDs
+  if (!task.info.review_tools) {
+    return toolId !== 'prominent_topics';
+  }
   return (
     task.info.review_tools?.some(
       ({ tool, enabled }) => tool === toolId && enabled
