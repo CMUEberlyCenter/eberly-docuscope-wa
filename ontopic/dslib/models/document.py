@@ -33,8 +33,7 @@ from dslib.utils import resource_path
 
 from docx import Document
 from docx.shared import RGBColor
-# from docx.enum.text import WD_COLOR_INDEX
-# from docx.enum.text import WD_UNDERLINE
+from docx.enum.style import WD_BUILTIN_STYLE, WD_STYLE_TYPE
 from docx.shared import Pt, Inches
 
 
@@ -2008,13 +2007,13 @@ class DSDocument():
                     if list_level == '0':
                         style = "List Bullet"
                     else:
-                        style = f"List Bullet {list_level}"
+                        style = f"List Bullet {int(list_level)+1}"
 
                 elif list_type == 'decimal':
                     if list_level == '0':
                         style = "List Number"
                     else:
-                        style = f"List Number {list_level}"
+                        style = f"List Number {int(list_level)+1}"
 
                 else:
                     style = 'Normal'
