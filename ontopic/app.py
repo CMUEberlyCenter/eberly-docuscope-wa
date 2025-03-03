@@ -191,7 +191,7 @@ async def ontopic(data: OnTopicRequest):
         coherence=CoherenceData.model_validate(coherence),
         local=local,
         clarity=clarity,
-        html=document.toHtml_OTOnly_DSWA(topics, -1),
+        html=document.toHtml_OTOnly(topics, -1),
         html_sentences=document.getHtmlSents(clarity)
     )
 
