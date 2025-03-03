@@ -13,8 +13,7 @@ import {
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
-import { isOnTopicReviewData, ReviewTool } from "../../../lib/ReviewResponse";
-import { isReview } from "../../../server/model/review";
+import { ReviewTool } from "../../../lib/ReviewResponse";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import {
   useArgumentsEnabled,
@@ -31,7 +30,7 @@ import {
   useSourcesEnabled,
   useTermMatrixEnabled,
 } from "../../service/review-tools.service";
-import { useReview } from "../../service/review.service";
+import { useOnTopicProse, useSegmentedProse } from "../../service/review.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
@@ -64,7 +63,8 @@ export const Review: FC = () => {
   const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
-  const review = useReview();
+  const segmentedProse = useSegmentedProse();
+  const ontopicProse = useOnTopicProse();
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("expectations");
   const [otherTool, setOtherTool] = useState<Tool>("paragraph_clarity");
@@ -77,26 +77,33 @@ export const Review: FC = () => {
     }
   }, [t, ready]);
   useEffect(() => {
-    // FIXME this causes redraw on review update
-    if (isReview(review)) {
-      const ontopic_analysis = review.analysis.find((analysis) =>
-        isOnTopicReviewData(analysis)
-      );
-      console.log(!!ontopic_analysis, !!ontopic_analysis?.response?.html, tab, otherTool);
-      if (
-        ontopic_analysis &&
-        ontopic_analysis.response?.html &&
-        tab === "fine_tuning" &&
-        ["sentences", "organization"].includes(otherTool)
-      ) {
-        setProse(ontopic_analysis.response.html);
-      } else {
-        setProse(review.segmented);
-      }
-    } else {
+    if (!segmentedProse && !ontopicProse) {
       setProse("");
+    } else if (ontopicProse && tab === "fine_tuning" && ["sentences", "organization"].includes(otherTool)) {
+      setProse(ontopicProse);
+    } else {
+      setProse(segmentedProse ?? "");
     }
-  }, [review, tab, otherTool]);
+    // FIXME this causes redraw on review update
+    // if (isReview(review)) {
+    //   const ontopic_analysis = review.analysis.find((analysis) =>
+    //     isOnTopicReviewData(analysis)
+    //   );
+    //   console.log(!!ontopic_analysis, !!ontopic_analysis?.response?.html, tab, otherTool);
+    //   if (
+    //     ontopic_analysis &&
+    //     ontopic_analysis.response?.html &&
+    //     tab === "fine_tuning" &&
+    //     ["sentences", "organization"].includes(otherTool)
+    //   ) {
+    //     setProse(ontopic_analysis.response.html);
+    //   } else {
+    //     setProse(review.segmented);
+    //   }
+    // } else {
+    //   setProse("");
+    // }
+  }, [segmentedProse, ontopicProse, tab, otherTool]);
 
   const civilToneFeature = useCivilToneEnabled();
   const ethosFeature = useEthosEnabled();

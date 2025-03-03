@@ -1,11 +1,12 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
-import { BehaviorSubject, filter, map, Observable, scan } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, scan, tap } from 'rxjs';
 import {
   CivilToneData,
   ErrorData,
   EthosData,
   ExpectationsData,
+  isOnTopicReviewData,
   LinesOfArgumentsData,
   LogicalFlowData,
   OnTopicReviewData,
@@ -72,6 +73,13 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
   SUSPENSE
 );
 
+export const [useSegmentedProse, segmented$] = bind<null | string>(
+  review$.pipe(
+    filter((rev) => isReview(rev)),
+    map((rev) => rev.segmented), distinctUntilChanged()),
+  null
+);
+
 review$.subscribe((rev) => {
   if (isReview(rev)) {
     writingTask.next(isWritingTask(rev.writing_task) ? rev.writing_task : null);
@@ -130,7 +138,7 @@ review$
           break;
         case 'expectations':
           if ('expectation' in analysis) expectationsAnalysis.next(analysis);
-          else console.warn('No expectation is expectation response!');
+          else console.warn('No expectation is expectations response!');
           break;
         case 'prominent_topics':
           prominentTopicsAnalysis.next(analysis);
@@ -194,6 +202,11 @@ export const [useProfessionalToneData, professionalToneData$] = bind(
 );
 export const [useSourcesData, sourcesData$] = bind(sourcesAnalysis, null);
 export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);
+export const [useOnTopicProse, onTopicProse$] = bind(ontopicAnalysis.pipe(
+  filter((data) => isOnTopicReviewData(data)),
+  map((data) => data.response.html ?? ""),
+  distinctUntilChanged(), tap(console.log),), null);
+
 export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(
     scan(
