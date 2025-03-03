@@ -61,28 +61,33 @@ const NullTool: FC = () => (
 );
 
 export const Review: FC = () => {
-  const { t } = useTranslation("review");
+  const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
   const review = useReview();
+  const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("expectations");
   const [otherTool, setOtherTool] = useState<Tool>("paragraph_clarity");
   const [prose, setProse] = useState<string>("");
 
   // useUnload();
   useEffect(() => {
-    window.document.title = t("document.title");
-  }, [t]);
+    if (ready) {
+      window.document.title = t("document.title");
+    }
+  }, [t, ready]);
   useEffect(() => {
     // FIXME this causes redraw on review update
     if (isReview(review)) {
       const ontopic_analysis = review.analysis.find((analysis) =>
         isOnTopicReviewData(analysis)
       );
+      console.log(!!ontopic_analysis, !!ontopic_analysis?.response?.html, tab, otherTool);
       if (
         ontopic_analysis &&
         ontopic_analysis.response?.html &&
-        ["sentences", "organization"].includes(tool)
+        tab === "fine_tuning" &&
+        ["sentences", "organization"].includes(otherTool)
       ) {
         setProse(ontopic_analysis.response.html);
       } else {
@@ -91,7 +96,7 @@ export const Review: FC = () => {
     } else {
       setProse("");
     }
-  }, [review, tool]);
+  }, [review, tab, otherTool]);
 
   const civilToneFeature = useCivilToneEnabled();
   const ethosFeature = useEthosEnabled();
@@ -130,6 +135,8 @@ export const Review: FC = () => {
             </Navbar>
           </header>
           <Tabs
+            activeKey={tab}
+            onSelect={(k) => setTab(k as "big_picture" | "fine_tuning")}
             variant="underline"
             className="justify-content-around inverse-color"
           >
