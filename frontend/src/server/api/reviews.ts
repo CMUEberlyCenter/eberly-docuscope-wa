@@ -2,6 +2,7 @@ import { Request, Response, Router } from 'express';
 import { body, param } from 'express-validator';
 import { OnTopicData } from '../../lib/OnTopicData';
 import {
+  BadRequest,
   FileNotFound,
   InternalServerError,
   UnprocessableContent,
@@ -9,6 +10,7 @@ import {
 } from '../../lib/ProblemDetails';
 import {
   Analysis,
+  BasicReviewPrompts,
   ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
@@ -138,6 +140,25 @@ const reviewData = ({
 });
 
 reviews.get(
+  '/:id/fo',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    try {
+      const review = await findReviewById(id);
+      response.json(review);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+
+reviews.get(
   '/:id/text',
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
@@ -156,6 +177,157 @@ reviews.get(
   }
 );
 
+reviews.get(
+  '/:id/ontopic',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      if (review.analysis.some(({ tool }) => tool === 'ontopic')) {
+        response.json(review);
+        return;
+      }
+      const data = await doOnTopic(review, controller.signal);
+      if (controller.signal.aborted) {
+        return;
+      }
+      if (!data) throw new Error(`NULL onTopic results.`);
+      const analysis = await updateReviewByIdAddAnalysis(id, data);
+      response.json(await findReviewById(id));
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+    // response.json({
+    //   ...review, analysis: [...review?.analysis ?? [], {
+    //     tool: 'ontopic',
+    //     datetime: new Date(),
+    //     error: {
+    //       message: err instanceof Error ? err.message : `${err}`,
+    //       details: err,
+    //     }
+    //   }]
+    // } as Review);
+    // }
+  }
+);
+
+reviews.get(
+  '/:id/:prompt',
+  validate(
+    param('id', 'Invalid review id').isMongoId(),
+    param('prompt').isString().isIn(BasicReviewPrompts)
+  ),
+  async (request: Request, response: Response) => {
+    const { id, prompt } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      if (
+        !isWritingTask(review.writing_task) ||
+        !isEnabled(review.writing_task, prompt)
+      ) {
+        response
+          .status(400)
+          .send(BadRequest('No Writing Task Definition or tool is disabled!'));
+        return;
+      }
+      if (review.analysis.some(({ tool }) => tool === prompt)) {
+        response.json(review); // already completed, return saved
+        return;
+      }
+      const { response: chat_response, finished: datetime } =
+        await doChat<ReviewResponse>(
+          prompt as ReviewPrompt,
+          reviewData(review),
+          controller.signal,
+          true,
+          true
+        );
+      if (controller.signal.aborted) {
+        return;
+      }
+      if (!chat_response) throw new Error(`NULL chat response for ${prompt}`);
+      const analysis = await updateReviewByIdAddAnalysis(id, {
+        tool: prompt,
+        datetime,
+        response: chat_response,
+      } as Analysis);
+      response.json(await findReviewById(id));
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+// reviews.get('/:id/expectations', validate(param('id', 'Invalid review id').isMongoId()),
+// async (request: Request, response: Response) => {
+//   const { id } = request.params;
+//   const controller = new AbortController();
+//   request.on('close', () => {
+//     controller.abort();
+//   });
+//   let review: Review | undefined;
+//   try {
+//     review = await findReviewById(id);
+//     if (review.analysis.some(({ tool }) => tool === 'expectations')) {
+//       response.json(review);
+//       return;
+//     }
+//     const existing = new Set(
+//       review.analysis
+//         .filter(isExpectationsData)
+//         .map(({ expectation }) => expectation)
+//     );
+//     const expectations = getExpectations(review.writing_task).filter(
+//       (rule) => !existing.has(rule.name)
+//     );
+//     for (const { name: expectation, description } of expectations) {
+//       if (response.writableEnded) break;
+//       try {
+//         const { response: chat_response, finished: datetime } =
+//           await doChat<ExpectationsOutput>(
+//             'expectations',
+//             {
+//               ...reviewData(review),
+//               expectation,
+//               description,
+//             },
+//             controller.signal,
+//             true,
+//             true
+//           );
+//         if (!chat_response)
+//           throw new Error(`NULL results for ${expectation}`);
+//         if (!isExpectationsOutput(chat_response)) {
+//           console.error(
+//             `Malformed results for ${expectation}`,
+//             chat_response
+//           );
+//           throw new Error(`Malformed results for ${expectation}`);
+//         }
+//         const data = await updateReviewByIdAddAnalysis(id, {
+//           tool: 'expectations',
+//           datetime,
+//           expectation,
+//           response: chat_response,
+//         });
 /**
  * @route GET <reviews>/:id
  * @summary Retrieve review data.
@@ -209,6 +381,33 @@ reviews.get(
       response.flushHeaders();
       response.on('close', () => response.end());
       response.write(`data: ${JSON.stringify(review)}\n\n`);
+
+      // if (
+      //   !request.closed &&
+      //   analyses.includes('ontopic') &&
+      //   !review.analysis.some(({ tool }) => tool === 'ontopic')
+      // ) {
+      //   try {
+      //     doOnTopic(review, controller.signal).then((data) => {
+      //       if (!data) throw new Error(`NULL onTopic results.`);
+      //       return updateAnalysis(data);
+      //     });
+      //     // const data = await doOnTopic(review, controller.signal);
+      //     // // TODO check for errors
+      //     // if (!data) throw new Error(`NULL onTopic results.`);
+      //     // await updateAnalysis(data);
+      //   } catch (err) {
+      //     console.error(err);
+      //     await updateAnalysis({
+      //       tool: 'ontopic',
+      //       datetime: new Date(),
+      //       error: {
+      //         message: err instanceof Error ? err.message : `${err}`,
+      //         details: err,
+      //       },
+      //     });
+      //   }
+      // }
 
       // const expectJobs: Promise<Analysis | undefined>[] = [];
       if (
@@ -319,28 +518,6 @@ reviews.get(
         }
       } //);
       //const ontopicJobs = ['ontopic'].map(async () => {
-      if (
-        !request.closed &&
-        analyses.includes('ontopic') &&
-        !review.analysis.some(({ tool }) => tool === 'ontopic')
-      ) {
-        try {
-          const data = await doOnTopic(review, controller.signal);
-          // TODO check for errors
-          if (!data) throw new Error(`NULL onTopic results.`);
-          await updateAnalysis(data);
-        } catch (err) {
-          console.error(err);
-          await updateAnalysis({
-            tool: 'ontopic',
-            datetime: new Date(),
-            error: {
-              message: err instanceof Error ? err.message : `${err}`,
-              details: err,
-            },
-          });
-        }
-      }
       // });
       // await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {

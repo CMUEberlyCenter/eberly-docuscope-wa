@@ -30,7 +30,10 @@ import {
   useSourcesEnabled,
   useTermMatrixEnabled,
 } from "../../service/review-tools.service";
-import { useOnTopicProse, useSegmentedProse } from "../../service/review.service";
+import {
+  useOnTopicProse,
+  useSegmentedProse,
+} from "../../service/review.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
@@ -79,7 +82,11 @@ export const Review: FC = () => {
   useEffect(() => {
     if (!segmentedProse && !ontopicProse) {
       setProse("");
-    } else if (ontopicProse && tab === "fine_tuning" && ["sentences", "organization"].includes(otherTool)) {
+    } else if (
+      ontopicProse &&
+      tab === "fine_tuning" &&
+      ["sentences", "organization"].includes(otherTool)
+    ) {
       setProse(ontopicProse);
     } else {
       setProse(segmentedProse ?? "");

@@ -9,7 +9,7 @@ import {
 } from "../../../lib/OnTopicData";
 import { isErrorData } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import { useOnTopicData, useReview } from "../../service/review.service";
+import { useOnTopicData, useOnTopicReview } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -89,8 +89,8 @@ type TextData = {
 
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
+  const review = useOnTopicReview();
   const data = useOnTopicData();
-  const review = useReview();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
@@ -108,7 +108,7 @@ export const Sentences: FC = () => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
     setTextData({
-      plain: review.segmented,
+      plain: review?.segmented ?? "",
       sentences: !isErrorData(data) ? data?.response.clarity : undefined,
     });
   }, [review, data]);
@@ -141,7 +141,7 @@ export const Sentences: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid sentences d-flex flex-column h-100">
+      <article className="container-fluid sentences overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
         {!data ? (
           <Loading />

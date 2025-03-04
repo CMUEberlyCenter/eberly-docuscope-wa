@@ -16,8 +16,21 @@ export type ReviewPrompt =
   | 'sources';
 // | 'term_matrix'; // All prompts
 
+export const BasicReviewPrompts: ReviewPrompt[] = [
+  'civil_tone',
+  'ethos',
+  'lines_of_arguments',
+  'logical_flow',
+  'paragraph_clarity',
+  'pathos',
+  'professional_tone',
+  'prominent_topics',
+  'sources',
+];
+
 export type ReviewTool =
   | ReviewPrompt
+  // | 'expectations'
   | 'sentence_density'
   | 'term_matrix'
   | 'ontopic'

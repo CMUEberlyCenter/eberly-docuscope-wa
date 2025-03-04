@@ -1,6 +1,17 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
-import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, scan } from 'rxjs';
+import {
+  BehaviorSubject,
+  distinctUntilChanged,
+  filter,
+  map,
+  Observable,
+  scan,
+  shareReplay,
+  switchMap,
+  tap,
+} from 'rxjs';
+import { fromFetch } from 'rxjs/fetch';
 import {
   CivilToneData,
   ErrorData,
@@ -14,6 +25,7 @@ import {
   PathosData,
   ProfessionalToneData,
   ProminentTopicsData,
+  ReviewPrompt,
   SourcesData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
@@ -70,15 +82,22 @@ const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
   });
 
 export const [useReview, review$] = bind<SUSPENSE | Review>(
-  fetchObservable(),
+  fetchObservable('expectations'),
   SUSPENSE
 );
 
+const review = fromFetch(`/api/v2/reviews/${REVIEW_ID}/fo`).pipe(
+  filter((response) => response.ok),
+  switchMap(async (response) => await response.json()),
+  filter((data): data is Review => isReview(data)),
+  shareReplay(1)
+);
 /** Segmented read only version of the user's text. */
 export const [useSegmentedProse, segmented$] = bind<null | string>(
-  review$.pipe(
-    filter((rev) => isReview(rev)),
-    map((rev) => rev.segmented), distinctUntilChanged()),
+  review.pipe(
+    map((data) => data.segmented),
+    distinctUntilChanged()
+  ),
   null
 );
 
@@ -180,35 +199,78 @@ review$
 //   globalCoherenceAnalysis,
 //   null
 // );
-export const [useCivilToneData, civilToneData$] = bind(civilToneAnalysis, null);
-export const [useEthosData, ethosData$] = bind(ethosAnalysis, null);
+
+function fetchReview<T>(prompt: ReviewPrompt) {
+  return fromFetch(`/api/v2/reviews/${REVIEW_ID}/${prompt}`).pipe(
+    switchMap(async (response) => await response.json()),
+    filter((data): data is Review => isReview(data)),
+    shareReplay(1),
+    map((data) => data?.analysis.find((a) => a.tool === prompt)),
+    tap((data) => console.log(data)),
+    filter((data) => !!data), // TODO errors
+    map((data) => data as T),
+    tap((data) => console.log(data))
+  );
+}
+export const [useCivilToneData, civilToneData$] = bind(
+  fetchReview<OptionalError<CivilToneData>>('civil_tone'),
+  null
+);
+export const [useEthosData, ethosData$] = bind(
+  fetchReview<OptionalError<EthosData>>('ethos'),
+  null
+);
 export const [useProminentTopicsData, prominentTopicsData$] = bind(
-  prominentTopicsAnalysis,
+  fetchReview<OptionalError<ProminentTopicsData>>('prominent_topics'),
   null
 );
 export const [useLinesOfArgumentsData, argumentsData$] = bind(
-  linesOfArgumentsAnalysis,
+  fetchReview<OptionalError<LinesOfArgumentsData>>('lines_of_arguments'),
+  // fromFetch(`/api/v2/reviews/${REVIEW_ID}/lines_of_arguments`).pipe(
+  //   switchMap(async (response) => await response.json()),
+  //   filter((data): data is Review => isReview(data)),
+  //   shareReplay(1),
+  //   map((data) => data?.analysis.find((a): a is LinesOfArgumentsData => a.tool === 'lines_of_arguments')),
+  //   filter((data) => !!data), // TODO errors
+  // ),
   null
 );
 export const [useLogicalFlowData, logicalFlowData$] = bind(
-  logicalFlowAnalysis,
+  fetchReview<OptionalError<LogicalFlowData>>('logical_flow'),
+  // fromFetch(`/api/v2/reviews/${REVIEW_ID}/logical_flow`).pipe(
+  //   switchMap(async (response) => await response.json()),
+  //   filter((data): data is Review => isReview(data)),
+  //   shareReplay(1),
+  //   map((data) => data?.analysis.find((a): a is LogicalFlowData => a.tool === 'logical_flow')),
+  //   filter((data) => !!data), // TODO errors
+  // ),
   null
 );
 export const [useParagraphClarityData, paragraphClarityData$] = bind(
-  paragraphClarityAnalysis,
+  fetchReview<OptionalError<ParagraphClarityData>>('paragraph_clarity'),
   null
 );
-export const [usePathosData, pathosData$] = bind(pathosAnalysis, null);
+export const [usePathosData, pathosData$] = bind(
+  fetchReview<OptionalError<PathosData>>('pathos'),
+  null
+);
 export const [useProfessionalToneData, professionalToneData$] = bind(
-  professionalToneAnalysis,
+  fetchReview<OptionalError<ProfessionalToneData>>('professional_tone'),
   null
 );
-export const [useSourcesData, sourcesData$] = bind(sourcesAnalysis, null);
-export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);
-export const [useOnTopicProse, onTopicProse$] = bind(ontopicAnalysis.pipe(
-  filter((data) => isOnTopicReviewData(data)),
-  map((data) => data.response.html ?? ""),
-  distinctUntilChanged()), null);
+export const [useSourcesData, sourcesData$] = bind(
+  fetchReview<OptionalError<SourcesData>>('sources'),
+  null
+);
+// export const [useOnTopicData_, _onTopicData$] = bind(ontopicAnalysis, null);
+export const [useOnTopicProse, onTopicProse$] = bind(
+  ontopicAnalysis.pipe(
+    filter((data) => isOnTopicReviewData(data)),
+    map((data) => data.response.html ?? ''),
+    distinctUntilChanged()
+  ),
+  null
+); // FIXME
 
 export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(
@@ -230,3 +292,19 @@ export const [useExpectationsData, expectationsData$] = bind(
   null
 );
 expectationsData$.subscribe(() => undefined); // at least one subscription to make sure it works.
+
+export const [useOnTopicReview, onTopicReview$] = bind(
+  fromFetch(`/api/v2/reviews/${REVIEW_ID}/ontopic`).pipe(
+    switchMap(async (response) => await response.json()),
+    filter((data): data is Review => isReview(data)),
+    shareReplay(1) // TODO errors
+  ),
+  null
+);
+export const [useOnTopicData, onTopicData$] = bind(
+  onTopicReview$.pipe(
+    map((data) => data?.analysis.find((a) => isOnTopicReviewData(a))),
+    filter((data) => !!data)
+  ),
+  null
+);
