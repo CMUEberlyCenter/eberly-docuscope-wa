@@ -279,6 +279,16 @@ def is_skip(elem, left_count, topic_filter):
     else:
         return False
 
+def contains_html_tags(text):
+    # Regular expression to match HTML tags
+    pattern = r'<[^>]+>'
+    
+    # Search for the pattern in the text
+    match = re.search(pattern, text)
+    
+    # Return True if a match is found, False otherwise
+    return match is not None
+
 class DSWord():
     def __init__(self, w, lw, end, lat, pos):
 
@@ -1353,11 +1363,15 @@ class DSDocument():
                 
             word_count+=1
 
-        # To find noun chunks (phrases), we need to strip HTML tags.
-        soup = bs(sent_dict['text'], "html.parser")
-        text_only = soup.text
-        text_only = text_only.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ')            
-        doc = nlp(text_only)
+
+        text = sent_dict['text']
+        if contains_html_tags(text):
+            # Strip HTML tags, if any.
+            soup = bs(text, "html.parser")
+            text = soup.text
+
+        text = text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
+        doc = nlp(text)
 
         if type(sent) == str:
             res['HEADING'] = True
