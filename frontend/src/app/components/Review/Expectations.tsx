@@ -27,6 +27,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import style from "./Expectations.module.scss";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
@@ -127,7 +128,7 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
             <FontAwesomeIcon
-              icon="circle-exclamation"
+              icon={faCircleExclamation}
               className="text-danger"
             />
           </Accordion.Header>
