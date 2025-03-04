@@ -3,10 +3,8 @@ import { Translation } from "react-i18next";
 import { Analysis, isAssessment } from "../../../lib/ReviewResponse";
 
 export const Summary: FC<{ review: Analysis }> = ({ review }) => {
-  console.log(review, "response" in review);
   if (!("response" in review)) return null;
   const response = review.response;
-  console.log(isAssessment(review.response));
   if (!isAssessment(response)) return null;
   const { strengths, weaknesses } = response.assessment;
   return (
