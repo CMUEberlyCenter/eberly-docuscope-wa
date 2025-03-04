@@ -1,6 +1,6 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
-import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, scan, tap } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, filter, map, Observable, scan } from 'rxjs';
 import {
   CivilToneData,
   ErrorData,
@@ -23,6 +23,7 @@ import { writingTask } from './writing-task.service';
 
 const searchParams = new URLSearchParams(window.location.search);
 const id = searchParams.get('id');
+export const REVIEW_ID = id || '';
 // class FatalError extends Error {}
 
 const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
@@ -73,6 +74,7 @@ export const [useReview, review$] = bind<SUSPENSE | Review>(
   SUSPENSE
 );
 
+/** Segmented read only version of the user's text. */
 export const [useSegmentedProse, segmented$] = bind<null | string>(
   review$.pipe(
     filter((rev) => isReview(rev)),
@@ -80,6 +82,7 @@ export const [useSegmentedProse, segmented$] = bind<null | string>(
   null
 );
 
+// Update the writing task from the review when it is available.
 review$.subscribe((rev) => {
   if (isReview(rev)) {
     writingTask.next(isWritingTask(rev.writing_task) ? rev.writing_task : null);
@@ -205,7 +208,7 @@ export const [useOnTopicData, onTopicData$] = bind(ontopicAnalysis, null);
 export const [useOnTopicProse, onTopicProse$] = bind(ontopicAnalysis.pipe(
   filter((data) => isOnTopicReviewData(data)),
   map((data) => data.response.html ?? ""),
-  distinctUntilChanged(), tap(console.log),), null);
+  distinctUntilChanged()), null);
 
 export const [useExpectationsData, expectationsData$] = bind(
   expectationsAnalysis.pipe(

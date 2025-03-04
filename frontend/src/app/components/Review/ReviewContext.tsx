@@ -3,9 +3,9 @@ import {
   Dispatch,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
-  useReducer,
+  useReducer
 } from "react";
 
 export const ReviewContext = createContext<ReviewContextState | null>(null);
@@ -70,7 +70,7 @@ export const ReviewProvider: FC<{ children: ReactNode }> = ({ children }) => {
  * @returns React component to use in composition with review tools.
  */
 export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = use(ReviewDispatchContext);
   // unset sentences so that any previous highlighting is cleared.
   useEffect(() => {
     dispatch({ type: "unset" });
