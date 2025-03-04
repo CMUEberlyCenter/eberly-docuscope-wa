@@ -70,7 +70,7 @@ export const ProfessionalTone: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader
           title={t("professional_tone.title")}
           instructionsKey="professional_tone"

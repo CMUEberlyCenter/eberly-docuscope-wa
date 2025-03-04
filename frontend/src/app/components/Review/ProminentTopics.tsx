@@ -35,7 +35,7 @@ export const ProminentTopics: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader
           title={t("prominent_topics.title")}
           instructionsKey="prominent_topics"

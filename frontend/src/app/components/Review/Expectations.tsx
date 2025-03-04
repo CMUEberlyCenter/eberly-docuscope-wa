@@ -182,7 +182,7 @@ export const Expectations: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader
           title={t("expectations.title")}
           instructionsKey="expectations"

@@ -130,7 +130,7 @@ export const GlobalCoherence: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <h4>{t("global_coherence.title")}</h4>
         <FadeContent htmlContent={t("global_coherence.overview")} />
         {!review ? (
@@ -205,7 +205,7 @@ export const GlobalCoherence: FC = () => {
             ) : null}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

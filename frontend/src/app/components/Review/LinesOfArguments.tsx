@@ -139,7 +139,7 @@ export const LinesOfArguments: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader
           title={t("lines_of_arguments.title")}
           instructionsKey="lines_of_arguments"
@@ -166,7 +166,6 @@ export const LinesOfArguments: FC = () => {
                   <Translation ns="instructions">
                     {(t) => <p>{t("lines_of_arguments_insights")}</p>}
                   </Translation>
-                  <p>{t("lines_of_arguments.insights")}</p>
                 </header>
                 {review.response.thesis ? (
                   <section className="mt-3">

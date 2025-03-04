@@ -45,7 +45,7 @@ export const Sources: FC = () => {
   const dispatch = useContext(ReviewDispatchContext);
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader title={t("sources.title")} instructionsKey="sources" />
         {!review ? (
           <Loading />

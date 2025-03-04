@@ -287,7 +287,7 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid organization">
+      <article className="container-fluid organization overflow-auto d-flex flex-column flex-grow-1">
         <ToolHeader
           title={t("organization.title")}
           instructionsKey="term_matrix"
