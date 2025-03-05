@@ -4,6 +4,7 @@ import { OnTopicData } from '../../lib/OnTopicData';
 import {
   BadRequest,
   FileNotFound,
+  Forbidden,
   InternalServerError,
   UnprocessableContent,
   UnprocessableContentError,
@@ -140,7 +141,7 @@ const reviewData = ({
 });
 
 reviews.get(
-  '/:id/fo',
+  '/:id',
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
     const { id } = request.params;
@@ -188,6 +189,8 @@ reviews.get(
     });
     try {
       const review = await findReviewById(id);
+      // add isWritingTask check? not needed for this analysis
+      // add isEnabled check? complicated as multiple tools use this.
       if (review.analysis.some(({ tool }) => tool === 'ontopic')) {
         response.json(review);
         return;
@@ -197,8 +200,8 @@ reviews.get(
         return;
       }
       if (!data) throw new Error(`NULL onTopic results.`);
-      const analysis = await updateReviewByIdAddAnalysis(id, data);
-      response.json(await findReviewById(id));
+      await updateReviewByIdAddAnalysis(id, data);
+      response.json(await findReviewById(id)); // return most recent with update.
     } catch (err) {
       console.error(err);
       if (err instanceof ReferenceError) {
@@ -207,17 +210,113 @@ reviews.get(
         response.status(500).send(InternalServerError(err));
       }
     }
-    // response.json({
-    //   ...review, analysis: [...review?.analysis ?? [], {
-    //     tool: 'ontopic',
-    //     datetime: new Date(),
-    //     error: {
-    //       message: err instanceof Error ? err.message : `${err}`,
-    //       details: err,
-    //     }
-    //   }]
-    // } as Review);
-    // }
+  }
+);
+
+reviews.get(
+  '/:id/expectations',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      if (!isWritingTask(review.writing_task)) {
+        response.status(400).send(BadRequest('No Writing Task Definition'));
+        return;
+      }
+      if (!isEnabled(review.writing_task, 'expectations')) {
+        response.status(403).send(Forbidden('Expectations tool is disabled!'));
+        return;
+      }
+      response.set({
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'text/event-stream',
+        Connection: 'keep-alive',
+      });
+      response.flushHeaders();
+      response.on('close', () => response.end());
+      response.write(`data: ${JSON.stringify(review)}\n\n`);
+
+      const existing = new Set(
+        review.analysis
+          .filter(isExpectationsData)
+          .map(({ expectation }) => expectation)
+      );
+      const expectations = getExpectations(review.writing_task).filter(
+        (rule) => !existing.has(rule.name)
+      );
+      for (const { name: expectation, description } of expectations) {
+        if (response.writableEnded) break;
+        try {
+          const { response: chat_response, finished: datetime } =
+            await doChat<ExpectationsOutput>(
+              'expectations',
+              {
+                ...reviewData(review),
+                expectation,
+                description,
+              },
+              controller.signal,
+              true,
+              true
+            );
+          if (controller.signal.aborted) {
+            return;
+          }
+          if (!chat_response)
+            throw new Error(`NULL results for ${expectation}`);
+          if (!isExpectationsOutput(chat_response)) {
+            console.error(
+              `Malformed results for ${expectation}`,
+              chat_response
+            );
+            throw new Error(`Malformed results for ${expectation}`);
+          }
+          await updateReviewByIdAddAnalysis(id, {
+            tool: 'expectations',
+            datetime,
+            expectation,
+            response: chat_response,
+          });
+          if (!response.closed) {
+            const ret = await findReviewById(id); // get updated
+            response.write(`data: ${JSON.stringify(ret)}\n\n`);
+          }
+        } catch (err) {
+          console.error(err);
+          await updateReviewByIdAddAnalysis(id, {
+            tool: 'expectations',
+            datetime: new Date(),
+            expectation,
+            error: {
+              message: err instanceof Error ? err.message : `${err}`,
+              details: err,
+            },
+          });
+          if (!response.closed) {
+            // if not closed, send the update
+            const ret = await findReviewById(id); // get
+            response.write(`data: ${JSON.stringify(ret)}\n\n`);
+          }
+        }
+      }
+      if (!response.closed) {
+        const final = await findReviewById(id);
+        response.write(`data: ${JSON.stringify(final)}\n\n`);
+        response.end();
+      }
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
   }
 );
 
@@ -235,13 +334,12 @@ reviews.get(
     });
     try {
       const review = await findReviewById(id);
-      if (
-        !isWritingTask(review.writing_task) ||
-        !isEnabled(review.writing_task, prompt)
-      ) {
-        response
-          .status(400)
-          .send(BadRequest('No Writing Task Definition or tool is disabled!'));
+      if (!isWritingTask(review.writing_task)) {
+        response.status(400).send(BadRequest('No Writing Task Definition!'));
+        return;
+      }
+      if (!isEnabled(review.writing_task, prompt as ReviewPrompt)) {
+        response.status(403).send(Forbidden(`Tool ${prompt} is disabled!`));
         return;
       }
       if (review.analysis.some(({ tool }) => tool === prompt)) {
@@ -260,7 +358,7 @@ reviews.get(
         return;
       }
       if (!chat_response) throw new Error(`NULL chat response for ${prompt}`);
-      const analysis = await updateReviewByIdAddAnalysis(id, {
+      await updateReviewByIdAddAnalysis(id, {
         tool: prompt,
         datetime,
         response: chat_response,
@@ -276,58 +374,7 @@ reviews.get(
     }
   }
 );
-// reviews.get('/:id/expectations', validate(param('id', 'Invalid review id').isMongoId()),
-// async (request: Request, response: Response) => {
-//   const { id } = request.params;
-//   const controller = new AbortController();
-//   request.on('close', () => {
-//     controller.abort();
-//   });
-//   let review: Review | undefined;
-//   try {
-//     review = await findReviewById(id);
-//     if (review.analysis.some(({ tool }) => tool === 'expectations')) {
-//       response.json(review);
-//       return;
-//     }
-//     const existing = new Set(
-//       review.analysis
-//         .filter(isExpectationsData)
-//         .map(({ expectation }) => expectation)
-//     );
-//     const expectations = getExpectations(review.writing_task).filter(
-//       (rule) => !existing.has(rule.name)
-//     );
-//     for (const { name: expectation, description } of expectations) {
-//       if (response.writableEnded) break;
-//       try {
-//         const { response: chat_response, finished: datetime } =
-//           await doChat<ExpectationsOutput>(
-//             'expectations',
-//             {
-//               ...reviewData(review),
-//               expectation,
-//               description,
-//             },
-//             controller.signal,
-//             true,
-//             true
-//           );
-//         if (!chat_response)
-//           throw new Error(`NULL results for ${expectation}`);
-//         if (!isExpectationsOutput(chat_response)) {
-//           console.error(
-//             `Malformed results for ${expectation}`,
-//             chat_response
-//           );
-//           throw new Error(`Malformed results for ${expectation}`);
-//         }
-//         const data = await updateReviewByIdAddAnalysis(id, {
-//           tool: 'expectations',
-//           datetime,
-//           expectation,
-//           response: chat_response,
-//         });
+
 /**
  * @route GET <reviews>/:id
  * @summary Retrieve review data.
@@ -339,7 +386,7 @@ reviews.get(
  * @returns { status: 500: body: @type{InternalServerError}}
  */
 reviews.get(
-  '/:id',
+  '/:id/ex',
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
     const controller = new AbortController();
@@ -361,17 +408,16 @@ reviews.get(
 
     const updateAnalysis = async (analysis: Analysis | undefined) => {
       if (analysis) {
-        console.log(`updating ${id}`);
-        const upd = await updateReviewByIdAddAnalysis(id, analysis);
+        await updateReviewByIdAddAnalysis(id, analysis);
         if (!response.closed) {
-          response.write(`data: ${JSON.stringify(upd)}\n\n`);
+          const ret = await findReviewById(id); // get the updated review
+          response.write(`data: ${JSON.stringify(ret)}\n\n`);
         }
       }
       return analysis;
     };
 
     try {
-      console.log(`Looking up ${id}`);
       const review = await findReviewById(id);
       response.set({
         'Cache-Control': 'no-cache',

@@ -172,10 +172,6 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
 export const Expectations: FC = () => {
   const { t } = useTranslation("review");
   const writingTask = useWritingTask();
-  // const [expectations, setExpectations] = useState<Rule[]>([]);
-  // useEffect(() => {
-  //   setExpectations(getExpectations(writingTask))
-  // }, [writingTask]);
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);

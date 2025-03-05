@@ -20,6 +20,17 @@ export const FileNotFound = (
   instance,
 });
 
+export const Forbidden = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/403',
+  title: 'Forbidden',
+  detail: err instanceof Error ? err.message : err,
+  status: 403,
+  instance,
+});
+
 export const InternalServerError = (
   err: Error | string | unknown,
   instance?: string

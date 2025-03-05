@@ -1,5 +1,6 @@
 import { FC, useEffect, useState } from "react";
 import {
+  Alert,
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
@@ -16,10 +17,13 @@ import Split from "react-split";
 import { ReviewTool } from "../../../lib/ReviewResponse";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import {
+  useAdditionalToolsEnabled,
   useArgumentsEnabled,
+  useBigPictureEnabled,
   useCivilToneEnabled,
   useEthosEnabled,
   useExpectationsEnabled,
+  useFineTuningEnabled,
   useImpressionsEnabled,
   useLogicalFlowEnabled,
   useParagraphClarityEnabled,
@@ -55,11 +59,11 @@ import { Sources } from "./Sources";
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 const NullTool: FC = () => (
-  <Stack className="position-absolute start-50 top-50 translate-middle">
-    <span className="mx-auto text-center">
+  <article className="container-fluid flex-grow-1 overflow-auto d-flex flex-column">
+    <Alert variant="warning" className="m-3">
       <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
-    </span>
-  </Stack>
+    </Alert>
+  </article>
 );
 
 export const Review: FC = () => {
@@ -70,7 +74,7 @@ export const Review: FC = () => {
   const ontopicProse = useOnTopicProse();
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("expectations");
-  const [otherTool, setOtherTool] = useState<Tool>("paragraph_clarity");
+  const [otherTool, setOtherTool] = useState<Tool>("null");
   const [prose, setProse] = useState<string>("");
 
   // useUnload();
@@ -91,25 +95,6 @@ export const Review: FC = () => {
     } else {
       setProse(segmentedProse ?? "");
     }
-    // FIXME this causes redraw on review update
-    // if (isReview(review)) {
-    //   const ontopic_analysis = review.analysis.find((analysis) =>
-    //     isOnTopicReviewData(analysis)
-    //   );
-    //   console.log(!!ontopic_analysis, !!ontopic_analysis?.response?.html, tab, otherTool);
-    //   if (
-    //     ontopic_analysis &&
-    //     ontopic_analysis.response?.html &&
-    //     tab === "fine_tuning" &&
-    //     ["sentences", "organization"].includes(otherTool)
-    //   ) {
-    //     setProse(ontopic_analysis.response.html);
-    //   } else {
-    //     setProse(review.segmented);
-    //   }
-    // } else {
-    //   setProse("");
-    // }
   }, [segmentedProse, ontopicProse, tab, otherTool]);
 
   const civilToneFeature = useCivilToneEnabled();
@@ -125,6 +110,9 @@ export const Review: FC = () => {
   const sourcesFeature = useSourcesEnabled();
   const impressionsFeature = useImpressionsEnabled();
   const organizationFeature = useTermMatrixEnabled();
+  const additionalToolsFeature = useAdditionalToolsEnabled();
+  const bigPictureFeature = useBigPictureEnabled();
+  const fineTuningFeature = useFineTuningEnabled();
 
   return (
     <ReviewProvider>
@@ -150,11 +138,19 @@ export const Review: FC = () => {
           </header>
           <Tabs
             activeKey={tab}
-            onSelect={(k) => setTab(k as "big_picture" | "fine_tuning")}
+            onSelect={(k) => {
+              if (k === "fine_tuning" && otherTool === "null") {
+                setOtherTool("paragraph_clarity"); // FIXME initial tool
+              }
+              if (k === "big_picture" && tool === "null") {
+                setTool("expectations"); // FIXME initial tool
+              }
+              setTab(k as "big_picture" | "fine_tuning");
+            }}
             variant="underline"
             className="justify-content-around inverse-color"
           >
-            {expectationsFeature || argumentsFeature || logicalFlowFeature ? (
+            {bigPictureFeature ? (
               <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
                 <div className="overflow-hidden h-100 d-flex flex-column">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
@@ -183,18 +179,16 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {/* <div className="position-relative flex-grow-1 overflow-auto"> */}
                   {(!tool || tool === "null") && <NullTool />}
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
                   {tool === "logical_flow" && <LogicalFlow />}
                   {/* Add Big Picture tools here. */}
-                  {/* </div> */}
                 </div>
               </Tab>
             ) : null}
-            {true ? (
+            {fineTuningFeature ? (
               <Tab
                 eventKey="fine_tuning"
                 title={t("tabs.fine_tuning")}
@@ -220,105 +214,109 @@ export const Review: FC = () => {
                         onClick={() => setOtherTool("professional_tone")}
                       />
                     ) : null}
-                    <Dropdown
-                      as={ButtonGroup}
-                      className="bg-white shadow-sm rounded-2"
-                    >
-                      <OverlayTrigger
-                        placement="bottom"
-                        overlay={
-                          <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
-                        }
+                    {additionalToolsFeature ? (
+                      <Dropdown
+                        as={ButtonGroup}
+                        className="bg-white shadow-sm rounded-2"
                       >
-                        <Dropdown.Toggle
-                          variant="outline-primary"
-                          className="tool_button"
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
+                          }
                         >
-                          <Stack>
-                            <AdditionalToolsIcon />
-                            <span>{t("additional_tools.title")}</span>
-                          </Stack>
-                        </Dropdown.Toggle>
-                      </OverlayTrigger>
-                      <Dropdown.Menu className="additional-tools-menu">
-                        {sourcesFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("sources")}
-                            active={otherTool === "sources"}
+                          <Dropdown.Toggle
+                            variant="outline-primary"
+                            className="tool_button"
                           >
-                            <h6 className="text-primary">
-                              {t("sources.title")}
-                            </h6>
-                            <div className="text-wrap">
-                              {inst("sources_scope_note")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                        {ethosFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("ethos")}
-                            active={otherTool === "ethos"}
-                          >
-                            <h6 className="text-primary">{t("ethos.title")}</h6>
-                            <div className="text-wrap">
-                              {inst("ethos_scope_note")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                        {pathosFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("pathos")}
-                            active={otherTool === "pathos"}
-                          >
-                            <h6 className="text-primary">
-                              {t("pathos.title")}
-                            </h6>
-                            <div className="text-wrap">
-                              {inst("pathos_scope_note")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                        {organizationFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("organization")}
-                            active={otherTool === "organization"}
-                          >
-                            <h6 className="text-primary">
-                              {t("organization.title")}
-                            </h6>
-                            <div className="text-wrap">
-                              {inst("term_matrix_scope_note")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                        {civilToneFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("civil_tone")}
-                            active={otherTool === "civil_tone"}
-                          >
-                            <h6 className="text-primary">
-                              {t("civil_tone.title")}
-                            </h6>
-                            <div className="text-wrap">
-                              {inst("civil_tone_scope_note")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                        {impressionsFeature ? (
-                          <Dropdown.Item
-                            onClick={() => setOtherTool("impressions")}
-                            active={otherTool === "impressions"}
-                          >
-                            <h6 className="text-primary">
-                              {t("impressions.title")}
-                            </h6>
-                            <div className="text-wrap">
-                              {t("impressions.tooltip")}
-                            </div>
-                          </Dropdown.Item>
-                        ) : null}
-                      </Dropdown.Menu>
-                    </Dropdown>
+                            <Stack>
+                              <AdditionalToolsIcon />
+                              <span>{t("additional_tools.title")}</span>
+                            </Stack>
+                          </Dropdown.Toggle>
+                        </OverlayTrigger>
+                        <Dropdown.Menu className="additional-tools-menu">
+                          {sourcesFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("sources")}
+                              active={otherTool === "sources"}
+                            >
+                              <h6 className="text-primary">
+                                {t("sources.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("sources_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {ethosFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("ethos")}
+                              active={otherTool === "ethos"}
+                            >
+                              <h6 className="text-primary">
+                                {t("ethos.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("ethos_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {pathosFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("pathos")}
+                              active={otherTool === "pathos"}
+                            >
+                              <h6 className="text-primary">
+                                {t("pathos.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("pathos_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {organizationFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("organization")}
+                              active={otherTool === "organization"}
+                            >
+                              <h6 className="text-primary">
+                                {t("organization.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("term_matrix_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {civilToneFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("civil_tone")}
+                              active={otherTool === "civil_tone"}
+                            >
+                              <h6 className="text-primary">
+                                {t("civil_tone.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("civil_tone_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {impressionsFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("impressions")}
+                              active={otherTool === "impressions"}
+                            >
+                              <h6 className="text-primary">
+                                {t("impressions.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {t("impressions.tooltip")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    ) : null}
                   </ButtonToolbar>
                   {(!otherTool || otherTool === "null") && <NullTool />}
                   {otherTool === "logical_flow" && <LogicalFlow />}

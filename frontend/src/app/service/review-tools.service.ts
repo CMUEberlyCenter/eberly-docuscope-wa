@@ -120,3 +120,34 @@ export const [useImpressionsEnabled, impressionsEnabled$] = bind(
   ),
   false
 );
+
+export const [useBigPictureEnabled, bigPictureEnabled$] = bind(
+  combineLatest([
+    expectationsEnabled$,
+    prominentTopicsEnabled$,
+    logicalFlowEnabled$,
+  ]).pipe(map((big) => big.some(Boolean))),
+  false
+);
+
+export const [useAdditionalToolsEnabled, additionalToolsEnabled$] = bind(
+  combineLatest([
+    sourcesEnabled$,
+    ethosEnabled$,
+    pathosEnabled$,
+    termMatrixEnabled$,
+    civilToneEnabled$,
+    impressionsEnabled$,
+  ]).pipe(map((addl) => addl.some(Boolean))),
+  false
+);
+
+export const [useFineTuningEnabled, fineTuningEnabled$] = bind(
+  combineLatest([
+    additionalToolsEnabled$,
+    paragraphClarityEnabled$,
+    sentenceDensityEnabled$,
+    professionalToneEnabled$,
+  ]).pipe(map((fine) => fine.some(Boolean))),
+  false
+);
