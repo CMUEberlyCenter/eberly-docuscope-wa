@@ -14,28 +14,6 @@ import {
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-// let prompts: PromptData;
-/**
- * Read the prompts from a file with content caching.
- * Note: server will need to be restarted to update prompts.
- * @returns The contents of the prompts json file.
- */
-// export async function readTemplates(): Promise<PromptData> {
-//   // TODO use fs.watch to detect file changes?
-//   if (!prompts) {
-//     const file = await readFile(PROMPT_TEMPLATES_PATH, 'utf8');
-//     prompts = JSON.parse(file);
-//   }
-//   return prompts;
-// }
-
-// function isOpenAIResponse(data: ChatCompletion | unknown): data is ChatCompletion {
-//   return !!data && typeof data === 'object' && 'object' in data && data.object === 'chat.completion';
-// }
-// function isAnthropicResponse(data: Message | unknown): data is Message {
-//   return !!data && typeof data === 'object' && 'type' in data && data.type === 'message';
-// }
-
 /** Anthropic error message schema. */
 type ErrorMessage = {
   type: 'error';
@@ -49,7 +27,9 @@ type ErrorMessage = {
  * Given a template key and instantiating data, perform the chat operation with a LLM.
  * @param key Which prompt to use, key value of an entry in the templates object.
  * @param data Data used to instantiate the prompt.
+ * @param signal AbortSignal to cancel the request.
  * @param json if true, returns a JSON object.
+ * @param cache if true, adds system caching of the input text and description.
  * @returns a string unless json pramameter is truthy.
  */
 export async function doChat<T>(
@@ -68,11 +48,6 @@ export async function doChat<T>(
     console.error(`${key} is not a valid template.`);
     throw new ReferenceError(`${key} template not found.`);
   }
-  // const { templates } = await readTemplates();
-  // if (!(key in templates)) {
-  //   console.error(`${key} is not a valid template.`);
-  //   throw new ReferenceError(`${key} template not found.`);
-  // }
   const { prompt, role, temperature } = template;
   if (!prompt) {
     console.error(`Missing prompt for ${key} template.`);
@@ -91,7 +66,6 @@ export async function doChat<T>(
       console.error('Unable to locate input_text template.');
       throw new ReferenceError('Unable to locate input_text template.');
     }
-
     const text_cache: TextBlockParam = {
       type: 'text',
       text: format(inputTemplate.prompt, data),
@@ -107,7 +81,7 @@ export async function doChat<T>(
         {
           type: 'text',
           text:
-            role ?? // if loaded from templates.json (old style)
+            role ?? // if loaded from templates.json (old style), deprecated
             data.roll ?? // set by calling function (used by notes_to_* tools)
             'You are a writing assistant for students engaged in a writing assignment.',
         },
@@ -186,5 +160,6 @@ export async function doChat<T>(
     delta_ms: finished.getTime() - started.getTime(),
     model,
     response,
+    usage: chat.usage,
   };
 }

@@ -76,25 +76,3 @@ const validate_text = validate(body('text').isString());
 // scribe.post('/proofread', validate_text, scribeText('grammar')); // no prompt for this anymore
 scribe.post('/copyedit', validate_text, scribeText('copyedit'));
 scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));
-
-// @depricated - unused and to be removed
-scribe.post(
-  '/assess_expectation',
-  validate(
-    body('text').isString(),
-    body('expectation').isString(),
-    body('description').isString()
-  ),
-  async (request: Request, response: Response) => {
-    const data = request.body as AssessExpectationRequest;
-    try {
-      const assessment = await doChat('expectation', {
-        ...DEFAULT_LANGUAGE_SETTINGS,
-        ...data,
-      });
-      response.json(assessment.response);
-    } catch (err) {
-      handleChatError(err, response);
-    }
-  }
-);
