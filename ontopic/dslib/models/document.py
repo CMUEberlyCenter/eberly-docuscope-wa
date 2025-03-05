@@ -23,6 +23,7 @@ from PIL import Image
 from io import BytesIO
 
 from bs4 import BeautifulSoup as bs
+from bs4 import Comment
 import bs4
 
 from pydocx import PyDocX
@@ -277,6 +278,16 @@ def is_skip(elem, left_count, topic_filter):
             return False            # otherwise, it's not a skip word.
     else:
         return False
+
+def contains_html_tags(text):
+    # Regular expression to match HTML tags
+    pattern = r'<[^>]+>'
+    
+    # Search for the pattern in the text
+    match = re.search(pattern, text)
+    
+    # Return True if a match is found, False otherwise
+    return match is not None
 
 class DSWord():
     def __init__(self, w, lw, end, lat, pos):
@@ -1216,7 +1227,6 @@ class DSDocument():
                     pos = 'PUNCT'
                 elif token.pos_ == 'PRON' and token.tag_ == 'NN':
                     pos = 'NOUN'
-
                 else:                                                  # Everything else
                     pos = token.pos_
 
@@ -1229,10 +1239,8 @@ class DSDocument():
                     # if incl_nsubj is True (user option), and the POS tag is in 
                     # the options selected by the user
                     left = True
-
                 elif lemma.lower() in DSDocument.user_defined_topics:
                     left = True
-
                 else:
                     left = is_left
 
@@ -1256,7 +1264,7 @@ class DSDocument():
 
         return res, noun_phrases, word_pos
 
-    def analyzeSent(self, sent_data, sent):
+    def analyzeSent(self, sent_dict, sent):
         """
         Perform a basic analysis of a given sentence in'sent_data'.
         """
@@ -1286,6 +1294,8 @@ class DSDocument():
                         return True
             return False      
 
+        sent_data = sent_dict['text_w_info']
+
         res = {}         # create a dictionary
 
         res['NOUNS']     = 0   # total # of nouns
@@ -1309,7 +1319,8 @@ class DSDocument():
         res['NUM_NPS']   = 0   # total # of NPs
         res['L_NPS']     = 0
         res['R_NPS']     = 0
-        res['BE_VERB']  = False
+        res['BE_VERB']   = False
+        res['HEADING']   = False
 
         word_count = 1
         root_pos = -1
@@ -1352,10 +1363,18 @@ class DSDocument():
                 
             word_count+=1
 
+
+        text = sent_dict['text']
+        if contains_html_tags(text):
+            # Strip HTML tags, if any.
+            soup = bs(text, "html.parser")
+            text = soup.text
+
+        text = text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
+        doc = nlp(text)
+
         if type(sent) == str:
-            doc = nlp(sent)
-        else:
-            doc = sent              # Sent is already an Spacy object
+            res['HEADING'] = True
 
         for token in doc:
             if token.dep_ == 'ROOT':
@@ -1376,6 +1395,15 @@ class DSDocument():
         # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert 
         # the 'sent_analysis' property to JSON easily later.
         res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
+
+        tokens = []
+        for token in doc:
+            if token.dep_ == 'ROOT':
+                is_root = True
+            else:
+                is_root = False
+            tokens.append( {'text': token.text, 'is_root': is_root})
+        res['TOKENS'] = tokens
 
         advcl_root = None
         for token in doc:
@@ -1422,6 +1450,10 @@ class DSDocument():
 
         else:
             res['MOD_CL'] = None
+
+        # print("analyzeSent()")
+        # print("res =", res)
+        # print("---------------------------")
 
         return res
 
@@ -1547,14 +1579,6 @@ class DSDocument():
                 para_dict['new_lemmas']         = list()
                 para_dict['given_accum_lemmas'] = list()
                 para_dict['new_accum_lemmas']   = list()
-
-                # stems are not used for now.
-                # para_dict['stems']              = list()
-                # para_dict['accum_stems']        = list()
-                # para_dict['given_stems']        = list()
-                # para_dict['new_stems']          = list()
-                # para_dict['given_accum_stems']  = list()
-                # para_dict['new_accum_stems']    = list()
                 
                 para_dict['style']              = 'Normal'
                 data['paragraphs'].append(para_dict)                  
@@ -1579,21 +1603,14 @@ class DSDocument():
             para_dict['given_lemmas']       = list()
             para_dict['new_lemmas']         = list()
             para_dict['given_accum_lemmas'] = list()
-            para_dict['new_accum_lemmas']   = list()
-            
-            # para_dict['stems']              = list()
-            # para_dict['accum_stems']        = list()
-            # para_dict['given_stems']        = list()
-            # para_dict['new_stems']          = list()
-            # para_dict['given_accum_stems']  = list()
-            # para_dict['new_accum_stems']    = list()
+            para_dict['new_accum_lemmas']   = list()            
             
             para_dict['style']              = style                 # set the paragraph style (from the docx file).
 
             if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title']:
                 slist = [para.text]
             else:
-                parsed_para = nlp(p)                                # split the paragraph into sentencees.
+                parsed_para = nlp(p)                               
                 slist = [sent for sent in parsed_para.sents]
 
             for s in slist:                                         # for each sentence in the paragraph 'p'
@@ -1606,7 +1623,8 @@ class DSDocument():
                     sent_dict['text'] = s.text.strip()
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s, start=word_pos+1) 
 
-                sent_dict['sent_analysis'] = self.analyzeSent(sent_dict['text_w_info'], s) # analyze sentences
+                # sent_dict['sent_analysis'] = self.analyzeSent(sent_dict['text_w_info'], s) # analyze sentences
+                sent_dict['sent_analysis'] = self.analyzeSent(sent_dict, s) # analyze sentences
 
                 sent_dict['lemmas'] = listLemmas(sent_dict['text_w_info'])    # list lemmas in the paragraph
                 sent_dict['accum_lemmas'] = []
@@ -1615,13 +1633,6 @@ class DSDocument():
                 sent_dict['given_accum_lemmas'] = []            # initializes the 'given_lemmas' field.
                 sent_dict['new_accum_lemmas'] = []              # initializes the 'new_lemmas' field.
 
-                # sent_dict['stems']  = listStems(sent_dict['text_w_info'])   # list stems in the paragraph
-                # sent_dict['accum_stems'] = []
-                # sent_dict['given_stems'] = []                  # initializes the 'given_lemmas' field.
-                # sent_dict['new_stems'] = []                    # initializes the 'new_lemmas' field.
-                # sent_dict['given_accum_stems'] = []            # initializes the 'given_lemmas' field.
-                # sent_dict['new_accum_stems'] = []              # initializes the 'new_lemmas' field.
-                
                 para_dict['sentences'].append(sent_dict)        # add sent_dict to para_dict.
 
                 # update the paragraph's 'lemmans' field by adding new lemmas from the new sentence 's'
@@ -1634,18 +1645,7 @@ class DSDocument():
                     if match != True:
                         para_dict['lemmas'].append(sl)
 
-                # update the paragraph's 'stems' field by adding new stems from the new sentence 'ss'
-                # for ss in sent_dict['stems']:                  # for each lemma in the new sentence,
-                    # match = False
-                    # for ps in para_dict['stems']:              # check against each stem in its paragraph.
-                        # if ps[STEM] == ss[STEM]:               # if there is a match
-                            # match = True                       # mark 'match' as True, and beak
-                            # break
-                    # if match != True:
-                        # para_dict['stems'].append(ss)
-
                 sent_dict['accum_lemmas'] = list(para_dict['lemmas'])
-                # sent_dict['accum_stems']  = list(para_dict['stems'])
 
             data['paragraphs'].append(para_dict)                # add para_dict to doc_dict
             
@@ -1653,7 +1653,6 @@ class DSDocument():
             # paragraphs and accumulating lemmas.            
             
             para_dict['accum_lemmas'] = accumulateParaLemmas(data['paragraphs'])
-            # para_dict['accum_stems']  = accumulateParaStems(data['paragraphs'])
 
         section_data['data']    = data
         section_data['end_pos'] = word_pos
@@ -2215,7 +2214,12 @@ class DSDocument():
         for tag in body.children:
 
             if type(tag) == bs4.element.NavigableString:
+                # skip floating strings w/ no tags.
                 continue
+
+            if isinstance(tag, Comment) or hasattr(tag, 'decode_contents') == False: 
+                # skip comments and other elements that do not contain content.
+                continue                
 
             tag_name = tag.name
 
@@ -2236,7 +2240,9 @@ class DSDocument():
                 add_list_recursively(tag, 1, "Bullet")
 
             elif tag_name == 'ol':
-                add_list_recursively(tag, 1, "Number") 
+                add_list_recursively(tag, 1, "Number")              
+            else:
+                text = tag.decode_contents()
 
         section_data = dict()
         section_data['doc']       = doc
@@ -2399,8 +2405,6 @@ class DSDocument():
                     word  = w[WORD]         # ontopic word
                     lemma = w[LEMMA]        # lemma/topic
 
-                    # print("   w =", w)
-
                     # if w[LEMMA] in topics:
                     if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
                         # we need to remove periods.
@@ -2495,7 +2499,7 @@ class DSDocument():
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
                                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                                        html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(pcount, scount, topic, temp_w[WORD])
+                                        html_temp_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(pcount, scount, topic, temp_w[WORD])
                                     else:
                                         html_temp_word = temp_w[WORD]
 
@@ -2847,7 +2851,7 @@ class DSDocument():
             return "DSDocument.toHtml(). No controller is available."
 
         if self.controller.isDocTagged() == False:
-            return self.toHtml_OTOnly(topics=topics, para_pos=para_pos, font_info=font_info)            
+            return self.toHtml_OTOnly(topics=topics, para_pos=para_pos, font_info=font_info) 
             # return self.toHtml_OTOnly_DSWA(topics=topics, para_pos=para_pos, font_info=font_info)                        
 
         if self.sections is None:
@@ -6025,16 +6029,14 @@ class DSDocument():
                         if is_be_verb:
                                 return "<b class=\"topic-text\">"
                         else:
-                            return "<b class=\"topic-text\">"                        
+                            return "<b class=\"topic-text\">"     
+
                     elif wpos == pos[1]:
                         return "</b>"
                 return ""
 
             for np in analysis['NOUN_CHUNKS']:
                 np_positions.append((np['start'], np['end']))
-
-            wpos = 0
-            sent_dict = sent_data[3]
 
             html_str = '<p class="non-topic-text">'
 
@@ -6043,25 +6045,38 @@ class DSDocument():
             else:
                 verb_class = "active-verb"
 
-            for w in sent_dict['text_w_info']:
-                wpos = w[WORD_POS] - word_pos_offset - sent_pos
-                word = w[WORD]
+            wpos = 0
+            tokens = analysis['TOKENS']
 
-                if word in right_quotes or word in end_puncts:
+            while wpos < len(tokens):
+                token = tokens[wpos]
+                w = token['text']
+                tag = getNPTag(wpos)
+
+                if tag.startswith("</b>") and html_str[-1] == ' ':
+                    # if tag is a closing tag, no space before it.
                     html_str = html_str[:-1]
-                elif word == "%":
-                    html_str = html_str[:-1]                
 
-                html_str += getNPTag(wpos)
-                if w[DEP] == 'ROOT':
+                if w in right_quotes or w in end_puncts or w == "%" or w in no_space_patterns:
+                    if html_str[-1] == ' ':
+                        # w shouldn't have a space before it.                
+                        html_str = html_str[:-1]
+
+                html_str += tag
+
+                if tag.startswith("</b>"):
+                    if w not in right_quotes and w not in end_puncts and w != "%" and w not in no_space_patterns:
+                        html_str += " "
+
+                if token['is_root']:
                     html_str += "<span class=\"{}\">{}</span>".format(verb_class, w[WORD])
                 else:
-                    html_str += word
+                    html_str += f"{w}"
 
-                if word not in left_quotes and word not in hyphen_slash:
+                if w not in left_quotes and w not in hyphen_slash:
                     html_str += " "
 
-                wpos += 1            
+                wpos += 1 
 
             html_str += "</p>"
 
