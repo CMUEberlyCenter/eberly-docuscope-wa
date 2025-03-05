@@ -165,7 +165,7 @@ export async function doChat<T>(
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
-    console.log(response);
+    // console.log(response);
   } else {
     console.warn(resp);
   }
