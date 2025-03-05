@@ -379,8 +379,10 @@ export function insertLog(
       prompt: key,
       model,
     },
-    delta_ms,
-    session_id,
-    usage,
+    performance_data: {
+      delta_ms,
+      session_id,
+      usage,
+    }
   });
 }
