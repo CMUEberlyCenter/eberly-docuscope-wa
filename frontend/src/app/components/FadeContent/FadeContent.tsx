@@ -26,7 +26,12 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
 
   return (
     <article {...props}>
-      <AnimateHeight id={id} height={height} className={css["fade-content"]}>
+      <AnimateHeight
+        id={id}
+        height={height}
+        className={css["fade-content"]}
+        data-fade={!expanded}
+      >
         {/* Workaround for html string content. */}
         {htmlContent && (
           <div
