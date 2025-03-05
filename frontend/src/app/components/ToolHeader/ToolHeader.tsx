@@ -10,7 +10,7 @@ export const ToolHeader: FC<Props> = ({ title, instructionsKey }) => (
   <header>
     <h4 className="text-primary fw-bold">{title}</h4>
     <Translation ns="instructions">
-      {(t) => <FadeContent htmlContent={t(instructionsKey)} />}
+      {(t) => <FadeContent role="note" htmlContent={t(instructionsKey)} />}
     </Translation>
   </header>
 );

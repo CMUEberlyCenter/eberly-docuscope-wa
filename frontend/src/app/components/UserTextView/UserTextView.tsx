@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useEffect } from "react";
-import { Placeholder } from "react-bootstrap";
+import { OverlayTrigger, Placeholder, Tooltip } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { ReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
@@ -21,6 +22,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const ctx = useContext(ReviewContext);
+  const { t } = useTranslation();
   const cl = classNames(className, "d-flex flex-column");
   // TODO make this so that it is aware of the previous number of levels and
   // removes them instead of hard coding.
@@ -55,7 +57,16 @@ export const UserTextView: FC<UserTextViewProps> = ({
     <main className={cl} {...props}>
       <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
         <TaskViewerButton />
-        <NoEditIcon />
+        <OverlayTrigger
+          placement="bottom"
+          overlay={<Tooltip>{t("editor.menu.no_edit")}</Tooltip>}
+        >
+          <NoEditIcon
+            role="status"
+            aria-label={t("editor.menu.no_edit")}
+            title={t("editor.menu.no_edit")}
+          />
+        </OverlayTrigger>
       </header>
       <article className="overflow-auto border-top">
         {prose.trim() === "" ? (

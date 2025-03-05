@@ -60,6 +60,7 @@ editor:
     strike: Strikethrough
     task: 'Content Expectations:'
     no_task: None Selected
+    no_edit: Text is not editable.
 tool:
   tab:
     generate: Draft
