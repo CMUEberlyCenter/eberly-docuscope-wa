@@ -29,6 +29,7 @@ import { doChat } from '../data/chat';
 import {
   deleteReviewById,
   findReviewById,
+  insertLog,
   insertReview,
   updateReviewByIdAddAnalysis,
 } from '../data/mongo';
@@ -195,11 +196,25 @@ reviews.get(
         response.json(review);
         return;
       }
+      const start = performance.now();
       const data = await doOnTopic(review, controller.signal);
       if (controller.signal.aborted) {
         return;
       }
       if (!data) throw new Error(`NULL onTopic results.`);
+      const delta_ms = performance.now() - start;
+      insertLog(request.sessionID ?? id, {
+        model: 'ontopic',
+        finished: new Date(),
+        key: 'ontopic',
+        delta_ms,
+        usage: {
+          input_tokens: 0,
+          output_tokens: 0,
+          cache_creation_input_tokens: 0,
+          cache_read_input_tokens: 0,
+        },
+      });
       await updateReviewByIdAddAnalysis(id, data);
       response.json(await findReviewById(id)); // return most recent with update.
     } catch (err) {
@@ -252,21 +267,21 @@ reviews.get(
       for (const { name: expectation, description } of expectations) {
         if (response.writableEnded) break;
         try {
-          const { response: chat_response, finished: datetime } =
-            await doChat<ExpectationsOutput>(
-              'expectations',
-              {
-                ...reviewData(review),
-                expectation,
-                description,
-              },
-              controller.signal,
-              true,
-              true
-            );
+          const chat = await doChat<ExpectationsOutput>(
+            'expectations',
+            {
+              ...reviewData(review),
+              expectation,
+              description,
+            },
+            controller.signal,
+            true,
+            true
+          );
           if (controller.signal.aborted) {
             return;
           }
+          const { response: chat_response, finished: datetime } = chat;
           if (!chat_response)
             throw new Error(`NULL results for ${expectation}`);
           if (!isExpectationsOutput(chat_response)) {
@@ -276,6 +291,7 @@ reviews.get(
             );
             throw new Error(`Malformed results for ${expectation}`);
           }
+          insertLog(request.sessionID ?? id, chat);
           await updateReviewByIdAddAnalysis(id, {
             tool: 'expectations',
             datetime,
@@ -346,17 +362,18 @@ reviews.get(
         response.json(review); // already completed, return saved
         return;
       }
-      const { response: chat_response, finished: datetime } =
-        await doChat<ReviewResponse>(
-          prompt as ReviewPrompt,
-          reviewData(review),
-          controller.signal,
-          true,
-          true
-        );
+      const chat = await doChat<ReviewResponse>(
+        prompt as ReviewPrompt,
+        reviewData(review),
+        controller.signal,
+        true,
+        true
+      );
       if (controller.signal.aborted) {
         return;
       }
+      insertLog(request.sessionID ?? id, chat);
+      const { response: chat_response, finished: datetime } = chat;
       if (!chat_response) throw new Error(`NULL chat response for ${prompt}`);
       await updateReviewByIdAddAnalysis(id, {
         tool: prompt,
@@ -655,9 +672,13 @@ reviews.post(
         document,
         segmented,
         writing_task,
-        token?.user,
+        token?.user ?? request.sessionID,
         token?.platformContext.resource.id
       );
+      // request.session['wtd'] = writing_task; // FUTURE use session for analysis
+      // request.session['document'] = document; // FUTURE use session for analysis
+      request.session['review_id'] = id;
+      request.session['reviews'] = [...(request.session['reviews'] ?? []), id];
       response.send(id);
     } catch (err) {
       if (err instanceof UnprocessableContentError) {

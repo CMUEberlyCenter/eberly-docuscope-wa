@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { randomUUID } from 'crypto';
 import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
@@ -41,7 +42,8 @@ function fromEnvFile(base: string, defaultValue?: string): string {
   return defaultValue ?? '';
 }
 
-export const LTI_KEY = fromEnvFile('LTI_KEY');
+export const SESSION_KEY = fromEnvFile('SESSION_KEY', randomUUID());
+export const LTI_KEY = fromEnvFile('LTI_KEY'); // As it is shared with the LMS, it should always exist.
 export const LTI_HOSTNAME = new URL(
   process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
 );

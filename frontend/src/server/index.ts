@@ -1,6 +1,8 @@
+import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
+import session from 'express-session';
 import { readdir, readFile, stat } from 'fs/promises';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
@@ -37,9 +39,11 @@ import {
   LTI_HOSTNAME,
   LTI_KEY,
   LTI_OPTIONS,
+  MONGO_CLIENT,
   ONTOPIC_URL,
   PLATFORMS_PATH,
   PORT,
+  SESSION_KEY,
 } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -191,6 +195,21 @@ async function __main__() {
     const app = express();
     app.use(express.json());
     app.use(cors({ origin: '*' }));
+    const MongoDBSessionStore = MongoDBStore(session);
+    const store = new MongoDBSessionStore({
+      uri: MONGO_CLIENT,
+      collection: 'sessions',
+    });
+    store.on('error', console.error);
+    app.use(
+      session({
+        secret: SESSION_KEY,
+        store,
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: 'auto' },
+      })
+    );
 
     // Writing Task/Outline Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);

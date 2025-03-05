@@ -1,16 +1,13 @@
 import { Request, Response, Router } from 'express';
 import { body } from 'express-validator';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
-import {
-  AssessExpectationRequest,
-  NotesRequest,
-  TextRequest,
-} from '../../lib/Requests';
+import { NotesRequest, TextRequest } from '../../lib/Requests';
+import { ReviewPrompt } from '../../lib/ReviewResponse';
 import { doChat } from '../data/chat';
+import { insertLog } from '../data/mongo';
 import { NotesPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
-import { ReviewPrompt } from '../../lib/ReviewResponse';
 
 export const scribe = Router();
 
@@ -35,6 +32,7 @@ const scribeNotes =
         role: 'You are a copy editor and expert in grammatical mechanics, usage, and readability.',
       });
       // TODO check for empty prose
+      insertLog(request.sessionID ?? 'index.html', chat); // TODO: use session id
       response.json(chat.response);
     } catch (err) {
       handleChatError(err, response);

@@ -1,3 +1,4 @@
+import { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
 import { Analysis } from '../../lib/ReviewResponse';
 import { WritingTask } from '../../lib/WritingTask';
@@ -16,6 +17,8 @@ const client = new MongoClient(MONGO_CLIENT);
 const WRITING_TASKS = 'writing_tasks';
 /** Database collection for storing reviews.  */
 const REVIEW = 'review';
+/** Database collection for logging. */
+const LOGGING = 'logging';
 
 /** Extra information stored in database about the writing task */
 type WritingTaskDb = WritingTask & {
@@ -190,6 +193,14 @@ export async function initDatabase() {
       { name: ExpireIndexName, expireAfterSeconds: EXPIRE_REVIEW_SECONDS }
     );
   }
+
+  await client.db(MONGO_DB).createCollection(LOGGING, {
+    timeseries: {
+      timeField: 'timestamp',
+      metaField: 'meta',
+    },
+    expireAfterSeconds: 3.154e7, // 1 year
+  });
   await privatizeWritingTasks(); // "expire" old tasks from public listings without deleting them.
   // Want to keep old ones around so that already distributed links do not break.
   const wtdShutdown = await initWritingTasks(
@@ -349,3 +360,27 @@ export async function deleteReviewById(id: string) {
 //     }]);
 //   return avg;
 // }
+
+type LogEntry = {
+  finished: Date;
+  key: string;
+  delta_ms: number;
+  model: Messages.Model;
+  usage: Messages.Usage;
+};
+export function insertLog(
+  session_id: string,
+  { finished, key, delta_ms, model, usage }: LogEntry
+) {
+  const collection = client.db(MONGO_DB).collection(LOGGING);
+  collection.insertOne({
+    timestamp: finished,
+    meta: {
+      prompt: key,
+      model,
+    },
+    delta_ms,
+    session_id,
+    usage,
+  });
+}
