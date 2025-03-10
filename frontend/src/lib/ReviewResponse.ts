@@ -156,9 +156,9 @@ export type LinesOfArgumentsOutput = {
   /** List of claims that supports the thesis */
   arguments: Claim[];
   /** List of claims that challenge an aspect of the thesis or a supporting claim. */
-  counter_arguments: Claim[];
+  counter_arguments?: Claim[];
   /** List of claims that address their corresponding counterargument. */
-  rebuttals: Claim[];
+  rebuttals?: Claim[];
 } & GeneralAssessment;
 
 export type LogicalFlowOutput = {

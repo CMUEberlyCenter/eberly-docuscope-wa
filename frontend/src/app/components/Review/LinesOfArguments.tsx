@@ -71,7 +71,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("lines_of_arguments.no_sentences")}
                       show={
                         (claim_sentences ?? []).length +
-                          (evidence_sentences ?? []).length ===
+                        (evidence_sentences ?? []).length ===
                         0
                       }
                     />
@@ -94,7 +94,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (evidence_sentences ?? []).length &&
-                            "highlight highlight-1"
+                          "highlight highlight-1"
                         )}
                       >
                         <h6 className="d-inline">
@@ -178,18 +178,19 @@ export const LinesOfArguments: FC = () => {
                     />
                   </section>
                 ) : null}
-                <section className="mt-3">
-                  <h5>{t("lines_of_arguments.counter_examples")}</h5>
-                  {review.response.counter_arguments?.length ? (
-                    <Claims
-                      onSelect={onSelect}
-                      activeKey={current}
-                      claims={review.response.counter_arguments}
-                    />
-                  ) : (
-                    <span>{t("lines_of_arguments.no_counter_examples")}</span>
-                  )}
-                </section>
+                {Array.isArray(review.response.counter_arguments) ? (
+                  <section className="mt-3">
+                    <h5>{t("lines_of_arguments.counter_examples")}</h5>
+                    {review.response.counter_arguments?.length ? (
+                      <Claims
+                        onSelect={onSelect}
+                        activeKey={current}
+                        claims={review.response.counter_arguments}
+                      />
+                    ) : (
+                      <span>{t("lines_of_arguments.no_counter_examples")}</span>
+                    )}
+                  </section>) : null}
                 {review.response.rebuttals?.length ? (
                   <section className="mt-3">
                     <h5>{t("lines_of_arguments.rebuttals")}</h5>
@@ -201,9 +202,9 @@ export const LinesOfArguments: FC = () => {
                   </section>
                 ) : null}
                 {"response" in review &&
-                !review.response.thesis &&
-                !review.response.counter_arguments?.length &&
-                !review.response.rebuttals?.length ? (
+                  !review.response.thesis &&
+                  !review.response.counter_arguments?.length &&
+                  !review.response.rebuttals?.length ? (
                   <Alert variant="warning">
                     {t("lines_of_arguments.null")}
                   </Alert>
