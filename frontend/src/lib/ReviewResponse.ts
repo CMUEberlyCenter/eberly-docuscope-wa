@@ -116,6 +116,8 @@ export function isExpectationsOutput(
 
 /** JSON structure for the results of the prominent_topics prompt. */
 export type ProminentTopicsOutput = {
+  central_idea?: string;
+  central_idea_sentences?: string[];
   topics: {
     /** A point or key idea of the text summarized in a single sentence. */
     topic: string;
