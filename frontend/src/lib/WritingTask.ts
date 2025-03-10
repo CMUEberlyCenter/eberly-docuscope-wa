@@ -189,7 +189,7 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
 export function isEnabled(task: WritingTask, toolId: string): boolean {
   // patch for #151 to support old WTDs
   if (!task.info.review_tools) {
-    return toolId !== 'prominent_topics';
+    return !['prominent_topics', 'pathos'].includes(toolId);
   }
   return (
     task.info.review_tools?.some(
