@@ -1,33 +1,37 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect } from "react";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
 import { OverlayTrigger, Placeholder, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { ReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
+import { useSegmentedProse } from "../../service/review.service";
 
-type UserTextViewProps = HTMLProps<HTMLDivElement> & {
-  /** The tagged html string representing the user's draft. */
-  prose: string;
-};
+type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**
  * Component for displaying user's read only draft with sentence highlighting.
  * This sentence highlighting expects a list of strings that exist in the draft
  * as would be returned by the AI service.
  */
 export const UserTextView: FC<UserTextViewProps> = ({
-  prose,
   className,
   ...props
 }) => {
+  const prose = useSegmentedProse();
   const ctx = useContext(ReviewContext);
   const { t } = useTranslation();
   const cl = classNames(className, "d-flex flex-column");
+  const [text, setText] = useState<string>("");
   // TODO make this so that it is aware of the previous number of levels and
   // removes them instead of hard coding.
   const maxHighlightLevels = 2;
   useEffect(() => {
+    setText(ctx?.text ?? prose ?? ""); // if custom tool text use that, otherwise use prose
+  }, [prose, ctx]);
+
+  useEffect(() => {
+    if (!text) return;
     const highlightClasses = [
       "highlight",
       ...Array(maxHighlightLevels)
@@ -51,7 +55,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
       behavior: "smooth",
       block: "center",
     });
-  }, [prose, ctx]);
+  }, [ctx, text]);
 
   return (
     <main className={cl} {...props}>
@@ -69,12 +73,12 @@ export const UserTextView: FC<UserTextViewProps> = ({
         </OverlayTrigger>
       </header>
       <article className="overflow-auto border-top">
-        {prose.trim() === "" ? (
+        {text.trim() === "" ? (
           <Placeholder></Placeholder>
         ) : (
           <div
             className="p-2 flex-grow-1 user-text"
-            dangerouslySetInnerHTML={{ __html: prose }}
+            dangerouslySetInnerHTML={{ __html: text }}
           />
         )}
       </article>

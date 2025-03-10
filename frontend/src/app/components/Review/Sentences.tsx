@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useState } from "react";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
 import { Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
@@ -9,12 +9,12 @@ import {
 } from "../../../lib/OnTopicData";
 import { isErrorData } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import { useOnTopicData, useOnTopicReview } from "../../service/review.service";
+import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { ReviewReset } from "./ReviewContext";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
@@ -82,19 +82,22 @@ const Legend: FC = () => {
   );
 };
 
-type TextData = {
-  plain: string;
-  sentences?: ClarityData;
-};
-
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
-  const review = useOnTopicReview();
   const data = useOnTopicData();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
   const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
+  const [textData, setTextData] = useState<ClarityData | undefined>();
+
+  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
+  const ontopicProse = useOnTopicProse();
+  const dispatch = useContext(ReviewDispatchContext);
+  useEffect(() => {
+    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  }, [ontopicProse]);
+
   useEffect(
     () =>
       setHtmlSentences(
@@ -102,16 +105,12 @@ export const Sentences: FC = () => {
       ),
     [data]
   );
-  const [textData, setTextData] = useState<TextData>({ plain: "" });
 
   useEffect(() => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
-    setTextData({
-      plain: review?.segmented ?? "",
-      sentences: !isErrorData(data) ? data?.response.clarity : undefined,
-    });
-  }, [review, data]);
+    setTextData(!isErrorData(data) ? data?.response.clarity : undefined);
+  }, [data]);
 
   useEffect(() => {
     if (paragraphIndex < 0 || sentenceIndex < 0) {
@@ -165,7 +164,7 @@ export const Sentences: FC = () => {
               <div className="overflow-auto w-100 h-100">
                 <table className="sentence-data align-middle table-hover w-100">
                   <tbody>
-                    {textData.sentences?.map((sentence, i) =>
+                    {textData?.map((sentence, i) =>
                       typeof sentence === "string" ? (
                         <tr key={`p${i}`}>
                           <td className="paragraph-count" colSpan={3}>
@@ -220,49 +219,6 @@ export const Sentences: FC = () => {
                 </table>
               </div>
             }
-            {/* <OnTopicVisualization
-              mode="SENTENCE"
-              singlepane={true}
-              onFlip={() => undefined}
-              onHandleTopic={() => undefined}
-              onHandleSentence={onHandleSentence}
-              loading={false}
-              invalidated={false}
-              textdata={textData}
-              highlight={"#E2D2BB"}
-            /> */}
-            {/* <Card>
-              <Card.Body>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.overview"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.description"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.read_aloud"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.passive"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-              </Card.Body>
-            </Card> */}
           </ErrorBoundary>
         )}
       </article>

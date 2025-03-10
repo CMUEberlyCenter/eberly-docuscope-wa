@@ -27,17 +27,24 @@ import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
-import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
+import {
+  FC,
+  HTMLProps,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
-import { useOnTopicData } from "../../service/review.service";
+import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
 import { clearAllHighlights } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
-import { ReviewReset } from "./ReviewContext";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);
@@ -225,6 +232,14 @@ export const Organization: FC = () => {
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selected, setSelected] = useState<SelectedRowCol>(null);
+
+  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
+  const ontopicProse = useOnTopicProse();
+  const dispatch = useContext(ReviewDispatchContext);
+  useEffect(() => {
+    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  }, [ontopicProse]);
+
   // const [selectedParagraph, setSelectedParagraph] = useState(-1);
   // const [selectedSentence, setSelectedSentence] = useState(-1);
   // const [selectedTopic, setSelectedTopic] = useState<string[]>([]);

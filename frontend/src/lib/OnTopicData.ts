@@ -92,11 +92,10 @@ export type OnTopicData = {
   local?: LocalData[];
 };
 
-export const cleanAndRepairSentenceData = (
-  data?: { html_sentences?: string[][] } | null
-) => {
-  if (!data || !data.html_sentences) return null;
-  return data.html_sentences.map((paragraph) =>
-    paragraph.filter((sentence) => sentence !== '')
+export const cleanAndRepairSentenceData = (data?: OnTopicData | null) => {
+  return (
+    data?.html_sentences?.map((paragraph) =>
+      paragraph.filter((sentence) => sentence !== '')
+    ) ?? null
   ); // sentence.trim()?
 };

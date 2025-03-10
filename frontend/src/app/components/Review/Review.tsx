@@ -34,10 +34,6 @@ import {
   useSourcesEnabled,
   useTermMatrixEnabled,
 } from "../../service/review-tools.service";
-import {
-  useOnTopicProse,
-  useSegmentedProse,
-} from "../../service/review.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
@@ -56,6 +52,7 @@ import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
 
+type TabKey = "big_picture" | "fine_tuning";
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 const NullTool: FC = () => (
@@ -70,12 +67,9 @@ export const Review: FC = () => {
   const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
-  const segmentedProse = useSegmentedProse();
-  const ontopicProse = useOnTopicProse();
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("expectations");
   const [otherTool, setOtherTool] = useState<Tool>("null");
-  const [prose, setProse] = useState<string>("");
 
   // useUnload();
   useEffect(() => {
@@ -83,19 +77,6 @@ export const Review: FC = () => {
       window.document.title = t("document.title");
     }
   }, [t, ready]);
-  useEffect(() => {
-    if (!segmentedProse && !ontopicProse) {
-      setProse("");
-    } else if (
-      ontopicProse &&
-      tab === "fine_tuning" &&
-      ["sentences", "organization"].includes(otherTool)
-    ) {
-      setProse(ontopicProse);
-    } else {
-      setProse(segmentedProse ?? "");
-    }
-  }, [segmentedProse, ontopicProse, tab, otherTool]);
 
   const civilToneFeature = useCivilToneEnabled();
   const ethosFeature = useEthosEnabled();
@@ -122,7 +103,7 @@ export const Review: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <UserTextView prose={prose} className="my-1" />
+        <UserTextView className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <header>
             <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
@@ -145,7 +126,7 @@ export const Review: FC = () => {
               if (k === "big_picture" && tool === "null") {
                 setTool("expectations"); // FIXME initial tool
               }
-              setTab(k as "big_picture" | "fine_tuning");
+              setTab(k as TabKey);
             }}
             variant="underline"
             className="justify-content-around inverse-color"
@@ -334,24 +315,6 @@ export const Review: FC = () => {
               </Tab>
             ) : null}
           </Tabs>
-          {/* <div className="position-relative flex-grow-1 overflow-auto">
-            {(!tool || tool === "null") && <NullTool />}
-            {tool === "lines_of_arguments" && <LinesOfArguments />}
-            {tool === "logical_flow" && <LogicalFlow />}
-            {tool === "civil_tone" && <CivilTone />}
-            {tool === "ethos" && <Ethos />}
-            {tool === "expectations" && <Expectations />} */}
-          {/* {tool === "global_coherence" && <GlobalCoherence />} */}
-          {/* {tool === "impressions" && <NullTool />}
-            {tool === "prominent_topics" && <ProminentTopics />}
-            {tool === "organization" && <Organization />}
-            {tool === "sentences" && <Sentences />}
-            {tool === "paragraph_clarity" && <ParagraphClarity />}
-            {tool === "pathos" && <Pathos />}
-            {tool === "professional_tone" && <ProfessionalTone />}
-            {tool === "sources" && <Sources />} */}
-          {/* Add more tool displays here. */}
-          {/* </div> */}
           <Legal />
         </aside>
       </Split>
