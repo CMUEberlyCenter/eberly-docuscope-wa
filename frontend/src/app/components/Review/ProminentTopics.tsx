@@ -58,9 +58,11 @@ export const ProminentTopics: FC = () => {
                     {(t) => <p>{t("prominent_topics_insights")}</p>}
                   </Translation>
                 </header>
-                {review.response.central_idea ? (<>
-                  <h6>{t("prominent_topics.main_idea")}</h6>
-                  <p>{review.response.central_idea}</p></>
+                {review.response.central_idea ? (
+                  <>
+                    <h6>{t("prominent_topics.main_idea")}</h6>
+                    <p>{review.response.central_idea}</p>
+                  </>
                 ) : null}
                 {review.response.topics.length ? (
                   <Accordion>
@@ -86,7 +88,7 @@ export const ProminentTopics: FC = () => {
                             <AlertIcon
                               show={
                                 topic_sentences.length +
-                                elaboration_sentences.length ===
+                                  elaboration_sentences.length ===
                                 0
                               }
                               message={t("prominent_topics.no_sentences")}
@@ -110,7 +112,7 @@ export const ProminentTopics: FC = () => {
                                 className={classNames(
                                   "pt-3 px-3 pb-0",
                                   elaboration_sentences.length &&
-                                  "highlight highlight-1"
+                                    "highlight highlight-1"
                                 )}
                               >
                                 <h6>{t("prominent_topics.elaborations")}</h6>
@@ -148,7 +150,8 @@ export const ProminentTopics: FC = () => {
                         </Accordion.Item>
                       )
                     )}
-                  </Accordion>) : (
+                  </Accordion>
+                ) : (
                   <Alert variant="warning">{t("prominent_topics.null")}</Alert>
                 )}
               </section>
