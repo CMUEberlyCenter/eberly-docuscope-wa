@@ -6069,7 +6069,7 @@ class DSDocument():
                         html_str += " "
 
                 if token['is_root']:
-                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w[WORD])
+                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w)
                 else:
                     html_str += f"{w}"
 
