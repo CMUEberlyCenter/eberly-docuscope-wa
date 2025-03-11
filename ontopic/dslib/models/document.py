@@ -18,15 +18,15 @@ import os
 from collections import Counter 
 
 # from urllib.parse import urlparse
-import base64
-from PIL import Image
-from io import BytesIO
+# import base64
+# from PIL import Image
+# from io import BytesIO
 
 from bs4 import BeautifulSoup as bs
 from bs4 import Comment
 import bs4
 
-from pydocx import PyDocX
+# from pydocx import PyDocX
 import unidecode
 
 import dslib.utils as utils
@@ -1370,7 +1370,7 @@ class DSDocument():
             soup = bs(text, "html.parser")
             text = soup.text
 
-        text = text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
+        text = re.sub(r"\s+", " ", text.strip()) # text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
         doc = nlp(text)
 
         if type(sent) == str:
@@ -1396,13 +1396,10 @@ class DSDocument():
         # the 'sent_analysis' property to JSON easily later.
         res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
 
-        tokens = []
-        for token in doc:
-            if token.dep_ == 'ROOT':
-                is_root = True
-            else:
-                is_root = False
-            tokens.append( {'text': token.text, 'is_root': is_root})
+        tokens = [{'text': token.text, 'is_root': token.dep_ == 'ROOT'} for token in doc]
+        # for token in doc:
+        #     is_root = token.dep_ == 'ROOT'
+        #     tokens.append( {'text': token.text, 'is_root': is_root})
         res['TOKENS'] = tokens
 
         advcl_root = None
@@ -2861,12 +2858,12 @@ class DSDocument():
                 data = self.sections[self.current_section]['data']
                 doc  = self.sections[self.current_section]['doc']
                 if doc is None:
-                    raise valueError
+                    raise ValueError
                 else:
                     docx_paras = doc.paragraphs
 
                 if data is None:
-                    raise valueError
+                    raise ValueError
             except:
                 logging.error(self.sections[self.current_section])                
                 return
@@ -3777,7 +3774,7 @@ class DSDocument():
                         bSkipPunct = True
                     else:
                         bSkipPunct = False
-                    res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
+                    res.append(tuple([p_count, s_count, s, bSkipPunct]))
                     s_count += 1
 
                 i+= 1
@@ -6019,31 +6016,21 @@ class DSDocument():
             if type(sent_data) == str and sent_data == "\n":
                 return ""
 
-            np_positions = list()
-            analysis = sent_data[2]
+            analysis = sent_data[2]['sent_analysis']
+            np_positions = list([(np['start'], np['end']) for np in analysis['NOUN_CHUNKS']])
             is_be_verb = analysis['BE_VERB']
 
             def getNPTag(wpos):
                 for pos in np_positions:
                     if wpos == pos[0]:
-                        if is_be_verb:
-                                return "<b class=\"topic-text\">"
-                        else:
-                            return "<b class=\"topic-text\">"     
-
+                        return '<b class="topic-text">'
                     elif wpos == pos[1]:
                         return "</b>"
                 return ""
 
-            for np in analysis['NOUN_CHUNKS']:
-                np_positions.append((np['start'], np['end']))
-
             html_str = '<p class="non-topic-text">'
 
-            if is_be_verb:
-                verb_class = "be-verb"
-            else:
-                verb_class = "active-verb"
+            verb_class = "be-verb" if is_be_verb else "active-verb"
 
             wpos = 0
             tokens = analysis['TOKENS']
@@ -6069,7 +6056,7 @@ class DSDocument():
                         html_str += " "
 
                 if token['is_root']:
-                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w[WORD])
+                    html_str += f'<span class="{verb_class}">{w}</span>'
                 else:
                     html_str += f"{w}"
 
@@ -6098,7 +6085,7 @@ class DSDocument():
                 html_strs = list()
                 
             elif type(sent_data[0]) != str and first_sent:
-                sent_dict = sent_data[3]
+                sent_dict = sent_data[2]
 
                 w = sent_dict['text_w_info'][0] # get the first word
                 first_word_pos = w[WORD_POS]

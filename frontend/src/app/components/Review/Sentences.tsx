@@ -186,31 +186,38 @@ export const Sentences: FC = () => {
                           }
                         >
                           <td className="text-end">
-                            {sentence[2].NPS.slice(0, sentence[2].L_NPS).map(
-                              (np, j) => (
-                                <TopicTextIcon
-                                  key={`s${i}-lnp${j}`}
-                                  title={np}
-                                />
-                              )
-                            )}
+                            {sentence[2].sent_analysis.NPS.slice(
+                              0,
+                              sentence[2].sent_analysis.L_NPS
+                            ).map((np, j) => (
+                              <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
+                            ))}
                           </td>
                           <td className="text-center">
-                            {sentence[2].BE_VERB ? (
-                              <BeVerbIcon />
+                            {sentence[2].sent_analysis.BE_VERB ? (
+                              <BeVerbIcon
+                                title={sentence[2].sent_analysis.TOKENS.filter(
+                                  ({ is_root }) => is_root
+                                )
+                                  .map(({ text }) => text)
+                                  .join(" ")}
+                              />
                             ) : (
-                              <ActiveVerbIcon />
+                              <ActiveVerbIcon
+                                title={sentence[2].sent_analysis.TOKENS.filter(
+                                  ({ is_root }) => is_root
+                                )
+                                  .map(({ text }) => text)
+                                  .join(" ")}
+                              />
                             )}
                           </td>
                           <td className="text-start">
-                            {sentence[2].NPS.slice(-sentence[2].R_NPS).map(
-                              (np, j) => (
-                                <TopicTextIcon
-                                  key={`s${i}-rnp${j}`}
-                                  title={np}
-                                />
-                              )
-                            )}
+                            {sentence[2].sent_analysis.NPS.slice(
+                              -sentence[2].sent_analysis.R_NPS
+                            ).map((np, j) => (
+                              <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
+                            ))}
                           </td>
                         </tr>
                       )
