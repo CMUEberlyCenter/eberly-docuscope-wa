@@ -55,14 +55,14 @@ import SelectExpectation from "../SelectExpectation/SelectExpectation";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
-type ToolCardProps = HTMLProps<HTMLDivElement>;
+type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 class NoSelectedTextError extends Error {}
 
 /**
  * Top level framework for writing tools display.
  */
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
-  ({ className, ...props }, ref) => {
+  ({ className, hasSelection, ...props }, ref) => {
     const { t } = useTranslation();
     const writingTask = useWritingTask();
     // TODO extend from global to global+assignment
@@ -326,7 +326,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             title={t("tool.button.prose.title")}
                             icon={<GenerateProseIcon />}
                             onClick={() => onTool("prose")}
-                            disabled={!scribe}
+                            disabled={!scribe || !hasSelection}
                           />
                         )}
                         {bulletsFeature && (
@@ -335,7 +335,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             title={t("tool.button.bullets.title")}
                             icon={<GenerateBulletsIcon />}
                             onClick={() => onTool("bullets")}
-                            disabled={!scribe}
+                            disabled={!scribe || !hasSelection}
                           />
                         )}
                       </ButtonGroup>
@@ -347,7 +347,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             tooltip={t("tool.button.expectation.tooltip")}
                             title={t("tool.button.expectation.title")}
                             icon={<CheckExpectationIcon />}
-                            disabled={!scribe || !writingTask}
+                            disabled={!scribe || !writingTask || !hasSelection}
                             onClick={() => onTool("expectation")}
                           />
                         )}
@@ -364,7 +364,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         <ToolButton
                           tooltip={t("tool.button.flow.tooltip")}
                           onClick={() => onTool("flow")}
-                          disabled={!scribe}
+                          disabled={!scribe || !hasSelection}
                           icon={<LocalCoherenceIcon />}
                           title={t("tool.button.flow.title")}
                         />
@@ -373,7 +373,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                         <ToolButton
                           tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}
-                          disabled={!scribe}
+                          disabled={!scribe || !hasSelection}
                           icon={<CopyEditIcon />}
                           title={t("tool.button.copyedit.title")}
                         />
