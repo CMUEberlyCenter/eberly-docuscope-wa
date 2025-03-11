@@ -208,7 +208,15 @@ export const Review: FC = () => {
                         >
                           <Dropdown.Toggle
                             variant="outline-primary"
-                            className="tool_button"
+                            className="tool_button tool_dropdown"
+                            active={[
+                              "sources",
+                              "ethos",
+                              "pathos",
+                              "organization",
+                              "civil_tone",
+                              "impressions",
+                            ].includes(otherTool)}
                           >
                             <Stack>
                               <AdditionalToolsIcon />

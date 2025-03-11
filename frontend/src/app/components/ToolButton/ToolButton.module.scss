@@ -27,3 +27,8 @@
     max-width: 74px;
   }
 }
+
+.tool_dropdown.active {
+  --bs-btn-active-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-active-color: var(--bs-primary);
+}
