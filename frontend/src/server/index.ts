@@ -2,6 +2,7 @@ import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
+import promBundle from 'express-prom-bundle';
 import session from 'express-session';
 import { readdir, readFile, stat } from 'fs/promises';
 import { Provider } from 'ltijs';
@@ -33,7 +34,7 @@ import {
   isInstructor,
   LTIPlatform,
 } from './model/lti';
-import { metrics } from './prometheus';
+import { metrics, myproseSessionErrorsTotal } from './prometheus';
 import {
   LTI_DB,
   LTI_HOSTNAME,
@@ -200,7 +201,10 @@ async function __main__() {
       uri: MONGO_CLIENT,
       collection: 'sessions',
     });
-    store.on('error', console.error);
+    store.on('error', (err) => {
+      console.error(err);
+      myproseSessionErrorsTotal.inc({ error: err.message });
+    });
     app.use(
       session({
         secret: SESSION_KEY,
@@ -211,6 +215,7 @@ async function __main__() {
       })
     );
 
+    app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
     // Scribe Endpoints
@@ -219,6 +224,8 @@ async function __main__() {
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
     app.use('/api/v2/reviews', reviews);
+
+    // app.use('/api/v2/performance', promptPerformance);
     // Metrics
     app.use(metrics);
 

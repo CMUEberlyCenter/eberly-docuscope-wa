@@ -10,6 +10,7 @@ import {
   MONGO_DB,
 } from '../settings';
 import { initWritingTasks } from './writing_task_description';
+import { type ChatResponse } from './chat';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -194,13 +195,14 @@ export async function initDatabase() {
     );
   }
 
-  await client.db(MONGO_DB).createCollection(LOGGING, {
+  await client.db(MONGO_DB).createCollection<LogData>(LOGGING, {
     timeseries: {
       timeField: 'timestamp',
       metaField: 'meta',
     },
-    expireAfterSeconds: 3.154e7, // 1 year
+    expireAfterSeconds: 3.154e7, // 1 year // 7.884e+6, // 3 months //
   });
+
   await privatizeWritingTasks(); // "expire" old tasks from public listings without deleting them.
   // Want to keep old ones around so that already distributed links do not break.
   const wtdShutdown = await initWritingTasks(
@@ -361,18 +363,24 @@ export async function deleteReviewById(id: string) {
 //   return avg;
 // }
 
-type LogEntry = {
-  finished: Date;
-  key: string;
-  delta_ms: number;
-  model: Messages.Model;
-  usage: Messages.Usage;
+type LogData = {
+  _id?: string;
+  timestamp: Date;
+  meta: {
+    prompt: string;
+    model: Messages.Model;
+  };
+  performance_data: {
+    delta_ms: number;
+    session_id: string;
+    usage: Messages.Usage;
+  };
 };
 export function insertLog(
   session_id: string,
-  { finished, key, delta_ms, model, usage }: LogEntry
+  { finished, key, delta_ms, model, usage }: ChatResponse<unknown>
 ) {
-  const collection = client.db(MONGO_DB).collection(LOGGING);
+  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   collection.insertOne({
     timestamp: finished,
     meta: {
@@ -383,6 +391,71 @@ export function insertLog(
       delta_ms,
       session_id,
       usage,
-    }
+    },
   });
+}
+
+type AggregateLogData = {
+  _id: string;
+  count: number;
+  avgTime: number;
+  avgInputTokens: number; // input_tokens
+  avgOutputTokens: number; // output_tokens
+  avgCacheCreate: number; // cache_creation_input_tokens
+  maxCacheCreate: number; // cache_creation_input_tokens
+  avgCacheRead: number; // cache_read_input_tokens
+  maxCacheRead: number; // cache_read_input_tokens
+};
+
+export async function getLogData(): Promise<AggregateLogData[]> {
+  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const cursor = collection.aggregate<AggregateLogData>([
+    {
+      $group: {
+        _id: '$meta.prompt',
+        count: { $count: {} },
+        avgTime: { $avg: '$performance_data.delta_ms' },
+        avgInputTokens: { $avg: '$performance_data.usage.input_tokens' },
+        avgOutputTokens: { $avg: '$performance_data.usage.output_tokens' },
+        avgCacheCreate: {
+          $avg: '$performance_data.usage.cache_creation_input_tokens',
+        },
+        maxCacheCreate: {
+          $max: '$performance_data.usage.cache_creation_input_tokens',
+        },
+        avgCacheRead: {
+          $avg: '$performance_data.usage.cache_read_input_tokens',
+        },
+        maxCacheRead: {
+          $max: '$performance_data.usage.cache_read_input_tokens',
+        },
+      },
+    },
+  ]);
+  const ret: AggregateLogData[] = [];
+  for await (const doc of cursor) {
+    ret.push(doc);
+  }
+  return ret;
+}
+
+export async function getLatestLogData(prompt: string): Promise<LogData[]> {
+  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const cursor = collection.aggregate<LogData>(
+    [
+      {
+        $match: {
+          'meta.prompt': prompt,
+        },
+      },
+      { $sort: { timestamp: -1 } },
+      { $limit: 1 },
+    ],
+    { maxTimeMS: 60000, allowDiskUse: true }
+  );
+  const ret: LogData[] = [];
+  for await (const doc of cursor) {
+    ret.push(doc);
+  }
+  return ret;
 }

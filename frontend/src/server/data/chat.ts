@@ -163,3 +163,5 @@ export async function doChat<T>(
     usage: chat.usage,
   };
 }
+
+export type ChatResponse<T = string> = Awaited<ReturnType<typeof doChat<T>>>;

@@ -37,6 +37,7 @@ import { IdToken } from '../model/lti';
 import { Review } from '../model/review';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
+import { countPrompt } from '../prometheus';
 
 export const reviews = Router();
 
@@ -141,6 +142,15 @@ const reviewData = ({
       : undefined) ?? '',
 });
 
+/**
+ * @route GET <reviews>/:id/
+ * @summary Retrieve review data entry.
+ * @description Retrieves review data entry from the database.  This is the current state of the review and does not initiate any analyses.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
   '/:id',
   validate(param('id', 'Invalid review id').isMongoId()),
@@ -160,6 +170,15 @@ reviews.get(
   }
 );
 
+/**
+ * @route GET <reviews>/:id/text
+ * @summary Retrieve text for the given review.
+ * @description Retrieves the segmented text for the review for display.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Segmented user submitted text.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
   '/:id/text',
   validate(param('id', 'Invalid review id').isMongoId()),
@@ -179,6 +198,15 @@ reviews.get(
   }
 );
 
+/**
+ * @route GET <reviews>/:id/ontopic
+ * @summary Retrieve review data including onTopic analysis.
+ * @description Retrieves review data for onTopic and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
   '/:id/ontopic',
   validate(param('id', 'Invalid review id').isMongoId()),
@@ -196,25 +224,11 @@ reviews.get(
         response.json(review);
         return;
       }
-      const start = performance.now();
       const data = await doOnTopic(review, controller.signal);
       if (controller.signal.aborted) {
         return;
       }
       if (!data) throw new Error(`NULL onTopic results.`);
-      const delta_ms = performance.now() - start;
-      insertLog(request.sessionID ?? id, {
-        model: 'ontopic',
-        finished: new Date(),
-        key: 'ontopic',
-        delta_ms,
-        usage: {
-          input_tokens: 0,
-          output_tokens: 0,
-          cache_creation_input_tokens: 0,
-          cache_read_input_tokens: 0,
-        },
-      });
       await updateReviewByIdAddAnalysis(id, data);
       response.json(await findReviewById(id)); // return most recent with update.
     } catch (err) {
@@ -228,6 +242,15 @@ reviews.get(
   }
 );
 
+/**
+ * @route GET <reviews>/:id/expectations
+ * @summary Retrieve expectations review data.
+ * @description Retrieves review data for expectations and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Stream of updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
   '/:id/expectations',
   validate(param('id', 'Invalid review id').isMongoId()),
@@ -291,6 +314,7 @@ reviews.get(
             );
             throw new Error(`Malformed results for ${expectation}`);
           }
+          countPrompt(chat);
           insertLog(request.sessionID ?? id, chat);
           await updateReviewByIdAddAnalysis(id, {
             tool: 'expectations',
@@ -336,6 +360,16 @@ reviews.get(
   }
 );
 
+/**
+ * @route GET <reviews>/:id/:prompt
+ * @summary Retrieve review data for a specific tool.
+ * @description Retrieves review data for a specific tool and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @param prompt The tool to use for the analysis.
+ * @returns Updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
   '/:id/:prompt',
   validate(
@@ -372,6 +406,7 @@ reviews.get(
       if (controller.signal.aborted) {
         return;
       }
+      countPrompt(chat);
       insertLog(request.sessionID ?? id, chat);
       const { response: chat_response, finished: datetime } = chat;
       if (!chat_response) throw new Error(`NULL chat response for ${prompt}`);
@@ -401,6 +436,7 @@ reviews.get(
  * @returns stream of review data, updated as reviews complete, finishes when all review complete.
  * @returns { status: 404, body: @type{FileNotFound}}
  * @returns { status: 500: body: @type{InternalServerError}}
+ * @deprecated 2.1.0
  */
 reviews.get(
   '/:id/ex',
@@ -637,6 +673,8 @@ type ReviewBody = {
 
 /**
  * @route POST <review>/
+ * @summary Add a review request.
+ * @description
  * Handles post request to add a review requiest for the given content and
  * performs any preprocessing of the incoming document.
  * This adds the document text and writing task to the database, it does
