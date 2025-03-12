@@ -78,7 +78,7 @@ export const ParagraphClarity: FC = () => {
                           onEntered={() =>
                             dispatch({
                               type: "set",
-                              sentences: [sentence_ids, [paragraph_id]],
+                              sentences: [sentence_ids],
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}

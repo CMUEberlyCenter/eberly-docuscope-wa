@@ -76,7 +76,7 @@ export const LogicalFlow: FC = () => {
                           onEntered={() =>
                             dispatch({
                               type: "set",
-                              sentences: [sentences, paragraphs],
+                              sentences: [sentences],
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}
