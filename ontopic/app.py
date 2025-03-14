@@ -53,13 +53,16 @@ class OnTopicRequest(BaseModel):  # pylint: disable=too-few-public-methods
 
 type Lemma = list[str | bool | None | int]
 
-
 class NounChunk(BaseModel):  # pylint: disable=too-few-public-methods
     """ onTopic Clarity noun chunk data. """
     text: str
     start: int
     end: int
 
+class Token(BaseModel):  # pylint: disable=too-few-public-methods
+    """ onTopic sentence Tokens. """
+    text: str
+    is_root: bool
 
 class SentenceData(BaseModel):  # pylint: disable=too-few-public-methods
     """ onTopic Clarity sentence statistics. """
@@ -81,7 +84,9 @@ class SentenceData(BaseModel):  # pylint: disable=too-few-public-methods
     L_NPS: int
     R_NPS: int
     BE_VERB: bool
+    HEADING: bool
     NOUN_CHUNKS: list[NounChunk]
+    TOKENS: list[Token]
     MOD_CL: None | tuple[int, int, str, int]  # [start, end, mod_cl, last_np]
 
 
@@ -98,8 +103,7 @@ class ClaritySentenceData(BaseModel):  # pylint: disable=too-few-public-methods
     new_accum_lemmas: list[Lemma]
 
 
-type ClarityData = str | tuple[int, int,
-                               SentenceData, ClaritySentenceData, bool]
+type ClarityData = str | tuple[int, int, ClaritySentenceData, bool]
 
 
 class CoherenceParagraph(BaseModel):  # pylint: disable=too-few-public-methods
@@ -168,7 +172,7 @@ async def ontopic(data: OnTopicRequest):
 
     coherence = document.generateGlobalVisData(
         2, 1, views.TOPIC_SORT_APPEARANCE)
-    clarity = document.getSentStructureData()
+    clarity: list[ClarityData] = document.getSentStructureData()
     topics = document.getCurrentTopics()
 
     num_paragraphs = coherence.get('num_paras')
@@ -191,7 +195,7 @@ async def ontopic(data: OnTopicRequest):
         coherence=CoherenceData.model_validate(coherence),
         local=local,
         clarity=clarity,
-        html=document.toHtml_OTOnly_DSWA(topics, -1),
+        html=document.toHtml_OTOnly(topics, -1),
         html_sentences=document.getHtmlSents(clarity)
     )
 

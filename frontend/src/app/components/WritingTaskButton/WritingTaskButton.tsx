@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useId, useState } from "react";
+import { FC, HTMLProps, useId, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
@@ -21,12 +21,6 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
   const [showSelect, setShowSelect] = useState(false);
   const taskId = useId();
   const selectId = useId();
-  // If writing task is changed, show its details.
-  useEffect(() => {
-    if (writingTask) {
-      setShowTask(true);
-    }
-  }, [writingTask]);
 
   const cn = classNames(
     className,

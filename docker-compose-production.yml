@@ -51,7 +51,7 @@ services:
       EXPIRE_REVIEW_SECONDS: 86400
       LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
-      MONGO_DB: docuscope
+      MONGO_DB: myprose
       MONGO_HOST: mongo:27017
       MONGO_PASSWORD_FILE: /run/secrets/mongo_pass
       MONGO_USER_FILE: /run/secrets/mongo_user

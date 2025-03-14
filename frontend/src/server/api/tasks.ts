@@ -1,33 +1,33 @@
 import { Request, Response, Router } from 'express';
-import {
-  findAllPublicWritingTasks,
-  findWritingTaskById,
-  insertWritingTask,
-  updatePublicWritingTasks,
-} from '../data/mongo';
+import { param } from 'express-validator';
 import {
   FileNotFound,
   InternalServerError,
   UnprocessableContent,
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
-import { validate } from '../model/validate';
-import { param } from 'express-validator';
-import { LTI_HOSTNAME } from '../settings';
 import { validateWritingTask } from '../../lib/schemaValidate';
 import { isWritingTask } from '../../lib/WritingTask';
+import {
+  findAllPublicWritingTasks,
+  findWritingTaskById,
+  insertWritingTask,
+} from '../data/mongo';
+import { validate } from '../model/validate';
+import { LTI_HOSTNAME } from '../settings';
 
 export const writingTasks = Router();
 
-writingTasks.patch('/update', async (_request: Request, response: Response) => {
-  try {
-    await updatePublicWritingTasks();
-    response.sendStatus(204);
-  } catch (err) {
-    console.error(err);
-    response.status(500).send(InternalServerError(err));
-  }
-});
+// Replacing with fs.watch
+// writingTasks.patch('/update', async (_request: Request, response: Response) => {
+//   try {
+//     await updatePublicWritingTasks();
+//     response.sendStatus(204);
+//   } catch (err) {
+//     console.error(err);
+//     response.status(500).send(InternalServerError(err));
+//   }
+// });
 
 writingTasks.get(
   '/:fileId',

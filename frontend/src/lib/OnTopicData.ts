@@ -59,6 +59,7 @@ type SentenceData = {
   R_NPS: number;
   BE_VERB: boolean;
   NOUN_CHUNKS: { text: string; start: number; end: number }[];
+  TOKENS: { text: string; is_root: boolean }[];
   MOD_CL: null | [number, number, string, number]; // [start, end, mod_cl, last_np]
 };
 type ClaritySentenceData = {
@@ -78,7 +79,6 @@ export type ClarityData = Array<
   | [
       number, // paragraph index (1-based)
       number, // sentence index (1-based)
-      SentenceData,
       ClaritySentenceData,
       boolean, // skip punctuation
     ]
@@ -92,11 +92,10 @@ export type OnTopicData = {
   local?: LocalData[];
 };
 
-export const cleanAndRepairSentenceData = (
-  data?: { html_sentences?: string[][] } | null
-) => {
-  if (!data || !data.html_sentences) return null;
-  return data.html_sentences.map((paragraph) =>
-    paragraph.filter((sentence) => sentence !== '')
+export const cleanAndRepairSentenceData = (data?: OnTopicData | null) => {
+  return (
+    data?.html_sentences?.map((paragraph) =>
+      paragraph.filter((sentence) => sentence !== '')
+    ) ?? null
   ); // sentence.trim()?
 };

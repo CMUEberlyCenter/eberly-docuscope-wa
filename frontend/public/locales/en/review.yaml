@@ -2,13 +2,40 @@
 document.title: myProse Review
 title: Review
 select_tool: Select a tool
+tabs:
+  big_picture: Big Picture
+  fine_tuning: Fine Tuning
+summary:
+  title: Summary
+  strengths: "What's working:"
+  weaknesses: "Revision opportunities:"
+insights: Revision Insights
 error:
   header: Error Loading Review!
   content: There was an error retrieving the review data.
   details: 'Details: {{message}}'
+additional_tools:
+  title: Additional Tools
+  tooltip: Refine your draft with additional review.
+civil_tone:
+  title: Civil Tone
+  tooltip: Using respectful and balanced language promotes collaborative dialogue.
+  error: Error displaying Civil Tone tool.
+  'null': No issues found.
+  prefix: 'Your Sentence:'
+ethos:
+  title: Credibility (Ethos)
+  tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
+  error: Error displaying Credibilty tool.
+  expertise: Expertise Ethos
+  analytical: Analytical Ethos
+  balanced: Balanced Ethos
+  assessment: "Observation:"
+  no_sentences: No relevant text found in your draft.
+  'null': No feedback.
 sentences:
-  title: Sentence Density
-  error: 'Error loading Sentence data:'
+  title: Sentence Clarity
+  error: 'Error displaying Sentence data:'
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
@@ -44,33 +71,38 @@ global_coherence:
     explanation: 'Issue(s):'
     suggestions: 'Suggestions:'
   'null': No feeback concerning logical progression could be generated from your draft.
-key_ideas:
-  entry: Prominent Topics
+prominent_topics:
   title: Prominent Topics
+  tooltip: Elaborating on prominent topics with sufficient detail helps readers grasp key ideas.
   main_idea: Main Idea
   error: Error reading Prominent Topics data.
   no_sentences: No relevant text addressing this topic was found in your draft.
   idea: 'Topic:'
   elaborations: Elaboration Strategies
   sentences: Sentences
-  suggestions: Suggestions
+  suggestions: Comments
   'null': No topics were found in your draft.
-arguments:
-  entry: Lines of Arguments
-  title: Review Lines of Arguments
+lines_of_arguments:
+  title: Lines of Argument
   error: Error reading Lines of Arguements data.
   no_sentences: No sentences to support this claim were found in your draft.
   main: Thesis
   arguments: Arguments
   counter_examples: Counter Argument
+  no_counter_examples: No obvious counterarguments are found.
   rebuttals: Rebuttals
   claim: 'Claim:'
   support: 'Support:'
   sentences: Sentences
-  suggestions: Suggestions
+  suggestions: Comments
   'null': No lines of arguments were detected in your draft.
+logical_flow:
+  title: Logical Flow Issues
+  tooltip: Organizing ideas coherently enhances readability and reader comprehension.
+  error: Error displaying Logical Flow Issues tool.
+  no_sentences: No relevant sentences were found in your draft.
 expectations:
-  title: Check Content Expectations
+  title: Content Expectations
   error:
     no_task: No text type specified!
   sentences: 'Sentences:'
@@ -78,8 +110,8 @@ expectations:
   warning: This expectation is not addressed in your draft.
   no_sentences: No relevant text was located in your draft.
 organization:
-  title: Organization (Term Matrix)
-  error: 'Error loading Organization data:'
+  title: Topical Progression
+  error: 'Error loading Topical Progression data:'
   legend:
     before_verb: Topic before the main verb.
     solid_circle: A filled circle.
@@ -90,7 +122,7 @@ organization:
     empty_circle: An empty circle.
     after_topic: Topic after the main verb of a topic sentence.
     dot_outline_circle: A empty circle with a small circle in the upper left corner.
-    location: Paragraph/Sentence number.
+    location: Paragraph number.
     boxed_number: A boxed number.
   description: The Coherence Panel charts the flow of your topic clusters across and
     within paragraphs. Dark circles indicate that a particular topic cluster is prominently
@@ -105,8 +137,52 @@ organization:
     paragraphs: Topic
     sentences_in_paragraph: 'Coherence across sentences in paragraph: {{paragraph}}'
     sentences: 'Sentences:'
+paragraph_clarity:
+  title: Paragraph Clarity
+  tooltip: Improving paragraph flow enhances readability and effective communication.
+  error: Error displaying Paragraph Clarity tool.
+pathos:
+  title: Emotional Appeal (Pathos)
+  tooltip: Creating emotional resonance and meaningful connections strengthens your writing.
+  error: Error displaying Emotional Appeal tool.
+  assessment: "Observation:"
+  no_sentences: No relavent text was detected in your draft.
+  situation: Situational Pathos
+  temporal: Temporal Pathos
+  immersive: Immersive Pathos
+  structural: Structural Pathos
+  'null': No feedback.
+professional_tone:
+  title: Professional Tone
+  tooltip: Maintaining appropriate language features helps your writing meet professional standards.
+  error: Error displaying Professional Tone tool.
+  sentiment: Sentiment
+  confidence: Confidence
+  subjectivity: Subjectivity
+  'null': No feedback.
+sources:
+  title: Sources
+  error: Error displaying Sources tool.
+  issue: "Issue:"
+  source: "Source(s):"
+  supportive:
+    title: Supportive Citation
+    "null": No supportive style of citation is used in this draft.
+  hedged:
+    title: Hedged Citation
+    "null": No hedged style of citation is used in this draft.
+  alternative:
+    title: Alternative Citation
+    "null": No alternative style of citation is used in this draft.
+  neutral:
+    title: Neutral Citation
+    "null": No neutral style of citation is used in this draft.
+  no_issues: No significant citation issues were found in your draft.
+  'null': No feedback.
+  types:
+    title: Types of Sources
+    subtitle: The following types of sources are found in this draft.
 impressions:
   title: Impressions
 'null':
-  title: Select a tool...
-  content: Select a review tool from the above selection box.
+  content: Select a review tool from the above buttons.

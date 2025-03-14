@@ -19,7 +19,7 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { createEditor, Descendant, Transforms } from "slate";
+import { createEditor, Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
@@ -28,7 +28,7 @@ import {
   Slate,
   withReact,
 } from "slate-react";
-import { deserializeHtmlText, serializeDocx } from "../../lib/slate";
+import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
 import { useLtiInfo } from "../../service/lti.service";
 import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
@@ -101,6 +101,7 @@ const CustomEditor: FC = () => {
     ]
   );
   const [zoom, setZoom] = useState<number>(100);
+  const [selection, setSelection] = useState<boolean>(false);
 
   const renderLeaf = useCallback(
     (props: RenderLeafProps) => <Leaf {...props} />,
@@ -282,6 +283,15 @@ const CustomEditor: FC = () => {
           // editorText.next(content); // FIXME does not have initial // unneccesary with useSlate
           setContent(content);
           sessionStorage.setItem("content", JSON.stringify(content));
+        } else {
+          const sel = editor.selection
+            ? serialize(Editor.fragment(editor, editor.selection)).trim()
+                .length > 0
+            : false;
+          if (sel !== selection) {
+            // debounce
+            setSelection(sel);
+          }
         }
       }}
     >
@@ -368,7 +378,7 @@ const CustomEditor: FC = () => {
           </ButtonToolbar>
           <Editable
             aria-label="user text"
-            className="p-2 flex-grow-1 overflow-auto"
+            className="p-2 flex-grow-1 overflow-auto user-text"
             style={{ fontSize: `${zoom}%` }}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
@@ -376,7 +386,7 @@ const CustomEditor: FC = () => {
             autoFocus
           />
         </main>
-        <ToolCard />
+        <ToolCard hasSelection={selection} />
       </Split>
       <FileUpload
         show={showUpload}

@@ -1,14 +1,14 @@
 import classNames from "classnames";
 import { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
+import { WritingTask } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
 
 /** Component for displaying the title of the globally selected outline. */
-export const WritingTaskTitle: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
-  ...props
-}) => {
-  const writingTask = useWritingTask();
+export const WritingTaskTitle: FC<
+  HTMLProps<HTMLDivElement> & { task?: WritingTask }
+> = ({ className, task, ...props }) => {
+  const writingTask = task ?? useWritingTask();
   const cn = classNames(
     className,
     "d-flex align-items-start flex-column justify-content-center"

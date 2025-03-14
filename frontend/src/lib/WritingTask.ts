@@ -1,3 +1,4 @@
+/** Test if the argument is an array of strings. */
 function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
 }
@@ -70,6 +71,7 @@ function isRule(rule: Rule | unknown): rule is Rule {
   );
 }
 
+/** Depth first generator for extracting leaf rules. */
 function* leafRuleGenerator(rule: Rule): Generator<Rule> {
   if (rule.children.length === 0) {
     yield rule;
@@ -79,11 +81,26 @@ function* leafRuleGenerator(rule: Rule): Generator<Rule> {
     }
   }
 }
+
+/**
+ * Extract the expectations from a writing task description.
+ * Expectations are defined as leaf rules of a WritingTask.
+ * @returns Array of expectations, [] if task is not a WritingTask.
+ */
 export function getExpectations(task: WritingTask | null) {
-  return task === null
-    ? []
-    : task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)]);
+  return isWritingTask(task)
+    ? task.rules.rules.flatMap((rule) => [...leafRuleGenerator(rule)])
+    : [];
 }
+
+type ToolConfig = {
+  /** Tool identifier */
+  tool: string;
+  /** Organizational information */
+  category?: string;
+  /** If tool is enabled for this writing task. */
+  enabled: boolean;
+};
 
 export type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
@@ -98,6 +115,7 @@ export type WritingTaskMetaData = {
   saved: string; // DateTime
   /** OS filename */
   filename: string;
+  /** Optional dictionary location. (UNUSED) */
   dict_path?: string;
   /** Optionally specify the input language for LLM templates. (Default configured in server settings) */
   user_lang?: string;
@@ -105,8 +123,15 @@ export type WritingTaskMetaData = {
   target_lang?: string;
   /** Keywords, optionally prefixed with a special tag like "category:" */
   keywords?: string[];
+  /** Additional descriptive notes from the author. */
+  author_notes?: string;
+  /** Per writing task tool configurations. */
+  review_tools?: ToolConfig[];
+  /** Optionally set the task as private. */
+  access?: string;
 };
 
+/** Test if the given object is an instance of WritingTaskMetaData. */
 function isWritingTaskMetaData(
   info: WritingTaskMetaData | unknown
 ): info is WritingTaskMetaData {
@@ -128,46 +153,49 @@ function isWritingTaskMetaData(
   );
 }
 
-function extractKeywords(tasks: WritingTask[]) {
-  return tasks.flatMap((task) => task.info.keywords ?? []);
+/** Extract all keywords from an array of writing task definitions. */
+export function extractKeywords(tasks: WritingTask[]) {
+  return [
+    ...new Set(tasks.flatMap((task) => task.info.keywords ?? [])),
+  ].toSorted((a, b) => a.localeCompare(b));
 }
+
 /**
- * Given a set of writing tasks, generate a mapping of categories
- * to co-occuring keywords.
- * @param tasks A list of writing task specifications.
- * @returns An object that maps "category:..." keywords to an array
- * of keywords that cooccur with that category.
+ * Checks if the given task contains an intersection of the keyword types.
+ * @param task a writing task definition
+ * @param keywords list of keywords to check against
+ * @returns true if the tasks keywords has some of each keyword type's keys.
  */
-export function keywordsByCategory(tasks: WritingTask[]): {
-  [k: string]: string[];
-} {
-  const acc = tasks.reduce(
-    (acc, task) => {
-      const { category, keyword } = categoryKeywords([task]);
-      const keywords = new Set(keyword);
-      category?.forEach((cat: string) => {
-        acc[cat] = cat in acc ? acc[cat].union(keywords) : new Set(keyword);
-      });
-      acc.ALL = acc.ALL.union(keywords);
-      return acc;
-    },
-    { ALL: new Set() } as Record<string, Set<string>>
-  );
-  return Object.fromEntries(
-    Object.entries(acc).map(([key, val]) => [key, [...val].toSorted()])
-  );
-}
-export function categoryKeywords(tasks: WritingTask[]) {
-  return Object.groupBy(
-    extractKeywords(tasks),
-    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
-  );
-}
 export function hasKeywords(task: WritingTask, keywords: string[]) {
   if (!task.info.keywords) return false;
   if (keywords.length === 0) return false;
-  const keys = new Set(task.info.keywords);
-  return keywords.some((key) => keys.has(key));
+  const catKeys = Object.groupBy(
+    keywords,
+    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
+  );
+  return Object.entries(catKeys).every(([_, keys]) => {
+    if (!keys) return true;
+    const kw = new Set(keys);
+    return task.info.keywords?.some((key) => kw.has(key));
+  }); // Intersection between types of keywords.
+}
+
+/**
+ * Test if a given tool is available according to the writing task definition.
+ * @param task a writing task definition.
+ * @param toolId tool identifier, often corresponds to prompt filename.
+ * @returns true if the given tool is enabled for the writing task.
+ */
+export function isEnabled(task: WritingTask, toolId: string): boolean {
+  // patch for #151 to support old WTDs
+  if (!task.info.review_tools) {
+    return !['prominent_topics', 'pathos'].includes(toolId);
+  }
+  return (
+    task.info.review_tools?.some(
+      ({ tool, enabled }) => tool === toolId && enabled
+    ) ?? false
+  );
 }
 
 export const ERROR_INFORMATION: WritingTaskMetaData = {
@@ -179,6 +207,7 @@ export const ERROR_INFORMATION: WritingTaskMetaData = {
   filename: '',
 };
 
+/** Container for the list of rules for the writing task and its metadata. */
 type Rules = {
   /** Title of the rule set. */
   name: string;
@@ -228,11 +257,13 @@ export type WritingTask = {
   rules: Rules;
   /** Extra information for Impressions tool. */
   impressions: Impressions;
-  values: unknown;
+  /** Extra value information, currently unused but reserved for future use. */
+  values?: Record<string, string>;
   /** Metadata about the task. */
   info: WritingTaskMetaData;
   /** Additional information that can be instantiated in the LLM prompts. */
   extra_instructions?: string;
+  /** Schema version. */
   wtd_version?: string;
   /** True if the task is listed in publicly available listings.  This is normally set by the server. */
   public?: boolean;

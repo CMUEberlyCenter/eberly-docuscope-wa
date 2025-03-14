@@ -1,121 +1,99 @@
-import { FC, HTMLProps, useEffect, useState } from "react";
-import { Dropdown, Nav, Navbar, Stack } from "react-bootstrap";
+import { FC, useEffect, useState } from "react";
+import {
+  Alert,
+  ButtonGroup,
+  ButtonToolbar,
+  Dropdown,
+  Nav,
+  Navbar,
+  OverlayTrigger,
+  Stack,
+  Tab,
+  Tabs,
+  Tooltip,
+} from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Split from "react-split";
-import { isReview } from "../../../server/model/review";
-// import { useUnload } from "../../service/beforeUnload.service";
-import { useReview } from "../../service/review.service";
+import { ReviewTool } from "../../../lib/ReviewResponse";
+import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import {
-  useGlobalFeatureArguments,
-  useGlobalFeatureExpectations,
-  useGlobalFeatureImpressions,
-  useGlobalFeatureKeyIdeas,
-  useGlobalFeatureLogicalProgression,
-  useGlobalFeatureSentenceDensity,
-  useGlobalFeatureTermMatrix,
-} from "../../service/settings.service";
+  useAdditionalToolsEnabled,
+  useArgumentsEnabled,
+  useBigPictureEnabled,
+  useCivilToneEnabled,
+  useEthosEnabled,
+  useExpectationsEnabled,
+  useFineTuningEnabled,
+  useImpressionsEnabled,
+  useLogicalFlowEnabled,
+  useParagraphClarityEnabled,
+  usePathosEnabled,
+  useProfessionalToneEnabled,
+  useProminentTopicsEnabled,
+  useSentenceDensityEnabled,
+  useSourcesEnabled,
+  useTermMatrixEnabled,
+} from "../../service/review-tools.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { UserTextView } from "../UserTextView/UserTextView";
-import { Arguments, ArgumentsTitle } from "./Arguments";
-import { GlobalCoherence, GlobalCoherenceTitle } from "./GlobalCoherence";
-import { KeyIdeas, KeyIdeasTitle } from "./KeyIdeas";
-import { Organization, OrganizationTitle } from "./Organization";
+import { CivilTone } from "./CivilTone";
+import { Ethos } from "./Ethos";
+import { Expectations, ExpectationsButton } from "./Expectations";
+import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
+import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import { Organization } from "./Organization";
+import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
+import { Pathos } from "./Pathos";
+import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
+import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
-import { Sentences, SentencesTitle } from "./Sentences";
-import { Expectations, ExpectationsTitle } from "./Expectations";
+import { Sentences, SentencesButton } from "./Sentences";
+import { Sources } from "./Sources";
 
-type Tool =
-  | "null"
-  | "sentences"
-  | "global_coherence"
-  | "key_ideas"
-  | "arguments"
-  | "expectations"
-  | "organization"
-  | "impressions";
-
-const NullTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => <span {...props}>{t("null.title")}</span>}
-  </Translation>
-);
-
-type ToolProps = HTMLProps<HTMLSpanElement> & { tool: Tool };
-const ToolTitle: FC<ToolProps> = ({ tool, ...props }) => {
-  switch (tool) {
-    case "sentences":
-      return <SentencesTitle {...props} />;
-    case "global_coherence":
-      return <GlobalCoherenceTitle {...props} />;
-    case "key_ideas":
-      return <KeyIdeasTitle {...props} />;
-    case "arguments":
-      return <ArgumentsTitle {...props} />;
-    case "expectations":
-      return <ExpectationsTitle {...props} />;
-    case "organization":
-      return <OrganizationTitle {...props} />;
-    case "impressions":
-      return (
-        <Translation ns={"review"}>
-          {(t) => <span {...props}>{t("impressions.title")}</span>}
-        </Translation>
-      );
-    case "null":
-    default:
-      return <NullTitle {...props} />;
-  }
-};
+type TabKey = "big_picture" | "fine_tuning";
+type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 const NullTool: FC = () => (
-  <Stack className="position-absolute start-50 top-50 translate-middle">
-    <span className="mx-auto text-center">
+  <article className="container-fluid flex-grow-1 overflow-auto d-flex flex-column">
+    <Alert variant="warning" className="m-3">
       <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
-    </span>
-  </Stack>
+    </Alert>
+  </article>
 );
 
 export const Review: FC = () => {
-  const { t } = useTranslation("review");
+  const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
-  // const settings = useSettings();
-  const review = useReview();
+  const { t: inst } = useTranslation("instructions");
+  const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("expectations");
-  const [prose, setProse] = useState<string>("");
+  const [otherTool, setOtherTool] = useState<Tool>("null");
 
   // useUnload();
   useEffect(() => {
-    window.document.title = t("document.title");
-  }, [t]);
-  useEffect(() => {
-    if (isReview(review)) {
-      const ontopic_doc = review.analysis.find(
-        (analysis) => analysis.tool === "ontopic"
-      )?.response.html;
-      if (ontopic_doc && ["sentences", "organization"].includes(tool)) {
-        setProse(ontopic_doc);
-      } else {
-        setProse(review.segmented);
-      }
-    } else {
-      setProse("");
+    if (ready) {
+      window.document.title = t("document.title");
     }
-  }, [review, tool]);
+  }, [t, ready]);
 
-  /* <!-- TODO limit tool availability based on writing task/settings --> */
-  const sentencesFeature = useGlobalFeatureSentenceDensity();
-  const coherenceFeature = useGlobalFeatureLogicalProgression();
-  const ideasFeature = useGlobalFeatureKeyIdeas();
-  const impressionsFeature = useGlobalFeatureImpressions();
-  const argumentsFeature = useGlobalFeatureArguments();
-  const expectationsFeature = useGlobalFeatureExpectations();
-  const organizationFeature = useGlobalFeatureTermMatrix();
-
-  const onSelect = (id: Tool) => {
-    setTool(id);
-  };
+  const civilToneFeature = useCivilToneEnabled();
+  const ethosFeature = useEthosEnabled();
+  const expectationsFeature = useExpectationsEnabled();
+  const ideasFeature = useProminentTopicsEnabled();
+  const argumentsFeature = useArgumentsEnabled();
+  const logicalFlowFeature = useLogicalFlowEnabled();
+  const paragraphClarityFeature = useParagraphClarityEnabled();
+  const pathosFeature = usePathosEnabled();
+  const professionalToneFeature = useProfessionalToneEnabled();
+  const sentencesFeature = useSentenceDensityEnabled();
+  const sourcesFeature = useSourcesEnabled();
+  const impressionsFeature = useImpressionsEnabled();
+  const organizationFeature = useTermMatrixEnabled();
+  const additionalToolsFeature = useAdditionalToolsEnabled();
+  const bigPictureFeature = useBigPictureEnabled();
+  const fineTuningFeature = useFineTuningEnabled();
 
   return (
     <ReviewProvider>
@@ -125,7 +103,7 @@ export const Review: FC = () => {
         minSize={[400, 320]}
         expandToMin={true}
       >
-        <UserTextView prose={prose} className="my-1" />
+        <UserTextView className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <header>
             <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
@@ -139,68 +117,212 @@ export const Review: FC = () => {
               </Navbar.Brand>
             </Navbar>
           </header>
-          <Dropdown className="d-flex justify-content-start mx-2 mb-2">
-            <Dropdown.Toggle
-              variant="primary"
-              className="select-button shadow-sm"
-            >
-              <div>
-                <ToolTitle tool={tool} />
-              </div>
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Header>
-                <NullTitle />
-              </Dropdown.Header>
-              {expectationsFeature && (
-                <Dropdown.Item onClick={() => onSelect("expectations")}>
-                  <ToolTitle tool="expectations" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {argumentsFeature && (
-                <Dropdown.Item onClick={() => onSelect("arguments")}>
-                  <ToolTitle tool="arguments" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {ideasFeature && (
-                <Dropdown.Item onClick={() => onSelect("key_ideas")}>
-                  <ToolTitle tool="key_ideas" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {coherenceFeature && (
-                <Dropdown.Item onClick={() => onSelect("global_coherence")}>
-                  <ToolTitle tool="global_coherence" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {organizationFeature && (
-                <Dropdown.Item onClick={() => onSelect("organization")}>
-                  <ToolTitle tool="organization" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {sentencesFeature && (
-                <Dropdown.Item onClick={() => onSelect("sentences")}>
-                  <ToolTitle tool="sentences" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {impressionsFeature && (
-                <Dropdown.Item onClick={() => onSelect("impressions")}>
-                  <ToolTitle tool="impressions" className="text-primary" />
-                </Dropdown.Item>
-              )}
-              {/* Add tool title select option here. */}
-            </Dropdown.Menu>
-          </Dropdown>
-          <div className="position-relative flex-grow-1 overflow-auto">
-            {(!tool || tool === "null") && <NullTool />}
-            {tool === "arguments" && <Arguments />}
-            {tool === "expectations" && <Expectations />}
-            {tool === "global_coherence" && <GlobalCoherence />}
-            {tool === "impressions" && <NullTool />}
-            {tool === "key_ideas" && <KeyIdeas />}
-            {tool === "organization" && <Organization />}
-            {tool === "sentences" && <Sentences />}
-            {/* Add more tool displays here. */}
-          </div>
+          <Tabs
+            activeKey={tab}
+            onSelect={(k) => {
+              if (k === "fine_tuning" && otherTool === "null") {
+                setOtherTool("paragraph_clarity"); // FIXME initial tool
+              }
+              if (k === "big_picture" && tool === "null") {
+                setTool("expectations"); // FIXME initial tool
+              }
+              setTab(k as TabKey);
+            }}
+            variant="underline"
+            className="justify-content-around inverse-color"
+          >
+            {bigPictureFeature ? (
+              <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
+                <div className="overflow-hidden h-100 d-flex flex-column">
+                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                    {expectationsFeature ? (
+                      <ExpectationsButton
+                        active={tool === "expectations"}
+                        onClick={() => setTool("expectations")}
+                      />
+                    ) : null}
+                    {ideasFeature ? (
+                      <ProminentTopicsButton
+                        active={tool === "prominent_topics"}
+                        onClick={() => setTool("prominent_topics")}
+                      />
+                    ) : null}
+                    {argumentsFeature ? (
+                      <LinesOfArgumentsButton
+                        active={tool === "lines_of_arguments"}
+                        onClick={() => setTool("lines_of_arguments")}
+                      />
+                    ) : null}
+                    {logicalFlowFeature ? (
+                      <LogicalFlowButton
+                        active={tool === "logical_flow"}
+                        onClick={() => setTool("logical_flow")}
+                      />
+                    ) : null}
+                  </ButtonToolbar>
+                  {(!tool || tool === "null") && <NullTool />}
+                  {tool === "expectations" && <Expectations />}
+                  {tool === "prominent_topics" && <ProminentTopics />}
+                  {tool === "lines_of_arguments" && <LinesOfArguments />}
+                  {tool === "logical_flow" && <LogicalFlow />}
+                  {/* Add Big Picture tools here. */}
+                </div>
+              </Tab>
+            ) : null}
+            {fineTuningFeature ? (
+              <Tab
+                eventKey="fine_tuning"
+                title={t("tabs.fine_tuning")}
+                className="overflow-hidden"
+              >
+                <div className="overflow-hidden h-100 d-flex flex-column">
+                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                    {paragraphClarityFeature ? (
+                      <ParagraphClarityButton
+                        active={otherTool === "paragraph_clarity"}
+                        onClick={() => setOtherTool("paragraph_clarity")}
+                      />
+                    ) : null}
+                    {sentencesFeature ? (
+                      <SentencesButton
+                        active={otherTool === "sentences"}
+                        onClick={() => setOtherTool("sentences")}
+                      />
+                    ) : null}
+                    {professionalToneFeature ? (
+                      <ProfessionalToneButton
+                        active={otherTool === "professional_tone"}
+                        onClick={() => setOtherTool("professional_tone")}
+                      />
+                    ) : null}
+                    {additionalToolsFeature ? (
+                      <Dropdown
+                        as={ButtonGroup}
+                        className="bg-white shadow-sm rounded-2"
+                      >
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
+                          }
+                        >
+                          <Dropdown.Toggle
+                            variant="outline-primary"
+                            className="tool_button tool_dropdown"
+                            active={[
+                              "sources",
+                              "ethos",
+                              "pathos",
+                              "organization",
+                              "civil_tone",
+                              "impressions",
+                            ].includes(otherTool)}
+                          >
+                            <Stack>
+                              <AdditionalToolsIcon />
+                              <span>{t("additional_tools.title")}</span>
+                            </Stack>
+                          </Dropdown.Toggle>
+                        </OverlayTrigger>
+                        <Dropdown.Menu className="additional-tools-menu">
+                          {sourcesFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("sources")}
+                              active={otherTool === "sources"}
+                            >
+                              <h6 className="text-primary">
+                                {t("sources.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("sources_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {ethosFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("ethos")}
+                              active={otherTool === "ethos"}
+                            >
+                              <h6 className="text-primary">
+                                {t("ethos.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("ethos_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {pathosFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("pathos")}
+                              active={otherTool === "pathos"}
+                            >
+                              <h6 className="text-primary">
+                                {t("pathos.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("pathos_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {organizationFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("organization")}
+                              active={otherTool === "organization"}
+                            >
+                              <h6 className="text-primary">
+                                {t("organization.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("term_matrix_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {civilToneFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("civil_tone")}
+                              active={otherTool === "civil_tone"}
+                            >
+                              <h6 className="text-primary">
+                                {t("civil_tone.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {inst("civil_tone_scope_note")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                          {impressionsFeature ? (
+                            <Dropdown.Item
+                              onClick={() => setOtherTool("impressions")}
+                              active={otherTool === "impressions"}
+                            >
+                              <h6 className="text-primary">
+                                {t("impressions.title")}
+                              </h6>
+                              <div className="text-wrap">
+                                {t("impressions.tooltip")}
+                              </div>
+                            </Dropdown.Item>
+                          ) : null}
+                        </Dropdown.Menu>
+                      </Dropdown>
+                    ) : null}
+                  </ButtonToolbar>
+                  {(!otherTool || otherTool === "null") && <NullTool />}
+                  {otherTool === "logical_flow" && <LogicalFlow />}
+                  {otherTool === "civil_tone" && <CivilTone />}
+                  {otherTool === "ethos" && <Ethos />}
+                  {otherTool === "impressions" && <NullTool />}
+                  {otherTool === "organization" && <Organization />}
+                  {otherTool === "sentences" && <Sentences />}
+                  {otherTool === "paragraph_clarity" && <ParagraphClarity />}
+                  {otherTool === "pathos" && <Pathos />}
+                  {otherTool === "professional_tone" && <ProfessionalTone />}
+                  {otherTool === "sources" && <Sources />}
+                  {/* Add more tool displays here. */}
+                </div>
+              </Tab>
+            ) : null}
+          </Tabs>
           <Legal />
         </aside>
       </Split>

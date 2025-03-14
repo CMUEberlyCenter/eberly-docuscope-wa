@@ -1,3 +1,5 @@
+import { ReviewPrompt } from '../../lib/ReviewResponse';
+
 /** Prompt data for formulating OpenAI requests. */
 export type Prompt = {
   prompt: string;
@@ -8,14 +10,11 @@ export type Prompt = {
 export type NotesPrompt = 'notes_to_prose' | 'notes_to_bullets';
 type ExpectationPrompt = 'expectation';
 export type TextPrompt = 'copyedit' | 'grammar' | 'local_coherence';
-export type ReviewPrompt = 'arguments' | 'global_coherence' | 'key_points';
-type ReviewExpectationsPrompt = 'all_expectations';
 export type PromptType =
   | NotesPrompt
   | ExpectationPrompt
   | TextPrompt
-  | ReviewPrompt
-  | ReviewExpectationsPrompt;
+  | ReviewPrompt;
 
 /** Prompt templates file json data. */
 export type PromptData = {

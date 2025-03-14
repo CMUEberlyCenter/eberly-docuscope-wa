@@ -1,7 +1,7 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { AllExpectationsData } from '../../lib/ReviewResponse';
+import { ExpectationsData } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { isReview, Review } from '../../server/model/review';
 import { getLtiRequest } from './lti.service';
@@ -40,7 +40,7 @@ expectations$.subscribe((rev) => {
 });
 const allExpectationsAnalysis = new BehaviorSubject<Map<
   string,
-  AllExpectationsData
+  ExpectationsData
 > | null>(null);
 expectations$.subscribe((rev) => {
   if (isReview(rev)) {

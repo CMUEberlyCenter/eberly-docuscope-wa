@@ -9,9 +9,9 @@ import { Translation, useTranslation } from "react-i18next";
 import { Suggestion } from "../../../lib/ReviewResponse";
 import GlobalCoherenceIcon from "../../assets/icons/global_coherence_icon.svg?react";
 import { useGlobalCoherenceData } from "../../service/review.service";
+import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
 
 /** Logical Progression title component for use in selection menu. */
 export const GlobalCoherenceTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
@@ -130,7 +130,7 @@ export const GlobalCoherence: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid overflow-auto">
+      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
         <h4>{t("global_coherence.title")}</h4>
         <FadeContent htmlContent={t("global_coherence.overview")} />
         {!review ? (
@@ -205,7 +205,7 @@ export const GlobalCoherence: FC = () => {
             ) : null}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

@@ -1,6 +1,9 @@
+import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
 import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
+import promBundle from 'express-prom-bundle';
+import session from 'express-session';
 import { readdir, readFile, stat } from 'fs/promises';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
@@ -24,21 +27,24 @@ import {
   initDatabase,
   insertWritingTask,
 } from './data/mongo';
+import { initPrompts } from './data/prompts';
 import {
   ContentItemType,
   IdToken,
   isInstructor,
   LTIPlatform,
 } from './model/lti';
-import { metrics } from './prometheus';
+import { metrics, myproseSessionErrorsTotal } from './prometheus';
 import {
   LTI_DB,
   LTI_HOSTNAME,
   LTI_KEY,
   LTI_OPTIONS,
+  MONGO_CLIENT,
   ONTOPIC_URL,
   PLATFORMS_PATH,
   PORT,
+  SESSION_KEY,
 } from './settings';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -47,8 +53,9 @@ const PUBLIC = join(__dirname, '../../build/app');
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
-  await initDatabase();
+  const shutdownDatabase = await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
+  const shutdownPrompts = await initPrompts();
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
   Provider.app.use(fileUpload({ createParentPath: true }));
@@ -135,8 +142,6 @@ async function __main__() {
     }
   );
 
-  console.log(`OnTopic: ${ONTOPIC_URL}`);
-
   Provider.app.get('/lti/info', async (_req: Request, res: Response) => {
     const token: IdToken | undefined = res.locals.token;
     const context = {
@@ -191,7 +196,26 @@ async function __main__() {
     const app = express();
     app.use(express.json());
     app.use(cors({ origin: '*' }));
+    const MongoDBSessionStore = MongoDBStore(session);
+    const store = new MongoDBSessionStore({
+      uri: MONGO_CLIENT,
+      collection: 'sessions',
+    });
+    store.on('error', (err) => {
+      console.error(err);
+      myproseSessionErrorsTotal.inc({ error: err.message });
+    });
+    app.use(
+      session({
+        secret: SESSION_KEY,
+        store,
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: 'auto' },
+      })
+    );
 
+    app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
     // Scribe Endpoints
@@ -200,6 +224,8 @@ async function __main__() {
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
     app.use('/api/v2/reviews', reviews);
+
+    // app.use('/api/v2/performance', promptPerformance);
     // Metrics
     app.use(metrics);
 
@@ -212,8 +238,20 @@ async function __main__() {
 
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
-    app.listen(PORT, () =>
+    const server = app.listen(PORT, () =>
       console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
+    );
+    const shutdown = () => {
+      server.close(async () => {
+        console.log('HTTP server closed.');
+        // If you have database connections, close them here
+        await shutdownDatabase();
+        await shutdownPrompts();
+        process.exit(0);
+      });
+    };
+    ['SIGTERM', 'SIGINT', 'SIGINT'].forEach((signal) =>
+      process.on(signal, shutdown)
     );
   } catch (err) {
     console.error(err);

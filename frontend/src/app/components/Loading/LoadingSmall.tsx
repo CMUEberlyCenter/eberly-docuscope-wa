@@ -1,14 +1,14 @@
-import { FC } from "react";
+import { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
 import DotSpinner from "../../assets/icons/6-dots-rotate.svg?react";
-import "./Loading.scss";
+import style from "./Loading.module.scss";
 
-export const LoadingSmall: FC = () => {
+export const LoadingSmall: FC<HTMLProps<HTMLDivElement>> = (...props) => {
   return (
-    <div role="status" className="loading">
+    <div role="status" {...props}>
       <DotSpinner
         aria-hidden="true"
-        className="text-primary loading-animate-spin"
+        className={`text-primary ${style["loading-animate-spin"]}`}
       />
       <Translation>
         {(t) => <span className="sr-only visually-hidden">{t("loading")}</span>}

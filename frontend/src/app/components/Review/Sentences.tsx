@@ -1,29 +1,35 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
+import { Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import {
   ClarityData,
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
-import SentencesIcon from "../../assets/icons/show_sentence_density_icon.svg?react";
-import { useOnTopicData, useReview } from "../../service/review.service";
+import { isErrorData } from "../../../lib/ReviewResponse";
+import Icon from "../../assets/icons/sentence_density_icon.svg?react";
+import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
-import { ReviewReset } from "./ReviewContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
-import { FadeContent } from "../FadeContent/FadeContent";
 
-export const SentencesTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <SentencesIcon /> {t("sentences.title")}
-      </span>
-    )}
-  </Translation>
-);
+export const SentencesButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  const { t: it } = useTranslation("instructions");
+  return (
+    <ToolButton
+      {...props}
+      title={t("sentences.title")}
+      tooltip={it("sentence_density_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 /** Error feedback component for clarity tool. */
 const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
@@ -76,31 +82,35 @@ const Legend: FC = () => {
   );
 };
 
-type TextData = {
-  plain: string;
-  sentences?: ClarityData;
-};
-
 export const Sentences: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
-  const review = useReview();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
   const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
+  const [textData, setTextData] = useState<ClarityData | undefined>();
+
+  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
+  const ontopicProse = useOnTopicProse();
+  const dispatch = useContext(ReviewDispatchContext);
+  useEffect(() => {
+    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  }, [ontopicProse]);
+
   useEffect(
-    () => setHtmlSentences(cleanAndRepairSentenceData(data?.response)),
+    () =>
+      setHtmlSentences(
+        !isErrorData(data) ? cleanAndRepairSentenceData(data?.response) : null
+      ),
     [data]
   );
-  const [textData, setTextData] = useState<TextData>({ plain: "" });
 
   useEffect(() => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
-    setTextData({ plain: review.segmented, sentences: data?.response.clarity });
-  }, [review, data]);
+    setTextData(!isErrorData(data) ? data?.response.clarity : undefined);
+  }, [data]);
 
   useEffect(() => {
     if (paragraphIndex < 0 || sentenceIndex < 0) {
@@ -130,9 +140,8 @@ export const Sentences: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid sentences d-flex flex-column h-100">
-        <h4>{t("sentences.title")}</h4>
-        <FadeContent htmlContent={ti("clarity")} />
+      <article className="container-fluid sentences overflow-auto d-flex flex-column flex-grow-1">
+        <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
         {!data ? (
           <Loading />
         ) : (
@@ -142,6 +151,7 @@ export const Sentences: FC = () => {
                 {new Date(data.datetime).toLocaleString()}
               </Card.Subtitle>
             )} */}
+            {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
             <Legend />
             <div className="py-1 overflow-auto sentence-display mb-1">
               {sentenceDetails ? (
@@ -154,7 +164,7 @@ export const Sentences: FC = () => {
               <div className="overflow-auto w-100 h-100">
                 <table className="sentence-data align-middle table-hover w-100">
                   <tbody>
-                    {textData.sentences?.map((sentence, i) =>
+                    {textData?.map((sentence, i) =>
                       typeof sentence === "string" ? (
                         <tr key={`p${i}`}>
                           <td className="paragraph-count" colSpan={3}>
@@ -176,31 +186,38 @@ export const Sentences: FC = () => {
                           }
                         >
                           <td className="text-end">
-                            {sentence[2].NPS.slice(0, sentence[2].L_NPS).map(
-                              (np, j) => (
-                                <TopicTextIcon
-                                  key={`s${i}-lnp${j}`}
-                                  title={np}
-                                />
-                              )
-                            )}
+                            {sentence[2].sent_analysis.NPS.slice(
+                              0,
+                              sentence[2].sent_analysis.L_NPS
+                            ).map((np, j) => (
+                              <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
+                            ))}
                           </td>
                           <td className="text-center">
-                            {sentence[2].BE_VERB ? (
-                              <BeVerbIcon />
+                            {sentence[2].sent_analysis.BE_VERB ? (
+                              <BeVerbIcon
+                                title={sentence[2].sent_analysis.TOKENS.filter(
+                                  ({ is_root }) => is_root
+                                )
+                                  .map(({ text }) => text)
+                                  .join(" ")}
+                              />
                             ) : (
-                              <ActiveVerbIcon />
+                              <ActiveVerbIcon
+                                title={sentence[2].sent_analysis.TOKENS.filter(
+                                  ({ is_root }) => is_root
+                                )
+                                  .map(({ text }) => text)
+                                  .join(" ")}
+                              />
                             )}
                           </td>
                           <td className="text-start">
-                            {sentence[2].NPS.slice(-sentence[2].R_NPS).map(
-                              (np, j) => (
-                                <TopicTextIcon
-                                  key={`s${i}-rnp${j}`}
-                                  title={np}
-                                />
-                              )
-                            )}
+                            {sentence[2].sent_analysis.NPS.slice(
+                              -sentence[2].sent_analysis.R_NPS
+                            ).map((np, j) => (
+                              <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
+                            ))}
                           </td>
                         </tr>
                       )
@@ -209,52 +226,9 @@ export const Sentences: FC = () => {
                 </table>
               </div>
             }
-            {/* <OnTopicVisualization
-              mode="SENTENCE"
-              singlepane={true}
-              onFlip={() => undefined}
-              onHandleTopic={() => undefined}
-              onHandleSentence={onHandleSentence}
-              loading={false}
-              invalidated={false}
-              textdata={textData}
-              highlight={"#E2D2BB"}
-            /> */}
-            {/* <Card>
-              <Card.Body>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.overview"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.description"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.read_aloud"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-                <p>
-                  <Trans
-                    t={t}
-                    i18nKey={"sentences.details.passive"}
-                    components={{ b: <b /> }}
-                  />
-                </p>
-              </Card.Body>
-            </Card> */}
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

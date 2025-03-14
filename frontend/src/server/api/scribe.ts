@@ -1,13 +1,11 @@
 import { Request, Response, Router } from 'express';
 import { body } from 'express-validator';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
-import {
-  AssessExpectationRequest,
-  NotesRequest,
-  TextRequest,
-} from '../../lib/Requests';
-import { doChat, readTemplates } from '../data/chat';
-import { NotesPrompt, ReviewPrompt, TextPrompt } from '../model/prompt';
+import { NotesRequest, TextRequest } from '../../lib/Requests';
+import { ReviewPrompt } from '../../lib/ReviewResponse';
+import { doChat } from '../data/chat';
+import { insertLog } from '../data/mongo';
+import { NotesPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
 
@@ -31,8 +29,10 @@ const scribeNotes =
       const chat = await doChat(key, {
         ...DEFAULT_LANGUAGE_SETTINGS,
         ...data,
+        role: 'You are a copy editor and expert in grammatical mechanics, usage, and readability.',
       });
       // TODO check for empty prose
+      insertLog(request.sessionID ?? 'index.html', chat); // TODO: use session id
       response.json(chat.response);
     } catch (err) {
       handleChatError(err, response);
@@ -50,6 +50,10 @@ scribe.post(
 export const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
   async (request: Request, response: Response) => {
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
     const data = request.body as TextRequest;
     try {
       const chat = await doChat(
@@ -58,6 +62,7 @@ export const scribeText =
           ...DEFAULT_LANGUAGE_SETTINGS,
           ...data,
         },
+        controller.signal,
         true
       );
       response.json(chat.response);
@@ -66,35 +71,6 @@ export const scribeText =
     }
   };
 const validate_text = validate(body('text').isString());
-scribe.post('/proofread', validate_text, scribeText('grammar'));
+// scribe.post('/proofread', validate_text, scribeText('grammar')); // no prompt for this anymore
 scribe.post('/copyedit', validate_text, scribeText('copyedit'));
 scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));
-scribe.post('/global_coherence', validate_text, scribeText('global_coherence'));
-scribe.post('/arguments', validate_text, scribeText('arguments'));
-scribe.post('/key_points', validate_text, scribeText('key_points'));
-
-scribe.post(
-  '/assess_expectation',
-  validate(
-    body('text').isString(),
-    body('expectation').isString(),
-    body('description').isString()
-  ),
-  async (request: Request, response: Response) => {
-    const data = request.body as AssessExpectationRequest;
-    try {
-      const assessment = await doChat('expectation', {
-        ...DEFAULT_LANGUAGE_SETTINGS,
-        ...data,
-      });
-      response.json(assessment.response);
-    } catch (err) {
-      handleChatError(err, response);
-    }
-  }
-);
-
-scribe.get('/templates/info', async (_request: Request, response: Response) => {
-  const { info } = await readTemplates();
-  response.json(info);
-});

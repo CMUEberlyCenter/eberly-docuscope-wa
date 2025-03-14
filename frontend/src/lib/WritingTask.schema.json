@@ -4,6 +4,9 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "additionalProperties": false,
   "definitions": {
+    "Record<string,string>": {
+      "type": "object"
+    },
     "Rule": {
       "properties": {
         "children": {
@@ -100,8 +103,16 @@
     "info": {
       "description": "Metadata about the task.",
       "properties": {
+        "access": {
+          "description": "Optionally set the task as private.",
+          "type": "string"
+        },
         "author": {
           "description": "Author of the outline.",
+          "type": "string"
+        },
+        "author_notes": {
+          "description": "Additional descriptive notes from the author.",
           "type": "string"
         },
         "copyright": {
@@ -109,15 +120,44 @@
           "type": "string"
         },
         "dict_path": {
+          "description": "Optional dictionary location. (UNUSED)",
           "type": "string"
         },
         "filename": {
           "description": "OS filename",
           "type": "string"
         },
+        "keywords": {
+          "description": "Keywords, optionally prefixed with a special tag like \"category:\"",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
         "name": {
           "description": "Title of the Writing Task/Outline",
           "type": "string"
+        },
+        "review_tools": {
+          "description": "Per writing task tool configurations.",
+          "items": {
+            "properties": {
+              "category": {
+                "description": "Organizational information",
+                "type": "string"
+              },
+              "enabled": {
+                "description": "If tool is enabled for this writing task.",
+                "type": "boolean"
+              },
+              "tool": {
+                "description": "Tool identifier",
+                "type": "string"
+              }
+            },
+            "type": "object"
+          },
+          "type": "array"
         },
         "saved": {
           "description": "Last modified date, expected to be ISO 8601 format.",
@@ -163,8 +203,12 @@
       },
       "type": "object"
     },
-    "values": {},
+    "values": {
+      "$ref": "#/definitions/Record<string,string>",
+      "description": "Extra value information, currently unused but reserved for future use."
+    },
     "wtd_version": {
+      "description": "Schema version.",
       "type": "string"
     }
   },

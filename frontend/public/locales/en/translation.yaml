@@ -8,7 +8,8 @@ about:
   task_name: 'Name: {{name}}'
 document.title: myProse
 document.description: myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
-loading: Processing...
+loading: Analyzing...
+wait: This may take a few seconds...
 legal:
   myprose: myProse Privacy Notice
   cmu: Legal
@@ -60,6 +61,7 @@ editor:
     strike: Strikethrough
     task: 'Content Expectations:'
     no_task: None Selected
+    no_edit: Text is not editable.
 tool:
   tab:
     generate: Draft
@@ -117,7 +119,13 @@ flow:
   issue: 'Issue:'
   suggestions: 'Suggestions:'
 select_task:
-  title: Select Text Type
+  title: Select Writing Type
+  filters: Filters
+  label: Text Search
+  placeholder: Enter title or keywords...
+  search: Search
+  context: Context
+  mode: Primary Mode
   upload: Upload Custom Text Type
   invalid_upload: Uploaded file is not a valid text type specificaton!
   "null": No Text Type
@@ -130,6 +138,8 @@ select_task:
   all_category: All
 cancel: Cancel
 select: Select
+next: Next
+select_insert: Select and Insert
 details:
   include: Include Details
   insert: Insert

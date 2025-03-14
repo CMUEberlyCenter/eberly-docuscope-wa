@@ -1,71 +1,94 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { readFile } from 'fs/promises';
 import format from 'string-format';
-import { PromptData, PromptType } from '../model/prompt';
+import { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
-  SCRIBE_TEMPLATES,
 } from '../settings';
+import { findPromptById } from './prompts';
+import {
+  MessageParam,
+  TextBlockParam,
+} from '@anthropic-ai/sdk/resources/index.mjs';
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
-let prompts: PromptData;
-/**
- * Read the prompts from a file with content caching.
- * Note: server will need to be restarted to update prompts.
- * @returns The contents of the prompts json file.
- */
-export async function readTemplates(): Promise<PromptData> {
-  // TODO use fs.watch to detect file changes?
-  if (!prompts) {
-    const file = await readFile(SCRIBE_TEMPLATES, 'utf8');
-    prompts = JSON.parse(file);
-  }
-  return prompts;
-}
-
-// function isOpenAIResponse(data: ChatCompletion | unknown): data is ChatCompletion {
-//   return !!data && typeof data === 'object' && 'object' in data && data.object === 'chat.completion';
-// }
-// function isAnthropicResponse(data: Message | unknown): data is Message {
-//   return !!data && typeof data === 'object' && 'type' in data && data.type === 'message';
-// }
+/** Anthropic error message schema. */
+type ErrorMessage = {
+  type: 'error';
+  error: {
+    type: string;
+    message: string;
+  };
+};
 
 /**
  * Given a template key and instantiating data, perform the chat operation with a LLM.
- * @param key Which prompt to use.
- * @param data Data used to instantiate prompt.
+ * @param key Which prompt to use, key value of an entry in the templates object.
+ * @param data Data used to instantiate the prompt.
+ * @param signal AbortSignal to cancel the request.
  * @param json if true, returns a JSON object.
+ * @param cache if true, adds system caching of the input text and description.
  * @returns a string unless json pramameter is truthy.
  */
-export async function doChat(
+export async function doChat<T>(
   key: PromptType,
   data: Record<string, string>,
-  json?: boolean
+  signal?: AbortSignal,
+  json?: boolean,
+  cache?: boolean
 ) {
+  if (!ANTHROPIC_API_KEY) {
+    throw new Error('No LLM configured.');
+  }
   const started = new Date();
-  const { templates } = await readTemplates();
-  if (!(key in templates)) {
+  const template = await findPromptById(key);
+  if (!template) {
     console.error(`${key} is not a valid template.`);
     throw new ReferenceError(`${key} template not found.`);
   }
-  const { prompt, role, temperature } = templates[key];
+  const { prompt, role, temperature } = template;
   if (!prompt) {
     console.error(`Missing prompt for ${key} template.`);
     throw new Error(`Malformed prompt for ${key}.`);
   }
   const content = format(prompt, data);
-  // TODO improve this logic
-  let model: string;
-  let response: string | object = '';
-  if (ANTHROPIC_API_KEY) {
-    const chat = await anthropic.messages.create({
+  let response: string | T = '';
+  const json_assistant: MessageParam = {
+    role: 'assistant',
+    content: '{',
+  };
+  const caching: TextBlockParam[] = [];
+  if (cache) {
+    const inputTemplate = await findPromptById('input_text');
+    if (!inputTemplate) {
+      console.error('Unable to locate input_text template.');
+      throw new ReferenceError('Unable to locate input_text template.');
+    }
+    const text_cache: TextBlockParam = {
+      type: 'text',
+      text: format(inputTemplate.prompt, data),
+      cache_control: { type: 'ephemeral' },
+    };
+    caching.push(text_cache);
+  }
+  const chat = await anthropic.messages.create(
+    {
       max_tokens: ANTHROPIC_MAX_TOKENS,
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
+      system: [
+        {
+          type: 'text',
+          text:
+            role ?? // if loaded from templates.json (old style), deprecated
+            data.roll ?? // set by calling function (used by notes_to_* tools)
+            'You are a writing assistant for students engaged in a writing assignment.',
+        },
+        ...caching,
+      ],
       messages: [
-        { role: 'assistant', content: role ?? 'You are a chatbot' },
+        ...(json ? [json_assistant] : []),
         {
           role: 'user',
           content,
@@ -73,24 +96,56 @@ export async function doChat(
       ],
       model: ANTHROPIC_MODEL,
       // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
-    });
-    model = chat.model;
-    // TODO handle anthropic error https://docs.anthropic.com/en/api/errors
-    // handle server errors, 400-529, 413 in particular (request_too_large)
-    // handle response error: chat.type === 'error'
-    //   chat.error.type and chat.error.message
-    const resp = chat.content.at(0);
-    if (resp?.type === 'text') {
-      response = resp.text;
-    } else {
-      console.warn(resp);
+    },
+    {
+      signal,
     }
+  );
+  const model = chat.model;
+  // Handle anthropic error https://docs.anthropic.com/en/api/errors
+  if (chat.type !== 'message') {
+    // This likely should be in catch
+    const err = chat as unknown as ErrorMessage; // typescript hack
+    console.error(
+      `Error response from ${chat.model} for request ${chat._request_id}`
+    );
+    console.error(chat);
+    throw new Error(err.error.message, { cause: chat });
+  }
+  switch (chat.stop_reason) {
+    case 'max_tokens':
+      throw new Error('Token limit exceeded.', { cause: chat });
+    case 'tool_use':
+      throw new Error('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
+    case 'stop_sequence':
+      throw new Error('No stop_sequence handler.', { cause: chat }); // Currently unused
+    case 'end_turn':
+      break;
+  }
+  // TODO handle server errors, 400-529, 413 in particular (request_too_large)
+  /* try {
+  await anthropic..create({...});
+  } catch (err) {
+    if (err.response) {
+      // The request was made and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("API Error:", error.response.status, error.response.data);
+    } else if (err.request) {
+      // The request was made but no response was received
+      console.error("Network Error:", error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error("Error:", error.message);  }*/
+  const resp = chat.content.at(0);
+  if (resp?.type === 'text') {
+    response = resp.text;
+    // console.log(response);
   } else {
-    throw new Error('No LLM configured.');
+    console.warn(resp);
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? JSON.parse(response) : response;
+    response = json ? (JSON.parse(response) as T) : response;
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError
@@ -105,5 +160,8 @@ export async function doChat(
     delta_ms: finished.getTime() - started.getTime(),
     model,
     response,
+    usage: chat.usage,
   };
 }
+
+export type ChatResponse<T = string> = Awaited<ReturnType<typeof doChat<T>>>;

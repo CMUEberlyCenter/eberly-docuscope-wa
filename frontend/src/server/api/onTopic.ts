@@ -1,18 +1,8 @@
 import { Request, Response, Router } from 'express';
 import { InternalServerError } from '../../lib/ProblemDetails';
-import { updateMetrics, updateResponseAvg } from '../prometheus';
 import { ONTOPIC_URL } from '../settings';
 
 export const ontopic = Router();
-
-/** middleware for collecting metrics. */
-ontopic.use('/', async (_request: Request, _response: Response, next) => {
-  // TODO replace with some prometheus library.
-  const start = Date.now();
-  updateMetrics();
-  next();
-  updateResponseAvg(Date.now() - start);
-});
 
 // TODO replace with express-proxy
 ontopic.post('/', async (request: Request, response: Response) => {

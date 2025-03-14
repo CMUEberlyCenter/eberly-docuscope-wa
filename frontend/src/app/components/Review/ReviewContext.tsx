@@ -3,22 +3,23 @@ import {
   Dispatch,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
   useReducer,
 } from "react";
+
+type ReviewContextState = {
+  sentences: string[][];
+  text?: string;
+};
+const initialReviewContext: ReviewContextState = {
+  sentences: [],
+};
 
 export const ReviewContext = createContext<ReviewContextState | null>(null);
 export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
 );
-
-type ReviewContextState = {
-  sentences: string[][];
-};
-const initialReviewContext: ReviewContextState = {
-  sentences: [],
-};
 
 type ReviewAction =
   | {
@@ -27,6 +28,14 @@ type ReviewAction =
     }
   | {
       type: "unset";
+      sentences?: undefined;
+    }
+  | {
+      type: "update";
+      sentences: string;
+    }
+  | {
+      type: "remove";
       sentences?: undefined;
     };
 
@@ -37,9 +46,13 @@ function reviewReducer(
 ) {
   switch (type) {
     case "set":
-      return { sentences };
+      return { ...review, sentences };
     case "unset":
-      return { sentences: [] };
+      return { ...review, sentences: [] };
+    case "update":
+      return { ...review, text: sentences };
+    case "remove":
+      return { ...review, text: undefined };
     default:
       console.warn(`Unknown action: ${type}`);
       return review;
@@ -70,11 +83,16 @@ export const ReviewProvider: FC<{ children: ReactNode }> = ({ children }) => {
  * @returns React component to use in composition with review tools.
  */
 export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = use(ReviewDispatchContext);
   // unset sentences so that any previous highlighting is cleared.
+  // remove tool specific text data.
   useEffect(() => {
     dispatch({ type: "unset" });
-    return () => dispatch({ type: "unset" });
+    dispatch({ type: "remove" });
+    return () => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "remove" });
+    };
   }, []);
   return children;
 };

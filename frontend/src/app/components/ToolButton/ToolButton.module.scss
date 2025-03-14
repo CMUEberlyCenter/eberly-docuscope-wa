@@ -1,0 +1,34 @@
+.tool_button {
+  // --prose-tool-radius: 0.75rem;
+  // border-radius: var(--prose-tool-radius);
+
+  min-width: 64px;
+  height: 64px;
+  border: none; // overriding Bootstrap button styling
+
+  &[disabled] {
+    color: gray !important;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+
+  span {
+    font-size: small;
+    font-weight: 500;
+    line-height: 1;
+    text-wrap: balance;
+    display: block;
+    white-space: normal;
+    max-width: 74px;
+  }
+}
+
+.tool_dropdown.active {
+  --bs-btn-active-bg: var(--bs-primary-bg-subtle);
+  --bs-btn-active-color: var(--bs-primary);
+}

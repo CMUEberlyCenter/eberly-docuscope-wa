@@ -2,7 +2,7 @@ import classnames from "classnames";
 import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Rule } from "../../../lib/WritingTask";
+import { Rule, WritingTask } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
@@ -14,6 +14,8 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   leafOnly?: boolean;
   /** If true, include the title of the outline. */
   includeTitle?: boolean;
+  /** Writing task */
+  task?: WritingTask;
 };
 /**
  * Component for displaying the currently outline with a sidebar for displaying
@@ -22,12 +24,13 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
 export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   includeTitle,
   select,
+  task,
   leafOnly,
   className,
   ...props
 }) => {
   const { t } = useTranslation();
-  const writingTask = useWritingTask();
+  const writingTask = task ?? useWritingTask();
   const [selected, setSelected] = useState<Rule | null>(null);
   const onSelect = useCallback(
     (rule: Rule) => {

@@ -3,7 +3,7 @@
 
       Disc — At least one sentence in the paragraph includes the word (topic) on the left side of the main verb of the sentence.
       Hollow circle — All of the instances of the word (topic) in the paragraph are on the right side of the sentences.
-      Dot on the shoulder — If the word (topic) appears in the first sentence of the paragraph a small dot is added to the icon. The dot can bee added to (1) or (2) above. 
+      Dot on the shoulder — If the word (topic) appears in the first sentence of the paragraph a small dot is added to the icon. The dot can bee added to (1) or (2) above.
 
   So, there are 4 possible icons.
 
@@ -15,41 +15,39 @@
 
       it appears in 2 or more paragraphs, AND
       it appears at least once on the left side of the main verb in a sentence, AND
-      it is also a Local Topic. 
+      it is also a Local Topic.
 
   A topic is a local topic in a given paragraph if:
 
       it appears in 2 or more sentences within the paragraph, AND
-      it appears at least once on the left side of the main verb in a sentence within the paragraph. 
+      it appears at least once on the left side of the main verb in a sentence within the paragraph.
 
  */
 import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
-import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
+import {
+  FC,
+  HTMLProps,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Alert, Button, Col, Container, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import TermMatrixIcon from "../../assets/icons/show_term_matrix_icon.svg?react";
-import { useOnTopicData } from "../../service/review.service";
+import { isErrorData } from "../../../lib/ReviewResponse";
+import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
 import { clearAllHighlights } from "../../service/topic.service";
 import { Loading } from "../Loading/Loading";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
-import { ReviewReset } from "./ReviewContext";
-import { FadeContent } from "../FadeContent/FadeContent";
+import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);
-
-export const OrganizationTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <TermMatrixIcon /> {t("organization.title")}
-      </span>
-    )}
-  </Translation>
-);
 
 type IndicatorIconProps = {
   unit: {
@@ -64,18 +62,34 @@ const IndicatorIcon: FC<IndicatorIconProps> = ({
 }: IndicatorIconProps) => {
   if (unit === null) return undefined;
   if (unit.is_left) {
-    return unit.is_topic_sent ? <DotSolidCircle /> : <SolidCircle />;
+    return unit.is_topic_sent ? (
+      <DotSolidCircle />
+    ) : (
+      <SolidCircle style={{ marginLeft: "0.3rem" }} />
+    );
   }
-  return unit.is_topic_sent ? <DotOutlineCircle /> : <OutlineCircle />;
+  return unit.is_topic_sent ? (
+    <DotOutlineCircle />
+  ) : (
+    <OutlineCircle style={{ marginLeft: "0.3rem" }} />
+  );
 };
 
 /** Solid circle icon component. */
-const SolidCircle: FC = () => (
+const SolidCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  style,
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <i
-        className="fa-solid fa-circle text-organization"
-        style={{ fontSize: "1rem" }}
+        {...props}
+        className={classNames(
+          "fa-solid fa-circle text-organization",
+          className
+        )}
+        style={{ ...style, fontSize: "1rem" }}
         title={t("organization.legend.before_verb")}
         aria-description={t("organization.legend.solid_circle")}
       ></i>
@@ -84,11 +98,15 @@ const SolidCircle: FC = () => (
 );
 
 /** Solid cirle with annotation dot icon component. */
-const DotSolidCircle: FC = () => (
+const DotSolidCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <span
-        className="text-nowrap text-organization"
+        {...props}
+        className={classNames("text-nowrap text-organization", className)}
         title={t("organization.legend.before_topic")}
         aria-description={t("organization.legend.dot_solid_circle")}
       >
@@ -103,12 +121,20 @@ const DotSolidCircle: FC = () => (
 );
 
 /** Circle outline icon component. */
-const OutlineCircle: FC = () => (
+const OutlineCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  style,
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <i
-        className="fa-regular fa-circle text-organization"
-        style={{ fontSize: "1rem" }}
+        {...props}
+        className={classNames(
+          "fa-regular fa-circle text-organization",
+          className
+        )}
+        style={{ ...style, fontSize: "1rem" }}
         title={t("organization.legend.after_verb")}
         aria-description={t("organization.legend.empty_circle")}
       ></i>
@@ -117,11 +143,15 @@ const OutlineCircle: FC = () => (
 );
 
 /** Circle outline with annotation dot icon component. */
-const DotOutlineCircle: FC = () => (
+const DotOutlineCircle: FC<HTMLProps<HTMLSpanElement>> = ({
+  className,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
       <span
-        className="text-nowrap text-organization"
+        {...props}
+        className={classNames("text-nowrap text-organization", className)}
         title={t("organization.legend.after_topic")}
         aria-description={t("organization.legend.dot_outline_circle")}
       >
@@ -198,19 +228,30 @@ type SelectedRowCol = {
 } | null;
 export const Organization: FC = () => {
   const { t } = useTranslation("review");
-  const { t: ti } = useTranslation("instructions");
   const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selected, setSelected] = useState<SelectedRowCol>(null);
+
+  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
+  const ontopicProse = useOnTopicProse();
+  const dispatch = useContext(ReviewDispatchContext);
+  useEffect(() => {
+    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  }, [ontopicProse]);
+
   // const [selectedParagraph, setSelectedParagraph] = useState(-1);
   // const [selectedSentence, setSelectedSentence] = useState(-1);
   // const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
 
   useEffect(() => {
-    setParagraphRange([
-      ...Array(data?.response.coherence?.num_paras ?? 0).keys(),
-    ]);
+    if (data && "response" in data) {
+      setParagraphRange([
+        ...Array(data.response.coherence?.num_paras ?? 0).keys(),
+      ]);
+    } else {
+      setParagraphRange([]);
+    }
     setSelected(null);
   }, [data]);
 
@@ -261,9 +302,11 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <div className="container-fluid organization">
-        <h4>{t("organization.title")}</h4>
-        <FadeContent htmlContent={ti("term_matrix")} />
+      <article className="container-fluid organization overflow-auto d-flex flex-column flex-grow-1">
+        <ToolHeader
+          title={t("organization.title")}
+          instructionsKey="term_matrix"
+        />
         {!data ? (
           <Loading />
         ) : (
@@ -298,7 +341,8 @@ export const Organization: FC = () => {
                 </div> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
               <div className="mt-1 mw-100 flex-grow-1">
-                {paragraphRange.length > 0 && (
+                {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
+                {"response" in data && paragraphRange.length > 0 && (
                   <DataTable
                     options={{
                       paging: false,
@@ -325,12 +369,13 @@ export const Organization: FC = () => {
                             key={`key-paragraph-${i}`}
                             data-dt-order={false}
                             className="no-sort p-0 text-center"
+                            onClick={() => onSelectParagraph(i)}
                           >
                             <Button
                               size="sm"
                               variant="outline-primary"
                               active={i === selected?.paragraph}
-                              onClick={() => onSelectParagraph(i)}
+                              // onClick={() => onSelectParagraph(i)}
                             >
                               {`${i + 1}`}
                             </Button>
@@ -519,7 +564,7 @@ export const Organization: FC = () => {
             </ErrorBoundary>
           </ErrorBoundary>
         )}
-      </div>
+      </article>
     </ReviewReset>
   );
 };

@@ -2,20 +2,26 @@ import { Request, Response, Router } from 'express';
 import { body, param } from 'express-validator';
 import { OnTopicData } from '../../lib/OnTopicData';
 import {
+  BadRequest,
   FileNotFound,
+  Forbidden,
   InternalServerError,
   UnprocessableContent,
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
-  AllExpectationsData,
-  AllExpectationsResponse,
   Analysis,
-  isAllExpectationsData,
+  BasicReviewPrompts,
+  ExpectationsOutput,
+  isExpectationsData,
+  isExpectationsOutput,
   OnTopicReviewData,
+  ReviewPrompt,
+  ReviewResponse,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
+  isEnabled,
   isWritingTask,
   WritingTask,
 } from '../../lib/WritingTask';
@@ -23,81 +29,95 @@ import { doChat } from '../data/chat';
 import {
   deleteReviewById,
   findReviewById,
+  insertLog,
   insertReview,
   updateReviewByIdAddAnalysis,
 } from '../data/mongo';
 import { IdToken } from '../model/lti';
-import { ReviewPrompt } from '../model/prompt';
 import { Review } from '../model/review';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
+import { countPrompt } from '../prometheus';
 
 export const reviews = Router();
 
 const ANALYSES: ReviewPrompt[] = [
-  // 'global_coherence',
-  'key_points',
-  'arguments',
+  'civil_tone',
+  'ethos',
+  'lines_of_arguments',
+  'logical_flow',
+  'paragraph_clarity',
+  'pathos',
+  'professional_tone',
+  'prominent_topics',
+  'revision_plan',
+  // 'sentence_density', // ontopic
+  'sources',
+  // 'term_matrix', // ontopic
 ];
 
+/**
+ * Submit data to onTopic for processing.
+ * @param review Review data to be sent to onTopic
+ * @returns Processed data.
+ * @throws fetch errors
+ * @throws Bad onTopic response status
+ * @throws JSON.parse errors
+ */
 const doOnTopic = async (
-  review: Review
+  review: Review,
+  signal?: AbortSignal
 ): Promise<OnTopicReviewData | undefined> => {
-  try {
-    const res = await fetch(ONTOPIC_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        base: review.document,
-      }),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      console.error(
-        `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
-      );
-      return;
-    }
-    const data = (await res.json()) as OnTopicData;
-    return {
-      tool: 'ontopic',
-      datetime: new Date(),
-      response: data,
-    };
-  } catch (err) {
-    console.error(err);
+  const res = await fetch(ONTOPIC_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      base: review.document,
+    }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    signal,
+  });
+  if (!res.ok) {
+    console.error(
+      `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
+    );
+    throw new Error(`onTopic Response status: ${res.status}`);
   }
+  const data = (await res.json()) as OnTopicData;
+  return {
+    tool: 'ontopic',
+    datetime: new Date(),
+    response: data,
+  };
 };
 
 /**
  * Segments the given text into sentences.
  * @param text content of editor.
- * @returns HTML string or ''.
+ * @returns HTML string.
+ * @throws Error on bad service status.
+ * @throws Network errors.
+ * @throws JSON parse errors.
  */
 const segmentText = async (text: string): Promise<string> => {
-  try {
-    const res = await fetch(SEGMENT_URL, {
-      method: 'POST',
-      body: JSON.stringify({ text }),
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      console.error(
-        `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
-      );
-      return '';
-    }
-    const data = (await res.json()) as string;
-    return data;
-  } catch (err) {
-    console.error(err); // fetch error, rare errors
-    return '';
+  const res = await fetch(SEGMENT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ text }),
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!res.ok) {
+    console.error(
+      `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
+    );
+    throw new Error(`Bad service response from 'segment': ${res.status}`);
   }
+  const data = (await res.json()) as string;
+  return data.trim();
 };
 
 /**
@@ -122,15 +142,134 @@ const reviewData = ({
       : undefined) ?? '',
 });
 
-// Depricate
+/**
+ * @route GET <reviews>/:id/
+ * @summary Retrieve review data entry.
+ * @description Retrieves review data entry from the database.  This is the current state of the review and does not initiate any analyses.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
 reviews.get(
-  '/:id/expectations',
-  validate(param('id').isMongoId()),
+  '/:id',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    try {
+      const review = await findReviewById(id);
+      response.json(review);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+
+/**
+ * @route GET <reviews>/:id/text
+ * @summary Retrieve text for the given review.
+ * @description Retrieves the segmented text for the review for display.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Segmented user submitted text.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
+reviews.get(
+  '/:id/text',
+  validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
     try {
       const { id } = request.params;
       const review = await findReviewById(id);
+      response.json(review.segmented);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
 
+/**
+ * @route GET <reviews>/:id/ontopic
+ * @summary Retrieve review data including onTopic analysis.
+ * @description Retrieves review data for onTopic and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
+reviews.get(
+  '/:id/ontopic',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      // add isWritingTask check? not needed for this analysis
+      // add isEnabled check? complicated as multiple tools use this.
+      if (review.analysis.some(({ tool }) => tool === 'ontopic')) {
+        response.json(review);
+        return;
+      }
+      const data = await doOnTopic(review, controller.signal);
+      if (controller.signal.aborted) {
+        return;
+      }
+      if (!data) throw new Error(`NULL onTopic results.`);
+      await updateReviewByIdAddAnalysis(id, data);
+      response.json(await findReviewById(id)); // return most recent with update.
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+
+/**
+ * @route GET <reviews>/:id/expectations
+ * @summary Retrieve expectations review data.
+ * @description Retrieves review data for expectations and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @returns Stream of updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
+reviews.get(
+  '/:id/expectations',
+  validate(param('id', 'Invalid review id').isMongoId()),
+  async (request: Request, response: Response) => {
+    const { id } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      if (!isWritingTask(review.writing_task)) {
+        response.status(400).send(BadRequest('No Writing Task Definition'));
+        return;
+      }
+      if (!isEnabled(review.writing_task, 'expectations')) {
+        response.status(403).send(Forbidden('Expectations tool is disabled!'));
+        return;
+      }
       response.set({
         'Cache-Control': 'no-cache',
         'Content-Type': 'text/event-stream',
@@ -138,48 +277,145 @@ reviews.get(
       });
       response.flushHeaders();
       response.on('close', () => response.end());
-      const { writing_task } = review;
       response.write(`data: ${JSON.stringify(review)}\n\n`);
-      if (isWritingTask(writing_task)) {
-        // Filter out already analysed expectations.
-        const existing = new Set(
-          review.analysis
-            .filter(isAllExpectationsData)
-            .map(({ expectation }) => expectation)
-        );
-        const expectations = writing_task.rules.rules
-          .flatMap((rule) => (rule.is_group ? rule.children : [rule]))
-          .filter((rule) => !existing.has(rule.name));
-        await Promise.allSettled(
-          expectations.map(async (expectation) => {
-            const { response: data, finished: datetime } = await doChat(
-              'all_expectations',
-              {
-                ...reviewData(review),
-                expectation: expectation.name,
-                description: expectation.description,
-              },
-              true
+
+      const existing = new Set(
+        review.analysis
+          .filter(isExpectationsData)
+          .map(({ expectation }) => expectation)
+      );
+      const expectations = getExpectations(review.writing_task).filter(
+        (rule) => !existing.has(rule.name)
+      );
+      for (const { name: expectation, description } of expectations) {
+        if (response.writableEnded) break;
+        try {
+          const chat = await doChat<ExpectationsOutput>(
+            'expectations',
+            {
+              ...reviewData(review),
+              expectation,
+              description,
+            },
+            controller.signal,
+            true,
+            true
+          );
+          if (controller.signal.aborted) {
+            return;
+          }
+          const { response: chat_response, finished: datetime } = chat;
+          if (!chat_response)
+            throw new Error(`NULL results for ${expectation}`);
+          if (!isExpectationsOutput(chat_response)) {
+            console.error(
+              `Malformed results for ${expectation}`,
+              chat_response
             );
-            if (!data) return; //FIXME add throw
-            const analysis: AllExpectationsData = {
-              tool: 'all_expectations',
-              datetime,
-              expectation: expectation.name,
-              response: data as AllExpectationsResponse,
-            };
-            const upd = await updateReviewByIdAddAnalysis(id, analysis);
-            if (!response.closed) {
-              response.write(`data: ${JSON.stringify(upd)}\n\n`);
-            }
-          })
-        );
-        if (!response.closed) {
-          const final = await findReviewById(id);
-          response.write(`data: ${JSON.stringify(final)}\n\n`);
-          response.end();
+            throw new Error(`Malformed results for ${expectation}`);
+          }
+          countPrompt(chat);
+          insertLog(request.sessionID ?? id, chat);
+          await updateReviewByIdAddAnalysis(id, {
+            tool: 'expectations',
+            datetime,
+            expectation,
+            response: chat_response,
+          });
+          if (!response.closed) {
+            const ret = await findReviewById(id); // get updated
+            response.write(`data: ${JSON.stringify(ret)}\n\n`);
+          }
+        } catch (err) {
+          console.error(err);
+          await updateReviewByIdAddAnalysis(id, {
+            tool: 'expectations',
+            datetime: new Date(),
+            expectation,
+            error: {
+              message: err instanceof Error ? err.message : `${err}`,
+              details: err,
+            },
+          });
+          if (!response.closed) {
+            // if not closed, send the update
+            const ret = await findReviewById(id); // get
+            response.write(`data: ${JSON.stringify(ret)}\n\n`);
+          }
         }
       }
+      if (!response.closed) {
+        const final = await findReviewById(id);
+        response.write(`data: ${JSON.stringify(final)}\n\n`);
+        response.end();
+      }
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        response.status(404).send(FileNotFound(err));
+      } else {
+        response.status(500).send(InternalServerError(err));
+      }
+    }
+  }
+);
+
+/**
+ * @route GET <reviews>/:id/:prompt
+ * @summary Retrieve review data for a specific tool.
+ * @description Retrieves review data for a specific tool and generates missing data if necessary.
+ * @param id Database id of the review request.  Must be a Mongo Id.
+ * @param prompt The tool to use for the analysis.
+ * @returns Updated review data.
+ * @returns { status: 404, body: @type{FileNotFound}}
+ * @returns { status: 500: body: @type{InternalServerError}}
+ */
+reviews.get(
+  '/:id/:prompt',
+  validate(
+    param('id', 'Invalid review id').isMongoId(),
+    param('prompt').isString().isIn(BasicReviewPrompts)
+  ),
+  async (request: Request, response: Response) => {
+    const { id, prompt } = request.params;
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    try {
+      const review = await findReviewById(id);
+      if (!isWritingTask(review.writing_task)) {
+        response.status(400).send(BadRequest('No Writing Task Definition!'));
+        return;
+      }
+      if (!isEnabled(review.writing_task, prompt as ReviewPrompt)) {
+        response.status(403).send(Forbidden(`Tool ${prompt} is disabled!`));
+        return;
+      }
+      if (review.analysis.some(({ tool }) => tool === prompt)) {
+        response.json(review); // already completed, return saved
+        return;
+      }
+      const chat = await doChat<ReviewResponse>(
+        prompt as ReviewPrompt,
+        reviewData(review),
+        controller.signal,
+        true,
+        true
+      );
+      if (controller.signal.aborted) {
+        return;
+      }
+      countPrompt(chat);
+      insertLog(request.sessionID ?? id, chat);
+      const { response: chat_response, finished: datetime } = chat;
+      if (!chat_response) throw new Error(`NULL chat response for ${prompt}`);
+      await updateReviewByIdAddAnalysis(id, {
+        tool: prompt,
+        datetime,
+        response: chat_response,
+      } as Analysis);
+      response.json(await findReviewById(id));
     } catch (err) {
       console.error(err);
       if (err instanceof ReferenceError) {
@@ -200,11 +436,17 @@ reviews.get(
  * @returns stream of review data, updated as reviews complete, finishes when all review complete.
  * @returns { status: 404, body: @type{FileNotFound}}
  * @returns { status: 500: body: @type{InternalServerError}}
+ * @deprecated 2.1.0
  */
 reviews.get(
-  '/:id',
+  '/:id/ex',
   validate(param('id', 'Invalid review id').isMongoId()),
   async (request: Request, response: Response) => {
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+
     const { id } = request.params;
     const tool = request.query.tool; // use query to specify subset
     const analyses = [...ANALYSES, 'ontopic', 'expectations'].filter(
@@ -216,6 +458,18 @@ reviews.get(
         );
       }
     );
+
+    const updateAnalysis = async (analysis: Analysis | undefined) => {
+      if (analysis) {
+        await updateReviewByIdAddAnalysis(id, analysis);
+        if (!response.closed) {
+          const ret = await findReviewById(id); // get the updated review
+          response.write(`data: ${JSON.stringify(ret)}\n\n`);
+        }
+      }
+      return analysis;
+    };
+
     try {
       const review = await findReviewById(id);
       response.set({
@@ -227,75 +481,146 @@ reviews.get(
       response.on('close', () => response.end());
       response.write(`data: ${JSON.stringify(review)}\n\n`);
 
-      const updateAnalysis = async (analysis: Analysis | undefined) => {
-        if (analysis) {
-          const upd = await updateReviewByIdAddAnalysis(id, analysis);
-          if (!response.closed) {
-            response.write(`data: ${JSON.stringify(upd)}\n\n`);
-          }
-        }
-        return analysis;
-      };
+      // if (
+      //   !request.closed &&
+      //   analyses.includes('ontopic') &&
+      //   !review.analysis.some(({ tool }) => tool === 'ontopic')
+      // ) {
+      //   try {
+      //     doOnTopic(review, controller.signal).then((data) => {
+      //       if (!data) throw new Error(`NULL onTopic results.`);
+      //       return updateAnalysis(data);
+      //     });
+      //     // const data = await doOnTopic(review, controller.signal);
+      //     // // TODO check for errors
+      //     // if (!data) throw new Error(`NULL onTopic results.`);
+      //     // await updateAnalysis(data);
+      //   } catch (err) {
+      //     console.error(err);
+      //     await updateAnalysis({
+      //       tool: 'ontopic',
+      //       datetime: new Date(),
+      //       error: {
+      //         message: err instanceof Error ? err.message : `${err}`,
+      //         details: err,
+      //       },
+      //     });
+      //   }
+      // }
 
-      const expectJobs: Promise<Analysis | undefined>[] = [];
+      // const expectJobs: Promise<Analysis | undefined>[] = [];
       if (
         isWritingTask(review.writing_task) &&
+        isEnabled(review.writing_task, 'expectations') &&
         analyses.includes('expectations')
       ) {
         const existing = new Set(
           review.analysis
-            .filter(isAllExpectationsData)
+            .filter(isExpectationsData)
             .map(({ expectation }) => expectation)
         );
         const expectations = getExpectations(review.writing_task).filter(
           (rule) => !existing.has(rule.name)
         );
-        expectJobs.push(
-          ...expectations.map(async ({ name: expectation, description }) => {
-            const { response, finished: datetime } = await doChat(
-              'all_expectations',
-              {
-                ...reviewData(review),
-                expectation,
-                description,
-              },
-              true
+        for (const { name: expectation, description } of expectations) {
+          if (response.closed) break;
+          // }
+          // expectJobs.push(
+          //   ...expectations.map(async ({ name: expectation, description }) => {
+          // if (response.closed) return;
+          try {
+            console.log(`starting expectation ${expectation}`);
+            performance.mark('expectation');
+            const { response: chat_response, finished: datetime } =
+              await doChat<ExpectationsOutput>(
+                'expectations',
+                {
+                  ...reviewData(review),
+                  expectation,
+                  description,
+                },
+                controller.signal,
+                true,
+                true
+              );
+            console.log(
+              `finished expectation: ${expectation}`,
+              performance.measure('expectation to Now', 'expectation')
             );
-            if (!response) return; // TODO throw null results
-            return updateAnalysis({
-              tool: 'all_expectations',
+            if (!chat_response)
+              throw new Error(`NULL results for ${expectation}`);
+            if (!isExpectationsOutput(chat_response)) {
+              console.error(
+                `Malformed results for ${expectation}`,
+                chat_response
+              );
+              throw new Error(`Malformed results for ${expectation}`);
+            }
+            await updateAnalysis({
+              tool: 'expectations',
               datetime,
               expectation,
-              response: response as AllExpectationsResponse,
+              response: chat_response,
             });
-          })
-        );
+          } catch (err) {
+            console.error(err);
+            await updateAnalysis({
+              tool: 'expectations',
+              datetime: new Date(),
+              expectation,
+              error: {
+                message: err instanceof Error ? err.message : `${err}`,
+                details: err, // TODO remove this in production.
+              },
+            });
+          }
+          // })
+          // );
+        }
       }
-      const chatJobs = analyses
-        .filter((a): a is ReviewPrompt => ANALYSES.includes(a as ReviewPrompt))
-        .map(async (key) => {
-          if (review.analysis.some(({ tool }) => tool === key)) return; // do not clobber
-          const { response, finished: datetime } = await doChat(
-            key,
-            reviewData(review),
-            true
-          );
-          if (!response) return;
-          return updateAnalysis({
+      const chatJobs = analyses.filter(
+        (a): a is ReviewPrompt =>
+          ANALYSES.includes(a as ReviewPrompt) &&
+          isWritingTask(review.writing_task) &&
+          isEnabled(review.writing_task, a) &&
+          !review.analysis.some(({ tool }) => tool === a) // do not clobber // TODO check if error
+      );
+      for (const key of chatJobs) {
+        // .map(async (key) => {
+        if (response.closed) break; // abort on closed response
+        // if (review.analysis.some(({ tool }) => tool === key)) continue; // do not clobber // TODO check if error
+        try {
+          const { response: chat_response, finished: datetime } =
+            await doChat<ReviewResponse>(
+              key,
+              reviewData(review),
+              controller.signal,
+              true,
+              true
+            );
+          if (!chat_response) throw new Error(`NULL chat response for ${key}`);
+          await updateAnalysis({
             tool: key,
             datetime,
-            response,
+            response: chat_response,
           } as Analysis); // FIXME typescript shenanigans
-        });
-      const ontopicJobs = ['ontopic'].map(async () => {
-        if (!analyses.includes('ontopic')) return;
-        if (review.analysis.some(({ tool }) => tool === 'ontopic')) return;
-        const data = await doOnTopic(review);
-        if (!data) return;
-        return updateAnalysis(data);
-      });
-      await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
+        } catch (err) {
+          console.error(err);
+          await updateAnalysis({
+            tool: key,
+            datetime: new Date(),
+            error: {
+              message: err instanceof Error ? err.message : `${err}`,
+              details: err, // TODO remove this in production.
+            },
+          });
+        }
+      } //);
+      //const ontopicJobs = ['ontopic'].map(async () => {
+      // });
+      // await Promise.allSettled([...expectJobs, ...chatJobs, ...ontopicJobs]);
       if (!response.closed) {
+        console.log(`Looking up final ${id}`);
         const final = await findReviewById(id);
         response.write(`data: ${JSON.stringify(final)}\n\n`);
         response.end();
@@ -348,6 +673,8 @@ type ReviewBody = {
 
 /**
  * @route POST <review>/
+ * @summary Add a review request.
+ * @description
  * Handles post request to add a review requiest for the given content and
  * performs any preprocessing of the incoming document.
  * This adds the document text and writing task to the database, it does
@@ -383,9 +710,13 @@ reviews.post(
         document,
         segmented,
         writing_task,
-        token?.user,
+        token?.user ?? request.sessionID,
         token?.platformContext.resource.id
       );
+      // request.session['wtd'] = writing_task; // FUTURE use session for analysis
+      // request.session['document'] = document; // FUTURE use session for analysis
+      request.session['review_id'] = id;
+      request.session['reviews'] = [...(request.session['reviews'] ?? []), id];
       response.send(id);
     } catch (err) {
       if (err instanceof UnprocessableContentError) {
