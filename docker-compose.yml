@@ -51,16 +51,33 @@ services:
       ONTOPIC_SERVER: http://ontopic:5000/
       OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
       PORT: 8888
-      SCRIBE_TEMPLATES: /app/private/templates.json
-      PROMPT_TEMPLATES: /app/private/prompts
+      SCRIBE_TEMPLATES: /app/resources/prompts/templates.json
+      PROMPT_TEMPLATES: /app/resources/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
-      WRITING_TASKS: /app/private/writing_tasks
+      WRITING_TASKS: /app/resources/wtd_lib
     restart: always
     depends_on:
       - "mongo"
     volumes:
       - "./settings:/app/build/app/settings:ro"
       - "./private:/app/private:ro"
+      - "../myprose-resources:/app/resources:ro"
+  # grafana:
+  #   image: docker.io/grafana/grafana-enterprise:latest
+  #   container_name: grafana
+  #   ports:
+  #     - 3000:3000
+  #   restart: unless-stopped
+  # prometheus:
+  #   image: docker.io/prom/prometheus:latest
+  #   container_name: prometheus
+  #   ports:
+  #     - 9090:9090
+  #   volumes:
+  #     - ./prometheus:/etc/prometheus
+  #   command:
+  #     - '--config.file=/etc/prometheus/prometheus.yml'
+  #   restart: unless-stopped
 
 secrets:
   anthropic_api_key:

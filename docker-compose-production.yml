@@ -59,15 +59,17 @@ services:
       ONTOPIC_SERVER: http://ontopic:5000/
       OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
       PORT: 8888
-      SCRIBE_TEMPLATES: /app/private/templates.json
+      SCRIBE_TEMPLATES: /app/resources/prompts/templates.json
+      PROMPT_TEMPLATES: /app/resources/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
-      WRITING_TASKS: /app/private/writing_tasks
+      WRITING_TASKS: /app/resources/wtd_lib
     restart: always
     depends_on:
       - "mongo"
     volumes:
       - "./settings:/app/build/app/settings:ro"
       - "./private:/app/private:ro"
+      - "/srv/scribe/myprose-resources:/app/resources:ro"
 
 volumes:
   db_data:
