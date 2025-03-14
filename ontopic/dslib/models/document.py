@@ -3755,7 +3755,7 @@ class DSDocument():
                             bSkipPunct = True
                         else:
                             bSkipPunct = False
-                        res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
+                        res.append(tuple([p_count, s_count, s, bSkipPunct]))
                         s_count += 1
 
                     i += 1

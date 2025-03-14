@@ -172,7 +172,7 @@ async def ontopic(data: OnTopicRequest):
 
     coherence = document.generateGlobalVisData(
         2, 1, views.TOPIC_SORT_APPEARANCE)
-    clarity = document.getSentStructureData()
+    clarity: list[ClarityData] = document.getSentStructureData()
     topics = document.getCurrentTopics()
 
     num_paragraphs = coherence.get('num_paras')
