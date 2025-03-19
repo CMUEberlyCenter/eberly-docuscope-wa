@@ -1,11 +1,25 @@
 about:
+  title: About
   overview: 'Project Overview:'
+  project_link_title: Future of Writing
   build: 'Build:'
   version: 'Version: {{version}} built on {{date}}'
   template: 'Templates Information:'
   templates: Templates built on {{date}}
   task: 'Writing Task:'
   task_name: 'Name: {{name}}'
+  acknowledgements:
+    title: 'Acknowledgements:'
+    content: >
+      This project has been partially supported by the A.W. Mellon Foundation,
+      Carnegie Mellon's Simon Initiative Seed Grant,
+      the Berkman Faculty Development Fund,
+      and the Seed Grant Program for Research and Development of Generative AI-Enabled
+      Educational Tools, Dietrich College of Humanities & Social Sciences,
+      Eberly Center for Teaching Excellence and Educational Innovation,
+      Department of English, and Center for Technology Transfer and Enterprise Creation.
+  cmu: Carnegie Mellon University
+  simon: Simon Initiative
 document.title: myProse
 document.description: myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...

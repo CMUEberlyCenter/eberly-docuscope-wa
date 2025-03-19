@@ -134,9 +134,9 @@ export const ProminentTopics: FC = () => {
                                 </ul>
                               </div>
                             ) : null}
-                            {suggestions?.length ? (
-                              <div className="m-3 mt-2">
-                                <h6>{t("prominent_topics.suggestions")}</h6>
+                            <div className="m-3 mt-2">
+                              <h6>{t("prominent_topics.suggestions")}</h6>
+                              {suggestions?.length ? (
                                 <ul>
                                   {suggestions.map((suggestion, k) => (
                                     <li key={`suggestion-${i}-${k}`}>
@@ -144,8 +144,12 @@ export const ProminentTopics: FC = () => {
                                     </li>
                                   ))}
                                 </ul>
-                              </div>
-                            ) : null}
+                              ) : (
+                                <p className="m-3 mt-2">
+                                  {t("prominent_topics.no_suggestions")}
+                                </p>
+                              )}
+                            </div>
                           </Accordion.Body>
                         </Accordion.Item>
                       )

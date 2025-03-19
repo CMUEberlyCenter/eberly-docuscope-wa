@@ -296,7 +296,7 @@ const CustomEditor: FC = () => {
       }}
     >
       <Split
-        className="container-fluid h-100 w-100 d-flex flex-row align-items-stretch"
+        className="container-fluid vh-100 w-100 d-flex flex-row align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}

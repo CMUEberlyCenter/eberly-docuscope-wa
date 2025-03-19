@@ -1,6 +1,6 @@
 import { FC, HTMLProps, useState } from "react";
 import { ListGroup, Modal, ModalProps } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { Translation, useTranslation } from "react-i18next";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
 
@@ -27,7 +27,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
     <Modal {...props}>
       <Modal.Header closeButton className="py-1">
         <Modal.Title>
-          About <Logo />
+          {t("about.title")} <Logo />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
@@ -40,7 +40,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
               target="_blank"
               rel="noreferrer noopener"
             >
-              Future of Writing
+              {t("about.project_link_title")}
             </a>
           </dd>
           <dt>{t("about.build")}</dt>
@@ -79,16 +79,12 @@ export const AboutModal: FC<ModalProps> = (props) => {
               </dd>
             </>
           )}
-          <dt>Acknowledgements:</dt>
-          <dd>
-            This project was partially funded by the A.W. Mellon Foundation,
-            Carnegie Mellon’s Simon Initiative Seed Grant and Berkman Faculty
-            Development Fund.
-          </dd>
+          <dt>{t("about.acknowledgements.title")}</dt>
+          <dd>{t("about.acknowledgements.content")}</dd>
         </dl>
         <p>
           <a href="https://cmu.edu/" target="_blank" rel="noreferrer noopener">
-            Carnegie Mellon University
+            {t("about.cmu")}
           </a>
         </p>
         <p>
@@ -97,7 +93,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
             target="_blank"
             rel="noreferrer noopener"
           >
-            Simon Initiative
+            {t("about.simon")}
           </a>
         </p>
       </Modal.Body>
@@ -111,15 +107,19 @@ export const About: FC<AnchorProps> = () => {
   const onHide = () => setShow(false);
   const toggle = () => setShow(!show);
   return (
-    <>
-      <a
-        style={{ fontSize: "small" }}
-        className="btn btn-link py-0 m-0 px-1"
-        onClick={toggle}
-      >
-        About
-      </a>
-      <AboutModal show={show} onHide={onHide} />
-    </>
+    <Translation>
+      {(t) => (
+        <>
+          <a
+            style={{ fontSize: "small" }}
+            className="btn btn-link py-0 m-0 px-1"
+            onClick={toggle}
+          >
+            {t("about.title")}
+          </a>
+          <AboutModal show={show} onHide={onHide} />
+        </>
+      )}
+    </Translation>
   );
 };
