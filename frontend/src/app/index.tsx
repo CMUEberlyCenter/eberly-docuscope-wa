@@ -4,7 +4,6 @@ import { createRoot } from "react-dom/client";
 import CustomEditor from "./components/Editor/CustomEditor";
 import "./i18n";
 import "./index.scss";
-// import "./index.css";
 
 const content = document.getElementById("content");
 console.assert(
