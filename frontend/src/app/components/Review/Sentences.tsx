@@ -18,6 +18,7 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
+/** Button component for selecting the Sentences tool. */
 export const SentencesButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -43,22 +44,26 @@ const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
 };
 
 type SentenceIconProps = HTMLProps<HTMLSpanElement>;
+/** Icons component for topic text, a square. */
 const TopicTextIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
   <span {...props} className={classNames(className, "topic-text-icon")}>
     ■
   </span>
 );
+/** Icons component for active verbs, a triangle. */
 const ActiveVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
   <span {...props} className={classNames(className, "active-verb-icon")}>
     ▲
   </span>
 );
+/** Icons component for be verbs, a circle. */
 const BeVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
   <span {...props} className={classNames(className, "be-verb-icon")}>
     ●
   </span>
 );
 
+/** Legend component for sentence icons. */
 const Legend: FC = () => {
   const { t } = useTranslation("review");
   return (
@@ -82,7 +87,11 @@ const Legend: FC = () => {
   );
 };
 
-export const Sentences: FC = () => {
+/** Sentences review tool component. */
+export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const data = useOnTopicData();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
@@ -140,7 +149,13 @@ export const Sentences: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid sentences overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid sentences overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
         {!data ? (
           <Loading />

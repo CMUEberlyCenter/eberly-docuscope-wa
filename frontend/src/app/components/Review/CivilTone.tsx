@@ -1,4 +1,5 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -10,7 +11,11 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
-export const CivilTone: FC = () => {
+/** Civil Tone Tool component. */
+export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useCivilToneData();
   const id = useId();
@@ -18,7 +23,13 @@ export const CivilTone: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("civil_tone.title")}
           instructionsKey="civil_tone"

@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from "react";
+import { FC, HTMLProps, useEffect, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -51,24 +51,33 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
+import classNames from "classnames";
 
 type TabKey = "big_picture" | "fine_tuning";
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
-const NullTool: FC = () => (
-  <article className="container-fluid flex-grow-1 overflow-auto d-flex flex-column">
+/** No selected tool component. */
+const NullTool: FC<HTMLProps<HTMLDivElement>> = ({ className, ...props }) => (
+  <article
+    {...props}
+    className={classNames(
+      className,
+      "container-fluid flex-grow-1 overflow-auto d-flex flex-column"
+    )}
+  >
     <Alert variant="warning" className="m-3">
       <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
     </Alert>
   </article>
 );
 
+/** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
-  const [tool, setTool] = useState<Tool>("expectations");
+  const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
 
   // useUnload();
@@ -120,12 +129,12 @@ export const Review: FC = () => {
           <Tabs
             activeKey={tab}
             onSelect={(k) => {
-              if (k === "fine_tuning" && otherTool === "null") {
-                setOtherTool("paragraph_clarity"); // FIXME initial tool
-              }
-              if (k === "big_picture" && tool === "null") {
-                setTool("expectations"); // FIXME initial tool
-              }
+              // if (k === "fine_tuning" && otherTool === "null") {
+              //   setOtherTool("paragraph_clarity"); // FIXME initial tool
+              // }
+              // if (k === "big_picture" && tool === "null") {
+              //   setTool("expectations"); // FIXME initial tool
+              // }
               setTab(k as TabKey);
             }}
             variant="underline"

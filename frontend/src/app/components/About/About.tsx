@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { FC, HTMLProps, useState } from "react";
 import { ListGroup, Modal, ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
@@ -102,7 +103,12 @@ export const AboutModal: FC<ModalProps> = (props) => {
 };
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
-export const About: FC<AnchorProps> = () => {
+export const About: FC<AnchorProps> = ({
+  className,
+  onClick,
+  style,
+  ...props
+}) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
   const toggle = () => setShow(!show);
@@ -111,8 +117,9 @@ export const About: FC<AnchorProps> = () => {
       {(t) => (
         <>
           <a
-            style={{ fontSize: "small" }}
-            className="btn btn-link py-0 m-0 px-1"
+            {...props}
+            style={{ ...style, fontSize: "small" }}
+            className={classNames(className, "btn btn-link py-0 m-0 px-1")}
             onClick={toggle}
           >
             {t("about.title")}

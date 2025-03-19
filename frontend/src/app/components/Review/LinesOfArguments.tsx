@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, useContext, useId, useState } from "react";
+import { FC, HTMLProps, useContext, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -18,6 +18,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -128,9 +129,11 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
 
 /**
  * Component for displaying the results of Lines of Arguments review.
- * @returns
  */
-export const LinesOfArguments: FC = () => {
+export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useLinesOfArgumentsData();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
@@ -139,7 +142,13 @@ export const LinesOfArguments: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("lines_of_arguments.title")}
           instructionsKey="lines_of_arguments"

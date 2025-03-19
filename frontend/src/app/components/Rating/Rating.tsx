@@ -1,9 +1,10 @@
 // Uses Bootstrap css classes
-import React from "react";
-import "./Rating.scss";
+import classNames from "classnames";
+import { FC, HTMLProps } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
+import "./Rating.scss";
 
-type RatingProps = {
+type RatingProps = HTMLProps<HTMLDivElement> & {
   value: number;
 };
 
@@ -13,7 +14,7 @@ type RatingProps = {
  * @param params.value the raw [0-1] rating value supplied by Scribe.
  * @returns
  */
-export const Rating: React.FC<RatingProps> = ({ value }: RatingProps) => {
+export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
   const scale = 5;
   const rating = value * scale;
   const fullSymbols = Math.floor(rating);
@@ -23,7 +24,7 @@ export const Rating: React.FC<RatingProps> = ({ value }: RatingProps) => {
       placement="right"
       overlay={<Tooltip>{rating.toFixed(1)}</Tooltip>}
     >
-      <div className="assess-rating">
+      <div {...props} className={classNames(className, "assess-rating")}>
         <div className={`d-flex rating-${fullSymbols}`}>
           {new Array(scale).fill(0).map((_v, i) => {
             let percent = 0;

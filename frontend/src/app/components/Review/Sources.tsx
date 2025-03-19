@@ -1,4 +1,5 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -9,6 +10,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Accordion component for displaying citations. */
 const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
   citations,
   ...props
@@ -39,13 +41,23 @@ const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
   );
 };
 
-export const Sources: FC = () => {
+/** Sources review tool component. */
+export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useSourcesData();
   const dispatch = useContext(ReviewDispatchContext);
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader title={t("sources.title")} instructionsKey="sources" />
         {!review ? (
           <Loading />

@@ -16,7 +16,9 @@ const initialReviewContext: ReviewContextState = {
   sentences: [],
 };
 
+/** Context for review tools. */
 export const ReviewContext = createContext<ReviewContextState | null>(null);
+/** Context for dispatching actions to modify the review tools state. */
 export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
 );

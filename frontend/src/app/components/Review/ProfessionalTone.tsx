@@ -1,4 +1,5 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -12,6 +13,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -25,6 +27,7 @@ export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
   );
 };
 
+/** Component for displaying sentence tone issues. */
 const SentenceToneIssues: FC<
   AccordionProps & { issues: SentenceToneIssue[] }
 > = ({ issues, ...props }) => {
@@ -64,13 +67,23 @@ const SentenceToneIssues: FC<
   );
 };
 
-export const ProfessionalTone: FC = () => {
+/** Professional Tone review tool component. */
+export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useProfessionalToneData();
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("professional_tone.title")}
           instructionsKey="professional_tone"

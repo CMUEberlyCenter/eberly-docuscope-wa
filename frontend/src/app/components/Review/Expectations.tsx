@@ -1,5 +1,15 @@
+import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
+import classNames from "classnames";
+import {
+  FC,
+  HTMLProps,
+  Suspense,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Accordion,
   AccordionItemProps,
@@ -10,7 +20,7 @@ import {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import { isErrorData, isExpectationsData } from "../../../lib/ReviewResponse";
 import { Rule } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
@@ -27,12 +37,12 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import style from "./Expectations.module.scss";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
   suggestion.match(/^none/i) !== null;
 
+/** Button component to use for selecting the Content Expectations tool. */
 export const ExpectationsButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -46,18 +56,19 @@ export const ExpectationsButton: FC<ButtonProps> = (props) => {
   );
 };
 
-export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-  <Translation ns={"review"}>
-    {(t) => (
-      <span {...props}>
-        <Icon />
-        {t("expectations.title")}
-      </span>
-    )}
-  </Translation>
-);
+// export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
+//   <Translation ns={"review"}>
+//     {(t) => (
+//       <span {...props}>
+//         <Icon />
+//         {t("expectations.title")}
+//       </span>
+//     )}
+//   </Translation>
+// );
 
 type ExpectationProps = AccordionItemProps & { rule: Rule };
+/** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const expectations = useExpectationsData();
@@ -169,7 +180,11 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
   );
 };
 
-export const Expectations: FC = () => {
+/** Content Expectations tool component. */
+export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const writingTask = useWritingTask();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
@@ -178,25 +193,33 @@ export const Expectations: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("expectations.title")}
           instructionsKey="expectations"
         />
-        {!writingTask ? (
-          <Loading />
-        ) : (
-          <section className="container-fluid overflow-auto position-relative flex-grow-1">
-            {writingTask?.rules.rules.map((rule, i) => (
-              <ExpectationRules
-                key={`rule-${i}`}
-                rule={rule}
-                onSelect={onSelect}
-                activeKey={current}
-              />
-            ))}
-          </section>
-        )}
+        <Suspense fallback={<Loading />}>
+          {!writingTask ? (
+            <Loading />
+          ) : (
+            <section className="container-fluid overflow-auto position-relative flex-grow-1">
+              {writingTask?.rules.rules.map((rule, i) => (
+                <ExpectationRules
+                  key={`rule-${i}`}
+                  rule={rule}
+                  onSelect={onSelect}
+                  activeKey={current}
+                />
+              ))}
+            </section>
+          )}
+        </Suspense>
       </article>
     </ReviewReset>
   );

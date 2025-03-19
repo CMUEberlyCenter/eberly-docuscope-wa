@@ -1,12 +1,10 @@
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import {
-  BehaviorSubject,
   distinctUntilChanged,
   filter,
   map,
   Observable,
-  scan,
   shareReplay,
   switchMap,
 } from 'rxjs';
@@ -16,6 +14,7 @@ import {
   ErrorData,
   EthosData,
   ExpectationsData,
+  isExpectationsData,
   isOnTopicReviewData,
   LinesOfArgumentsData,
   LogicalFlowData,
@@ -76,11 +75,6 @@ const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
     return () => ctrl.abort();
   });
 
-export const [useExpectations, expectations$] = bind<SUSPENSE | Review>(
-  fetchObservable('expectations'),
-  SUSPENSE
-);
-
 const review$ = fromFetch(`/api/v2/reviews/${REVIEW_ID}`).pipe(
   filter((response) => response.ok),
   switchMap(async (response) => await response.json()),
@@ -103,96 +97,11 @@ review$.subscribe((rev) => {
   }
 });
 
-// const globalCoherenceAnalysis = new BehaviorSubject<GlobalCoherenceData | null>(
-//   null
-// );
 type OptionalError<T> = T | ErrorData | null;
-// const civilToneAnalysis = new BehaviorSubject<OptionalError<CivilToneData>>(
-//   null
-// );
-// const ethosAnalysis = new BehaviorSubject<OptionalError<EthosData>>(null);
-// const prominentTopicsAnalysis = new BehaviorSubject<
-//   OptionalError<ProminentTopicsData>
-// >(null);
-// const linesOfArgumentsAnalysis = new BehaviorSubject<
-//   OptionalError<LinesOfArgumentsData>
-// >(null);
-// const logicalFlowAnalysis = new BehaviorSubject<OptionalError<LogicalFlowData>>(
-//   null
-// );
-// const paragraphClarityAnalysis = new BehaviorSubject<
-//   OptionalError<ParagraphClarityData>
-// >(null);
-// const pathosAnalysis = new BehaviorSubject<OptionalError<PathosData>>(null);
-// const professionalToneAnalysis = new BehaviorSubject<
-//   OptionalError<ProfessionalToneData>
-// >(null);
-// const sourcesAnalysis = new BehaviorSubject<OptionalError<SourcesData>>(null);
-// const ontopicAnalysis = new BehaviorSubject<OptionalError<OnTopicReviewData>>(
-//   null
-// );
 export type OptionalExpectations =
   | ExpectationsData
   | (ErrorData & { expectation: string })
   | null;
-const expectationsAnalysis = new BehaviorSubject<OptionalExpectations>(null);
-
-expectations$
-  .pipe(
-    filter((rev) => isReview(rev)),
-    map((rev) => rev.analysis)
-  )
-  .subscribe((analyses) =>
-    analyses.forEach((analysis) => {
-      switch (analysis.tool) {
-        // TODO add shape checks
-        case 'civil_tone':
-          // civilToneAnalysis.next(analysis);
-          break;
-        case 'ethos':
-          // ethosAnalysis.next(analysis);
-          break;
-        case 'expectations':
-          if ('expectation' in analysis) expectationsAnalysis.next(analysis);
-          else console.warn('No expectation is expectations response!');
-          break;
-        case 'prominent_topics':
-          // prominentTopicsAnalysis.next(analysis);
-          break;
-        case 'lines_of_arguments':
-          // linesOfArgumentsAnalysis.next(analysis);
-          break;
-        case 'logical_flow':
-          // logicalFlowAnalysis.next(analysis);
-          break;
-        case 'paragraph_clarity':
-          // paragraphClarityAnalysis.next(analysis);
-          break;
-        case 'pathos':
-          // pathosAnalysis.next(analysis);
-          break;
-        case 'professional_tone':
-          // professionalToneAnalysis.next(analysis);
-          break;
-        case 'sources':
-          // sourcesAnalysis.next(analysis);
-          break;
-        case 'ontopic':
-          // ontopicAnalysis.next(analysis);
-          break;
-        case 'docuscope':
-        default:
-          // expectations.set(analysis.expectation, analysis);
-          break;
-      }
-      // allExpectationsAnalysis.next(expectations);
-    })
-  );
-
-// export const [useGlobalCoherenceData, globalCoherenceData$] = bind(
-//   globalCoherenceAnalysis,
-//   null
-// );
 
 function fetchReview<T>(prompt: ReviewPrompt) {
   return fromFetch(`/api/v2/reviews/${REVIEW_ID}/${prompt}`).pipe(
@@ -204,79 +113,78 @@ function fetchReview<T>(prompt: ReviewPrompt) {
     map((data) => data as T)
   );
 }
+/** Fetch the review data for the civil tone tool. */
 export const [useCivilToneData, civilToneData$] = bind(
   fetchReview<OptionalError<CivilToneData>>('civil_tone'),
   null
 );
+/** Fetch the review data for the ethos tool. */
 export const [useEthosData, ethosData$] = bind(
   fetchReview<OptionalError<EthosData>>('ethos'),
   null
 );
+/** Fetch the review data for the prominent topics tool. */
 export const [useProminentTopicsData, prominentTopicsData$] = bind(
   fetchReview<OptionalError<ProminentTopicsData>>('prominent_topics'),
   null
 );
+/** Fetch the review data for the lines of arguments tool. */
 export const [useLinesOfArgumentsData, argumentsData$] = bind(
   fetchReview<OptionalError<LinesOfArgumentsData>>('lines_of_arguments'),
   null
 );
+/** Fetch the review data for the logical flow tool. */
 export const [useLogicalFlowData, logicalFlowData$] = bind(
   fetchReview<OptionalError<LogicalFlowData>>('logical_flow'),
   null
 );
+/** Fetch the review data for the paragraph clarity tool. */
 export const [useParagraphClarityData, paragraphClarityData$] = bind(
   fetchReview<OptionalError<ParagraphClarityData>>('paragraph_clarity'),
   null
 );
+/** Fetch the review data for the pathos tool. */
 export const [usePathosData, pathosData$] = bind(
   fetchReview<OptionalError<PathosData>>('pathos'),
   null
 );
+/** Fetch the review data for the professional tone tool. */
 export const [useProfessionalToneData, professionalToneData$] = bind(
   fetchReview<OptionalError<ProfessionalToneData>>('professional_tone'),
   null
 );
+/** Fetch the review data for the sources tool. */
 export const [useSourcesData, sourcesData$] = bind(
   fetchReview<OptionalError<SourcesData>>('sources'),
   null
 );
-
+/** Fetch the review data for the expectations tool. */
 export const [useExpectationsData, expectationsData$] = bind(
-  expectationsAnalysis.pipe(
-    scan(
-      (
-        acc: Map<string, OptionalExpectations>,
-        current: OptionalExpectations
-      ) => {
-        if (!current) {
-          return acc;
-        }
-        const m = new Map(acc);
-        m.set(current.expectation, current);
-        return m;
-      },
-      new Map<string, OptionalExpectations>()
+  fetchObservable('expectations').pipe(
+    filter((data): data is Review => isReview(data)),
+    map(
+      (data) =>
+        new Map<string, OptionalExpectations>(
+          data.analysis
+            .filter(isExpectationsData)
+            .map((a) => [a.expectation, a])
+        )
     )
   ),
   null
 );
-expectationsData$.subscribe(() => undefined); // at least one subscription to make sure it works.
-
-export const [useOnTopicReview, onTopicReview$] = bind(
+/** Fetch the review data for the ontopic tools. */
+export const [useOnTopicData, onTopicData$] = bind(
   fromFetch(`/api/v2/reviews/${REVIEW_ID}/ontopic`).pipe(
     switchMap(async (response) => await response.json()),
     filter((data): data is Review => isReview(data)),
-    shareReplay(1) // TODO errors
-  ),
-  null
-);
-export const [useOnTopicData, onTopicData$] = bind(
-  onTopicReview$.pipe(
+    shareReplay(1), // TODO errors
     map((data) => data?.analysis.find((a) => isOnTopicReviewData(a))),
     filter((data) => !!data)
   ),
   null
 );
+/** Fetch the text for the ontopic tools. */
 export const [useOnTopicProse, onTopicProse$] = bind(
   onTopicData$.pipe(
     map((data) => data?.response.html ?? ''),
