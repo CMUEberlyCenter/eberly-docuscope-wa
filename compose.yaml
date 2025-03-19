@@ -1,21 +1,13 @@
 ###################################################################################
 #
-# For use on production server.
-# docker-compose-production.yml with added mounting of the `settings` directory
-# so that features and options can be changed without needing to recompile.
+# Default compose file, assumes development environment.
+# > docker-compose -f compose.yaml up -d
+# > docker-compose -f compose.yaml up -d --build frontend ontopic
+# > docker-compose -f compose.yaml --profile stats up -d
 #
 ###################################################################################
 
 services:
-  # redirect:
-  #   # Temporary redirect of main page, quick way to disable access.
-  #   image: morbz/docker-web-redirect
-  #   ports:
-  #     - 8888:80
-  #   restart: always
-  #   environment:
-  #     - REDIRECT_TARGET=https://www.cmu.edu/dietrich/english/research-and-publications/myprose.html
-  #     - REDIRECT_TYPE=redirect
   mongo:
     image: docker.io/mongo:latest
     restart: always
@@ -25,18 +17,35 @@ services:
     secrets:
       - mongo_user
       - mongo_pass
-    volumes:
-      - db_data:/data/db
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    profiles:
+      - dev
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_ADMINUSERNAME_FILE: "/run/secrets/mongo_user"
+      ME_CONFIG_MONGODB_ADMINPASSWORD_FILE: "/run/secrets/mongo_pass"
+    secrets:
+      - mongo_user
+      - mongo_pass
 
   ontopic:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
+    build:
+      context: ./ontopic
+      dockerfile: ./Dockerfile
     restart: always
-    volumes:
-      - "./ontopic/data:/home/appuser/data:ro"
-      - "./ontopic/resources:/home/appuser/resources:ro"
+    ports:
+     - 5000:5000
 
   frontend:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/myprose:latest
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
     ports:
      - 8888:8888
     secrets:
@@ -49,7 +58,7 @@ services:
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       ANTHROPIC_MAX_TOKENS: 2048
       EXPIRE_REVIEW_SECONDS: 86400
-      LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
+      LTI_HOSTNAME: https://docuscope-sc-test.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
       MONGO_DB: myprose
       MONGO_HOST: mongo:27017
@@ -69,12 +78,27 @@ services:
     volumes:
       - "./settings:/app/build/app/settings:ro"
       - "./private:/app/private:ro"
-      - "/srv/scribe/myprose-resources:/app/resources:ro"
-
-volumes:
-  db_data:
-    labels:
-      edu.cmu.eberly.docuscope.description: "Database volume"
+      - "../myprose-resources:/app/resources:ro"
+  grafana:
+    image: docker.io/grafana/grafana-enterprise:latest
+    container_name: grafana
+    ports:
+      - 3000:3000
+    profiles:
+      - stats
+    restart: unless-stopped
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - 9090:9090
+    profiles:
+      - stats
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
 
 secrets:
   anthropic_api_key:
