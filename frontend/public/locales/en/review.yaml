@@ -81,6 +81,7 @@ prominent_topics:
   elaborations: Elaboration Strategies
   sentences: Sentences
   suggestions: Comments
+  no_suggestions: No comments. It looks very good.
   'null': No topics were found in your draft.
 lines_of_arguments:
   title: Lines of Argument
