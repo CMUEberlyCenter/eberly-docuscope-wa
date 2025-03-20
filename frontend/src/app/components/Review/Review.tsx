@@ -1,6 +1,8 @@
+import { faClipboardList } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import classNames from "classnames";
 import { FC, HTMLProps, useEffect, useState } from "react";
 import {
-  Alert,
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
@@ -51,9 +53,10 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
-import classNames from "classnames";
 
+// tab event keys
 type TabKey = "big_picture" | "fine_tuning";
+// tool event keys
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 /** No selected tool component. */
@@ -62,12 +65,17 @@ const NullTool: FC<HTMLProps<HTMLDivElement>> = ({ className, ...props }) => (
     {...props}
     className={classNames(
       className,
-      "container-fluid flex-grow-1 overflow-auto d-flex flex-column"
+      "container-fluid flex-grow-1 overflow-auto d-flex flex-column position-relative"
     )}
   >
-    <Alert variant="warning" className="m-3">
-      <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
-    </Alert>
+    <Stack className="position-absolute top-50 start-50 translate-middle w-75">
+      <FontAwesomeIcon icon={faClipboardList} className="mx-auto" />
+      <Translation ns={"review"}>
+        {(t) => (
+          <span className="mx-auto text-center">{t("null.content")}</span>
+        )}
+      </Translation>
+    </Stack>
   </article>
 );
 
