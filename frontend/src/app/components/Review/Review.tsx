@@ -1,5 +1,3 @@
-import { faClipboardList } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { FC, HTMLProps, useEffect, useState } from "react";
 import {
@@ -14,10 +12,11 @@ import {
   Tabs,
   Tooltip,
 } from "react-bootstrap";
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { ReviewTool } from "../../../lib/ReviewResponse";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
+import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import {
   useAdditionalToolsEnabled,
   useArgumentsEnabled,
@@ -60,9 +59,9 @@ type TabKey = "big_picture" | "fine_tuning";
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 /** No selected tool component. */
-const NullTool: FC<HTMLProps<HTMLDivElement> & { tab: TabKey }> = ({
+const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
   className,
-  tab = "big_picture",
+  text,
   ...props
 }) => (
   <article
@@ -73,19 +72,8 @@ const NullTool: FC<HTMLProps<HTMLDivElement> & { tab: TabKey }> = ({
     )}
   >
     <Stack className="position-absolute top-50 start-50 translate-middle w-75">
-      <FontAwesomeIcon
-        icon={faClipboardList}
-        className="mx-auto text-primary"
-      />
-      <Translation ns={"review"}>
-        {(t) => (
-          <span className="mx-auto text-center">
-            {tab === "big_picture"
-              ? t("null.big_picture")
-              : t("null.fine_tuning")}
-          </span>
-        )}
-      </Translation>
+      <ReviewIcon className="mx-auto text-primary md-icon" />
+      <span className="mx-auto text-center">{text}</span>
     </Stack>
   </article>
 );
@@ -188,7 +176,9 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {(!tool || tool === "null") && <NullTool tab={tab} />}
+                  {(!tool || tool === "null") && (
+                    <NullTool text={t("null.big_picture")} />
+                  )}
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
@@ -336,13 +326,13 @@ export const Review: FC = () => {
                     ) : null}
                   </ButtonToolbar>
                   {(!otherTool || otherTool === "null") && (
-                    <NullTool tab={tab} />
+                    <NullTool text={t("null.fine_tuning")} />
                   )}
                   {otherTool === "logical_flow" && <LogicalFlow />}
                   {otherTool === "civil_tone" && <CivilTone />}
                   {otherTool === "ethos" && <Ethos />}
                   {otherTool === "impressions" && (
-                    <NullTool tab="fine_tuning" />
+                    <NullTool text={t("null.not_available")} />
                   )}
                   {otherTool === "organization" && <Organization />}
                   {otherTool === "sentences" && <Sentences />}
