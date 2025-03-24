@@ -219,11 +219,11 @@ export const [
   useGlobalFeatureProfessionalTone,
   globalFeatureProfessionalTone$,
 ] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.professional_tone)),
   false
 );
 export const [useGlobalFeatureSources, globalFeatureSources$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
+  settings$.pipe(map((settings) => !!settings.scribe && !!settings.sources)),
   false
 );
 
