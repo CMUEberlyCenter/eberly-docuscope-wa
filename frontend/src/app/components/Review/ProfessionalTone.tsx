@@ -45,8 +45,11 @@ const SentenceToneIssues: FC<
       {issues.map((sent, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
-            <span>{t("professional_tone.text")}{" "}
-            <q>{sent.sentence}</q></span>
+            <span>
+              <h6 className="d-inline">{t("professional_tone.text")}</h6>
+              {" "}
+              <q>{sent.sentence}</q>
+            </span>
           </Accordion.Header>
           <Accordion.Body
             className="pb-3"

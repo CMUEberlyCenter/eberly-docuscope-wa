@@ -59,7 +59,7 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
                       >
                         <Accordion.Header className="accordion-header-highlight">
                           <h6 className="d-inline">{t("civil_tone.prefix")}</h6>{" "}
-                          &quot;{sent.sentence}&quot;
+                          <q>{sent.sentence}</q>
                         </Accordion.Header>
                         <Accordion.Body
                           className="pb-3"

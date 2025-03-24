@@ -22,7 +22,7 @@ civil_tone:
   tooltip: Using respectful and balanced language promotes collaborative dialogue.
   error: Error displaying Civil Tone tool.
   'null': No issues found.
-  prefix: 'Your Sentence:'
+  prefix: 'Your Text:'
 ethos:
   title: Credibility (Ethos)
   tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
