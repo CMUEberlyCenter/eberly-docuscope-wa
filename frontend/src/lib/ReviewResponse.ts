@@ -80,7 +80,7 @@ export type SentenceToneIssue = {
 };
 export type CivilToneOutput = {
   issues: SentenceToneIssue[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type SentenceAssessment = {
   sentence_ids: string[];
@@ -91,7 +91,7 @@ export type EthosOutput = {
   expertise_ethos: SentenceAssessment[];
   analytical_ethos: SentenceAssessment[];
   balanced_ethos: SentenceAssessment[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type ExpectationsOutput = {
   /** List of span ids */
@@ -134,7 +134,7 @@ export type ProminentTopicsOutput = {
     /** A list of span ids for the sentences from the text that provide the evidence used to support the claim. */
     elaboration_sentences: string[];
   }[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type Claim = {
   /** Summary of the claim written in a single sentence. */
@@ -161,7 +161,7 @@ export type LinesOfArgumentsOutput = {
   counter_arguments?: Claim[];
   /** List of claims that address their corresponding counterargument. */
   rebuttals?: Claim[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type LogicalFlowOutput = {
   disruptions: {
@@ -170,7 +170,7 @@ export type LogicalFlowOutput = {
     sentences: string[];
     paragraphs: string[];
   }[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type ParagraphClarityOutput = {
   paragraphs: {
@@ -179,20 +179,20 @@ export type ParagraphClarityOutput = {
     explanation: string;
     suggestions: string;
   }[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type PathosOutput = {
   situation_pathos: SentenceAssessment[];
   temporal_pathos: SentenceAssessment[];
   immersive_pathos: SentenceAssessment[];
   structural_pathos: SentenceAssessment[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type ProfessionalToneOutput = {
   sentiment: SentenceToneIssue[];
   confidence: SentenceToneIssue[];
   subjectivity: SentenceToneIssue[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type Citation = {
   /** Name(s) of the sources. */
@@ -213,7 +213,7 @@ export type SourcesOutput = {
     suggestion: string;
     sentences: string[];
   }[];
-} & GeneralAssessment;
+} & Partial<GeneralAssessment>;
 
 export type ReviewResponse =
   | CivilToneOutput
