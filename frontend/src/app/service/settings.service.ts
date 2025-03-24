@@ -29,7 +29,7 @@ interface Settings {
   // Draft Tools
   notes2prose?: boolean; // Notes to Prose LLM tool
   notes2bullets?: boolean; // Notes to List LLM tool
-  assess_expectation?: boolean; // Assess Single Expectation LLM tool
+  assess_expectation?: boolean; // Assess Single Expectation LLM tool // to be removed
   // LLM Review Tools
   overview?: boolean;
   civil_tone?: boolean;
@@ -39,7 +39,7 @@ interface Settings {
   lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
   logical_flow?: boolean; // Logical Progression review LLM tool
   paragraph_clarity?: boolean;
-  pathos?: boolean;
+  pathos?: boolean; // to be removed
   professional_tone?: boolean;
   sources?: boolean;
   // onTopic Review Tools
@@ -65,7 +65,7 @@ const DEFAULT: Settings = {
 
   notes2prose: true,
   notes2bullets: true,
-  assess_expectation: false,
+  assess_expectation: false, // to be removed
 
   civil_tone: true,
   ethos: true,
@@ -74,7 +74,7 @@ const DEFAULT: Settings = {
   lines_of_arguments: true,
   logical_flow: true,
   paragraph_clarity: true,
-  pathos: false,
+  pathos: false, // to be removed
   professional_tone: true,
   term_matrix: true,
   sentence_density: true,
