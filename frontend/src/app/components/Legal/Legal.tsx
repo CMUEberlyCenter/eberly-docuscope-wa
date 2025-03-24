@@ -3,6 +3,9 @@ import { Translation } from "react-i18next";
 import { About } from "../About/About";
 import classNames from "classnames";
 
+/**
+ * Footer component with legal links.
+ */
 export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   style,

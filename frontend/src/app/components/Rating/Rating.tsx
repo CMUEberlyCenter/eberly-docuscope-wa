@@ -25,7 +25,7 @@ export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
       overlay={<Tooltip>{rating.toFixed(1)}</Tooltip>}
     >
       <div {...props} className={classNames(className, "assess-rating")}>
-        <div className={`d-flex rating-${fullSymbols}`}>
+        <div className={`d-flex rating-${fullSymbols} align-items-baseline`}>
           {new Array(scale).fill(0).map((_v, i) => {
             let percent = 0;
             if (i - fullSymbols < 0) {
@@ -42,7 +42,7 @@ export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
                 ></i>
                 <i
                   className="fa-solid fa-star d-inline-block position-absolute overflow-hidden"
-                  style={{ top: 0, left: 0, width: `${percent}%` }}
+                  style={{top: 5, left: 0, width: `${percent}%` }}
                 ></i>
               </span>
             );
