@@ -74,7 +74,7 @@ const DEFAULT: Settings = {
   lines_of_arguments: true,
   logical_flow: true,
   paragraph_clarity: true,
-  pathos: true,
+  pathos: false,
   professional_tone: true,
   term_matrix: true,
   sentence_density: true,
