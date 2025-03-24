@@ -60,7 +60,11 @@ type TabKey = "big_picture" | "fine_tuning";
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 /** No selected tool component. */
-const NullTool: FC<HTMLProps<HTMLDivElement>> = ({ className, ...props }) => (
+const NullTool: FC<HTMLProps<HTMLDivElement> & { tab: TabKey }> = ({
+  className,
+  tab = "big_picture",
+  ...props
+}) => (
   <article
     {...props}
     className={classNames(
@@ -69,10 +73,17 @@ const NullTool: FC<HTMLProps<HTMLDivElement>> = ({ className, ...props }) => (
     )}
   >
     <Stack className="position-absolute top-50 start-50 translate-middle w-75">
-      <FontAwesomeIcon icon={faClipboardList} className="mx-auto" />
+      <FontAwesomeIcon
+        icon={faClipboardList}
+        className="mx-auto text-primary"
+      />
       <Translation ns={"review"}>
         {(t) => (
-          <span className="mx-auto text-center">{t("null.content")}</span>
+          <span className="mx-auto text-center">
+            {tab === "big_picture"
+              ? t("null.big_picture")
+              : t("null.fine_tuning")}
+          </span>
         )}
       </Translation>
     </Stack>
@@ -177,7 +188,7 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {(!tool || tool === "null") && <NullTool />}
+                  {(!tool || tool === "null") && <NullTool tab={tab} />}
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
@@ -324,11 +335,15 @@ export const Review: FC = () => {
                       </Dropdown>
                     ) : null}
                   </ButtonToolbar>
-                  {(!otherTool || otherTool === "null") && <NullTool />}
+                  {(!otherTool || otherTool === "null") && (
+                    <NullTool tab={tab} />
+                  )}
                   {otherTool === "logical_flow" && <LogicalFlow />}
                   {otherTool === "civil_tone" && <CivilTone />}
                   {otherTool === "ethos" && <Ethos />}
-                  {otherTool === "impressions" && <NullTool />}
+                  {otherTool === "impressions" && (
+                    <NullTool tab="fine_tuning" />
+                  )}
                   {otherTool === "organization" && <Organization />}
                   {otherTool === "sentences" && <Sentences />}
                   {otherTool === "paragraph_clarity" && <ParagraphClarity />}
