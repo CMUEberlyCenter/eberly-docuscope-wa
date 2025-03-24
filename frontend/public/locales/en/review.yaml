@@ -161,6 +161,9 @@ professional_tone:
   confidence: Confidence
   subjectivity: Subjectivity
   'null': No feedback.
+  text: "Your Text:"
+  issue: "Issue:"
+  suggestion: "Suggestion:"
 sources:
   title: Sources
   error: Error displaying Sources tool.

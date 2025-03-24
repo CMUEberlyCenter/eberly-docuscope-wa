@@ -33,12 +33,11 @@ const SentenceToneIssues: FC<
 > = ({ issues, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
+  const { t } = useTranslation("review");
 
   if (issues.length <= 0) {
     return (
-      <Translation ns={"review"}>
-        {(t) => <Alert variant="info">{t("professional_tone.null")}</Alert>}
-      </Translation>
+      <Alert variant="info">{t("professional_tone.null")}</Alert>
     );
   }
   return (
@@ -46,7 +45,8 @@ const SentenceToneIssues: FC<
       {issues.map((sent, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
-            &quot;{sent.sentence}&quot;
+            <span>{t("professional_tone.text")}{" "}
+            <q>{sent.sentence}</q></span>
           </Accordion.Header>
           <Accordion.Body
             className="pb-3"
