@@ -15,17 +15,17 @@ export const Default: Story = {
 };
 
 export const Value1: Story = {
-  args: { value: 1/5 },
+  args: { value: 1 / 5 },
 };
 
 export const Value2: Story = {
-  args: { value: 2/5 },
+  args: { value: 2 / 5 },
 };
 export const Value3: Story = {
-  args: { value: 3/5 },
+  args: { value: 3 / 5 },
 };
 export const Value4: Story = {
-  args: { value: 4/5 },
+  args: { value: 4 / 5 },
 };
 export const Value5: Story = {
   args: { value: 1 },

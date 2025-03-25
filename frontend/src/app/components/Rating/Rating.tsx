@@ -2,7 +2,7 @@
 import classNames from "classnames";
 import { FC, HTMLProps } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import "./Rating.scss";
+import style from "./Rating.module.scss";
 
 type RatingProps = HTMLProps<HTMLDivElement> & {
   value: number;
@@ -24,8 +24,20 @@ export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
       placement="right"
       overlay={<Tooltip>{rating.toFixed(1)}</Tooltip>}
     >
-      <div {...props} className={classNames(className, "assess-rating")}>
-        <div className={`d-flex rating-${fullSymbols} align-items-baseline`}>
+      <div
+        {...props}
+        className={classNames(className, style["assess-rating"])}
+        role="meter"
+        aria-valuemin={0}
+        aria-valuemax={scale}
+        aria-valuenow={rating}
+      >
+        <div
+          className={classNames(
+            `d-flex align-items-baseline`,
+            style[`rating-${fullSymbols}`]
+          )}
+        >
           {new Array(scale).fill(0).map((_v, i) => {
             let percent = 0;
             if (i - fullSymbols < 0) {
@@ -42,7 +54,7 @@ export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
                 ></i>
                 <i
                   className="fa-solid fa-star d-inline-block position-absolute overflow-hidden"
-                  style={{top: 5, left: 0, width: `${percent}%` }}
+                  style={{ top: 5, left: 0, width: `${percent}%` }}
                 ></i>
               </span>
             );
