@@ -9,10 +9,12 @@ import {
 } from "react";
 
 type ReviewContextState = {
-  sentences: string[][];
+  paragraphs?: string[];
+  sentences?: string[][];
   text?: string;
 };
 const initialReviewContext: ReviewContextState = {
+  paragraphs: [],
   sentences: [],
 };
 
@@ -27,30 +29,34 @@ type ReviewAction =
   | {
       type: "set";
       sentences: string[][];
+      paragraphs?: string[];
     }
   | {
       type: "unset";
       sentences?: undefined;
+      paragraphs?: undefined;
     }
   | {
       type: "update";
       sentences: string;
+      paragraphs?: undefined;
     }
   | {
       type: "remove";
       sentences?: undefined;
+      paragraphs?: undefined;
     };
 
 /** Dispatch function for modifying the review state. */
 function reviewReducer(
   review: ReviewContextState,
-  { type, sentences }: ReviewAction
+  { type, sentences, paragraphs }: ReviewAction
 ) {
   switch (type) {
     case "set":
-      return { ...review, sentences };
+      return { ...review, sentences, paragraphs };
     case "unset":
-      return { ...review, sentences: [] };
+      return { ...review, sentences: [], paragraphs: [] };
     case "update":
       return { ...review, text: sentences };
     case "remove":

@@ -89,6 +89,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
                             dispatch({
                               type: "set",
                               sentences: [sentences],
+                              paragraphs,
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}

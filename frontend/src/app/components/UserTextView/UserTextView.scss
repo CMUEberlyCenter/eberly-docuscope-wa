@@ -29,5 +29,12 @@
     font-weight: bolder;
   }
 
+  // if there are any no-blur elements, then blur the other p elements. #176
+  &:has(.no-blur) {
+    p:not(.no-blur) {
+      filter: blur(2px);
+    }
+  }
+
   @include meta.load-css("./myprose_styles");
 }

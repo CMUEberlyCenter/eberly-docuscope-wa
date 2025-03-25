@@ -91,6 +91,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
                             dispatch({
                               type: "set",
                               sentences: [sentence_ids],
+                              paragraphs: [paragraph_id],
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}
