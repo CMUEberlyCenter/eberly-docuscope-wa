@@ -1,5 +1,5 @@
-import { Logo } from "./Logo";
 import { Meta, StoryObj } from "@storybook/react";
+import { Logo } from "./Logo";
 
 const meta = {
   component: Logo,

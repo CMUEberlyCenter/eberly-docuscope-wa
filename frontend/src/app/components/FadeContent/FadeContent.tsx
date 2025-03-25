@@ -8,6 +8,7 @@ type ToolFadeContentProps = {
   maxHeight?: Height;
   htmlContent?: string;
 } & HTMLProps<HTMLDivElement>;
+/** An expandable component that fades overflow content when minimized. */
 export const FadeContent: FC<ToolFadeContentProps> = ({
   children,
   minHeight,
