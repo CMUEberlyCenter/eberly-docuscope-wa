@@ -31,16 +31,17 @@ interface Settings {
   notes2bullets?: boolean; // Notes to List LLM tool
   assess_expectation?: boolean; // Assess Single Expectation LLM tool // to be removed
   // LLM Review Tools
-  overview?: boolean;
+  // overview?: boolean;
   civil_tone?: boolean;
-  ethos?: boolean;
+  credibility?: boolean; // Credibility review LLM tool
+  // ethos?: boolean;
   expectations?: boolean; // All Expectations review LLM tool
-  prominent_topics?: boolean; // Key Ideas review LLM tool
   lines_of_arguments?: boolean; // Lines of Arguments review LLM tool
   logical_flow?: boolean; // Logical Progression review LLM tool
   paragraph_clarity?: boolean;
-  pathos?: boolean; // to be removed
+  // pathos?: boolean; // to be removed
   professional_tone?: boolean;
+  prominent_topics?: boolean; // Key Ideas review LLM tool
   sources?: boolean;
   // onTopic Review Tools
   term_matrix?: boolean;
@@ -65,20 +66,18 @@ const DEFAULT: Settings = {
 
   notes2prose: true,
   notes2bullets: true,
-  assess_expectation: false, // to be removed
 
   civil_tone: true,
-  ethos: true,
+  credibility: true,
   expectations: true,
-  prominent_topics: true,
   lines_of_arguments: true,
   logical_flow: true,
   paragraph_clarity: true,
-  pathos: false, // to be removed
   professional_tone: true,
-  term_matrix: true,
+  prominent_topics: true,
   sentence_density: true,
   sources: true,
+  term_matrix: true,
 
   flow: false,
   copyedit: false,
@@ -127,7 +126,6 @@ export const [useGlobalFeatureNotes2Bullets, globalFeatureNotes2Bullets$] =
     ),
     false
   );
-
 export const [useGlobalFeatureExpectation, globalFeatureExpectation$] = bind(
   settings$.pipe(
     map((settings) => !!settings.scribe && !!settings.assess_expectation)
@@ -149,15 +147,14 @@ export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
   settings$.pipe(
     map(
       (settings) =>
-        !!settings.overview ||
         !!settings.civil_tone ||
-        !!settings.ethos ||
+        !!settings.credibility ||
         !!settings.expectations ||
-        !!settings.prominent_topics ||
         !!settings.lines_of_arguments ||
         !!settings.logical_flow ||
-        !!settings.pathos ||
+        !!settings.paragraph_clarity ||
         !!settings.professional_tone ||
+        !!settings.prominent_topics ||
         !!settings.sources ||
         !!settings.term_matrix ||
         !!settings.sentence_density
@@ -170,8 +167,10 @@ export const [useGlobalFeatureCivilTone, globalFeatureCivilTone$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.civil_tone)),
   false
 );
-export const [useGlobalFeatureEthos, globalFeatureEthos$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.ethos)),
+export const [useGlobalFeatureCredibility, globalFeatureCredibility$] = bind(
+  settings$.pipe(
+    map((settings) => !!settings.scribe && !!settings.credibility)
+  ),
   false
 );
 export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
@@ -180,13 +179,6 @@ export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
   ),
   false
 );
-export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] =
-  bind(
-    settings$.pipe(
-      map((settings) => !!settings.scribe && !!settings.prominent_topics)
-    ),
-    false
-  );
 export const [
   useGlobalFeatureLinesOfArguments,
   globalFeatureLinesOfArguments$,
@@ -211,10 +203,6 @@ export const [
   ),
   false
 );
-export const [useGlobalFeaturePathos, globalFeaturePathos$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.pathos)),
-  false
-);
 export const [
   useGlobalFeatureProfessionalTone,
   globalFeatureProfessionalTone$,
@@ -224,6 +212,13 @@ export const [
   ),
   false
 );
+export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] =
+  bind(
+    settings$.pipe(
+      map((settings) => !!settings.scribe && !!settings.prominent_topics)
+    ),
+    false
+  );
 export const [useGlobalFeatureSources, globalFeatureSources$] = bind(
   settings$.pipe(map((settings) => !!settings.scribe && !!settings.sources)),
   false

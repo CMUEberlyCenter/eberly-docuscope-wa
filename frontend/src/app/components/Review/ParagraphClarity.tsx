@@ -70,19 +70,16 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
               </header>
               {"response" in review ? (
                 <Accordion>
-                  {review.response.paragraphs.map(
-                    (
-                      { explanation, suggestions, sentence_ids, paragraph_id },
-                      i
-                    ) => (
+                  {review.response.map(
+                    ({ issue, suggestion, sent_ids, para_id }, i) => (
                       <Accordion.Item
                         key={`${id}-${i}`}
                         eventKey={`${id}-${i}`}
                       >
                         <Accordion.Header className="accordion-header-highlight">
-                          <div className="flex-grow-1">{explanation}</div>
+                          <div className="flex-grow-1">{issue}</div>
                           <AlertIcon
-                            show={sentence_ids.length === 0 && !paragraph_id}
+                            show={sent_ids.length === 0 && !para_id}
                             message={t("logical_flow.no_sentences")}
                           />
                         </Accordion.Header>
@@ -90,13 +87,16 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
                           onEntered={() =>
                             dispatch({
                               type: "set",
-                              sentences: [sentence_ids],
-                              paragraphs: [paragraph_id],
+                              sentences: [sent_ids],
+                              paragraphs: [para_id],
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}
                         >
-                          {suggestions}
+                          <h6 className="d-inline">
+                            {t("paragraph_clarity.suggestion")}
+                          </h6>{" "}
+                          <p className="d-inline">{suggestion}</p>
                         </Accordion.Body>
                       </Accordion.Item>
                     )

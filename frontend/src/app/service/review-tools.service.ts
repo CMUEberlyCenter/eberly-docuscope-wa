@@ -1,33 +1,22 @@
 import { bind } from '@react-rxjs/core';
 import { combineLatest, map } from 'rxjs';
+import { ReviewTool } from '../../lib/ReviewResponse';
 import { isEnabled, isWritingTask, WritingTask } from '../../lib/WritingTask';
 import {
   globalFeatureCivilTone$,
-  globalFeatureEthos$,
+  globalFeatureCredibility$,
   globalFeatureExpectations$,
-  globalFeatureProminentTopics$,
   globalFeatureLinesOfArguments$,
   globalFeatureLogicalFlow$,
-  globalFeaturePathos$,
   globalFeatureProfessionalTone$,
+  globalFeatureProminentTopics$,
   globalFeatureSources$,
   globalFeatureTermMatrix$,
 } from './settings.service';
 import { writingTask$ } from './writing-task.service';
-import { ReviewTool } from '../../lib/ReviewResponse';
 
 const existsEnabled = (task: WritingTask | null, key: ReviewTool) =>
   isWritingTask(task) && isEnabled(task, key);
-
-export const [useArgumentsEnabled, argumentsEnabled$] = bind(
-  combineLatest([globalFeatureLinesOfArguments$, writingTask$]).pipe(
-    map(
-      ([settings, task]) =>
-        settings && existsEnabled(task, 'lines_of_arguments')
-    )
-  ),
-  false
-);
 
 export const [useCivilToneEnabled, civilToneEnabled$] = bind(
   combineLatest([globalFeatureCivilTone$, writingTask$]).pipe(
@@ -35,25 +24,23 @@ export const [useCivilToneEnabled, civilToneEnabled$] = bind(
   ),
   false
 );
-
-export const [useEthosEnabled, ethosEnabled$] = bind(
-  combineLatest([globalFeatureEthos$, writingTask$]).pipe(
-    map(([settings, task]) => settings && existsEnabled(task, 'ethos'))
+export const [useCredibilityEnabled, credibilityEnabled$] = bind(
+  combineLatest([globalFeatureCredibility$, writingTask$]).pipe(
+    map(([settings, task]) => settings && existsEnabled(task, 'credibility'))
   ),
   false
 );
-
 export const [useExpectationsEnabled, expectationsEnabled$] = bind(
   combineLatest([globalFeatureExpectations$, writingTask$]).pipe(
     map(([settings, task]) => settings && existsEnabled(task, 'expectations'))
   ),
   false
 );
-
-export const [useProminentTopicsEnabled, prominentTopicsEnabled$] = bind(
-  combineLatest([globalFeatureProminentTopics$, writingTask$]).pipe(
+export const [useArgumentsEnabled, argumentsEnabled$] = bind(
+  combineLatest([globalFeatureLinesOfArguments$, writingTask$]).pipe(
     map(
-      ([settings, task]) => settings && existsEnabled(task, 'prominent_topics')
+      ([settings, task]) =>
+        settings && existsEnabled(task, 'lines_of_arguments')
     )
   ),
   false
@@ -75,17 +62,18 @@ export const [useParagraphClarityEnabled, paragraphClarityEnabled$] = bind(
   false
 );
 
-export const [usePathosEnabled, pathosEnabled$] = bind(
-  combineLatest([globalFeaturePathos$, writingTask$]).pipe(
-    map(([settings, task]) => settings && existsEnabled(task, 'pathos'))
-  ),
-  false
-);
-
 export const [useProfessionalToneEnabled, professionalToneEnabled$] = bind(
   combineLatest([globalFeatureProfessionalTone$, writingTask$]).pipe(
     map(
       ([settings, task]) => settings && existsEnabled(task, 'professional_tone')
+    )
+  ),
+  false
+);
+export const [useProminentTopicsEnabled, prominentTopicsEnabled$] = bind(
+  combineLatest([globalFeatureProminentTopics$, writingTask$]).pipe(
+    map(
+      ([settings, task]) => settings && existsEnabled(task, 'prominent_topics')
     )
   ),
   false
@@ -124,6 +112,7 @@ export const [useImpressionsEnabled, impressionsEnabled$] = bind(
 export const [useBigPictureEnabled, bigPictureEnabled$] = bind(
   combineLatest([
     expectationsEnabled$,
+    argumentsEnabled$,
     prominentTopicsEnabled$,
     logicalFlowEnabled$,
   ]).pipe(map((big) => big.some(Boolean))),
@@ -132,11 +121,10 @@ export const [useBigPictureEnabled, bigPictureEnabled$] = bind(
 
 export const [useAdditionalToolsEnabled, additionalToolsEnabled$] = bind(
   combineLatest([
-    sourcesEnabled$,
-    ethosEnabled$,
-    pathosEnabled$,
-    termMatrixEnabled$,
     civilToneEnabled$,
+    credibilityEnabled$,
+    sourcesEnabled$,
+    termMatrixEnabled$,
     impressionsEnabled$,
   ]).pipe(map((addl) => addl.some(Boolean))),
   false

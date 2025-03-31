@@ -1,9 +1,9 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId } from "react";
+import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { Citation, isErrorData } from "../../../lib/ReviewResponse";
+import { isErrorData, Source, SourceType } from "../../../lib/ReviewResponse";
 import { useSourcesData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -11,26 +11,29 @@ import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying citations. */
-const Citations: FC<AccordionProps & { citations: Citation[] }> = ({
-  citations,
-  ...props
-}) => {
+const Citations: FC<
+  AccordionProps & { citations?: Source[]; emptyText?: string }
+> = ({ citations, emptyText, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
   const { t } = useTranslation("review");
 
+  if (!citations?.length && emptyText) {
+    return <p>{emptyText}</p>;
+  }
+
   return (
     <Accordion {...props}>
-      {citations.map(({ names, assessment, sentences }, i) => (
+      {citations?.map(({ name, assessment, sent_ids }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">
-              <strong className="d-inline">{t("sources.source")}</strong>{" "}
-              <span>{names}</span>
+              <h6 className="d-inline">{t("sources.source")}</h6>{" "}
+              <p className="d-inline">{name}</p>
             </div>
           </Accordion.Header>
           <Accordion.Body
-            onEntered={() => dispatch({ type: "set", sentences: [sentences] })}
+            onEntered={() => dispatch({ type: "set", sentences: [sent_ids] })}
             onExit={() => dispatch({ type: "unset" })}
           >
             {assessment}
@@ -49,6 +52,24 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const review = useSourcesData();
   const dispatch = useContext(ReviewDispatchContext);
+  const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
+    {}
+  );
+  useEffect(() => {
+    if (
+      review &&
+      "response" in review &&
+      "sources" in review.response &&
+      review.response.sources
+    ) {
+      const data = Object.groupBy(
+        review.response.sources,
+        ({ src_type }) => src_type
+      );
+      setSources(data);
+    }
+  }, [review]);
+
   return (
     <ReviewReset>
       <article
@@ -74,26 +95,24 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
                     {(t) => <p>{t("sources_insights")}</p>}
                   </Translation>
                 </header>
-                {review.response.citation_issues.length <= 0 ? (
+                {review.response.issues.length <= 0 ? (
                   <Alert variant="info">{t("sources.no_issues")}</Alert>
                 ) : (
                   <Accordion>
-                    {review.response.citation_issues.map(
-                      ({ description, suggestion, sentences }, i) => (
+                    {review.response.issues.map(
+                      ({ issue, suggestion, sent_ids }, i) => (
                         <Accordion.Item key={`${i}`} eventKey={`${i}`}>
                           <Accordion.Header className="accordion-header-highlight">
                             <div>
-                              <strong className="d-inline">
-                                {t("sources.issue")}
-                              </strong>{" "}
-                              <span>{description}</span>
+                              <h6 className="d-inline">{t("sources.issue")}</h6>{" "}
+                              <p className="d-inline">{issue}</p>
                             </div>
                           </Accordion.Header>
                           <Accordion.Body
                             onEntered={() =>
                               dispatch({
                                 type: "set",
-                                sentences: [sentences],
+                                sentences: [sent_ids],
                               })
                             }
                             onExit={() => dispatch({ type: "unset" })}
@@ -115,47 +134,35 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
                 </header>
                 <section>
                   <h6>{t("sources.supportive.title")}</h6>
-                  {review.response.supportive_citation.length <= 0 ? (
-                    <p>{t("sources.supportive.null")}</p>
-                  ) : (
-                    <Citations
-                      className="mb-3"
-                      citations={review.response.supportive_citation}
-                    />
-                  )}
+                  <Citations
+                    className="mb-3"
+                    citations={sources.supporting}
+                    emptyText={t("sources.supportive.null")}
+                  />
                 </section>
                 <section>
                   <h6>{t("sources.hedged.title")}</h6>
-                  {review.response.hedged_citation.length <= 0 ? (
-                    <p>{t("sources.hedged.null")}</p>
-                  ) : (
-                    <Citations
-                      className="mb-3"
-                      citations={review.response.hedged_citation}
-                    />
-                  )}
+                  <Citations
+                    className="mb-3"
+                    citations={sources.hedged}
+                    emptyText={t("sources.hedged.null")}
+                  />
                 </section>
                 <section>
                   <h6>{t("sources.alternative.title")}</h6>
-                  {review.response.alternative_citation.length <= 0 ? (
-                    <p>{t("sources.alternative.null")}</p>
-                  ) : (
-                    <Citations
-                      className="mb-3"
-                      citations={review.response.alternative_citation}
-                    />
-                  )}
+                  <Citations
+                    className="mb-3"
+                    citations={sources.alternative}
+                    emptyText={t("sources.alternative.null")}
+                  />
                 </section>
                 <section>
                   <h6>{t("sources.neutral.title")}</h6>
-                  {review.response.neutral_citation.length <= 0 ? (
-                    <p>{t("sources.neutral.null")}</p>
-                  ) : (
-                    <Citations
-                      className="mb-3"
-                      citations={review.response.neutral_citation}
-                    />
-                  )}
+                  <Citations
+                    className="mb-3"
+                    citations={sources.neutral}
+                    emptyText={t("sources.neutral.null")}
+                  />
                 </section>
               </section>
             ) : null}

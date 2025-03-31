@@ -51,9 +51,10 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 {
                   claim,
                   support,
-                  suggestions,
-                  claim_sentences,
-                  evidence_sentences,
+                  claim_sent_ids,
+                  support_sent_ids,
+                  suggestion,
+                  impact,
                 },
                 i
               ) => (
@@ -71,8 +72,8 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                     <AlertIcon
                       message={t("lines_of_arguments.no_sentences")}
                       show={
-                        (claim_sentences ?? []).length +
-                          (evidence_sentences ?? []).length ===
+                        (claim_sent_ids ?? []).length +
+                          (support_sent_ids ?? []).length ===
                         0
                       }
                     />
@@ -83,19 +84,19 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       dispatch({
                         type: "set",
                         sentences: [
-                          claim_sentences ?? [],
-                          evidence_sentences ?? [],
+                          claim_sent_ids ?? [],
+                          support_sent_ids ?? [],
                         ],
                       })
                     }
                     onExit={() => dispatch({ type: "unset" })}
                   >
-                    {support ? (
+                    {/* {support && typeof support === "string" ? (
                       <div
                         className={classNames(
                           "p-3 pb-2",
-                          (evidence_sentences ?? []).length &&
-                            "highlight highlight-1"
+                          (support_sent_ids ?? []).length &&
+                          "highlight highlight-1"
                         )}
                       >
                         <h6 className="d-inline">
@@ -103,14 +104,33 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         </h6>{" "}
                         <span>{support}</span>
                       </div>
+                    ) : null} */}
+                    {support && Array.isArray(support) ? (
+                      <div
+                        className={classNames(
+                          "p-3 pb-2",
+                          (support_sent_ids ?? []).length &&
+                            "highlight highlight-1"
+                        )}
+                      >
+                        <h6>{t("lines_of_arguments.support")}</h6>
+                        <ul>
+                          {support.map((s, k) => (
+                            <li key={`${i}-${k}`}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
                     ) : null}
-                    {suggestions?.length ? (
+                    {suggestion || impact ? (
                       <div className="m-3 mt-2">
                         <h6>{t("lines_of_arguments.suggestions")}</h6>
                         <ul>
-                          {suggestions.map((suggestion, k) => (
-                            <li key={`${i}-${k}`}>{suggestion}</li>
-                          ))}
+                          {suggestion ? (
+                            <li key={`${i}-suggestion`}>{suggestion}</li>
+                          ) : null}
+                          {impact ? (
+                            <li key={`${i}-impact`}>{impact}</li>
+                          ) : null}
                         </ul>
                       </div>
                     ) : null}
@@ -176,49 +196,39 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
                     {(t) => <p>{t("lines_of_arguments_insights")}</p>}
                   </Translation>
                 </header>
-                {review.response.thesis ? (
-                  <section className="mt-3">
-                    <h6 className="d-inline">{t("lines_of_arguments.main")}</h6>
-                    <p>{review.response.thesis}</p>
-                    <Claims
-                      onSelect={onSelect}
-                      activeKey={current}
-                      claims={review.response.arguments}
-                    />
-                  </section>
-                ) : null}
-                {Array.isArray(review.response.counter_arguments) ? (
-                  <section className="mt-3">
-                    <h5>{t("lines_of_arguments.counter_examples")}</h5>
-                    {review.response.counter_arguments?.length ? (
-                      <Claims
-                        onSelect={onSelect}
-                        activeKey={current}
-                        claims={review.response.counter_arguments}
-                      />
-                    ) : (
-                      <span>{t("lines_of_arguments.no_counter_examples")}</span>
-                    )}
-                  </section>
-                ) : null}
-                {review.response.rebuttals?.length ? (
-                  <section className="mt-3">
-                    <h5>{t("lines_of_arguments.rebuttals")}</h5>
-                    <Claims
-                      onSelect={onSelect}
-                      activeKey={current}
-                      claims={review.response.rebuttals}
-                    />
-                  </section>
-                ) : null}
-                {"response" in review &&
-                !review.response.thesis &&
-                !review.response.counter_arguments?.length &&
-                !review.response.rebuttals?.length ? (
-                  <Alert variant="warning">
-                    {t("lines_of_arguments.null")}
-                  </Alert>
-                ) : null}
+                <section className="mt-3">
+                  {review.response.thesis ? (
+                    <div>
+                      <h6 className="d-inline">
+                        {t("lines_of_arguments.main")}
+                      </h6>{" "}
+                      <p className="d-inline">{review.response.thesis}</p>
+                    </div>
+                  ) : null}
+                  {"strategies" in review.response &&
+                  Array.isArray(review.response.strategies) ? (
+                    <section className="mt-3">
+                      <h6>{t("lines_of_arguments.strategies")}</h6>
+                      <ul>
+                        {review.response.strategies.map((strat, i) => (
+                          <li key={`loa-strat-${i}`}>{strat}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                  <Claims
+                    onSelect={onSelect}
+                    activeKey={current}
+                    claims={review.response.claims}
+                  />
+                  {!review.response.thesis &&
+                  !review.response.strategies?.length &&
+                  !review.response.claims?.length ? (
+                    <Alert variant="warning">
+                      {t("lines_of_arguments.null")}
+                    </Alert>
+                  ) : null}
+                </section>
               </section>
             ) : null}
           </ErrorBoundary>

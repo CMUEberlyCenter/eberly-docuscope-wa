@@ -50,38 +50,49 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
                     {(t) => <p>{t("civil_tone_insights")}</p>}
                   </Translation>
                 </header>
-                {review.response.issues.length ? (
+                {review.response.length ? (
                   <Accordion>
-                    {review.response.issues.map((sent, i) => (
-                      <Accordion.Item
-                        key={`${id}-${i}`}
-                        eventKey={`${id}-${i}`}
-                      >
-                        <Accordion.Header className="accordion-header-highlight">
-                          <h6 className="d-inline">{t("civil_tone.prefix")}</h6>{" "}
-                          <q>{sent.sentence}</q>
-                        </Accordion.Header>
-                        <Accordion.Body
-                          className="pb-3"
-                          onEntered={() =>
-                            dispatch({
-                              type: "set",
-                              sentences: [[sent.sentence_id]],
-                            })
-                          }
-                          onExit={() => dispatch({ type: "unset" })}
+                    {review.response.map(
+                      ({ text, assessment, suggestion, sent_id }, i) => (
+                        <Accordion.Item
+                          key={`${id}-${i}`}
+                          eventKey={`${id}-${i}`}
                         >
-                          <p>{sent.assessment}</p>
-                          <p>{sent.suggestion}</p>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    ))}
+                          <Accordion.Header className="accordion-header-highlight">
+                            <h6 className="d-inline">
+                              {t("civil_tone.prefix")}
+                            </h6>{" "}
+                            <q>{text}</q>
+                          </Accordion.Header>
+                          <Accordion.Body
+                            className="pb-3"
+                            onEntered={() =>
+                              dispatch({
+                                type: "set",
+                                sentences: [[sent_id]],
+                              })
+                            }
+                            onExit={() => dispatch({ type: "unset" })}
+                          >
+                            <div>
+                              <h6 className="d-inline">
+                                {t("civil_tone.issue")}
+                              </h6>{" "}
+                              <p className="d-inline">{assessment}</p>
+                            </div>
+                            <div>
+                              <h6 className="d-inline">
+                                {t("civil_tone.suggestion")}
+                              </h6>{" "}
+                              <p className="d-inline">{suggestion}</p>
+                            </div>
+                          </Accordion.Body>
+                        </Accordion.Item>
+                      )
+                    )}
                   </Accordion>
                 ) : (
-                  <div>
-                    <h6 className="d-inline">{t("civil_tone.prefix")}</h6>{" "}
-                    {t("civil_tone.null")}
-                  </div>
+                  <div className="alert alert-info">{t("civil_tone.null")}</div>
                 )}
               </section>
             ) : null}

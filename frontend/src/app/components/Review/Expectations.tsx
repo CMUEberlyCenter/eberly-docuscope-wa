@@ -82,27 +82,27 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   return (
     <Accordion.Item {...props}>
       {isExpectationsData(expectation) &&
-      isNone(expectation.response.suggestions) ? (
+      isNone(expectation.response.suggestion) ? (
         <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{expectation.expectation}</div>
           <AlertIcon message={t("warning")} show />
         </div>
       ) : null}
       {isExpectationsData(expectation) &&
-      !isNone(expectation.response.suggestions) ? (
+      !isNone(expectation.response.suggestion) ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
             <AlertIcon
               message={t("no_sentences")}
-              show={expectation.response.sentences.length === 0}
+              show={expectation.response.sent_ids.length === 0}
             />
           </Accordion.Header>
           <Accordion.Body
             onEntered={() =>
               isExpectationsData(expectation)
                 ? dispatch({
-                    sentences: [expectation.response.sentences],
+                    sentences: [expectation.response.sent_ids],
                     type: "set",
                   })
                 : dispatch({ type: "unset" })
@@ -118,13 +118,15 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
                 </span>
               </div>
             ) : null}
-            <div>
-              <h6 className="d-inline">{t("suggestions")}</h6>{" "}
-              <span key={`${id}-suggestion`}>
-                {isExpectationsData(expectation) &&
-                  expectation.response.suggestions}
-              </span>
-            </div>
+            {isExpectationsData(expectation) &&
+            expectation.response.suggestion ? (
+              <div>
+                <h6 className="d-inline">{t("suggestion")}</h6>{" "}
+                <span key={`${id}-suggestion`}>
+                  {expectation.response.suggestion}
+                </span>
+              </div>
+            ) : null}
           </Accordion.Body>
         </>
       ) : null}

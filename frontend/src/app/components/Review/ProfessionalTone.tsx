@@ -3,7 +3,10 @@ import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, SentenceToneIssue } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  ProfessionalToneOutput,
+} from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import { useProfessionalToneData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
@@ -29,26 +32,23 @@ export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
 
 /** Component for displaying sentence tone issues. */
 const SentenceToneIssues: FC<
-  AccordionProps & { issues: SentenceToneIssue[] }
+  AccordionProps & { issues: ProfessionalToneOutput }
 > = ({ issues, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
   const { t } = useTranslation("review");
 
   if (issues.length <= 0) {
-    return (
-      <Alert variant="info">{t("professional_tone.null")}</Alert>
-    );
+    return <Alert variant="info">{t("professional_tone.null")}</Alert>;
   }
   return (
     <Accordion {...props}>
-      {issues.map((sent, i) => (
+      {issues.map(({ text, sent_ids, assessment, suggestion }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
             <span>
-              <h6 className="d-inline">{t("professional_tone.text")}</h6>
-              {" "}
-              <q>{sent.sentence}</q>
+              <h6 className="d-inline">{t("professional_tone.text")}</h6>{" "}
+              <q>{text}</q>
             </span>
           </Accordion.Header>
           <Accordion.Body
@@ -56,13 +56,19 @@ const SentenceToneIssues: FC<
             onEntered={() =>
               dispatch({
                 type: "set",
-                sentences: [[sent.sentence_id]],
+                sentences: [sent_ids],
               })
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <p>{sent.assessment}</p>
-            <p>{sent.suggestion}</p>
+            <div>
+              <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
+              <p className="d-inline">{assessment}</p>
+            </div>
+            <div>
+              <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
+              <p className="d-inline">{suggestion}</p>
+            </div>
           </Accordion.Body>
         </Accordion.Item>
       ))}
@@ -110,16 +116,28 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
                   </Translation>
                 </header>
                 <section>
-                  <h5>{t("professional_tone.sentiment")}</h5>
-                  <SentenceToneIssues issues={review.response.sentiment} />
-                </section>
-                <section>
                   <h5>{t("professional_tone.confidence")}</h5>
-                  <SentenceToneIssues issues={review.response.confidence} />
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "confident"
+                    )}
+                  />
                 </section>
                 <section>
                   <h5>{t("professional_tone.subjectivity")}</h5>
-                  <SentenceToneIssues issues={review.response.subjectivity} />
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "subjectivity"
+                    )}
+                  />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.sentiment")}</h5>
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "emotion"
+                    )}
+                  />
                 </section>
               </section>
             ) : null}

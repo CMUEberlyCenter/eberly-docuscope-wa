@@ -3,8 +3,8 @@ import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
-import { useEthosData } from "../../service/review.service";
+import { CredibilityOutput, isErrorData } from "../../../lib/ReviewResponse";
+import { useCredibilityData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -14,7 +14,7 @@ import { ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying sentence assessments. */
 const SentenceAssessments: FC<
-  AccordionProps & { assessments?: SentenceAssessment[] }
+  AccordionProps & { assessments?: CredibilityOutput }
 > = ({ assessments, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const prefix = useId();
@@ -23,7 +23,7 @@ const SentenceAssessments: FC<
       {(t) =>
         assessments?.length ? (
           <Accordion {...props}>
-            {assessments.map(({ sentence_ids, assessment, suggestion }, i) => (
+            {assessments.map(({ issue, suggestion, sent_ids }, i) => (
               <Accordion.Item
                 key={`${prefix}-${i}`}
                 eventKey={`${prefix}-${i}`}
@@ -31,11 +31,11 @@ const SentenceAssessments: FC<
                 <Accordion.Header className="accordion-header-highlight">
                   <div className="fex-grow-1">
                     <h6 className="d-inline">{t("ethos.assessment")}</h6>{" "}
-                    <span>{assessment}</span>
+                    <span>{issue}</span>
                   </div>
                   <AlertIcon
                     message={t("ethos.no_sentences")}
-                    show={sentence_ids.length === 0}
+                    show={sent_ids.length === 0}
                   />
                 </Accordion.Header>
                 <Accordion.Body
@@ -43,7 +43,7 @@ const SentenceAssessments: FC<
                   onEntered={() =>
                     dispatch({
                       type: "set",
-                      sentences: [sentence_ids],
+                      sentences: [sent_ids],
                     })
                   }
                   onExit={() => dispatch({ type: "unset" })}
@@ -68,7 +68,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   // credibility
   const { t } = useTranslation("review");
-  const review = useEthosData();
+  const review = useCredibilityData();
 
   return (
     <ReviewReset>
@@ -97,22 +97,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
                   </Translation>
                 </header>
                 <section>
-                  <h5>{t("ethos.expertise")}</h5>
-                  <SentenceAssessments
-                    assessments={review.response.expertise_ethos}
-                  />
-                </section>
-                <section>
-                  <h5>{t("ethos.analytical")}</h5>
-                  <SentenceAssessments
-                    assessments={review.response.analytical_ethos}
-                  />
-                </section>
-                <section>
-                  <h5>{t("ethos.balanced")}</h5>
-                  <SentenceAssessments
-                    assessments={review.response.balanced_ethos}
-                  />
+                  <SentenceAssessments assessments={review.response} />
                 </section>
               </section>
             ) : (

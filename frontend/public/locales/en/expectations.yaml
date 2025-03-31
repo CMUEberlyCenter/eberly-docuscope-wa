@@ -4,6 +4,6 @@ error:
   no_task: No text type specified!
 sentences: 'Sentences:'
 assessment: "What's working:"
-suggestions: 'Suggestions:'
+suggestion: 'Suggestion:'
 warning: This expectation is not addressed in your draft.
 no_sentences: No relevant text was located in your draft.

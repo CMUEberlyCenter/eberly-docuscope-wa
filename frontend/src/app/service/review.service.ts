@@ -11,15 +11,14 @@ import {
 import { fromFetch } from 'rxjs/fetch';
 import {
   CivilToneData,
+  CredibilityData,
   ErrorData,
-  EthosData,
   ExpectationsData,
   isExpectationsData,
   isOnTopicReviewData,
   LinesOfArgumentsData,
   LogicalFlowData,
   ParagraphClarityData,
-  PathosData,
   ProfessionalToneData,
   ProminentTopicsData,
   ReviewPrompt,
@@ -119,13 +118,8 @@ export const [useCivilToneData, civilToneData$] = bind(
   null
 );
 /** Fetch the review data for the ethos tool. */
-export const [useEthosData, ethosData$] = bind(
-  fetchReview<OptionalError<EthosData>>('ethos'),
-  null
-);
-/** Fetch the review data for the prominent topics tool. */
-export const [useProminentTopicsData, prominentTopicsData$] = bind(
-  fetchReview<OptionalError<ProminentTopicsData>>('prominent_topics'),
+export const [useCredibilityData, credibilityData$] = bind(
+  fetchReview<OptionalError<CredibilityData>>('credibility'),
   null
 );
 /** Fetch the review data for the lines of arguments tool. */
@@ -143,14 +137,14 @@ export const [useParagraphClarityData, paragraphClarityData$] = bind(
   fetchReview<OptionalError<ParagraphClarityData>>('paragraph_clarity'),
   null
 );
-/** Fetch the review data for the pathos tool. */
-export const [usePathosData, pathosData$] = bind(
-  fetchReview<OptionalError<PathosData>>('pathos'),
-  null
-);
 /** Fetch the review data for the professional tone tool. */
 export const [useProfessionalToneData, professionalToneData$] = bind(
   fetchReview<OptionalError<ProfessionalToneData>>('professional_tone'),
+  null
+);
+/** Fetch the review data for the prominent topics tool. */
+export const [useProminentTopicsData, prominentTopicsData$] = bind(
+  fetchReview<OptionalError<ProminentTopicsData>>('prominent_topics'),
   null
 );
 /** Fetch the review data for the sources tool. */
