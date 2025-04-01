@@ -77,7 +77,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
                   </div>
                 ) : null}
                 {review.response.strategies?.length ? (
-                  <div>
+                  <div className="mt-3">
                     <h6>{t("prominent_topics.strategies")}</h6>
                     <ul>
                       {review.response.strategies.map((strategy, i) => (
