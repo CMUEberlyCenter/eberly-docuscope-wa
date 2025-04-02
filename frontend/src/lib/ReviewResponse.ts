@@ -157,7 +157,7 @@ export type ProminentTopicsOutput = {
 
 export type SourceType = 'supporting' | 'hedged' | 'alternative' | 'neutral';
 export type Source = {
-  name: string;
+  names: string;
   assessment: string;
   sent_ids: string[];
   src_type: SourceType;

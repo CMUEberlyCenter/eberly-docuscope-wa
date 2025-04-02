@@ -24,12 +24,12 @@ const Citations: FC<
 
   return (
     <Accordion {...props}>
-      {citations?.map(({ name, assessment, sent_ids }, i) => (
+      {citations?.map(({ names, assessment, sent_ids }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">
               <h6 className="d-inline">{t("sources.source")}</h6>{" "}
-              <p className="d-inline">{name}</p>
+              <p className="d-inline">{names}</p>
             </div>
           </Accordion.Header>
           <Accordion.Body
