@@ -6,6 +6,9 @@
   "private": true,
   "browser": "./index.html",
   "scripts": {
+    "dev:vike": "npx tsx ./index.ts",
+    "build:vike": "npx vike build",
+    "preview:vike": "NODE_ENV=production npx tsx ./index.ts",
     "start": "npm run build:client && npx tsx src/server/index",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
@@ -135,6 +138,7 @@
     "i18next": "^24.2.3",
     "i18next-browser-languagedetector": "^8.0.4",
     "i18next-http-backend": "^3.0.2",
+    "i18next-http-middleware": "^3.7.2",
     "ltijs": "=5.9.5",
     "mammoth": "^1.9.0",
     "mongodb": "^6.15.0",
@@ -157,6 +161,8 @@
     "string-format": "^2.0.0",
     "swr": "^2.3.3",
     "systeminformation": "^5.25.11",
+    "vike": "^0.4.228",
+    "vike-react": "^0.6.1",
     "yaml": "^2.7.1"
   },
   "overrides": {

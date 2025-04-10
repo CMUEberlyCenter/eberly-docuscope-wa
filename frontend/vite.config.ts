@@ -4,23 +4,24 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import { version } from './package.json';
+import vike from 'vike/plugin';
 
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), visualizer(), svgr()],
+  plugins: [react(), visualizer(), svgr(), vike()],
   build: {
     sourcemap: mode === 'development',
     minify: mode !== 'development',
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'index.html'),
-        deeplink: resolve(__dirname, 'deeplink.html'),
-        review: resolve(__dirname, 'review.html'),
-        genlink: resolve(__dirname, 'genlink.html'),
-      },
+      // input: {
+      //   main: resolve(__dirname, 'index.html'),
+      //   deeplink: resolve(__dirname, 'deeplink.html'),
+      //   review: resolve(__dirname, 'review.html'),
+      //   genlink: resolve(__dirname, 'genlink.html'),
+      // },
       output: {
-        dir: 'build/app',
+        // dir: 'build/app',
         manualChunks(id: string) {
           if (id.includes('d3')) { return 'vendor-d3'; }
           if (id.includes('@fortawesome')) { return 'vendor-@fortawesome'; }

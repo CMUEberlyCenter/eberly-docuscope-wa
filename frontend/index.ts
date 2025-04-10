@@ -1,0 +1,329 @@
+import MongoDBStore from 'connect-mongodb-session';
+import cors from 'cors';
+import express, { Request, Response } from 'express';
+import fileUpload from 'express-fileupload';
+import promBundle from 'express-prom-bundle';
+import session from 'express-session';
+import { readdir, readFile, stat } from 'fs/promises';
+import { Provider } from 'ltijs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
+import {
+  BadRequest,
+  BadRequestError,
+  FileNotFound,
+  InternalServerError,
+  UnprocessableContent,
+  UnprocessableContentError,
+} from './src/lib/ProblemDetails';
+import { validateWritingTask } from './src/lib/schemaValidate';
+import { isWritingTask, WritingTask } from './src/lib/WritingTask';
+import { ontopic } from './src/server/api/onTopic';
+import { reviews } from './src/server/api/reviews';
+import { scribe } from './src/server/api/scribe';
+import { writingTasks } from './src/server/api/tasks';
+import {
+  findWritingTaskById,
+  initDatabase,
+  insertWritingTask,
+} from './src/server/data/mongo';
+import { initPrompts } from './src/server/data/prompts';
+import {
+  ContentItemType,
+  IdToken,
+  isInstructor,
+  LTIPlatform,
+} from './src/server/model/lti';
+import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
+import {
+  LTI_DB,
+  LTI_HOSTNAME,
+  LTI_KEY,
+  LTI_OPTIONS,
+  MONGO_CLIENT,
+  ONTOPIC_URL,
+  PLATFORMS_PATH,
+  PORT,
+  SESSION_KEY,
+} from './src/server/settings';
+import { createDevMiddleware, renderPage } from 'vike/server';
+import i18n from 'i18next';
+import { LanguageDetector, handle } from 'i18next-http-middleware';
+import { parse } from 'yaml';
+import Backend from 'i18next-http-backend';
+import { readFileSync } from 'fs';
+import { initReactI18next } from 'react-i18next';
+
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const root = __dirname;
+const PUBLIC = __dirname;// join(__dirname, './build/app');
+
+async function __main__() {
+  console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
+  const shutdownDatabase = await initDatabase();
+  console.log('Database service initialized, ok to start listening ...');
+  const shutdownPrompts = await initPrompts();
+  Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
+  Provider.app.use(cors({ origin: '*' }));
+  Provider.app.use(fileUpload({ createParentPath: true }));
+  Provider.app.use(
+    express.urlencoded({
+      extended: true,
+    })
+  );
+
+  Provider.onConnect(async (token: IdToken, _req: Request, res: Response) => {
+    if (token) {
+      return res.sendFile(join(PUBLIC, 'index.html'));
+    }
+    Provider.redirect(res, '/index.html');
+  });
+  // Provider.onInvalidToken(async (req: Request, res: Response) => {
+  //   console.log('InvalidToken');
+  //   return res.sendFile(join(PUBLIC, 'index.html'));
+  // })
+  Provider.onDeepLinking(
+    async (_token: IdToken, _req: Request, res: Response) =>
+      //  res.sendFile(join(PUBLIC, 'deeplink.html'))
+      // Provider.redirect(res, '/deeplink', { newResource: true })
+      Provider.redirect(res, '/deeplink')
+  );
+  Provider.app.get('/deeplink', async (_req: Request, res: Response) =>
+    res.sendFile(join(PUBLIC, 'deeplink.html'))
+  );
+  Provider.app.post(
+    // TODO validate(checkSchema({})),
+    '/deeplink',
+    async (request: Request, response: Response) => {
+      // const url = new URL('/index.html', LTI_HOSTNAME);
+      const url = new URL('/', LTI_HOSTNAME);
+      try {
+        const task = JSON.parse(request.body.file) as {
+          _id?: string;
+        } & WritingTask;
+        const { _id, ...writing_task } = task;
+        const valid = validateWritingTask(task);
+        if (!valid) {
+          throw new UnprocessableContentError(
+            validateWritingTask.errors,
+            'Invalid JSON'
+          );
+        }
+        if (!isWritingTask(writing_task)) {
+          throw new UnprocessableContentError(
+            ['Failed type checking!'],
+            'Invalid JSON'
+          );
+        }
+        const writing_task_id: string =
+          _id ?? (await insertWritingTask(task)).toString();
+        if (writing_task_id) {
+          url.searchParams.append('writing_task', writing_task_id);
+        }
+        const items: ContentItemType[] = [
+          {
+            type: 'ltiResourceLink',
+            url: url.toString(),
+            custom: {
+              writing_task_id,
+              writing_task: JSON.stringify(writing_task),
+            },
+          },
+        ];
+        const form = await Provider.DeepLinking.createDeepLinkingForm(
+          response.locals.token,
+          items
+        ); // {message: 'Success'}
+        response.send(form);
+      } catch (err) {
+        if (err instanceof SyntaxError) {
+          response.status(422).send(UnprocessableContent(err));
+        } else if (err instanceof UnprocessableContentError) {
+          response.status(422).send(UnprocessableContent(err));
+        } else if (err instanceof BadRequestError) {
+          response.status(400).send(BadRequest(err));
+        } else {
+          response.status(500).send(InternalServerError(err));
+        }
+      }
+    }
+  );
+
+  Provider.app.get('/lti/info', async (_req: Request, res: Response) => {
+    const token: IdToken | undefined = res.locals.token;
+    const context = {
+      instructor: isInstructor(token?.platformContext),
+      resource: token?.platformContext?.resource,
+      userInfo: token?.userInfo,
+      context: token?.platformContext.context,
+    };
+    try {
+      const taskId = token?.platformContext.custom?.writing_task_id;
+      if (!taskId || typeof taskId !== 'string') {
+        throw new BadRequestError('No writing task id in custom parameters.');
+      }
+      const writing_task = await findWritingTaskById(taskId);
+      const ret = {
+        ...context,
+        writing_task,
+      };
+      res.send(ret);
+    } catch (err) {
+      console.error(err);
+      if (err instanceof ReferenceError) {
+        res.status(404).send(FileNotFound(err));
+      } else if (err instanceof BadRequestError) {
+        res.status(400).send(BadRequest(err));
+      } else {
+        res.status(500).send(InternalServerError(err));
+      }
+    }
+  });
+
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink');
+  try {
+    // await Provider.deploy({ port: PORT });
+    await Provider.deploy({ serverless: true });
+
+    // Register manually configured platforms.
+    try {
+      const files = await readdir(PLATFORMS_PATH);
+      for (const file of files) {
+        const path = join(PLATFORMS_PATH, file);
+        const stats = await stat(path);
+        if (stats.isFile() && file.endsWith('.json')) {
+          const content = await readFile(path, { encoding: 'utf8' });
+          const json = JSON.parse(content) as LTIPlatform;
+          await Provider.registerPlatform(json);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    const app = express();
+    app.use(express.json());
+    app.use(cors({ origin: '*' }));
+
+    // Setup sessions
+    const MongoDBSessionStore = MongoDBStore(session);
+    const store = new MongoDBSessionStore({
+      uri: MONGO_CLIENT,
+      collection: 'sessions',
+    });
+    store.on('error', (err) => {
+      console.error(err);
+      myproseSessionErrorsTotal.inc({ error: err.message });
+    });
+    app.use(
+      session({
+        secret: SESSION_KEY,
+        store,
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: 'auto' },
+      })
+    );
+    i18n.use(Backend).use(LanguageDetector).use(initReactI18next).init({
+      preload: ['en-US'],
+      fallbackLng: 'en-US',
+      interpolation: { escapeValue: false },
+      backend: {
+        loadPath: '/locales/{{lng}}/{{ns}}.yaml',
+        parse: (data: string) => parse(data),
+      },
+      resources: {
+        'en-US': {
+          translation: parse(
+            readFileSync(join(root, 'public/locales/en/translation.yaml'), 'utf-8')
+          )
+        }
+      }
+    })
+    app.use(handle(i18n));
+
+    if (process.env.NODE_ENV === 'production') {
+      console.log('Production mode');
+      app.use(express.static(join(root, 'dist', 'client')));
+    } else {
+      const vite = await import('vite');
+      const { devMiddleware } = await createDevMiddleware({root});
+      app.use(devMiddleware);
+    }
+    app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
+    // Writing Task/Outline Endpoints
+    app.use('/api/v2/writing_tasks', writingTasks);
+    // Scribe Endpoints
+    app.use('/api/v2/scribe', scribe);
+    // OnTopic Enpoints
+    app.use('/api/v2/ontopic', ontopic);
+    // Reviews Endpoints
+    app.use('/api/v2/reviews', reviews);
+
+    // app.use('/api/v2/performance', promptPerformance);
+    // Metrics
+    app.use(metrics);
+
+    // Static directories that do not need to be managed by ltijs
+    app.use('/favicon.ico', express.static(join(PUBLIC, 'favicon.ico')));
+    app.use('/static', express.static(join(PUBLIC, 'static')));
+    app.use('/assets', express.static(join(PUBLIC, 'assets')));
+    app.use('/locales', express.static(join(root, 'public/locales')));
+    app.use('/settings', express.static(join(PUBLIC, 'settings')));
+
+    app.use(Provider.app);
+    app.use(express.static(PUBLIC));
+    app.all('*splat', async (req: Request, res: Response, next) => {
+      console.log('splat', req.i18n.language);
+      console.log(req.i18n.t('document.title'));
+      const pageContextInit = {
+        urlOriginal: req.url,
+        headersOriginal: req.headers,
+        t: req.i18n.t,
+        i18n: req.i18n,
+        foo: 'foo',
+        // headers: {
+        //   'Content-Type': 'text/html',
+        //   'Cache-Control': 'no-cache',
+        // },
+      };
+      const pageContext = await renderPage(pageContextInit);
+      if (pageContext.errorWhileRendering) {
+        console.error('Error rendering page:', pageContext.errorWhileRendering);
+        // return res.status(500).send(InternalServerError('Error rendering page'));
+      }
+      const { httpResponse } = pageContext;
+      if (!httpResponse) {
+        return next();
+      } else {
+        const { body, statusCode, headers, earlyHints } = httpResponse;
+        if (res.writeEarlyHints) {
+          res.writeEarlyHints({ link: earlyHints.map((hint) => hint.earlyHintLink) });
+        }
+        headers.forEach(([name, value]) => res.setHeader(name, value));
+        res.status(statusCode);
+        res.send(body);
+      }
+    });
+    const server = app.listen(/*PORT*/3003, () =>
+      console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
+    );
+    const shutdown = () => {
+      server.close(async () => {
+        console.log('HTTP server closed.');
+        // If you have database connections, close them here
+        await shutdownDatabase();
+        await shutdownPrompts();
+        process.exit(0);
+      });
+    };
+    ['SIGTERM', 'SIGINT', 'SIGINT'].forEach((signal) =>
+      process.on(signal, shutdown)
+    );
+  } catch (err) {
+    console.error(err);
+  }
+}
+export default (await __main__());
+// __main__();

@@ -1,0 +1,9 @@
+document.title: myProse Expectations Analysis
+title: Check Content Expectations
+error:
+  no_task: No text type specified!
+sentences: 'Sentences:'
+assessment: "What's working:"
+suggestion: 'Suggestion:'
+warning: This expectation is not addressed in your draft.
+no_sentences: No relevant text was located in your draft.

@@ -10,10 +10,11 @@ i18n
   .use(LanguageDetector) // get language from browser
   .use(initReactI18next)
   .init({
-    fallbackLng: 'en',
+    fallbackLng: 'en-US',
     interpolation: { escapeValue: false },
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.yaml',
       parse: (data: string) => parse(data),
     },
   });
+export default i18n;
