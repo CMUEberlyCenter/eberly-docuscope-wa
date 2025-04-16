@@ -1,13 +1,12 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { useData } from 'vike-react/useData'
-import { isWritingTask, WritingTask } from "../../src/lib/WritingTask";
-import { usePageContext } from "vike-react/usePageContext";
 import { Form, ListGroup } from "react-bootstrap";
-import { WritingTaskInfo } from "../../src/app/components/WritingTaskInfo/WritingTaskInfo";
+import { useTranslation } from "react-i18next";
+import { useData } from 'vike-react/useData';
 import { ClipboardIconButton } from "../../src/app/components/ClipboardIconButton/ClipboardIconButton";
 import { WritingTaskFilter } from "../../src/app/components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "../../src/app/components/WritingTaskInfo/WritingTaskInfo";
 import { validateWritingTask } from "../../src/lib/schemaValidate";
+import { isWritingTask, WritingTask } from "../../src/lib/WritingTask";
 
 type IdWritingTask = WritingTask & { _id?: string };
 
@@ -26,6 +25,7 @@ const Page: FC = () => {
   useEffect(() => {
     window.document.title = t("genlink.title", "myProse Link Generator");
   }, [t]);
+
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {

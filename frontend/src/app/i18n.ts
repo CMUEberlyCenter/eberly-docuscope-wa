@@ -10,7 +10,7 @@ i18n
   .use(LanguageDetector) // get language from browser
   .use(initReactI18next)
   .init({
-    fallbackLng: 'en-US',
+    fallbackLng: 'en',
     interpolation: { escapeValue: false },
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.yaml',
