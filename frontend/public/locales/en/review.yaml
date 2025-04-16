@@ -73,7 +73,7 @@ global_coherence:
 prominent_topics:
   title: Prominent Topics
   tooltip: Elaborating on prominent topics with sufficient detail helps readers grasp key ideas.
-  main_idea: Main Idea
+  main_idea: "Main Idea:"
   strategies: Strategies Used
   error: Error reading Prominent Topics data.
   no_sentences: No relevant text addressing this topic was found in your draft.

@@ -213,9 +213,14 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
                       <h6 className="d-inline">
                         {t("lines_of_arguments.main")}
                       </h6>{" "}
-                      <p className="d-inline">{review.response.thesis}</p>
-                      {/* <Button onMouseEnter={() => dispatch({ type: "set", sentences: [review.response.sent_ids??[]] })} onMouseLeave={() => dispatch({ type: "unset" })} variant="link" className="p-0 ms-2">
-                        SOURCE</Button> */}
+                      <p
+                        className={classNames(
+                          "d-inline",
+                          !current ? "highlight highlight-0" : ""
+                        )}
+                      >
+                        {review.response.thesis}
+                      </p>
                     </div>
                   ) : null}
                   {"strategies" in review.response &&

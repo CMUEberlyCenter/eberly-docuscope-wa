@@ -85,7 +85,14 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
                     <h6 className="d-inline">
                       {t("prominent_topics.main_idea")}
                     </h6>{" "}
-                    <p className="d-inline">{review.response.main_idea}</p>
+                    <p
+                      className={classNames(
+                        "d-inline",
+                        !current ? "highlight highlight-0" : ""
+                      )}
+                    >
+                      {review.response.main_idea}
+                    </p>
                   </div>
                 ) : null}
                 {review.response.strategies?.length ? (
