@@ -43,7 +43,7 @@ const SentenceToneIssues: FC<
   }
   return (
     <Accordion {...props}>
-      {issues.map(({ text, sent_ids, assessment, suggestion }, i) => (
+      {issues.map(({ text, sent_id, issue, suggestion }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
             <span>
@@ -56,14 +56,14 @@ const SentenceToneIssues: FC<
             onEntered={() =>
               dispatch({
                 type: "set",
-                sentences: [sent_ids],
+                sentences: [[sent_id]],
               })
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <div>
+            <div className="highlight highlight-1">
               <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
-              <p className="d-inline">{assessment}</p>
+              <p className="d-inline">{issue}</p>
             </div>
             <div>
               <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
@@ -119,15 +119,15 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
                   <h5>{t("professional_tone.confidence")}</h5>
                   <SentenceToneIssues
                     issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "confident"
+                      ({ tone_type }) => tone_type === "confidence"
                     )}
                   />
                 </section>
                 <section>
                   <h5>{t("professional_tone.subjectivity")}</h5>
                   <SentenceToneIssues
-                    issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "subjectivity"
+                    issues={review.response.filter(({ tone_type }) =>
+                      ["subjective", "subjectivity"].includes(tone_type)
                     )}
                   />
                 </section>
@@ -135,7 +135,7 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
                   <h5>{t("professional_tone.sentiment")}</h5>
                   <SentenceToneIssues
                     issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "emotion"
+                      ({ tone_type }) => tone_type === "emotional"
                     )}
                   />
                 </section>

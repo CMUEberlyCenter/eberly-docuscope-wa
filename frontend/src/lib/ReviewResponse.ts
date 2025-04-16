@@ -133,10 +133,10 @@ export type ParagraphClarityOutput = {
 
 export type ProfessionalToneOutput = {
   text: string;
-  sent_ids: string[];
-  assessment: string;
+  sent_id: string;
+  issue: string;
   suggestion: string;
-  tone_type: 'confident' | 'subjectivity' | 'emotion';
+  tone_type: 'confidence' | 'subjectivity' | 'emotional';
 }[];
 
 /** JSON structure for the results of the prominent_topics prompt. */
