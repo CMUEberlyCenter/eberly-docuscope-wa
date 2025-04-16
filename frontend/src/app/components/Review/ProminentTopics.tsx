@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext } from "react";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -13,6 +13,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
@@ -36,6 +37,17 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const review = useProminentTopicsData();
   const dispatch = useContext(ReviewDispatchContext);
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  useEffect(() => {
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
+    }
+  }, [current, review, dispatch]);
 
   return (
     <ReviewReset>
@@ -87,7 +99,10 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
                   </div>
                 ) : null}
                 {review.response.topics.length ? (
-                  <Accordion>
+                  <Accordion
+                    onSelect={(eventKey, _event) => setCurrent(eventKey)}
+                    activeKey={current}
+                  >
                     {review.response.topics.map(
                       (
                         {
