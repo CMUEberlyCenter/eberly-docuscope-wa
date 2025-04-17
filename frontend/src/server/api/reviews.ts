@@ -43,14 +43,15 @@ export const reviews = Router();
 
 const ANALYSES: ReviewPrompt[] = [
   'civil_tone',
-  'ethos',
+  'credibility',
+  // 'ethos',
   'lines_of_arguments',
   'logical_flow',
   'paragraph_clarity',
-  'pathos',
+  // 'pathos',
   'professional_tone',
   'prominent_topics',
-  'revision_plan',
+  // 'revision_plan',
   // 'sentence_density', // ontopic
   'sources',
   // 'term_matrix', // ontopic
@@ -715,8 +716,8 @@ reviews.post(
       );
       // request.session['wtd'] = writing_task; // FUTURE use session for analysis
       // request.session['document'] = document; // FUTURE use session for analysis
-      request.session['review_id'] = id;
-      request.session['reviews'] = [...(request.session['reviews'] ?? []), id];
+      request.session.review_id = id;
+      request.session.reviews = [...(request.session.reviews ?? []), id];
       response.send(id);
     } catch (err) {
       if (err instanceof UnprocessableContentError) {
