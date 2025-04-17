@@ -24,18 +24,18 @@ export function clearAllHighlights() {
 /**
  * Add highlight to the specified paragraph.
  * @param aParagraphIndex 0 based index
- */
-export function highlightParagraph(aParagraphIndex: number) {
-  clearAllHighlights();
-  if (aParagraphIndex < 0) return;
-  const element = document.querySelector(
-    `.paragraph[data-ds-paragraph="${aParagraphIndex + 1}"]`
-  );
-  // const pId = `p${aParagraphIndex + 1}`;
-  // const element = document.getElementById(pId);
-  element?.classList.add('paragraph-highlight');
-  element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+ */ // @deprecated
+// export function highlightParagraph(aParagraphIndex: number) {
+//   clearAllHighlights();
+//   if (aParagraphIndex < 0) return;
+//   const element = document.querySelector(
+//     `.paragraph[data-ds-paragraph="${aParagraphIndex + 1}"]`
+//   );
+//   // const pId = `p${aParagraphIndex + 1}`;
+//   // const element = document.getElementById(pId);
+//   element?.classList.add('paragraph-highlight');
+//   element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+// }
 
 /**
  * Add highlight to the specified sentence in a given paragraph.
@@ -55,42 +55,42 @@ export function highlightSentence(
 }
 
 /**
- *
+ * Dead code for highlighting topics.
  */
-export function highlightTopic(
-  aParagraphIndex: number,
-  aSentenceIndex: number,
-  aTopicList: string[]
-) {
-  clearAllHighlights();
+// export function highlightTopic(
+//   aParagraphIndex: number,
+//   aSentenceIndex: number,
+//   aTopicList: string[]
+// ) {
+//   clearAllHighlights();
 
-  const paragraphElement = document.getElementById('p' + (aParagraphIndex + 1));
+//   const paragraphElement = document.getElementById('p' + (aParagraphIndex + 1));
 
-  const topicElements = paragraphElement
-    ? paragraphElement.getElementsByClassName('word')
-    : document.getElementsByClassName('word');
-  const tElements = [...topicElements].map((e) => e as HTMLElement);
-  const topics = aTopicList.map((li) => li.toLowerCase());
+//   const topicElements = paragraphElement
+//     ? paragraphElement.getElementsByClassName('word')
+//     : document.getElementsByClassName('word');
+//   const tElements = [...topicElements].map((e) => e as HTMLElement);
+//   const topics = aTopicList.map((li) => li.toLowerCase());
 
-  if (aParagraphIndex >= 0 && aSentenceIndex >= 0) {
-    tElements
-      .filter((element) =>
-        topics.includes(element.dataset.topic?.toLowerCase() ?? '')
-      )
-      .forEach((element) => {
-        element.classList.add('word-highlight');
-        element.parentElement?.classList.add('sentence-highlight');
-      });
-  } else {
-    tElements.forEach((element) => {
-      const topic = element.dataset.topic?.toLowerCase() ?? '';
-      if (
-        (aSentenceIndex === -1 && topics.includes(topic)) ||
-        topics.at(aSentenceIndex) === topic
-      ) {
-        element.classList.add('word-highlight');
-        element.parentElement?.classList.add('sentence-highlight');
-      }
-    });
-  }
-}
+//   if (aParagraphIndex >= 0 && aSentenceIndex >= 0) {
+//     tElements
+//       .filter((element) =>
+//         topics.includes(element.dataset.topic?.toLowerCase() ?? '')
+//       )
+//       .forEach((element) => {
+//         element.classList.add('word-highlight');
+//         element.parentElement?.classList.add('sentence-highlight');
+//       });
+//   } else {
+//     tElements.forEach((element) => {
+//       const topic = element.dataset.topic?.toLowerCase() ?? '';
+//       if (
+//         (aSentenceIndex === -1 && topics.includes(topic)) ||
+//         topics.at(aSentenceIndex) === topic
+//       ) {
+//         element.classList.add('word-highlight');
+//         element.parentElement?.classList.add('sentence-highlight');
+//       }
+//     });
+//   }
+// }
