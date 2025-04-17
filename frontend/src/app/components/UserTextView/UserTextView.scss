@@ -34,7 +34,8 @@
     .no-blur {
       color: var(--bs-text);
     }
-    > :not(.no-blur) { // #201 use color instead of blur.
+    > :not(.no-blur) {
+      // #201 use color instead of blur.
       color: var(--bs-tertiary-color);
     }
   }

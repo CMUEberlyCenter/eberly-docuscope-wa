@@ -125,7 +125,7 @@
     "datatables.net-fixedcolumns": "^5.0.4",
     "datatables.net-fixedcolumns-dt": "^5.0.4",
     "datatables.net-react": "^1.0.0",
-    "docx": "^9.3.0",
+    "docx": "9.3",
     "escape-html": "^1.0.3",
     "express": "^5.1.0",
     "express-fileupload": "^1.5.1",
