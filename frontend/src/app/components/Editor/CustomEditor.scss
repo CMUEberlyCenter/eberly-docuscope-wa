@@ -12,9 +12,7 @@ div[role="textbox"]:focus {
 
   /* Base text elements */
   p,
-  li,
-  p *,
-  li * {
+  li {
     margin: 0 0 0.5em 0; // 0 0 6pt 0;
     font-size: 0.95em; //11pt;
     color: #303030;
