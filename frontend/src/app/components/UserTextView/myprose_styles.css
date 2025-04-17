@@ -8,7 +8,6 @@ p,
 li {
   margin: 0 0 6pt 0;
   font-size: 11pt;
-  color: #303030;
   font-family: "Open Sans", sans-serif;
   font-weight: 400;
 }
@@ -21,7 +20,7 @@ h4 {
   margin: 12pt 0 3pt 0;
   page-break-after: avoid;
   font-family: "Open Sans", sans-serif;
-  color: #303030;
+  /* color: #303030; */
   font-weight: 600;
 }
 
@@ -53,4 +52,5 @@ b {
 ol,
 ul {
   margin-bottom: 9pt;
+  /* color: #303030; */
 }
