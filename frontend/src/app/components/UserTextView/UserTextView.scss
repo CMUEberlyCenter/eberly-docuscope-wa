@@ -8,13 +8,6 @@
     padding-inline-end: 0.5em;
   }
 
-  // .highlight { // Remove to fix #199
-  //   span[data-topic] {
-  //     color: var(--bs-blue);
-  //     font-weight: bold;
-  //   }
-  // }
-
   .paragraph-highlight {
     background-color: var(--bs-highlight);
     span[data-topic] {

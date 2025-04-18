@@ -95,7 +95,7 @@ async function __main__() {
           _id?: string;
         } & WritingTask;
         const { _id, ...writing_task } = task;
-        const valid = validateWritingTask(task);
+        const valid = validateWritingTask(writing_task);
         if (!valid) {
           throw new UnprocessableContentError(
             validateWritingTask.errors,
@@ -153,7 +153,9 @@ async function __main__() {
     try {
       const taskId = token?.platformContext.custom?.writing_task_id;
       if (!taskId || typeof taskId !== 'string') {
-        throw new BadRequestError('No writing task id in custom parameters.');
+        // This looks like it happens when deeplinking for the first time.
+        return res.send(context);
+        // throw new BadRequestError('No writing task id in custom parameters.');
       }
       const writing_task = await findWritingTaskById(taskId);
       const ret = {

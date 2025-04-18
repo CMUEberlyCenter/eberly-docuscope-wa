@@ -95,6 +95,9 @@ export async function doChat<T>(
         },
       ],
       model: ANTHROPIC_MODEL,
+      // metadata: {
+      //   user_id: '' // TODO set user id based on hash of product+hostname
+      // }
       // stream: true, // https://github.com/anthropics/anthropic-sdk-typescript/blob/main/examples/cancellation.ts
     },
     {
