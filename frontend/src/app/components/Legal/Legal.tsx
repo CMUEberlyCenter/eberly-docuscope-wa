@@ -1,13 +1,25 @@
-import { FC } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
 import { About } from "../About/About";
 
-export const Legal: FC = () => (
+/**
+ * Footer component with legal links.
+ */
+export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  style,
+  ...props
+}) => (
   <Translation>
     {(t) => (
       <footer
-        className="container-fluid border-top py-2 d-flex flex-row align-items-baseline justify-content-end"
-        style={{ fontSize: "small" }}
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid border-top py-2 d-flex flex-row align-items-baseline justify-content-end"
+        )}
+        style={{ ...style, fontSize: "small" }}
       >
         <About />
         {/* <a className="px-1 border-end border-2" href="https://www.andrew.cmu.edu/" target="_blank">{t('legal.myprose')}</a> */}

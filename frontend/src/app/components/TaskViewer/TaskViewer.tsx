@@ -5,6 +5,7 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import { useTranslation } from "react-i18next";
 import { useWritingTask } from "../../service/writing-task.service";
 
+/** Button component for showing the task viewer. */
 export const TaskViewerButton: FC = () => {
   const [show, setShow] = useState(false);
   const { t } = useTranslation();

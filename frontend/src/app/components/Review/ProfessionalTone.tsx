@@ -1,8 +1,12 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, SentenceToneIssue } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  ProfessionalToneOutput,
+} from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import { useProfessionalToneData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
@@ -12,6 +16,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -25,38 +30,45 @@ export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
   );
 };
 
+/** Component for displaying sentence tone issues. */
 const SentenceToneIssues: FC<
-  AccordionProps & { issues: SentenceToneIssue[] }
+  AccordionProps & { issues: ProfessionalToneOutput }
 > = ({ issues, ...props }) => {
   const dispatch = useContext(ReviewDispatchContext);
   const id = useId();
+  const { t } = useTranslation("review");
 
   if (issues.length <= 0) {
-    return (
-      <Translation ns={"review"}>
-        {(t) => <Alert variant="info">{t("professional_tone.null")}</Alert>}
-      </Translation>
-    );
+    return <Alert variant="info">{t("professional_tone.null")}</Alert>;
   }
   return (
     <Accordion {...props}>
-      {issues.map((sent, i) => (
+      {issues.map(({ text, sent_id, issue, suggestion }, i) => (
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
-            &quot;{sent.sentence}&quot;
+            <span>
+              <h6 className="d-inline">{t("professional_tone.text")}</h6>{" "}
+              <q>{text}</q>
+            </span>
           </Accordion.Header>
           <Accordion.Body
             className="pb-3"
             onEntered={() =>
               dispatch({
                 type: "set",
-                sentences: [[sent.sentence_id]],
+                sentences: [[sent_id]],
               })
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <p>{sent.assessment}</p>
-            <p>{sent.suggestion}</p>
+            <div className="highlight highlight-1">
+              <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
+              <p className="d-inline">{issue}</p>
+            </div>
+            <div>
+              <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
+              <p className="d-inline">{suggestion}</p>
+            </div>
           </Accordion.Body>
         </Accordion.Item>
       ))}
@@ -64,13 +76,23 @@ const SentenceToneIssues: FC<
   );
 };
 
-export const ProfessionalTone: FC = () => {
+/** Professional Tone review tool component. */
+export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useProfessionalToneData();
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("professional_tone.title")}
           instructionsKey="professional_tone"
@@ -94,16 +116,28 @@ export const ProfessionalTone: FC = () => {
                   </Translation>
                 </header>
                 <section>
-                  <h5>{t("professional_tone.sentiment")}</h5>
-                  <SentenceToneIssues issues={review.response.sentiment} />
-                </section>
-                <section>
                   <h5>{t("professional_tone.confidence")}</h5>
-                  <SentenceToneIssues issues={review.response.confidence} />
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "confidence"
+                    )}
+                  />
                 </section>
                 <section>
                   <h5>{t("professional_tone.subjectivity")}</h5>
-                  <SentenceToneIssues issues={review.response.subjectivity} />
+                  <SentenceToneIssues
+                    issues={review.response.filter(({ tone_type }) =>
+                      ["subjective", "subjectivity"].includes(tone_type)
+                    )}
+                  />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.sentiment")}</h5>
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "emotional"
+                    )}
+                  />
                 </section>
               </section>
             ) : null}

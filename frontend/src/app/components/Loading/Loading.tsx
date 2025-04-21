@@ -4,6 +4,10 @@ import DotSpinner from "../../assets/icons/6-dots-rotate.svg?react";
 import style from "./Loading.module.scss";
 import classNames from "classnames";
 
+/**
+ * Basic loading spinner with text.
+ * To be used in Tool content areas.
+ */
 export const Loading: FC<HTMLProps<HTMLDivElement>> = (className, ...props) => {
   return (
     <div

@@ -87,6 +87,12 @@ services:
     profiles:
       - stats
     restart: unless-stopped
+    secrets:
+      - grafana_admin_pass
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD__FILE: "/run/secrets/grafana_admin_pass"
+    volumes:
+      - 'grafana_storage:/var/lib/grafana'
   prometheus:
     image: docker.io/prom/prometheus:latest
     container_name: prometheus
@@ -103,6 +109,8 @@ services:
 secrets:
   anthropic_api_key:
     file: secrets/anthropic_api_key
+  grafana_admin_pass:
+    file: secrets/grafana_admin_pass
   mongo_user:
     file: secrets/mongo_user
   mongo_pass:
@@ -111,3 +119,6 @@ secrets:
     file: secrets/openai_api_key
   token:
     file: secrets/token
+
+volumes:
+  grafana_storage: {}

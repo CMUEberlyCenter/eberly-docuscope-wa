@@ -1,4 +1,5 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -13,6 +14,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -26,7 +28,11 @@ export const LogicalFlowButton: FC<ButtonProps> = (props) => {
   );
 };
 
-export const LogicalFlow: FC = () => {
+/** Logical Flow review tool component. */
+export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useLogicalFlowData();
   const id = useId();
@@ -34,7 +40,13 @@ export const LogicalFlow: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("logical_flow.title")}
           instructionsKey="logical_flow"
@@ -56,19 +68,21 @@ export const LogicalFlow: FC = () => {
               </header>
               {"response" in review ? (
                 <Accordion>
-                  {review.response.disruptions.map(
-                    (
-                      { explanation, suggestions, sentences, paragraphs },
-                      i
-                    ) => (
+                  {review.response.map(
+                    ({ issue, suggestion, sent_ids, para_ids }, i) => (
                       <Accordion.Item
                         key={`${id}-${i}`}
                         eventKey={`${id}-${i}`}
                       >
                         <Accordion.Header className="accordion-header-highlight">
-                          <div className="flex-grow-1">{explanation}</div>
+                          <div className="flex-grow-1">
+                            <h6 className="d-inline">
+                              {t("logical_flow.issue")}
+                            </h6>{" "}
+                            <span>{issue}</span>
+                          </div>
                           <AlertIcon
-                            show={sentences.length + paragraphs.length === 0}
+                            show={sent_ids.length + para_ids.length === 0}
                             message={t("logical_flow.no_sentences")}
                           />
                         </Accordion.Header>
@@ -76,12 +90,16 @@ export const LogicalFlow: FC = () => {
                           onEntered={() =>
                             dispatch({
                               type: "set",
-                              sentences: [sentences],
+                              sentences: [sent_ids],
+                              paragraphs: para_ids,
                             })
                           }
                           onExit={() => dispatch({ type: "unset" })}
                         >
-                          {suggestions}
+                          <h6 className="d-inline">
+                            {t("logical_flow.suggestion")}
+                          </h6>{" "}
+                          <p className="d-inline">{suggestion}</p>
                         </Accordion.Body>
                       </Accordion.Item>
                     )

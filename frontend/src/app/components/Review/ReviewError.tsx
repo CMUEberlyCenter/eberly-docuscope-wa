@@ -1,15 +1,17 @@
 import { FC } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, AlertProps } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import { ErrorData } from "../../../lib/ReviewResponse";
 
-export const ReviewError: FC<{
-  error: Error;
-  resetErrorBoundary: () => void;
-}> = ({ error }) => (
+export const ReviewError: FC<
+  AlertProps & {
+    error: Error;
+    resetErrorBoundary: () => void;
+  }
+> = ({ error, variant, ...props }) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Alert variant="danger">
+      <Alert {...props} variant={variant ?? "danger"}>
         <Alert.Heading>{t("error.header")}</Alert.Heading>
         <p>{t("error.content")}</p>
         {!!error?.message && (
@@ -20,10 +22,14 @@ export const ReviewError: FC<{
   </Translation>
 );
 
-export const ReviewErrorData: FC<{ data: ErrorData }> = ({ data }) => (
+export const ReviewErrorData: FC<AlertProps & { data: ErrorData }> = ({
+  data,
+  variant,
+  ...props
+}) => (
   <Translation ns="review">
     {(t) => (
-      <Alert variant="danger">
+      <Alert {...props} variant={variant ?? "danger"}>
         <Alert.Heading>{t("error.header")}</Alert.Heading>
         <p>
           {process.env.NODE_ENV === "production" ? (

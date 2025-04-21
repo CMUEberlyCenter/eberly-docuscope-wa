@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, useContext } from "react";
+import { FC, HTMLProps, useContext, useEffect, useState } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -13,7 +13,9 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 
+/** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   const { t: it } = useTranslation("instructions");
@@ -28,14 +30,34 @@ export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
 };
 
 /** Component for displaying results of Key Ideas review results. */
-export const ProminentTopics: FC = () => {
+export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = useProminentTopicsData();
   const dispatch = useContext(ReviewDispatchContext);
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  useEffect(() => {
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
+    }
+  }, [current, review, dispatch]);
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("prominent_topics.title")}
           instructionsKey="prominent_topics"
@@ -58,22 +80,45 @@ export const ProminentTopics: FC = () => {
                     {(t) => <p>{t("prominent_topics_insights")}</p>}
                   </Translation>
                 </header>
-                {review.response.central_idea ? (
-                  <>
-                    <h6>{t("prominent_topics.main_idea")}</h6>
-                    <p>{review.response.central_idea}</p>
-                  </>
+                {review.response.main_idea ? (
+                  <div>
+                    <h6 className="d-inline">
+                      {t("prominent_topics.main_idea")}
+                    </h6>{" "}
+                    <p
+                      className={classNames(
+                        "d-inline",
+                        !current ? "highlight highlight-0" : ""
+                      )}
+                    >
+                      {review.response.main_idea}
+                    </p>
+                  </div>
+                ) : null}
+                {review.response.strategies?.length ? (
+                  <div className="mt-3">
+                    <h6>{t("prominent_topics.strategies")}</h6>
+                    <ul>
+                      {review.response.strategies.map((strategy, i) => (
+                        <li key={`strategy-${i}`}>{strategy}</li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
                 {review.response.topics.length ? (
-                  <Accordion>
+                  <Accordion
+                    onSelect={(eventKey, _event) => setCurrent(eventKey)}
+                    activeKey={current}
+                  >
                     {review.response.topics.map(
                       (
                         {
                           topic,
-                          elaborations,
-                          suggestions,
-                          topic_sentences,
-                          elaboration_sentences,
+                          techniques,
+                          topic_sents_ids,
+                          elaboration_sents_ids,
+                          suggestion,
+                          impact,
                         },
                         i
                       ) => (
@@ -87,8 +132,8 @@ export const ProminentTopics: FC = () => {
                             </div>
                             <AlertIcon
                               show={
-                                topic_sentences.length +
-                                  elaboration_sentences.length ===
+                                topic_sents_ids.length +
+                                  elaboration_sents_ids.length ===
                                 0
                               }
                               message={t("prominent_topics.no_sentences")}
@@ -100,49 +145,42 @@ export const ProminentTopics: FC = () => {
                               dispatch({
                                 type: "set",
                                 sentences: [
-                                  topic_sentences,
-                                  elaboration_sentences,
+                                  topic_sents_ids,
+                                  elaboration_sents_ids,
                                 ],
                               })
                             }
                             onExit={() => dispatch({ type: "unset" })}
                           >
-                            {elaborations?.length ? (
+                            {techniques?.length ? (
                               <div
                                 className={classNames(
                                   "pt-3 px-3 pb-0",
-                                  elaboration_sentences.length &&
-                                    "highlight highlight-1"
+                                  elaboration_sents_ids.length
+                                    ? "highlight highlight-1"
+                                    : ""
                                 )}
                               >
                                 <h6>{t("prominent_topics.elaborations")}</h6>
                                 <ul>
-                                  {elaborations.map(
-                                    (
-                                      { elaboration_strategy, explanation },
-                                      k
-                                    ) => (
-                                      <li key={`elaboration-${i}-${k}`}>
-                                        <h6 className="d-inline">
-                                          {elaboration_strategy}
-                                        </h6>
-                                        {"  "}
-                                        <span>{explanation}</span>
-                                      </li>
-                                    )
-                                  )}
+                                  {techniques.map((technique, k) => (
+                                    <li key={`elaboration-${i}-${k}`}>
+                                      {technique}
+                                    </li>
+                                  ))}
                                 </ul>
                               </div>
                             ) : null}
                             <div className="m-3 mt-2">
                               <h6>{t("prominent_topics.suggestions")}</h6>
-                              {suggestions?.length ? (
+                              {suggestion || impact ? (
                                 <ul>
-                                  {suggestions.map((suggestion, k) => (
-                                    <li key={`suggestion-${i}-${k}`}>
-                                      {suggestion}
-                                    </li>
-                                  ))}
+                                  <li key={`suggestion-${i}-${suggestion}`}>
+                                    {suggestion}
+                                  </li>
+                                  <li key={`impact-${i}-${impact}`}>
+                                    {impact}
+                                  </li>
                                 </ul>
                               ) : (
                                 <p className="m-3 mt-2">

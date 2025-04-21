@@ -81,6 +81,7 @@ export const ANTHROPIC_MAX_TOKENS = envInt(
   process.env.ANTHROPIC_MAX_TOKENS,
   1024
 );
+// export const ANTHROPIC_USER_ID = fromEnvFile('ANTHROPIC_USER_ID', 'myprose');
 
 // Path to prompts json file // depricated
 export const PROMPT_TEMPLATES_PATH =

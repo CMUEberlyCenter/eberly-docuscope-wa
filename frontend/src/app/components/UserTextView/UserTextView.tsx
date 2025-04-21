@@ -3,10 +3,10 @@ import { FC, HTMLProps, useContext, useEffect, useState } from "react";
 import { OverlayTrigger, Placeholder, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
+import { useSegmentedProse } from "../../service/review.service";
 import { ReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
-import { useSegmentedProse } from "../../service/review.service";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**
@@ -41,16 +41,27 @@ export const UserTextView: FC<UserTextViewProps> = ({
     document.querySelectorAll(".user-text .highlight").forEach((ele) => {
       ele.classList.remove(...highlightClasses);
     });
-    if (!ctx?.sentences || ctx.sentences.length <= 0) {
-      return;
+    if (ctx?.sentences && ctx.sentences.length > 0) {
+      ctx.sentences.forEach((ids, index) => {
+        ids.forEach((id) =>
+          document
+            .getElementById(id)
+            ?.classList.add("highlight", `highlight-${index}`)
+        );
+      });
     }
-    ctx.sentences.forEach((ids, index) => {
-      ids.forEach((id) =>
-        document
-          .getElementById(id)
-          ?.classList.add("highlight", `highlight-${index}`)
-      );
+    // remove blur by removing the no-blur classes.
+    document.querySelectorAll(".user-text .no-blur").forEach((ele) => {
+      ele.classList.remove("no-blur");
     });
+
+    // add no-blur to the paragraphs that are focused.
+    // This will cause other paragraphs to blur through css.
+    if (ctx?.paragraphs && ctx.paragraphs.length > 0) {
+      ctx.paragraphs.forEach((id) => {
+        document.getElementById(id)?.classList.add("no-blur");
+      });
+    }
     document.querySelector(".user-text .highlight")?.scrollIntoView({
       behavior: "smooth",
       block: "center",
@@ -77,7 +88,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
           <Placeholder></Placeholder>
         ) : (
           <div
-            className="p-2 flex-grow-1 user-text"
+            className={classNames("p-2 flex-grow-1 user-text")}
             dangerouslySetInnerHTML={{ __html: text }}
           />
         )}

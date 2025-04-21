@@ -22,14 +22,13 @@ civil_tone:
   tooltip: Using respectful and balanced language promotes collaborative dialogue.
   error: Error displaying Civil Tone tool.
   'null': No issues found.
-  prefix: 'Your Sentence:'
+  prefix: 'Your Text:'
+  issue: "Issue:"
+  suggestion: "Suggestion:"
 ethos:
   title: Credibility (Ethos)
   tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
   error: Error displaying Credibilty tool.
-  expertise: Expertise Ethos
-  analytical: Analytical Ethos
-  balanced: Balanced Ethos
   assessment: "Observation:"
   no_sentences: No relevant text found in your draft.
   'null': No feedback.
@@ -74,11 +73,12 @@ global_coherence:
 prominent_topics:
   title: Prominent Topics
   tooltip: Elaborating on prominent topics with sufficient detail helps readers grasp key ideas.
-  main_idea: Main Idea
+  main_idea: "Main Idea:"
+  strategies: Strategies Used
   error: Error reading Prominent Topics data.
   no_sentences: No relevant text addressing this topic was found in your draft.
   idea: 'Topic:'
-  elaborations: Elaboration Strategies
+  elaborations: Elaboration Techniques
   sentences: Sentences
   suggestions: Comments
   no_suggestions: No comments. It looks very good.
@@ -87,7 +87,8 @@ lines_of_arguments:
   title: Lines of Argument
   error: Error reading Lines of Arguements data.
   no_sentences: No sentences to support this claim were found in your draft.
-  main: Thesis
+  strategies: Strategies Used
+  main: "Thesis:"
   arguments: Arguments
   counter_examples: Counter Argument
   no_counter_examples: No obvious counterarguments are found.
@@ -102,6 +103,8 @@ logical_flow:
   tooltip: Organizing ideas coherently enhances readability and reader comprehension.
   error: Error displaying Logical Flow Issues tool.
   no_sentences: No relevant sentences were found in your draft.
+  issue: "Issue:"
+  suggestion: "Suggestion:"
 expectations:
   title: Content Expectations
   error:
@@ -142,17 +145,7 @@ paragraph_clarity:
   title: Paragraph Clarity
   tooltip: Improving paragraph flow enhances readability and effective communication.
   error: Error displaying Paragraph Clarity tool.
-pathos:
-  title: Emotional Appeal (Pathos)
-  tooltip: Creating emotional resonance and meaningful connections strengthens your writing.
-  error: Error displaying Emotional Appeal tool.
-  assessment: "Observation:"
-  no_sentences: No relavent text was detected in your draft.
-  situation: Situational Pathos
-  temporal: Temporal Pathos
-  immersive: Immersive Pathos
-  structural: Structural Pathos
-  'null': No feedback.
+  suggestion: "Suggestion:"
 professional_tone:
   title: Professional Tone
   tooltip: Maintaining appropriate language features helps your writing meet professional standards.
@@ -161,6 +154,9 @@ professional_tone:
   confidence: Confidence
   subjectivity: Subjectivity
   'null': No feedback.
+  text: "Your Text:"
+  issue: "Issue:"
+  suggestion: "Suggestion:"
 sources:
   title: Sources
   error: Error displaying Sources tool.
@@ -186,4 +182,6 @@ sources:
 impressions:
   title: Impressions
 'null':
-  content: Select a review tool from the above buttons.
+  big_picture: Use the Big-Picture tools to review the content expectations, overall structure and argument of your draft.
+  fine_tuning: Use the Fine-Tuning tools to review the clarity, style, and tone of your writing.
+  not_available: This tool is currently undavailable.

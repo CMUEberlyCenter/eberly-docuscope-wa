@@ -7,6 +7,7 @@ type AlertIconProps = HTMLProps<HTMLDivElement> & {
   message: string;
   show?: boolean;
 };
+/** Simple alert icon component with a title tooltip. */
 export const AlertIcon: FC<AlertIconProps> = ({
   message,
   show,
@@ -16,6 +17,7 @@ export const AlertIcon: FC<AlertIconProps> = ({
   <>
     {show ? (
       <div
+        role="alert"
         {...props}
         className={classNames(className, "text-warning")}
         title={message}

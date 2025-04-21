@@ -35,7 +35,15 @@ import {
   useEffect,
   useState,
 } from "react";
-import { Alert, Button, Col, Container, Row } from "react-bootstrap";
+import {
+  Alert,
+  AlertProps,
+  Button,
+  Col,
+  Container,
+  ContainerProps,
+  Row,
+} from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
@@ -166,10 +174,10 @@ const DotOutlineCircle: FC<HTMLProps<HTMLSpanElement>> = ({
 );
 
 /** Legend for data representation for these tools. */
-const Legend: FC = () => (
+const Legend: FC<ContainerProps> = (props) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Container>
+      <Container {...props}>
         <Row xs={"auto"} md={"auto"} lg={2}>
           <Col>
             <SolidCircle /> {t("organization.legend.before_verb")}
@@ -198,10 +206,15 @@ const Legend: FC = () => (
   </Translation>
 );
 
-const OrganizationErrorFallback: FC<{ error?: Error }> = ({ error }) => (
+/** Alert component for displaying organization errors. */
+const OrganizationErrorFallback: FC<AlertProps & { error?: Error }> = ({
+  error,
+  variant,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Alert variant="danger">
+      <Alert {...props} variant={variant ?? "danger"}>
         <p>{t("organization.error")}</p>
         <pre>{error?.message}</pre>
       </Alert>
@@ -209,10 +222,15 @@ const OrganizationErrorFallback: FC<{ error?: Error }> = ({ error }) => (
   </Translation>
 );
 
-const CoherenceErrorFallback: FC<{ error?: Error }> = ({ error }) => (
+/** Alert component for displaying coherence errors. */
+const CoherenceErrorFallback: FC<AlertProps & { error?: Error }> = ({
+  error,
+  variant,
+  ...props
+}) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Alert color="warning">
+      <Alert {...props} color={variant ?? "warning"}>
         {t("organizaion.error")}
         {error?.message}
       </Alert>
@@ -226,7 +244,11 @@ type SelectedRowCol = {
   topic?: Topic;
   sentence?: number;
 } | null;
-export const Organization: FC = () => {
+/** Organization review tool component. */
+export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const data = useOnTopicData();
   const showToggle = false;
@@ -302,7 +324,13 @@ export const Organization: FC = () => {
 
   return (
     <ReviewReset>
-      <article className="container-fluid organization overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid organization overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader
           title={t("organization.title")}
           instructionsKey="term_matrix"
@@ -317,28 +345,6 @@ export const Organization: FC = () => {
               </Card.Subtitle>
             )} */}
             <Legend />
-            {/* <Card.Text>{t("organization.description")}</Card.Text> */}
-            {/* <Card className="my-1">
-              <Card.Header className="d-flex justify-content-between">
-                <span>{t("organization.coherence.title")}</span> */}
-            {/* <div
-                  className="d-flex align-items-start"
-                  onChange={() => setShowToggle(!showToggle)}
-                >
-                  <label className="form-check-label me-1" htmlFor={toggleId}>
-                    {t("organization.coherence.topic_only")}
-                  </label>
-                  <div className="form-check form-switch">
-                    <input
-                      onChange={() => { }}
-                      className="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id={toggleId}
-                      checked={showToggle}
-                    />
-                  </div>
-                </div> */}
             <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
               <div className="mt-1 mw-100 flex-grow-1">
                 {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
@@ -362,7 +368,6 @@ export const Organization: FC = () => {
                     {/* <caption>{t("organization.coherence.title")}</caption> */}
                     <thead>
                       <tr>
-                        {/* <td style={{ width: "150px" }}> */}
                         <th>{t("organization.coherence.paragraphs")}</th>
                         {paragraphRange.map((i) => (
                           <th
@@ -375,7 +380,6 @@ export const Organization: FC = () => {
                               size="sm"
                               variant="outline-primary"
                               active={i === selected?.paragraph}
-                              // onClick={() => onSelectParagraph(i)}
                             >
                               {`${i + 1}`}
                             </Button>

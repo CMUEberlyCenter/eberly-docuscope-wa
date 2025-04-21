@@ -1,7 +1,7 @@
 /**
  * Button group for playing, pausing, and stopping speech synthesis of
  * a given text.
- * @module components/scribe/TextToSpeach
+ * @module components/TextToSpeach
  */
 import {
   faClose,

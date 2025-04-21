@@ -1,4 +1,4 @@
-import { faCheckDouble, faX } from "@fortawesome/free-solid-svg-icons";
+import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   Dispatch,
@@ -8,23 +8,101 @@ import {
   useCallback,
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
-import {
-  Button,
-  ButtonGroup,
-  FloatingLabel,
-  Form,
-  InputGroup,
-} from "react-bootstrap";
+import { Button, FloatingLabel, Form, InputGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import {
   extractKeywords,
+  groupByCategory,
   hasKeywords,
   WritingTask,
 } from "../../../lib/WritingTask";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import { useWritingTasks } from "../../service/writing-task.service";
+
+const sep = ":";
+const hasPrefix = (prefix: string, key: string) =>
+  key.startsWith(`${prefix}${sep}`) &&
+  key.substring(prefix.length + sep.length).length > 0;
+
+type CategoryKeywordsProps = {
+  prefix: string;
+  title: string;
+  keywords: string[];
+  activeKeywords: string[];
+  toggle: (key: string) => void;
+  selectNone: () => void;
+  selectAll: () => void;
+};
+
+const CategoryKeywords: FC<CategoryKeywordsProps> = ({
+  prefix,
+  title,
+  keywords,
+  activeKeywords,
+  toggle,
+  selectAll,
+  selectNone,
+}) => {
+  const hasCategoryPrefix = useCallback(
+    (key: string) => hasPrefix(prefix, key),
+    [prefix]
+  );
+  const [keys, setKeys] = useState(new Set(keywords.filter(hasCategoryPrefix)));
+  useEffect(() => {
+    setKeys(new Set(keywords.filter(hasCategoryPrefix)));
+  }, [keywords, hasCategoryPrefix]);
+  const [active, setActive] = useState(
+    new Set(activeKeywords.filter(hasCategoryPrefix))
+  );
+  useEffect(() => {
+    setActive(new Set(activeKeywords.filter(hasCategoryPrefix)));
+  }, [activeKeywords, hasCategoryPrefix]);
+  const [allSelected, setAllSelected] = useState(false);
+  useEffect(() => {
+    setAllSelected(keys.symmetricDifference(active).size === 0);
+  }, [keys, active]);
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.indeterminate = active.size > 0 && !allSelected;
+    }
+  }, [ref, active, allSelected]);
+  const id = useId();
+
+  return (
+    <section className="my-3">
+      <header>
+        <Form.Check
+          id={`${id}-${prefix}-checkbox-all`}
+          type="checkbox"
+          label={title}
+          className="fs-6 fw-semibold"
+          key={`context-all`}
+          checked={allSelected}
+          ref={ref}
+          onChange={() => (allSelected ? selectNone() : selectAll())}
+        />
+      </header>
+      <Form>
+        {[...keys].map((key, i) => (
+          <Form.Check
+            id={`${id}=${prefix}-checkbox-${i}`}
+            type="checkbox"
+            label={key.substring(`${prefix}${sep}`.length)}
+            className="ms-4"
+            data-keyword={key}
+            key={`${key}-${i}`}
+            checked={activeKeywords.includes(key)}
+            onChange={() => toggle(key)}
+          />
+        ))}
+      </Form>
+    </section>
+  );
+};
 
 type WritingTaskFilterProps = {
   update?: Dispatch<SetStateAction<WritingTask[]>>;
@@ -118,70 +196,22 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
           <FontAwesomeIcon icon={faX} />
         </Button>
       </InputGroup>
-      <section className="my-3">
-        <header className="d-flex gap-3">
-          <h6>{t("select_task.context")}</h6>
-          <ButtonGroup>
-            <Button variant="secondary" onClick={() => selectAll("context")}>
-              <FontAwesomeIcon icon={faCheckDouble} />
-            </Button>
-            <Button variant="secondary" onClick={() => selectNone("context")}>
-              <FontAwesomeIcon icon={faX} />
-            </Button>
-          </ButtonGroup>
-        </header>
-        <Form>
-          {keywords
-            .filter(
-              (key) =>
-                key.startsWith("context:") &&
-                key.substring("context:".length).length > 0
-            )
-            .map((key, i) => (
-              <Form.Check
-                id={`context-checkbox-${i}`}
-                type="checkbox"
-                label={key.substring("context:".length)}
-                data-keyword={key}
-                key={`${key}-${i}`}
-                checked={activeKeywords.includes(key)}
-                onChange={() => toggle(key)}
-              />
-            ))}
-        </Form>
-      </section>
-      <section>
-        <header className="d-flex gap-3">
-          <h6>{t("select_task.mode")}</h6>
-          <ButtonGroup>
-            <Button variant="secondary" onClick={() => selectAll("mode")}>
-              <FontAwesomeIcon icon={faCheckDouble} />
-            </Button>
-            <Button variant="secondary" onClick={() => selectNone("mode")}>
-              <FontAwesomeIcon icon={faX} />
-            </Button>
-          </ButtonGroup>
-        </header>
-        <Form>
-          {keywords
-            .filter(
-              (key) =>
-                key.startsWith("mode:") &&
-                key.substring("mode:".length).length > 0
-            )
-            .map((key, i) => (
-              <Form.Check
-                id={`mode-checkbox-${i}`}
-                type="checkbox"
-                label={key.substring("mode:".length)}
-                data-keyword={key}
-                key={`${key}-${i}`}
-                checked={activeKeywords.includes(key)}
-                onChange={() => toggle(key)}
-              />
-            ))}
-        </Form>
-      </section>
+      {Object.keys(groupByCategory(keywords))
+        .toSorted((a, b) =>
+          t(`select_task.${a}`).localeCompare(t(`select_task.${b}`))
+        )
+        .map((prefix) => (
+          <CategoryKeywords
+            key={prefix}
+            prefix={prefix}
+            title={t(`select_task.${prefix}`)}
+            keywords={keywords}
+            activeKeywords={activeKeywords}
+            toggle={toggle}
+            selectAll={() => selectAll(prefix)}
+            selectNone={() => selectNone(prefix)}
+          />
+        ))}
     </div>
   );
 };

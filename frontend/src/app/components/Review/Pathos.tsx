@@ -1,4 +1,5 @@
-import { FC, useContext, useId } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useContext, useId } from "react";
 import { Accordion, AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
@@ -11,6 +12,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
+/** Accordion component for sentence assessments. */
 const SentenceAssessments: FC<
   AccordionProps & { assessments?: SentenceAssessment[] }
 > = ({ assessments, ...props }) => {
@@ -59,13 +61,23 @@ const SentenceAssessments: FC<
   );
 };
 
-export const Pathos: FC = () => {
+/** Pathos review tool component. */
+export const Pathos: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const review = usePathosData();
 
   return (
     <ReviewReset>
-      <article className="container-fluid overflow-auto d-flex flex-column flex-grow-1">
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
         <ToolHeader title={t("pathos.title")} instructionsKey="pathos" />
         {!review ? (
           <Loading />

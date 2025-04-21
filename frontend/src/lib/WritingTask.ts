@@ -160,6 +160,14 @@ export function extractKeywords(tasks: WritingTask[]) {
   ].toSorted((a, b) => a.localeCompare(b));
 }
 
+/** Group keywords by category. */
+export function groupByCategory(keywords: string[]) {
+  return Object.groupBy(
+    keywords,
+    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
+  );
+}
+
 /**
  * Checks if the given task contains an intersection of the keyword types.
  * @param task a writing task definition
@@ -169,10 +177,7 @@ export function extractKeywords(tasks: WritingTask[]) {
 export function hasKeywords(task: WritingTask, keywords: string[]) {
   if (!task.info.keywords) return false;
   if (keywords.length === 0) return false;
-  const catKeys = Object.groupBy(
-    keywords,
-    (key) => /^(\w+):\s*(.*)/.exec(key)?.at(1) ?? 'keyword'
-  );
+  const catKeys = groupByCategory(keywords);
   return Object.entries(catKeys).every(([_, keys]) => {
     if (!keys) return true;
     const kw = new Set(keys);

@@ -3,6 +3,7 @@ import * as CoverLetter from '../../test/CoverLetter.json';
 import {
   extractKeywords,
   getExpectations,
+  groupByCategory,
   hasKeywords,
   isEnabled,
   isWritingTask,
@@ -43,6 +44,24 @@ describe('extractKeywords', () => {
   test('given CoverLetter then 2 keywords', () => {
     const keywords = extractKeywords([CoverLetter]);
     expect(keywords.length).toBe(2);
+  });
+});
+
+describe('groupByCategory', () => {
+  test('given [] then empty object', () => {
+    const grouped = groupByCategory([]);
+    expect(Object.keys(grouped).length).toBe(0);
+  });
+  test('given ["context:Professional", "mode:Persuasive"] then 2 categories', () => {
+    const grouped = groupByCategory([
+      'context:Professional',
+      'mode:Persuasive',
+    ]);
+    expect(Object.keys(grouped).length).toBe(2);
+    expect('context' in grouped).toBeTruthy();
+    expect('mode' in grouped).toBeTruthy();
+    expect(grouped['context']?.length).toBe(1);
+    expect(grouped['mode']?.length).toBe(1);
   });
 });
 

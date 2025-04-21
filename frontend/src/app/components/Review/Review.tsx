@@ -1,6 +1,6 @@
-import { FC, useEffect, useState } from "react";
+import classNames from "classnames";
+import { FC, HTMLProps, useEffect, useState } from "react";
 import {
-  Alert,
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
@@ -12,22 +12,22 @@ import {
   Tabs,
   Tooltip,
 } from "react-bootstrap";
-import { Translation, useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { ReviewTool } from "../../../lib/ReviewResponse";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
+import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import {
   useAdditionalToolsEnabled,
   useArgumentsEnabled,
   useBigPictureEnabled,
   useCivilToneEnabled,
-  useEthosEnabled,
+  useCredibilityEnabled,
   useExpectationsEnabled,
   useFineTuningEnabled,
   useImpressionsEnabled,
   useLogicalFlowEnabled,
   useParagraphClarityEnabled,
-  usePathosEnabled,
   useProfessionalToneEnabled,
   useProminentTopicsEnabled,
   useSentenceDensityEnabled,
@@ -44,7 +44,6 @@ import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
 import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
 import { Organization } from "./Organization";
 import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
-import { Pathos } from "./Pathos";
 import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
 import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
@@ -52,23 +51,38 @@ import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
 
+// tab event keys
 type TabKey = "big_picture" | "fine_tuning";
+// tool event keys
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
-const NullTool: FC = () => (
-  <article className="container-fluid flex-grow-1 overflow-auto d-flex flex-column">
-    <Alert variant="warning" className="m-3">
-      <Translation ns={"review"}>{(t) => <>{t("null.content")}</>}</Translation>
-    </Alert>
+/** No selected tool component. */
+const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
+  className,
+  text,
+  ...props
+}) => (
+  <article
+    {...props}
+    className={classNames(
+      className,
+      "container-fluid flex-grow-1 overflow-auto d-flex flex-column position-relative"
+    )}
+  >
+    <Stack className="position-absolute top-50 start-50 translate-middle w-75">
+      <ReviewIcon className="mx-auto text-primary md-icon" />
+      <span className="mx-auto text-center">{text}</span>
+    </Stack>
   </article>
 );
 
+/** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t, ready } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
-  const [tool, setTool] = useState<Tool>("expectations");
+  const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
 
   // useUnload();
@@ -79,13 +93,12 @@ export const Review: FC = () => {
   }, [t, ready]);
 
   const civilToneFeature = useCivilToneEnabled();
-  const ethosFeature = useEthosEnabled();
+  const credibilityFeature = useCredibilityEnabled();
   const expectationsFeature = useExpectationsEnabled();
   const ideasFeature = useProminentTopicsEnabled();
   const argumentsFeature = useArgumentsEnabled();
   const logicalFlowFeature = useLogicalFlowEnabled();
   const paragraphClarityFeature = useParagraphClarityEnabled();
-  const pathosFeature = usePathosEnabled();
   const professionalToneFeature = useProfessionalToneEnabled();
   const sentencesFeature = useSentenceDensityEnabled();
   const sourcesFeature = useSourcesEnabled();
@@ -120,12 +133,12 @@ export const Review: FC = () => {
           <Tabs
             activeKey={tab}
             onSelect={(k) => {
-              if (k === "fine_tuning" && otherTool === "null") {
-                setOtherTool("paragraph_clarity"); // FIXME initial tool
-              }
-              if (k === "big_picture" && tool === "null") {
-                setTool("expectations"); // FIXME initial tool
-              }
+              // if (k === "fine_tuning" && otherTool === "null") {
+              //   setOtherTool("paragraph_clarity"); // FIXME initial tool
+              // }
+              // if (k === "big_picture" && tool === "null") {
+              //   setTool("expectations"); // FIXME initial tool
+              // }
               setTab(k as TabKey);
             }}
             variant="underline"
@@ -160,7 +173,9 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {(!tool || tool === "null") && <NullTool />}
+                  {(!tool || tool === "null") && (
+                    <NullTool text={t("null.big_picture")} />
+                  )}
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
@@ -211,8 +226,7 @@ export const Review: FC = () => {
                             className="tool_button tool_dropdown"
                             active={[
                               "sources",
-                              "ethos",
-                              "pathos",
+                              "credibility",
                               "organization",
                               "civil_tone",
                               "impressions",
@@ -238,29 +252,16 @@ export const Review: FC = () => {
                               </div>
                             </Dropdown.Item>
                           ) : null}
-                          {ethosFeature ? (
+                          {credibilityFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("ethos")}
-                              active={otherTool === "ethos"}
+                              onClick={() => setOtherTool("credibility")}
+                              active={otherTool === "credibility"}
                             >
                               <h6 className="text-primary">
                                 {t("ethos.title")}
                               </h6>
                               <div className="text-wrap">
                                 {inst("ethos_scope_note")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                          {pathosFeature ? (
-                            <Dropdown.Item
-                              onClick={() => setOtherTool("pathos")}
-                              active={otherTool === "pathos"}
-                            >
-                              <h6 className="text-primary">
-                                {t("pathos.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {inst("pathos_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -307,15 +308,19 @@ export const Review: FC = () => {
                       </Dropdown>
                     ) : null}
                   </ButtonToolbar>
-                  {(!otherTool || otherTool === "null") && <NullTool />}
+                  {(!otherTool || otherTool === "null") && (
+                    <NullTool text={t("null.fine_tuning")} />
+                  )}
                   {otherTool === "logical_flow" && <LogicalFlow />}
                   {otherTool === "civil_tone" && <CivilTone />}
-                  {otherTool === "ethos" && <Ethos />}
-                  {otherTool === "impressions" && <NullTool />}
+                  {otherTool === "credibility" && <Ethos />}
+                  {otherTool === "impressions" && (
+                    <NullTool text={t("null.not_available")} />
+                  )}
                   {otherTool === "organization" && <Organization />}
                   {otherTool === "sentences" && <Sentences />}
                   {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                  {otherTool === "pathos" && <Pathos />}
+                  {/* {otherTool === "pathos" && <Pathos />} */}
                   {otherTool === "professional_tone" && <ProfessionalTone />}
                   {otherTool === "sources" && <Sources />}
                   {/* Add more tool displays here. */}
