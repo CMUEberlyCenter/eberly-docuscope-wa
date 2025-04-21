@@ -1,16 +1,11 @@
 @use "sass:meta";
 
 .user-text {
+  color: #303030; // TODO use bs var for theme switching.
+
   span.sentence {
     // fix for #117 - sentence spacing
     padding-inline-end: 0.5em;
-  }
-
-  .highlight {
-    span[data-topic] {
-      color: var(--bs-blue);
-      font-weight: bold;
-    }
   }
 
   .paragraph-highlight {
@@ -25,14 +20,14 @@
 
   .word-highlight {
     color: var(--bs-blue);
-    // background: #f7f7f7;
     font-weight: bolder;
   }
 
-  // if there are any no-blur elements, then blur the other p elements. #176
+  // if there are any no-blur elements, then blur the other elements. #176
   &:has(.no-blur) {
-    p:not(.no-blur) {
-      filter: blur(2px);
+    > :not(.no-blur) {
+      // #201 use color instead of blur.
+      color: var(--bs-tertiary-color);
     }
   }
 

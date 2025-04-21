@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId, useState } from "react";
+import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
 import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import {
   AccordionEventKey,
@@ -159,6 +159,17 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
+  const dispatch = useContext(ReviewDispatchContext);
+  useEffect(() => {
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
+    }
+  }, [current, review, dispatch]);
 
   return (
     <ReviewReset>
@@ -202,7 +213,14 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
                       <h6 className="d-inline">
                         {t("lines_of_arguments.main")}
                       </h6>{" "}
-                      <p className="d-inline">{review.response.thesis}</p>
+                      <p
+                        className={classNames(
+                          "d-inline",
+                          !current ? "highlight highlight-0" : ""
+                        )}
+                      >
+                        {review.response.thesis}
+                      </p>
                     </div>
                   ) : null}
                   {"strategies" in review.response &&

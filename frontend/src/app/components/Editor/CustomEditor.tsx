@@ -75,9 +75,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-        "strikethrough" in leaf &&
-        leaf.underline &&
-        leaf.strikethrough
+          "strikethrough" in leaf &&
+          leaf.underline &&
+          leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -202,10 +202,15 @@ const CustomEditor: FC = () => {
         const file = await handle.getFile();
         setUpload(file);
       } catch (err) {
-        console.error(err);
         if (err instanceof DOMException && err.name === "AbortError") {
           return; // Skip cancel.
         }
+        if (err instanceof DOMException && err.name === "SecurityError") {
+          // Security error, show custom upload dialog.  Usually due to being in a cross-orgin iframe.
+          setShowUpload(true);
+          return;
+        }
+        console.error(err);
         if (err instanceof Error) {
           setErrors([{ type: "error", message: err.message, error: err }]);
           setShowErrors(true);
@@ -222,6 +227,9 @@ const CustomEditor: FC = () => {
   const lti = useLtiInfo();
   const saveAs = useCallback(async () => {
     if (content) {
+      const blob = await Packer.toBlob(
+        serializeDocx(content, writingTask, lti?.userInfo?.name)
+      );
       if (
         "showSaveFilePicker" in window &&
         typeof window.showSaveFilePicker === "function"
@@ -237,9 +245,6 @@ const CustomEditor: FC = () => {
             suggestedName: `${rootname}`,
           });
           const writable = await handle.createWritable();
-          const blob = await Packer.toBlob(
-            serializeDocx(content, writingTask, lti?.userInfo?.name)
-          );
           await writable.write(blob);
           await writable.close();
         } catch (err) {
@@ -253,19 +258,18 @@ const CustomEditor: FC = () => {
             case "AbortError":
               break; // user cancelled
             case "SecurityError":
-              setErrors([
-                { type: "error", message: "Security Error", error: err },
-              ]);
-              setShowErrors(true);
+              // fallback to download if filesystem api is not available. (in iframe in LMS without filesystem access)
+              setDocx(blob);
+              // setErrors([
+              //   { type: "error", message: "Security Error", error: err },
+              // ]);
+              // setShowErrors(true);
               break; // os reject
             default:
               console.error(err);
           }
         }
       } else {
-        const blob = await Packer.toBlob(
-          serializeDocx(content, writingTask, lti?.userInfo?.name)
-        );
         setDocx(blob);
       }
     } else {
@@ -286,7 +290,7 @@ const CustomEditor: FC = () => {
         } else {
           const sel = editor.selection
             ? serialize(Editor.fragment(editor, editor.selection)).trim()
-                .length > 0
+              .length > 0
             : false;
           if (sel !== selection) {
             // debounce

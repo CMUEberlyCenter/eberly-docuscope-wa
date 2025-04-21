@@ -12,9 +12,7 @@ div[role="textbox"]:focus {
 
   /* Base text elements */
   p,
-  li,
-  p *,
-  li * {
+  li {
     margin: 0 0 0.5em 0; // 0 0 6pt 0;
     font-size: 0.95em; //11pt;
     color: #303030;
@@ -24,35 +22,33 @@ div[role="textbox"]:focus {
   h1,
   h2,
   h3,
-  h4,
-  h1 *,
-  h2 *,
-  h3 *,
-  h4 * {
+  h4 {
     margin: 1em 0 0.25em 0; // 12pt 0 3pt 0;
-    page-break-after: avoid;
+    break-after: avoid;
     color: #303030;
     font-weight: 600;
+    * {
+      break-after: avoid;
+      font-weight: 600;
+      color: #303030;
+    }
   }
 
-  h1,
-  h1 * {
+  h1 {
     font-size: 1.4em; // ~16pt;
     margin-bottom: 0.5em; // =6pt;
   }
 
-  h2,
-  h2 * {
+  h2 {
     font-size: 1.08em; // ~13pt;
   }
 
   h3,
-  h4,
-  h3 *,
-  h4 * {
+  h4 {
     font-size: 0.95em; // ~11pt;
   }
 
+  h4,
   h4 * {
     font-style: italic;
   }

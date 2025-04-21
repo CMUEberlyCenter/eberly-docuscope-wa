@@ -40,7 +40,7 @@ export const DeepLink: FC = () => {
   };
 
   return (
-    <main className="h-100 w-100 pt-2">
+    <main className="vh-100 vw-90 py-2">
       {isLoading ? (
         <Loading />
       ) : (
