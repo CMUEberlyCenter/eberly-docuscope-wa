@@ -1,15 +1,14 @@
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
 import { visualizer } from "rollup-plugin-visualizer";
+import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import { version } from './package.json';
-import vike from 'vike/plugin';
 
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react(), visualizer(), svgr(), vike()],
+  plugins: [react(), visualizer(), svgr(), vike(),],
   build: {
     sourcemap: mode === 'development',
     minify: mode !== 'development',
@@ -43,5 +42,8 @@ export default defineConfig(({ mode }) => ({
   define: {
     __APP_VERSION__: JSON.stringify(version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString())
+  },
+  server: { // fixes accessing from docker container
+    allowedHosts: mode !== 'development' ? [] : ['localhost', 'host.docker.internal'],
   }
 }))

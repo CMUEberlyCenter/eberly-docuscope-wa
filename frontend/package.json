@@ -1,7 +1,7 @@
 {
   "name": "myprose",
   "version": "2.2.0",
-  "description": "An AI-enhanced online writing studio with a suite of generative and assessment tools supporting the writing process from initial-phase writing to the completion of the final draft.",
+  "description": "myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.",
   "type": "module",
   "private": true,
   "browser": "./index.html",
@@ -138,7 +138,7 @@
     "i18next": "^25.0.1",
     "i18next-browser-languagedetector": "^8.0.5",
     "i18next-http-backend": "^3.0.2",
-    "i18next-http-middleware": "^3.7.2",
+    "i18next-http-middleware": "^3.7.4",
     "ltijs": "=5.9.5",
     "mammoth": "^1.9.0",
     "mongodb": "^6.15.0",
