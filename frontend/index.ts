@@ -4,10 +4,18 @@ import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
+import { body } from 'express-validator';
+import { readFileSync } from 'fs';
 import { readdir, readFile, stat } from 'fs/promises';
+import i18n from 'i18next';
+import Backend from 'i18next-http-backend';
+import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { Provider } from 'ltijs';
 import { dirname, join } from 'path';
+import { initReactI18next } from 'react-i18next';
 import { fileURLToPath } from 'url';
+import { createDevMiddleware, renderPage } from 'vike/server';
+import { parse } from 'yaml';
 import {
   BadRequest,
   BadRequestError,
@@ -34,6 +42,7 @@ import {
   isInstructor,
   LTIPlatform,
 } from './src/server/model/lti';
+import { validate } from './src/server/model/validate';
 import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
 import {
   LTI_DB,
@@ -46,13 +55,6 @@ import {
   PORT,
   SESSION_KEY,
 } from './src/server/settings';
-import { createDevMiddleware, renderPage } from 'vike/server';
-import i18n from 'i18next';
-import { LanguageDetector, handle } from 'i18next-http-middleware';
-import { parse } from 'yaml';
-import Backend from 'i18next-http-backend';
-import { readFileSync } from 'fs';
-import { initReactI18next } from 'react-i18next';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -75,10 +77,16 @@ async function __main__() {
   );
 
   Provider.onConnect(async (token: IdToken, _req: Request, res: Response) => {
+    console.log('onConnect', _req.url);
     if (token) {
-      return res.sendFile(join(PUBLIC, 'index.html'));
+      // if (token.platformContext.custom?.writing_task_id) {
+      //   console.log('onConnect writing_task_id', token.platformContext.custom.writing_task_id);
+      //   Provider.redirect(res, '/edit/${token.platformContext.custom.writing_task_id}');
+      // // } else if (token.platformContext.custom?.writing_task) {
+      // }
+      return Provider.redirect(res, '/edit'); //'/index.html');
     }
-    Provider.redirect(res, '/index.html');
+    Provider.redirect(res, '/'); //'/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
@@ -90,9 +98,9 @@ async function __main__() {
       // Provider.redirect(res, '/deeplink', { newResource: true })
       Provider.redirect(res, '/deeplink')
   );
-  Provider.app.get('/deeplink', async (_req: Request, res: Response) =>
-    res.sendFile(join(PUBLIC, 'deeplink.html'))
-  );
+  // Provider.app.get('/deeplink', async (_req: Request, res: Response) =>
+  //   res.sendFile(join(PUBLIC, 'deeplink.html'))
+  // );
   Provider.app.post(
     // TODO validate(checkSchema({})),
     '/deeplink',
@@ -104,7 +112,7 @@ async function __main__() {
           _id?: string;
         } & WritingTask;
         const { _id, ...writing_task } = task;
-        const valid = validateWritingTask(task);
+        const valid = validateWritingTask(writing_task);
         if (!valid) {
           throw new UnprocessableContentError(
             validateWritingTask.errors,
@@ -120,12 +128,21 @@ async function __main__() {
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
         if (writing_task_id) {
+          url.pathname = `${url.pathname}/${writing_task_id}`;
           url.searchParams.append('writing_task', writing_task_id);
         }
+        console.log(url.toString());
         const items: ContentItemType[] = [
           {
             type: 'ltiResourceLink',
+            title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
+            text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
             url: url.toString(),
+            icon: {
+              url: new URL('logo.svg', LTI_HOSTNAME).toString(),
+              width: 500,
+              height: 160
+            },
             custom: {
               writing_task_id,
               writing_task: JSON.stringify(writing_task),
@@ -162,7 +179,9 @@ async function __main__() {
     try {
       const taskId = token?.platformContext.custom?.writing_task_id;
       if (!taskId || typeof taskId !== 'string') {
-        throw new BadRequestError('No writing task id in custom parameters.');
+        // this looks like it happens on initial deeplinking connection.
+        return res.send(context)
+        // throw new BadRequestError('No writing task id in custom parameters.');
       }
       const writing_task = await findWritingTaskById(taskId);
       const ret = {
@@ -182,7 +201,7 @@ async function __main__() {
     }
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink');
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /edit/, '/');
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
@@ -248,7 +267,7 @@ async function __main__() {
       app.use(express.static(join(root, 'dist', 'client')));
     } else {
       const vite = await import('vite');
-      const { devMiddleware } = await createDevMiddleware({root});
+      const { devMiddleware } = await createDevMiddleware({ root });
       app.use(devMiddleware);
     }
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
@@ -260,6 +279,42 @@ async function __main__() {
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
     app.use('/api/v2/reviews', reviews);
+
+    type SessionData = {
+      document?: string;
+      writing_task?: WritingTask;
+      writing_task_id?: string;
+    }
+    app.post('/api/v2/session', validate(body('document').isString()),
+      async (req: Request, res: Response) => {
+        const { document, writing_task, writing_task_id } = req.body as SessionData;
+        if (req.session.document !== document) {
+          req.session.document = document;
+          req.session.segmented = undefined;
+          req.session.analysis = undefined;
+        }
+        if (writing_task_id && req.session.writing_task_id !== writing_task_id) {
+          req.session.writing_task = undefined;
+          req.session.writing_task_id = writing_task_id;
+        } else if (writing_task && req.session.writing_task !== writing_task) {
+          const valid = validateWritingTask(writing_task);
+          if (!valid) {
+            throw new UnprocessableContentError(
+              validateWritingTask.errors,
+              'Invalid JSON'
+            );
+          }
+          if (!isWritingTask(writing_task)) {
+            throw new UnprocessableContentError(
+              ['Failed type checking!'],
+              'Invalid JSON'
+            );
+          }
+          req.session.writing_task = writing_task;
+          req.session.writing_task_id = undefined;
+          req.session.analysis = undefined;
+        }
+      });
 
     // app.use('/api/v2/performance', promptPerformance);
     // Metrics
@@ -276,19 +331,26 @@ async function __main__() {
     app.use(express.static(PUBLIC));
     app.all('*splat', async (req: Request, res: Response, next) => {
       console.log('splat', req.i18n.language);
-      console.log(req.i18n.t('document.title'));
+      const token: IdToken | undefined = res.locals.token;
+      const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
+      const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
+      // const ltik = new URL(req.url, LTI_HOSTNAME).searchParams.get('ltik');
       const pageContextInit = {
         urlOriginal: req.url,
         headersOriginal: req.headers,
         t: req.i18n.t,
         i18n: req.i18n,
-        foo: 'foo',
+        token,
+        session: req.session,
+        writing_task_id
+        // ltik,
         // headers: {
         //   'Content-Type': 'text/html',
         //   'Cache-Control': 'no-cache',
         // },
       };
       const pageContext = await renderPage(pageContextInit);
+      pageContext.urlParsed?.search
       if (pageContext.errorWhileRendering) {
         console.error('Error rendering page:', pageContext.errorWhileRendering);
         // return res.status(500).send(InternalServerError('Error rendering page'));
@@ -302,11 +364,10 @@ async function __main__() {
           res.writeEarlyHints({ link: earlyHints.map((hint) => hint.earlyHintLink) });
         }
         headers.forEach(([name, value]) => res.setHeader(name, value));
-        res.status(statusCode);
-        res.send(body);
+        res.status(statusCode).send(body);
       }
     });
-    const server = app.listen(/*PORT*/3003, () =>
+    const server = app.listen(PORT, () =>
       console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
     );
     const shutdown = () => {

@@ -91,7 +91,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
       ) : (
         <>
           {children}
-          {actions && <footer className="mx-2">{actions}</footer>}
+          {!!children && !!actions && <footer className="mx-2">{actions}</footer>}
         </>
       )}
     </div>
@@ -215,6 +215,9 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
     },
     [editor]
   );
+  if (!text) {
+    return null;
+  }
   return (
     <div className="d-flex">
       <Button

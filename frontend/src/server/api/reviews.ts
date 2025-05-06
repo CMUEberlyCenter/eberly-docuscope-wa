@@ -716,8 +716,8 @@ reviews.post(
       );
       // request.session['wtd'] = writing_task; // FUTURE use session for analysis
       // request.session['document'] = document; // FUTURE use session for analysis
-      request.session.review_id = id;
-      request.session.reviews = [...(request.session.reviews ?? []), id];
+      // request.session.review_id = id;
+      // request.session.reviews = [...(request.session.reviews ?? []), id];
       response.send(id);
     } catch (err) {
       if (err instanceof UnprocessableContentError) {

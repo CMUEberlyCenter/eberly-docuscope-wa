@@ -2,17 +2,18 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from 'vike-react/useData';
-import { ClipboardIconButton } from "../../src/app/components/ClipboardIconButton/ClipboardIconButton";
-import { WritingTaskFilter } from "../../src/app/components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../src/app/components/WritingTaskInfo/WritingTaskInfo";
-import { validateWritingTask } from "../../src/lib/schemaValidate";
-import { isWritingTask, WritingTask } from "../../src/lib/WritingTask";
+import { ClipboardIconButton } from "../../../src/app/components/ClipboardIconButton/ClipboardIconButton";
+import { WritingTaskFilter } from "../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "../../../src/app/components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "../../../src/lib/schemaValidate";
+import { isWritingTask, WritingTask } from "../../../src/lib/WritingTask";
+import type { Data } from "./+data";
 
 type IdWritingTask = WritingTask & { _id?: string };
 
 const Page: FC = () => {
   const { t } = useTranslation();
-  const { tasks } = useData<{ tasks: WritingTask[] }>();
+  const { tasks } = useData<Data>();
   /** Currently selected writing task. */
   const [selected, setSelected] = useState<IdWritingTask | null>(null);
   const [custom, setCustom] = useState<IdWritingTask | null>(null); // Uploaded file content.
@@ -22,9 +23,6 @@ const Page: FC = () => {
   const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
   const [data, setData] = useState<WritingTask[]>([]);
 
-  useEffect(() => {
-    window.document.title = t("genlink.title", "myProse Link Generator");
-  }, [t]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;

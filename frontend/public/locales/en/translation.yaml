@@ -32,7 +32,7 @@ deeplink: Select a text type for this assignment
 deeplinking:
   title: myProse LTI Deeplinking
 genlink:
-  title: myProse Text Type Link Generator
+  title: myProse Writing Task Link Generator
   link: 'Link:'
 audio:
   play: Play
