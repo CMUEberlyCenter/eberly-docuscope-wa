@@ -4,7 +4,7 @@ import { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskInfoProps = {
   /** The writing task to display information about. */
-  task: WritingTask | null;
+  task: WritingTask | null | undefined;
 };
 /**
  * Component for displaying Metadata about a writing task (outline).

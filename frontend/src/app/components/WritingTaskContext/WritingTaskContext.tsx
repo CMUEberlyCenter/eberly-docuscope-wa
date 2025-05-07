@@ -9,8 +9,8 @@ import {
 import { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskContext = {
-  task?: WritingTask;
-  taskId?: string;
+  task?: WritingTask | null;
+  taskId?: string | null;
 };
 const WritingTaskContext = createContext<WritingTaskContext>({});
 const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(

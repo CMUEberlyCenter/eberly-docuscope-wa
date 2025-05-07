@@ -96,7 +96,7 @@ export const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
 
 /** Serialize to text for the clipboard. */
 export const taskToClipboard = (
-  task: WritingTask | null,
+  task: WritingTask | null | undefined,
   includeDetails: boolean
 ): string => {
   if (!task) return '';

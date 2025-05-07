@@ -19,13 +19,18 @@ import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,
   taskToEditor,
-  useWritingTask,
-  writingTask,
+  // useWritingTask,
+  useWritingTasks,
+  // writingTask,
 } from "../../service/writing-task.service";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
+import {
+  useSetWritingTask,
+  useWritingTask,
+} from "../WritingTaskContext/WritingTaskContext";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
@@ -35,12 +40,15 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
  */
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  // const { data: writingTasks } = useWritingTasks(); // all public tasks
-  const writing_task = useWritingTask(); // current task
+  const { data: writingTasks } = useWritingTasks(); // all public tasks
+  const { task: writingTask } = useWritingTask(); // current task
+  const setWritingTask = useSetWritingTask();
   const inLti = useLti(); // in LTI context
   const ltiInfo = useLtiInfo(); // Information from LTI
-  const [selected, setSelected] = useState<WritingTask | null>(writing_task);
-  useEffect(() => setSelected(writing_task), [writing_task]);
+  const [selected, setSelected] = useState<WritingTask | undefined | null>(
+    writingTask
+  );
+  useEffect(() => setSelected(writingTask), [writingTask]);
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
   useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
@@ -74,11 +82,12 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
 
   const hide = useCallback(() => {
     setShowDetails(false);
-    setSelected(null);
+    setSelected(undefined);
     onHide?.();
   }, [onHide]);
   const commit = useCallback(() => {
-    writingTask.next(selected);
+    setWritingTask({ task: selected });
+    // writingTask.next(selected);
     hide();
   }, [hide, selected]);
   const editor = useSlate();
@@ -117,7 +126,11 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
             className="d-flex flex-row align-items-stretch position-relative gap-3"
             style={{ maxHeight: "75vh", height: "75vh" }}
           >
-            <WritingTaskFilter className="w-100" update={setData} />
+            <WritingTaskFilter
+              className="w-100"
+              update={setData}
+              tasks={writingTasks}
+            />
             <div className="w-100 h-0">
               <ListGroup className="overflow-auto w-100 mh-100">
                 {data.map((task) => (
@@ -142,7 +155,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
                 <ListGroup.Item
                   action
                   variant="warning"
-                  onClick={() => setSelected(null)}
+                  onClick={() => setSelected(undefined)}
                 >
                   {t("select_task.null")}
                 </ListGroup.Item>
