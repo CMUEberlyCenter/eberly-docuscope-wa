@@ -1,6 +1,7 @@
 For testing LTI connection with a local docker Moodle instance:
 
 Setup:
+
 1. go to Site administration > External tool > Manage tolls.
 1. Use Add LTI Advantage button to initialize tool.
 1. Approve for usage.

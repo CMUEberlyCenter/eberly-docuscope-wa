@@ -9,5 +9,5 @@ export const data = async (pageContext: PageContextServer) => {
   console.log('taskId', taskId);
   console.log(pageContext.token);
   return { tasks, course, taskId };
-}
+};
 export type Data = Awaited<ReturnType<typeof data>>;

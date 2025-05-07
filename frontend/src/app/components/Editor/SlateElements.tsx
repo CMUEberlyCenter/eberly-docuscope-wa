@@ -28,7 +28,9 @@ const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
       return <p {...attributes}>{children}</p>;
   }
 };
-export const renderElement = (props: RenderElementProps) => <Element {...props} />;
+export const renderElement = (props: RenderElementProps) => (
+  <Element {...props} />
+);
 
 /** Component for rendering editor content leaf nodes. */
 const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
@@ -38,9 +40,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"

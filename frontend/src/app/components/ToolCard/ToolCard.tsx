@@ -45,13 +45,12 @@ import {
   useGlobalFeatureFlow,
   useGlobalFeatureNotes2Bullets,
   useGlobalFeatureNotes2Prose,
-  useGlobalFeatureReview,
 } from "../../service/settings.service";
-import { useWritingTask } from "../../service/writing-task.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
 import SelectExpectation from "../SelectExpectation/SelectExpectation";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
@@ -63,14 +62,14 @@ class NoSelectedTextError extends Error {}
  */
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ className, hasSelection, ...props }, ref) => {
+    const { task: writingTask } = useWritingTask();
     const { t } = useTranslation();
-    const writingTask = useWritingTask();
     // TODO extend from global to global+assignment
     const notes2proseFeature = useGlobalFeatureNotes2Prose();
     const bulletsFeature = useGlobalFeatureNotes2Bullets();
     const flowFeature = useGlobalFeatureFlow();
     const copyEditFeature = useGlobalFeatureCopyedit();
-    const reviewFeature = useGlobalFeatureReview();
+    const reviewFeature = false; // useGlobalFeatureReview();
     const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
     const [history, setHistory] = useState<ToolResult[]>([]);
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);

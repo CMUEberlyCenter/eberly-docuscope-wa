@@ -39,22 +39,38 @@ export const Page: FC = () => {
   return (
     <main className="vh-100 vw-90 p-2">
       <div className="d-flex flex-column h-100 w-100 gap-3">
-        <div className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100" style={{ minHeight: 0 }}>
+        <div
+          className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
+          style={{ minHeight: 0 }}
+        >
           <ListGroup className="overflow-auto w-100">
             {tasks.map((task) => (
-              <ListGroup.Item key={task.info.name} action
+              <ListGroup.Item
+                key={task.info.name}
+                action
                 active={selected === task}
-                onClick={() => setSelected(task)}>
+                onClick={() => setSelected(task)}
+              >
                 {task.info.name}
               </ListGroup.Item>
             ))}
             {custom && (
-              <ListGroup.Item key={"custom"} action active={selected === custom}
-                onClick={() => setSelected(custom)}>
+              <ListGroup.Item
+                key={"custom"}
+                action
+                active={selected === custom}
+                onClick={() => setSelected(custom)}
+              >
                 {custom.info.name}
               </ListGroup.Item>
             )}
-            <ListGroup.Item key="null" action variant="warning" active={!selected} onClick={() => setSelected(null)}>
+            <ListGroup.Item
+              key="null"
+              action
+              variant="warning"
+              active={!selected}
+              onClick={() => setSelected(null)}
+            >
               {t("select_task.null")}
             </ListGroup.Item>
           </ListGroup>
@@ -75,7 +91,13 @@ export const Page: FC = () => {
             </Form.Control.Feedback>
           </Form.Group>
           <Form noValidate method="post">
-            <input type="hidden" name="file" value={JSON.stringify(selected)} className="d-none" readOnly={true} />
+            <input
+              type="hidden"
+              name="file"
+              value={JSON.stringify(selected)}
+              className="d-none"
+              readOnly={true}
+            />
             <button type="submit" className="btn btn-primary">
               {t("select")}
             </button>

@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useData } from 'vike-react/useData';
+import { useData } from "vike-react/useData";
 import { ClipboardIconButton } from "../../../src/app/components/ClipboardIconButton/ClipboardIconButton";
 import { WritingTaskFilter } from "../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../../../src/app/components/WritingTaskInfo/WritingTaskInfo";
@@ -22,7 +22,6 @@ const Page: FC = () => {
   const hostname = new URL("/index.html", window.location.href); // base url for link
   const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
   const [data, setData] = useState<WritingTask[]>([]);
-
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -91,7 +90,11 @@ const Page: FC = () => {
             className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
             style={{ minHeight: 0 }}
           >
-            <WritingTaskFilter className="w-100" update={setData} tasks={tasks}/>
+            <WritingTaskFilter
+              className="w-100"
+              update={setData}
+              tasks={tasks}
+            />
             <ListGroup className="overflow-auto w-100 mh-100">
               {data.map((task) => (
                 <ListGroup.Item
@@ -158,12 +161,12 @@ const Page: FC = () => {
         </Form>
       </footer>
     </main>
-  )
+  );
   // return (
   //   <div>
   //     <h1 suppressHydrationWarning={true} data-allow-mismatch="text">{t('genlink.title')}</h1>
   //     <p>This is the Generate Link page.</p>
   //   </div>
   // );
-}
+};
 export default Page;

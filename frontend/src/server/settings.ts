@@ -62,7 +62,7 @@ export const LTI_OPTIONS = {
   dynReg: {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.
-    // logo: new URL('logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
+    logo: new URL('/logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
     description: 'myProse tool for LTI 1.3', // Tool Provider description.
     redirectUris: [new URL('/launch', LTI_HOSTNAME).toString()], // Additional redirection URLs. The main URL is added by default.
     customParameters: { key: 'value' }, // Custom parameters.

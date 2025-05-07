@@ -1,6 +1,5 @@
-import { FC, ReactNode } from 'react';
+import { FC, ReactNode } from "react";
 
 export const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  return (<>{children}</>
-  )
+  return <>{children}</>;
 };

@@ -20,7 +20,6 @@ import {
   WritingTask,
 } from "../../../lib/WritingTask";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
-import { useWritingTasks } from "../../service/writing-task.service";
 
 const sep = ":";
 const hasPrefix = (prefix: string, key: string) =>
@@ -110,7 +109,8 @@ type WritingTaskFilterProps = {
 } & HTMLProps<HTMLDivElement>;
 
 export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
-  tasks = [], update,
+  tasks = [],
+  update,
   ...props
 }) => {
   const { t } = useTranslation();

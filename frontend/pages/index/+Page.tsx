@@ -6,7 +6,7 @@ export const Page: FC = () => {
   // const {t} = useTranslation();
   return (
     <>
-    <CustomEditor />
+      <CustomEditor />
     </>
   );
-}
+};

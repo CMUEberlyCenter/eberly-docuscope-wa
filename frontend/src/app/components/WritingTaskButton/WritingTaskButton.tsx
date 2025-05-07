@@ -3,11 +3,8 @@ import { FC, HTMLProps, useId, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
-import {
-  useSelectTaskAvailable,
-  useWritingTask,
-} from "../../service/writing-task.service";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
 
 /** Component for displaying the title of the globally selected outline. */
@@ -15,8 +12,8 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props
 }) => {
-  const writingTask = useWritingTask();
-  const selectAvailable = useSelectTaskAvailable();
+  const { task: writingTask, taskId: writingTaskId } = useWritingTask();
+  // const selectAvailable = useSelectTaskAvailable();
   const [showTask, setShowTask] = useState(false);
   const [showSelect, setShowSelect] = useState(false);
   const taskId = useId();
@@ -43,7 +40,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
               >
                 {writingTask.rules.name}
               </Button>
-              {selectAvailable && (
+              {!writingTaskId && (
                 <Button
                   aria-controls={taskId}
                   variant={"light"}
@@ -57,7 +54,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
               )}
             </>
           )}
-          {selectAvailable && !writingTask && (
+          {!writingTaskId && !writingTask && (
             <Button
               variant="primary"
               aria-controls={selectId}
@@ -66,15 +63,16 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
               {t("select_task.title")}
             </Button>
           )}
-          {!selectAvailable && !writingTask && (
+          {writingTaskId && !writingTask && (
             <h6 className="mb-1">{t("editor.menu.no_task")}</h6>
           )}
           <WritingTaskDetails
             id={taskId}
             show={showTask}
+            writingTask={writingTask}
             onHide={() => setShowTask(false)}
           />
-          {selectAvailable ? (
+          {!writingTaskId ? (
             <SelectWritingTask
               id={selectId}
               show={showSelect}

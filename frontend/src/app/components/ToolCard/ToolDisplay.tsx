@@ -91,7 +91,9 @@ export const ToolRoot: FC<ToolRootProps> = ({
       ) : (
         <>
           {children}
-          {!!children && !!actions && <footer className="mx-2">{actions}</footer>}
+          {!!children && !!actions && (
+            <footer className="mx-2">{actions}</footer>
+          )}
         </>
       )}
     </div>

@@ -201,7 +201,7 @@ async function __main__() {
     }
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /edit/, '/');
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/);
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
@@ -334,6 +334,7 @@ async function __main__() {
       const token: IdToken | undefined = res.locals.token;
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
+      console.log('writing_task_id', writing_task_id);
       // const ltik = new URL(req.url, LTI_HOSTNAME).searchParams.get('ltik');
       const pageContextInit = {
         urlOriginal: req.url,

@@ -3,7 +3,6 @@ import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Rule, WritingTask } from "../../../lib/WritingTask";
-import { useWritingTask } from "../../service/writing-task.service";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
 
@@ -30,7 +29,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const writingTask = task ?? useWritingTask();
+  const writingTask = task;
   const [selected, setSelected] = useState<Rule | null>(null);
   const onSelect = useCallback(
     (rule: Rule) => {

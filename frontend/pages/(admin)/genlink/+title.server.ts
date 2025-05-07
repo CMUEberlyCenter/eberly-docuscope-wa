@@ -1,5 +1,8 @@
-import { PageContextServer } from "vike/types";
+import { PageContextServer } from 'vike/types';
 
 export function title(pageContext: PageContextServer) {
-  return pageContext.t?.("genlink.title", "myProse Link Generator") ?? "myProse Link Generator";
+  return (
+    pageContext.t?.('genlink.title', 'myProse Link Generator') ??
+    'myProse Link Generator'
+  );
 }

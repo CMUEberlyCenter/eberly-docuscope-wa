@@ -15,7 +15,8 @@ import { fromFetch } from 'rxjs/fetch';
 
 // URL for settings.json, 'base' gets it to work with webpack.
 const SETTINGS_URL = new URL(
-  /* @vite-ignore */ '../settings/settings.json',
+  '/public/settings/settings.json',
+  /* @vite-ignore */ //'../settings/settings.json',
   import.meta.url
 );
 

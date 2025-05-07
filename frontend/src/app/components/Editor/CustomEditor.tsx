@@ -21,23 +21,19 @@ import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { createEditor, Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
-import {
-  Editable,
-  Slate,
-  withReact
-} from "slate-react";
+import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
 import { useLtiInfo } from "../../service/lti.service";
-import { useWritingTask } from "../../service/writing-task.service";
+// import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
 import { FileUpload } from "../FileUpload/FileUpload";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
-
 
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
@@ -52,9 +48,9 @@ const CustomEditor: FC = () => {
   const [selection, setSelection] = useState<boolean>(false);
 
   // Update document title based on translation.
-  useEffect(() => {
-    window.document.title = t("document.title");
-  }, [t]);
+  // useEffect(() => {
+  //   window.document.title = t("document.title");
+  // }, [t]);
 
   // useEffect(() => {
   //   console.log(selection);
@@ -162,7 +158,7 @@ const CustomEditor: FC = () => {
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
-  const writingTask = useWritingTask();
+  const { task: writingTask } = useWritingTask();
   const lti = useLtiInfo();
   const saveAs = useCallback(async () => {
     if (content) {
@@ -229,7 +225,7 @@ const CustomEditor: FC = () => {
         } else {
           const sel = editor.selection
             ? serialize(Editor.fragment(editor, editor.selection)).trim()
-              .length > 0
+                .length > 0
             : false;
           if (sel !== selection) {
             // debounce
