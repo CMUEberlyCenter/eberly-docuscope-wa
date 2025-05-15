@@ -82,14 +82,14 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
   return (
     <Accordion.Item {...props}>
       {isExpectationsData(expectation) &&
-      isNone(expectation.response.suggestion) ? (
+        isNone(expectation.response.suggestion) ? (
         <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{expectation.expectation}</div>
           <AlertIcon message={t("warning")} show />
         </div>
       ) : null}
       {isExpectationsData(expectation) &&
-      !isNone(expectation.response.suggestion) ? (
+        !isNone(expectation.response.suggestion) ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{expectation.expectation}</div>
@@ -102,15 +102,15 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
             onEntered={() =>
               isExpectationsData(expectation)
                 ? dispatch({
-                    sentences: [expectation.response.sent_ids],
-                    type: "set",
-                  })
+                  sentences: [expectation.response.sent_ids],
+                  type: "set",
+                })
                 : dispatch({ type: "unset" })
             }
             onExit={() => dispatch({ type: "unset" })}
           >
             {isExpectationsData(expectation) &&
-            expectation.response.assessment ? (
+              expectation.response.assessment ? (
               <div>
                 <h6 className="d-inline">{t("assessment")}</h6>{" "}
                 <span key={`${id}-assessment`}>
@@ -119,11 +119,20 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
               </div>
             ) : null}
             {isExpectationsData(expectation) &&
-            expectation.response.suggestion ? (
+              expectation.response.suggestion ? (
               <div>
                 <h6 className="d-inline">{t("suggestion")}</h6>{" "}
                 <span key={`${id}-suggestion`}>
                   {expectation.response.suggestion}
+                </span>
+              </div>
+            ) : null}
+            {isExpectationsData(expectation) &&
+              !expectation.response.suggestion ? (
+              <div>
+                <h6 className="d-inline">{t("suggestion")}</h6>{" "}
+                <span key={`${id}-suggestion`}>
+                  {t("no_suggestions")}
                 </span>
               </div>
             ) : null}
