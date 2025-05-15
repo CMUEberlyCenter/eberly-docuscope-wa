@@ -75,9 +75,9 @@ const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
       fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
       textDecoration:
         "underline" in leaf &&
-          "strikethrough" in leaf &&
-          leaf.underline &&
-          leaf.strikethrough
+        "strikethrough" in leaf &&
+        leaf.underline &&
+        leaf.strikethrough
           ? "underline line-through"
           : "underline" in leaf && leaf.underline
             ? "underline"
@@ -290,7 +290,7 @@ const CustomEditor: FC = () => {
         } else {
           const sel = editor.selection
             ? serialize(Editor.fragment(editor, editor.selection)).trim()
-              .length > 0
+                .length > 0
             : false;
           if (sel !== selection) {
             // debounce
