@@ -1,4 +1,4 @@
-FROM docker.io/node:23 AS base
+FROM docker.io/node:23-slim AS base
 RUN mkdir -p /app
 
 FROM base AS build
@@ -12,6 +12,8 @@ COPY . /app
 RUN npm run build
 
 FROM base
+LABEL org.opencontainers.image.description="myProse web application"
+LABEL org.opencontainers.image.licenses=CC-BY-NC-SA-4.0
 EXPOSE 8888
 ENV PORT=8888
 WORKDIR /app

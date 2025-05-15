@@ -13,6 +13,8 @@ COPY ./Pipfile.lock .
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
 FROM base AS runtime
+LABEL org.opencontainers.image.description="onTopic service"
+LABEL org.opencontainers.image.licenses=CC-BY-NC-SA-4.0
 ENV PYTHONOPTIMIZE=2
 ENV PATH="/.venv/bin:$PATH"
 RUN useradd --create-home appuser
@@ -25,14 +27,4 @@ COPY . .
 
 # Expose the ports we're interested in
 EXPOSE 5000
-
-# For now we have to use an older version of Spacy because the language
-# model was compiled for this one and won't work with 3>
-# RUN pip install spacy==2.3.5
-
-
-# RUN export FLASK_APP=app.py
-# RUN export FLASK_ENV=development
-# RUN export FLASK_DEBUG=0
-
 CMD ["hypercorn", "-b", "0.0.0.0:5000", "--root-path", "/", "app:app"]
