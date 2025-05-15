@@ -127,6 +127,13 @@ const ExpectationRule: FC<ExpectationProps> = ({ rule, ...props }) => {
                 </span>
               </div>
             ) : null}
+            {isExpectationsData(expectation) &&
+            !expectation.response.suggestion ? (
+              <div>
+                <h6 className="d-inline">{t("suggestion")}</h6>{" "}
+                <span key={`${id}-suggestion`}>{t("no_suggestions")}</span>
+              </div>
+            ) : null}
           </Accordion.Body>
         </>
       ) : null}

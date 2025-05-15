@@ -52,7 +52,7 @@ const SentenceToneIssues: FC<
             </span>
           </Accordion.Header>
           <Accordion.Body
-            className="pb-3"
+            className="p-0 pb-3"
             onEntered={() =>
               dispatch({
                 type: "set",
@@ -61,11 +61,11 @@ const SentenceToneIssues: FC<
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <div className="highlight highlight-1">
+            <div className="highlight highlight-1 p-3 pb-2">
               <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
               <p className="d-inline">{issue}</p>
             </div>
-            <div>
+            <div className="p-3">
               <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
               <p className="d-inline">{suggestion}</p>
             </div>

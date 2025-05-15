@@ -5,5 +5,6 @@ error:
 sentences: 'Sentences:'
 assessment: "What's working:"
 suggestion: 'Suggestion:'
+no_suggestions: No comments. It looks very good.
 warning: This expectation is not addressed in your draft.
 no_sentences: No relevant text was located in your draft.

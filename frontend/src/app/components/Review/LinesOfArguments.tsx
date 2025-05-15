@@ -121,9 +121,9 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         </ul>
                       </div>
                     ) : null}
-                    {suggestion || impact ? (
-                      <div className="m-3 mt-2">
-                        <h6>{t("lines_of_arguments.suggestions")}</h6>
+                    <div className="m-3 mt-2">
+                      <h6>{t("lines_of_arguments.suggestions")}</h6>
+                      {suggestion || impact ? (
                         <ul>
                           {suggestion ? (
                             <li key={`${i}-suggestion`}>{suggestion}</li>
@@ -132,8 +132,10 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                             <li key={`${i}-impact`}>{impact}</li>
                           ) : null}
                         </ul>
-                      </div>
-                    ) : null}
+                      ) : (
+                        <p>{t("lines_of_arguments.no_suggestions")}</p>
+                      )}
+                    </div>
                   </Accordion.Body>
                 </Accordion.Item>
               )

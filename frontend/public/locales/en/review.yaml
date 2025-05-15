@@ -96,7 +96,8 @@ lines_of_arguments:
   claim: 'Claim:'
   support: 'Support:'
   sentences: Sentences
-  suggestions: Comments
+  suggestions: 'Comments:'
+  no_suggestions: No comments. It looks very good.
   'null': No lines of arguments were detected in your draft.
 logical_flow:
   title: Logical Flow Issues
