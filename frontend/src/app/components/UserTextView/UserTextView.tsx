@@ -1,5 +1,6 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useState } from "react";
+import { convertToHtml } from "mammoth";
+import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
   Dropdown,
@@ -11,7 +12,11 @@ import {
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useSegmentedProse } from "../../service/review.service";
-import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
+import {
+  useInitiateUploadFile,
+  useSetUploadErrors,
+  useUploadFile,
+} from "../FileUpload/FileUploadContext";
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
@@ -19,7 +24,7 @@ import "./UserTextView.scss";
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**
  * Component for displaying user's read only draft with sentence highlighting.
- * This sentence highlighting expects a list of strings that exist in the draft
+ * This sentence highlighting expects a list of ids that exist in the draft
  * as would be returned by the AI service.
  */
 export const UserTextView: FC<UserTextViewProps> = ({
@@ -27,7 +32,45 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const uploadFile = useInitiateUploadFile();
+  const uploadedFile = useUploadFile();
+  const setUploadErrors = useSetUploadErrors();
+  const [upload, setUpload] = useState<string | null>(null);
+
+  const loadFile = useCallback(async (file: Optional<File>) => {
+    if (!file) return;
+    try {
+      if (
+        file.type !==
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        throw new TypeError(file.name);
+      }
+      const arrayBuffer = await file.arrayBuffer();
+      const { value, messages } = await convertToHtml(
+        { arrayBuffer },
+        { styleMap: "u => u" }
+      );
+      if (messages.length) {
+        setUploadErrors(messages);
+        console.log(messages);
+      }
+      setUpload(value);
+    } catch (err) {
+      if (err instanceof Error) {
+        setUploadErrors([{ type: "error", message: err.message, error: err }]);
+        console.error(err);
+      } else {
+        console.error("Caught non-error", err);
+      }
+    }
+  }, []);
+  useEffect(() => {
+    if (uploadedFile) {
+      loadFile(uploadedFile);
+    }
+  }, [uploadedFile]);
   const prose = useSegmentedProse();
+
   const ctx = useReviewContext();
   const { t } = useTranslation();
   const cl = classNames(className, "d-flex flex-column");
@@ -37,8 +80,8 @@ export const UserTextView: FC<UserTextViewProps> = ({
   // of highlighting, this is not a big deal for now.
   const maxHighlightLevels = 2;
   useEffect(() => {
-    setText(ctx?.text ?? prose ?? ""); // if custom tool text use that, otherwise use prose
-  }, [prose, ctx]);
+    setText(ctx?.text ?? prose ?? upload ?? ""); // if custom tool text use that, otherwise use prose
+  }, [prose, ctx, upload]);
 
   useEffect(() => {
     if (!text) return;
