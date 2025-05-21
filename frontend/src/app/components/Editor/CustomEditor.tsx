@@ -14,8 +14,6 @@ import {
   Dropdown,
   DropdownButton,
   Form,
-  ListGroup,
-  Toast,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
@@ -24,9 +22,12 @@ import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
 import { useLtiInfo } from "../../service/lti.service";
-// import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
-import { FileUpload } from "../FileUpload/FileUpload";
+import {
+  useInitiateUploadFile,
+  useSetUploadErrors,
+  useUploadFile,
+} from "../FileUpload/FileUploadContext";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -47,11 +48,6 @@ const CustomEditor: FC = () => {
   const [zoom, setZoom] = useState<number>(100);
   const [selection, setSelection] = useState<boolean>(false);
 
-  // Update document title based on translation.
-  // useEffect(() => {
-  //   window.document.title = t("document.title");
-  // }, [t]);
-
   // useEffect(() => {
   //   console.log(selection);
   //   // if (!selection) return;
@@ -65,13 +61,9 @@ const CustomEditor: FC = () => {
   // }, [selection])
 
   // Import a docx file
-  type Message =
-    | { type: "error"; message: string; error: unknown }
-    | { type: "warning"; message: string };
-  const [showUpload, setShowUpload] = useState(false);
-  const [upload, setUpload] = useState<File | null>(null);
-  const [errors, setErrors] = useState<Message[]>([]);
-  const [showErrors, setShowErrors] = useState(false);
+  const upload = useUploadFile();
+  const setErrors = useSetUploadErrors();
+
   const loadFile = useCallback(
     async (file: File) => {
       try {
@@ -89,7 +81,7 @@ const CustomEditor: FC = () => {
         );
         if (messages.length) {
           setErrors(messages);
-          setShowErrors(true);
+          // setShowErrors(true);
           console.log(messages);
         }
         const content = deserializeHtmlText(value);
@@ -100,7 +92,7 @@ const CustomEditor: FC = () => {
       } catch (err) {
         if (err instanceof Error) {
           setErrors([{ type: "error", message: err.message, error: err }]);
-          setShowErrors(true);
+          // setShowErrors(true);
           console.error(err);
         } else {
           console.error("Caught non-error", err);
@@ -125,36 +117,7 @@ const CustomEditor: FC = () => {
       },
     ],
   };
-
-  const uploadFile = useCallback(async () => {
-    if (
-      "showOpenFilePicker" in window &&
-      typeof window.showOpenFilePicker === "function"
-    ) {
-      try {
-        const [handle]: FileSystemFileHandle[] =
-          await window.showOpenFilePicker(loadSaveFileOps);
-        const file = await handle.getFile();
-        setUpload(file);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return; // Skip cancel.
-        }
-        if (err instanceof DOMException && err.name === "SecurityError") {
-          // Security error, show custom upload dialog.  Usually due to being in a cross-orgin iframe.
-          setShowUpload(true);
-          return;
-        }
-        console.error(err);
-        if (err instanceof Error) {
-          setErrors([{ type: "error", message: err.message, error: err }]);
-          setShowErrors(true);
-        }
-      }
-    } else {
-      setShowUpload(true);
-    }
-  }, []);
+  const uploadFile = useInitiateUploadFile();
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
@@ -185,7 +148,7 @@ const CustomEditor: FC = () => {
         } catch (err) {
           if (!(err instanceof DOMException)) {
             setErrors([{ type: "error", message: "Failed Write", error: err }]);
-            setShowErrors(true);
+            // setShowErrors(true);
             console.error(err);
             return;
           }
@@ -327,44 +290,6 @@ const CustomEditor: FC = () => {
         </main>
         <ToolCard hasSelection={selection} />
       </Split>
-      <FileUpload
-        show={showUpload}
-        onHide={() => setShowUpload(false)}
-        onFile={setUpload}
-      />
-      <Toast
-        bg="light"
-        className="position-absolute start-50 bottom-0 translate-middle"
-        show={showErrors}
-        onClose={() => setShowErrors(!showErrors)}
-      >
-        <Toast.Header className="justify-content-between">
-          {t("editor.upload.error.title")}
-        </Toast.Header>
-        <Toast.Body>
-          <p>{t("editor.upload.error.overview")}</p>
-          <ListGroup>
-            {errors.map((msg, i) => (
-              <ListGroup.Item
-                key={i}
-                variant={msg.type === "error" ? "danger" : "warning"}
-              >
-                {msg.type === "error"
-                  ? t("editor.upload.error.error")
-                  : t("editor.upload.error.warning")}{" "}
-                {(msg.message === "Security Error" &&
-                  t("editor.upload.error.security")) ||
-                  (msg.message === "Failed Write" &&
-                    t("editor.upload.error.failed_write")) ||
-                  (msg.type === "error" &&
-                    msg.error instanceof TypeError &&
-                    t("editor.upload.error.not_docx", { file: msg.message })) ||
-                  msg.message}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Toast.Body>
-      </Toast>
     </Slate>
   );
 };

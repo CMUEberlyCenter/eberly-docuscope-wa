@@ -14,7 +14,7 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   /** If true, include the title of the outline. */
   includeTitle?: boolean;
   /** Writing task */
-  task?: WritingTask;
+  task?: Optional<WritingTask>;
 };
 /**
  * Component for displaying the currently outline with a sidebar for displaying

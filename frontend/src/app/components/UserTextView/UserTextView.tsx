@@ -1,10 +1,18 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect, useState } from "react";
-import { OverlayTrigger, Placeholder, Tooltip } from "react-bootstrap";
+import { FC, HTMLProps, useEffect, useState } from "react";
+import {
+  ButtonGroup,
+  Dropdown,
+  DropdownButton,
+  OverlayTrigger,
+  Placeholder,
+  Tooltip,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useSegmentedProse } from "../../service/review.service";
-import { ReviewContext } from "../Review/ReviewContext";
+import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
+import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
 
@@ -18,13 +26,15 @@ export const UserTextView: FC<UserTextViewProps> = ({
   className,
   ...props
 }) => {
+  const uploadFile = useInitiateUploadFile();
   const prose = useSegmentedProse();
-  const ctx = useContext(ReviewContext);
+  const ctx = useReviewContext();
   const { t } = useTranslation();
   const cl = classNames(className, "d-flex flex-column");
   const [text, setText] = useState<string>("");
   // TODO make this so that it is aware of the previous number of levels and
-  // removes them instead of hard coding.
+  // removes them instead of hard coding.  As there is only 2 levels
+  // of highlighting, this is not a big deal for now.
   const maxHighlightLevels = 2;
   useEffect(() => {
     setText(ctx?.text ?? prose ?? ""); // if custom tool text use that, otherwise use prose
@@ -71,6 +81,17 @@ export const UserTextView: FC<UserTextViewProps> = ({
   return (
     <main className={cl} {...props}>
       <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
+        <ButtonGroup>
+          <DropdownButton
+            as={ButtonGroup}
+            title={t("editor.menu.file")}
+            variant="light"
+          >
+            <Dropdown.Item eventKey={"open"} onClick={() => uploadFile()}>
+              {t("editor.menu.open")}
+            </Dropdown.Item>
+          </DropdownButton>
+        </ButtonGroup>
         <TaskViewerButton />
         <OverlayTrigger
           placement="bottom"
@@ -83,7 +104,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
           />
         </OverlayTrigger>
       </header>
-      <article className="overflow-auto border-top">
+      <article className="overflow-auto border-top flex-grow-1">
         {text.trim() === "" ? (
           <Placeholder></Placeholder>
         ) : (

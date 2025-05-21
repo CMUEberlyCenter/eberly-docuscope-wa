@@ -6,7 +6,7 @@ import { useWritingTask } from "../../service/writing-task.service";
 
 /** Component for displaying the title of the globally selected outline. */
 export const WritingTaskTitle: FC<
-  HTMLProps<HTMLDivElement> & { task?: WritingTask }
+  HTMLProps<HTMLDivElement> & { task?: Optional<WritingTask> }
 > = ({ className, task, ...props }) => {
   const writingTask = task ?? useWritingTask();
   const cn = classNames(

@@ -1,6 +1,6 @@
 {
   "extends": "@tsconfig/vite-react/tsconfig.json",
-  "include": ["./src/app/**/*", "./src/lib/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts"],
+  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts"],
   "compilerOptions": {
     "target": "es2022",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],

@@ -3,14 +3,14 @@ import { Button, Modal, ModalProps } from "react-bootstrap";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import { useTranslation } from "react-i18next";
-import { useWritingTask } from "../../service/writing-task.service";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 
 /** Button component for showing the task viewer. */
 export const TaskViewerButton: FC = () => {
   const [show, setShow] = useState(false);
   const { t } = useTranslation();
   const id = useId();
-  const writingTask = useWritingTask();
+  const { task: writingTask } = useWritingTask();
   return (
     <div className="d-flex align-items-baseline gap-1 py-1">
       <span className="text-muted">{t("editor.menu.task")}</span>
@@ -35,15 +35,16 @@ export const TaskViewerButton: FC = () => {
 
 /** Modal component for displaying the outline. */
 export const TaskViewer: FC<ModalProps> = (props) => {
+  const { task } = useWritingTask();
   return (
     <Modal {...props} size="lg">
       <Modal.Header closeButton className="py-1">
         <Modal.Title>
-          <WritingTaskTitle />
+          <WritingTaskTitle task={task} />
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <WritingTaskRulesTree style={{ maxHeight: "70vh" }} />
+        <WritingTaskRulesTree task={task} style={{ maxHeight: "70vh" }} />
       </Modal.Body>
     </Modal>
   );

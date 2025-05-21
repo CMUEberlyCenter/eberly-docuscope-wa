@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useState } from "react";
+import { FC, HTMLProps, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
@@ -78,7 +78,7 @@ const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
 
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
-  const { t, ready } = useTranslation("review");
+  const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
   const { t: inst } = useTranslation("instructions");
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
@@ -86,11 +86,11 @@ export const Review: FC = () => {
   const [otherTool, setOtherTool] = useState<Tool>("null");
 
   // useUnload();
-  useEffect(() => {
-    if (ready) {
-      window.document.title = t("document.title");
-    }
-  }, [t, ready]);
+  // useEffect(() => {
+  //   if (ready) {
+  //     window.document.title = t("document.title");
+  //   }
+  // }, [t, ready]);
 
   const civilToneFeature = useCivilToneEnabled();
   const credibilityFeature = useCredibilityEnabled();
@@ -111,7 +111,7 @@ export const Review: FC = () => {
   return (
     <ReviewProvider>
       <Split
-        className="container-fluid h-100 w-100 d-flex flex-row review align-items-stretch"
+        className="container-fluid vh-100 w-100 d-flex flex-row review align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
@@ -133,12 +133,6 @@ export const Review: FC = () => {
           <Tabs
             activeKey={tab}
             onSelect={(k) => {
-              // if (k === "fine_tuning" && otherTool === "null") {
-              //   setOtherTool("paragraph_clarity"); // FIXME initial tool
-              // }
-              // if (k === "big_picture" && tool === "null") {
-              //   setTool("expectations"); // FIXME initial tool
-              // }
               setTab(k as TabKey);
             }}
             variant="underline"

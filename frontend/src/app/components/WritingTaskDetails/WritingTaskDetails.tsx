@@ -14,12 +14,9 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 /**
  * Modal dialog component for viewing the outline of the writing task.
  */
-const WritingTaskDetails: FC<ModalProps & { writingTask?: WritingTask }> = ({
-  show,
-  onHide,
-  writingTask,
-  ...props
-}) => {
+const WritingTaskDetails: FC<
+  ModalProps & { writingTask?: Optional<WritingTask> }
+> = ({ show, onHide, writingTask, ...props }) => {
   const { t } = useTranslation();
   // const writingTask = useWritingTask();
   // const [selected, setSelected] = useState<Rule | null>(null);
