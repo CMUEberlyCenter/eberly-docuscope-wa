@@ -15,7 +15,7 @@ import {
 import { currentTool } from './current-tool.service';
 import { editorText, setEditorState } from './editor-state.service';
 import {
-  TaggerResults,
+  type TaggerResults,
   gen_patterns_map,
   isTaggerResult,
   tag,

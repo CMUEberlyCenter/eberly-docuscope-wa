@@ -1,13 +1,13 @@
 import Anthropic from '@anthropic-ai/sdk';
 import format from 'string-format';
-import { PromptType } from '../model/prompt';
+import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
 } from '../settings';
 import { findPromptById } from './prompts';
-import {
+import type {
   MessageParam,
   TextBlockParam,
 } from '@anthropic-ai/sdk/resources/index.mjs';

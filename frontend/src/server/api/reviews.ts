@@ -1,6 +1,6 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
-import { OnTopicData } from '../../lib/OnTopicData';
+import type { OnTopicData } from '../../lib/OnTopicData';
 import {
   BadRequest,
   FileNotFound,
@@ -10,20 +10,20 @@ import {
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
-  Analysis,
+  type Analysis,
   BasicReviewPrompts,
-  ExpectationsOutput,
+  type ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
-  OnTopicReviewData,
-  ReviewPrompt,
-  ReviewResponse,
+  type OnTopicReviewData,
+  type ReviewPrompt,
+  type ReviewResponse,
 } from '../../lib/ReviewResponse';
 import {
   getExpectations,
   isEnabled,
   isWritingTask,
-  WritingTask,
+  type WritingTask,
 } from '../../lib/WritingTask';
 import { doChat } from '../data/chat';
 import {
@@ -33,8 +33,8 @@ import {
   insertReview,
   updateReviewByIdAddAnalysis,
 } from '../data/mongo';
-import { IdToken } from '../model/lti';
-import { Review } from '../model/review';
+import type { IdToken } from '../model/lti';
+import type { Review } from '../model/review';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
 import { countPrompt } from '../prometheus';

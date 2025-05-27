@@ -1,4 +1,4 @@
-import { ICommonDictionary } from '../service/common-dictionary.service';
+import type { ICommonDictionary } from '../service/common-dictionary.service';
 
 export const FAKE_COMMON_DICTIONARY: ICommonDictionary = {
   default_dict: 'fake_dict',

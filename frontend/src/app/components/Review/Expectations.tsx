@@ -2,8 +2,8 @@ import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import {
-  FC,
-  HTMLProps,
+  type FC,
+  type HTMLProps,
   Suspense,
   useContext,
   useEffect,
@@ -12,20 +12,20 @@ import {
 } from "react";
 import {
   Accordion,
-  AccordionItemProps,
-  AccordionProps,
-  ButtonProps,
+  type AccordionItemProps,
+  type AccordionProps,
+  type ButtonProps,
 } from "react-bootstrap";
-import {
+import type {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { useTranslation } from "react-i18next";
 import { isErrorData, isExpectationsData } from "../../../lib/ReviewResponse";
-import { Rule } from "../../../lib/WritingTask";
+import type { Rule } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
 import {
-  OptionalExpectations,
+  type OptionalExpectations,
   useExpectationsData,
 } from "../../service/review.service";
 import { useWritingTask } from "../../service/writing-task.service";

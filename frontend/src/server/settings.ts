@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { version } from '../../package.json';
-import { LanguageSettingsRequest } from '../lib/Requests';
+import type { LanguageSettingsRequest } from '../lib/Requests';
 
 const program = new Command();
 program

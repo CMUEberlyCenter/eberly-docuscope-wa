@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect, useState } from "react";
+import { type FC, type ReactNode, useEffect, useState } from "react";
 import { ButtonGroup, Dropdown } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Editor, Element, Transforms } from "slate";

@@ -1,8 +1,8 @@
 import {
   createContext,
-  Dispatch,
-  FC,
-  ReactNode,
+  type Dispatch,
+  type FC,
+  type ReactNode,
   use,
   useContext,
   useEffect,

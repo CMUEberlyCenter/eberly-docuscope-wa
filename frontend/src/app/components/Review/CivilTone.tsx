@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId } from "react";
+import { type FC, type HTMLProps, useContext, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";

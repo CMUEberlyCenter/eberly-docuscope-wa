@@ -1,6 +1,12 @@
 import classNames from "classnames";
 import { convertToHtml } from "mammoth";
-import { FC, HTMLProps, useCallback, useEffect, useState } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   ButtonGroup,
   Dropdown,

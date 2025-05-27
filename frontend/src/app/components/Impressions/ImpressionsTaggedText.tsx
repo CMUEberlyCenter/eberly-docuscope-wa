@@ -1,5 +1,5 @@
 import { select, selectAll } from "d3";
-import { FC, useEffect, useState } from "react";
+import { type FC, useEffect, useState } from "react";
 import { Badge, OverlayTrigger, Popover } from "react-bootstrap";
 import { isTaggerResult, useTaggerResults } from "../../service/tagger.service";
 

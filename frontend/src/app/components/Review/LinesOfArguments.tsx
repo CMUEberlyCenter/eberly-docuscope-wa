@@ -1,13 +1,28 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
-import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from "react";
+import {
+  Accordion,
+  type AccordionProps,
+  Alert,
+  type ButtonProps,
+} from "react-bootstrap";
+import type {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { Claim as ClaimProps, isErrorData } from "../../../lib/ReviewResponse";
+import {
+  type Claim as ClaimProps,
+  isErrorData,
+} from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import { useLinesOfArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";

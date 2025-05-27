@@ -1,6 +1,6 @@
 import { watch } from 'chokidar';
 import { readFile } from 'node:fs/promises';
-import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import { isWritingTask, type WritingTask } from '../../lib/WritingTask';
 import { WRITING_TASKS_PATH } from '../settings';
 
 export async function initWritingTasks(

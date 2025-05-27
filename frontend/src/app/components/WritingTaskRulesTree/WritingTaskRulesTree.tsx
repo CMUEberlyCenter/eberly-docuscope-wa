@@ -1,8 +1,15 @@
 import classnames from "classnames";
-import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Rule, WritingTask } from "../../../lib/WritingTask";
+import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
 

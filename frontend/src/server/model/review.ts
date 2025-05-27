@@ -1,6 +1,6 @@
 import { DBRef } from 'mongodb';
-import { Analysis } from '../../lib/ReviewResponse';
-import { isWritingTask, WritingTask } from '../../lib/WritingTask';
+import type { Analysis } from '../../lib/ReviewResponse';
+import { isWritingTask, type WritingTask } from '../../lib/WritingTask';
 
 export type Review = {
   /** Assignment identifier. */

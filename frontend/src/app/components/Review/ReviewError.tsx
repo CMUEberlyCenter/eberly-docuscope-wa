@@ -1,7 +1,7 @@
-import { FC } from "react";
-import { Alert, AlertProps } from "react-bootstrap";
+import type { FC } from "react";
+import { Alert, type AlertProps } from "react-bootstrap";
 import { Translation } from "react-i18next";
-import { ErrorData } from "../../../lib/ReviewResponse";
+import type { ErrorData } from "../../../lib/ReviewResponse";
 
 export const ReviewError: FC<
   AlertProps & {

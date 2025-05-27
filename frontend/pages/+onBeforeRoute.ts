@@ -1,4 +1,4 @@
-import { OnBeforeRouteSync } from 'vike/types';
+import type { OnBeforeRouteSync } from 'vike/types';
 
 export const onBeforeRoute: OnBeforeRouteSync = (
   pageContext

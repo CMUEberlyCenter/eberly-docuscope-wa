@@ -3,7 +3,7 @@
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, catchError, filter, of, switchMap } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
-import { WritingTask } from '../../lib/WritingTask';
+import type { WritingTask } from '../../lib/WritingTask';
 
 type LtiInfo = {
   instructor: boolean;

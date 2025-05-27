@@ -1,6 +1,7 @@
+/** @deprecated No longer used. */
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { type FC, type HTMLProps, useContext, useId } from "react";
+import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData, SentenceAssessment } from "../../../lib/ReviewResponse";
@@ -61,7 +62,7 @@ const SentenceAssessments: FC<
   );
 };
 
-/** Pathos review tool component. */
+/** Pathos review tool component. @deprecated */
 export const Pathos: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props

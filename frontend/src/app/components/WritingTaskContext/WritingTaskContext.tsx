@@ -1,12 +1,12 @@
 import {
   createContext,
-  Dispatch,
-  FC,
-  ReactNode,
+  type Dispatch,
+  type FC,
+  type ReactNode,
   useContext,
   useReducer,
 } from "react";
-import { WritingTask } from "../../../lib/WritingTask";
+import type { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskContext = {
   task?: WritingTask | null;

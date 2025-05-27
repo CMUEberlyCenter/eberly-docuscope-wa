@@ -1,20 +1,26 @@
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  type FC,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   Button,
   CloseButton,
   Form,
   ListGroup,
   Modal,
-  ModalProps,
+  type ModalProps,
   OverlayTrigger,
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
-import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
+import { type WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,

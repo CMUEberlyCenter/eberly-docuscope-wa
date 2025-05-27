@@ -1,6 +1,12 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect, useState } from "react";
-import { Accordion, Alert, ButtonProps } from "react-bootstrap";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";
@@ -13,7 +19,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
+import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {

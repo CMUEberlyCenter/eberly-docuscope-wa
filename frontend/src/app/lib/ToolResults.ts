@@ -1,5 +1,5 @@
-import { Descendant, Range } from 'slate';
-import { Rule } from '../../lib/WritingTask';
+import { type Descendant, Range } from 'slate';
+import type { Rule } from '../../lib/WritingTask';
 
 export interface SelectedText {
   text: string;

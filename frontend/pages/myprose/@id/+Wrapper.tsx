@@ -1,4 +1,4 @@
-import { FC, ReactNode, useEffect } from "react";
+import { type FC, type ReactNode, useEffect } from "react";
 import { useData } from "vike-react/useData";
 import {
   useSetWritingTask,

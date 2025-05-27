@@ -1,4 +1,4 @@
-import { PageContextServer } from "vike/types";
+import type { PageContextServer } from "vike/types";
 import { findWritingTaskById } from "../../src/server/data/mongo";
 
 export async function data(pageContext: PageContextServer) {

@@ -1,6 +1,6 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useState } from "react";
-import { ListGroup, Modal, ModalProps } from "react-bootstrap";
+import { type FC, type HTMLProps, useState } from "react";
+import { ListGroup, Modal, type ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";

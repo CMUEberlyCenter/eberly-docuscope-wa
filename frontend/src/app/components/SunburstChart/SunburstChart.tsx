@@ -7,12 +7,12 @@ It is not possible to zoom beyond the patterns level or the top level categories
 */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
-import { HierarchyRectangularNode } from "d3";
+import type { HierarchyRectangularNode } from "d3";
 import {
-  FC,
-  HTMLProps,
+  type FC,
+  type HTMLProps,
   Suspense,
-  SVGProps,
+  type SVGProps,
   useEffect,
   useRef,
   useState,
@@ -22,7 +22,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
 import {
   commonDictionary$,
-  CommonDictionaryTreeNode,
+  type CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
 import { useEditorState } from "../../service/editor-state.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";

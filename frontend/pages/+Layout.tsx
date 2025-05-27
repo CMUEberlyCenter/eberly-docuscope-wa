@@ -1,4 +1,4 @@
-import { FC, ReactNode, use } from "react";
+import { type FC, type ReactNode, use } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "../src/app/i18n";
 import "../src/app/index.scss";

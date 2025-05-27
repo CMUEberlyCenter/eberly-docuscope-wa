@@ -1,7 +1,7 @@
 import classNames from "classnames";
-import { FC, HTMLProps } from "react";
+import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
-import { WritingTask } from "../../../lib/WritingTask";
+import type { WritingTask } from "../../../lib/WritingTask";
 import { useWritingTask } from "../../service/writing-task.service";
 
 /** Component for displaying the title of the globally selected outline. */

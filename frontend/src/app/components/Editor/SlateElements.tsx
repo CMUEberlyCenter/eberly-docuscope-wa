@@ -1,5 +1,5 @@
-import { FC } from "react";
-import { RenderElementProps, RenderLeafProps } from "slate-react";
+import type { FC } from "react";
+import type { RenderElementProps, RenderLeafProps } from "slate-react";
 
 /** Component for rendering editor content nodes. */
 const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {

@@ -1,6 +1,6 @@
 // Uses Bootstrap css classes
 import classNames from "classnames";
-import { FC, HTMLProps } from "react";
+import type { FC, HTMLProps } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import style from "./Rating.module.scss";
 

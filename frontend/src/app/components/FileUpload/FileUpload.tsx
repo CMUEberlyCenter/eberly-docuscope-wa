@@ -1,5 +1,5 @@
-import { ChangeEvent, FC, useState } from "react";
-import { Button, Form, Modal, ModalProps } from "react-bootstrap";
+import { type ChangeEvent, type FC, useState } from "react";
+import { Button, Form, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 type FileUploadProps = ModalProps & {

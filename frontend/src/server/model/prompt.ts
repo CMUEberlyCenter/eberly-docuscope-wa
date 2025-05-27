@@ -1,4 +1,4 @@
-import { ReviewPrompt } from '../../lib/ReviewResponse';
+import type { ReviewPrompt } from '../../lib/ReviewResponse';
 
 /** Prompt data for formulating OpenAI requests. */
 export type Prompt = {

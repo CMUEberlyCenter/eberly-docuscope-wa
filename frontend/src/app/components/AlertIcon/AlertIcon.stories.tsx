@@ -1,5 +1,5 @@
 import { AlertIcon } from "./AlertIcon";
-import { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   component: AlertIcon,

@@ -1,7 +1,7 @@
 import { watch } from 'chokidar';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import { Prompt } from '../model/prompt';
+import type { Prompt } from '../model/prompt';
 import { PROMPT_TEMPLATES_PATH } from '../settings';
 
 const PROMPTS = new Map<string, Prompt>();

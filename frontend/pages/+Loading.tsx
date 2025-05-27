@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import DotSpinner from "../src/app/assets/icons/6-dots-rotate.svg?react";
 import style from "../src/app/components/Loading/Loading.module.scss";
 

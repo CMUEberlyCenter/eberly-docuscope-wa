@@ -1,10 +1,10 @@
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Dispatch,
-  FC,
-  HTMLProps,
-  SetStateAction,
+  type Dispatch,
+  type FC,
+  type HTMLProps,
+  type SetStateAction,
   useCallback,
   useEffect,
   useId,
@@ -17,7 +17,7 @@ import {
   extractKeywords,
   groupByCategory,
   hasKeywords,
-  WritingTask,
+  type WritingTask,
 } from "../../../lib/WritingTask";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 

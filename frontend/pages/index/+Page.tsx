@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import CustomEditor from "../../src/app/components/Editor/CustomEditor";
 // import { useTranslation } from "react-i18next";
 

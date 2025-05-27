@@ -1,6 +1,6 @@
 // https://vike.dev/Head
 
-import { FC } from "react";
+import type { FC } from "react";
 import logoUrl from "../src/app/assets/logo.svg";
 
 const HeadDefault: FC = () => {

@@ -1,6 +1,6 @@
 import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express, { type Request, type Response } from 'express';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
@@ -17,7 +17,7 @@ import {
   UnprocessableContentError,
 } from '../lib/ProblemDetails';
 import { validateWritingTask } from '../lib/schemaValidate';
-import { isWritingTask, WritingTask } from '../lib/WritingTask';
+import { isWritingTask, type WritingTask } from '../lib/WritingTask';
 import { ontopic } from './api/onTopic';
 import { reviews } from './api/reviews';
 import { scribe } from './api/scribe';
@@ -29,10 +29,10 @@ import {
 } from './data/mongo';
 import { initPrompts } from './data/prompts';
 import {
-  ContentItemType,
-  IdToken,
+  type ContentItemType,
+  type IdToken,
   isInstructor,
-  LTIPlatform,
+  type LTIPlatform,
 } from './model/lti';
 import { metrics, myproseSessionErrorsTotal } from './prometheus';
 import {

@@ -1,7 +1,7 @@
-import { FC, useCallback, useState } from "react";
-import { Button, Modal, ModalProps } from "react-bootstrap";
+import { type FC, useCallback, useState } from "react";
+import { Button, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Rule } from "../../../lib/WritingTask";
+import type { Rule } from "../../../lib/WritingTask";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 
 type SelectExpectationProps = ModalProps & {

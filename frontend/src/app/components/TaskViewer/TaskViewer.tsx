@@ -1,5 +1,5 @@
-import { FC, useId, useState } from "react";
-import { Button, Modal, ModalProps } from "react-bootstrap";
+import { type FC, useId, useState } from "react";
+import { Button, Modal, type ModalProps } from "react-bootstrap";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import { useTranslation } from "react-i18next";

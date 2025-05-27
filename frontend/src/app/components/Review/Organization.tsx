@@ -28,8 +28,8 @@ import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
 import {
-  FC,
-  HTMLProps,
+  type FC,
+  type HTMLProps,
   useCallback,
   useContext,
   useEffect,
@@ -37,11 +37,11 @@ import {
 } from "react";
 import {
   Alert,
-  AlertProps,
+  type AlertProps,
   Button,
   Col,
   Container,
-  ContainerProps,
+  type ContainerProps,
   Row,
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";

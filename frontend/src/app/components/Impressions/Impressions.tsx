@@ -7,7 +7,7 @@
  * checkbox will initiate highlighting in the tagged text view.
  */
 import { Subscribe } from "@react-rxjs/core";
-import { FC, Suspense } from "react";
+import { type FC, Suspense } from "react";
 import { Accordion, Alert, Card, ProgressBar, Spinner } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import {

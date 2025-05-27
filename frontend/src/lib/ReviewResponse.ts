@@ -1,4 +1,4 @@
-import { OnTopicData } from './OnTopicData';
+import type { OnTopicData } from './OnTopicData';
 
 export type ReviewPrompt =
   | 'civil_tone'

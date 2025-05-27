@@ -1,8 +1,8 @@
 import { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
-import { Analysis } from '../../lib/ReviewResponse';
-import { WritingTask } from '../../lib/WritingTask';
-import { Review } from '../model/review';
+import type { Analysis } from '../../lib/ReviewResponse';
+import type { WritingTask } from '../../lib/WritingTask';
+import type { Review } from '../model/review';
 import {
   ACCESS_LEVEL,
   EXPIRE_REVIEW_SECONDS,

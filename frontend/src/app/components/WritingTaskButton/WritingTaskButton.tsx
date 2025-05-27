@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useId, useState } from "react";
+import { type FC, type HTMLProps, useId, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";

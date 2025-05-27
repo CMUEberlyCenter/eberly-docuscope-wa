@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
 import { convertToHtml } from "mammoth";
-import { FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
@@ -17,7 +17,7 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { createEditor, Descendant, Editor, Transforms } from "slate";
+import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";

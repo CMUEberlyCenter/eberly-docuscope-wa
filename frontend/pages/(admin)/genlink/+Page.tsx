@@ -1,5 +1,5 @@
 /* @overview: This page allows the user to generate a link for a writing task. The user can select a writing task from a list, or upload a custom writing task file. The page also displays the generated link and allows the user to copy it to the clipboard. */
-import { ChangeEvent, FC, useEffect, useState } from "react";
+import { type ChangeEvent, type FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -7,7 +7,7 @@ import { ClipboardIconButton } from "../../../src/app/components/ClipboardIconBu
 import { WritingTaskFilter } from "../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../../../src/app/components/WritingTaskInfo/WritingTaskInfo";
 import { validateWritingTask } from "../../../src/lib/schemaValidate";
-import { isWritingTask, WritingTask } from "../../../src/lib/WritingTask";
+import { isWritingTask, type WritingTask } from "../../../src/lib/WritingTask";
 import type { Data } from "./+data";
 
 type IdWritingTask = WritingTask & { _id?: string };

@@ -1,7 +1,11 @@
 import { bind } from '@react-rxjs/core';
 import { combineLatest, map } from 'rxjs';
-import { ReviewTool } from '../../lib/ReviewResponse';
-import { isEnabled, isWritingTask, WritingTask } from '../../lib/WritingTask';
+import type { ReviewTool } from '../../lib/ReviewResponse';
+import {
+  isEnabled,
+  isWritingTask,
+  type WritingTask,
+} from '../../lib/WritingTask';
 import {
   globalFeatureCivilTone$,
   globalFeatureCredibility$,
