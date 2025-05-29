@@ -2,8 +2,8 @@
   "extends": "@tsconfig/vite-react/tsconfig.json",
   "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts"],
   "compilerOptions": {
-    "target": "es2022",
+    "target": "ES2024",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "vike-react", "./vike.d.ts"]
+    "types": ["vite/client", "vike-react", "./vike.d.ts",]
   }
 }

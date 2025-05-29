@@ -3,8 +3,13 @@ import { Button, Form, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
 type FileUploadProps = ModalProps & {
-  onFile?: (file: File) => void;
+  onFile?: (file: File) => void; // Callback when a file is selected.
 };
+/**
+ * Alternative file upload component in case the browser's file picker is not available.
+ * Unavailable file picker is usually due to iframe context, such as in LTI tools.
+ * @returns
+ */
 export const FileUpload: FC<FileUploadProps> = ({
   show,
   onHide,

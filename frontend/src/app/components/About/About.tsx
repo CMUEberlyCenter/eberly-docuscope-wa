@@ -17,6 +17,11 @@ import { Logo } from "../Logo/Logo";
 
 // const templatesInfo = fetchTemplateInfo();
 
+/**
+ * AboutModal component for displaying information about the application.
+ * @param props Bootstrap Modal properties.
+ * @returns
+ */
 export const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;

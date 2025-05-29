@@ -36,6 +36,11 @@ type Message =
   | { type: "error"; message: string; error: unknown }
   | { type: "warning"; message: string };
 
+  /**
+   * FileUploadProvider context component for handling essay uploads from the filesystem.
+   * @param param0.children - The children to render inside the provider.
+   * @returns
+   */
 export const FileUploadProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {

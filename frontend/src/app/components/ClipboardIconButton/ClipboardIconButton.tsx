@@ -4,6 +4,9 @@ import { Translation } from "react-i18next";
 import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
 import classNames from "classnames";
 
+/**
+ * ClipboardIconButton component for displaying a button with a clipboard icon.
+ */
 export const ClipboardIconButton: FC<ButtonProps> = ({
   className,
   ...props

@@ -37,6 +37,7 @@ export const Page: FC = () => {
     }
   };
 
+  // TODO: error page when not in LTI context.
   return (
     <main className="vh-100 vw-90 p-2">
       <div className="d-flex flex-column h-100 w-100 gap-3">
