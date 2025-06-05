@@ -278,7 +278,7 @@ async function __main__() {
     // OnTopic Enpoints
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
-    app.use('/api/v2/reviews', reviews);
+    app.use('/api/v2/review', reviews);
 
     type SessionData = {
       document?: string;

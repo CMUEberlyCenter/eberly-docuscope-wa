@@ -1,12 +1,5 @@
 import classNames from "classnames";
-import { convertToHtml } from "mammoth";
-import {
-  type FC,
-  type HTMLProps,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { type FC, type HTMLProps, useEffect, useState } from "react";
 import {
   ButtonGroup,
   Dropdown,
@@ -17,11 +10,10 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
-import { useSegmentedProse } from "../../service/review.service";
+// import { useSegmentedProse } from "../../service/review.service";
 import {
+  useFileText,
   useInitiateUploadFile,
-  useSetUploadErrors,
-  useUploadFile,
 } from "../FileUpload/FileUploadContext";
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
@@ -38,44 +30,44 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const uploadFile = useInitiateUploadFile();
-  const uploadedFile = useUploadFile();
-  const setUploadErrors = useSetUploadErrors();
-  const [upload, setUpload] = useState<string | null>(null);
+  // const uploadedFile = useUploadFile();
+  // const setUploadErrors = useSetUploadErrors();
+  const upload = useFileText();
 
-  const loadFile = useCallback(async (file: Optional<File>) => {
-    if (!file) return;
-    try {
-      if (
-        file.type !==
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
-        throw new TypeError(file.name);
-      }
-      const arrayBuffer = await file.arrayBuffer();
-      const { value, messages } = await convertToHtml(
-        { arrayBuffer },
-        { styleMap: "u => u" }
-      );
-      if (messages.length) {
-        setUploadErrors(messages);
-        console.log(messages);
-      }
-      setUpload(value);
-    } catch (err) {
-      if (err instanceof Error) {
-        setUploadErrors([{ type: "error", message: err.message, error: err }]);
-        console.error(err);
-      } else {
-        console.error("Caught non-error", err);
-      }
-    }
-  }, []);
-  useEffect(() => {
-    if (uploadedFile) {
-      loadFile(uploadedFile);
-    }
-  }, [uploadedFile]);
-  const prose = useSegmentedProse();
+  // const loadFile = useCallback(async (file: Optional<File>) => {
+  //   if (!file) return;
+  //   try {
+  //     if (
+  //       file.type !==
+  //       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  //     ) {
+  //       throw new TypeError(file.name);
+  //     }
+  //     const arrayBuffer = await file.arrayBuffer();
+  //     const { value, messages } = await convertToHtml(
+  //       { arrayBuffer },
+  //       { styleMap: "u => u" }
+  //     );
+  //     if (messages.length) {
+  //       setUploadErrors(messages);
+  //       console.log(messages);
+  //     }
+  //     setUpload(value);
+  //   } catch (err) {
+  //     if (err instanceof Error) {
+  //       setUploadErrors([{ type: "error", message: err.message, error: err }]);
+  //       console.error(err);
+  //     } else {
+  //       console.error("Caught non-error", err);
+  //     }
+  //   }
+  // }, []);
+  // useEffect(() => {
+  //   if (uploadedFile) {
+  //     loadFile(uploadedFile);
+  //   }
+  // }, [uploadedFile]);
+  // const prose = useSegmentedProse();
 
   const ctx = useReviewContext();
   const { t } = useTranslation();
@@ -86,8 +78,8 @@ export const UserTextView: FC<UserTextViewProps> = ({
   // of highlighting, this is not a big deal for now.
   const maxHighlightLevels = 2;
   useEffect(() => {
-    setText(ctx?.text ?? prose ?? upload ?? ""); // if custom tool text use that, otherwise use prose
-  }, [prose, ctx, upload]);
+    setText(ctx?.text /*?? prose*/ ?? upload ?? ""); // if custom tool text use that, otherwise use prose
+  }, [/*prose,*/ ctx, upload]);
 
   useEffect(() => {
     if (!text) return;

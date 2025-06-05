@@ -62,10 +62,10 @@ function isRule(rule: Rule | unknown): rule is Rule {
     'is_group' in rule &&
     typeof rule.is_group === 'boolean' &&
     'children' in rule &&
-    rule.children instanceof Array &&
+    Array.isArray(rule.children) &&
     rule.children.every(isRule) &&
     ('topics' in rule
-      ? rule.topics instanceof Array && rule.topics.every(isTopic)
+      ? Array.isArray(rule.topics) && rule.topics.every(isTopic)
       : true) &&
     ('examples' in rule ? typeof rule.examples === 'string' : true)
   );
@@ -221,7 +221,7 @@ type Rules = {
   /** List of top-level rules. */
   rules: Rule[];
 };
-function isRules(rules: unknown): rules is Rules {
+export function isRules(rules: unknown): rules is Rules {
   return (
     !!rules &&
     typeof rules === 'object' &&
@@ -230,7 +230,7 @@ function isRules(rules: unknown): rules is Rules {
     'overview' in rules &&
     typeof rules.overview === 'string' &&
     'rules' in rules &&
-    rules.rules instanceof Array &&
+    Array.isArray(rules.rules) &&
     rules.rules.every(isRule)
   );
 }
@@ -286,6 +286,22 @@ export function isWritingTask(
     isImpressions(task.impressions) &&
     'info' in task &&
     isWritingTaskMetaData(task.info)
+  );
+}
+
+export function equivalentWritingTasks(
+  a: WritingTask | null,
+  b: WritingTask | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.info.name === b.info.name &&
+    a.info.version === b.info.version &&
+    a.info.author === b.info.author &&
+    a.info.copyright === b.info.copyright &&
+    a.info.saved === b.info.saved &&
+    JSON.stringify(a.rules) === JSON.stringify(b.rules)
   );
 }
 

@@ -4,8 +4,6 @@ import {
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
-  Nav,
-  Navbar,
   OverlayTrigger,
   Stack,
   Tab,
@@ -35,21 +33,20 @@ import {
   useTermMatrixEnabled,
 } from "../../service/review-tools.service";
 import { Legal } from "../Legal/Legal";
-import { Logo } from "../Logo/Logo";
+import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
-import { CivilTone } from "./CivilTone";
-import { Ethos } from "./Ethos";
-import { Expectations, ExpectationsButton } from "./Expectations";
-import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
-import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
-import { Organization } from "./Organization";
-import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
-import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
-import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
-import { Sentences, SentencesButton } from "./Sentences";
+import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
+import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
+import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
+import { CivilTone } from "./CivilTone";
+import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
+import { Ethos } from "./Ethos";
 import { Sources } from "./Sources";
+import { Sentences, SentencesButton } from "./Sentences";
+import { Organization } from "./Organization";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -80,7 +77,6 @@ const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
-  const { t: inst } = useTranslation("instructions");
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
@@ -118,18 +114,7 @@ export const Review: FC = () => {
       >
         <UserTextView className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
-          <header>
-            <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
-              <Nav>
-                <Nav.Item className="active text-primary ms-3">
-                  {tt("tool.tab.review")}
-                </Nav.Item>
-              </Nav>
-              <Navbar.Brand>
-                <Logo />
-              </Navbar.Brand>
-            </Navbar>
-          </header>
+          <StageHeader title={tt("tool.tab.review")} />
           <Tabs
             activeKey={tab}
             onSelect={(k) => {
@@ -139,15 +124,20 @@ export const Review: FC = () => {
             className="justify-content-around inverse-color"
           >
             {bigPictureFeature ? (
-              <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
-                <div className="overflow-hidden h-100 d-flex flex-column">
+              <Tab
+                eventKey="big_picture"
+                title={t("tabs.big_picture")}
+                className="h-100"
+              >
+                <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                    {expectationsFeature ? (
-                      <ExpectationsButton
-                        active={tool === "expectations"}
-                        onClick={() => setTool("expectations")}
-                      />
-                    ) : null}
+                    {expectationsFeature
+                      ? null
+                      : // <ExpectationsButton
+                        //   active={tool === "expectations"}
+                        //   onClick={() => setTool("expectations")}
+                        // />
+                        null}
                     {ideasFeature ? (
                       <ProminentTopicsButton
                         active={tool === "prominent_topics"}
@@ -170,7 +160,7 @@ export const Review: FC = () => {
                   {(!tool || tool === "null") && (
                     <NullTool text={t("null.big_picture")} />
                   )}
-                  {tool === "expectations" && <Expectations />}
+                  {/* {tool === "expectations" && <Expectations />} */}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
                   {tool === "logical_flow" && <LogicalFlow />}
@@ -182,9 +172,9 @@ export const Review: FC = () => {
               <Tab
                 eventKey="fine_tuning"
                 title={t("tabs.fine_tuning")}
-                className="overflow-hidden"
+                className="h-100"
               >
-                <div className="overflow-hidden h-100 d-flex flex-column">
+                <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {paragraphClarityFeature ? (
                       <ParagraphClarityButton
@@ -242,7 +232,7 @@ export const Review: FC = () => {
                                 {t("sources.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("sources_scope_note")}
+                                {t("instructions:sources_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -255,7 +245,7 @@ export const Review: FC = () => {
                                 {t("ethos.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("ethos_scope_note")}
+                                {t("instructions:ethos_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -268,7 +258,7 @@ export const Review: FC = () => {
                                 {t("organization.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("term_matrix_scope_note")}
+                                {t("instructions:term_matrix_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -281,7 +271,7 @@ export const Review: FC = () => {
                                 {t("civil_tone.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("civil_tone_scope_note")}
+                                {t("instructions:civil_tone_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -308,13 +298,12 @@ export const Review: FC = () => {
                   {otherTool === "logical_flow" && <LogicalFlow />}
                   {otherTool === "civil_tone" && <CivilTone />}
                   {otherTool === "credibility" && <Ethos />}
-                  {otherTool === "impressions" && (
-                    <NullTool text={t("null.not_available")} />
-                  )}
+                  {/* {otherTool === "impressions" && ( */}
+                  {/* <NullTool text={t("null.not_available")} /> */}
+                  {/* )} */}
                   {otherTool === "organization" && <Organization />}
                   {otherTool === "sentences" && <Sentences />}
                   {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                  {/* {otherTool === "pathos" && <Pathos />} */}
                   {otherTool === "professional_tone" && <ProfessionalTone />}
                   {otherTool === "sources" && <Sources />}
                   {/* Add more tool displays here. */}

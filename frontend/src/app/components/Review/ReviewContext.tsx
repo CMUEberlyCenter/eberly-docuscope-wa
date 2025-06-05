@@ -71,6 +71,7 @@ function reviewReducer(
 
 /**
  * A component for providing the contexts for review tools.
+ * This is for handling the displayed text and its highlighting.
  * @param param0.chidren the child nodes.
  * @returns
  */

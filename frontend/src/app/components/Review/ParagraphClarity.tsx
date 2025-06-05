@@ -1,28 +1,40 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import { type FC, type HTMLProps, useContext, useId } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  type ParagraphClarityData,
+} from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
-import { useParagraphClarityData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Paragraph Clarity tool. */
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
     <ToolButton
       {...props}
-      title={t("paragraph_clarity.title")}
-      tooltip={it("paragraph_clarity_scope_note")}
+      title={t("review:paragraph_clarity.title")}
+      tooltip={t("instructions:paragraph_clarity_scope_note")}
       icon={<Icon />}
     />
   );
@@ -34,9 +46,59 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useParagraphClarityData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<ParagraphClarityData | null>(null);
+
+  // const review = useParagraphClarityData();
   const id = useId();
   const dispatch = useContext(ReviewDispatchContext);
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+      signal: AbortSignal;
+    }) => {
+      const { document, writing_task, signal } = data;
+      const response = await fetch("/api/v2/review/paragraph_clarity", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Paragraph Clarity review");
+      }
+      return response.json();
+    },
+    onSuccess: ({
+      input,
+      data,
+    }: {
+      input: string;
+      data: ParagraphClarityData;
+    }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Paragraph Clarity review:", error);
+    },
+  });
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Paragraph Clarity
+    const controller = new AbortController();
+    mutation.mutate({ document, writing_task, signal: controller.signal });
+    // TODO error handling
+    return () => {
+      controller.abort();
+    };
+  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -51,7 +113,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("paragraph_clarity.title")}
           instructionsKey="paragraph_clarity"
         />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary

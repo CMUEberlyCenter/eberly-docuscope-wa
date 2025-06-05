@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
@@ -7,29 +8,33 @@ import {
   useState,
 } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
+import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  type ProminentTopicsData,
+} from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
-import { useProminentTopicsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
     <ToolButton
       {...props}
-      title={t("prominent_topics.title")}
-      tooltip={it("prominent_topics_scope_note")}
+      title={t("review:prominent_topics.title")}
+      tooltip={t("instructions:prominent_topics_scope_note")}
       icon={<Icon />}
     />
   );
@@ -41,7 +46,9 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useProminentTopicsData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<ProminentTopicsData | null>(null);
   const dispatch = useContext(ReviewDispatchContext);
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   useEffect(() => {
@@ -54,6 +61,56 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
       dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
   }, [current, review, dispatch]);
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+      signal: AbortSignal;
+    }) => {
+      const { document, writing_task, signal } = data;
+      const response = await fetch("/api/v2/review/prominent_topics", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Prominent Topics review");
+      }
+      return response.json();
+    },
+    onSuccess: ({
+      input,
+      data,
+    }: {
+      input: string;
+      data: ProminentTopicsData;
+    }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Civil Tone review:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Civil Tone
+    const controller = new AbortController();
+    mutation.mutate({
+      document,
+      writing_task,
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+    };
+  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -68,7 +125,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("prominent_topics.title")}
           instructionsKey="prominent_topics"
         />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary

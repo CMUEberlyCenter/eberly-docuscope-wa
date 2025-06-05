@@ -1,5 +1,12 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useContext, useId } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import {
   Accordion,
   type AccordionProps,
@@ -10,26 +17,29 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
+  type ProfessionalToneData,
   type ProfessionalToneOutput,
 } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
-import { useProfessionalToneData } from "../../service/review.service";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { useMutation } from "@tanstack/react-query";
+import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
     <ToolButton
       {...props}
-      title={t("professional_tone.title")}
-      tooltip={it("professional_tone_scope_note")}
+      title={t("review:professional_tone.title")}
+      tooltip={t("instructions:professional_tone_scope_note")}
       icon={<Icon />}
     />
   );
@@ -87,7 +97,61 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useProfessionalToneData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<ProfessionalToneData | null>(null);
+  const dispatch = useContext(ReviewDispatchContext);
+  // const review = useProfessionalToneData();
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+      signal: AbortSignal;
+    }) => {
+      const { document, writing_task, signal } = data;
+      const response = await fetch("/api/v2/review/professional_tone", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Professional Tone review");
+      }
+      return response.json();
+    },
+    onSuccess: ({
+      input,
+      data,
+    }: {
+      input: string;
+      data: ProfessionalToneData;
+    }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Professional Tone review:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Professional Tone
+    const controller = new AbortController();
+    mutation.mutate({
+      document,
+      writing_task,
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+    };
+  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -102,7 +166,7 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("professional_tone.title")}
           instructionsKey="professional_tone"
         />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary

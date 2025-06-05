@@ -1,3 +1,4 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
@@ -13,13 +14,17 @@ import {
   type ClarityData,
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
-import { isErrorData } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  type OnTopicReviewData,
+} from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
 import { highlightSentence } from "../../service/topic.service";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
@@ -99,7 +104,10 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const data = useOnTopicData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [data, setData] = useState<OnTopicReviewData | null>(null);
+  // const data = useOnTopicData();
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
@@ -107,11 +115,45 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   const [textData, setTextData] = useState<ClarityData | undefined>();
 
   // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
-  const ontopicProse = useOnTopicProse();
+  // const ontopicProse = useOnTopicProse();
   const dispatch = useContext(ReviewDispatchContext);
+  const mutation = useMutation({
+    mutationFn: async (data: { document: string; signal: AbortSignal }) => {
+      const { document, signal } = data;
+      const response = await fetch("/api/v2/review/ontopic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document }),
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update sentences");
+      }
+      return response.json();
+    },
+    onSuccess: (data: OnTopicReviewData) => {
+      setData(data);
+      if (data.response.html)
+        dispatch({ type: "update", sentences: data.response.html });
+    },
+  });
   useEffect(() => {
-    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
-  }, [ontopicProse]);
+    if (!document || !writing_task) return;
+    // Fetch the review data for Sentences
+    const controller = new AbortController();
+    mutation.mutate({
+      document,
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+    };
+  }, [document, writing_task]);
+  // useEffect(() => {
+  //   if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  // }, [ontopicProse]);
 
   useEffect(
     () =>
@@ -163,7 +205,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
         )}
       >
         <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
-        {!data ? (
+        {!data || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary FallbackComponent={ClarityErrorFallback}>

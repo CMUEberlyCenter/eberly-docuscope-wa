@@ -1,4 +1,3 @@
-import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { bind, SUSPENSE } from '@react-rxjs/core';
 import {
   distinctUntilChanged,
@@ -8,25 +7,22 @@ import {
   shareReplay,
   switchMap,
 } from 'rxjs';
-import { fromFetch } from 'rxjs/fetch';
 import {
   type CivilToneData,
   type CredibilityData,
   type ErrorData,
   type ExpectationsData,
   isExpectationsData,
-  isOnTopicReviewData,
   type LinesOfArgumentsData,
   type LogicalFlowData,
   type ParagraphClarityData,
   type ProfessionalToneData,
   type ProminentTopicsData,
   type ReviewPrompt,
-  type SourcesData,
+  type SourcesData
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { isReview, type Review } from '../../server/model/review';
-import { getLtiRequest } from './lti.service';
 import { writingTask } from './writing-task.service';
 
 const searchParams = new URLSearchParams(window.location.search);
@@ -34,52 +30,59 @@ const id = searchParams.get('id');
 export const REVIEW_ID = id || '';
 // class FatalError extends Error {}
 
-const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
-  new Observable((subscriber) => {
-    subscriber.next(SUSPENSE);
-    const ctrl = new AbortController();
+// const fetchObservable = (tool?: string): Observable<SUSPENSE | Review> =>
+//   new Observable((subscriber) => {
+//     subscriber.next(SUSPENSE);
+//     const ctrl = new AbortController();
 
-    const toolParam = new URLSearchParams();
-    if (tool) {
-      toolParam.append('tool', tool);
-    }
-    // TODO: add tool query parameter based on configured available.
-    fetchEventSource(`/api/v2/reviews/${id}/${tool ?? ''}`, {
-      ...getLtiRequest,
-      signal: ctrl.signal,
-      // async onopen(response) {
-      //   if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
-      //     return;
-      //   }
-      //   if (response.status >= 400 && response.status < 500 && response.status !== 429) {
-      //     throw new FatalError(`Bad return status: ${response.status}`);
-      //   }
-      //   throw new Error();
-      // },
-      onerror(err) {
-        console.error(err);
-        subscriber.error(new Error(err));
-        // if (err instanceof FatalError) {
-        //   throw err;
-        // }
-        // else retry
-      },
-      onmessage(msg) {
-        subscriber.next(JSON.parse(msg.data));
-      },
-      onclose() {
-        subscriber.complete();
-      },
-    });
-    return () => ctrl.abort();
-  });
+//     const toolParam = new URLSearchParams();
+//     if (tool) {
+//       toolParam.append('tool', tool);
+//     }
+//     // TODO: add tool query parameter based on configured available.
+//     fetchEventSource(`/api/v2/reviews/${id}/${tool ?? ''}`, {
+//       ...getLtiRequest,
+//       signal: ctrl.signal,
+//       // async onopen(response) {
+//       //   if (response.ok && response.headers.get('content-type') === EventStreamContentType) {
+//       //     return;
+//       //   }
+//       //   if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+//       //     throw new FatalError(`Bad return status: ${response.status}`);
+//       //   }
+//       //   throw new Error();
+//       // },
+//       onerror(err) {
+//         console.error(err);
+//         subscriber.error(new Error(err));
+//         // if (err instanceof FatalError) {
+//         //   throw err;
+//         // }
+//         // else retry
+//       },
+//       onmessage(msg) {
+//         subscriber.next(JSON.parse(msg.data));
+//       },
+//       onclose() {
+//         subscriber.complete();
+//       },
+//     });
+//     return () => ctrl.abort();
+//   });
 
-const review$ = fromFetch(`/api/v2/reviews/${REVIEW_ID}`).pipe(
+// const review$ = fromFetch(`/api/v2/reviews/${REVIEW_ID}`).pipe(
+//   filter((response) => response.ok),
+//   switchMap(async (response) => await response.json()),
+//   filter((data): data is Review => isReview(data)),
+//   shareReplay(1)
+// );
+const review$ = new Observable<Response>().pipe(
   filter((response) => response.ok),
   switchMap(async (response) => await response.json()),
   filter((data): data is Review => isReview(data)),
   shareReplay(1)
 );
+
 /** Segmented read only version of the user's text. */
 export const [useSegmentedProse, segmented$] = bind<null | string>(
   review$.pipe(
@@ -103,15 +106,20 @@ export type OptionalExpectations =
   | null;
 
 function fetchReview<T>(prompt: ReviewPrompt) {
-  return fromFetch(`/api/v2/reviews/${REVIEW_ID}/${prompt}`).pipe(
-    switchMap(async (response) => await response.json()),
-    filter((data): data is Review => isReview(data)),
-    shareReplay(1),
-    map((data) => data?.analysis.find((a) => a.tool === prompt)),
-    filter((data) => !!data), // TODO errors
-    map((data) => data as T)
-  );
+  return new Observable<T>((subscriber) => {
+    // subscriber.next(SUSPENSE);
+    subscriber.next(null as T);
+  });
 }
+// return fromFetch(`/api/v2/reviews/${REVIEW_ID}/${prompt}`).pipe(
+//   switchMap(async (response) => await response.json()),
+//   filter((data): data is Review => isReview(data)),
+//   shareReplay(1),
+//   map((data) => data?.analysis.find((a) => a.tool === prompt)),
+//   filter((data) => !!data), // TODO errors
+//   map((data) => data as T)
+// );
+// }
 /** Fetch the review data for the civil tone tool. */
 export const [useCivilToneData, civilToneData$] = bind(
   fetchReview<OptionalError<CivilToneData>>('civil_tone'),
@@ -154,7 +162,11 @@ export const [useSourcesData, sourcesData$] = bind(
 );
 /** Fetch the review data for the expectations tool. */
 export const [useExpectationsData, expectationsData$] = bind(
-  fetchObservable('expectations').pipe(
+  new Observable<SUSPENSE | OptionalError<Review>>((subscriber) => {
+    subscriber.next(SUSPENSE);
+    subscriber.next(null as OptionalError<Review>);
+  }).pipe(
+    // fetchObservable('expectations').pipe(
     filter((data): data is Review => isReview(data)),
     map(
       (data) =>
@@ -168,21 +180,30 @@ export const [useExpectationsData, expectationsData$] = bind(
   null
 );
 /** Fetch the review data for the ontopic tools. */
-export const [useOnTopicData, onTopicData$] = bind(
-  fromFetch(`/api/v2/reviews/${REVIEW_ID}/ontopic`).pipe(
-    switchMap(async (response) => await response.json()),
-    filter((data): data is Review => isReview(data)),
-    shareReplay(1), // TODO errors
-    map((data) => data?.analysis.find((a) => isOnTopicReviewData(a))),
-    filter((data) => !!data)
-  ),
-  null
-);
+// export const [useOnTopicData, onTopicData$] = bind(
+//   // fromFetch(`/api/v2/reviews/${REVIEW_ID}/ontopic`).pipe(
+//   new Observable<Response>((subscriber) => {}).pipe(
+//     switchMap(async (response) => await response.json()),
+//     filter((data): data is Review => isReview(data)),
+//     shareReplay(1), // TODO errors
+//     map((data) => data?.analysis.find((a) => isOnTopicReviewData(a))),
+//     filter((data) => !!data)
+//   ),
+//   null
+// );
 /** Fetch the text for the ontopic tools. */
-export const [useOnTopicProse, onTopicProse$] = bind(
-  onTopicData$.pipe(
-    map((data) => data?.response.html ?? ''),
-    distinctUntilChanged()
-  ),
-  null
+// export const [useOnTopicProse, onTopicProse$] = bind(
+//   onTopicData$.pipe(
+//     map((data) => data?.response.html ?? ''),
+//     distinctUntilChanged()
+//   ),
+//   null
+// );
+
+export const [useReviewText, reviewText$] = bind(
+  new Observable<SUSPENSE | string>((subscriber) => {
+    subscriber.next(SUSPENSE);
+    // TODO get from session/session.storage
+  }),
+  SUSPENSE
 );

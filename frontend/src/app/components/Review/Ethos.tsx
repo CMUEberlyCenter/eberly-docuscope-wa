@@ -1,17 +1,28 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import { type FC, type HTMLProps, useContext, useId } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
+  type CredibilityData,
   type CredibilityOutput,
   isErrorData,
 } from "../../../lib/ReviewResponse";
-import { useCredibilityData } from "../../service/review.service";
+import type { WritingTask } from "../../../lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -71,7 +82,55 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   // credibility
   const { t } = useTranslation("review");
-  const review = useCredibilityData();
+  const dispatch = useContext(ReviewDispatchContext);
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<CredibilityData | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+      signal: AbortSignal;
+    }) => {
+      const { document, writing_task, signal } = data;
+      const response = await fetch("/api/v2/review/credibility", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Credibility review");
+      }
+      return response.json();
+    },
+    onSuccess: ({ input, data }: { input: string; data: CredibilityData }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Credibility review:", error);
+    },
+  });
+
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Credibility
+    const controller = new AbortController();
+    mutation.mutate({
+      document,
+      writing_task,
+      signal: controller.signal,
+    });
+    return () => {
+      controller.abort();
+    };
+  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -83,7 +142,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
         )}
       >
         <ToolHeader title={t("ethos.title")} instructionsKey="ethos" />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary
