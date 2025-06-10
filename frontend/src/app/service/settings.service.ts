@@ -27,6 +27,7 @@ const SETTINGS_URL = new URL(
 interface Settings {
   text2speech?: boolean; // Text to speech widgets
   scribe?: boolean; // global LLM tool availability, false disables all LLM tools
+  word_count_limit?: number; // Word Count limit for review tools.
   // Draft Tools
   notes2prose?: boolean; // Notes to Prose LLM tool
   notes2bullets?: boolean; // Notes to List LLM tool
@@ -58,12 +59,14 @@ interface Settings {
   tagger: string; // URL. Needed for impressions
 }
 
+const WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   text2speech: true,
   scribe: true,
+  word_count_limit: WORD_COUNT_LIMIT,
 
   notes2prose: true,
   notes2bullets: true,
@@ -237,4 +240,11 @@ export const [useGlobalFeatureImpressions, globalFeatureImpressions$] = bind(
     map((settings) => !!settings.docuscope && !!settings.impressions)
   ),
   false
+);
+
+export const [useWordCountLimit, wordCountLimit$] = bind(
+  settings$.pipe(
+    map((settings) => settings.word_count_limit ?? DEFAULT.word_count_limit ?? WORD_COUNT_LIMIT)
+  ),
+  WORD_COUNT_LIMIT
 );
