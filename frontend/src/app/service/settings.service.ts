@@ -244,7 +244,12 @@ export const [useGlobalFeatureImpressions, globalFeatureImpressions$] = bind(
 
 export const [useWordCountLimit, wordCountLimit$] = bind(
   settings$.pipe(
-    map((settings) => settings.word_count_limit ?? DEFAULT.word_count_limit ?? WORD_COUNT_LIMIT)
+    map(
+      (settings) =>
+        settings.word_count_limit ??
+        DEFAULT.word_count_limit ??
+        WORD_COUNT_LIMIT
+    )
   ),
   WORD_COUNT_LIMIT
 );

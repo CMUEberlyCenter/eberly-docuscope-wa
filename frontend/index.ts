@@ -81,12 +81,12 @@ async function __main__() {
     if (token) {
       // if (token.platformContext.custom?.writing_task_id) {
       //   console.log('onConnect writing_task_id', token.platformContext.custom.writing_task_id);
-      //   Provider.redirect(res, '/edit/${token.platformContext.custom.writing_task_id}');
+      //   Provider.redirect(res, '/myprose/${token.platformContext.custom.writing_task_id}/draft');
       // // } else if (token.platformContext.custom?.writing_task) {
       // }
-      return Provider.redirect(res, '/edit'); //'/index.html');
+      return Provider.redirect(res, '/draft'); //'/index.html');
     }
-    Provider.redirect(res, '/'); //'/index.html');
+    Provider.redirect(res, '/index.html'); //'/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
@@ -330,7 +330,6 @@ async function __main__() {
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
     app.all('*splat', async (req: Request, res: Response, next) => {
-      console.log('splat', req.i18n.language);
       const token: IdToken | undefined = res.locals.token;
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;

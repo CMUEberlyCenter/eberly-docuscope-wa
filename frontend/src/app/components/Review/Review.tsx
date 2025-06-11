@@ -115,6 +115,9 @@ export const Review: FC = () => {
         <UserTextView className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
           <StageHeader title={tt("tool.tab.review")} />
+          {!bigPictureFeature && !fineTuningFeature && (
+            <NullTool text={t("null.no_writing_task")} />
+          )}
           <Tabs
             activeKey={tab}
             onSelect={(k) => {

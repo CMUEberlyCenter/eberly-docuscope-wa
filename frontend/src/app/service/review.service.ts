@@ -19,7 +19,7 @@ import {
   type ProfessionalToneData,
   type ProminentTopicsData,
   type ReviewPrompt,
-  type SourcesData
+  type SourcesData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
 import { isReview, type Review } from '../../server/model/review';
