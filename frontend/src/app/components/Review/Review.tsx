@@ -35,18 +35,19 @@ import {
 import { Legal } from "../Legal/Legal";
 import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
+import { CivilTone } from "./CivilTone";
+import { Ethos } from "./Ethos";
+import { Expectations, ExpectationsButton } from "./Expectations";
+import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
+import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import { Organization } from "./Organization";
+import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
+import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
+import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
-import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
-import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
-import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
-import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
-import { CivilTone } from "./CivilTone";
-import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
-import { Ethos } from "./Ethos";
-import { Sources } from "./Sources";
 import { Sentences, SentencesButton } from "./Sentences";
-import { Organization } from "./Organization";
+import { Sources } from "./Sources";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -134,13 +135,12 @@ export const Review: FC = () => {
               >
                 <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                    {expectationsFeature
-                      ? null
-                      : // <ExpectationsButton
-                        //   active={tool === "expectations"}
-                        //   onClick={() => setTool("expectations")}
-                        // />
-                        null}
+                    {expectationsFeature ? (
+                      <ExpectationsButton
+                        active={tool === "expectations"}
+                        onClick={() => setTool("expectations")}
+                      />
+                    ) : null}
                     {ideasFeature ? (
                       <ProminentTopicsButton
                         active={tool === "prominent_topics"}
@@ -163,7 +163,7 @@ export const Review: FC = () => {
                   {(!tool || tool === "null") && (
                     <NullTool text={t("null.big_picture")} />
                   )}
-                  {/* {tool === "expectations" && <Expectations />} */}
+                  {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
                   {tool === "logical_flow" && <LogicalFlow />}

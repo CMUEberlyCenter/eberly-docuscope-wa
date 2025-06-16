@@ -257,7 +257,7 @@ reviews.post(
         (a) => isExpectationsData(a) && a.expectation === expectation
       );
       if (cached) {
-        response.json(cached);
+        response.json({ input: request.session.segmented, data: cached });
         return;
       }
       const chat = await doChat<ExpectationsOutput>(
@@ -295,7 +295,7 @@ reviews.post(
         response: chat_response,
       };
       request.session.analysis = [...(request.session.analysis ?? []), data];
-      response.json(data);
+      response.json({ input: request.session.segmented, data });
     } catch (err) {
       if (err instanceof UnprocessableContentError) {
         response.status(422).send(UnprocessableContent(err));
