@@ -25,18 +25,16 @@ import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,
   taskToEditor,
-  // useWritingTask,
   useWritingTasks,
-  // writingTask,
 } from "../../service/writing-task.service";
-import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
-import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
-import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import {
   useSetWritingTask,
   useWritingTask,
 } from "../WritingTaskContext/WritingTaskContext";
+import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
+import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
+import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.

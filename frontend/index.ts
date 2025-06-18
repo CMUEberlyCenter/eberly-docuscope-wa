@@ -53,8 +53,9 @@ import {
   ONTOPIC_URL,
   PLATFORMS_PATH,
   PORT,
-  SESSION_KEY,
+  SESSION_KEY
 } from './src/server/settings';
+import { getSettings, watchSettings } from './src/ToolSettings';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -67,6 +68,7 @@ async function __main__() {
   const shutdownDatabase = await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
   const shutdownPrompts = await initPrompts();
+  const shutdownSettings = await watchSettings();
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
   Provider.app.use(fileUpload({ createParentPath: true }));
@@ -342,7 +344,8 @@ async function __main__() {
         i18n: req.i18n,
         token,
         session: req.session,
-        writing_task_id
+        writing_task_id,
+        settings: getSettings(),
         // ltik,
         // headers: {
         //   'Content-Type': 'text/html',
@@ -376,6 +379,7 @@ async function __main__() {
         // If you have database connections, close them here
         await shutdownDatabase();
         await shutdownPrompts();
+        shutdownSettings();
         process.exit(0);
       });
     };

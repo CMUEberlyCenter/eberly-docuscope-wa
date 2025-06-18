@@ -2,7 +2,7 @@
 #
 # For use on production server.
 # compose.production.yaml is to be used in conjunction with compose.yaml
-# > docker-compose -f compose.yaml -f compose.production.yaml up -d
+# > docker compose -f compose.yaml -f compose.production.yaml up -d
 #
 ###################################################################################
 

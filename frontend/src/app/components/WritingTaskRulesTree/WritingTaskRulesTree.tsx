@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
+import type { Optional } from "../../../index.d";
 
 type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   /** Callback for when rule selection changes. */
@@ -63,7 +64,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   return (
     <div {...props} className={cn}>
       <div className="d-flex flex-column align-items-start writing-task-tree h-0 w-100 overflow-auto">
-        {includeTitle && <WritingTaskTitle />}
+        {includeTitle && <WritingTaskTitle task={writingTask} />}
         {writingTask?.rules.rules.map((rule, i) => (
           <div key={`${id}-${i}`} aria-expanded="true">
             <ButtonGroup aria-selected={selected === rule}>

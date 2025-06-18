@@ -89,6 +89,9 @@ export const PROMPT_TEMPLATES_PATH =
 // Path to writing task definition files
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
+// Path to tool settings file
+export const TOOL_SETTINGS_PATH =
+  process.env['TOOL_SETTINGS'] ?? join('public', 'settings', 'settings.json');
 // LTI platform configuration files path
 export const PLATFORMS_PATH =
   process.env['PLATFORMS'] ?? join('private', 'platforms');

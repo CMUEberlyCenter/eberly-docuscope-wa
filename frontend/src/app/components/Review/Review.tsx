@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useState } from "react";
+import { type FC, type HTMLProps, useEffect, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
@@ -13,28 +13,15 @@ import {
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
+import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
-import {
-  useAdditionalToolsEnabled,
-  useArgumentsEnabled,
-  useBigPictureEnabled,
-  useCivilToneEnabled,
-  useCredibilityEnabled,
-  useExpectationsEnabled,
-  useFineTuningEnabled,
-  useImpressionsEnabled,
-  useLogicalFlowEnabled,
-  useParagraphClarityEnabled,
-  useProfessionalToneEnabled,
-  useProminentTopicsEnabled,
-  useSentenceDensityEnabled,
-  useSourcesEnabled,
-  useTermMatrixEnabled,
-} from "../../service/review-tools.service";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Legal } from "../Legal/Legal";
+import { useSettingsContext } from "../Settings/SettingsContext";
 import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone } from "./CivilTone";
 import { Ethos } from "./Ethos";
 import { Expectations, ExpectationsButton } from "./Expectations";
@@ -81,7 +68,14 @@ export const Review: FC = () => {
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
+  const [ready, setReady] = useState<boolean>(false);
+  const userText = useFileText();
+  const { task: writingTask } = useWritingTask();
+  const settings = useSettingsContext();
 
+  useEffect(() => {
+    setReady(!!userText && userText.trim().length > 0 && !!writingTask);
+  }, [userText, writingTask]);
   // useUnload();
   // useEffect(() => {
   //   if (ready) {
@@ -89,21 +83,96 @@ export const Review: FC = () => {
   //   }
   // }, [t, ready]);
 
-  const civilToneFeature = useCivilToneEnabled();
-  const credibilityFeature = useCredibilityEnabled();
-  const expectationsFeature = useExpectationsEnabled();
-  const ideasFeature = useProminentTopicsEnabled();
-  const argumentsFeature = useArgumentsEnabled();
-  const logicalFlowFeature = useLogicalFlowEnabled();
-  const paragraphClarityFeature = useParagraphClarityEnabled();
-  const professionalToneFeature = useProfessionalToneEnabled();
-  const sentencesFeature = useSentenceDensityEnabled();
-  const sourcesFeature = useSourcesEnabled();
-  const impressionsFeature = useImpressionsEnabled();
-  const organizationFeature = useTermMatrixEnabled();
-  const additionalToolsFeature = useAdditionalToolsEnabled();
-  const bigPictureFeature = useBigPictureEnabled();
-  const fineTuningFeature = useFineTuningEnabled();
+  const [civilToneFeature, setCivilToneFeature] = useState(false);
+  const [credibilityFeature, setCredibilityFeature] = useState(false);
+  const [expectationsFeature, setExpectationsFeature] = useState(false);
+  const [ideasFeature, setIdeasFeature] = useState(false);
+  const [argumentsFeature, setArgumentsFeature] = useState(false);
+  const [logicalFlowFeature, setLogicalFlowFeature] = useState(false);
+  const [paragraphClarityFeature, setParagraphClarityFeature] = useState(false);
+  const [professionalToneFeature, setProfessionalToneFeature] = useState(false);
+  const [sentencesFeature, setSentencesFeature] = useState(false);
+  const [sourcesFeature, setSourcesFeature] = useState(false);
+  const [impressionsFeature, setImpressionsFeature] = useState(false);
+  const [organizationFeature, setOrganizationFeature] = useState(false);
+  const [additionalToolsFeature, setAdditionalToolsFeature] = useState(false);
+  const [bigPictureFeature, setBigPictureFeature] = useState(false);
+  const [fineTuningFeature, setFineTuningFeature] = useState(false);
+  useEffect(() => {
+    setCivilToneFeature(
+      settings.civil_tone && isEnabled(writingTask, "civil_tone")
+    );
+    setCredibilityFeature(
+      settings.credibility && isEnabled(writingTask, "credibility")
+    );
+    setExpectationsFeature(
+      settings.expectations && isEnabled(writingTask, "expectations")
+    );
+    setArgumentsFeature(
+      settings.lines_of_arguments &&
+        isEnabled(writingTask, "lines_of_arguments")
+    );
+    setLogicalFlowFeature(
+      settings.logical_flow && isEnabled(writingTask, "logical_flow")
+    );
+    setParagraphClarityFeature(
+      settings.paragraph_clarity && isEnabled(writingTask, "paragraph_clarity")
+    );
+    setProfessionalToneFeature(
+      settings.professional_tone && isEnabled(writingTask, "professional_tone")
+    );
+    setIdeasFeature(
+      settings.prominent_topics && isEnabled(writingTask, "prominent_topics")
+    );
+    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setSentencesFeature(
+      settings.sentence_density && isEnabled(writingTask, "sentence_density")
+    );
+    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setOrganizationFeature(
+      settings.term_matrix && isEnabled(writingTask, "term_matrix")
+    );
+    setImpressionsFeature(
+      false
+      /*settings.impressions && isEnabled(writingTask, "impressions")*/
+    );
+  }, [settings, writingTask]);
+  useEffect(() => {
+    setBigPictureFeature(
+      expectationsFeature ||
+        argumentsFeature ||
+        ideasFeature ||
+        logicalFlowFeature
+    );
+  }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
+  useEffect(() => {
+    setAdditionalToolsFeature(
+      civilToneFeature ||
+        credibilityFeature ||
+        sourcesFeature ||
+        organizationFeature ||
+        impressionsFeature
+    );
+  }, [
+    civilToneFeature,
+    credibilityFeature,
+    sourcesFeature,
+    organizationFeature,
+    impressionsFeature,
+  ]);
+  useEffect(() => {
+    setFineTuningFeature(
+      additionalToolsFeature ||
+        paragraphClarityFeature ||
+        professionalToneFeature ||
+        sentencesFeature
+    );
+  }, [
+    additionalToolsFeature,
+    paragraphClarityFeature,
+    professionalToneFeature,
+    sentencesFeature,
+  ]);
 
   return (
     <ReviewProvider>
@@ -137,24 +206,28 @@ export const Review: FC = () => {
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {expectationsFeature ? (
                       <ExpectationsButton
+                        disabled={!ready}
                         active={tool === "expectations"}
                         onClick={() => setTool("expectations")}
                       />
                     ) : null}
                     {ideasFeature ? (
                       <ProminentTopicsButton
+                        disabled={!ready}
                         active={tool === "prominent_topics"}
                         onClick={() => setTool("prominent_topics")}
                       />
                     ) : null}
                     {argumentsFeature ? (
                       <LinesOfArgumentsButton
+                        disabled={!ready}
                         active={tool === "lines_of_arguments"}
                         onClick={() => setTool("lines_of_arguments")}
                       />
                     ) : null}
                     {logicalFlowFeature ? (
                       <LogicalFlowButton
+                        disabled={!ready}
                         active={tool === "logical_flow"}
                         onClick={() => setTool("logical_flow")}
                       />
@@ -181,18 +254,21 @@ export const Review: FC = () => {
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {paragraphClarityFeature ? (
                       <ParagraphClarityButton
+                        disabled={!ready}
                         active={otherTool === "paragraph_clarity"}
                         onClick={() => setOtherTool("paragraph_clarity")}
                       />
                     ) : null}
                     {sentencesFeature ? (
                       <SentencesButton
+                        disabled={!ready}
                         active={otherTool === "sentences"}
                         onClick={() => setOtherTool("sentences")}
                       />
                     ) : null}
                     {professionalToneFeature ? (
                       <ProfessionalToneButton
+                        disabled={!ready}
                         active={otherTool === "professional_tone"}
                         onClick={() => setOtherTool("professional_tone")}
                       />
@@ -230,6 +306,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("sources")}
                               active={otherTool === "sources"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("sources.title")}
@@ -243,6 +320,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("credibility")}
                               active={otherTool === "credibility"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("ethos.title")}
@@ -256,6 +334,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("organization")}
                               active={otherTool === "organization"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("organization.title")}
@@ -269,6 +348,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("civil_tone")}
                               active={otherTool === "civil_tone"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("civil_tone.title")}
@@ -282,6 +362,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("impressions")}
                               active={otherTool === "impressions"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("impressions.title")}

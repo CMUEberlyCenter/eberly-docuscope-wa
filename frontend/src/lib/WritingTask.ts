@@ -1,3 +1,5 @@
+import type { Optional } from '../index.d';
+
 /** Test if the argument is an array of strings. */
 function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
@@ -191,8 +193,12 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
  * @param toolId tool identifier, often corresponds to prompt filename.
  * @returns true if the given tool is enabled for the writing task.
  */
-export function isEnabled(task: WritingTask, toolId: string): boolean {
+export function isEnabled(
+  task: Optional<WritingTask>,
+  toolId: string
+): boolean {
   // patch for #151 to support old WTDs
+  if (!task) return false;
   if (!task.info.review_tools) {
     return !['prominent_topics', 'pathos'].includes(toolId);
   }

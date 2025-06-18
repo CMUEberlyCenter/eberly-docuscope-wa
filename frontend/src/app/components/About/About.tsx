@@ -2,8 +2,8 @@ import classNames from "classnames";
 import { type FC, type HTMLProps, useState } from "react";
 import { ListGroup, Modal, type ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 
 // type PromptInfo = { saved_at: string };
 // async function fetchTemplateInfo() {
@@ -27,7 +27,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
   const version = __APP_VERSION__;
   const build_date = new Date(__BUILD_DATE__);
   // const template_info = use(templatesInfo);
-  const task = useWritingTask();
+  const { task } = useWritingTask();
 
   return (
     <Modal {...props}>

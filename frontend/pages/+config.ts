@@ -12,4 +12,5 @@ export default {
 
   extends: vikeReact,
   ssr: false,
+  passToClient: ['settings'],
 } satisfies Config;

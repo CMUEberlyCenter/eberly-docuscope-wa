@@ -1,3 +1,4 @@
+/* @deprecated This service is deprecated and will be removed in a future version. */
 import { bind } from '@react-rxjs/core';
 import { combineLatest, map } from 'rxjs';
 import type { ReviewTool } from '../../lib/ReviewResponse';
