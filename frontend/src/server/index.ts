@@ -190,10 +190,15 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
+          console.log(`Registered platform: ${json.url} (${json.clientId})`);
         }
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      console.log('LTI platforms registered.');
+      const ps = await Promise.all([...await Provider.getAllPlatforms()].map(async p => await p.platformJSON()));
+      ps.forEach(console.log);
     }
     const app = express();
     app.use(express.json());
