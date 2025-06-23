@@ -18,5 +18,5 @@ EXPOSE 8888
 ENV PORT=8888
 WORKDIR /app
 COPY ./package.json .
-COPY --from=build /app/build /app/build
-CMD [ "node", "build/server/index.js"]
+COPY --from=build /app/ /app/
+CMD [ "npm", "run", "preview"]
