@@ -58,8 +58,8 @@ import {
 import { getSettings, watchSettings } from './src/ToolSettings';
 
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// const __filename = fileURLToPath(import.meta.url);
+const __dirname = process.cwd(); //dirname(__filename);
 const root = __dirname;
 const PUBLIC = __dirname;// join(__dirname, './build/app');
 

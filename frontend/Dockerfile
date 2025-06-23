@@ -10,6 +10,7 @@ RUN cp -a /tmp/node_modules /app
 WORKDIR /app
 COPY . /app
 RUN npm run build
+RUN npm run build:server
 
 FROM base
 LABEL org.opencontainers.image.description="myProse web application"
@@ -18,5 +19,7 @@ EXPOSE 8888
 ENV PORT=8888
 WORKDIR /app
 COPY ./package.json .
-COPY --from=build /app/ /app/
-CMD [ "npm", "run", "preview"]
+COPY --from=build /app/dist/ /app/dist/
+COPY --from=build /app/build/ /app/build/
+COPY --from=build /app/public/ /app/public/
+CMD [ "node", "build/server/index.js" ]

@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "npx tsx ./index.ts",
     "build": "npx vike build",
+    "build:server": "rollup -c",
     "preview": "cross-env NODE_ENV=production npx tsx ./index.ts",
     "start": "npm run dev",
     "test": "vitest run",
