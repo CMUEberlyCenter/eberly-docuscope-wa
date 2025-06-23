@@ -88,7 +88,7 @@ async function __main__() {
       // }
       return Provider.redirect(res, '/draft'); //'/index.html');
     }
-    Provider.redirect(res, '/index.html'); //'/index.html');
+    // Provider.redirect(res, '/index'); //'/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
@@ -268,7 +268,7 @@ async function __main__() {
       console.log('Production mode');
       app.use(express.static(join(root, 'dist', 'client')));
     } else {
-      const vite = await import('vite');
+      // const vite = await import('vite');
       const { devMiddleware } = await createDevMiddleware({ root });
       app.use(devMiddleware);
     }

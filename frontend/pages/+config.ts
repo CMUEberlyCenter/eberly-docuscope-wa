@@ -10,7 +10,8 @@ export default {
   description:
     'myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.',
 
-  extends: vikeReact,
   ssr: false,
   passToClient: ['settings'],
+
+  extends: vikeReact,
 } satisfies Config;
