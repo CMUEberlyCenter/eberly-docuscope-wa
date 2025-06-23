@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, Source, SourceType } from "../../../lib/ReviewResponse";
+import { isErrorData, type Source, type SourceType } from "../../../lib/ReviewResponse";
 import { useSourcesData } from "../../service/review.service";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";

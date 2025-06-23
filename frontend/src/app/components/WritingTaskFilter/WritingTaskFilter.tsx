@@ -17,7 +17,7 @@ import {
   extractKeywords,
   groupByCategory,
   hasKeywords,
-  WritingTask,
+  type WritingTask,
 } from "../../../lib/WritingTask";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import { useWritingTasks } from "../../service/writing-task.service";

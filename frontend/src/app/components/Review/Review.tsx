@@ -14,7 +14,7 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { ReviewTool } from "../../../lib/ReviewResponse";
+import type { ReviewTool } from "../../../lib/ReviewResponse";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import {

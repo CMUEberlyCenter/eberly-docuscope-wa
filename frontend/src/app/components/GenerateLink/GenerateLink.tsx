@@ -2,7 +2,7 @@ import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { validateWritingTask } from "../../../lib/schemaValidate";
-import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
+import { isWritingTask, type WritingTask } from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { Loading } from "../Loading/Loading";

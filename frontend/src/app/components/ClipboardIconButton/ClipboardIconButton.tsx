@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { Button, ButtonProps } from "react-bootstrap";
+import { Button, type ButtonProps } from "react-bootstrap";
 import { Translation } from "react-i18next";
 import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
 import classNames from "classnames";

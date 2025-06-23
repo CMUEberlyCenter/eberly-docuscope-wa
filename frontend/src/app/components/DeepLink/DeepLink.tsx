@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, useEffect, useState } from "react";
 import { Button, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { isWritingTask, WritingTask } from "../../../lib/WritingTask";
+import { isWritingTask, type WritingTask } from "../../../lib/WritingTask";
 import { useWritingTasks } from "../../service/writing-task.service";
 import { Loading } from "../Loading/Loading";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";

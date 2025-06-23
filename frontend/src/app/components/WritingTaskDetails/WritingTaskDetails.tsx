@@ -1,5 +1,5 @@
 import { FC, useCallback, useState } from "react";
-import { Button, Form, Modal, ModalProps } from "react-bootstrap";
+import { Button, Form, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";

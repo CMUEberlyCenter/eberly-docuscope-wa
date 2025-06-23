@@ -6,7 +6,7 @@ import { FC, HTMLProps, ReactNode, useCallback, useState } from "react";
 import {
   Alert,
   Button,
-  ButtonProps,
+  type ButtonProps,
   ButtonToolbar,
   Card,
   OverlayTrigger,
@@ -19,7 +19,7 @@ import { useSlate } from "slate-react";
 import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
 import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { deserializeHtmlText } from "../../lib/slate";
-import { ToolResult } from "../../lib/ToolResults";
+import type { ToolResult } from "../../lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";

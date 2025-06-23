@@ -1,9 +1,9 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, AccordionProps, Alert } from "react-bootstrap";
+import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { CredibilityOutput, isErrorData } from "../../../lib/ReviewResponse";
+import { type CredibilityOutput, isErrorData } from "../../../lib/ReviewResponse";
 import { useCredibilityData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";

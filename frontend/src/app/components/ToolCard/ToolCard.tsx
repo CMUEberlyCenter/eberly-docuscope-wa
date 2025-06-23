@@ -23,7 +23,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
-import { Rule } from "../../../lib/WritingTask";
+import type { Rule } from "../../../lib/WritingTask";
 import CheckExpectationIcon from "../../assets/icons/check_expectation_icon.svg?react";
 import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
@@ -31,7 +31,7 @@ import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react"
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import LocalCoherenceIcon from "../../assets/icons/local_coherence_icon.svg?react";
 import { serialize, serializeHtml } from "../../lib/slate";
-import { Tool, ToolResult } from "../../lib/ToolResults";
+import type { Tool, ToolResult } from "../../lib/ToolResults";
 import {
   postClarifyText,
   postConvertNotes,

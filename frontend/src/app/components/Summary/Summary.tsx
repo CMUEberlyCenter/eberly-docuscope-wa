@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Translation } from "react-i18next";
-import { Analysis, isAssessment } from "../../../lib/ReviewResponse";
+import { type Analysis, isAssessment } from "../../../lib/ReviewResponse";
 
 export const Summary: FC<{ review: Analysis }> = ({ review }) => {
   if (!("response" in review)) return null;

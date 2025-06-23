@@ -1,12 +1,12 @@
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject } from 'rxjs';
-import {
+import type {
   AssessExpectationRequest,
   NotesRequest,
   TextRequest,
 } from '../../lib/Requests';
-import { Rule, WritingTask } from '../../lib/WritingTask';
-import {
+import type { Rule, WritingTask } from '../../lib/WritingTask';
+import type {
   CopyEditResponse,
   ExpectationData,
   LocalCoherenceResponse,

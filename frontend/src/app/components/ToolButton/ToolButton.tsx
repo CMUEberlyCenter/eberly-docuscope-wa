@@ -3,7 +3,7 @@ import { FC, ReactNode } from "react";
 import {
   Button,
   ButtonGroup,
-  ButtonProps,
+  type ButtonProps,
   OverlayTrigger,
   Stack,
   Tooltip,

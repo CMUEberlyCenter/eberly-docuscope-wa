@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, AccordionProps, Alert, ButtonProps } from "react-bootstrap";
+import { Accordion, type AccordionProps, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
-  ProfessionalToneOutput,
+  type ProfessionalToneOutput,
 } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import { useProfessionalToneData } from "../../service/review.service";

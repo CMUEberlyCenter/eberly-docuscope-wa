@@ -9,10 +9,10 @@ import {
   TextRun,
 } from 'docx';
 import escapeHtml from 'escape-html';
-import { Descendant, Node as SlateNode, Text } from 'slate';
+import type { Descendant, Node as SlateNode, Text } from 'slate';
 import { jsx } from 'slate-hyperscript';
-import { WritingTask } from '../../lib/WritingTask';
-import { CustomElement, CustomText, ListElement } from '../slate';
+import type { WritingTask } from '../../lib/WritingTask';
+import type { CustomElement, CustomText, ListElement } from '../slate';
 
 /**
  * Convert editor's Descendants to a string with double newline between

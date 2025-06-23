@@ -37,11 +37,11 @@ import {
 } from "react";
 import {
   Alert,
-  AlertProps,
+  type AlertProps,
   Button,
   Col,
   Container,
-  ContainerProps,
+  type ContainerProps,
   Row,
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";

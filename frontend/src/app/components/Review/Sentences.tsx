@@ -1,10 +1,10 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useEffect, useState } from "react";
-import { Alert, ButtonProps } from "react-bootstrap";
+import { Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import {
-  ClarityData,
+  type ClarityData,
   cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
 import { isErrorData } from "../../../lib/ReviewResponse";

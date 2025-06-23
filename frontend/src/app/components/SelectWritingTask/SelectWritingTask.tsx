@@ -7,14 +7,14 @@ import {
   Form,
   ListGroup,
   Modal,
-  ModalProps,
+  type ModalProps,
   OverlayTrigger,
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
-import { WritingTask, isWritingTask } from "../../../lib/WritingTask";
+import { type WritingTask, isWritingTask } from "../../../lib/WritingTask";
 import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,

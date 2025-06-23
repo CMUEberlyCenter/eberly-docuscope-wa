@@ -1,6 +1,6 @@
 import classNames from "classnames";
 import { FC, HTMLProps, useContext, useId } from "react";
-import { Accordion, Alert, ButtonProps } from "react-bootstrap";
+import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData } from "../../../lib/ReviewResponse";

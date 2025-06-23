@@ -1,6 +1,6 @@
 import { FC } from "react";
 import { Translation } from "react-i18next";
-import { WritingTask } from "../../../lib/WritingTask";
+import type { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskInfoProps = {
   /** The writing task to display information about. */

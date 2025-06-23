@@ -10,22 +10,22 @@ import {
 } from 'rxjs';
 import { fromFetch } from 'rxjs/fetch';
 import {
-  CivilToneData,
-  CredibilityData,
-  ErrorData,
-  ExpectationsData,
+  type CivilToneData,
+  type CredibilityData,
+  type ErrorData,
+  type ExpectationsData,
   isExpectationsData,
   isOnTopicReviewData,
-  LinesOfArgumentsData,
-  LogicalFlowData,
-  ParagraphClarityData,
-  ProfessionalToneData,
-  ProminentTopicsData,
-  ReviewPrompt,
-  SourcesData,
+  type LinesOfArgumentsData,
+  type LogicalFlowData,
+  type ParagraphClarityData,
+  type ProfessionalToneData,
+  type ProminentTopicsData,
+  type ReviewPrompt,
+  type SourcesData,
 } from '../../lib/ReviewResponse';
 import { isWritingTask } from '../../lib/WritingTask';
-import { isReview, Review } from '../../server/model/review';
+import { isReview, type Review } from '../../server/model/review';
 import { getLtiRequest } from './lti.service';
 import { writingTask } from './writing-task.service';
 

@@ -19,12 +19,12 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
-import { createEditor, Descendant, Editor, Transforms } from "slate";
+import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import {
   Editable,
-  RenderElementProps,
-  RenderLeafProps,
+  type RenderElementProps,
+  type RenderLeafProps,
   Slate,
   withReact,
 } from "slate-react";

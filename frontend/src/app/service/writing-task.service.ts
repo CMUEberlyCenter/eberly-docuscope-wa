@@ -4,7 +4,7 @@ import { fromFetch } from 'rxjs/fetch';
 import sanitizeHtml from 'sanitize-html';
 import { Node } from 'slate';
 import useSWR from 'swr';
-import { WritingTask } from '../../lib/WritingTask';
+import type { WritingTask } from '../../lib/WritingTask';
 import { fetcher } from './fetcher';
 import { lti$, ltiInfo$ } from './lti.service';
 
