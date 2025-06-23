@@ -20,8 +20,10 @@ const Page: FC = () => {
   const [custom, setCustom] = useState<IdWritingTask | null>(null); // Uploaded file content.
   const [valid, setValid] = useState(true); // Uploaded file validity.
   const [error, setError] = useState(""); // Error messages for uploaded file.
-  const hostname = new URL("/index.html", window.location.href); // base url for link
+  const hostname = new URL("/draft", window.location.href); // base url for link
+  const reviewHostname = new URL("/review", window.location.href);
   const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
+  const [review, setReview] = useState(reviewHostname); // URL for review of currently selected writing task.
   const [data, setData] = useState<WritingTask[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -74,10 +76,13 @@ const Page: FC = () => {
   };
   useEffect(() => {
     const target = new URL(hostname);
+    const reviewTarget = new URL(reviewHostname);
     if (selected && selected._id) {
       target.searchParams.append("writing_task", selected._id);
+      reviewTarget.searchParams.append("writing_task", selected._id);
     }
     setUrl(target);
+    setReview(reviewTarget);
   }, [selected]);
 
   return (
@@ -131,7 +136,16 @@ const Page: FC = () => {
               <div className="border rounded container-fluid mb-1 py-1">
                 <h4 className="d-inline">{t("genlink.link")}</h4>
                 <a href={url.toString()} className="ms-4">
-                  {selected?.info.name ?? "myProse"}
+                  {selected?.info.name
+                    ? t("genlink.draft_template", { title: selected.info.name })
+                    : t("genlink.draft")}
+                </a>
+                <a href={review.toString()} className="ms-4">
+                  {selected?.info.name
+                    ? t("genlink.review_template", {
+                        title: selected.info.name,
+                      })
+                    : t("genlink.review")}
                 </a>
                 <p>
                   <ClipboardIconButton
@@ -140,6 +154,14 @@ const Page: FC = () => {
                     }
                   />
                   {url.toString()}
+                </p>
+                <p>
+                  <ClipboardIconButton
+                    onClick={() =>
+                      navigator.clipboard.writeText(review.toString())
+                    }
+                  />
+                  {review.toString()}
                 </p>
               </div>
               <WritingTaskInfo task={selected} />

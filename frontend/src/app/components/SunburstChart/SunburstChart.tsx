@@ -300,17 +300,15 @@ const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
             {/* all the wedges */}
-            {root
-              ?.descendants()
-              .map((d) => (
-                <Arc
-                  key={d.data.id}
-                  node={d}
-                  root={parent}
-                  onClick={click}
-                  arc={arc}
-                />
-              ))}
+            {root?.descendants().map((d) => (
+              <Arc
+                key={d.data.id}
+                node={d}
+                root={parent}
+                onClick={click}
+                arc={arc}
+              />
+            ))}
           </g>
           <g
             ref={labelRef}
@@ -319,16 +317,14 @@ const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
             className="sunburst-chart-label"
           >
             {/* all of the wedge labels */}
-            {root
-              ?.descendants()
-              .map((d) => (
-                <ArcLabel
-                  key={`label-${d.data.id}`}
-                  radius={radius}
-                  node={d}
-                  root={parent}
-                />
-              ))}
+            {root?.descendants().map((d) => (
+              <ArcLabel
+                key={`label-${d.data.id}`}
+                radius={radius}
+                node={d}
+                root={parent}
+              />
+            ))}
           </g>
           {/* center hole */}
           <circle

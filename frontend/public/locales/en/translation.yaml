@@ -34,6 +34,10 @@ deeplinking:
 genlink:
   title: myProse Writing Task Link Generator
   link: 'Link:'
+  draft: myProse Draft
+  review: myProse Review
+  draft_template: "myProse Draft: {{title}}"
+  review_template: "myProse Review: {{title}}"
 audio:
   play: Play
   pause: Pause
