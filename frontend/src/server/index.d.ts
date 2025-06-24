@@ -1,5 +1,5 @@
 import 'express-session';
-import { ObjectId } from 'mongodb';
+import type { ObjectId } from 'mongodb';
 
 declare module 'express-session' {
   interface SessionData {

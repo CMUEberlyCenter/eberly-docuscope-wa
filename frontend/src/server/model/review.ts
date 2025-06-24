@@ -1,4 +1,4 @@
-import { DBRef } from 'mongodb';
+import type { DBRef } from 'mongodb';
 import type { Analysis } from '../../lib/ReviewResponse';
 import { isWritingTask, type WritingTask } from '../../lib/WritingTask';
 

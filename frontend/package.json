@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "An AI-enhanced online writing studio with a suite of generative and assessment tools supporting the writing process from initial-phase writing to the completion of the final draft.",
   "type": "module",
   "private": true,

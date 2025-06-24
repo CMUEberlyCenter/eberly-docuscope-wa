@@ -1,5 +1,5 @@
-import { DBRef } from 'mongodb';
-import { WritingTask } from '../../lib/WritingTask';
+import type { DBRef } from 'mongodb';
+import type { WritingTask } from '../../lib/WritingTask';
 
 export type Assignment = {
   writing_task: WritingTask | DBRef; // which writing task file to use.
