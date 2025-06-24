@@ -1,4 +1,4 @@
-import { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
+import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
 import type { Analysis } from '../../lib/ReviewResponse';
 import type { WritingTask } from '../../lib/WritingTask';

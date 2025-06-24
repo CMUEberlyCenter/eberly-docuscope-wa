@@ -11,9 +11,8 @@ import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { Provider } from 'ltijs';
-import { dirname, join } from 'path';
+import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { fileURLToPath } from 'url';
 import { createDevMiddleware, renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -56,9 +55,12 @@ import {
   SESSION_KEY
 } from './src/server/settings';
 import { getSettings, watchSettings } from './src/ToolSettings';
+import { log } from 'console';
 
 
 // const __filename = fileURLToPath(import.meta.url);
+// use process.cwd() to get the current working directory so that
+// both development and production environments work correctly.
 const __dirname = process.cwd(); //dirname(__filename);
 const root = __dirname;
 const PUBLIC = __dirname;// join(__dirname, './build/app');
@@ -96,13 +98,9 @@ async function __main__() {
   // })
   Provider.onDeepLinking(
     async (_token: IdToken, _req: Request, res: Response) =>
-      //  res.sendFile(join(PUBLIC, 'deeplink.html'))
       // Provider.redirect(res, '/deeplink', { newResource: true })
       Provider.redirect(res, '/deeplink')
   );
-  // Provider.app.get('/deeplink', async (_req: Request, res: Response) =>
-  //   res.sendFile(join(PUBLIC, 'deeplink.html'))
-  // );
   Provider.app.post(
     // TODO validate(checkSchema({})),
     '/deeplink',
@@ -218,10 +216,20 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
+          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId}`);
         }
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      const platforms = await Provider.getAllPlatforms();
+      platforms.forEach(async (platform) => {
+        const name = await platform.platformName();
+        const url = await platform.platformUrl();
+        const active = await platform.platformActive();
+        console.log('Registered platforms:');
+        console.log(`${active? '+' : 'o'} Platform: ${name}, URL: ${url}, Active: ${active}`);
+      });
     }
     const app = express();
     app.use(express.json());

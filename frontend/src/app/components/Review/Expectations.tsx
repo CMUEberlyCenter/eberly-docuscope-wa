@@ -1,16 +1,18 @@
-import { faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
-import { faEllipsis } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleExclamation,
+  faEllipsis,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
-  type FC,
-  type HTMLProps,
   useContext,
   useEffect,
   useId,
   useRef,
   useState,
+  type FC,
+  type HTMLProps,
 } from "react";
 import {
   Accordion,
@@ -27,12 +29,10 @@ import {
   isErrorData,
   isExpectationsData,
   type ErrorData,
+  type ExpectationsData,
 } from "../../../lib/ReviewResponse";
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
-// import {
-//   type OptionalExpectations
-// } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { useFileText } from "../FileUpload/FileUploadContext";
 import { LoadingSmall } from "../Loading/LoadingSmall";
@@ -42,7 +42,6 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import type { ExpectationData } from "../../lib/ToolResults";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
@@ -76,11 +75,15 @@ export const ExpectationsButton: FC<ButtonProps> = (props) => {
 
 // }
 
-type ExpectationProps = AccordionItemProps & { rule: Rule };
+type ExpectationProps = AccordionItemProps & {
+  rule: Rule;
+  setCurrent?: (key: AccordionEventKey) => void;
+};
 /** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationProps> = ({
   eventKey,
   rule,
+  setCurrent,
   ...props
 }) => {
   const dispatch = useContext(ReviewDispatchContext);
@@ -90,10 +93,9 @@ const ExpectationRule: FC<ExpectationProps> = ({
     "unset" | "pending" | "fulfilled" | "rejected"
   >("unset");
   const [error, setError] = useState<ErrorData | null>(null);
-  // const expectations = useExpectationsData();
   const { t } = useTranslation("expectations");
   const id = useId();
-  const [expectation, setExpectation] = useState<ExpectationData | null>(null);
+  const [expectation, setExpectation] = useState<ExpectationsData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -103,6 +105,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
     }) => {
       const { document, writing_task, expectation } = data;
       setError(null);
+      setCurrent?.(""); // Close any open accordion item
       abortControllerRef.current = new AbortController();
 
       const response = await fetch("/api/v2/review/expectation", {
@@ -118,16 +121,21 @@ const ExpectationRule: FC<ExpectationProps> = ({
       }
       return response.json();
     },
-    onSuccess: ({ input, data }: { input: string; data: ExpectationData }) => {
+    onSuccess: ({ input, data }: { input: string; data: ExpectationsData }) => {
       setExpectation(data);
       if (isErrorData(data)) {
+        dispatch({ type: "unset" });
         setState("rejected");
         setError(data);
         return;
       }
       setState("fulfilled");
-      dispatch({ type: "unset" });
       dispatch({ type: "update", sentences: input });
+      dispatch({
+        type: "set",
+        sentences: [data.response.sent_ids],
+      });
+      setCurrent?.(eventKey); // open this accordion item
     },
     onError: (error) => {
       console.error("Error fetching expectation:", error);
@@ -267,11 +275,15 @@ const ExpectationRule: FC<ExpectationProps> = ({
   );
 };
 
-type ExpectationRulesProps = AccordionProps & { rule: Rule };
+type ExpectationRulesProps = AccordionProps & {
+  rule: Rule;
+  setCurrent?: (key: AccordionEventKey) => void;
+};
 /** Component for rendering individual expectation rules. */
 const ExpectationRules: FC<ExpectationRulesProps> = ({
   rule,
   className,
+  setCurrent,
   ...props
 }) => {
   const id = useId();
@@ -285,6 +297,7 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
             rule={rule}
             key={`${id}-expectation-${j}`}
             eventKey={`${id}-expectation-${j}`}
+            setCurrent={setCurrent}
           />
         ))}
       </Accordion>
@@ -300,8 +313,9 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const { task } = useWritingTask();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
-  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
+  const onSelect: AccordionSelectCallback = (eventKey, _event) => {
     setCurrent(eventKey);
+  };
 
   return (
     <ReviewReset>
@@ -326,6 +340,7 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
             <ExpectationRules
               key={`rule-${i}`}
               rule={rule}
+              setCurrent={setCurrent}
               onSelect={onSelect}
               activeKey={current}
             />
