@@ -69,7 +69,9 @@ async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDatabase = await initDatabase();
   console.log('Database service initialized, ok to start listening ...');
+  // Initialize and watch prompts
   const shutdownPrompts = await initPrompts();
+  // watch interface settings file
   const shutdownSettings = await watchSettings();
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
@@ -105,13 +107,15 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     '/deeplink',
     async (request: Request, response: Response) => {
-      // const url = new URL('/index.html', LTI_HOSTNAME);
-      const url = new URL('/', LTI_HOSTNAME);
+      const url = new URL('/myprose', LTI_HOSTNAME);
       try {
         const task = JSON.parse(request.body.file) as {
           _id?: string;
         } & WritingTask;
+        const tool = ['draft', 'review'].includes(request.body.tool) ? request.body.tool : 'draft';
+        url.pathname = `/${tool}`;
         const { _id, ...writing_task } = task;
+        // url.pathname = `myprose/${_id}/${tool}`;
         const valid = validateWritingTask(writing_task);
         if (!valid) {
           throw new UnprocessableContentError(
@@ -127,11 +131,10 @@ async function __main__() {
         }
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
-        if (writing_task_id) {
-          url.pathname = `${url.pathname}/${writing_task_id}`;
-          url.searchParams.append('writing_task', writing_task_id);
-        }
-        console.log(url.toString());
+        // if (writing_task_id) {
+        //   url.pathname = `${url.pathname}/${writing_task_id}/${tool}`;
+        //   // url.searchParams.append('writing_task', writing_task_id);
+        // }
         const items: ContentItemType[] = [
           {
             type: 'ltiResourceLink',
@@ -146,6 +149,7 @@ async function __main__() {
             custom: {
               writing_task_id,
               writing_task: JSON.stringify(writing_task),
+              tool
             },
           },
         ];
@@ -343,7 +347,7 @@ async function __main__() {
       const token: IdToken | undefined = res.locals.token;
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
-      console.log('writing_task_id', writing_task_id);
+      // console.log('writing_task_id', writing_task_id);
       // const ltik = new URL(req.url, LTI_HOSTNAME).searchParams.get('ltik');
       const pageContextInit = {
         urlOriginal: req.url,

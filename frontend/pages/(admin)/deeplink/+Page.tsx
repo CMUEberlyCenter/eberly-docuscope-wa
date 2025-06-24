@@ -3,7 +3,9 @@ import { type ChangeEvent, type FC, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
+import { WritingTaskFilter } from "../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../../../src/app/components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "../../../src/lib/schemaValidate";
 import { isWritingTask, type WritingTask } from "../../../src/lib/WritingTask";
 import type { Data } from "./+data";
 
@@ -13,26 +15,43 @@ export const Page: FC = () => {
   const [selected, setSelected] = useState<WritingTask | null>(null);
   const [custom, setCustom] = useState<WritingTask | null>(null); // Uploaded file content.
   const [valid, setValid] = useState(true); // Uploaded file validity.
-  // const [error, setError] = useState(""); // Error messages for uploaded file.
+  const [error, setError] = useState(""); // Error messages for uploaded file.
+  const [data, setData] = useState<WritingTask[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files) {
+      if (files.length > 1) {
+        setValid(false);
+        setError(t("select_task.multiple_file_error"));
+        return;
+      }
+
       try {
         const content = await files[0].text();
         const json = JSON.parse(content);
-        if (isWritingTask(json)) {
+        if (!validateWritingTask(json)) {
+          setValid(false);
+          setError(JSON.stringify(validateWritingTask.errors));
+        }
+        else if (isWritingTask(json)) {
           setValid(true);
           setCustom(json);
           setSelected(json);
         } else {
           setValid(false);
+          setError(t("select_task.invalid_upload"));
         }
       } catch (err) {
         // expecting JSON parser error.
         // TODO provide error message to invalid text.
         setValid(false);
         console.error(err);
+        if (err instanceof SyntaxError) {
+          setError(t("select_task.malformed_json"));
+        } else {
+          setError(t("select_task.invalid_upload"));
+        }
       }
     }
   };
@@ -45,8 +64,9 @@ export const Page: FC = () => {
           className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
           style={{ minHeight: 0 }}
         >
+          <WritingTaskFilter tasks={tasks} update={setData} />
           <ListGroup className="overflow-auto w-100">
-            {tasks.map((task) => (
+            {data.map((task) => (
               <ListGroup.Item
                 key={task.info.name}
                 action
@@ -89,10 +109,10 @@ export const Page: FC = () => {
               isInvalid={!valid}
             />
             <Form.Control.Feedback type="invalid">
-              {t("select_task.invalid_upload")}
+              {error}
             </Form.Control.Feedback>
           </Form.Group>
-          <Form noValidate method="post">
+          <Form noValidate method="post" className="d-flex gap-2">
             <input
               type="hidden"
               name="file"
@@ -100,6 +120,10 @@ export const Page: FC = () => {
               className="d-none"
               readOnly={true}
             />
+            <select className="form-select" name="tool" required>
+              <option value="draft" selected>{t('deeplinking.option.draft')}</option>
+              <option value="review">{t('deeplinking.option.review')}</option>
+            </select>
             <button type="submit" className="btn btn-primary">
               {t("select")}
             </button>

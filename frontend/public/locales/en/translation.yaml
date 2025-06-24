@@ -31,6 +31,9 @@ legal:
 deeplink: Select a text type for this assignment
 deeplinking:
   title: myProse LTI Deeplinking
+  option:
+    draft: Draft
+    review: Review
 genlink:
   title: myProse Writing Task Link Generator
   link: 'Link:'
