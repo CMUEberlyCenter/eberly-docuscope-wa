@@ -55,8 +55,6 @@ import {
   SESSION_KEY
 } from './src/server/settings';
 import { getSettings, watchSettings } from './src/ToolSettings';
-import { log } from 'console';
-
 
 // const __filename = fileURLToPath(import.meta.url);
 // use process.cwd() to get the current working directory so that
@@ -92,6 +90,7 @@ async function __main__() {
       // }
       return Provider.redirect(res, '/draft'); //'/index.html');
     }
+    Provider.redirect(res, '/draft');
     // Provider.redirect(res, '/index'); //'/index.html');
   });
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
