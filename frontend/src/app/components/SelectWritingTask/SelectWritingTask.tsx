@@ -21,7 +21,6 @@ import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { type WritingTask, isWritingTask } from "../../../lib/WritingTask";
-import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,
   taskToEditor,
@@ -45,17 +44,16 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
   const { data: writingTasks } = useWritingTasks(); // all public tasks
-  const { task: writingTask } = useWritingTask(); // current task
+  const { task: writingTask, isInstructor, isLTI } = useWritingTask(); // current task
   const setWritingTask = useSetWritingTask();
-  const inLti = useLti(); // in LTI context
-  const ltiInfo = useLtiInfo(); // Information from LTI
+  // const inLti = useLti(); // in LTI context
   const [selected, setSelected] = useState<WritingTask | undefined | null>(
     writingTask
   );
   useEffect(() => setSelected(writingTask), [writingTask]);
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
-  useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
+  // useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
   const [data, setData] = useState<WritingTask[]>([]); // filtered list of tasks.
   const [showDetails, setShowDetails] = useState(false);
@@ -176,13 +174,13 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           <Form.Check
             type="checkbox"
             label={t("details.include")}
-            disabled={!writingTask}
+            disabled={!selected}
             checked={includeDetails}
             onChange={() => setIncludeDetails(!includeDetails)}
           />
           <Button
             variant="secondary"
-            disabled={!writingTask}
+            disabled={!selected}
             onClick={async () =>
               await navigator.clipboard.writeText(
                 taskToClipboard(selected, includeDetails)
@@ -191,7 +189,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           >
             {t("clipboard")}
           </Button>
-          <Button variant="secondary" disabled={!writingTask} onClick={insert}>
+          <Button variant="secondary" disabled={!selected} onClick={insert}>
             {t("select_insert")}
           </Button>
           <Button variant="primary" disabled={!selected} onClick={commit}>
@@ -200,7 +198,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
         </Modal.Footer>
       ) : (
         <Modal.Footer>
-          {(!inLti || ltiInfo?.instructor) && (
+          {(!isLTI || isInstructor) && (
             <OverlayTrigger
               onToggle={(nextShow) => setShowFile(nextShow)}
               show={showFile}

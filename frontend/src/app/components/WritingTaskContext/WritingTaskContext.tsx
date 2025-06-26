@@ -11,6 +11,10 @@ import type { WritingTask } from "../../../lib/WritingTask";
 type WritingTaskContext = {
   task?: WritingTask | null;
   taskId?: string | null;
+  username?: string;
+  ltiActivityTitle?: string;
+  isLTI?: boolean;
+  isInstructor?: boolean;
 };
 const WritingTaskContext = createContext<WritingTaskContext>({});
 const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
@@ -25,7 +29,7 @@ export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
       ...state,
       ...newState,
     }),
-    { task: undefined, taskId: undefined }
+    { task: undefined, taskId: undefined, username: undefined, ltiActivityTitle: undefined, isLTI: false, isInstructor: false }
   );
   return (
     <WritingTaskContext.Provider value={task}>

@@ -21,7 +21,6 @@ import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
-import { useLtiInfo } from "../../service/lti.service";
 import { FileDownload } from "../FileDownload/FileDownload";
 import {
   useInitiateUploadFile,
@@ -121,12 +120,11 @@ const CustomEditor: FC = () => {
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
-  const { task: writingTask } = useWritingTask();
-  const lti = useLtiInfo();
+  const { task: writingTask, username, ltiActivityTitle } = useWritingTask();
   const saveAs = useCallback(async () => {
     if (content) {
       const blob = await Packer.toBlob(
-        serializeDocx(content, writingTask, lti?.userInfo?.name)
+        serializeDocx(content, writingTask, username)
       );
       if (
         "showSaveFilePicker" in window &&
@@ -134,7 +132,7 @@ const CustomEditor: FC = () => {
       ) {
         const rootname =
           upload?.name ||
-          lti?.resource.title ||
+          ltiActivityTitle ||
           writingTask?.rules.name ||
           "myProse";
         try {
@@ -173,7 +171,7 @@ const CustomEditor: FC = () => {
     } else {
       setDocx(null);
     }
-  }, [content, lti, writingTask]);
+  }, [content, ltiActivityTitle, writingTask]);
 
   return (
     <Slate
@@ -225,7 +223,7 @@ const CustomEditor: FC = () => {
                   <FileDownload
                     content={docx}
                     title={
-                      lti?.resource.title ||
+                      ltiActivityTitle ||
                       writingTask?.rules.name ||
                       "myProse"
                     }

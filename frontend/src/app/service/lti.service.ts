@@ -1,4 +1,5 @@
 /** @fileoverview Accessing LTI 1.3 information. */
+/* @deprecated This service is deprecated and will be removed in the future. Use the LTI 1.3 context from the WritingTaskContext instead. */
 
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject, catchError, filter, of, switchMap } from 'rxjs';
@@ -55,7 +56,7 @@ export const [useLti, lti$] = bind(lti, isLti());
  * Construct the request parameters that includes the LTI credentials
  * @returns Request parameters with included credentials.
  */
-export const getLtiRequest = (): RequestInit => {
+const getLtiRequest = (): RequestInit => {
   try {
     return {
       credentials: 'include',

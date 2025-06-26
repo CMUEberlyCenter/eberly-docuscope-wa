@@ -7,9 +7,9 @@ import {
 import type { Data } from "./+data";
 
 const DataWrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  const { task, taskId } = useData<Data>();
+  const data = useData<Data>();
   const setTask = useSetWritingTask();
-  useEffect(() => setTask({ task, taskId }), [task, taskId, setTask]);
+  useEffect(() => setTask(data), [data, setTask]);
   return <>{children}</>;
 };
 const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
