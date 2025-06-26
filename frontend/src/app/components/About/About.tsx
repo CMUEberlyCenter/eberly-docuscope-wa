@@ -53,16 +53,6 @@ export const AboutModal: FC<ModalProps> = (props) => {
           <dd>
             {t("about.version", { version, date: build_date.toLocaleString() })}
           </dd>
-          {/* <dt>{t("about.template")}</dt>
-          <dd>
-            <Suspense fallback={<LoadingSmall />}>
-              {template_info
-                ? t("about.templates", {
-                    date: new Date(template_info.saved_at).toLocaleString(),
-                  })
-                : null}
-            </Suspense>
-          </dd> */}
           {task && (
             <>
               <dt>{t("about.task")}</dt>
@@ -108,12 +98,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
 };
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
-export const About: FC<AnchorProps> = ({
-  className,
-  onClick,
-  style,
-  ...props
-}) => {
+export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
   const toggle = () => setShow(!show);

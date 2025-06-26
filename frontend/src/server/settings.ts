@@ -64,7 +64,9 @@ export const LTI_OPTIONS = {
     name: PRODUCT, // Tool Provider name. Required field.
     logo: new URL('/logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
     description: 'myProse Editing and Review tools', // Tool Provider description.
-    redirectUris: ['/draft', '/review'].map(endpoint => new URL(endpoint, LTI_HOSTNAME).toString()), // Additional redirection URLs. The main URL is added by default.
+    redirectUris: ['/draft', '/review'].map((endpoint) =>
+      new URL(endpoint, LTI_HOSTNAME).toString()
+    ), // Additional redirection URLs. The main URL is added by default.
     customParameters: {}, // Custom parameters.
     autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
   },

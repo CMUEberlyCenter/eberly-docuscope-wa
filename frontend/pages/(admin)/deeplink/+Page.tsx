@@ -33,8 +33,7 @@ export const Page: FC = () => {
         if (!validateWritingTask(json)) {
           setValid(false);
           setError(JSON.stringify(validateWritingTask.errors));
-        }
-        else if (isWritingTask(json)) {
+        } else if (isWritingTask(json)) {
           setValid(true);
           setCustom(json);
           setSelected(json);
@@ -121,8 +120,10 @@ export const Page: FC = () => {
               readOnly={true}
             />
             <select className="form-select" name="tool" required>
-              <option value="draft" selected>{t('deeplinking.option.draft')}</option>
-              <option value="review">{t('deeplinking.option.review')}</option>
+              <option value="draft" selected>
+                {t("deeplinking.option.draft")}
+              </option>
+              <option value="review">{t("deeplinking.option.review")}</option>
             </select>
             <button type="submit" className="btn btn-primary">
               {t("select")}

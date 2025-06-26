@@ -13,10 +13,6 @@ export function useWritingTasks() {
   return useSWR(writing_tasks, fetcher<WritingTask[]>);
 }
 
-/** The current writing task specification */
-// export const writingTask = new BehaviorSubject<WritingTask | null>(null);
-// export const [useWritingTask, writingTask$] = bind(writingTask, null);
-
 /** Serialization of an html string. */
 const descriptionToSlate = (description: string): string => {
   // TODO add markings.

@@ -223,9 +223,7 @@ const CustomEditor: FC = () => {
                   <FileDownload
                     content={docx}
                     title={
-                      ltiActivityTitle ||
-                      writingTask?.rules.name ||
-                      "myProse"
+                      ltiActivityTitle || writingTask?.rules.name || "myProse"
                     }
                   />
                 )}

@@ -29,7 +29,14 @@ export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
       ...state,
       ...newState,
     }),
-    { task: undefined, taskId: undefined, username: undefined, ltiActivityTitle: undefined, isLTI: false, isInstructor: false }
+    {
+      task: undefined,
+      taskId: undefined,
+      username: undefined,
+      ltiActivityTitle: undefined,
+      isLTI: false,
+      isInstructor: false,
+    }
   );
   return (
     <WritingTaskContext.Provider value={task}>
