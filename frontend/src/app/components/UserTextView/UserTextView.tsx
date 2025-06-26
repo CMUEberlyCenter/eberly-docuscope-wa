@@ -10,7 +10,6 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
-// import { useSegmentedProse } from "../../service/review.service";
 import {
   useFileText,
   useInitiateUploadFile,
