@@ -15,6 +15,7 @@
     "coverage": "vitest run --coverage",
     "prettier": "npx prettier -c src/",
     "eslint": "npx eslint@^9 src",
+    "depcheck": "npx depcheck --ignore-dirs=dist,build,coverage,storybook-static,storybook",
     "precommit": "npm run prettier && npm run eslint && npm test",
     "gen:schema": "npx typescript-json-schema ./tsconfig.gen.json WritingTask --out ./src/lib/WritingTask.schema.json",
     "storybook": "storybook dev -p 6006",
@@ -66,7 +67,7 @@
     "@types/express": "^5.0.3",
     "@types/express-fileupload": "^1.5.1",
     "@types/express-session": "^1.18.2",
-    "@types/node": "^24.0.3",
+    "@types/node": "^24.0.4",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/sanitize-html": "^2.16.0",
@@ -84,21 +85,20 @@
     "jsdom": "^26.1.0",
     "playwright": "^1.53.1",
     "postcss": "^8.5.6",
-    "prettier": "^3.6.0",
+    "prettier": "^3.6.1",
     "rollup-plugin-visualizer": "^6.0.3",
     "sass": "^1.89.2",
     "storybook": "^9.0.13",
     "tslib": "^2.8.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.35.0",
-    "typescript-json-schema": "^0.65.1",
     "vite": "^7.0.0",
     "vite-plugin-svgr": "^4.3.0",
     "vitest": "^3.2.4",
     "vitest-fetch-mock": "^0.4.5"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.54.0",
+    "@anthropic-ai/sdk": "^0.55.0",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
@@ -145,11 +145,11 @@
     "react-transition-group": "^4.4.5",
     "rxjs": "^7.8.2",
     "sanitize-html": "^2.17.0",
-    "slate": "^0.117.0",
+    "slate": "^0.117.2",
     "slate-dom": "^0.116.0",
     "slate-history": "^0.113.1",
     "slate-hyperscript": "^0.100.0",
-    "slate-react": "^0.117.1",
+    "slate-react": "^0.117.2",
     "string-format": "^2.0.0",
     "swr": "^2.3.3",
     "systeminformation": "^5.27.6",
@@ -160,7 +160,6 @@
   },
   "overrides": {
     "bluebird": ">=3.7.2",
-    "glob": "^9",
     "ltijs": {
       "mongoose": ">=8.9.5",
       "mongodb": "$mongodb"
@@ -170,7 +169,6 @@
       "react-dom": "$react-dom"
     },
     "tr46": "^5.0.0",
-    "esbuild": ">=0.25.0",
     "@storybook/react-vite": {
       "vite": "$vite"
     }
