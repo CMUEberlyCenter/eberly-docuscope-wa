@@ -6,16 +6,24 @@ import style from "./Rating.module.scss";
 
 type RatingProps = HTMLProps<HTMLDivElement> & {
   value: number;
+  scale?: number; // Optional scale, default is 5, minimum is 1, maximum is 5
 };
 
 /**
  * Render rating stars.
  * @param params
- * @param params.value the raw [0-1] rating value supplied by Scribe.
+ * @param params.value the raw [0-1] rating value.
+ * @param params.scale the scale of the rating, default is 5, minimum is 1, maximum is 5.
  * @returns
  */
-export const Rating: FC<RatingProps> = ({ value, className, ...props }) => {
-  const scale = 5;
+export const Rating: FC<RatingProps> = ({
+  scale,
+  value,
+  className,
+  ...props
+}) => {
+  const maxValue = 5; // Only have 5 colors specified in the CSS
+  scale = Math.min(Math.max(1, Math.floor(scale || 5)), maxValue); // Default scale to 5 if not provided
   const rating = value * scale;
   const fullSymbols = Math.floor(rating);
 

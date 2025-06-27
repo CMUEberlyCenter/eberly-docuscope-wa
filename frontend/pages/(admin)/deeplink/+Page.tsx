@@ -125,7 +125,11 @@ export const Page: FC = () => {
               </option>
               <option value="review">{t("deeplinking.option.review")}</option>
             </select>
-            <button type="submit" className="btn btn-primary">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!selected}
+            >
               {t("select")}
             </button>
           </Form>

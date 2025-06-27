@@ -81,11 +81,16 @@ async function __main__() {
   );
 
   Provider.onConnect(async (token: IdToken, _req: Request, res: Response) => {
-    console.log('onConnect', _req.url);
+    // console.log('onConnect', _req.url);
     if (token) {
+      // console.log('onConnect token', token);
+      if (token.platformContext.custom?.tool) {
+        return Provider.redirect(res, `/${token.platformContext.custom.tool}`);
+      }
+      // if instructor and torus (no deep linking) redirect to admin/instructor
       // if (token.platformContext.custom?.writing_task_id) {
       //   console.log('onConnect writing_task_id', token.platformContext.custom.writing_task_id);
-      //   Provider.redirect(res, '/myprose/${token.platformContext.custom.writing_task_id}/draft');
+      //   Provider.redirect(res, '/myprose/${token.platformContext.custom.writing_task_id}/${token.platformContext.custom.tool ?? 'draft'}');
       // // } else if (token.platformContext.custom?.writing_task) {
       // }
       return Provider.redirect(res, '/draft'); //'/index.html');
@@ -190,6 +195,7 @@ async function __main__() {
       const ret = {
         ...context,
         writing_task,
+        token,
       };
       res.send(ret);
     } catch (err) {
@@ -231,7 +237,7 @@ async function __main__() {
         const url = await platform.platformUrl();
         const active = await platform.platformActive();
         console.log('Registered platforms:');
-        console.log(`${active? '+' : 'o'} Platform: ${name}, URL: ${url}, Active: ${active}`);
+        console.log(`${active ? '+' : 'o'} Platform: ${name}, URL: ${url}, Active: ${active}`);
       });
     }
     const app = express();
@@ -344,6 +350,8 @@ async function __main__() {
     app.use(express.static(PUBLIC));
     app.all('*splat', async (req: Request, res: Response, next) => {
       const token: IdToken | undefined = res.locals.token;
+      console.log('LTI info', token);
+
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
       // console.log('writing_task_id', writing_task_id);
