@@ -18,15 +18,15 @@ import os
 from collections import Counter 
 
 # from urllib.parse import urlparse
-# import base64
-# from PIL import Image
-# from io import BytesIO
+import base64
+from PIL import Image
+from io import BytesIO
 
 from bs4 import BeautifulSoup as bs
 from bs4 import Comment
 import bs4
 
-# from pydocx import PyDocX
+from pydocx import PyDocX
 import unidecode
 
 import dslib.utils as utils
@@ -145,7 +145,7 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
 import dslib.models.stat as ds_stat
 
 nlp = None
-LOAD_TRAINED_MODEL = False # If True, will check for the existence of models in the filesystem.
+LOAD_TRAINED_MODEL = False  # If True, will check for the existence of models in the filesystem.
 
 ##
 # https://spacy.io/api/top-level#spacy.info
@@ -158,12 +158,10 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if lang == 'en':
             default_model = resource_path("data/default_model")
             large_model = resource_path("data/large_model")
+
             if LOAD_TRAINED_MODEL and model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
                 nlp = spacy.load(default_model)
-                #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
-                #print("\n\n")
-                #print(result)
             elif LOAD_TRAINED_MODEL and os.path.exists(large_model):
                 logging.info("Loading Spacy large model ...")
                 nlp = spacy.load(large_model)
@@ -540,7 +538,7 @@ class DSDocument():
     def setNounSubjectOptions(cls, options):
         DSDocument.noun_subject_options = options
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setUserDefinedSynonyms(cls, synsets):
         # convert a list of synonyms into a dictionary for faster look up
         if synsets == [] or synsets == None:
@@ -570,14 +568,14 @@ class DSDocument():
 
             DSDocument.user_defined_synonym_names.append(lemma)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedSynonym(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             return True
         else:
             return False
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedSynonymDefined(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             for synonym, name in DSDocument.user_defined_synonyms.items():
@@ -590,7 +588,7 @@ class DSDocument():
         else:
             return False            
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setMultiwordTopics(cls, topics):
         if topics is None:
             DSDocument.multiword_topics = []
@@ -600,42 +598,42 @@ class DSDocument():
             DSDocument.deleted_multiword_topics = list(set(DSDocument.multiword_topics) - set(topics))
             DSDocument.multiword_topics = topics
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setUserDefinedTopics(cls, topics):
         DSDocument.user_defined_topics = [t.lower().replace(' ', '_') for t in topics]
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedTopic(cls, lemma):
         if lemma in DSDocument.user_defined_topics:
             return True
         else:
             return False
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def addUserDefinedTopic(cls, topic):
         if topic is not None and topic != '':
             lc_topic = topic.lower()
             if lc_topic not in DSDocument.user_defined_topics:
                 DSDocument.user_defined_topics.append(lc_topic)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def deleteUserDefinedTopic(cls, topic_to_delete):
         if topic_to_delete in DSDocument.user_defined_topics.remove:
             DSDocument.user_defined_topics.remove(topic_to_delete)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def clearUserDefinedTopics(cls):
         DSDocument.user_defined_topics = []
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def getUserDefinedTopics(cls):
         return DSDocument.user_defined_topics
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def getUserDefinedSynonyms(cls):
         return DSDocument.user_defined_synonym_names
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def clearUserDefinedSynonyms(cls):
         DSDocument.user_defined_synonym_names = []
 
@@ -702,6 +700,8 @@ class DSDocument():
         self.global_topics           = []
         self.local_topics            = []
         self.topic_location_dict     = None
+
+        self.lexical_overlaps_analyzed = False
 
     def setController(self, c):
         self.controller = c
@@ -1370,7 +1370,7 @@ class DSDocument():
             soup = bs(text, "html.parser")
             text = soup.text
 
-        text = re.sub(r"\s+", " ", text.strip()) # text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
+        text = text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
         doc = nlp(text)
 
         if type(sent) == str:
@@ -1396,10 +1396,13 @@ class DSDocument():
         # the 'sent_analysis' property to JSON easily later.
         res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
 
-        tokens = [{'text': token.text, 'is_root': token.dep_ == 'ROOT'} for token in doc]
-        # for token in doc:
-        #     is_root = token.dep_ == 'ROOT'
-        #     tokens.append( {'text': token.text, 'is_root': is_root})
+        tokens = []
+        for token in doc:
+            if token.dep_ == 'ROOT':
+                is_root = True
+            else:
+                is_root = False
+            tokens.append( {'text': token.text, 'is_root': is_root})
         res['TOKENS'] = tokens
 
         advcl_root = None
@@ -1448,10 +1451,6 @@ class DSDocument():
         else:
             res['MOD_CL'] = None
 
-        # print("analyzeSent()")
-        # print("res =", res)
-        # print("---------------------------")
-
         return res
 
     def clearGlobalTopicalProgDataCache(self):
@@ -1483,19 +1482,6 @@ class DSDocument():
 
         word_pos = section_data['start']
 
-       # def listLemmas(sent):
-       #      global stop_words
-
-       #      lemmas = list()
-       #      temp = list()
-
-       #      for w in sent:
-       #          if w[POS] is not None and w[LEMMA] not in stop_words:
-       #              if (w[POS], w[LEMMA]) not in temp:
-       #                  temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
-       #                  lemmas.append(w)
-       #      return lemmas
-
         # Optimized by only adding NOUNs. We ignore all the other POSs.
         def listLemmas(sent):
             global stop_words
@@ -1520,13 +1506,7 @@ class DSDocument():
                         temp.append(w[STEM])
                         stems.append(w)
             return stems
-        
-        # def accumulateParaLemmas(paragraphs):
-        #     accum = list()
-        #     for para in paragraphs:
-        #         accum += para['lemmas']
-        #     return accum
-
+    
         # Optimization. We are only interested in nouns now.
         def accumulateParaLemmas(paragraphs):
             temp = list()
@@ -1654,7 +1634,7 @@ class DSDocument():
         section_data['data']    = data
         section_data['end_pos'] = word_pos
 
-        self.recalculateGivenWords(data=data)
+        # self.recalculateGivenWords(data=data) # 2025.07.03
 
     def recalculateGivenWords(self, data=None, section=-1):
 
@@ -1668,6 +1648,9 @@ class DSDocument():
             else:
                 data = self.sections[section]['data']
 
+        if self.lexical_overlaps_analyzed:
+            return
+
         if self.progress_callback:
             self.progress_callback(max_val=50, msg="Finding lexical overlaps between paragraphs...")
 
@@ -1677,6 +1660,9 @@ class DSDocument():
             self.progress_callback(max_val=80, msg="Finding lexical overlaps between sentences...")
 
         self.findGivenWordsSent(data)               # find given words between sentences in each paragraph
+
+        self.clearGlobalTopicalProgDataCache()
+        self.lexical_overlaps_analyzed = True
 
     def isGiven(self, l1, l2, pos1, pos2, pronoun=False):  
               
@@ -2858,12 +2844,12 @@ class DSDocument():
                 data = self.sections[self.current_section]['data']
                 doc  = self.sections[self.current_section]['doc']
                 if doc is None:
-                    raise ValueError
+                    raise valueError
                 else:
                     docx_paras = doc.paragraphs
 
                 if data is None:
-                    raise ValueError
+                    raise valueError
             except:
                 logging.error(self.sections[self.current_section])                
                 return
@@ -3342,7 +3328,7 @@ class DSDocument():
                 sent_text = sent['text']
 
                 if htag_level == 0:
-                    xml_str += f"<span id=\"p{pcount}s{scount}\" class=\"sentence\">{sent_text}</span>"
+                    xml_str += f"<span id=\"p{pcount}s{scount}\">{sent_text}</span>"
                 else:
                     # this text is inisde a heading tag. We do not mark it as a sentence.
                     sent_text = sent['text']
@@ -3543,8 +3529,10 @@ class DSDocument():
         return res
 
     def getGlobalTopicalProgData(self, sort_by=TOPIC_SORT_APPEARANCE):
-        if self.global_topical_prog_data is not None:
-            return self.global_topical_prog_data
+
+        if self.lexical_overlaps_analyzed:                # if lexical overlaps have been analyzed already
+            if self.global_topical_prog_data is not None: # if global_topical_prog_data are already genreated, return themn.
+                return self.global_topical_prog_data      # otherwise, we'll generate new global_topical_prog_data
 
         # first we should make a list of given lemmas as they appear in the text
         all_lemmas = list()
@@ -3755,7 +3743,7 @@ class DSDocument():
                             bSkipPunct = True
                         else:
                             bSkipPunct = False
-                        res.append(tuple([p_count, s_count, s, bSkipPunct]))
+                        res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
                         s_count += 1
 
                     i += 1
@@ -3774,7 +3762,7 @@ class DSDocument():
                         bSkipPunct = True
                     else:
                         bSkipPunct = False
-                    res.append(tuple([p_count, s_count, s, bSkipPunct]))
+                    res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
                     s_count += 1
 
                 i+= 1
@@ -5063,6 +5051,8 @@ class DSDocument():
         sort_by:                The sorting method option.
         """
 
+        self.doc.recalculateGivenWords(section=0)
+
         global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
         self.updateLocalTopics()
         self.updateGlobalTopics(global_data)
@@ -6016,21 +6006,31 @@ class DSDocument():
             if type(sent_data) == str and sent_data == "\n":
                 return ""
 
-            analysis = sent_data[2]['sent_analysis']
-            np_positions = list([(np['start'], np['end']) for np in analysis['NOUN_CHUNKS']])
+            np_positions = list()
+            analysis = sent_data[2]
             is_be_verb = analysis['BE_VERB']
 
             def getNPTag(wpos):
                 for pos in np_positions:
                     if wpos == pos[0]:
-                        return '<b class="topic-text">'
+                        if is_be_verb:
+                                return "<b class=\"topic-text\">"
+                        else:
+                            return "<b class=\"topic-text\">"     
+
                     elif wpos == pos[1]:
                         return "</b>"
                 return ""
 
+            for np in analysis['NOUN_CHUNKS']:
+                np_positions.append((np['start'], np['end']))
+
             html_str = '<p class="non-topic-text">'
 
-            verb_class = "be-verb" if is_be_verb else "active-verb"
+            if is_be_verb:
+                verb_class = "be-verb"
+            else:
+                verb_class = "active-verb"
 
             wpos = 0
             tokens = analysis['TOKENS']
@@ -6056,7 +6056,7 @@ class DSDocument():
                         html_str += " "
 
                 if token['is_root']:
-                    html_str += f'<span class="{verb_class}">{w}</span>'
+                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w)
                 else:
                     html_str += f"{w}"
 
@@ -6085,7 +6085,7 @@ class DSDocument():
                 html_strs = list()
                 
             elif type(sent_data[0]) != str and first_sent:
-                sent_dict = sent_data[2]
+                sent_dict = sent_data[3]
 
                 w = sent_dict['text_w_info'][0] # get the first word
                 first_word_pos = w[WORD_POS]
