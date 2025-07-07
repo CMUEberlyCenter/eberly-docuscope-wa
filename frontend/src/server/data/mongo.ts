@@ -97,7 +97,7 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
       .db(MONGO_DB)
       .collection<WritingTask>(WRITING_TASKS);
     const cursor = collection.find<WritingTask>(
-      { public: true },
+      { public: true, 'info.access': ACCESS_LEVEL },
       { projection: { path: 0, modified: 0 } }
     );
     const ret: WritingTask[] = [];
