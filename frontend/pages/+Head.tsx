@@ -29,7 +29,7 @@ const HeadDefault: FC = () => {
       />
       <script
         async
-        src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.PUBLIC_ENV__GOOGLE_ANALYTICS}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.GOOGLE_ANALYTICS}`}
       ></script>
       <script
         dangerouslySetInnerHTML={{
@@ -37,7 +37,7 @@ const HeadDefault: FC = () => {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '${import.meta.env.PUBLIC_ENV__GOOGLE_ANALYTICS}');`,
+          gtag('config', '${import.meta.env.GOOGLE_ANALYTICS}');`,
         }}
       ></script>
     </>
