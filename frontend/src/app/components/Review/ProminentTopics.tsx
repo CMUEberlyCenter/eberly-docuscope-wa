@@ -5,6 +5,7 @@ import {
   type HTMLProps,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
@@ -61,20 +62,21 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
       dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
   }, [current, review, dispatch]);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
       writing_task: WritingTask;
-      signal: AbortSignal;
     }) => {
-      const { document, writing_task, signal } = data;
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
       const response = await fetch("/api/v2/review/prominent_topics", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document, writing_task }),
-        signal,
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to fetch Prominent Topics review");
@@ -101,14 +103,12 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Civil Tone
-    const controller = new AbortController();
     mutation.mutate({
       document,
       writing_task,
-      signal: controller.signal,
     });
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
 

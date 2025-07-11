@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
@@ -86,21 +87,22 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<CredibilityData | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
       writing_task: WritingTask;
-      signal: AbortSignal;
     }) => {
-      const { document, writing_task, signal } = data;
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
       const response = await fetch("/api/v2/review/credibility", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document, writing_task }),
-        signal,
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to fetch Credibility review");
@@ -116,19 +118,20 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
       // TODO: handle error appropriately
       console.error("Error fetching Credibility review:", error);
     },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
   });
 
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Credibility
-    const controller = new AbortController();
     mutation.mutate({
       document,
       writing_task,
-      signal: controller.signal,
     });
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
 

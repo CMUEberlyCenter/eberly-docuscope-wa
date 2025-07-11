@@ -80,10 +80,8 @@ async function __main__() {
     })
   );
 
-  Provider.onConnect(async (token: IdToken, _req: Request, res: Response) => {
-    // console.log('onConnect', _req.url);
+  Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
     if (token) {
-      // console.log('onConnect token', token);
       if (token.platformContext.custom?.tool) {
         return Provider.redirect(res, `/${token.platformContext.custom.tool}`);
       }
@@ -94,6 +92,9 @@ async function __main__() {
       // // } else if (token.platformContext.custom?.writing_task) {
       // }
       return Provider.redirect(res, '/draft'); //'/index.html');
+    }
+    if (req.query.writing_task) {
+      return Provider.redirect(res, `/myprose/${req.query.writing_task}/`);
     }
     Provider.redirect(res, '/draft');
     // Provider.redirect(res, '/index'); //'/index.html');
@@ -210,7 +211,7 @@ async function __main__() {
     }
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/);
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/);
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
@@ -348,14 +349,17 @@ async function __main__() {
 
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
+    // Handle index.html to support old (pre-tool split) genlink links
+    app.get('/index.html', (req: Request, res: Response) => {
+      if (req.query.writing_task) {
+        return Provider.redirect(res, `/myprose/${req.query.writing_task}/`);
+      }
+      Provider.redirect(res, '/draft');
+    });
     app.all('*splat', async (req: Request, res: Response, next) => {
       const token: IdToken | undefined = res.locals.token;
-      console.log('LTI info', token);
-
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
-      // console.log('writing_task_id', writing_task_id);
-      // const ltik = new URL(req.url, LTI_HOSTNAME).searchParams.get('ltik');
       const pageContextInit = {
         urlOriginal: req.url,
         headersOriginal: req.headers,

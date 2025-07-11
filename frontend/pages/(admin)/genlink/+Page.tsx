@@ -78,8 +78,10 @@ const Page: FC = () => {
     const target = new URL(hostname);
     const reviewTarget = new URL(reviewHostname);
     if (selected && selected._id) {
-      target.searchParams.append("writing_task", selected._id);
-      reviewTarget.searchParams.append("writing_task", selected._id);
+      target.pathname = `/myprose/${selected.info.id ?? selected._id}/draft`;
+      // target.searchParams.append("writing_task", selected._id);
+      reviewTarget.pathname = `/myprose/${selected.info.id ?? selected._id}/review`;
+      // reviewTarget.searchParams.append("writing_task", selected._id);
     }
     setUrl(target);
     setReview(reviewTarget);

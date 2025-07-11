@@ -9,8 +9,8 @@ import {
   MONGO_CLIENT,
   MONGO_DB,
 } from '../settings';
-import { initWritingTasks } from './writing_task_description';
 import { type ChatResponse } from './chat';
+import { initWritingTasks } from './writing_task_description';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -35,14 +35,24 @@ type WritingTaskDb = WritingTask & {
  */
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   try {
-    const _id = new ObjectId(id);
     const collection = client.db(MONGO_DB).collection(WRITING_TASKS);
+    if (ObjectId.isValid(id) && id.length === 24) {
+      const _id = new ObjectId(id);
+      const rules = await collection.findOne<WritingTask>(
+        { _id },
+        { projection: { _id: 0, path: 0, modified: 0 } }
+      );
+      if (!rules) {
+        throw new ReferenceError(`Writing Task ${id} not found.`);
+      }
+      return rules;
+    }
     const rules = await collection.findOne<WritingTask>(
-      { _id },
+      { 'info.id': id },
       { projection: { _id: 0, path: 0, modified: 0 } }
     );
     if (!rules) {
-      throw new ReferenceError(`Expectation file ${id} not found.`);
+      throw new ReferenceError(`Writing Task ${id} not found.`);
     }
     return rules;
   } catch (err) {

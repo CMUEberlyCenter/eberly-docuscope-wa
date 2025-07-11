@@ -117,6 +117,8 @@ export type WritingTaskMetaData = {
   saved: string; // DateTime
   /** OS filename */
   filename: string;
+  /** Identifier, a uri fragment */
+  id?: string;
   /** Optional dictionary location. (UNUSED) */
   dict_path?: string;
   /** Optionally specify the input language for LLM templates. (Default configured in server settings) */

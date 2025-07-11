@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
@@ -53,20 +54,21 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   // const review = useParagraphClarityData();
   const id = useId();
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
       writing_task: WritingTask;
-      signal: AbortSignal;
     }) => {
-      const { document, writing_task, signal } = data;
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
       const response = await fetch("/api/v2/review/paragraph_clarity", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document, writing_task }),
-        signal,
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to fetch Paragraph Clarity review");
@@ -88,15 +90,17 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
       // TODO: handle error appropriately
       console.error("Error fetching Paragraph Clarity review:", error);
     },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
   });
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Paragraph Clarity
-    const controller = new AbortController();
-    mutation.mutate({ document, writing_task, signal: controller.signal });
+    mutation.mutate({ document, writing_task });
     // TODO error handling
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
 

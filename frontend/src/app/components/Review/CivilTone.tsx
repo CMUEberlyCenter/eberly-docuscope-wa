@@ -1,8 +1,10 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   useContext,
   useEffect,
   useId,
+  useRef,
   useState,
   type FC,
   type HTMLProps,
@@ -11,6 +13,7 @@ import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import { isErrorData, type CivilToneData } from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -18,8 +21,6 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { useMutation } from "@tanstack/react-query";
-import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Civil Tone Tool component. */
 export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
@@ -33,20 +34,22 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
   // const review = useCivilToneData();
   const id = useId();
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
       writing_task: WritingTask;
-      signal: AbortSignal;
     }) => {
-      const { document, writing_task, signal } = data;
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
       const response = await fetch("/api/v2/review/civil_tone", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document, writing_task }),
-        signal,
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to fetch Civil Tone review");
@@ -62,19 +65,20 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
       // TODO: handle error appropriately
       console.error("Error fetching Civil Tone review:", error);
     },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
   });
 
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Civil Tone
-    const controller = new AbortController();
     mutation.mutate({
       document,
       writing_task,
-      signal: controller.signal,
     });
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
 

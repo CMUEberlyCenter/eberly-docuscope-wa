@@ -34,6 +34,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import {
@@ -266,16 +267,18 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
   // const ontopicProse = useOnTopicProse();
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
-    mutationFn: async (data: { document: string; signal: AbortSignal }) => {
-      const { document, signal } = data;
+    mutationFn: async (data: { document: string }) => {
+      const { document } = data;
+      abortControllerRef.current = new AbortController();
       const response = await fetch("/api/v2/review/ontopic", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ document }),
-        signal,
+        signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
         throw new Error("Failed to update sentences");
@@ -287,17 +290,19 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
       if (data.response.html)
         dispatch({ type: "update", sentences: data.response.html });
     },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+    // TODO: handle error appropriately
   });
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Sentences
-    const controller = new AbortController();
     mutation.mutate({
       document,
-      signal: controller.signal,
     });
     return () => {
-      controller.abort();
+      abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
 
