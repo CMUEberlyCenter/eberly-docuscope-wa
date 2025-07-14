@@ -1,6 +1,10 @@
 import { watch } from 'chokidar';
 import { readFile } from 'node:fs/promises';
-import { isWritingTask, type WritingTask } from '../../lib/WritingTask';
+import {
+  isWritingTask,
+  isWritingTaskIdValid,
+  type WritingTask,
+} from '../../lib/WritingTask';
 import { WRITING_TASKS_PATH } from '../settings';
 
 export async function initWritingTasks(
@@ -25,6 +29,9 @@ export async function initWritingTasks(
       if (!isWritingTask(json)) {
         throw new Error(`${path} is not a Writing Task Description.`);
       }
+      if (!isWritingTaskIdValid(json.info.id)) {
+        throw new Error(`${path} has an invalid info.id value.`);
+      }
       await add(path, json);
     } catch (err) {
       console.error(err);
@@ -36,6 +43,9 @@ export async function initWritingTasks(
       const json = JSON.parse(content);
       if (!isWritingTask(json)) {
         throw new Error(`${path} is not a WTD`);
+      }
+      if (!isWritingTaskIdValid(json.info.id)) {
+        throw new Error(`${path} has an invalid info.id value.`);
       }
       await add(path, json);
     } catch (err) {

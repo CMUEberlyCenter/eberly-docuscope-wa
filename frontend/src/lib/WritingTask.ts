@@ -157,6 +157,13 @@ function isWritingTaskMetaData(
   );
 }
 
+/** Test if a given task uri identifier (info.id) is undefined or a valid uri fragment. */
+export function isWritingTaskIdValid(taskId?: string): boolean {
+  if (!taskId) return true; // No task ID means no task, so valid.
+  // Task ID should be a valid URI fragment, so it must not contain spaces or special characters.
+  return /^[a-zA-Z0-9_-]+$/.test(taskId);
+}
+
 /** Extract all keywords from an array of writing task definitions. */
 export function extractKeywords(tasks: WritingTask[]) {
   return [
