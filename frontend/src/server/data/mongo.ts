@@ -48,8 +48,9 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
       return rules;
     }
     const rules = await collection.findOne<WritingTask>(
-      { 'info.id': id },
-      { projection: { _id: 0, path: 0, modified: 0 } }
+      { 'info.id': id, public: true }, // Find if the id exists in the public tasks.
+      // Only use public tasks so that instructor submittend tasks are not returned.
+      { projection: { _id: 0, path: 0, modified: 0 }, sort: { modified: -1 } }
     );
     if (!rules) {
       throw new ReferenceError(`Writing Task ${id} not found.`);

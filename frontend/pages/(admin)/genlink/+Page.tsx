@@ -1,5 +1,5 @@
 /* @overview: This page allows the user to generate a link for a writing task. The user can select a writing task from a list, or upload a custom writing task file. The page also displays the generated link and allows the user to copy it to the clipboard. */
-import { type ChangeEvent, type FC, useEffect, useState } from "react";
+import { type ChangeEvent, type FC, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -10,6 +10,20 @@ import { validateWritingTask } from "../../../src/lib/schemaValidate";
 import { isWritingTask, type WritingTask } from "../../../src/lib/WritingTask";
 import type { Data } from "./+data";
 
+const WritingTaskLink: FC<{ href: URL; title: string }> = ({ href, title }) => {
+  const url = href.toString();
+  return (
+    <div className="d-flex flex-column justify-content-between">
+      <a href={url}>{title}</a>
+      <span>
+        {url}
+        <ClipboardIconButton
+          onClick={() => navigator.clipboard.writeText(url)}
+        />
+      </span>
+    </div>
+  );
+};
 type IdWritingTask = WritingTask & { _id?: string };
 
 const Page: FC = () => {
@@ -21,9 +35,6 @@ const Page: FC = () => {
   const [valid, setValid] = useState(true); // Uploaded file validity.
   const [error, setError] = useState(""); // Error messages for uploaded file.
   const hostname = new URL("/draft", window.location.href); // base url for link
-  const reviewHostname = new URL("/review", window.location.href);
-  const [url, setUrl] = useState(hostname); // URL for currently selected writing task.
-  const [review, setReview] = useState(reviewHostname); // URL for review of currently selected writing task.
   const [data, setData] = useState<WritingTask[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -74,18 +85,6 @@ const Page: FC = () => {
       }
     }
   };
-  useEffect(() => {
-    const target = new URL(hostname);
-    const reviewTarget = new URL(reviewHostname);
-    if (selected && selected._id) {
-      target.pathname = `/myprose/${selected.info.id ?? selected._id}/draft`;
-      // target.searchParams.append("writing_task", selected._id);
-      reviewTarget.pathname = `/myprose/${selected.info.id ?? selected._id}/review`;
-      // reviewTarget.searchParams.append("writing_task", selected._id);
-    }
-    setUrl(target);
-    setReview(reviewTarget);
-  }, [selected]);
 
   return (
     <main className="vh-100 vw-100 d-flex flex-column card px-0">
@@ -135,36 +134,76 @@ const Page: FC = () => {
               </ListGroup.Item>
             </ListGroup>
             <div className="w-100 overflow-auto">
-              <div className="border rounded container-fluid mb-1 py-1">
-                <h4 className="d-inline">{t("genlink.link")}</h4>
-                <a href={url.toString()} className="ms-4">
-                  {selected?.info.name
-                    ? t("genlink.draft_template", { title: selected.info.name })
-                    : t("genlink.draft")}
-                </a>
-                <a href={review.toString()} className="ms-4">
-                  {selected?.info.name
-                    ? t("genlink.review_template", {
-                        title: selected.info.name,
-                      })
-                    : t("genlink.review")}
-                </a>
-                <p>
-                  <ClipboardIconButton
-                    onClick={() =>
-                      navigator.clipboard.writeText(url.toString())
-                    }
-                  />
-                  {url.toString()}
-                </p>
-                <p>
-                  <ClipboardIconButton
-                    onClick={() =>
-                      navigator.clipboard.writeText(review.toString())
-                    }
-                  />
-                  {review.toString()}
-                </p>
+              <div className="mb-1 py-1">
+                <header>
+                  <h4 className="d-inline">{t("genlink.link")}</h4>
+                </header>
+                <ListGroup>
+                  {selected ? (
+                    <>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={
+                            new URL(
+                              `/myprose/${selected !== custom && selected.public && selected.info.id ? selected.info.id : selected._id}`,
+                              hostname
+                            )
+                          }
+                          title={t("genlink.top_template", {
+                            title: selected.info.name,
+                          })}
+                        />
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={
+                            new URL(
+                              `/myprose/${selected !== custom && selected.public && selected.info.id ? selected.info.id : selected._id}/draft`,
+                              hostname
+                            )
+                          }
+                          title={t("genlink.draft_template", {
+                            title: selected.info.name,
+                          })}
+                        />
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={
+                            new URL(
+                              `/myprose/${selected !== custom && selected.public && selected.info.id ? selected.info.id : selected._id}/review`,
+                              hostname
+                            )
+                          }
+                          title={t("genlink.review_template", {
+                            title: selected.info.name,
+                          })}
+                        />
+                      </ListGroup.Item>
+                    </>
+                  ) : (
+                    <>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={new URL("/myprose", hostname)}
+                          title={t("document.title")}
+                        />
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={new URL("/draft", hostname)}
+                          title={t("genlink.draft")}
+                        />
+                      </ListGroup.Item>
+                      <ListGroup.Item>
+                        <WritingTaskLink
+                          href={new URL("/review", hostname)}
+                          title={t("genlink.review")}
+                        />
+                      </ListGroup.Item>
+                    </>
+                  )}
+                </ListGroup>
               </div>
               <WritingTaskInfo task={selected} />
             </div>

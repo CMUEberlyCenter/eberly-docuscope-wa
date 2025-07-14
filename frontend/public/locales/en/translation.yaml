@@ -21,26 +21,27 @@ about:
   cmu: Carnegie Mellon University
   simon: Simon Initiative
 document.title: myProse
-document.description: myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
+document.description: $t(document.title) is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...
 wait: This may take a few seconds...
 legal:
-  myprose: myProse Privacy Notice
+  myprose: $t(document.title) Privacy Notice
   cmu: Legal
   privacy: Privacy Notice
 deeplink: Select a text type for this assignment
 deeplinking:
-  title: myProse LTI Deeplinking
+  title: $t(document.title) LTI Deeplinking
   option:
     draft: Draft
     review: Review
 genlink:
-  title: myProse Writing Task Link Generator
-  link: 'Link:'
-  draft: myProse Draft
-  review: myProse Review
-  draft_template: "myProse Draft: {{title}}"
-  review_template: "myProse Review: {{title}}"
+  title: $t(document.title) Writing Task Link Generator
+  link: 'Links:'
+  draft: $t(document.title) Draft
+  review: $t(document.title) Review
+  top_template: "$t(document.title): {{title}}"
+  draft_template: "$t(document.title) Draft: {{title}}"
+  review_template: "$t(document.title) Review: {{title}}"
 audio:
   play: Play
   pause: Pause
