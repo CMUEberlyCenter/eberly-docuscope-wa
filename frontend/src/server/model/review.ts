@@ -1,6 +1,6 @@
 import { DBRef } from 'mongodb';
 import type { Analysis } from '../../lib/ReviewResponse';
-import { isWritingTask, type WritingTask } from '../../lib/WritingTask';
+import { type WritingTask } from '../../lib/WritingTask';
 
 export type Review = {
   /** Assignment identifier. */
@@ -19,12 +19,12 @@ export type Review = {
   created?: Date;
 };
 
-export const isReview = (obj: Review | unknown): obj is Review =>
-  !!obj &&
-  typeof obj === 'object' &&
-  'document' in obj &&
-  typeof obj.document === 'string' &&
-  'writing_task' in obj &&
-  isWritingTask(obj.writing_task) &&
-  'analysis' in obj &&
-  Array.isArray(obj.analysis); // TODO add obj.analysis.every(isAnalysis)
+// const isReview = (obj: Review | unknown): obj is Review =>
+//   !!obj &&
+//   typeof obj === 'object' &&
+//   'document' in obj &&
+//   typeof obj.document === 'string' &&
+//   'writing_task' in obj &&
+//   isWritingTask(obj.writing_task) &&
+//   'analysis' in obj &&
+//   Array.isArray(obj.analysis); // TODO add obj.analysis.every(isAnalysis)

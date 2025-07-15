@@ -1,5 +1,5 @@
 /* Type declaration for RFC-9457 problem details */
-export type ProblemDetails<Details = string> = {
+type ProblemDetails<Details = string> = {
   type?: string; // URI
   title?: string; // Human readable identifier, should match title from type page
   status?: number; // HTTP status code
@@ -9,6 +9,7 @@ export type ProblemDetails<Details = string> = {
   [key: string]: unknown;
 };
 
+/** Generate File Not Found message. */
 export const FileNotFound = (
   err: Error | string,
   instance?: string
@@ -20,6 +21,7 @@ export const FileNotFound = (
   instance,
 });
 
+/** Generate Forbidden message. */
 export const Forbidden = (
   err: Error | string,
   instance?: string
@@ -31,6 +33,7 @@ export const Forbidden = (
   instance,
 });
 
+/** Generate Internal Server Error message. */
 export const InternalServerError = (
   err: Error | string | unknown,
   instance?: string
@@ -50,6 +53,7 @@ export const InternalServerError = (
 
 export class BadRequestError extends Error {}
 
+/** Generate Bad Request message. */
 export const BadRequest = (
   err: Error | string,
   instance?: string
@@ -61,6 +65,7 @@ export const BadRequest = (
   instance,
 });
 
+/** Generate Unauthorized message. */
 export const Unauthorized = (
   err: Error | string,
   instance?: string
@@ -83,6 +88,7 @@ export class UnprocessableContentError extends Error {
   }
 }
 
+/** Generate Unprocessable Content message. */
 export const UnprocessableContent = (
   err: Error | string,
   instance?: string

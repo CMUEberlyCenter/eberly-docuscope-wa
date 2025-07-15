@@ -47,7 +47,7 @@ scribe.post(
   scribeNotes('notes_to_bullets')
 );
 
-export const scribeText =
+const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
   async (request: Request, response: Response) => {
     const controller = new AbortController();

@@ -15,11 +15,3 @@ export type PromptType =
   | ExpectationPrompt
   | TextPrompt
   | ReviewPrompt;
-
-/** Prompt templates file json data. */
-export type PromptData = {
-  templates: Record<PromptType, Prompt>;
-  info: {
-    saved_at: string; // DateTime
-  };
-};

@@ -5,11 +5,11 @@ export interface LanguageSettingsRequest {
 }
 
 /** Assess a single expectation request. */
-export interface AssessExpectationRequest extends LanguageSettingsRequest {
-  text: string;
-  expectation: string;
-  description: string;
-}
+// export interface AssessExpectationRequest extends LanguageSettingsRequest {
+//   text: string;
+//   expectation: string;
+//   description: string;
+// }
 
 /** Notes to prose request. */
 export interface NotesRequest extends LanguageSettingsRequest {

@@ -41,7 +41,7 @@ export interface Settings {
   tagger: string; // URL. Needed for impressions
 }
 
-export const WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
+const WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
 // Default json settings, in case of network failure.
 export const DEFAULT: Settings = {
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',

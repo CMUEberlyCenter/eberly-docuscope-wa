@@ -94,7 +94,7 @@ export const TaskViewerButton: FC = () => {
 };
 
 /** Modal component for displaying the outline. */
-export const TaskViewer: FC<ModalProps> = (props) => {
+const TaskViewer: FC<ModalProps> = (props) => {
   const { task } = useWritingTask();
   return (
     <Modal {...props} size="lg">
@@ -109,7 +109,6 @@ export const TaskViewer: FC<ModalProps> = (props) => {
     </Modal>
   );
 };
-export default TaskViewer;
 
 const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();

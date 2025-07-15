@@ -5,7 +5,7 @@ function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
 }
 
-export type Topic = {
+type Topic = {
   lemma: string;
   /** True if topic is user generated. */
   user_defined: boolean;
@@ -104,7 +104,7 @@ type ToolConfig = {
   enabled: boolean;
 };
 
-export type WritingTaskMetaData = {
+type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
   name: string;
   /** String used to identify the version of the outline, expected to be a SemTag */
@@ -218,14 +218,14 @@ export function isEnabled(
   );
 }
 
-export const ERROR_INFORMATION: WritingTaskMetaData = {
-  name: 'NOT SET ERROR',
-  version: 'ERROR',
-  author: '',
-  copyright: 'NONE',
-  saved: 'UNKNOWN',
-  filename: '',
-};
+// export const ERROR_INFORMATION: WritingTaskMetaData = {
+//   name: 'NOT SET ERROR',
+//   version: 'ERROR',
+//   author: '',
+//   copyright: 'NONE',
+//   saved: 'UNKNOWN',
+//   filename: '',
+// };
 
 /** Container for the list of rules for the writing task and its metadata. */
 type Rules = {
@@ -236,7 +236,7 @@ type Rules = {
   /** List of top-level rules. */
   rules: Rule[];
 };
-export function isRules(rules: unknown): rules is Rules {
+function isRules(rules: unknown): rules is Rules {
   return (
     !!rules &&
     typeof rules === 'object' &&

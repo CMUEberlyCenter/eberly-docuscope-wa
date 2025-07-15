@@ -7,7 +7,7 @@ export interface SelectedText {
   range?: Range;
   html?: string;
 }
-export interface SelectedNotesProse extends SelectedText {
+interface SelectedNotesProse extends SelectedText {
   prose?: string;
 }
 
@@ -27,14 +27,14 @@ interface ToolData<T> {
   error?: Error;
 }
 
-export interface ProseTool extends ToolData<string> {
+interface ProseTool extends ToolData<string> {
   tool: 'prose';
 }
-export interface BulletTool extends ToolData<string> {
+interface BulletTool extends ToolData<string> {
   tool: 'bullets';
 }
 
-export type ExpectationData = {
+type ExpectationData = {
   rating?: number;
   general_assessment: string;
   issues: {
@@ -43,7 +43,7 @@ export type ExpectationData = {
   }[];
 };
 
-export interface ExpectationTool extends ToolData<ExpectationData> {
+interface ExpectationTool extends ToolData<ExpectationData> {
   tool: 'expectation';
   expectation?: Rule;
 }
@@ -55,11 +55,11 @@ export type CopyEditResponse = {
   explanation: string; // html
 };
 
-export interface CopyEditTool extends ToolData<CopyEditResponse> {
+interface CopyEditTool extends ToolData<CopyEditResponse> {
   tool: 'copyedit';
 }
 
-export interface GrammarTool extends ToolData<CopyEditResponse> {
+interface GrammarTool extends ToolData<CopyEditResponse> {
   tool: 'grammar';
 }
 
@@ -69,7 +69,7 @@ export type LocalCoherenceResponse = {
   issues: { description: string; suggestions: string[] }[];
 };
 
-export interface FlowTool extends ToolData<LocalCoherenceResponse> {
+interface FlowTool extends ToolData<LocalCoherenceResponse> {
   tool: 'flow'; // local-coherence
 }
 

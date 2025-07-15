@@ -7,6 +7,13 @@ import {
 } from '../../lib/WritingTask';
 import { WRITING_TASKS_PATH } from '../settings';
 
+/**
+ * Initialize the writing tasks by watching the specified directory.
+ * The watched directory is specified by the WRITING_TASKS_PATH setting.
+ * @param add A function to call when a new writing task is added.
+ * @param remove A function to call when a writing task is removed.
+ * @returns A function to stop watching for changes.
+ */
 export async function initWritingTasks(
   add: (path: string, task: WritingTask) => Promise<unknown>,
   remove: (path: string) => Promise<unknown>

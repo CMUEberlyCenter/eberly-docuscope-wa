@@ -4,10 +4,17 @@ import { basename } from 'node:path';
 import type { Prompt } from '../model/prompt';
 import { PROMPT_TEMPLATES_PATH } from '../settings';
 
+/** Map of prompt identifiers to their content.  Acts as an in-memory database. */
 const PROMPTS = new Map<string, Prompt>();
 
+/** Extract the key from a filename. */
 const keyFromFilename = (path: string) => basename(path, '.md');
 
+/**
+ * Initialize the prompts by watching the specified directory.
+ * The watched directory is specified by the PROMPT_TEMPLATES_PATH setting.
+ * @returns A function to stop watching for changes.
+ */
 export async function initPrompts() {
   // update on file changes.
   const prompts = watch(PROMPT_TEMPLATES_PATH, {
@@ -31,6 +38,16 @@ export async function initPrompts() {
   return () => prompts.close();
 }
 
+/**
+ * Retrieve the prompt given its identifier.
+ * The identifier is equivalent to the basename of the prompt file without the extension.
+ * @example
+ * ```ts
+ * const prompt = await findPromptById('civil_tone');
+ * ```
+ * @param id The ID of the prompt to retrieve.
+ * @returns The prompt if found, otherwise undefined.
+ */
 export async function findPromptById(id: string) {
   return PROMPTS.get(id);
 }

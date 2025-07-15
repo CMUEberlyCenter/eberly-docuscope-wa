@@ -22,7 +22,7 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
  * @param props Bootstrap Modal properties.
  * @returns
  */
-export const AboutModal: FC<ModalProps> = (props) => {
+const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;
   const build_date = new Date(__BUILD_DATE__);

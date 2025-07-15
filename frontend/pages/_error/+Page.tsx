@@ -9,6 +9,7 @@ declare global {
     }
   }
 }
+
 const Page: FC = () => {
   const pageContext = usePageContext();
   const { abortReason, abortStatusCode } = pageContext;

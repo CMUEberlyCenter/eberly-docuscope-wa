@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, use } from "react";
+import { type FC, type ReactNode, StrictMode, use } from "react";
 import { I18nextProvider } from "react-i18next";
 import i18n from "../src/app/i18n";
 import "../src/app/index.scss";
@@ -16,9 +16,11 @@ const I18Next: FC<{ children: ReactNode }> = ({ children }) => {
 
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
-    <div className="layout">
-      <I18Next>{children}</I18Next>
-    </div>
+    <StrictMode>
+      <div className="layout">
+        <I18Next>{children}</I18Next>
+      </div>
+    </StrictMode>
   );
 };
 export default Layout;
