@@ -179,7 +179,6 @@ async function __main__() {
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
    */
   Provider.app.get('/lti/configuration', async (_req: Request, res: Response) => {
-    console.log('configuration request');
     res.json({
       title: PRODUCT,
       description: 'myProse Editing and Review tools',
@@ -235,7 +234,7 @@ async function __main__() {
     });
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, '/lti/configuration/');
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, '/lti/configuration');
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
