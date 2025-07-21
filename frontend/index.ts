@@ -1,6 +1,6 @@
 import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
-import express, { Request, Response } from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
@@ -175,6 +175,29 @@ async function __main__() {
     }
   );
 
+  Provider.onDynamicRegistration(async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (!req.query.openid_configuration) return res.status(400).send({ status: 400, error: 'Bad Request', details: { message: 'Missing parameter: "openid_configuration".' } })
+      const message = await Provider.DynamicRegistration.register(req.query.openid_configuration, req.query.registration_token, {
+        'https://purl.imsglobal.org/spec/lti-tool-configuration': {
+          messages: [
+            {
+              message_type: 'LtiDeepLinkingRequest',
+              target_link_url: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+              label: PRODUCT,
+              placements: ["ContentArea", "assignment_selection", "link_selection"], // Add placements for Canvas
+              supported_types: ['LtiResourceLink'], // to match what is produced in deep linking
+            }
+          ]
+        }
+      })
+      res.setHeader('Content-type', 'text/html');
+      res.send(message);
+    } catch (err) {
+      if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send({ status: 403, error: 'Forbidden', details: { message: 'Platform already registered.' } })
+      return res.status(500).send({ status: 500, error: 'Internal Server Error', details: { message: err.message } })
+    }
+  })
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
    */
