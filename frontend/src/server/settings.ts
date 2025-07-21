@@ -58,7 +58,12 @@ export const LTI_DB = {
 
 export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
 export const LTI_OPTIONS = {
-  devMode: DEV,
+  devMode: false,
+  ltiaas: true,
+  // cookies: {
+  //   secure: !DEV, // Use secure cookies in production.
+  //   sameSite: 'None', // SameSite policy for cookies.
+  // },
   dynReg: {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.

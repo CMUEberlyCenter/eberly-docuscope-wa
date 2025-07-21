@@ -18,10 +18,9 @@ import { parse } from 'yaml';
 import {
   BadRequest,
   BadRequestError,
-  FileNotFound,
   InternalServerError,
   UnprocessableContent,
-  UnprocessableContentError,
+  UnprocessableContentError
 } from './src/lib/ProblemDetails';
 import { validateWritingTask } from './src/lib/schemaValidate';
 import { isWritingTask, WritingTask } from './src/lib/WritingTask';
@@ -30,16 +29,14 @@ import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
 import { writingTasks } from './src/server/api/tasks';
 import {
-  findWritingTaskById,
   initDatabase,
-  insertWritingTask,
+  insertWritingTask
 } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
 import {
   ContentItemType,
   IdToken,
-  isInstructor,
-  LTIPlatform,
+  LTIPlatform
 } from './src/server/model/lti';
 import { validate } from './src/server/model/validate';
 import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
@@ -52,6 +49,7 @@ import {
   ONTOPIC_URL,
   PLATFORMS_PATH,
   PORT,
+  PRODUCT,
   SESSION_KEY
 } from './src/server/settings';
 import { getSettings, watchSettings } from './src/ToolSettings';
@@ -177,41 +175,67 @@ async function __main__() {
     }
   );
 
-  Provider.app.get('/lti/info', async (_req: Request, res: Response) => {
-    const token: IdToken | undefined = res.locals.token;
-    const context = {
-      instructor: isInstructor(token?.platformContext),
-      resource: token?.platformContext?.resource,
-      userInfo: token?.userInfo,
-      context: token?.platformContext.context,
-    };
-    try {
-      const taskId = token?.platformContext.custom?.writing_task_id;
-      if (!taskId || typeof taskId !== 'string') {
-        // this looks like it happens on initial deeplinking connection.
-        return res.send(context)
-        // throw new BadRequestError('No writing task id in custom parameters.');
-      }
-      const writing_task = await findWritingTaskById(taskId);
-      const ret = {
-        ...context,
-        writing_task,
-        token,
-      };
-      res.send(ret);
-    } catch (err) {
-      console.error(err);
-      if (err instanceof ReferenceError) {
-        res.status(404).send(FileNotFound(err));
-      } else if (err instanceof BadRequestError) {
-        res.status(400).send(BadRequest(err));
-      } else {
-        res.status(500).send(InternalServerError(err));
-      }
-    }
+  /**
+   * Endpoint to retrieve the Canvas LTI configuration for the tool.
+   */
+  Provider.app.get('/lti/configuration', async (_req: Request, res: Response) => {
+    console.log('configuration request');
+    res.json({
+      title: PRODUCT,
+      description: 'myProse Editing and Review tools',
+      oidc_initiation_url: Provider.loginRoute(),
+      target_link_uri: Provider.appRoute(),
+      scopes: [
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+        // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+        // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
+        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+        // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
+        // "https://canvas.instructure.com/lti/public_jwk/scope/update"
+      ],
+      extensions: [
+        {
+          domain: 'eberly.cmu.edu',
+          tool_id: PRODUCT,
+          platform: "canvas.instructure.com",
+          privacy_level: "public",
+          settings: {
+            text: 'myProse Editing and Review tools',
+            labels: {
+              en: "myProse Editing and Review tools",
+            },
+            icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+            selection_height: 800,
+            selection_width: 800,
+            placements: [
+              {
+                text: 'myProse',
+                placement: "assignment_selection",
+                icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                message_type: "LtiDeepLinkingRequest",
+                target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+                selection_height: 600,
+                selection_width: 600,
+              },
+              {
+                text: 'myProse',
+                placement: "link_selection",
+                icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                message_type: "LtiDeepLinkingRequest",
+                target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+                selection_height: 600,
+                selection_width: 600,
+              },
+            ]
+          }
+        }
+      ],
+      public_jwk_url: new URL(Provider.keysetRoute(), LTI_HOSTNAME).toString(),
+    });
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/);
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, '/lti/configuration/');
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
