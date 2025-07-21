@@ -182,8 +182,10 @@ async function __main__() {
         'https://purl.imsglobal.org/spec/lti-tool-configuration': {
           messages: [
             {
-              message_type: 'LtiDeepLinkingRequest',
-              target_link_url: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+              type: 'LtiResourceLinkRequest',
+            },
+            {
+              type: 'LtiDeepLinkingRequest',
               label: PRODUCT,
               placements: ["ContentArea", "assignment_selection", "link_selection"], // Add placements for Canvas
               supported_types: ['LtiResourceLink'], // to match what is produced in deep linking
@@ -192,6 +194,7 @@ async function __main__() {
         }
       })
       res.setHeader('Content-type', 'text/html');
+      console.log('Dynamic registration message:', message);
       res.send(message);
     } catch (err) {
       if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send({ status: 403, error: 'Forbidden', details: { message: 'Platform already registered.' } })
