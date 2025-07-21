@@ -182,14 +182,14 @@ async function __main__() {
     res.json({
       title: PRODUCT,
       description: 'myProse Editing and Review tools',
-      oidc_initiation_url: Provider.loginRoute(),
-      target_link_uri: Provider.appRoute(),
+      oidc_initiation_url: new URL(Provider.loginRoute(), LTI_HOSTNAME).toString(),
+      target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
       scopes: [
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+        // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+        // "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
         // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
         // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
-        "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+        // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
         // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
         // "https://canvas.instructure.com/lti/public_jwk/scope/update"
       ],
