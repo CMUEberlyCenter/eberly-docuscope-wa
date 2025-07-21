@@ -200,7 +200,21 @@ async function __main__() {
       if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send({ status: 403, error: 'Forbidden', details: { message: 'Platform already registered.' } })
       return res.status(500).send({ status: 500, error: 'Internal Server Error', details: { message: err.message } })
     }
-  })
+  });
+
+  Provider.app.delete('/lti/platforms/:platformId', async (req: Request, res: Response) => {
+    const platformId = req.params.platformId;
+    if (!platformId) {
+      return res.status(400).send({ status: 400, error: 'Bad Request', details: { message: 'Missing platformId parameter.' } });
+    }
+    try {
+      await Provider.deletePlatformById(platformId);
+      res.status(204).send(); // No Content
+    } catch (err) {
+      console.error('Error deleting platform:', err);
+      return res.status(500).send({ status: 500, error: 'Internal Server'});
+    }
+  });
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
    */
@@ -260,7 +274,7 @@ async function __main__() {
     });
   });
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, '/lti/configuration');
+  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, /lti/);
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
@@ -283,11 +297,12 @@ async function __main__() {
     } finally {
       const platforms = await Provider.getAllPlatforms();
       platforms.forEach(async (platform) => {
+        const platformId = await platform.platformId();
         const name = await platform.platformName();
         const url = await platform.platformUrl();
         const active = await platform.platformActive();
         console.log('Registered platforms:');
-        console.log(`${active ? '+' : 'o'} Platform: ${name}, URL: ${url}, Active: ${active}`);
+        console.log(`${active ? '+' : 'o'} Platform: ${name} (${platformId}), URL: ${url}, Active: ${active}`);
       });
     }
     const app = express();
