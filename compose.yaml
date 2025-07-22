@@ -68,9 +68,7 @@ services:
       MONGO_USER_FILE: /run/secrets/mongo_user
       NODE_ENV: production
       ONTOPIC_SERVER: http://ontopic:5000/
-      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
       PORT: 8888
-      SCRIBE_TEMPLATES: /app/resources/prompts/templates.json
       PROMPT_TEMPLATES: /app/resources/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
       TOOL_SETTINGS: /app/build/app/settings/settings.json
@@ -118,8 +116,6 @@ secrets:
     file: secrets/mongo_user
   mongo_pass:
     file: secrets/mongo_pass
-  openai_api_key:
-    file: secrets/openai_api_key
   token:
     file: secrets/token
 
