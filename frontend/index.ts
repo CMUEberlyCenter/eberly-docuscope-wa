@@ -192,7 +192,7 @@ async function __main__() {
               type: 'LtiDeepLinkingRequest',
               label: PRODUCT,
               placements: ["ContentArea", "assignment_selection", "link_selection"], // Add placements for Canvas
-              supported_types: ['LtiResourceLink'], // to match what is produced in deep linking
+              supported_types: ['LtiResourceLink'], // match what is produced in deep linking
             }
           ]
         }
