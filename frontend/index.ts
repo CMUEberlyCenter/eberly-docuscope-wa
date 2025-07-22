@@ -1,3 +1,4 @@
+// import { toNodeHandler } from 'better-auth/node';
 import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
 import express, { NextFunction, Request, Response } from 'express';
@@ -13,7 +14,7 @@ import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { createDevMiddleware, renderPage } from 'vike/server';
+import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
   BadRequest,
@@ -53,6 +54,9 @@ import {
   SESSION_KEY
 } from './src/server/settings';
 import { getSettings, watchSettings } from './src/ToolSettings';
+// import { auth } from './src/utils/auth';
+// import { apply } from 'vike-server/express'
+// import { serve } from 'vike-server/express/serve';
 
 // const __filename = fileURLToPath(import.meta.url);
 // use process.cwd() to get the current working directory so that
@@ -212,7 +216,7 @@ async function __main__() {
       res.status(204).send(); // No Content
     } catch (err) {
       console.error('Error deleting platform:', err);
-      return res.status(500).send({ status: 500, error: 'Internal Server'});
+      return res.status(500).send({ status: 500, error: 'Internal Server' });
     }
   });
   /**
@@ -249,7 +253,7 @@ async function __main__() {
             selection_width: 800,
             placements: [
               {
-                text: 'myProse',
+                text: PRODUCT,
                 placement: "assignment_selection",
                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                 message_type: "LtiDeepLinkingRequest",
@@ -258,7 +262,7 @@ async function __main__() {
                 selection_width: 600,
               },
               {
-                text: 'myProse',
+                text: PRODUCT,
                 placement: "link_selection",
                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                 message_type: "LtiDeepLinkingRequest",
@@ -306,6 +310,8 @@ async function __main__() {
       });
     }
     const app = express();
+    // app.all('/api/auth/{*auth}', toNodeHandler(auth));
+    // mount json middleware after auth
     app.use(express.json());
     app.use(cors({ origin: '*' }));
 
@@ -350,10 +356,11 @@ async function __main__() {
       console.log('Production mode');
       app.use(express.static(join(root, 'dist', 'client')));
     } else {
-      // const vite = await import('vite');
-      const { devMiddleware } = await createDevMiddleware({ root });
+      const vike = await import('vike/server');
+      const { devMiddleware } = await vike.createDevMiddleware({ root });
       app.use(devMiddleware);
     }
+    // prometheus metrics
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
@@ -420,7 +427,8 @@ async function __main__() {
       }
       Provider.redirect(res, '/draft');
     });
-    app.all('*splat', async (req: Request, res: Response, next) => {
+    // apply(app);
+    app.all('{*vike}', async (req: Request, res: Response, next) => {
       const token: IdToken | undefined = res.locals.token;
       const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
       const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
@@ -460,6 +468,13 @@ async function __main__() {
     const server = app.listen(PORT, () =>
       console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
     );
+    // const server2 = serve(app, {
+    //   port: PORT,
+    //   hostname: LTI_HOSTNAME.toString(),
+    //   onReady: () => {
+    //     console.log(` > Ready on ${LTI_HOSTNAME.toString()}:${PORT}`);
+    //   },
+    // });
     const shutdown = () => {
       server.close(async () => {
         console.log('HTTP server closed.');
@@ -473,6 +488,7 @@ async function __main__() {
     ['SIGTERM', 'SIGINT', 'SIGINT'].forEach((signal) =>
       process.on(signal, shutdown)
     );
+    return server;
   } catch (err) {
     console.error(err);
   }
