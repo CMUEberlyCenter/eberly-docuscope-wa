@@ -239,7 +239,7 @@ async function __main__() {
       ],
       extensions: [
         {
-          domain: 'eberly.cmu.edu',
+          domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
           tool_id: PRODUCT,
           platform: "canvas.instructure.com",
           privacy_level: "public",
@@ -249,8 +249,6 @@ async function __main__() {
               en: "myProse Editing and Review tools",
             },
             icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-            selection_height: 800,
-            selection_width: 800,
             placements: [
               {
                 text: PRODUCT,
@@ -258,8 +256,6 @@ async function __main__() {
                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                 message_type: "LtiDeepLinkingRequest",
                 target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-                selection_height: 600,
-                selection_width: 600,
               },
               {
                 text: PRODUCT,
@@ -267,8 +263,6 @@ async function __main__() {
                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                 message_type: "LtiDeepLinkingRequest",
                 target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-                selection_height: 600,
-                selection_width: 600,
               },
             ]
           }
