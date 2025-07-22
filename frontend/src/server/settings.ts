@@ -15,7 +15,7 @@ program
 // )
 program.parse();
 // const options = program.opts();
-export const DEV = true; // process.env.NODE_ENV !== 'production'; // use token only, no cookies.
+export const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 
@@ -58,10 +58,10 @@ export const LTI_DB = {
 
 export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
 export const LTI_OPTIONS = {
-  devMode: false,
+  devMode: DEV,
   ltiaas: true,
   cookies: {
-    secure: !DEV, // Use secure cookies in production.
+    secure: true, // Use secure cookies in production.
     sameSite: 'None', // SameSite policy for cookies.
   },
   dynReg: {
