@@ -17,6 +17,7 @@ import {
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
+import { usePicker } from "../FileUpload/PickerContex";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**
@@ -29,6 +30,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const uploadFile = useInitiateUploadFile();
+  const gdocImport = usePicker();
   // const uploadedFile = useUploadFile();
   // const setUploadErrors = useSetUploadErrors();
   const upload = useFileText();
@@ -129,6 +131,12 @@ export const UserTextView: FC<UserTextViewProps> = ({
           >
             <Dropdown.Item eventKey={"open"} onClick={() => uploadFile()}>
               {t("editor.menu.open")}
+            </Dropdown.Item>
+            <Dropdown.Item
+              eventKey={"gdoc"}
+              onClick={() => gdocImport((doc) => console.log(doc))}
+            >
+              gdoc
             </Dropdown.Item>
           </DropdownButton>
         </ButtonGroup>
