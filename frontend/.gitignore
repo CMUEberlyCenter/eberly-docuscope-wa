@@ -4,6 +4,7 @@ dist/
 build/
 output/
 coverage/
+storybook-static/
 .env*
 stats.html
 
