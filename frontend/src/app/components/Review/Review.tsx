@@ -1,11 +1,9 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useEffect, useState } from "react";
+import { type FC, type HTMLProps, useEffect, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
-  Nav,
-  Navbar,
   OverlayTrigger,
   Stack,
   Tab,
@@ -15,28 +13,15 @@ import {
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
+import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
-import {
-  useAdditionalToolsEnabled,
-  useArgumentsEnabled,
-  useBigPictureEnabled,
-  useCivilToneEnabled,
-  useCredibilityEnabled,
-  useExpectationsEnabled,
-  useFineTuningEnabled,
-  useImpressionsEnabled,
-  useLogicalFlowEnabled,
-  useParagraphClarityEnabled,
-  useProfessionalToneEnabled,
-  useProminentTopicsEnabled,
-  useSentenceDensityEnabled,
-  useSourcesEnabled,
-  useTermMatrixEnabled,
-} from "../../service/review-tools.service";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Legal } from "../Legal/Legal";
-import { Logo } from "../Logo/Logo";
+import { useSettingsContext } from "../Settings/SettingsContext";
+import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone } from "./CivilTone";
 import { Ethos } from "./Ethos";
 import { Expectations, ExpectationsButton } from "./Expectations";
@@ -78,96 +63,171 @@ const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
 
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
-  const { t, ready } = useTranslation("review");
+  const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
-  const { t: inst } = useTranslation("instructions");
   const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
+  const [ready, setReady] = useState<boolean>(false);
+  const userText = useFileText();
+  const { task: writingTask } = useWritingTask();
+  const settings = useSettingsContext();
 
-  // useUnload();
   useEffect(() => {
-    if (ready) {
-      window.document.title = t("document.title");
-    }
-  }, [t, ready]);
+    setReady(!!userText && userText.trim().length > 0 && !!writingTask);
+  }, [userText, writingTask]);
+  // useUnload();
+  // useEffect(() => {
+  //   if (ready) {
+  //     window.document.title = t("document.title");
+  //   }
+  // }, [t, ready]);
 
-  const civilToneFeature = useCivilToneEnabled();
-  const credibilityFeature = useCredibilityEnabled();
-  const expectationsFeature = useExpectationsEnabled();
-  const ideasFeature = useProminentTopicsEnabled();
-  const argumentsFeature = useArgumentsEnabled();
-  const logicalFlowFeature = useLogicalFlowEnabled();
-  const paragraphClarityFeature = useParagraphClarityEnabled();
-  const professionalToneFeature = useProfessionalToneEnabled();
-  const sentencesFeature = useSentenceDensityEnabled();
-  const sourcesFeature = useSourcesEnabled();
-  const impressionsFeature = useImpressionsEnabled();
-  const organizationFeature = useTermMatrixEnabled();
-  const additionalToolsFeature = useAdditionalToolsEnabled();
-  const bigPictureFeature = useBigPictureEnabled();
-  const fineTuningFeature = useFineTuningEnabled();
+  const [civilToneFeature, setCivilToneFeature] = useState(false);
+  const [credibilityFeature, setCredibilityFeature] = useState(false);
+  const [expectationsFeature, setExpectationsFeature] = useState(false);
+  const [ideasFeature, setIdeasFeature] = useState(false);
+  const [argumentsFeature, setArgumentsFeature] = useState(false);
+  const [logicalFlowFeature, setLogicalFlowFeature] = useState(false);
+  const [paragraphClarityFeature, setParagraphClarityFeature] = useState(false);
+  const [professionalToneFeature, setProfessionalToneFeature] = useState(false);
+  const [sentencesFeature, setSentencesFeature] = useState(false);
+  const [sourcesFeature, setSourcesFeature] = useState(false);
+  const [impressionsFeature, setImpressionsFeature] = useState(false);
+  const [organizationFeature, setOrganizationFeature] = useState(false);
+  const [additionalToolsFeature, setAdditionalToolsFeature] = useState(false);
+  const [bigPictureFeature, setBigPictureFeature] = useState(false);
+  const [fineTuningFeature, setFineTuningFeature] = useState(false);
+  useEffect(() => {
+    setCivilToneFeature(
+      settings.civil_tone && isEnabled(writingTask, "civil_tone")
+    );
+    setCredibilityFeature(
+      settings.credibility && isEnabled(writingTask, "credibility")
+    );
+    setExpectationsFeature(
+      settings.expectations && isEnabled(writingTask, "expectations")
+    );
+    setArgumentsFeature(
+      settings.lines_of_arguments &&
+        isEnabled(writingTask, "lines_of_arguments")
+    );
+    setLogicalFlowFeature(
+      settings.logical_flow && isEnabled(writingTask, "logical_flow")
+    );
+    setParagraphClarityFeature(
+      settings.paragraph_clarity && isEnabled(writingTask, "paragraph_clarity")
+    );
+    setProfessionalToneFeature(
+      settings.professional_tone && isEnabled(writingTask, "professional_tone")
+    );
+    setIdeasFeature(
+      settings.prominent_topics && isEnabled(writingTask, "prominent_topics")
+    );
+    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setSentencesFeature(
+      settings.sentence_density && isEnabled(writingTask, "sentence_density")
+    );
+    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setOrganizationFeature(
+      settings.term_matrix && isEnabled(writingTask, "term_matrix")
+    );
+    setImpressionsFeature(
+      false
+      /*settings.impressions && isEnabled(writingTask, "impressions")*/
+    );
+  }, [settings, writingTask]);
+  useEffect(() => {
+    setBigPictureFeature(
+      expectationsFeature ||
+        argumentsFeature ||
+        ideasFeature ||
+        logicalFlowFeature
+    );
+  }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
+  useEffect(() => {
+    setAdditionalToolsFeature(
+      civilToneFeature ||
+        credibilityFeature ||
+        sourcesFeature ||
+        organizationFeature ||
+        impressionsFeature
+    );
+  }, [
+    civilToneFeature,
+    credibilityFeature,
+    sourcesFeature,
+    organizationFeature,
+    impressionsFeature,
+  ]);
+  useEffect(() => {
+    setFineTuningFeature(
+      additionalToolsFeature ||
+        paragraphClarityFeature ||
+        professionalToneFeature ||
+        sentencesFeature
+    );
+  }, [
+    additionalToolsFeature,
+    paragraphClarityFeature,
+    professionalToneFeature,
+    sentencesFeature,
+  ]);
 
   return (
     <ReviewProvider>
       <Split
-        className="container-fluid h-100 w-100 d-flex flex-row review align-items-stretch"
+        className="container-fluid vh-100 w-100 d-flex flex-row review align-items-stretch"
         sizes={[60, 40]}
         minSize={[400, 320]}
         expandToMin={true}
       >
         <UserTextView className="my-1" />
         <aside className="my-1 border rounded bg-light d-flex flex-column">
-          <header>
-            <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
-              <Nav>
-                <Nav.Item className="active text-primary ms-3">
-                  {tt("tool.tab.review")}
-                </Nav.Item>
-              </Nav>
-              <Navbar.Brand>
-                <Logo />
-              </Navbar.Brand>
-            </Navbar>
-          </header>
+          <StageHeader title={tt("tool.tab.review")} />
+          {!bigPictureFeature && !fineTuningFeature && (
+            <NullTool text={t("null.no_writing_task")} />
+          )}
           <Tabs
             activeKey={tab}
             onSelect={(k) => {
-              // if (k === "fine_tuning" && otherTool === "null") {
-              //   setOtherTool("paragraph_clarity"); // FIXME initial tool
-              // }
-              // if (k === "big_picture" && tool === "null") {
-              //   setTool("expectations"); // FIXME initial tool
-              // }
               setTab(k as TabKey);
             }}
             variant="underline"
             className="justify-content-around inverse-color"
           >
             {bigPictureFeature ? (
-              <Tab eventKey="big_picture" title={t("tabs.big_picture")}>
-                <div className="overflow-hidden h-100 d-flex flex-column">
+              <Tab
+                eventKey="big_picture"
+                title={t("tabs.big_picture")}
+                className="h-100"
+              >
+                <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {expectationsFeature ? (
                       <ExpectationsButton
+                        disabled={!ready}
                         active={tool === "expectations"}
                         onClick={() => setTool("expectations")}
                       />
                     ) : null}
                     {ideasFeature ? (
                       <ProminentTopicsButton
+                        disabled={!ready}
                         active={tool === "prominent_topics"}
                         onClick={() => setTool("prominent_topics")}
                       />
                     ) : null}
                     {argumentsFeature ? (
                       <LinesOfArgumentsButton
+                        disabled={!ready}
                         active={tool === "lines_of_arguments"}
                         onClick={() => setTool("lines_of_arguments")}
                       />
                     ) : null}
                     {logicalFlowFeature ? (
                       <LogicalFlowButton
+                        disabled={!ready}
                         active={tool === "logical_flow"}
                         onClick={() => setTool("logical_flow")}
                       />
@@ -188,24 +248,27 @@ export const Review: FC = () => {
               <Tab
                 eventKey="fine_tuning"
                 title={t("tabs.fine_tuning")}
-                className="overflow-hidden"
+                className="h-100"
               >
-                <div className="overflow-hidden h-100 d-flex flex-column">
+                <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {paragraphClarityFeature ? (
                       <ParagraphClarityButton
+                        disabled={!ready}
                         active={otherTool === "paragraph_clarity"}
                         onClick={() => setOtherTool("paragraph_clarity")}
                       />
                     ) : null}
                     {sentencesFeature ? (
                       <SentencesButton
+                        disabled={!ready}
                         active={otherTool === "sentences"}
                         onClick={() => setOtherTool("sentences")}
                       />
                     ) : null}
                     {professionalToneFeature ? (
                       <ProfessionalToneButton
+                        disabled={!ready}
                         active={otherTool === "professional_tone"}
                         onClick={() => setOtherTool("professional_tone")}
                       />
@@ -243,12 +306,13 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("sources")}
                               active={otherTool === "sources"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("sources.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("sources_scope_note")}
+                                {t("instructions:sources_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -256,12 +320,13 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("credibility")}
                               active={otherTool === "credibility"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("ethos.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("ethos_scope_note")}
+                                {t("instructions:ethos_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -269,12 +334,13 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("organization")}
                               active={otherTool === "organization"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("organization.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("term_matrix_scope_note")}
+                                {t("instructions:term_matrix_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -282,12 +348,13 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("civil_tone")}
                               active={otherTool === "civil_tone"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("civil_tone.title")}
                               </h6>
                               <div className="text-wrap">
-                                {inst("civil_tone_scope_note")}
+                                {t("instructions:civil_tone_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -295,6 +362,7 @@ export const Review: FC = () => {
                             <Dropdown.Item
                               onClick={() => setOtherTool("impressions")}
                               active={otherTool === "impressions"}
+                              disabled={!ready}
                             >
                               <h6 className="text-primary">
                                 {t("impressions.title")}
@@ -314,13 +382,12 @@ export const Review: FC = () => {
                   {otherTool === "logical_flow" && <LogicalFlow />}
                   {otherTool === "civil_tone" && <CivilTone />}
                   {otherTool === "credibility" && <Ethos />}
-                  {otherTool === "impressions" && (
-                    <NullTool text={t("null.not_available")} />
-                  )}
+                  {/* {otherTool === "impressions" && ( */}
+                  {/* <NullTool text={t("null.not_available")} /> */}
+                  {/* )} */}
                   {otherTool === "organization" && <Organization />}
                   {otherTool === "sentences" && <Sentences />}
                   {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                  {/* {otherTool === "pathos" && <Pathos />} */}
                   {otherTool === "professional_tone" && <ProfessionalTone />}
                   {otherTool === "sources" && <Sources />}
                   {/* Add more tool displays here. */}

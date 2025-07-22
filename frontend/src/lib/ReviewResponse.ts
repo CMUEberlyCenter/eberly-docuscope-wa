@@ -30,7 +30,7 @@ export type ReviewTool =
   | 'ontopic'
   | 'docuscope';
 
-export type GeneralAssessment = {
+type GeneralAssessment = {
   assessment: {
     /** A brief comment on the strenghts. */
     strengths: string;
@@ -39,6 +39,7 @@ export type GeneralAssessment = {
   };
 };
 
+/** Check if the data has a valid general assessment. */
 export function isAssessment(data: unknown): data is GeneralAssessment {
   return (
     !!data &&
@@ -52,7 +53,7 @@ export function isAssessment(data: unknown): data is GeneralAssessment {
 }
 
 /** List of identified civility issues in the text. */
-export type CivilToneOutput = {
+type CivilToneOutput = {
   text: string; // An inappropriate text segment.
   assessment: string;
   suggestion: string;
@@ -105,7 +106,7 @@ export type Claim = {
 };
 
 /** JSON structure for the results of the arguments prompt. */
-export type LinesOfArgumentsOutput = {
+type LinesOfArgumentsOutput = {
   /** This is a sentence that summarizes the main argument. This is a sentence that describes the argumentation strategy and its assessment. */
   thesis: string;
   /** List of phrases describing the strategies. */
@@ -117,14 +118,14 @@ export type LinesOfArgumentsOutput = {
 } & Partial<GeneralAssessment>;
 
 /** List of identified logical flow issues (i.e., disruptions). */
-export type LogicalFlowOutput = {
+type LogicalFlowOutput = {
   issue: string;
   suggestion: string;
   sent_ids: string[];
   para_ids: string[];
 }[];
 
-export type ParagraphClarityOutput = {
+type ParagraphClarityOutput = {
   issue: string;
   suggestion: string;
   sent_ids: string[];
@@ -140,7 +141,7 @@ export type ProfessionalToneOutput = {
 }[];
 
 /** JSON structure for the results of the prominent_topics prompt. */
-export type ProminentTopicsOutput = {
+type ProminentTopicsOutput = {
   main_idea: string;
   strategies: string[];
   /** A list of span ids for the sentences from the text that are used to state the main idea. */
@@ -162,7 +163,7 @@ export type Source = {
   sent_ids: string[];
   src_type: SourceType;
 };
-export type SourcesOutput = {
+type SourcesOutput = {
   sources: Source[];
   issues: {
     issue: string;

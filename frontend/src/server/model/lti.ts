@@ -1,4 +1,4 @@
-export type ContextToken = {
+type ContextToken = {
   contextId: string;
   user: string;
   roles: string[];

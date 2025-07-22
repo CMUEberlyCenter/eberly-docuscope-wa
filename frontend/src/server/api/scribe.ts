@@ -1,11 +1,11 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { body } from 'express-validator';
 import { FileNotFound, InternalServerError } from '../../lib/ProblemDetails';
-import { NotesRequest, TextRequest } from '../../lib/Requests';
-import { ReviewPrompt } from '../../lib/ReviewResponse';
+import type { NotesRequest, TextRequest } from '../../lib/Requests';
+import type { ReviewPrompt } from '../../lib/ReviewResponse';
 import { doChat } from '../data/chat';
 import { insertLog } from '../data/mongo';
-import { NotesPrompt, TextPrompt } from '../model/prompt';
+import type { NotesPrompt, TextPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
 
@@ -47,7 +47,7 @@ scribe.post(
   scribeNotes('notes_to_bullets')
 );
 
-export const scribeText =
+const scribeText =
   (key: TextPrompt | ReviewPrompt) =>
   async (request: Request, response: Response) => {
     const controller = new AbortController();

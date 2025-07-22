@@ -4,7 +4,7 @@ import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { version } from '../../package.json';
-import { LanguageSettingsRequest } from '../lib/Requests';
+import type { LanguageSettingsRequest } from '../lib/Requests';
 
 const program = new Command();
 program
@@ -15,7 +15,7 @@ program
 // )
 program.parse();
 // const options = program.opts();
-export const DEV = process.env.NODE_ENV !== 'production';
+export const DEV = true; // process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 
@@ -58,14 +58,21 @@ export const LTI_DB = {
 
 export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
 export const LTI_OPTIONS = {
-  devMode: DEV,
+  devMode: false,
+  ltiaas: true,
+  // cookies: {
+  //   secure: !DEV, // Use secure cookies in production.
+  //   sameSite: 'None', // SameSite policy for cookies.
+  // },
   dynReg: {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.
-    // logo: new URL('logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
-    description: 'myProse tool for LTI 1.3', // Tool Provider description.
-    redirectUris: [new URL('/launch', LTI_HOSTNAME).toString()], // Additional redirection URLs. The main URL is added by default.
-    customParameters: { key: 'value' }, // Custom parameters.
+    logo: new URL('/logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
+    description: 'myProse Editing and Review tools', // Tool Provider description.
+    redirectUris: ['/draft', '/review'].map((endpoint) =>
+      new URL(endpoint, LTI_HOSTNAME).toString()
+    ), // Additional redirection URLs. The main URL is added by default.
+    customParameters: {}, // Custom parameters.
     autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
   },
 };
@@ -76,7 +83,7 @@ export const SEGMENT_URL = new URL('api/v2/segment', ONTOPIC_SERVER);
 
 export const ANTHROPIC_API_KEY = fromEnvFile('ANTHROPIC_API_KEY');
 export const ANTHROPIC_MODEL =
-  process.env.ANTHROPIC_MODEL ?? 'claude-3-5-sonnet-20241022';
+  process.env.ANTHROPIC_MODEL ?? 'claude-3-7-sonnet-latest';
 export const ANTHROPIC_MAX_TOKENS = envInt(
   process.env.ANTHROPIC_MAX_TOKENS,
   1024
@@ -89,6 +96,9 @@ export const PROMPT_TEMPLATES_PATH =
 // Path to writing task definition files
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
+// Path to tool settings file
+export const TOOL_SETTINGS_PATH =
+  process.env['TOOL_SETTINGS'] ?? join('public', 'settings', 'settings.json');
 // LTI platform configuration files path
 export const PLATFORMS_PATH =
   process.env['PLATFORMS'] ?? join('private', 'platforms');

@@ -11,10 +11,10 @@ import {
   faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useGlobalFeatureTextToSpeech } from "../../service/settings.service";
+import { useSettingsContext } from "../Settings/SettingsContext";
 
 /**
  * Component for adding text to speech controls.
@@ -35,7 +35,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
-  const enabled = useGlobalFeatureTextToSpeech();
+  const enabled = useSettingsContext().text2speech;
 
   useEffect(() => {
     return () => {

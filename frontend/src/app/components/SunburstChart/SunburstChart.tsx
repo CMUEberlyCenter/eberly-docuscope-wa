@@ -7,12 +7,12 @@ It is not possible to zoom beyond the patterns level or the top level categories
 */
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
-import { HierarchyRectangularNode } from "d3";
+import type { HierarchyRectangularNode } from "d3";
 import {
-  FC,
-  HTMLProps,
+  type FC,
+  type HTMLProps,
   Suspense,
-  SVGProps,
+  type SVGProps,
   useEffect,
   useRef,
   useState,
@@ -22,7 +22,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { combineLatest, map } from "rxjs";
 import {
   commonDictionary$,
-  CommonDictionaryTreeNode,
+  type CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
 import { useEditorState } from "../../service/editor-state.service";
 import { gen_patterns_map, taggerResults$ } from "../../service/tagger.service";
@@ -300,17 +300,15 @@ const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
         <g transform={`translate(${width / 2},${width / 2})`}>
           <g ref={wedgeRef}>
             {/* all the wedges */}
-            {root
-              ?.descendants()
-              .map((d) => (
-                <Arc
-                  key={d.data.id}
-                  node={d}
-                  root={parent}
-                  onClick={click}
-                  arc={arc}
-                />
-              ))}
+            {root?.descendants().map((d) => (
+              <Arc
+                key={d.data.id}
+                node={d}
+                root={parent}
+                onClick={click}
+                arc={arc}
+              />
+            ))}
           </g>
           <g
             ref={labelRef}
@@ -319,16 +317,14 @@ const SunburstFigure: FC<SunburstChartProps> = (props: SunburstChartProps) => {
             className="sunburst-chart-label"
           >
             {/* all of the wedge labels */}
-            {root
-              ?.descendants()
-              .map((d) => (
-                <ArcLabel
-                  key={`label-${d.data.id}`}
-                  radius={radius}
-                  node={d}
-                  root={parent}
-                />
-              ))}
+            {root?.descendants().map((d) => (
+              <ArcLabel
+                key={`label-${d.data.id}`}
+                radius={radius}
+                node={d}
+                root={parent}
+              />
+            ))}
           </g>
           {/* center hole */}
           <circle

@@ -1,9 +1,9 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useState } from "react";
+import { type FC, type HTMLProps, useState } from "react";
 import { ListGroup, Modal, type ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { useWritingTask } from "../../service/writing-task.service";
 import { Logo } from "../Logo/Logo";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 
 // type PromptInfo = { saved_at: string };
 // async function fetchTemplateInfo() {
@@ -17,12 +17,17 @@ import { Logo } from "../Logo/Logo";
 
 // const templatesInfo = fetchTemplateInfo();
 
-export const AboutModal: FC<ModalProps> = (props) => {
+/**
+ * AboutModal component for displaying information about the application.
+ * @param props Bootstrap Modal properties.
+ * @returns
+ */
+const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;
   const build_date = new Date(__BUILD_DATE__);
   // const template_info = use(templatesInfo);
-  const task = useWritingTask();
+  const { task } = useWritingTask();
 
   return (
     <Modal {...props}>
@@ -48,16 +53,6 @@ export const AboutModal: FC<ModalProps> = (props) => {
           <dd>
             {t("about.version", { version, date: build_date.toLocaleString() })}
           </dd>
-          {/* <dt>{t("about.template")}</dt>
-          <dd>
-            <Suspense fallback={<LoadingSmall />}>
-              {template_info
-                ? t("about.templates", {
-                    date: new Date(template_info.saved_at).toLocaleString(),
-                  })
-                : null}
-            </Suspense>
-          </dd> */}
           {task && (
             <>
               <dt>{t("about.task")}</dt>
@@ -103,12 +98,7 @@ export const AboutModal: FC<ModalProps> = (props) => {
 };
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
-export const About: FC<AnchorProps> = ({
-  className,
-  onClick,
-  style,
-  ...props
-}) => {
+export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
   const toggle = () => setShow(!show);

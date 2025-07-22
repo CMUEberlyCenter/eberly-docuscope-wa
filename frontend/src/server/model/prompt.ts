@@ -1,4 +1,4 @@
-import { ReviewPrompt } from '../../lib/ReviewResponse';
+import type { ReviewPrompt } from '../../lib/ReviewResponse';
 
 /** Prompt data for formulating OpenAI requests. */
 export type Prompt = {
@@ -15,11 +15,3 @@ export type PromptType =
   | ExpectationPrompt
   | TextPrompt
   | ReviewPrompt;
-
-/** Prompt templates file json data. */
-export type PromptData = {
-  templates: Record<PromptType, Prompt>;
-  info: {
-    saved_at: string; // DateTime
-  };
-};

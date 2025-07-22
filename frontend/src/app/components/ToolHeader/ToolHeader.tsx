@@ -1,4 +1,4 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { Translation } from "react-i18next";
 import { FadeContent } from "../FadeContent/FadeContent";
 

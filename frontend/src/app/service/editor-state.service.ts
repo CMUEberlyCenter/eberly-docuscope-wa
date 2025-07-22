@@ -9,7 +9,7 @@ import {
   filter,
   map,
 } from 'rxjs';
-import { Descendant } from 'slate';
+import type { Descendant } from 'slate';
 import { serialize } from '../lib/slate';
 
 // For tracking Editor editable toggle.

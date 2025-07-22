@@ -12,10 +12,10 @@ import {
   expect,
   test,
 } from 'vitest';
-import { currentTool } from './current-tool.service';
+// import { currentTool } from './current-tool.service';
 import { editorText, setEditorState } from './editor-state.service';
 import {
-  TaggerResults,
+  type TaggerResults,
   gen_patterns_map,
   isTaggerResult,
   tag,
@@ -35,7 +35,7 @@ beforeAll(() => {
 });
 beforeEach(() => {
   // following is necessary to trigger impressions service.
-  currentTool.next('impressions'); // switch to impressions tab
+  // currentTool.next('impressions'); // switch to impressions tab
   setEditorState(false); // lock editor
 });
 afterAll(() => {

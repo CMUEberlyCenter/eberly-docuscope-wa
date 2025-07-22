@@ -1,15 +1,31 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
-import { Accordion, type AccordionProps, Alert, type ButtonProps } from "react-bootstrap";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import {
+  Accordion,
+  type AccordionProps,
+  Alert,
+  type ButtonProps,
+} from "react-bootstrap";
 import type {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { type Claim as ClaimProps, isErrorData } from "../../../lib/ReviewResponse";
+import {
+  type Claim as ClaimProps,
+  isErrorData,
+  type LinesOfArgumentsData,
+} from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
-import { useLinesOfArgumentsData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -17,16 +33,19 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { useFileText } from "../FileUpload/FileUploadContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
+import { useMutation } from "@tanstack/react-query";
+import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
     <ToolButton
       {...props}
-      title={t("lines_of_arguments.title")}
-      tooltip={it("lines_of_arguments_scope_note")}
+      title={t("review:lines_of_arguments.title")}
+      tooltip={t("instructions:lines_of_arguments_scope_note")}
       icon={<Icon />}
     />
   );
@@ -157,11 +176,65 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useLinesOfArgumentsData();
+  // const review = useLinesOfArgumentsData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<LinesOfArgumentsData | null>(null);
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+    }) => {
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
+      const response = await fetch("/api/v2/review/lines_of_arguments", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal: abortControllerRef.current.signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Lines of Arguments review");
+      }
+      return response.json();
+    },
+    onSuccess: ({
+      input,
+      data,
+    }: {
+      input: string;
+      data: LinesOfArgumentsData;
+    }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Lines of Arguments review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+  });
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    setCurrent(null);
+    // Fetch the review data for Lines of Arguments
+    // const controller = new AbortController();
+    mutation.mutate({ document, writing_task });
+    // TODO error handling
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [document, writing_task]);
   useEffect(() => {
     if (
       !current &&
@@ -179,14 +252,14 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
         {...props}
         className={classNames(
           className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1 h-100"
         )}
       >
         <ToolHeader
           title={t("lines_of_arguments.title")}
           instructionsKey="lines_of_arguments"
         />
-        {!review ? (
+        {mutation.isPending || !review ? (
           <Loading />
         ) : (
           <ErrorBoundary

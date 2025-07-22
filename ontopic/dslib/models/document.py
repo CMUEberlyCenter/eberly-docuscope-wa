@@ -11,38 +11,43 @@ __copyright__ = "2017-21 Suguru Ishizaki, Carnegie Mellon University"
 import logging
 import json
 import re
-import regex
 import string
 import os
+import pprint                                  # pretty prnting for debugging
 # import sys
-from collections import Counter 
+from collections import Counter
+
+import regex
 
 # from urllib.parse import urlparse
-# import base64
-# from PIL import Image
-# from io import BytesIO
+# import base64 # unused-import
+# from PIL import Image # unused-import
+# from io import BytesIO # unused-import
 
 from bs4 import BeautifulSoup as bs
 from bs4 import Comment
 import bs4
 
-# from pydocx import PyDocX
+# from pydocx import PyDocX # unused-import
 import unidecode
-
-import dslib.utils as utils
-from dslib.utils import resource_path
 
 from docx import Document
 from docx.shared import RGBColor
-from docx.enum.style import WD_BUILTIN_STYLE, WD_STYLE_TYPE
-from docx.shared import Pt, Inches
+# from docx.enum.style import WD_BUILTIN_STYLE, WD_STYLE_TYPE # unused-import
+from docx.shared import Inches # unused-import Pt
+
+
+from spacy.lang.en.stop_words import STOP_WORDS
+import spacy                                   # SpaCy NLP library
+# from spacy.attrs import ORTH, LEMMA, POS
+
+from dslib.utils import resource_path, remove_hrefs, inchesToDoubleQuotes
+import dslib.models.stat as ds_stat
 
 
 ##################################################
 # English ONLY
 ##################################################
-from spacy.lang.en.stop_words import STOP_WORDS
-
 stop_words = list(STOP_WORDS)
 stop_words += ['therefore', 'however', 'thus', 'hence', '\'s', 'mr.', 'mrs.', 'ms.', 'dr.', 'prof.']
 pronouns = ['it',  'i',    'we',   'you',   'he',  'she',  'they',
@@ -55,7 +60,7 @@ for p in pronouns:
         stop_words.remove(p)
 
 no_space_patterns = ["\u2019ve", "n\u2019t", ".\u201D", ".\u2019",
-                     "\u2019s", "\u2019t", "\u2019m", "\u2019ll", "\u2019re", "\u2019d", 
+                     "\u2019s", "\u2019t", "\u2019m", "\u2019ll", "\u2019re", "\u2019d",
                      "\'ve" ,"n\'t", ".\"", ".\'",
                      "\'s", "\'t", "\'m", "\'ll", "\'re", "\'d",
                      "%"]
@@ -75,8 +80,6 @@ be_verbs = ['be', 'been', 'am', 'is', 'are', 'was', 'were', '\'m', '\'re', '\'s'
 
 ##################################################
 
-import spacy                                   # SpaCy NLP library
-# from spacy.attrs import ORTH, LEMMA, POS
 # POS dependency labels (see: https://spacy.io/api/annotation)
 
 NLP_MODEL_DEFAULT = 0
@@ -104,7 +107,6 @@ default_font_info = {'Title':          24,
                      'Heading 3':      18,
                      'Heading 4':      16}
 
-import pprint                                  # pretty prnting for debugging
 pp = pprint.PrettyPrinter(indent=4)            # create a pretty printing object used for debugging.
 
 TEXT_COLOR      = RGBColor( 64,  64,  64)
@@ -113,7 +115,7 @@ TEXT_NP_VCOLOR  = RGBColor(125,   0, 125)
 
 #
 # Constants for sentence['text_w_info']. Each word is represented using a tuple with
-# the following elements. 
+# the following elements.
 # TODO: Create a enumeration class to represent this. The indexes have grown too long.
 #
 POS      = 0          # Part of Speech
@@ -127,7 +129,7 @@ LINKS    = 6          # If it is a verb, it is the total # of links from the ver
 QUOTE    = 7          # QUOTED or not
 WORD_POS = 8          # Indexes between 8 and 13 have been changed on July 17.
 DS_DATA  = 9          # DocuScope Data (i.e., models.DSWord)
-PARA_POS = 10 #  9          
+PARA_POS = 10 #  9
 SENT_POS = 11 # 10
 NEW      = 12 # 11
 GIVEN    = 13 # 12
@@ -142,10 +144,8 @@ IGNORE_ADVCL_FIRST_WORDS = ['after', 'before', 'until', 'soon', 'once', 'now',
                             'where', 'although', 'though',
                             'thanks', 'based', 'to', 'based']
 
-import dslib.models.stat as ds_stat
-
 nlp = None
-LOAD_TRAINED_MODEL = False # If True, will check for the existence of models in the filesystem.
+LOAD_TRAINED_MODEL = False  # If True, will check for the existence of models in the filesystem.
 
 ##
 # https://spacy.io/api/top-level#spacy.info
@@ -158,12 +158,10 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if lang == 'en':
             default_model = resource_path("data/default_model")
             large_model = resource_path("data/large_model")
+
             if LOAD_TRAINED_MODEL and model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
                 nlp = spacy.load(default_model)
-                #result=nlp("I am applying for the Graduate Assistant position at Crane & Jenkins University.");
-                #print("\n\n")
-                #print(result)
             elif LOAD_TRAINED_MODEL and os.path.exists(large_model):
                 logging.info("Loading Spacy large model ...")
                 nlp = spacy.load(large_model)
@@ -180,10 +178,7 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
 #
 ##
 def isModelLoaded():
-    if nlp is not None:
-        return True
-    else:
-        return False
+    return nlp is not None
 
 def removeQuotedSlashes(s):
     if s.find('“') > 0 and s.find('”') > 0:
@@ -208,11 +203,11 @@ def adjustSpaces(text):
 
     text = text.strip()                         # trim
 
-    text = utils.remove_hrefs(text)
+    text = remove_hrefs(text)
 
     # Just in case a period is found in front of a word (e.g, ".And")  This handles
     # a case where 4 dot ellipses is used (3 dot ellipses followed by a period
-    # followed by no space.) 
+    # followed by no space.)
     text = re.sub(r'\.([a-zA-Z]+)(?!\.)', r'. \1', text)
 
     # If there is a comma followed by a character (i.e., missing a sapce), add a space.
@@ -222,7 +217,7 @@ def adjustSpaces(text):
     text = re.sub(r'\<img.+>', '', text)
 
     # Replace the space character(s) in multiword patterns with underscor character "_"
-    for mw_topic in DSDocument.multiword_topics: 
+    for mw_topic in DSDocument.multiword_topics:
         connected_mw_topic = mw_topic.replace(' ', '_')
         text = text.replace(mw_topic, connected_mw_topic)
         text = text.replace(mw_topic.lower(), connected_mw_topic.lower())
@@ -237,7 +232,7 @@ def adjustSpaces(text):
 
     text = text.replace(u' cannot ', u' can not ')   # replace cannot with can not.
     text = text.replace(u' cannot, ', u' can not, ') # replace cannot with can not.
-    
+
     text = text.replace(u'\u2014', u' \u2014 ')      # always add a space before/after an em-dash
     text = text.replace(u'--', u' \u2014 ')          # replace double dashes with an em-dash.
 
@@ -253,8 +248,8 @@ def adjustSpaces(text):
     text = text.replace(u'!!', u'!').replace(u'!!', u'!')    # double/triple punctuations are not allowed
     text = text.replace(u',,', u',').replace(u',,', u',')    # double/triple punctuations are not allowed
 
-    text = utils.inchesToDoubleQuotes(text)          # convert inch characters (") to curly double-quotes.
-    text = removeQuotedSlashes(text)    
+    text = inchesToDoubleQuotes(text)          # convert inch characters (") to curly double-quotes.
+    text = removeQuotedSlashes(text)
 
     text = text.replace(u'  ', u' ').replace(u'  ', u' ').replace(u'  ', u' ') # remove extra spaces
 
@@ -262,15 +257,15 @@ def adjustSpaces(text):
 
 def is_skip(elem, left_count, topic_filter):
 
-    # if theme_only == True:                 
+    # if theme_only == True:
     if topic_filter == TOPIC_FILTER_LEFT:
 
         # if the left only mode is on
-        if elem[IS_TOPIC] == False:
+        if not elem[IS_TOPIC]:
             # skip, if it is not a topic word
-            return True # skip  
+            return True # skip
 
-        elif left_count < 1 and elem[ISLEFT] == False:
+        elif left_count < 1 and not elem[ISLEFT]:
             # skip if it's a right-side word and left_count < 1 (==0)
             return True # skip
 
@@ -282,17 +277,17 @@ def is_skip(elem, left_count, topic_filter):
 def contains_html_tags(text):
     # Regular expression to match HTML tags
     pattern = r'<[^>]+>'
-    
+
     # Search for the pattern in the text
     match = re.search(pattern, text)
-    
+
     # Return True if a match is found, False otherwise
     return match is not None
 
 class DSWord():
     def __init__(self, w, lw, end, lat, pos):
 
-        # strip double quoted numbers 
+        # strip double quoted numbers
         x = re.search('(?<=\")[0-9,.]+(?=\")', w)
         if x:
             self.word  = x.group()   # original word
@@ -326,7 +321,7 @@ class DSWord():
 
 class AdjacencyStats():
     """
-    The AdjacencyStats object is used to reprsent the stats for 
+    The AdjacencyStats object is used to reprsent the stats for
     for each paragraph (or any unit).
     """
 
@@ -361,10 +356,10 @@ class AdjacencyStats():
 
     def addLAT(self, lat, p_id, s_id):
 
-        if lat == 'UNRECOGNIZED' or lat == '':
+        if lat in ('UNRECOGNIZED', ''):
             return
 
-        dim, clust = self.controller.getDimensionAndCluster(lat)  
+        dim, clust = self.controller.getDimensionAndCluster(lat)
 
         if clust is None or dim is None:
             return
@@ -398,7 +393,7 @@ class AdjacencyStats():
             return None
         else:
             res = stats.getClusterCount(clust)
-            if res == None:
+            if res is None:
                 return 0
             else:
                 return res
@@ -409,7 +404,7 @@ class AdjacencyStats():
             return None
         else:
             res = stats.getClusterFreq(clust, method=method)
-            if res == None:
+            if res is None:
                 return 0
             else:
                 return res
@@ -420,7 +415,7 @@ class AdjacencyStats():
             return None
         else:
             res = stats.getDimensionCount(dimension)
-            if res == None:
+            if res is None:
                 return 0
             else:
                 return res
@@ -432,10 +427,9 @@ class AdjacencyStats():
             return None
         else:
             res = stats.getDimensionFreq(dimension, method=method)
-            if res == None:
+            if res is None:
                 return 0
-            else:
-                return res
+            return res
 
     def getParaStats(self):
         return self.para_stats
@@ -458,7 +452,7 @@ class AdjacencyStats():
             for dim in self.dim_counter.keys():
                 dim_c = self.getParaClusterCount(dim, p_id)
                 if dim_c is not None:
-                    dim_counter[clust] = dim_c
+                    dim_counter[dim] = dim_c
 
             lat_counter = Counter()
             for lat in self.lat_counter.keys():
@@ -494,16 +488,10 @@ class AdjacencyStats():
             return new_topic_paras, new_topic_sents
 
     def isTopicSent(self, sent_id, para_id):
-        if (para_id, sent_id) in self.topic_sents:
-            return True
-        else:
-            return False
+        return (para_id, sent_id) in self.topic_sents
 
     def isTopicPara(self, para_id):
-        if para_id in self.topic_paras:
-            return True
-        else:
-            return False            
+        return para_id in self.topic_paras
 
     def print(self):
         print("AdjacencyStats:")
@@ -532,7 +520,7 @@ class DSDocument():
     multiword_topics         = []
     deleted_multiword_topics = []
 
-    user_defined_synonyms      = None 
+    user_defined_synonyms      = None
     user_defined_synonym_names = []
     user_defined_topics        = []
 
@@ -540,7 +528,7 @@ class DSDocument():
     def setNounSubjectOptions(cls, options):
         DSDocument.noun_subject_options = options
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setUserDefinedSynonyms(cls, synsets):
         # convert a list of synonyms into a dictionary for faster look up
         if synsets == [] or synsets == None:
@@ -570,14 +558,14 @@ class DSDocument():
 
             DSDocument.user_defined_synonym_names.append(lemma)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedSynonym(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             return True
         else:
             return False
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedSynonymDefined(cls, lemma):
         if DSDocument.user_defined_synonyms is not None and lemma in DSDocument.user_defined_synonym_names:
             for synonym, name in DSDocument.user_defined_synonyms.items():
@@ -586,56 +574,56 @@ class DSDocument():
                         return False
                     else:
                         return True
-            return False                        
+            return False
         else:
-            return False            
+            return False
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setMultiwordTopics(cls, topics):
         if topics is None:
             DSDocument.multiword_topics = []
-            DSDocument.deleted_multiword_topics = []            
+            DSDocument.deleted_multiword_topics = []
         else:
             topics.sort(reverse=True, key=lambda x: len(x.split()))
             DSDocument.deleted_multiword_topics = list(set(DSDocument.multiword_topics) - set(topics))
             DSDocument.multiword_topics = topics
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def setUserDefinedTopics(cls, topics):
         DSDocument.user_defined_topics = [t.lower().replace(' ', '_') for t in topics]
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def isUserDefinedTopic(cls, lemma):
         if lemma in DSDocument.user_defined_topics:
             return True
         else:
             return False
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def addUserDefinedTopic(cls, topic):
         if topic is not None and topic != '':
             lc_topic = topic.lower()
             if lc_topic not in DSDocument.user_defined_topics:
                 DSDocument.user_defined_topics.append(lc_topic)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def deleteUserDefinedTopic(cls, topic_to_delete):
-        if topic_to_delete in DSDocument.user_defined_topics.remove:
+        if topic_to_delete in DSDocument.user_defined_topics:
             DSDocument.user_defined_topics.remove(topic_to_delete)
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def clearUserDefinedTopics(cls):
         DSDocument.user_defined_topics = []
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def getUserDefinedTopics(cls):
         return DSDocument.user_defined_topics
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def getUserDefinedSynonyms(cls):
         return DSDocument.user_defined_synonym_names
 
-    @classmethod # FIXME should not be classmethod as persistance could mess up asyncronous processing
+    @classmethod
     def clearUserDefinedSynonyms(cls):
         DSDocument.user_defined_synonym_names = []
 
@@ -656,16 +644,16 @@ class DSDocument():
         self.filename = None
         self.header_labels = []
 
-        # Visualizer options                                
-        self.noun = True                   
+        # Visualizer options
+        self.noun = True
         self.verb = False
-        self.adj  = False     
+        self.adj  = False
         self.adv  = False
         self.prp  = False
 
         self.max_paras        = 500
         self.skip_paras       = 0
-        
+
         self.is_collapsed         = True
 
         self.total_words          = 0
@@ -684,7 +672,7 @@ class DSDocument():
         self.selectedWord         = None
         self.showKeyTopics        = False
         self.showKeySentTopics    = False
-        
+
         self.selected_sent_info   = None
 
         self.bQuote = False        # temp variable
@@ -702,6 +690,8 @@ class DSDocument():
         self.global_topics           = []
         self.local_topics            = []
         self.topic_location_dict     = None
+
+        self.lexical_overlaps_analyzed = False
 
     def setController(self, c):
         self.controller = c
@@ -721,7 +711,7 @@ class DSDocument():
         """
         self.verb             = False
         self.noun             = True
-        self.adj              = False     
+        self.adj              = False
         self.adv              = False
 
         self.para_accum_mode  = True
@@ -782,10 +772,10 @@ class DSDocument():
             self.selectedSent = None
         else:
             self.selectedSent = sent_id
-            
+
     def setSelectedWord(self, selected_word):
         self.selectedWord = selected_word    # word is a tuple = elem
-        
+
     # def setSynonymThreshold(self, val):
         # self.synonym_threshold = val
 
@@ -810,7 +800,7 @@ class DSDocument():
             return True
         else:
             return False
-        
+
     def isUserTopic(self, topic):
         if len(topic) == 0:
             return True
@@ -843,7 +833,7 @@ class DSDocument():
             # res = self.adj
             return self.adj
         elif pos.startswith("ADV"):
-            # res = self.adv    
+            # res = self.adv
             return self.adv
         elif pos.startswith("PRP"):
             # res = self.prp      # pronoun, personal
@@ -863,7 +853,7 @@ class DSDocument():
         if self.sections is not None and self.current_section < len(self.sections):
             return self.sections[self.current_section]
         else:
-            return None            
+            return None
 
     def getSections(self):
         if self.sections is not None:
@@ -897,7 +887,7 @@ class DSDocument():
     def getParagraphs(self):
         data = self.sections[self.current_section]['data']
         return data['paragraphs']
-        
+
     def getRealParaCount(self):
         data = self.sections[self.current_section]['data']
         return data['real_para_count']
@@ -911,7 +901,7 @@ class DSDocument():
         sent_count = 0
         for p in data['paragraphs']:
             sent_count += len(p['sentences'])
-        return sent_count 
+        return sent_count
 
     def getSentCounts(self):
         res = list()
@@ -925,7 +915,7 @@ class DSDocument():
 
     def getParaMenuItems(self, num_words=5):
         """
-        Create a list of menu labels for the paragraphs in the text. 
+        Create a list of menu labels for the paragraphs in the text.
         The first 'num_words' words from each paragraph are used for the label.
         """
         res = list()
@@ -971,7 +961,7 @@ class DSDocument():
             return self.filename
         else:
             return 'Undefined'
-        
+
     def getSelectedSentInfo(self):
         return self.selected_sent_info
 
@@ -985,15 +975,15 @@ class DSDocument():
                 if data is None:
                     raise ValueError
             except:
-                logging.warn(self.sections[self.current_section])                
-                return
+                logging.warning(self.sections[self.current_section])
+                return []
 
         res = []
         pcount = 1
-        for para in data['paragraphs']:    
+        for para in data['paragraphs']:
 
             scount = 1
-            for sent in para['sentences']: 
+            for sent in para['sentences']:
                 b_topic = False
                 b_experience = False
 
@@ -1016,7 +1006,7 @@ class DSDocument():
                 for rule in ruleset.getRules():
 
                     b_match = rule.isMatching(lemmas, clusters)
-                    
+
                     if res.get(rule, False) and sent not in res[rule]:
                         res[rule].append(sent)
 
@@ -1037,7 +1027,7 @@ class DSDocument():
 
     def processSent(self, sent, start=0):
         """
-        Given a sentence 'sent' in a string format, return a list [] of analyzed words. 
+        Given a sentence 'sent' in a string format, return a list [] of analyzed words.
         Each entry in the list is a tuple (POS, Word, Lemma, bLeft_of_the_Main_Verb).
         e.g., ('NOUN', 'dogs', 'dog', False)
         """
@@ -1049,7 +1039,7 @@ class DSDocument():
             res = list()
             doc = nlp(heading)
 
-            # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 
+            # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT,
             #     4.DEP, 5.STEM, 6.LINKS, 7.QUOTE, 8.WORD_POS, 9.DS_DATA
             # Note: the nouns in headings/titels are always considered 'pre-verb' ISLEFT + TRUE
             is_left = False
@@ -1057,9 +1047,9 @@ class DSDocument():
                 for token in doc:
 
                     if token.pos_ == 'NOUN' or token.pos_ == 'PROPN':     # if the token is a noun
-                        is_left = True                            
+                        is_left = True
                         t = token.text
-                        lemma = DSDocument.user_defined_synonyms.get(t, None)   
+                        lemma = DSDocument.user_defined_synonyms.get(t, None)
 
                         if lemma is None:
                             lemma = token.lemma_.lower()
@@ -1068,9 +1058,9 @@ class DSDocument():
                         is_left = True
                         t = token.text
                         lemma = DSDocument.user_defined_synonyms.get(t, None)
-      
+
                         if lemma is None:
-                           lemma = token.lemma_.lower()
+                            lemma = token.lemma_.lower()
 
                     else:
                         t = token.text.lower()
@@ -1091,12 +1081,12 @@ class DSDocument():
                     else:                                                  # Everything else
                         pos = token.pos_
 
-                    res.append((pos, token.text, lemma, is_left, 
+                    res.append((pos, token.text, lemma, is_left,
                                token.dep_, '', None, False, word_pos, None))
                     word_pos += 1
             else:
                 for token in doc:
-                    # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 
+                    # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT,
                     #     4.DEP, 5.STEM, 6.LINKS, 7.QUOTE, 8.WORD_POS, 9.DS_DATA
                     # Note: the nouns are always considered 'pre-verb' ISLEFT + TRUE
                     is_left = False
@@ -1116,18 +1106,18 @@ class DSDocument():
                     else:                                                  # Everything else
                         pos = token.pos_
 
-                    res.append((pos, token.text, token.lemma_.lower(), is_left, 
-                               token.dep_, '', None, False, word_pos, None))   
+                    res.append((pos, token.text, token.lemma_.lower(), is_left,
+                               token.dep_, '', None, False, word_pos, None))
                     word_pos += 1
 
             temp = []
             for n in doc.noun_chunks:
                 n = str(n)
-                n = n.translate(n.maketrans('', '', string.punctuation))     # removes punctuation            
+                n = n.translate(n.maketrans('', '', string.punctuation))     # removes punctuation
                 temp.append(n)
 
             noun_phrases = tuple(temp)
-        
+
             return res, noun_phrases
 
 
@@ -1181,7 +1171,7 @@ class DSDocument():
                     elif token.tag_ == 'PRP' or token.tag_ == 'PRP$':
                         t = token.text.lower()
                         lemma = DSDocument.user_defined_synonyms.get(t, None)   # e.g., He
-      
+
                         if lemma is None:
                             lemma = getPronounLemma(t)  # e.g., his
                             if lemma is None:
@@ -1201,7 +1191,7 @@ class DSDocument():
                         else:
                             token.pos_ = 'NOUN'
                             token.tag_ = 'NN'
-                              
+
                 elif token.tag_ == 'PRP' or token.tag_ == 'PRP$':
                     t = token.text.lower()
                     lemma = getPronounLemma(t)
@@ -1230,13 +1220,13 @@ class DSDocument():
                 else:                                                  # Everything else
                     pos = token.pos_
 
-                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM, 
-                # 6.LINKS (for ROOT), 7.QUOTE, 8.WORD_POS, 9.DS_DATA, 
+                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM,
+                # 6.LINKS (for ROOT), 7.QUOTE, 8.WORD_POS, 9.DS_DATA,
                 # 10.PARA_POS, 11.SENT_POS, 12.NEW, 13.GIVEN, 14.IS_SKIP, 15.IS_TOPIC
                 # 10 thr 15 are added later.
 
                 if incl_nsubj and token.dep_ in DSDocument.noun_subject_options:
-                    # if incl_nsubj is True (user option), and the POS tag is in 
+                    # if incl_nsubj is True (user option), and the POS tag is in
                     # the options selected by the user
                     left = True
                 elif lemma.lower() in DSDocument.user_defined_topics:
@@ -1244,7 +1234,7 @@ class DSDocument():
                 else:
                     left = is_left
 
-                res.append((pos, token.text, lemma, left, token.dep_, '', 
+                res.append((pos, token.text, lemma, left, token.dep_, '',
                             None, False, word_pos, None))
 
                 if token.dep_ == "ROOT":
@@ -1255,7 +1245,7 @@ class DSDocument():
             temp = []
             for n in doc.noun_chunks:
                 n = str(n)
-                n = n.translate(n.maketrans('', '', string.punctuation))     # removes punctuation            
+                n = n.translate(n.maketrans('', '', string.punctuation))     # removes punctuation
                 temp.append(n)
             noun_phrases = tuple(temp)
 
@@ -1268,7 +1258,7 @@ class DSDocument():
         """
         Perform a basic analysis of a given sentence in'sent_data'.
         """
-        def traverse(token, is_left):        
+        def traverse(token, is_left):
             l = None
             r = None
             res = None
@@ -1292,7 +1282,7 @@ class DSDocument():
                 for np in d:
                     if np[0] <= i and i < np[1]:
                         return True
-            return False      
+            return False
 
         sent_data = sent_dict['text_w_info']
 
@@ -1309,7 +1299,7 @@ class DSDocument():
         res['MV_LINKS']  = 0   # total # of links fron the root verb
         res['MV_L_LINKS']= 0   # total # of left links from the root veb
         res['MV_R_LINKS']= 0   # total # of right links from the root verb
-        
+
         res['V_LINKS']   = 0   # total # of links from all the non-root verbs
         res['V_L_LINKS'] = 0   # total # of left links from all the non-root verbs
         res['V_R_LINKS'] = 0   # total # of right links fromn all the non-root verbs
@@ -1337,10 +1327,10 @@ class DSDocument():
                 res['HNOUNS'] += 1
 
                 if data[ISLEFT] == True:
-                    res['L_HNOUNS'] += 1                
+                    res['L_HNOUNS'] += 1
                 else:
                     res['R_HNOUNS'] += 1
-                        
+
             if data[DEP] == 'ROOT':
                 links = data[LINKS]
                 if links is not None:
@@ -1358,9 +1348,9 @@ class DSDocument():
                 if links is not None:
                     res['V_LINKS'] += links['CCOUNT']
                     res['V_L_LINKS'] += links['LCOUNT']
-                    res['V_R_LINKS'] += links['RCOUNT']                 
+                    res['V_R_LINKS'] += links['RCOUNT']
                     res['NR_VERBS']  += 1
-                
+
             word_count+=1
 
 
@@ -1370,7 +1360,7 @@ class DSDocument():
             soup = bs(text, "html.parser")
             text = soup.text
 
-        text = re.sub(r"\s+", " ", text.strip()) # text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ') 
+        text = text.strip().replace('\n', ' ').replace('   ', ' ').replace('  ', ' ')
         doc = nlp(text)
 
         if type(sent) == str:
@@ -1386,20 +1376,23 @@ class DSDocument():
             if (np.end-1) < root_pos: # LEFT
                 res['L_NPS'] += 1
                 left_nps.append(np)
-            elif (np.end-1) > root_pos: # RIGHT   
+            elif (np.end-1) > root_pos: # RIGHT
                 res['R_NPS'] += 1
             res['NPS'].append(np.text)
         res['NUM_NPS'] = len(res['NPS'])
 
-        # res['NOUN_CHUNKS'] = list(doc.noun_chunks) 
-        # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert 
+        # res['NOUN_CHUNKS'] = list(doc.noun_chunks)
+        # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert
         # the 'sent_analysis' property to JSON easily later.
         res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
 
-        tokens = [{'text': token.text, 'is_root': token.dep_ == 'ROOT'} for token in doc]
-        # for token in doc:
-        #     is_root = token.dep_ == 'ROOT'
-        #     tokens.append( {'text': token.text, 'is_root': is_root})
+        tokens = []
+        for token in doc:
+            if token.dep_ == 'ROOT':
+                is_root = True
+            else:
+                is_root = False
+            tokens.append( {'text': token.text, 'is_root': is_root})
         res['TOKENS'] = tokens
 
         advcl_root = None
@@ -1448,10 +1441,6 @@ class DSDocument():
         else:
             res['MOD_CL'] = None
 
-        # print("analyzeSent()")
-        # print("res =", res)
-        # print("---------------------------")
-
         return res
 
     def clearGlobalTopicalProgDataCache(self):
@@ -1464,14 +1453,14 @@ class DSDocument():
         """
 
         if (isModelLoaded () == False):
-           logging.warning("Warning: language model not loaded yet, loading ...")
-           setLanguageModel ("en", NLP_MODEL_DEFAULT)
+            logging.warning("Warning: language model not loaded yet, loading ...")
+            setLanguageModel ("en", NLP_MODEL_DEFAULT)
 
         if (isModelLoaded () == False):
-           logging.error("Error: unable to load language model!")
-           return (list())
+            logging.error("Error: unable to load language model!")
+            return list()
 
-        logging.info("Language model appears to be loaded, processing text ...")   
+        logging.info("Language model appears to be loaded, processing text ...")
 
         self.global_topical_prog_data = None # clear the cache
 
@@ -1479,22 +1468,9 @@ class DSDocument():
 
         if self.progress_callback:
             self.progress_callback(max_val=20, msg="Preprocessing...")
-        self.num_quoted_words = 0 
+        self.num_quoted_words = 0
 
         word_pos = section_data['start']
-
-       # def listLemmas(sent):
-       #      global stop_words
-
-       #      lemmas = list()
-       #      temp = list()
-
-       #      for w in sent:
-       #          if w[POS] is not None and w[LEMMA] not in stop_words:
-       #              if (w[POS], w[LEMMA]) not in temp:
-       #                  temp.append( (w[WORD], w[POS], w[LEMMA]) )   # 'they' + 'NOUN' + 'man'
-       #                  lemmas.append(w)
-       #      return lemmas
 
         # Optimized by only adding NOUNs. We ignore all the other POSs.
         def listLemmas(sent):
@@ -1520,12 +1496,6 @@ class DSDocument():
                         temp.append(w[STEM])
                         stems.append(w)
             return stems
-        
-        # def accumulateParaLemmas(paragraphs):
-        #     accum = list()
-        #     for para in paragraphs:
-        #         accum += para['lemmas']
-        #     return accum
 
         # Optimization. We are only interested in nouns now.
         def accumulateParaLemmas(paragraphs):
@@ -1568,23 +1538,23 @@ class DSDocument():
             if p.startswith("<img "): # skip if p is an image element.
                 para_dict = dict()
                 para_dict['text'] = p
-                para_dict['sentences']          = list() 
-                
+                para_dict['sentences']          = list()
+
                 para_dict['lemmas']             = list()
                 para_dict['accum_lemmas']       = list()
                 para_dict['given_lemmas']       = list()
                 para_dict['new_lemmas']         = list()
                 para_dict['given_accum_lemmas'] = list()
                 para_dict['new_accum_lemmas']   = list()
-                
+
                 para_dict['style']              = 'Normal'
-                data['paragraphs'].append(para_dict)                  
-                continue                      
+                data['paragraphs'].append(para_dict)
+                continue
 
             if p == "":                       # skip if it is an empty line.
                 continue
 
-            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title', 
+            if para.style.name not in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title',
                                        'List Bullet', 'List Bullet 2', 'List Bullet 3',
                                        'List Number', 'List Number 2', 'List Number 3']:
                 style = 'Normal'
@@ -1593,21 +1563,21 @@ class DSDocument():
 
             para_dict = dict()                                     # initalizes a dict for the paragraph
             para_dict['text']               = p                    # assign the paragraph obj to para_dict['text']
-            para_dict['sentences']          = list()               # and initialize other fields with an empty list.            
-            
+            para_dict['sentences']          = list()               # and initialize other fields with an empty list.
+
             para_dict['lemmas']             = list()
             para_dict['accum_lemmas']       = list()
             para_dict['given_lemmas']       = list()
             para_dict['new_lemmas']         = list()
             para_dict['given_accum_lemmas'] = list()
-            para_dict['new_accum_lemmas']   = list()            
-            
+            para_dict['new_accum_lemmas']   = list()
+
             para_dict['style']              = style                 # set the paragraph style (from the docx file).
 
             if style in ['Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Heading 5', 'Heading 6', 'Title']:
                 slist = [para.text]
             else:
-                parsed_para = nlp(p)                               
+                parsed_para = nlp(p)
                 slist = [sent for sent in parsed_para.sents]
 
             for s in slist:                                         # for each sentence in the paragraph 'p'
@@ -1618,7 +1588,7 @@ class DSDocument():
                     sent_dict['text_w_info'], NPs, word_pos = self.processSent(s.strip(), start=word_pos+1)
                 else:
                     sent_dict['text'] = s.text.strip()
-                    sent_dict['text_w_info'], NPs, word_pos = self.processSent(s, start=word_pos+1) 
+                    sent_dict['text_w_info'], NPs, word_pos = self.processSent(s, start=word_pos+1)
 
                 # sent_dict['sent_analysis'] = self.analyzeSent(sent_dict['text_w_info'], s) # analyze sentences
                 sent_dict['sent_analysis'] = self.analyzeSent(sent_dict, s) # analyze sentences
@@ -1645,19 +1615,18 @@ class DSDocument():
                 sent_dict['accum_lemmas'] = list(para_dict['lemmas'])
 
             data['paragraphs'].append(para_dict)                # add para_dict to doc_dict
-            
+
             # here, we need to create para_dict['accmum_lemmas'] by going through all the previous
-            # paragraphs and accumulating lemmas.            
-            
+            # paragraphs and accumulating lemmas.
+
             para_dict['accum_lemmas'] = accumulateParaLemmas(data['paragraphs'])
 
         section_data['data']    = data
         section_data['end_pos'] = word_pos
 
-        self.recalculateGivenWords(data=data)
+        # self.recalculateGivenWords(data=data) # 2025.07.03
 
     def recalculateGivenWords(self, data=None, section=-1):
-
         """
         (re)Calculate given words at the sentence and the paragraph level.
         """
@@ -1667,6 +1636,9 @@ class DSDocument():
                 return
             else:
                 data = self.sections[section]['data']
+
+        if self.lexical_overlaps_analyzed:
+            return
 
         if self.progress_callback:
             self.progress_callback(max_val=50, msg="Finding lexical overlaps between paragraphs...")
@@ -1678,13 +1650,16 @@ class DSDocument():
 
         self.findGivenWordsSent(data)               # find given words between sentences in each paragraph
 
-    def isGiven(self, l1, l2, pos1, pos2, pronoun=False):  
-              
-        if pos1 == pos2:                                 
+        self.clearGlobalTopicalProgDataCache()
+        self.lexical_overlaps_analyzed = True
+
+    def isGiven(self, l1, l2, pos1, pos2, pronoun=False):
+
+        if pos1 == pos2:
             # these 2 lemmas share the same POS tag.
             if pronoun == False and pos1 == 'PRP':
                 # we'll ignore this since they are pronouns and the pronoun display is OFF.
-                return False 
+                return False
             elif l1 == l2:  # lemma 1 == lemma 2 and POS1 == POS1
                 return True
             else:
@@ -1693,29 +1668,29 @@ class DSDocument():
         elif pronoun == True and pos1 == 'PRP':
             # The pronoun display is ON, and pos1 is a pronoun.
             # Pronouns are ALWAYS given.
-            return True            
+            return True
 
         else:
             return False
 
     def findGivenWordsSent(self, data):
         """
-        This method iterates through the sentences in each paragraph 
-        of the document, and find all the given and 'new' lemmas. Notice 
+        This method iterates through the sentences in each paragraph
+        of the document, and find all the given and 'new' lemmas. Notice
         that this function only finds given words/lemmas between sentences
-        within a given paragraph. (i.e., No given words are discovered 
+        within a given paragraph. (i.e., No given words are discovered
         between the last sentence of a paragraph and the first sentence
         of the next paragraph.)
         """
         num_paras = len(data['paragraphs'])
-        count_para = 0          
-        for para in data['paragraphs']:                    # for each paragraph  
-            count_para += 1 
+        count_para = 0
+        for para in data['paragraphs']:                    # for each paragraph
+            count_para += 1
 
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para/num_paras))
 
-            prev_s = None                                       
+            prev_s = None
             for sent in para['sentences']:                      # for each sentence in the paragraph
                 sent['given_accum_lemmas'] = list()
                 sent['new_accum_lemmas']   = list()
@@ -1723,7 +1698,7 @@ class DSDocument():
                 if prev_s is not None:                          # start with the 2nd sentence.
                     for gl in sent['lemmas']:                   # for each given lemmas in the sentence
 
-                        for cl in prev_s['accum_lemmas']:        
+                        for cl in prev_s['accum_lemmas']:
                             # for each given accum_lemmas in the prev sentence
                             # if a lemma ('gl') is in the previous paragraph AND their POSs maatch
 
@@ -1753,7 +1728,7 @@ class DSDocument():
                             if gl[LEMMA].lower() not in sent['given_accum_lemmas']:
                                 sent['given_accum_lemmas'].append(gl)
 
-                    prev_s = sent       
+                    prev_s = sent
 
                 else:
                     prev_s = sent
@@ -1769,10 +1744,10 @@ class DSDocument():
         appear in the following paragraph.
         """
         num_paras = len(data['paragraphs'])
-        count_para = 0        
+        count_para = 0
         prev_p = None
-        for para in data['paragraphs']:                         # for each paragraph  
-            count_para += 1        
+        for para in data['paragraphs']:                         # for each paragraph
+            count_para += 1
 
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para/num_paras))
@@ -1782,7 +1757,7 @@ class DSDocument():
             foo = list()
             if prev_p is not None:                      # start with the 2nd paragraph.
                 for gl in para['lemmas']:               # for each lemma in the paragraph
-                    
+
                     for cl in prev_p['accum_lemmas']:   # for each given lemmas in the prev. paragraph
                         # if a lemma ('gl') is in the previous paragraphs AND their POSs maatch
                         #if self.isPOSVisible(gl[POS]) and self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS]):
@@ -1790,11 +1765,11 @@ class DSDocument():
                             para['given_accum_lemmas'].append(gl)         # add 'gl' to the list
                             break # 2024.12.02
 
-                    for temp_para in data['paragraphs']: 
+                    for temp_para in data['paragraphs']:
                         if temp_para == para:
-                            break        
+                            break
 
-                        for cl in temp_para['accum_lemmas']:     # for each paragraph's accum_lemmas 
+                        for cl in temp_para['accum_lemmas']:     # for each paragraph's accum_lemmas
                             # if a lemma ('gl') is in the previous paragraph AND their POSs maatch
                             if self.isGiven(gl[LEMMA], cl[LEMMA], gl[POS], cl[POS], pronoun=self.prp):
                                 # if 'cl' is not already in the previous paragraph's new lemmas list
@@ -1808,16 +1783,16 @@ class DSDocument():
                             para['given_accum_lemmas'].append(gl)
 
                 # remove the duplicates. It may be a bit faster to do it here than checking duplicates in the loop above...
-                para['given_accum_lemmas'] = list(set(para['given_accum_lemmas']))  
+                para['given_accum_lemmas'] = list(set(para['given_accum_lemmas']))
 
                 prev_p = para
 
             else:
-                prev_p = para           
-                for gl in para['lemmas']: 
+                prev_p = para
+                for gl in para['lemmas']:
                     #### Adding new (not-given) lemmas to the first paragraph (2024.12.02)
                     if gl[LEMMA] not in [x[LEMMA] for x in para['new_accum_lemmas']]:
-                        para['new_accum_lemmas'].append(gl) 
+                        para['new_accum_lemmas'].append(gl)
 
                     if DSDocument.isUserDefinedTopic(gl[LEMMA].lower()) or \
                        DSDocument.isUserDefinedSynonym(gl[LEMMA]):
@@ -1862,7 +1837,7 @@ class DSDocument():
 
     def loadFromTxtFile(self, src_dir, file):
         """
-        Load a text from a plain text file. 
+        Load a text from a plain text file.
         It then process the document by calling the processDoc method.
         It calls back the application object to update the headings.
         """
@@ -1899,7 +1874,7 @@ class DSDocument():
         self.processDoc(section_data)
         section_data['start'] = 0
         self.processDoc(section_data)
- 
+
     def loadFromMSWordFile(self, src_dir, file):
         """
         Load a text from a MS Word file. If the file contains headings using
@@ -1916,24 +1891,24 @@ class DSDocument():
             """
             # Access the XML element
             p_element = paragraph._element
-            
+
             # The namespace prefix is already registered in python-docx
             # Check for numbering properties
             num_pr = p_element.xpath('./w:pPr/w:numPr')
             if not num_pr:
                 return None, None
-            
+
             # Get numbering ID and level
             num_id_elements = num_pr[0].xpath('./w:numId')
             ilvl_elements = num_pr[0].xpath('./w:ilvl')
-            
+
             if not num_id_elements or not ilvl_elements:
                 return None, None
-            
+
             # Get the values
             num_id = num_id_elements[0].attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val')
             ilvl = ilvl_elements[0].attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val')
-            
+
             # Get the document's numbering part
             try:
                 numbering_part = paragraph._parent._parent.part.numbering_part
@@ -1941,34 +1916,34 @@ class DSDocument():
                     return None, None
             except AttributeError:
                 return None, None
-            
+
             # Get the XML from numbering definitions
             numbering_xml = numbering_part._element
-            
+
             # Find the abstract numbering ID
             # We need to use full XPath with namespace prefixes already registered
             abstract_num_xpath = f'.//w:num[@w:numId="{num_id}"]/w:abstractNumId'
             abstract_num_id_elements = numbering_xml.xpath(abstract_num_xpath)
-            
+
             if not abstract_num_id_elements:
                 return None, None
-            
+
             abstract_num_id = abstract_num_id_elements[0].attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val')
-            
+
             # Find the level format
             level_xpath = f'.//w:abstractNum[@w:abstractNumId="{abstract_num_id}"]/w:lvl[@w:ilvl="{ilvl}"]/w:numFmt'
             num_fmt_elements = numbering_xml.xpath(level_xpath)
-            
+
             if not num_fmt_elements:
                 return None, None
-            
+
             num_fmt = num_fmt_elements[0].attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val')
             return num_fmt, ilvl
 
         self.current_section = 0
 
         if self.progress_callback:
-            self.progress_callback(max_val=10, msg="Opening file...")         
+            self.progress_callback(max_val=10, msg="Opening file...")
 
         self.sections = list()
         fpath = os.path.join(src_dir,file)
@@ -1990,13 +1965,13 @@ class DSDocument():
 
             ptext = adjustSpaces(ptext)
 
-            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title', 
+            if para.style.name in ['Normal', 'Heading 1', 'Heading 2', 'Heading 3', 'Heading 4', 'Title',
                                    'List Bullet', 'List Bullet 2', 'List Bullet 3',
                                    'List Number', 'List Number 2', 'List Number 3']:
                 style = para.style.name
 
             elif para.style.name == 'List Paragraph':
-                
+
                 list_type, list_level = get_list_type_and_level(para) # check the list type and its level
 
                 if list_type == 'bullet':
@@ -2022,9 +1997,9 @@ class DSDocument():
                 section_data['doc'] = Document()
                 section_data['heading'] = ptext
                 section_data['pos'] = sect_count
-                section_data['para_data'] = []                        
+                section_data['para_data'] = []
                 self.sections.append(section_data)
-                headings.append("")                
+                headings.append("")
                 sect_count += 1
                 p = None
 
@@ -2051,7 +2026,7 @@ class DSDocument():
         return headings
 
     def loadFromListOfParagraphs(self, doc, section):
-
+        """ UNUSED """
         self.current_section = section
 
         if self.filename is not None:
@@ -2069,7 +2044,7 @@ class DSDocument():
         new_sections = list()
 
         for para in doc.paragraphs:
-            
+
             ptext = para.text
 
             if ptext.startswith("<img "):
@@ -2077,8 +2052,8 @@ class DSDocument():
                 para_count += 1
                 continue
 
-            for mw_topic in DSDocument.multiword_topics + DSDocument.deleted_multiword_topics: 
-                            
+            for mw_topic in DSDocument.multiword_topics + DSDocument.deleted_multiword_topics:
+
                 connected_mw_topic = mw_topic.replace(' ', '_')
                 ptext = ptext.replace(connected_mw_topic, mw_topic)
                 ptext = ptext.replace(connected_mw_topic.lower(), mw_topic.lower())
@@ -2089,7 +2064,7 @@ class DSDocument():
 
             if para_count == 0:
 
-                if para.style.name == 'Heading 1' or para.style.name == 'Title':
+                if para.style.name in ('Heading 1', 'Title'):
                     section_data = dict()
                     section_data['doc'] = Document()
                     section_data['heading'] = ptext
@@ -2157,7 +2132,7 @@ class DSDocument():
                         if level == 1:
                             style = f"List {list_type}"
                         else:
-                            style = f"List {list_type} {level}"                    
+                            style = f"List {list_type} {level}"
 
                         if p is None:
                             p = doc.add_paragraph("", style=style)
@@ -2185,13 +2160,13 @@ class DSDocument():
                     add_list_recursively(child, level+1, "Number")
 
                 else:
-                    text = child.decode_contents()                    
+                    text = child.decode_contents()
                     text = text.strip()
 
                     if level == 1:
                         style = f"List {list_type}"
                     else:
-                        style = f"List {list_type} {level}"                    
+                        style = f"List {list_type} {level}"
 
                     if p is None:
                         p = doc.add_paragraph("", style=style)
@@ -2210,13 +2185,13 @@ class DSDocument():
 
         for tag in body.children:
 
-            if type(tag) == bs4.element.NavigableString:
+            if isinstance(tag, bs4.element.NavigableString):
                 # skip floating strings w/ no tags.
                 continue
 
-            if isinstance(tag, Comment) or hasattr(tag, 'decode_contents') == False: 
+            if isinstance(tag, Comment) or not hasattr(tag, 'decode_contents'):
                 # skip comments and other elements that do not contain content.
-                continue                
+                continue
 
             tag_name = tag.name
 
@@ -2237,7 +2212,7 @@ class DSDocument():
                 add_list_recursively(tag, 1, "Bullet")
 
             elif tag_name == 'ol':
-                add_list_recursively(tag, 1, "Number")              
+                add_list_recursively(tag, 1, "Number")
             else:
                 text = tag.decode_contents()
 
@@ -2294,13 +2269,13 @@ class DSDocument():
 
                     level_str = para_style[-1]
                     if level_str.isnumeric():
-                        level = int(level_str)                
+                        level = int(level_str)
                     else:
                         level = 1
 
                     if li_tag < level:                # The current level is greater
                         html_str += "<ul>"
-                        ul_tag += 1                        
+                        ul_tag += 1
                     elif li_tag > level:
                         html_str += "</ul></li>"         # Th current level is lesser
                         ul_tag -= 1
@@ -2314,9 +2289,9 @@ class DSDocument():
                     else:
                         level = 1
 
-                    if li_tag < level:    
+                    if li_tag < level:
                         html_str += "<ol>"
-                        ol_tag += 1                        
+                        ol_tag += 1
                     elif li_tag > level:
                         html_str += "</ol></li>"
                         ol_tag -= 1
@@ -2379,7 +2354,7 @@ class DSDocument():
             else:
                 if para_style == 'Heading 1':
                     html_str += '<h1 data-ds-paragraph="{0}" id="p{0}" class="paragraph">'.format(pcount)
-                elif para_style == 'Heading 2':                
+                elif para_style == 'Heading 2':
                     html_str += '<h2 data-ds-paragraph="{0}" id="p{0}" class="paragraph">'.format(pcount)
                 elif para_style == 'Heading 3':
                     html_str += '<h3 data-ds-paragraph="{0}" id="p{0}" class="paragraph">'.format(pcount)
@@ -2397,16 +2372,16 @@ class DSDocument():
                 html_str += '<span id="p{0}s{1}" class="sentence" data-ds-paragraph="{0}" data-ds-sentence="{1}"> '.format(pcount, scount)
 
                 while word_count < total_words:
-                    
+
                     w = sent['text_w_info'][word_count]
                     word  = w[WORD]         # ontopic word
                     lemma = w[LEMMA]        # lemma/topic
 
                     # if w[LEMMA] in topics:
-                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
+                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
                         # we need to remove periods.
                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
-                        html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(pcount, scount, topic, word) 
+                        html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(pcount, scount, topic, word)
                     else:
                         html_word = word
 
@@ -2522,7 +2497,7 @@ class DSDocument():
 
                                     elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
                                                                          and temp_next_w[WORD] != ellipsis:
-                                        is_space = False   
+                                        is_space = False
 
                                     else:
                                         is_space = True
@@ -2534,8 +2509,8 @@ class DSDocument():
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
-                                is_space = False 
-             
+                                is_space = False
+
                             elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
@@ -2544,10 +2519,10 @@ class DSDocument():
                             else:
                                 is_space = True
 
-                        if is_space:        
-                            next_char = ' '          
-                        else:    
-                            next_char = ''   
+                        if is_space:
+                            next_char = ' '
+                        else:
+                            next_char = ''
 
                     else:  # last word/char in 'sent'
                         if word in ['\u201C', '\u2018']:
@@ -2566,7 +2541,7 @@ class DSDocument():
                         html_str += combo_word
                     else:
                         html_str += html_word
-                        
+
                     html_str += next_char
                     word_count += 1
 
@@ -2575,7 +2550,7 @@ class DSDocument():
                     # bTagOpen = False
 
                 #  word
-                html_str += '</span> '                
+                html_str += '</span> '
                 html_str += next_char
                 scount += 1
 
@@ -2592,10 +2567,10 @@ class DSDocument():
                 elif para_style == 'Heading 3':
                     html_str += '</h3>'
                 elif para_style == 'Heading 4':
-                    html_str += '</h4>'                    
+                    html_str += '</h4>'
                 else:
                     html_str += '</p>'
-                pcount += 1                
+                pcount += 1
 
         if li_tag > 0:
             if ul_tag > 0:
@@ -2657,7 +2632,7 @@ class DSDocument():
                     lemma = w[LEMMA]        # lemma/topic
 
                     # if w[LEMMA] in topics:
-                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):                        
+                    if lemma in topics and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
                         # we need to remove periods.
                         topic = unidecode.unidecode(w[LEMMA].replace('.',''))
                         html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span>'.format(pcount, scount, topic, word)
@@ -2673,7 +2648,7 @@ class DSDocument():
                         # Let's deal with hyphenations and words followed by a no-space units.
                         next_w = sent['text_w_info'][word_count+1]
                         next_next_w = None
-                        
+
                         if word_count+1 < total_words-1:
                             next_next_w = sent['text_w_info'][word_count+2]
 
@@ -2776,7 +2751,7 @@ class DSDocument():
 
                                     elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
                                                                          and temp_next_w[WORD] != ellipsis:
-                                        is_space = False                                        
+                                        is_space = False
 
                                     else:
                                         is_space = True
@@ -2788,18 +2763,18 @@ class DSDocument():
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
-                                is_space = False 
-             
+                                is_space = False
+
                             elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
                             else:
                                 is_space = True
 
-                        if is_space:        
-                            next_char = ' '          
-                        else:    
-                            next_char = ''   
+                        if is_space:
+                            next_char = ' '
+                        else:
+                            next_char = ''
 
                     else:  # last word/char in 'sent'
                         if word in ['\u201C', '\u2018']:
@@ -2812,14 +2787,14 @@ class DSDocument():
                                 html_str = html_str.rstrip()
                             next_char = ' '
                         else:
-                            next_char = ' '       # end of 'sent' 
+                            next_char = ' '       # end of 'sent'
 
 
                     if is_combo:
                         html_str += combo_word
                     else:
                         html_str += html_word
-                        
+
                     html_str += next_char
                     word_count += 1
 
@@ -2847,9 +2822,9 @@ class DSDocument():
         if self.controller is None:
             return "DSDocument.toHtml(). No controller is available."
 
-        if self.controller.isDocTagged() == False:
-            return self.toHtml_OTOnly(topics=topics, para_pos=para_pos, font_info=font_info) 
-            # return self.toHtml_OTOnly_DSWA(topics=topics, para_pos=para_pos, font_info=font_info)                        
+        if self.controller.isDocTagged() is False:
+            return self.toHtml_OTOnly(topics=topics, para_pos=para_pos, font_info=font_info)
+            # return self.toHtml_OTOnly_DSWA(topics=topics, para_pos=para_pos, font_info=font_info)
 
         if self.sections is None:
             return "Error in toHtml()"
@@ -2859,13 +2834,12 @@ class DSDocument():
                 doc  = self.sections[self.current_section]['doc']
                 if doc is None:
                     raise ValueError
-                else:
-                    docx_paras = doc.paragraphs
+                docx_paras = doc.paragraphs
 
                 if data is None:
                     raise ValueError
             except:
-                logging.error(self.sections[self.current_section])                
+                logging.error(self.sections[self.current_section])
                 return
 
         bTagOpen = False
@@ -2901,10 +2875,10 @@ class DSDocument():
 
             para_style = para['style']
             font_size = font_info[para_style]
-            if para_style == 'Heading 1' or para_style == 'Heading 2':
-                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size)                 
-            elif para_style == 'Heading 3' or para_style == 'Heading 4':
-                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size) 
+            if para_style  in ('Heading 1', 'Heading 2'):
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size)
+            elif para_style in ('Heading 3', 'Heading 4'):
+                html_str += '<p class=\'p{}\' style=\'font-weight: bold; font-size: {}pt;\'>'.format(pcount, font_size)
             else:
                 html_str += '<p class=\'p{}\' style=\'font-size: {}pt;\'>'.format(pcount, font_size)
 
@@ -2913,7 +2887,7 @@ class DSDocument():
                 is_combo = False
                 word_count = 0
 
-                # For some reason (usualy it is a NLP parser problem), if a sentence is starting 
+                # For some reason (usualy it is a NLP parser problem), if a sentence is starting
                 # with a punctionation that's supposed to be part of the previous sentence, remove
                 # a space from html_str.
                 first_w = sent['text_w_info'][0]
@@ -2965,14 +2939,14 @@ class DSDocument():
                         # Let's put an open tags around DS patterns.
                         if pos == 0:                     # The first word of a DS TAG
 
-                            if bTagOpen == True:         # if a tag is open, close it.
+                            if bTagOpen is True:         # if a tag is open, close it.
                                 html_str += '</ds>'
                                 html_str += next_char    # add a space (or nothing)
                                 bTagOpen = False
                             else:
                                 html_str += next_char
 
-                            if bTagOpen == False:        # if a tag is not open, start a new one.
+                            if bTagOpen is False:        # if a tag is not open, start a new one.
 
                                 if word_count == (total_words-1) and \
                                     word == '.' and pos == 0 and lat != '':
@@ -2992,12 +2966,12 @@ class DSDocument():
                         elif bParaCrossingPattern:
 
                             html_str += next_char
-                            if lat == '' or lat == 'UNRECOGNIZED':
+                            if lat in ('', 'UNRECOGNIZED'):
                                 html_str += '<ds class=\'na\'>'
                             else:
                                 html_str += '<ds class=\'{} {} {}\'>'.format(clust, dim, lat)
 
-                            bTagOpen = True                
+                            bTagOpen = True
 
                             bParaCrossingPattern = False
                         else:
@@ -3015,7 +2989,7 @@ class DSDocument():
                         # Let's deal with hyphenations and words followed by a no-space units.
                         next_w = sent['text_w_info'][word_count+1]
                         next_next_w = None
-                        
+
                         if word_count+1 < total_words-1:
                             next_next_w = sent['text_w_info'][word_count+2]
 
@@ -3092,8 +3066,8 @@ class DSDocument():
                                     temp_w = sent['text_w_info'][temp_word_count]
                                     if temp_w[LEMMA] in topics and (temp_w[POS] == 'NOUN' or temp_w[POS] == 'PRP'):
                                         topic = unidecode.unidecode(temp_w[LEMMA].replace('.',''))
-                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic, 
-                                                                                  pcount, scount, 
+                                        html_temp_word = "<t class=\'{} p{} s{}\'>{}</t>".format(topic,
+                                                                                  pcount, scount,
                                                                                   temp_w[WORD])
                                     else:
                                         html_temp_word = temp_w[WORD]
@@ -3120,7 +3094,7 @@ class DSDocument():
 
                                     elif temp_next_w[WORD] in end_puncts and temp_next_w[WORD] not in dashes \
                                                                          and temp_next_w[WORD] != ellipsis:
-                                        is_space = False                                        
+                                        is_space = False
 
                                     else:
                                         is_space = True
@@ -3131,18 +3105,18 @@ class DSDocument():
                                 is_combo = True
 
                             elif next_w[WORD] in right_quotes:
-                                is_space = False 
-             
+                                is_space = False
+
                             elif next_w[POS] == 'PUNCT' and next_w[WORD] not in dashes and next_w[WORD] != ellipsis:
                                 is_space = False
 
                             else:
                                 is_space = True
 
-                        if is_space:        
-                            next_char = ' '          
-                        else:    
-                            next_char = ''   
+                        if is_space:
+                            next_char = ' '
+                        else:
+                            next_char = ''
 
                     else:  # last word/char in 'sent'
                         if word in ['\u201C', '\u2018']:
@@ -3155,7 +3129,7 @@ class DSDocument():
                                 html_str = html_str.rstrip()
                             next_char = ' '
                         else:
-                            next_char = ' '       # end of 'sent' 
+                            next_char = ' '       # end of 'sent'
 
                     if is_combo:
                         html_str += combo_word
@@ -3183,7 +3157,7 @@ class DSDocument():
 
     def saveAsDocx(self, filepath):
         """
-        This method saves the currently analyzed document as a MS docx file.  
+        This method saves the currently analyzed document as a MS docx file.
         """
         docx = self.toPlainDoc()
         docx.save(filepath)
@@ -3200,12 +3174,12 @@ class DSDocument():
 
             for i in range(num_paragraphs):              # for each paragraph in the current document.
 
-                style = paragraphs[i]['style'] 
-                if style not in ['Normal', 'Heading 1', 'Heading 2', 'Heasing 3', 'Title', 
+                style = paragraphs[i]['style']
+                if style not in ['Normal', 'Heading 1', 'Heading 2', 'Heasing 3', 'Title',
                                 'List Bullet',   'List Number'
                                 'List Bullet 2', 'List Number 2'
-                                'List Bullet 3', 'List Number 3' 
-                                ]:                        
+                                'List Bullet 3', 'List Number 3'
+                                ]:
                     style = 'Normal'
 
                 text = paragraphs[i]['text']
@@ -3220,16 +3194,16 @@ class DSDocument():
                     w = int(float(w)/96.0)
                     h = int(float(h)/96.0)
                     if src is not None:
-                        p = res_docx.add_paragraph()           # add a paragraph object                        
+                        p = res_docx.add_paragraph()           # add a paragraph object
                         r = p.add_run()
                         r.add_picture(src, width=Inches(w), height=Inches(h))
                     continue
 
                 p = res_docx.add_paragraph('')           # add a paragraph object
                 p.style = style
-                
+
                 # replace underscores with spaces if there are multi-word topics
-                for mw_topic in DSDocument.multiword_topics: 
+                for mw_topic in DSDocument.multiword_topics:
                     connected_mw_topic = mw_topic.replace(' ', '_')
                     text = text.replace(connected_mw_topic, mw_topic)
                     text = text.replace(connected_mw_topic.lower(), mw_topic.lower())
@@ -3242,12 +3216,12 @@ class DSDocument():
                 #     if style == 'Title':
                 #         r.font.size = Pt(24)
                 #     else:
-                #         r.font.size = Pt(18)             
+                #         r.font.size = Pt(18)
                 #     r.underline = False
                 #     r.bold = False
                 # else:
                 #     r = p.add_run(text)
-                    
+
                 r = p.add_run(text)
 
         return res_docx
@@ -3284,12 +3258,12 @@ class DSDocument():
                 elif ul_tag:
                     xml_str += "</ul>\n\n"
                     ul_tag = False
-                    pcount += 1                                       
+                    pcount += 1
                 elif ol_tag:
                     xml_str += "</ol>\n\n"
                     ol_tag = False
-                    pcount += 1                   
-            elif li_tag == False:
+                    pcount += 1
+            else:
                 # If the prev tag was not li, and the current tag is li, we will fist add the ul tag.
                 if para_style.startswith('List Bullet'):
                     xml_str += f"<ul id=\"p{pcount}\">"
@@ -3297,8 +3271,8 @@ class DSDocument():
                     scount = 1
                 elif para_style.startswith('List Number'):
                     xml_str += f"<ol id=\"p{pcount}\">"
-                    ol_tag = True    
-                    scount = 1                    
+                    ol_tag = True
+                    scount = 1
 
             li_tag = False
             title_tag = False
@@ -3316,25 +3290,25 @@ class DSDocument():
             elif para_style == 'Heading 3':
                 xml_str += f"<h3 id=\"p{pcount}\">"
                 htag_level = 3
-            elif para_style == 'Heading 4':               
+            elif para_style == 'Heading 4':
                 xml_str += f"<h4 id=\"p{pcount}\">"
                 htag_level = 4
             elif para_style == 'Heading 5':
                 xml_str += f"<h5 id=\"p{pcount}\">"
-                htag_level = 5              
+                htag_level = 5
             elif para_style == 'Heading 6':
                 xml_str += f"<h6 id=\"p{pcount}\">"
-                htag_level = 6                                       
+                htag_level = 6
             elif para_style.startswith('List Bullet'):
                 xml_str += '<li>'
                 li_tag = True
             elif para_style.startswith('List Number'):
                 xml_str += '<li>'
-                li_tag = True                
-            elif ol_tag != True and ul_tag != True:
+                li_tag = True
+            elif ol_tag is not True and ul_tag is not True:
                 xml_str += f'<p id=\"p{pcount}\">'
 
-            if ol_tag != True and ul_tag != True:
+            if ol_tag is not True and ul_tag is not True:
                 scount = 1
 
             for sent in para['sentences']: # for each sentence
@@ -3342,7 +3316,7 @@ class DSDocument():
                 sent_text = sent['text']
 
                 if htag_level == 0:
-                    xml_str += f"<span id=\"p{pcount}s{scount}\" class=\"sentence\">{sent_text}</span>"
+                    xml_str += f"<span id=\"p{pcount}s{scount}\">{sent_text}</span>"
                 else:
                     # this text is inisde a heading tag. We do not mark it as a sentence.
                     sent_text = sent['text']
@@ -3356,18 +3330,18 @@ class DSDocument():
                 pcount += 1
             elif title_tag:
                 xml_str += '</title>\n'
-                pcount += 1                
+                pcount += 1
             elif li_tag:
-                xml_str += '</li>\n'   
-            elif ol_tag != True and ul_tag != True:
-                xml_str += '</p>\n\n'  
+                xml_str += '</li>\n'
+            elif ol_tag is not True and ul_tag is not True:
+                xml_str += '</p>\n\n'
                 pcount += 1
 
         return xml_str
 
-    ##        
+    ##
 
-    def getLocalTopicalProgData(self, selected_paragraphs):  
+    def getLocalTopicalProgData(self, selected_paragraphs):
 
         selected_paragraphs.sort()
 
@@ -3447,16 +3421,13 @@ class DSDocument():
             s_count = 1
 
             # we'll need to find a sentence with a single punctuation character.
-            for s in p['sentences']:             
-                if len(s['text']) == 1 and \
+            for s in p['sentences']:
+                bSkipPunct = len(s['text']) == 1 and \
                        (s['text'] in dashes or \
                         s['text'] in hyphen_slash or \
                         s['text'] in left_quotes or \
                         s['text'] in right_quotes or \
-                        s['text'] == ellipsis):
-                    bSkipPunct = True
-                else:
-                    bSkipPunct = False
+                        s['text'] == ellipsis)
 
                 # The following changes support the local cohesion visualization with 2 ore more paragraphs
                 # remove any lemmas that have appeared in the previous paragraphs from new_lemmas list
@@ -3479,7 +3450,7 @@ class DSDocument():
                                                                    prev_para_given_accum_lemmas + \
                                                                    prev_para_new_accum_lemmas))
                 else:
-                    given_lemmas = list(set(s_lemmas) & 
+                    given_lemmas = list(set(s_lemmas) &
                                         set(s_given_accum_lemmas + prev_given_lemmas))
 
                 sres = list() # get an empty list
@@ -3489,30 +3460,30 @@ class DSDocument():
                     is_given = False
 
                     # if (l[0], l[1]) in [(t[POS], t[LEMMA]) for t in new_lemmas]:
-                    if (l[0], l[1]) in new_lemmas: 
+                    if (l[0], l[1]) in new_lemmas:
                         is_new = True
 
                     # if (l[0], l[1]) in [(t[POS], t[LEMMA]) for t in given_lemmas]:
                     if (l[0], l[1]) in given_lemmas:
                         is_given = True
 
-                    is_match = False                    
+                    is_match = False
                     if is_new or is_given:
                         is_left = False
                         left_t = None
-                        for sl in s['lemmas']: 
+                        for sl in s['lemmas']:
 
                             if sl[LEMMA] == l[1]:
 
                                 # LOCAL
-                                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM,  
-                                # 6.LINKS, 7.QUOTE, 8.WORD_POS, 9.DS_DATA, 
+                                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM,
+                                # 6.LINKS, 7.QUOTE, 8.WORD_POS, 9.DS_DATA,
                                 # 10.PARA_POS, 11.SENT_POS, 12.NEW, 13.GIVEN, 14.IS_SKIP, 15.IS_TOPIC
 
                                 if sl[ISLEFT]:
                                     is_left = True
                                     left_t = sl + tuple([p_count, s_count, is_new, is_given, bSkipPunct, True])
-                                elif is_left == False:
+                                elif is_left is False:
                                     t = sl + tuple([p_count, s_count, is_new, is_given, bSkipPunct, False])
 
                                 is_match = True
@@ -3520,22 +3491,22 @@ class DSDocument():
 
                         if is_match:
                             if is_left and left_t is not None:
-                                sres.append(left_t) 
+                                sres.append(left_t)
                             else:
                                 sres.append(t)
 
-                    if is_match == False:
+                    if is_match is False:
                         sres.append(tuple([None, bSkipPunct]))
 
                 # for each lemmas in 'all_lemmas'
-                
-                res.append(sres) 
+
+                res.append(sres)
                 s_count += 1
 
                 prev_given_lemmas = given_lemmas
                 prev_para = p
 
-            res.append([-1]*(len(all_lemmas)+2))            
+            res.append([-1]*(len(all_lemmas)+2))
             p_count += 1
 
         res = res[:-1]
@@ -3543,8 +3514,10 @@ class DSDocument():
         return res
 
     def getGlobalTopicalProgData(self, sort_by=TOPIC_SORT_APPEARANCE):
-        if self.global_topical_prog_data is not None:
-            return self.global_topical_prog_data
+
+        if self.lexical_overlaps_analyzed:                # if lexical overlaps have been analyzed already
+            if self.global_topical_prog_data is not None: # if global_topical_prog_data are already genreated, return themn.
+                return self.global_topical_prog_data      # otherwise, we'll generate new global_topical_prog_data
 
         # first we should make a list of given lemmas as they appear in the text
         all_lemmas = list()
@@ -3560,16 +3533,16 @@ class DSDocument():
             return
 
         for p in data['paragraphs']:                 # for each paragraph
-                for l in p['new_accum_lemmas']:      # for each new lemma
-                    t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
-                    if t not in temp:                # if the lemma 'l' is not already in the list,
-                        all_lemmas.append((l[POS], l[LEMMA],l[8]))  # append a tuple (POS, LEMMA, word_pos)  
-                        temp.append(t)
-                for l in p['given_accum_lemmas']:    # for each new lemma
-                    t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
-                    if t not in temp:                # if the lemma 'l' is not already in the list,
-                        all_lemmas.append((l[POS], l[LEMMA],l[8]))  # append a tuple (POS, LEMMA, word_pos)
-                        temp.append(t)
+            for l in p['new_accum_lemmas']:      # for each new lemma
+                t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
+                if t not in temp:                # if the lemma 'l' is not already in the list,
+                    all_lemmas.append((l[POS], l[LEMMA],l[8]))  # append a tuple (POS, LEMMA, word_pos)
+                    temp.append(t)
+            for l in p['given_accum_lemmas']:    # for each new lemma
+                t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
+                if t not in temp:                # if the lemma 'l' is not already in the list,
+                    all_lemmas.append((l[POS], l[LEMMA],l[8]))  # append a tuple (POS, LEMMA, word_pos)
+                    temp.append(t)
 
         # Count how many times each topic appears on the left side of a sentence.
         sent_topic_counter = Counter()
@@ -3602,22 +3575,22 @@ class DSDocument():
         all_lemmas = list()
         temp = list()
         for p in data['paragraphs']:                 # for each paragraph
-                for l in p['new_accum_lemmas']:      # for each new lemma
-                    t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
-                    if t not in temp:                # if the lemma 'l' is not already in the list,
-                        s_topic_count = sent_topic_counter[l[LEMMA]]
-                        p_topic_count = para_topic_counter[l[LEMMA]]
-                        all_lemmas.append((l[POS], l[LEMMA],l[8], s_topic_count, p_topic_count))  # append a tuple (POS, LEMMA, word_pos)  
-                        temp.append(t)
-                for l in p['given_accum_lemmas']:    # for each new lemma
-                    t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
-                    if t not in temp:                # if the lemma 'l' is not already in the list,
-                        s_topic_count = sent_topic_counter[l[LEMMA]]
-                        p_topic_count = para_topic_counter[l[LEMMA]]
-                        all_lemmas.append((l[POS], l[LEMMA],l[8], s_topic_count, p_topic_count))  # append a tuple (POS, LEMMA, word_pos)
-                        temp.append(t)
+            for l in p['new_accum_lemmas']:      # for each new lemma
+                t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
+                if t not in temp:                # if the lemma 'l' is not already in the list,
+                    s_topic_count = sent_topic_counter[l[LEMMA]]
+                    p_topic_count = para_topic_counter[l[LEMMA]]
+                    all_lemmas.append((l[POS], l[LEMMA],l[8], s_topic_count, p_topic_count))  # append a tuple (POS, LEMMA, word_pos)
+                    temp.append(t)
+            for l in p['given_accum_lemmas']:    # for each new lemma
+                t = (l[POS], l[LEMMA])           # tuple = (POS, LEMMA)
+                if t not in temp:                # if the lemma 'l' is not already in the list,
+                    s_topic_count = sent_topic_counter[l[LEMMA]]
+                    p_topic_count = para_topic_counter[l[LEMMA]]
+                    all_lemmas.append((l[POS], l[LEMMA],l[8], s_topic_count, p_topic_count))  # append a tuple (POS, LEMMA, word_pos)
+                    temp.append(t)
 
-        ###### 
+        ######
         all_lemmas.sort(key=lambda tup: tup[2])      # sort by the order of appearance.
         if sort_by == TOPIC_SORT_LEFT_COUNT:
             all_lemmas.sort(key=lambda tup: tup[3], reverse=True)      # sort by the total left count
@@ -3643,16 +3616,12 @@ class DSDocument():
             for s in p['sentences']:             # for each sentence
                 # if s['text'] is a single character, and one of these punct chracters
                 # we'll make the row as bSkipPunct == True.
-                if len(s['text']) == 1 and \
+                bSkipPunct = len(s['text']) == 1 and \
                        (s['text'] in dashes or \
                         s['text'] in hyphen_slash or \
                         s['text'] in left_quotes or \
                         s['text'] in right_quotes or \
-                        s['text'] == ellipsis):
-                    bSkipPunct = True
-                else:
-                    bSkipPunct = False
-
+                        s['text'] == ellipsis)
                 sres = list()                    # get an empty list
                 for l in all_lemmas:             # for each topic candidate
                     is_new   = False
@@ -3663,23 +3632,23 @@ class DSDocument():
                     if (l[0], l[1]) in [(t[POS], t[LEMMA]) for t in p['given_accum_lemmas']]:
                         is_given = True
 
-                    is_match = False                    
+                    is_match = False
                     if is_new or is_given:            # if 'l' is given or new
                         is_left = False
                         left_t = None
                         for sl in s['lemmas']:
-                            # and the lemma is also in the sentence. 
+                            # and the lemma is also in the sentence.
                             if sl[LEMMA] == l[1] and sl[POS] == l[0]:
 
                                 # Global
-                                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM, 
+                                # t = 0.POS, 1.WORD, 2.LEMMA, 3.ISLEFT, 4.DEP, 5.STEM,
                                 # 6.LINKS, 7.QUOTE, 8.WORD_POS, 9.DS_DATA, 10.PARA_POS, 11.SENT_POS
                                 # 12.NEW, 13.GIVEN, 14.IS_SKIP, 15.IS_TOPIC
 
                                 if sl[ISLEFT]:
                                     is_left = True
                                     left_t = sl + tuple([p_count, s_count, is_new, is_given, bSkipPunct, is_left])
-                                elif is_left == False:
+                                elif is_left is False:
                                     t = sl + tuple([p_count, s_count, is_new, is_given, bSkipPunct, is_left])
 
                                 is_match = True
@@ -3688,23 +3657,23 @@ class DSDocument():
                         if is_match:
                             if is_left and left_t is not None:
                                 pres[p_count+1] = left_t
-                                sres.append(left_t) 
+                                sres.append(left_t)
                             else:
                                 pres[p_count+1] = t
                                 sres.append(t)
 
-                    if is_match == False:
+                    if is_match is False:
                         sres.append(tuple([None, bSkipPunct]))
 
                     # end of 'for l in all_lemmas:'
 
                 # append a sentencce
                 collapsed_res.append(pres)
-                res.append(sres)              
+                res.append(sres)
 
                 s_count += 1
                 # end of 'for s in p['sentences']:'
-                            
+
             res.append([-1]*(len(all_lemmas)+2))
             p_count += 1
 
@@ -3724,12 +3693,12 @@ class DSDocument():
         res.append("\n") # paragraph break
         bSkipPunct = False
 
-        if self.sections is None: 
+        if self.sections is None:
             return res
 
         if len(self.sections) <= self.current_section:
             return res
-            
+
         data = self.sections[self.current_section]['data']
         if data is None or 'paragraphs' not in data:
             return res
@@ -3755,7 +3724,7 @@ class DSDocument():
                             bSkipPunct = True
                         else:
                             bSkipPunct = False
-                        res.append(tuple([p_count, s_count, s, bSkipPunct]))
+                        res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
                         s_count += 1
 
                     i += 1
@@ -3765,16 +3734,13 @@ class DSDocument():
             else:
                 s_count = 1
                 for s in p['sentences']:             # for each sentence
-                    if len(s['text']) == 1 and \
+                    bSkipPunct = len(s['text']) == 1 and \
                            (s['text'] in dashes or \
                             s['text'] in hyphen_slash or \
                             s['text'] in left_quotes or \
                             s['text'] in right_quotes or \
-                            s['text'] == ellipsis):
-                        bSkipPunct = True
-                    else:
-                        bSkipPunct = False
-                    res.append(tuple([p_count, s_count, s, bSkipPunct]))
+                            s['text'] == ellipsis)
+                    res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
                     s_count += 1
 
                 i+= 1
@@ -3790,10 +3756,10 @@ class DSDocument():
     #
     ########################################
     def saveJSON(self, filepath):
+        """ Write json to <filepath>.json file."""
         filename = "{}.json".format(filepath)
-        fout = open(filename, "w")
-        fout.write(json.dumps(self.sections, indent=4))
-        fout.close()
+        with open(filename, "w") as fout:
+            fout.write(json.dumps(self.sections, indent=4))
 
     def exportToCSV(self, filepath):
         """
@@ -3817,7 +3783,7 @@ class DSDocument():
             data = self.sections[self.current_section]['data']
             for para in data['paragraphs']:    # for each paragraph
                 for sent in para['sentences']: # for each sentence
-                    for w in sent['text_w_info']: 
+                    for w in sent['text_w_info']:
                         line = list(w[:DS_DATA])
                         dsw = w[DS_DATA]
                         if dsw is not None:
@@ -3844,7 +3810,7 @@ class DSDocument():
                 for sent in para['sentences']: # for each sentence
 
                     wcount = 1
-                    for w in sent['text_w_info']: 
+                    for w in sent['text_w_info']:
 
                         dsw = w[DS_DATA]
                         if dsw is not None:
@@ -3858,15 +3824,14 @@ class DSDocument():
                                 sent_list.append((pcount, scount, wcount))
 
                         wcount += 1
-                        
+
                     scount += 1
 
                 pcount += 1
 
             if sent_list:
                 return sent_list
-            else:
-                return []
+        return []
 
     def getSentencesWithCluster(self, cluster_name):
 
@@ -3884,7 +3849,7 @@ class DSDocument():
                 for sent in para['sentences']: # for each sentence
 
                     wcount = 1
-                    for w in sent['text_w_info']: 
+                    for w in sent['text_w_info']:
 
                         dsw = w[DS_DATA]
                         if dsw is not None:
@@ -3895,15 +3860,14 @@ class DSDocument():
                                 sent_list.append((pcount, scount, wcount))
 
                         wcount += 1
-                        
+
                     scount += 1
 
                 pcount += 1
 
             if sent_list:
                 return sent_list
-            else:
-                return []
+        return []
 
     def getSentencesWithImpression(self, impression):
 
@@ -3921,20 +3885,19 @@ class DSDocument():
                 for sent in para['sentences']: # for each sentence
 
                     wcount = 1
-                    for w in sent['text_w_info']: 
+                    for w in sent['text_w_info']:
                         lemma = w[LEMMA]
                         if lemma == impression:
                             sent_list.append((pcount, scount, wcount))
                         wcount += 1
-                        
+
                     scount += 1
 
                 pcount += 1
 
             if sent_list:
                 return sent_list
-            else:
-                return []
+            return []
 
     ### UNUSED NOW ####
     # def getAdjacentDSCategories(self, topic):
@@ -3960,7 +3923,7 @@ class DSDocument():
     #                 if isTopicInSent(sent):
     #                     # if 'topic' is in this sentence, add all the docuscope categories
     #                     # in this sentence to the result.
-    #                     for w in sent['text_w_info']: 
+    #                     for w in sent['text_w_info']:
     #                         dsw = w[DS_DATA]
     #                         end = dsw.getEnd()
     #                         lat = getLAT()
@@ -4008,7 +3971,7 @@ class DSDocument():
             for sent in para['sentences']:
 
                 wcount = 1
-                for w in sent['text_w_info']: 
+                for w in sent['text_w_info']:
 
                     if w[LEMMA] == topic and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
                         if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  ## NEW 3/2/21
@@ -4023,7 +3986,7 @@ class DSDocument():
                 scount+=1
 
             pcount+=1
-        
+
         bTagOpen = False
         bParaCrossingPattern = False
 
@@ -4043,14 +4006,14 @@ class DSDocument():
                 pcount += 1
                 continue
 
-            if adj_stats.isTopicPara(pcount) == False:
+            if not adj_stats.isTopicPara(pcount):
                 # skip the paragraphs that do not include the topic word.
                 pcount += 1
                 continue
 
             for sent in para['sentences']:
 
-                if adj_stats.isTopicSent(scount, pcount) == False:
+                if not adj_stats.isTopicSent(scount, pcount):
                     # skip the sentences that do not include the topic word.
                     bParaCrossingPattern = False
                     scount += 1
@@ -4059,7 +4022,7 @@ class DSDocument():
                 total_words = len(sent['text_w_info'])
                 word_count = 0
 
-                for w in sent['text_w_info']: 
+                for w in sent['text_w_info']:
                     dsw   = w[DS_DATA]      # docuscope word
 
                     if dsw is not None:
@@ -4069,12 +4032,12 @@ class DSDocument():
                             # pos = int(round(float(pos)))
                             pos   = dsw.getPos()
                             if pos == 0:                # The first word of a DS TAG
-                                if bTagOpen == True:    # if a tag is open, close it.
+                                if bTagOpen is True:    # if a tag is open, close it.
                                     # New tag
                                     # adj_stats.addLAT(lat) no no... we are closing the tag here.
                                     bTagOpen = False
 
-                                if bTagOpen == False:        
+                                if bTagOpen is False:
                                     if word_count == (total_words-1) and w[WORD] == '.' and pos == 0 and lat != '':
                                         # new tag starting with a period at the end of a sentence.
                                         bParaCrossingPattern = True
@@ -4084,8 +4047,8 @@ class DSDocument():
                                         adj_stats.addLAT(lat, pcount, scount)
                                         bTagOpen = True
 
-                            elif bParaCrossingPattern == True:
-                                bTagOpen = True             
+                            elif bParaCrossingPattern is True:
+                                bTagOpen = True
                                 # New tag
                                 adj_stats.addLAT(lat, pcount, scount)
                                 bParaCrossingPattern = False
@@ -4134,9 +4097,9 @@ class DSDocument():
                 continue
 
             for sent in para['sentences']:
-                for w in sent['text_w_info']: 
+                for w in sent['text_w_info']:
                     if w[LEMMA] in topics:
-                        if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  # NEW 3/2/21
+                        if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] is False:  # NEW 3/2/21
                             pass
                         adj_stats.addParagraphID(pcount)
                         adj_stats.addSentenceID(pcount, scount)
@@ -4162,14 +4125,14 @@ class DSDocument():
                 pcount += 1
                 continue
 
-            if adj_stats.isTopicPara(pcount) == False:
+            if not adj_stats.isTopicPara(pcount):
                 # skip the paragraphs that do not include the topic word.
                 pcount += 1
                 continue
 
             for sent in para['sentences']:
 
-                if adj_stats.isTopicSent(scount, pcount) == False:
+                if not adj_stats.isTopicSent(scount, pcount):
                     # skip the sentences that do not include the topic word.
                     bParaCrossingPattern = False
                     scount += 1
@@ -4178,22 +4141,22 @@ class DSDocument():
                 total_words = len(sent['text_w_info'])
                 word_count = 0
 
-                for w in sent['text_w_info']: 
-                    dsw   = w[DS_DATA]      # docuscope word
+                for w in sent['text_w_info']:
+                    dsw = w[DS_DATA]      # docuscope word
 
                     if dsw is not None:
-                        lat   = dsw.getLAT()
-                        pos   = dsw.getPos()
+                        lat = dsw.getLAT()
+                        pos = dsw.getPos()
                         pos = int(round(float(pos)))
 
                         if lat is not None:
                             if pos == 0:                # The first word of a DS TAG
-                                if bTagOpen == True:    # if a tag is open, close it.
+                                if bTagOpen is True:    # if a tag is open, close it.
                                     # New tag
                                     # adj_stats.addLAT(lat) no no... we are closing the tag here.
                                     bTagOpen = False
 
-                                if bTagOpen == False:        
+                                if bTagOpen is False:
                                     if word_count == (total_words-1) and w[WORD] == '.' and pos == 0 and lat != '':
                                         # new tag starting with a period at the end of a sentence.
                                         bParaCrossingPattern = True
@@ -4203,13 +4166,13 @@ class DSDocument():
                                         adj_stats.addLAT(lat, pcount, scount)
                                         bTagOpen = True
 
-                            elif bParaCrossingPattern == True:
-                                bTagOpen = True             
+                            elif bParaCrossingPattern is True:
+                                bTagOpen = True
                                 # New tag
                                 adj_stats.addLAT(lat, pcount, scount)
                                 bParaCrossingPattern = False
 
-                            elif word_count == 0 and pos ==1:
+                            elif word_count == 0 and pos == 1:
                                 # A pattern started in the previous sentence (e.g,. ". He"), but
                                 # the previous sentenc is not a topic sentence.
                                 adj_stats.addLAT(lat, pcount, scount)
@@ -4230,7 +4193,7 @@ class DSDocument():
     def calculateParaStats(self, para_pos=-1):
         """
         This function is used to get the stats spefific to the given paragraph.
-        It is used by the controller to update the dictionary tree.        
+        It is used by the controller to update the dictionary tree.
         """
 
         if self.controller is None:
@@ -4259,7 +4222,7 @@ class DSDocument():
                 continue
 
             for sent in para['sentences']:
-                for w in sent['text_w_info']: 
+                for w in sent['text_w_info']:
                     adj_stats.addParagraphID(pcount)
                     adj_stats.addSentenceID(pcount, scount)
                 scount+=1
@@ -4289,7 +4252,7 @@ class DSDocument():
                 total_words = len(sent['text_w_info'])
                 word_count = 0
 
-                for w in sent['text_w_info']: 
+                for w in sent['text_w_info']:
                     dsw   = w[DS_DATA]      # docuscope word
 
                     if dsw is not None:
@@ -4299,12 +4262,12 @@ class DSDocument():
 
                         if lat is not None:
                             if pos == 0:                # The first word of a DS TAG
-                                if bTagOpen == True:    # if a tag is open, close it.
+                                if bTagOpen is True:    # if a tag is open, close it.
                                     # New tag
                                     # adj_stats.addLAT(lat) no no... we are closing the tag here.
                                     bTagOpen = False
 
-                                if bTagOpen == False:        
+                                if bTagOpen is False:
                                     if word_count == (total_words-1) and w[WORD] == '.' and pos == 0 and lat != '':
                                         # new tag starting with a period at the end of a sentence.
                                         bParaCrossingPattern = True
@@ -4314,8 +4277,8 @@ class DSDocument():
                                         adj_stats.addLAT(lat, pcount, scount)
                                         bTagOpen = True
 
-                            elif bParaCrossingPattern == True:
-                                bTagOpen = True             
+                            elif bParaCrossingPattern is True:
+                                bTagOpen = True
                                 # New tag
                                 adj_stats.addLAT(lat, pcount, scount)
                                 bParaCrossingPattern = False
@@ -4330,7 +4293,7 @@ class DSDocument():
 
     ########################################
     #
-    # DocuScope Data Processing 
+    # DocuScope Data Processing
     #
     ########################################
 
@@ -4339,7 +4302,7 @@ class DSDocument():
         if self.sections is not None:
             if section_id is not None:
                 errors = self.setDSCategoriesOne(section_id)
-                if errors['positions']:                
+                if errors['positions']:
                     list_of_errors = [errors]
                 self.calculateDSTemporalStats(section_id)
             else:
@@ -4375,7 +4338,7 @@ class DSDocument():
                 errors['positions'].append(d)
 
         section_data = self.sections[section_id]
-        ot_data = section_data['data'] 
+        ot_data = section_data['data']
         ds_data = self.generateOTCompatibleData(section_id)
 
         ds_count = 0
@@ -4405,7 +4368,7 @@ class DSDocument():
                             otw_word = otw[WORD]
 
                             if next_dsw_word == '.':
-                                # We have a case where a period is used in abbreviations etc. 
+                                # We have a case where a period is used in abbreviations etc.
                                 # (not at the end of a sentence.)
                                 sent['text_w_info'][ot_count] = otw[:-1] + (dsw,)
                                 ds_count += 1
@@ -4418,7 +4381,7 @@ class DSDocument():
                             elif otw_word.startswith(dsw_word):
                                 pos = len(dsw_word)
                                 temp_word = dsw_word
-                                while pos < len(otw_word):   
+                                while pos < len(otw_word):
                                     next_dsw = ds_data[ds_count+1]
                                     next_dsw_word = next_dsw.getWord()
                                     temp_word += next_dsw_word
@@ -4497,7 +4460,7 @@ class DSDocument():
 
         output = list()
         word_count = 0
-        
+
         # b_in_html_element = False
         word = ''
         prev_word = ''
@@ -4509,7 +4472,7 @@ class DSDocument():
                 token_info = line.split(',')
 
                 # get a list of numbers with thousand separator(s)
-                # num_list = re.findall("\"[0-9,.]+\"(?=,)", line) 
+                # num_list = re.findall("\"[0-9,.]+\"(?=,)", line)
                 num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
                 if num_list:
                     token_info = num_list + token_info[-3:]
@@ -4525,7 +4488,7 @@ class DSDocument():
             lword = token_info[1]    # lowercase word
             end   = token_info[2]    # end reason
             lat   = token_info[3]    # category
-            pos   = token_info[4]    # 
+            pos   = token_info[4]    #
 
             if pos != '':
                 pos = int(token_info[4])
@@ -4544,18 +4507,18 @@ class DSDocument():
                 w2 = word[split_at:]
 
                 res = hyphenated_word(w1)
-                if res != False:
+                if res is not False:
                     res.append(w2)
                     words = res
                 else:
                     words = [w1, w2]
             else:
                 res = hyphenated_word(word)
-                if res != False:
+                if res is not False:
                     words = res
                 else:
                     res = slashed_word(word)
-                    if res != False:
+                    if res is not False:
                         words = res
 
             if words is not None:
@@ -4570,7 +4533,7 @@ class DSDocument():
                             line = [w, w.lower(), 'c', lat, pos+i]
                         else:
                             # use 'end' at the end.
-                            line = [w, w.lower(), end, lat, pos+i] 
+                            line = [w, w.lower(), end, lat, pos+i]
                         output.append(line)
                 else:
                     line = [word, lword, end, lat, pos]
@@ -4583,10 +4546,8 @@ class DSDocument():
                 line = [word, lword, end, lat, pos]
                 output.append(line)
 
-        res = list()
-        for line in output:
-            # [word, lword, end, lat, pos]
-            res.append(DSWord(line[0], line[1], line[2], line[3], line[4]))
+        # [word, lword, end, lat, pos]
+        res = [DSWord(line[0], line[1], line[2], line[3], line[4]) for line in output]
 
         # # Debugging
         if debug:
@@ -4597,7 +4558,7 @@ class DSDocument():
                 for p in data['paragraphs']:
                     for s in p['sentences']:
                         for w in s['text_w_info']:
-                             ot_words.append(w[WORD])
+                            ot_words.append(w[WORD])
 
 
             for i in range(len(output)):
@@ -4606,26 +4567,24 @@ class DSDocument():
                     break
                 w = ot_words[i]
                 error_table += "{},{},{},{},{},{}\n".format(line[0], line[1], line[2], line[3], line[4], w)
-                
-            # csv_file = "debugging_{}.csv".format(section_id)                
+
+            # csv_file = "debugging_{}.csv".format(section_id)
             # with open(csv_file, 'w') as fout:
                 # fout.write(error_table)
             return error_table
-            # return res
-        else:
-            return res
+        return res
 
     def processTokenData(self, section_id=None, section=None):
-        """
+        """ UNUSED!!!
         This function uses the token dataset (via csv file) created by DocuScope for a section,
         and generate a set of tags (with positions etc.). Tags data are used to identify
         the category of DS patterns in the editor.
         """
-
+        token_data = ''
         if section is None and section_id is not None:
             section = self.sections[section_id]
             token_data = section.get('token_data', '')
-        elif section is not None:
+        if section is not None:
             token_data = section.get('token_data', '')
 
         bTagOpen = False
@@ -4657,7 +4616,7 @@ class DSDocument():
                 # Get a list of numbers with thousand separator(s), followed by a comma separator
                 # This also captures patterns like N=2,000 etc.
                 # num_list = re.findall("\"[0-9,.]+\"(?=,)", line)  # old
-                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021               
+                num_list = re.findall(r"\"[\sA-Za-z=0-9,.]+\"(?=,)", line)   # revised Apr 20, 2021
                 if num_list:
                     token_info = num_list + token_info[-3:]
 
@@ -4690,7 +4649,7 @@ class DSDocument():
                 end_str = end_str[:-1]                                     # must be a space after a hyphen/slash
 
             elif word == 'not' and prev_word == 'can' and i+1 < len(lines):
-                # a special case. We need to remove the space between "can" and "not", 
+                # a special case. We need to remove the space between "can" and "not",
                 # unless it is followed by 'only'.
                 next_line = lines[i+1]                    # get the next line
                 next_token_info = next_line.split(',')    # we don't worry about it being a number.
@@ -4735,19 +4694,19 @@ class DSDocument():
                         bTagOpen = True
 
             elif bParaCrossingPattern:
-                if len(end_str) <= 1:                
+                if len(end_str) <= 1:
                     pattern += end_str
 
-                bTagOpen = True                
+                bTagOpen = True
                 bParaCrossingPattern = False
             else:
-                if len(end_str) <= 1:                
-                    pattern += end_str                
+                if len(end_str) <= 1:
+                    pattern += end_str
 
             if word == '\"\"\"\"':
-                pattern += '\"'             
+                pattern += '\"'
             elif word == '\'\'\'\'':
-                pattern += '\"'          
+                pattern += '\"'
             elif word == '\\':
                 pattern += '\\'
             elif word == '\u0000':
@@ -4779,14 +4738,14 @@ class DSDocument():
             prev_dim   = dim
             prev_lat   = lat
 
-        if bTagOpen == True:
+        if bTagOpen is True:
             pat_end = pat_start + len(pattern)
             tags[pcount].append( ((pat_start, pat_end), pattern, (clust, dim, lat)) )
 
             if len(end_str) <= 1:
                 pat_start = pat_end + len(end_str)
             else:
-                pat_start = pat_end            
+                pat_start = pat_end
             # pat_start = pat_end + 1
             pattern = ''
 
@@ -4859,7 +4818,7 @@ class DSDocument():
                     para_data.addDimension(dim)
                     para_data.addLAT(lat)
 
-                bTagOpen = True                
+                bTagOpen = True
                 bParaCrossingPattern = False
 
             else:
@@ -4887,7 +4846,7 @@ class DSDocument():
                 end_str += ''
 
                 if para_count > (self.skip_paras + self.max_paras - 1):
-                   break
+                    break
                 para_count += 1
 
             elif end == 's':           # no space
@@ -4906,7 +4865,7 @@ class DSDocument():
 ###############################################################################
 #
 # The Methods below here are used only by the online version of DocuScope Write & Audit
-# 
+#
 # The following are the top level functions that should be used to retrieve the data.
 #     DSDocument.generateLocalVisData(self, selected_paragraphs, max_topic_sents=1, min_topics=2)
 #     DSDocument.generateGlobalVisData(self, min_topics=2, max_topic_sents=1, sort_by=TOPIC_SORT_APPEARANCE)
@@ -4935,7 +4894,7 @@ class DSDocument():
 
         data = self.getLocalTopicalProgData(selected_paragraphs)
         if data is None:
-            return ({'error': 'data is None'});
+            return ({'error': 'data is None'})
 
         topic_filter = TOPIC_FILTER_LEFT_RIGHT
         key_para_topics = self.getKeyParaTopics()
@@ -4947,7 +4906,7 @@ class DSDocument():
         ncols  = len(header)
 
         if ncols == 0:
-            return ({'error': 'ncols is 0'});
+            return ({'error': 'ncols is 0'})
 
         vis_data = dict()
         vis_data['num_topics'] = ncols
@@ -4968,13 +4927,14 @@ class DSDocument():
                 b_skip     = False
                 sent_pos   = 0
                 sent_id    = 0
+                count = 0
 
                 if topic is not None:
                     true_left_count = sent_filter[topic]['left_count']
 
                     if topic_filter == TOPIC_FILTER_ALL:
                         count = sent_filter[topic]['count']
-                        l_count = sent_filter[topic]['left_count']                  
+                        l_count = sent_filter[topic]['left_count']
                     else:
                         l_count = sent_filter[topic]['left_count']
                         if l_count == 1:
@@ -4989,10 +4949,7 @@ class DSDocument():
                 if topic in self.global_topics:
                     is_global = True
 
-                if DSDocument.isUserDefinedSynonym(topic):
-                    is_tc = True
-                else:
-                    is_tc = False
+                is_tc = DSDocument.isUserDefinedSynonym(topic)
 
                 self.local_topics.append((topic, is_global))
 
@@ -5001,32 +4958,28 @@ class DSDocument():
                 para_id = selected_paragraphs[para_count]
 
                 for ri in range(1,nrows):     # for each row
-                    elem= data[ri][ci]      # get the elem 
+                    elem= data[ri][ci]      # get the elem
 
-                    if type(elem) == int and elem < 0:
+                    if isinstance(elem, int) and elem < 0:
                         b_para_break = True
-                    elif type(elem) == tuple and elem[0] is not None and \
-                                is_skip(elem, true_left_count, topic_filter) == False:
-                        if elem[IS_SKIP] == False:
+                    elif isinstance(elem, tuple) and elem[0] is not None and \
+                                not is_skip(elem, true_left_count, topic_filter):
+                        if elem[IS_SKIP] is False:
                             d = dict()
                             # d['topic'] = elem
                             d['sent_pos'] = sent_id
                             d['para_pos'] = para_id
                             d['is_left'] = elem[ISLEFT]
-
-                            if sent_id < max_topic_sents:
-                                d['is_topic_sent'] = True
-                            else:
-                                d['is_topic_sent'] = False
+                            d['is_topic_sent'] = sent_id < max_topic_sents
 
                             topic_data[sent_pos] = d
                             topic_info = elem
 
-                    elif type(elem) == tuple and elem[0] is not None \
-                                and is_skip(elem, true_left_count, topic_filter) == True:
+                    elif isinstance(elem, tuple) and elem[0] is not None \
+                                and is_skip(elem, true_left_count, topic_filter) is True:
                         b_skip = True
 
-                    elif type(elem) == tuple and elem[0] is None:
+                    elif isinstance(elem, tuple) and elem[0] is None:
                         b_skip = True
 
                     if b_para_break:
@@ -5038,7 +4991,7 @@ class DSDocument():
                         sent_pos += 1
                         sent_id  += 1
 
-                vis_data['data'].append({'sentences':        topic_data, 
+                vis_data['data'].append({'sentences':        topic_data,
                                          'is_topic_cluster': is_tc,
                                          'is_global':        is_global,
                                          'num_sents':        len(topic_data),
@@ -5063,6 +5016,8 @@ class DSDocument():
         sort_by:                The sorting method option.
         """
 
+        self.recalculateGivenWords(section=0)
+
         global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
         self.updateLocalTopics()
         self.updateGlobalTopics(global_data)
@@ -5071,13 +5026,13 @@ class DSDocument():
         self.locateTopics(topics)                # to count the # of sentences each topic appears later. 8/23/2022.
 
         if global_data is None:
-            return ({'error': 'ncols is 0'})
+            return {'error': 'ncols is 0'}
 
         data = global_data['data']
         # para_data = global_data['para_data']
 
         if data is None:
-            return ({'error': 'ncols is 0'})
+            return {'error': 'ncols is 0'}
 
         header = data[0]   # list of tuples (POS, LEMMA, POS, COUNT)
 
@@ -5110,25 +5065,23 @@ class DSDocument():
             topic_data = [None] * (nrows-1)                 # initialize the topic data
             p_ri = 0                                        # initialize the row index w/in paragraph
 
-            if topic is not None:                           # topic exists 
-                if  self.isLocalTopic(topic) == False and \
-                    DSDocument.isUserDefinedSynonym(topic) == False:         # topic cluster = user defined synonym
-                    # if the topic is NOT a local topic AND it is NOT a topic cluster, 
+            if topic is not None:                           # topic exists
+                if  self.isLocalTopic(topic) is False and \
+                    DSDocument.isUserDefinedSynonym(topic) is False:         # topic cluster = user defined synonym
+                    # if the topic is NOT a local topic AND it is NOT a topic cluster,
                     # we should skip this topic.
                     continue
 
                 # Count how manu times the topic appears on the left side of the main verb.
                 if DSDocument.isUserDefinedSynonym(topic):                # topic is a topic cluster.
                     true_left_count = sent_filter[topic]['left_count']
-                    count   = sent_filter[topic]['count']                    
+                    count   = max(sent_filter[topic]['count'], 2)
                     l_count = sent_filter[topic]['left_count']
-                    if count < 2:
-                            count = 2
                 else:                                                            # topic is not a topic sluster
                     true_left_count = sent_filter[topic]['left_count']
                     if topic_filter == TOPIC_FILTER_ALL:                  # rarely used.
                         count   = sent_filter[topic]['count']
-                        l_count = sent_filter[topic]['left_count']                  
+                        l_count = sent_filter[topic]['left_count']
                     else:                                                        # default
                         l_count = sent_filter[topic]['left_count']
                         if l_count == 1:                                         # one left + one right case.
@@ -5141,39 +5094,36 @@ class DSDocument():
 
             self.global_topics.append(topic)                    # if we get here, the topic is a global topic.
 
-            if DSDocument.isUserDefinedSynonym(topic):     # check if topic is a topic cluster.
-                is_tc = True
-            else:
-                is_tc = False
+            is_tc = DSDocument.isUserDefinedSynonym(topic)     # check if topic is a topic cluster.
 
             topic_info = None
             sent_count = 0
 
-            # we will start with the index == 2 because the first index is the header row, 
+            # we will start with the index == 2 because the first index is the header row,
             # and the second index is the pragraph break indicator.
 
             for ri in range(2,nrows):     # for each column (r & c are flipped!)
 
-                elem= data[ri][ci]        # get the elem 
+                elem = data[ri][ci]       # get the elem
 
-                if type(elem) == int and elem < 0:       # paragraph brek
+                if isinstance(elem, int) and elem < 0:       # paragraph brek
                     b_break = True
 
                 # Not the first column (not the paragraph ID/Number)
-                elif type(elem) == tuple and elem[0] is not None and \
-                            is_skip(elem, true_left_count, topic_filter) == False:
+                elif isinstance(elem, tuple) and elem[0] is not None and \
+                            is_skip(elem, true_left_count, topic_filter) is False:
 
                     curr_elem = topic_data[p_ri]
 
                     # d['sent_id'] captures the sent id of the first occurence of the topic on the left side.
                     if curr_elem is not None and \
-                       elem[ISLEFT] == True and \
-                       curr_elem['topic'][ISLEFT] == False:
+                       elem[ISLEFT] is True and \
+                       curr_elem['topic'][ISLEFT] is False:
                         # 'elem' not the first instance for this paragraph
                         # the existing element 'curr_elem' is on the right side.
                         d = dict()
                         d['topic']   = list(elem)
-                        d['first_left_sent_id'] = sent_count   
+                        d['first_left_sent_id'] = sent_count
                         d['para_pos'] = p_ri
                         d['is_left'] = True
                         # d['is_topic_cluster'] = is_tc
@@ -5190,7 +5140,7 @@ class DSDocument():
                         d['topic'] = list(elem)
                         d['para_pos'] = p_ri
 
-                        if elem[ISLEFT] == True:
+                        if elem[ISLEFT] is True:
                             d['first_left_sent_id'] = sent_count
                             d['is_left'] = True
                         else:
@@ -5205,15 +5155,15 @@ class DSDocument():
                         topic_data[p_ri] = d
                         topic_info = elem
 
-                elif type(elem) == tuple and elem[0] is not None \
-                            and is_skip(elem, true_left_count, topic_filter) == True:
+                elif isinstance(elem, tuple) and elem[0] is not None \
+                            and is_skip(elem, true_left_count, topic_filter) is True:
                     pass
 
-                elif type(elem) == tuple and elem[0] is None:                     # if empty slot 
+                elif isinstance(elem, tuple) and elem[0] is None:                     # if empty slot
                     pass
 
                 if b_break:
-                    p_ri += 1 
+                    p_ri += 1
                     b_break = False
                     sent_count = 0
                 else:
@@ -5225,11 +5175,8 @@ class DSDocument():
                 d = topic_data[i]
                 if d is not None:
                     del d['topic']
-            
-            if self.isLocalTopic(topic) == False:               
-                is_non_local = True
-            else:
-                is_non_local = False
+
+            is_non_local = not self.isLocalTopic(topic)
 
             num_sents_per_topic = self.countSentencesWithTopic(topic)
 
@@ -5239,17 +5186,17 @@ class DSDocument():
                                      'topic':            list(topic_info[0:3]),
                                      'sent_count':       num_sents_per_topic})
 
-            vis_data['num_paras']  = (p_ri)
+            vis_data['num_paras'] = p_ri
 
         # Add missing topic clusters, if any
-        tcs = DSDocument.getUserDefinedSynonyms()        
+        tcs = DSDocument.getUserDefinedSynonyms()
         if tcs is not None:
             missing_tcs = list(set(tcs) - set(self.global_topics))
             for tc  in missing_tcs:
 
                 topic_info = ['NOUN', '', tc]
 
-                vis_data['data'].append({'paragraphs': [], 
+                vis_data['data'].append({'paragraphs': [],
                                          'is_topic_cluster': True,
                                          'is_non_local':     False,
                                          'topic':            topic_info,
@@ -5280,19 +5227,19 @@ class DSDocument():
             first_new_paras   = list()
 
             for r in range(1, nrows):
-                elem= data[r][c-1]
+                elem = data[r][c-1]
 
-                if type(elem) == tuple and elem[0] is not None:
+                if isinstance(elem, tuple) and elem[0] is not None:
                     if start < 0:
-                       start = r
+                        start = r
                     elif start >= 0:
-                       end = r
+                        end = r
 
                     if elem[ISLEFT]:
                         if l_start < 0:
-                           l_start = r
+                            l_start = r
                         elif l_start >= 0:
-                           l_end = r
+                            l_end = r
 
                         given_left_count += 1
                         given_left_paras.append(para_count)
@@ -5302,7 +5249,7 @@ class DSDocument():
 
                     given_count += 1
 
-                elif type(elem) == int and elem < 0:
+                elif isinstance(elem, int) and elem < 0:
                     para_count += 1
 
             l_skip_lines = 0
@@ -5311,23 +5258,19 @@ class DSDocument():
             for r in range(1, nrows):
                 elem= data[r][c-1]
 
-                if r > l_start and r < l_end:               
-                    if type(elem) == str and elem == 'heading':
+                if r > l_start and r < l_end:
+                    if isinstance(elem, str) and elem in ['heading', 'title']:
                         l_skip_lines += 1
-                    elif type(elem) == str and elem == 'title':
-                        l_skip_lines += 1                  
-                    elif type(elem) == int and elem < 0:
+                    elif isinstance(elem, int) and elem < 0:
                         l_skip_lines += 1
 
                 if r > start and r < end:
-                    if type(elem) == str and elem == 'heading':
+                    if isinstance(elem, str) and elem in ['heading', 'title']:
                         skip_lines += 1
-                    elif type(elem) == str and elem == 'title':
-                        skip_lines += 1                  
-                    elif type(elem) == int and elem < 0:
+                    elif isinstance(elem, int) and elem < 0:
                         skip_lines += 1
-                        
-                if type(elem) != str and type(elem) != int:
+
+                if not isinstance(elem, (str, int)):
                     sent_count += 1
 
             given_left_paras  = list(set(given_left_paras))
@@ -5336,30 +5279,26 @@ class DSDocument():
             is_topic = False
             if len(given_left_paras) > 1:
                 is_topic = True
-            elif len(given_left_paras) == 1:  
-                # this topic only appears in one paragraph. Let's see if it appears in 
+            elif len(given_left_paras) == 1:
+                # this topic only appears in one paragraph. Let's see if it appears in
                 # another pragraph on the right side...
                 if len(set(given_right_paras)-set(given_left_paras)) > 0:
                     # This topic satisfies the min requirement to be a topic.
                     is_topic = True
 
             # left only
-            l_span = (l_end - l_start + 1) - l_skip_lines
-            if l_span < 0:
-                l_span = 0
+            l_span = max((l_end - l_start + 1) - l_skip_lines, 0)
             norm_l_span = (l_span / sent_count) * 100
             norm_l_coverage = (given_left_count / sent_count) * 100
 
             # left or right
-            span = (end - start + 1) - skip_lines
-            if span < 0:
-                span = 0
+            span = max((end - start + 1) - skip_lines, 0)
             norm_span = (span / sent_count) * 100
             norm_coverage = (given_count / sent_count) * 100
-                        
+
             res[header] = {'type':            0,
                            'is_topic':        is_topic,
-                           'left_span':       norm_l_span, 
+                           'left_span':       norm_l_span,
                            'left_coverage':   norm_l_coverage,
                            'span':            norm_span,         # left+right
                            'coverage':        norm_coverage,     # left+right
@@ -5394,7 +5333,7 @@ class DSDocument():
 
                 elem= data[r][c-1]
 
-                if type(elem) == tuple and elem[0] is not None:
+                if isinstance(elem, tuple) and elem[0] is not None:
                     if p_start < 0:
                         p_start = para_count
                     elif p_start >= 0:
@@ -5415,7 +5354,7 @@ class DSDocument():
                     given_paras.append(para_count)
                     given_count += 1
 
-                elif type(elem) == int and elem < 0:
+                elif isinstance(elem, int) and elem < 0:
                     para_count += 1
 
             para_count -= 1
@@ -5436,8 +5375,8 @@ class DSDocument():
             is_topic = False
             if len(given_left_paras) > 1:
                 is_topic = True
-            elif len(given_left_paras) == 1:  
-                # this topic only appears in one paragraph. Let's see if it appears in 
+            elif len(given_left_paras) == 1:
+                # this topic only appears in one paragraph. Let's see if it appears in
                 # another pragraph on the right side...
                 if len(set(given_right_paras)-set(given_left_paras)) > 0:
                     # This topic satisfies the min requirement to be a topic.
@@ -5446,9 +5385,9 @@ class DSDocument():
             res[header] = {'type':           4,
                            'is_topic':       is_topic,
                            'left_span':      norm_l_span,
-                           'left_coverage':  norm_l_coverage, 
+                           'left_coverage':  norm_l_coverage,
                            'span':           norm_span,
-                           'coverage':       norm_coverage, 
+                           'coverage':       norm_coverage,
                            'count':          len(given_paras),
                            'left_count':     len(given_left_paras),
                            'right_count':    len(given_right_paras),
@@ -5471,16 +5410,16 @@ class DSDocument():
             header = data[0][c-1][1]
 
             for r in range(1, nrows):
-                elem= data[r][c-1]
+                elem = data[r][c-1]
 
-                if type(elem) == tuple and elem[0] is not None:
+                if isinstance(elem, tuple) and elem[0] is not None:
                     # if para_count == para_pos:
                     bSkip = False
 
-                    if elem[IS_TOPIC] == False: # it's not a topic word
+                    if elem[IS_TOPIC] is False: # it's not a topic word
                         bSkip = True
 
-                    if bSkip == False: # it's a topic word
+                    if bSkip is False: # it's a topic word
                         if start < 0:
                             start = r
                         elif start >= 0:
@@ -5488,7 +5427,7 @@ class DSDocument():
 
                         given_left_count += 1
 
-                        if elem[ISLEFT] == False:
+                        if elem[ISLEFT] is False:
                             first_new_count += 1
 
                     given_count += 1
@@ -5503,14 +5442,14 @@ class DSDocument():
             for r in range(1, nrows):
                 elem= data[r][c-1]
 
-                if r > start and r < end:               
-                    if type(elem) == str and elem == 'heading':
+                if start < r < end:
+                    if isinstance(elem, str) and elem == 'heading':
                         skip_lines += 1
-                    elif type(elem) == int and elem < 0:
+                    elif isinstance(elem, int) and elem < 0:
                         skip_lines += 1
-                        
-                if type(elem) != str and type(elem) != int:
-                        sent_count += 1
+
+                if not isinstance(elem, (str, int)):
+                    sent_count += 1
 
             if start >= 0 and end >= 0:
                 span = (end - start + 1) - skip_lines
@@ -5525,9 +5464,9 @@ class DSDocument():
                 norm_coverage = 0
 
             res[header] = {'type':            1,
-                           'span':            norm_span, 
-                           'coverage':        norm_coverage, 
-                           'count':           given_count, 
+                           'span':            norm_span,
+                           'coverage':        norm_coverage,
+                           'count':           given_count,
                            'left_count':      given_left_count,
                            'first_new_count': first_new_count,
                            'sent_count':      sent_count,
@@ -5543,11 +5482,12 @@ class DSDocument():
             if stats['left_count'] == top_left_count and \
                 stats['left_count'] - stats['first_new_count'] != 0:
                 stats['top'] = True
-                    
-        return res        
+
+        return res
 
     def updateGlobalTopics(self, global_data, min_topics=2):
-        if global_data is None: return []
+        if global_data is None:
+            return []
 
         data = global_data['data']
 
@@ -5563,7 +5503,7 @@ class DSDocument():
             return []
 
         topic_filter    = TOPIC_FILTER_ALL
-        sent_filter     = self.filterTopics(data, nrows, ncols)     
+        sent_filter     = self.filterTopics(data, nrows, ncols)
 
         true_left_count = 0
         l_count = 0
@@ -5574,22 +5514,21 @@ class DSDocument():
             p_ri = 0
 
             if topic is not None:
-                if self.isLocalTopic(topic) == False and \
-                   DSDocument.isUserDefinedSynonym(topic) == False:
+                if not self.isLocalTopic(topic) and \
+                   not DSDocument.isUserDefinedSynonym(topic):
                     continue
 
                 if DSDocument.isUserDefinedSynonym(topic):
                     true_left_count = sent_filter[topic]['left_count']
-                    count = sent_filter[topic]['count']                    
+                    count = sent_filter[topic]['count']
                     l_count = sent_filter[topic]['left_count']
-                    if count < 2:
-                        count = 2
+                    count = max(count, 2)
                 else:
                     true_left_count = sent_filter[topic]['left_count']
 
                     if topic_filter == TOPIC_FILTER_ALL:
                         count = sent_filter[topic]['count']
-                        l_count = sent_filter[topic]['left_count']                  
+                        l_count = sent_filter[topic]['left_count']
                     else:
                         l_count = sent_filter[topic]['left_count']
                         if l_count == 1:
@@ -5635,16 +5574,16 @@ class DSDocument():
                 header = data[0][c-1][1]
 
                 for r in range(1, nrows):
-                    elem= data[r][c-1]
+                    elem = data[r][c-1]
 
-                    if type(elem) == tuple and elem[0] is not None:
+                    if isinstance(elem, tuple) and elem[0] is not None:
                         # if para_count == para_pos:
                         bSkip = False
 
-                        if elem[IS_TOPIC] == False: # it's not a topic word
+                        if not elem[IS_TOPIC]: # it's not a topic word
                             bSkip = True
 
-                        if bSkip == False: # it's a topic word
+                        if not bSkip: # it's a topic word
                             if start < 0:
                                 start = r
                             elif start >= 0:
@@ -5652,7 +5591,7 @@ class DSDocument():
 
                             given_left_count += 1
 
-                            if elem[ISLEFT] == False:
+                            if not elem[ISLEFT]:
                                 first_new_count += 1
 
                         given_count += 1
@@ -5671,14 +5610,14 @@ class DSDocument():
                         # para_count += 1
                     # elif para_count == para_pos:
 
-                    if r > start and r < end:               
-                        if type(elem) == str and elem == 'heading':
+                    if start < r < end:
+                        if isinstance(elem, str) and elem == 'heading':
                             skip_lines += 1
-                        elif type(elem) == int and elem < 0:
+                        elif isinstance(elem, int) and elem < 0:
                             skip_lines += 1
-                            
-                    if type(elem) != str and type(elem) != int:
-                            sent_count += 1
+
+                    if not isinstance(elem, (str, int)):
+                        sent_count += 1
 
                 if start >= 0 and end >= 0:
                     span = (end - start + 1) - skip_lines
@@ -5693,9 +5632,9 @@ class DSDocument():
                     norm_coverage = 0
 
                 res[header] = {'type':            1,
-                               'span':            norm_span, 
-                               'coverage':        norm_coverage, 
-                               'count':           given_count, 
+                               'span':            norm_span,
+                               'coverage':        norm_coverage,
+                               'count':           given_count,
                                'left_count':      given_left_count,
                                'first_new_count': first_new_count,
                                'sent_count':      sent_count,
@@ -5711,7 +5650,7 @@ class DSDocument():
                 if stats['left_count'] == top_left_count and \
                     stats['left_count'] - stats['first_new_count'] != 0:
                     stats['top'] = True
-                        
+
             return res
 
         def get_local_topics(local_data, min_topics=2):
@@ -5727,21 +5666,21 @@ class DSDocument():
 
             sent_filter = filter_local_topics(data, nrows, ncols)
 
-            true_left_count = 0
+            # true_left_count = 0 # unused-variable
             l_count = 0
             self.local_topics = list()
 
             for ci in range(ncols):
 
                 topic = header[ci][1]
-                sent_count = 0
+                count = 0
 
                 if topic is not None:
                     true_left_count = sent_filter[topic]['left_count']
 
                     if topic_filter == TOPIC_FILTER_ALL:
                         count = sent_filter[topic]['count']
-                        l_count = sent_filter[topic]['left_count']                  
+                        l_count = sent_filter[topic]['left_count']
                     else:
                         l_count = sent_filter[topic]['left_count']
                         if l_count == 1:
@@ -5777,23 +5716,23 @@ class DSDocument():
         """
         Returns True if <topic> is a local topic.
         """
-        if self.local_topics_dict is not None:            
+        if self.local_topics_dict is not None:
             for key, value in self.local_topics_dict.items():    # for each paragraph
                 local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
                 if topic in local_topics:                        # if <topic> is in it, return True
                     return True
-        return False     
+        return False
 
 
     def testPrintGlobalVisData(self, vis_data):
 
         if vis_data['data'] == []:
-            logging.warn("No global topics")
+            logging.warning("No global topics")
             return
 
         data       = vis_data['data']
         num_paras  = vis_data['num_paras']
-        num_topics = vis_data['num_topics']
+        # num_topics = vis_data['num_topics'] # unused-variable
 
         # Print paragraph IDs
         line = " " * 30
@@ -5803,7 +5742,7 @@ class DSDocument():
         logging.debug(line)
 
         # For each data for a specific topic,
-        for topic_data in data:                                    
+        for topic_data in data:
             topic = topic_data['topic']
             lemma = topic[LEMMA]
             is_topic_cluster = topic_data['is_topic_cluster']
@@ -5824,25 +5763,19 @@ class DSDocument():
                 # * = topic sentence.
                 for para_data in topic_data['paragraphs']:
                     if para_data is not None:
-                        para_pos = para_data['para_pos']
+                        # para_pos = para_data['para_pos'] # unused-variable
                         is_left  = para_data['is_left']
                         is_topic_sent = para_data['is_topic_sent']
 
                         if is_left:                     # is 'topic' on the left side?
-                            if is_non_local:            # is it a non-local global topic?
-                                c = 'l'
-                            else: 
-                                c = 'L'
+                            c = 'l' if is_non_local else 'L'  # is it a non-local global topic?
 
                             if is_topic_sent:           # is 'topic' appear in a topic sentence?
                                 line += (c + "*")
-                            else:                      
+                            else:
                                 line += (c + " ")
                         else:
-                            if is_non_local:
-                                c = 'r'
-                            else: 
-                                c = 'R'
+                            c = 'r' if is_non_local else 'R'
 
                             if is_topic_sent:
                                 line += (c + "*")
@@ -5856,7 +5789,7 @@ class DSDocument():
     def testPrintLocalVisData(self, vis_data):
 
         if vis_data['data'] == []:
-            logging.warn("No local topics")
+            logging.warning("No local topics")
             return
 
         data       = vis_data['data']
@@ -5897,7 +5830,7 @@ class DSDocument():
 
                             if is_topic_sent:
                                 line += (c + '*')
-                            else:           
+                            else:
                                 line += (c + ' ')
                         else:
                             if is_global:
@@ -5918,7 +5851,7 @@ class DSDocument():
 
         topics = self.global_topics
 
-        for key, value in self.local_topics_dict.items(): 
+        for key, value in self.local_topics_dict.items():
             local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
             topics += local_topics
 
@@ -5931,20 +5864,19 @@ class DSDocument():
         Given a topic <string>, this method returns the toal number of sentences
         that includes the topic.
         """
-        topics = list()
-        if self.topic_location_dict is not None and topics != None:
-            locations = self.topic_location_dict.get(topic, None)
+        if self.topic_location_dict is None:
+            return 0
+        locations = self.topic_location_dict.get(topic, None)
+        if locations is None:
+            return 0
+        temp = set([pos[:2] for pos in locations.getTopicPositions()])
+        # topic_positions = locations.getTopicPositions()
+        # for t in topic_positions:
+        #     if t[:2] not in temp:
+        #         temp.append(t[:2])
+        return len(temp)
 
-        temp = list()
-        topic_positions = locations.getTopicPositions()
-        for t in topic_positions:
-            if t[:2] not in temp:
-                temp.append(t[:2])
-
-        count = len(temp)
-        return count
-
-    def locateTopics(self, topics):        
+    def locateTopics(self, topics):
         """
         Given a set of topics, this method locates the topics in a current document,
         and update self.topic_location_dict.
@@ -5952,7 +5884,7 @@ class DSDocument():
 
         def locateATopic(topic):
             """
-            This method is called by locateTopics(), and should not 
+            This method is called by locateTopics(), and should not
             """
 
             if self.sections is None:
@@ -5967,7 +5899,7 @@ class DSDocument():
 
             adj_stats = AdjacencyStats(topic=topic, controller=self.controller)
             topic_filter = TOPIC_FILTER_LEFT_RIGHT
-            
+
             # Let's find which paragraphs/sentences the selected 'topic' is included.
             pcount = 1
             for para in data['paragraphs']:
@@ -5980,9 +5912,9 @@ class DSDocument():
                 for sent in para['sentences']:
 
                     wcount = 1
-                    for w in sent['text_w_info']: 
+                    for w in sent['text_w_info']:
                         if w[LEMMA] == topic and (w[POS] == 'NOUN' or w[POS] == 'PRP'):
-                            if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] == False:  ## NEW 3/2/21
+                            if topic_filter == TOPIC_FILTER_LEFT and w[ISLEFT] is False:  ## NEW 3/2/21
                                 pass
                             else:
                                 adj_stats.addParagraphID(pcount)
@@ -5994,7 +5926,7 @@ class DSDocument():
                     scount+=1
 
                 pcount+=1
-            
+
             return adj_stats
 
         if topics is None or topics == []:
@@ -6013,24 +5945,34 @@ class DSDocument():
 
         def generate_html(sent_data, sent_pos, word_pos_offset):
 
-            if type(sent_data) == str and sent_data == "\n":
+            if isinstance(sent_data, str) and sent_data == "\n":
                 return ""
 
-            analysis = sent_data[2]['sent_analysis']
-            np_positions = list([(np['start'], np['end']) for np in analysis['NOUN_CHUNKS']])
+            np_positions = list()
+            analysis = sent_data[2]
             is_be_verb = analysis['BE_VERB']
 
             def getNPTag(wpos):
                 for pos in np_positions:
                     if wpos == pos[0]:
-                        return '<b class="topic-text">'
+                        # if is_be_verb:
+                            # return "<b class=\"topic-text\">"
+                        # else:
+                        return "<b class=\"topic-text\">"
+
                     elif wpos == pos[1]:
                         return "</b>"
                 return ""
 
+            for np in analysis['NOUN_CHUNKS']:
+                np_positions.append((np['start'], np['end']))
+
             html_str = '<p class="non-topic-text">'
 
-            verb_class = "be-verb" if is_be_verb else "active-verb"
+            if is_be_verb:
+                verb_class = "be-verb"
+            else:
+                verb_class = "active-verb"
 
             wpos = 0
             tokens = analysis['TOKENS']
@@ -6046,7 +5988,7 @@ class DSDocument():
 
                 if w in right_quotes or w in end_puncts or w == "%" or w in no_space_patterns:
                     if html_str[-1] == ' ':
-                        # w shouldn't have a space before it.                
+                        # w shouldn't have a space before it.
                         html_str = html_str[:-1]
 
                 html_str += tag
@@ -6056,20 +5998,20 @@ class DSDocument():
                         html_str += " "
 
                 if token['is_root']:
-                    html_str += f'<span class="{verb_class}">{w}</span>'
+                    html_str += "<span class=\"{}\">{}</span>".format(verb_class, w)
                 else:
                     html_str += f"{w}"
 
                 if w not in left_quotes and w not in hyphen_slash:
                     html_str += " "
 
-                wpos += 1 
+                wpos += 1
 
             html_str += "</p>"
 
             return html_str
 
-        # 
+        #
         res = list()
         first_word_pos = 0
         first_sent = True
@@ -6078,14 +6020,14 @@ class DSDocument():
 
         for sent_data in data:
 
-            if type(sent_data[0]) == str and sent_data[0] == '\n': 
+            if isinstance(sent_data[0], str) and sent_data[0] == '\n':
                 if para_count != 1:
                     res.append(html_strs)
                 para_count += 1
                 html_strs = list()
-                
-            elif type(sent_data[0]) != str and first_sent:
-                sent_dict = sent_data[2]
+
+            elif not isinstance(sent_data[0], str) and first_sent:
+                sent_dict = sent_data[3]
 
                 w = sent_dict['text_w_info'][0] # get the first word
                 first_word_pos = w[WORD_POS]
@@ -6095,7 +6037,7 @@ class DSDocument():
             if s != "<p></p>":
                 html_strs.append(s)
 
-            if type(sent_data[0]) == str and sent_data[0] == '\n':    # paragraph break
+            if isinstance(sent_data[0], str) and sent_data[0] == '\n':    # paragraph break
                 first_sent = True
                 sent_pos = 0
             else:
@@ -6127,7 +6069,7 @@ class DSDocument():
         csv_str += line
 
         # For each data for a specific topic,
-        for topic_data in data:                                    
+        for topic_data in data:
             topic = topic_data['topic']
             lemma = topic[LEMMA]
             is_topic_cluster = topic_data['is_topic_cluster']
@@ -6155,7 +6097,7 @@ class DSDocument():
                             c = 'L'
                             if is_topic_sent:           # is 'topic' appear in a topic sentence?
                                 line += (c + "*")
-                            else:                      
+                            else:
                                 line += c
                         else:
                             c = 'R'
@@ -6165,7 +6107,7 @@ class DSDocument():
                             else:
                                 line += c
 
-                        line += ","                                
+                        line += ","
 
                     else:
                         line += ","
@@ -6178,12 +6120,12 @@ class DSDocument():
         return csv_str
 
     def getSentenceIDs(self, sentences, fuzzy=True):
-
-        def is_overlapping_fuzzy(text, _sentences):
-            threshold = 80                
-            for s in _sentences:
-                if utils.fuzzy_cmpstr(s, text, threshold):    # approximate string comparison
-                    return True
+        """ UNUSED!!! """
+        def is_overlapping_fuzzy(_text, _sentences):
+            # threshold = 80  # FIXME define fuzzy_cmpstr
+            # for s in _sentences:
+            #     if fuzzy_cmpstr(s, text, threshold):    # approximate string comparison
+            #         return True
             return False
 
         def is_overlapping(text, _sentences):
@@ -6193,10 +6135,10 @@ class DSDocument():
 
             for s in _sentences:
                 clean_s = s.replace('\u2019', "'").replace('\u2018', "'")
-                clean_s = clean_s.replace('\u201C', "'").replace('\u201D', "'").lower()                
+                clean_s = clean_s.replace('\u201C', "'").replace('\u201D', "'").lower()
                 if clean_s in clean_text:
                     return True
-                elif len(clean_text.split())/len(clean_s.split()) > 0.8 and clean_text in clean_s:
+                if len(clean_text.split())/len(clean_s.split()) > 0.8 and clean_text in clean_s:
                     return True
 
             return False
@@ -6221,17 +6163,16 @@ class DSDocument():
                             sent_list.append((pcount, scount, -1))
                         else:
                             if is_overlapping(sent['text'], sentences):
-                                sent_list.append((pcount, scount, -1))                            
-                    else:                        
+                                sent_list.append((pcount, scount, -1))
+                    else:
                         if is_overlapping(sent['text'], sentences):
                             sent_list.append((pcount, scount, -1))
-                        
+
                     scount += 1
                 pcount += 1
 
             if sent_list:
                 return sent_list
-            else:
-                return []
+            return []
         else:
             logging.error("    self.sections is None!!!!...")

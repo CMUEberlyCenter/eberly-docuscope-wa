@@ -6,14 +6,29 @@ const config: StorybookConfig = {
     "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)"
   ],
   "addons": [
-    "@storybook/addon-essentials",
     "@storybook/addon-onboarding",
     "@chromatic-com/storybook",
-    "@storybook/experimental-addon-test"
+    "@storybook/addon-vitest",
+    "@storybook/addon-docs"
   ],
   "framework": {
     "name": "@storybook/react-vite",
-    "options": {}
-  }
+    "options": {
+      "builder": {
+        "viteConfigPath": "./vite.storybook.config.ts"
+      }
+    }
+  },
+  // "core": {
+  //   "builder":
+  //   {
+  //     name: "@storybook/builder-vite",
+  //     "options": {
+  //       "viteConfig": {
+  //         "configFile": "../vite.storybook.config.ts",
+  //       }
+  //     }
+  //   }
+  // },
 };
 export default config;

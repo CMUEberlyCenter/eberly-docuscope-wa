@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { ClipboardIconButton } from "./ClipboardIconButton";
 
 const meta = {

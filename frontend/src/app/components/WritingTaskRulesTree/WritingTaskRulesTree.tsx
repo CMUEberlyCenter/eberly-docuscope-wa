@@ -1,11 +1,18 @@
 import classnames from "classnames";
-import { FC, HTMLProps, useCallback, useEffect, useId, useState } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+} from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
-import { useWritingTask } from "../../service/writing-task.service";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
+import type { Optional } from "../../../index.d";
 
 type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   /** Callback for when rule selection changes. */
@@ -15,7 +22,7 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   /** If true, include the title of the outline. */
   includeTitle?: boolean;
   /** Writing task */
-  task?: WritingTask;
+  task?: Optional<WritingTask>;
 };
 /**
  * Component for displaying the currently outline with a sidebar for displaying
@@ -30,7 +37,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const writingTask = task ?? useWritingTask();
+  const writingTask = task;
   const [selected, setSelected] = useState<Rule | null>(null);
   const onSelect = useCallback(
     (rule: Rule) => {
@@ -57,7 +64,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   return (
     <div {...props} className={cn}>
       <div className="d-flex flex-column align-items-start writing-task-tree h-0 w-100 overflow-auto">
-        {includeTitle && <WritingTaskTitle />}
+        {includeTitle && <WritingTaskTitle task={writingTask} />}
         {writingTask?.rules.rules.map((rule, i) => (
           <div key={`${id}-${i}`} aria-expanded="true">
             <ButtonGroup aria-selected={selected === rule}>

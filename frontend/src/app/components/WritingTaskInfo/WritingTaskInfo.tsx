@@ -1,10 +1,10 @@
-import { FC } from "react";
+import type { FC } from "react";
 import { Translation } from "react-i18next";
 import type { WritingTask } from "../../../lib/WritingTask";
 
 type WritingTaskInfoProps = {
   /** The writing task to display information about. */
-  task: WritingTask | null;
+  task: WritingTask | null | undefined;
 };
 /**
  * Component for displaying Metadata about a writing task (outline).

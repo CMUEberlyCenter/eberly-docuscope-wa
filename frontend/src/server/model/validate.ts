@@ -1,5 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import { ContextRunner } from 'express-validator';
+import type { NextFunction, Request, Response } from 'express';
+import type { ContextRunner } from 'express-validator';
 import { BadRequest } from '../../lib/ProblemDetails';
 
 /** Middleware for running express-validator validations. */

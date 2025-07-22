@@ -2,7 +2,13 @@ import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-i
 import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { FC, HTMLProps, ReactNode, useCallback, useState } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  type ReactNode,
+  useCallback,
+  useState,
+} from "react";
 import {
   Alert,
   Button,
@@ -55,7 +61,7 @@ type ToolRootProps = HTMLProps<HTMLDivElement> &
     onBookmark: () => void;
     actions?: ReactNode;
   };
-export const ToolRoot: FC<ToolRootProps> = ({
+const ToolRoot: FC<ToolRootProps> = ({
   tool,
   children,
   // icon,
@@ -91,7 +97,9 @@ export const ToolRoot: FC<ToolRootProps> = ({
       ) : (
         <>
           {children}
-          {actions && <footer className="mx-2">{actions}</footer>}
+          {!!children && !!actions && (
+            <footer className="mx-2">{actions}</footer>
+          )}
         </>
       )}
     </div>
@@ -99,7 +107,7 @@ export const ToolRoot: FC<ToolRootProps> = ({
 };
 
 /** Component for displaying the users input selected for this tool. */
-export const ToolInput: FC<ToolProp> = ({ tool }) => {
+const ToolInput: FC<ToolProp> = ({ tool }) => {
   const { t } = useTranslation();
   return (
     <Card as="section" className="mx-1">
@@ -129,7 +137,7 @@ export const ToolInput: FC<ToolProp> = ({ tool }) => {
 type ToolResponseProps = HTMLProps<HTMLDivElement> &
   ToolProp & { text?: string; regenerate?: (tool: ToolResult) => void };
 /** Component for displaying the LLM response with the appropriate header */
-export const ToolResponse: FC<ToolResponseProps> = ({
+const ToolResponse: FC<ToolResponseProps> = ({
   tool,
   text,
   regenerate,
@@ -171,7 +179,7 @@ export const ToolResponse: FC<ToolResponseProps> = ({
 
 type ToolPasteProps = { text: string | undefined | null };
 /** Footer button components for copying LLM output. */
-export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
+const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
   const { t } = useTranslation();
   const editor = useSlate();
   const paste = useCallback(
@@ -215,6 +223,9 @@ export const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
     },
     [editor]
   );
+  if (!text) {
+    return null;
+  }
   return (
     <div className="d-flex">
       <Button

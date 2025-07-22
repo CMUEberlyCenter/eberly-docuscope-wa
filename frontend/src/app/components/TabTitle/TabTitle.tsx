@@ -2,7 +2,7 @@
 
 This renders the audit icon image and then the child text in a h3 element.
 */
-import { FC, ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 import { Image } from "react-bootstrap";
 import audit_icon from "../../assets/icons/audit_icon.png";
 import "./TabTitle.scss";

@@ -1,28 +1,38 @@
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useId } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData } from "../../../lib/ReviewResponse";
+import { isErrorData, type LogicalFlowData } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
-import { useLogicalFlowData } from "../../service/review.service";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import { useMutation } from "@tanstack/react-query";
+import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
     <ToolButton
       {...props}
-      title={t("logical_flow.title")}
-      tooltip={it("logical_flow_scope_note")}
+      title={t("review:logical_flow.title")}
+      tooltip={t("instructions:logical_flow_scope_note")}
       icon={<Icon />}
     />
   );
@@ -34,9 +44,53 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useLogicalFlowData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<LogicalFlowData | null>(null); // useLogicalFlowData();
   const id = useId();
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+    }) => {
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
+      const response = await fetch("/api/v2/review/logical_flow", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal: abortControllerRef.current.signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Logical Flow review");
+      }
+      return response.json();
+    },
+    onSuccess: ({ input, data }: { input: string; data: LogicalFlowData }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Logical Flow review:", error);
+    },
+  });
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Logical Flow
+    mutation.mutate({
+      document,
+      writing_task,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -51,7 +105,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("logical_flow.title")}
           instructionsKey="logical_flow"
         />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary

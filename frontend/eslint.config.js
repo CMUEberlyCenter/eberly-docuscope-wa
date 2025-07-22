@@ -1,11 +1,12 @@
-import globals from "globals";
 import pluginJs from "@eslint/js";
-import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
+import storybook from "eslint-plugin-storybook"; // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import globals from "globals";
+import tseslint from "typescript-eslint";
 
 
 export default [
-  {languageOptions: { globals: {...globals.browser, ...globals.node} }},
+  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -29,4 +30,6 @@ export default [
         { "argsIgnorePattern": "^_" }
       ]
     }
-  }];
+  },
+  ...storybook.configs["flat/recommended"]
+];

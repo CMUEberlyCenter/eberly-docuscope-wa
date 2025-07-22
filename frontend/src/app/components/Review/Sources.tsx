@@ -1,12 +1,28 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import { FC, HTMLProps, useContext, useEffect, useId, useState } from "react";
+import {
+  type FC,
+  type HTMLProps,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, type Source, type SourceType } from "../../../lib/ReviewResponse";
-import { useSourcesData } from "../../service/review.service";
+import {
+  isErrorData,
+  type Source,
+  type SourcesData,
+  type SourceType,
+} from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
@@ -50,8 +66,52 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const review = useSourcesData();
+  // const review = useSourcesData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [review, setReview] = useState<SourcesData | null>(null);
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: {
+      document: string;
+      writing_task: WritingTask;
+    }) => {
+      const { document, writing_task } = data;
+      abortControllerRef.current = new AbortController();
+      const response = await fetch("/api/v2/review/sources", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document, writing_task }),
+        signal: abortControllerRef.current.signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch Sources review");
+      }
+      return response.json();
+    },
+    onSuccess: ({ input, data }: { input: string; data: SourcesData }) => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "update", sentences: input });
+      setReview(data);
+    },
+    onError: (error) => {
+      // TODO: handle error appropriately
+      console.error("Error fetching Sources review:", error);
+    },
+  });
+  useEffect(() => {
+    if (!document || !writing_task) return;
+    // Fetch the review data for Sources
+    mutation.mutate({ document, writing_task });
+    // TODO error handling
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [document, writing_task]);
+
   const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
     {}
   );
@@ -80,7 +140,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
         )}
       >
         <ToolHeader title={t("sources.title")} instructionsKey="sources" />
-        {!review ? (
+        {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary

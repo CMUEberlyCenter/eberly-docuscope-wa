@@ -1,4 +1,4 @@
-import type { DBRef } from 'mongodb';
+import { DBRef } from 'mongodb';
 import type { WritingTask } from '../../lib/WritingTask';
 
 export type Assignment = {
