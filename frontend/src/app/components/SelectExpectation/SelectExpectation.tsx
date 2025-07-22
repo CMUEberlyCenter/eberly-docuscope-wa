@@ -1,4 +1,4 @@
-import { FC, useCallback, useState } from "react";
+import { type FC, useCallback, useState } from "react";
 import { Button, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { Rule } from "../../../lib/WritingTask";

@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import { param } from 'express-validator';
 import {
   FileNotFound,
@@ -7,7 +7,7 @@ import {
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import { validateWritingTask } from '../../lib/schemaValidate';
-import { isWritingTask } from '../../lib/WritingTask';
+import { isWritingTask, isWritingTaskIdValid } from '../../lib/WritingTask';
 import {
   findAllPublicWritingTasks,
   findWritingTaskById,
@@ -76,6 +76,12 @@ writingTasks.post('', async (request: Request, response: Response) => {
     if (!isWritingTask(task)) {
       throw new UnprocessableContentError(
         ['Failed type check.'],
+        'Invalid JSON'
+      );
+    }
+    if (!isWritingTaskIdValid(task.info.id)) {
+      throw new UnprocessableContentError(
+        ['Invalid info.id value. Must be a valid URI fragment.'],
         'Invalid JSON'
       );
     }

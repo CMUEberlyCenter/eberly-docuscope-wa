@@ -1,4 +1,4 @@
-import { FC, HTMLProps } from "react";
+import type { FC, HTMLProps } from "react";
 import AttentionIcon from "../../assets/icons/attention_icon.svg?react";
 import classNames from "classnames";
 import css from "./AlertIcon.module.scss";

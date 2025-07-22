@@ -1,4 +1,4 @@
-import { Request, Response, Router } from 'express';
+import { type Request, type Response, Router } from 'express';
 import {
   collectDefaultMetrics,
   Counter,
@@ -52,7 +52,11 @@ const myproseOutputTokensTotal = new Counter({
   labelNames: ['key'],
 });
 
-export const countPrompt = ({ key, delta_ms, usage }: ChatResponse<any>) => {
+export const countPrompt = ({
+  key,
+  delta_ms,
+  usage,
+}: ChatResponse<unknown>) => {
   myprosePromptDuration.observe({ key }, delta_ms / 1000);
   myprosePromptTokenCacheCreationTotal.inc(
     { key },

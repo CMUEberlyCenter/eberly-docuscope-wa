@@ -1,6 +1,12 @@
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ChangeEvent, FC, useCallback, useEffect, useState } from "react";
+import {
+  type ChangeEvent,
+  type FC,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import {
   Button,
   CloseButton,
@@ -15,13 +21,15 @@ import { useTranslation } from "react-i18next";
 import { Transforms } from "slate";
 import { useSlate } from "slate-react";
 import { type WritingTask, isWritingTask } from "../../../lib/WritingTask";
-import { useLti, useLtiInfo } from "../../service/lti.service";
 import {
   taskToClipboard,
   taskToEditor,
-  useWritingTask,
-  writingTask,
+  useWritingTasks,
 } from "../../service/writing-task.service";
+import {
+  useSetWritingTask,
+  useWritingTask,
+} from "../WritingTaskContext/WritingTaskContext";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
@@ -35,15 +43,17 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
  */
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  // const { data: writingTasks } = useWritingTasks(); // all public tasks
-  const writing_task = useWritingTask(); // current task
-  const inLti = useLti(); // in LTI context
-  const ltiInfo = useLtiInfo(); // Information from LTI
-  const [selected, setSelected] = useState<WritingTask | null>(writing_task);
-  useEffect(() => setSelected(writing_task), [writing_task]);
+  const { data: writingTasks } = useWritingTasks(); // all public tasks
+  const { task: writingTask, isInstructor, isLTI } = useWritingTask(); // current task
+  const setWritingTask = useSetWritingTask();
+  // const inLti = useLti(); // in LTI context
+  const [selected, setSelected] = useState<WritingTask | undefined | null>(
+    writingTask
+  );
+  useEffect(() => setSelected(writingTask), [writingTask]);
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
-  useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
+  // useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
   const [data, setData] = useState<WritingTask[]>([]); // filtered list of tasks.
   const [showDetails, setShowDetails] = useState(false);
@@ -74,11 +84,12 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
 
   const hide = useCallback(() => {
     setShowDetails(false);
-    setSelected(null);
+    setSelected(undefined);
     onHide?.();
   }, [onHide]);
   const commit = useCallback(() => {
-    writingTask.next(selected);
+    setWritingTask({ task: selected });
+    // writingTask.next(selected);
     hide();
   }, [hide, selected]);
   const editor = useSlate();
@@ -117,7 +128,11 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
             className="d-flex flex-row align-items-stretch position-relative gap-3"
             style={{ maxHeight: "75vh", height: "75vh" }}
           >
-            <WritingTaskFilter className="w-100" update={setData} />
+            <WritingTaskFilter
+              className="w-100"
+              update={setData}
+              tasks={writingTasks}
+            />
             <div className="w-100 h-0">
               <ListGroup className="overflow-auto w-100 mh-100">
                 {data.map((task) => (
@@ -142,7 +157,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
                 <ListGroup.Item
                   action
                   variant="warning"
-                  onClick={() => setSelected(null)}
+                  onClick={() => setSelected(undefined)}
                 >
                   {t("select_task.null")}
                 </ListGroup.Item>
@@ -159,13 +174,13 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           <Form.Check
             type="checkbox"
             label={t("details.include")}
-            disabled={!writingTask}
+            disabled={!selected}
             checked={includeDetails}
             onChange={() => setIncludeDetails(!includeDetails)}
           />
           <Button
             variant="secondary"
-            disabled={!writingTask}
+            disabled={!selected}
             onClick={async () =>
               await navigator.clipboard.writeText(
                 taskToClipboard(selected, includeDetails)
@@ -174,7 +189,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
           >
             {t("clipboard")}
           </Button>
-          <Button variant="secondary" disabled={!writingTask} onClick={insert}>
+          <Button variant="secondary" disabled={!selected} onClick={insert}>
             {t("select_insert")}
           </Button>
           <Button variant="primary" disabled={!selected} onClick={commit}>
@@ -183,7 +198,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
         </Modal.Footer>
       ) : (
         <Modal.Footer>
-          {(!inLti || ltiInfo?.instructor) && (
+          {(!isLTI || isInstructor) && (
             <OverlayTrigger
               onToggle={(nextShow) => setShowFile(nextShow)}
               show={showFile}

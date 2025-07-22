@@ -11,7 +11,7 @@
 import { bind, Subscribe } from "@react-rxjs/core";
 import * as d3 from "d3";
 import React, {
-  ChangeEvent,
+  type ChangeEvent,
   Suspense,
   useEffect,
   useId,
@@ -25,12 +25,12 @@ import { combineLatest, map } from "rxjs";
 import {
   CommonDictionary,
   commonDictionary$,
-  CommonDictionaryTreeNode,
+  type CommonDictionaryTreeNode,
 } from "../../service/common-dictionary.service";
 import { useEditorState } from "../../service/editor-state.service";
 import {
   gen_patterns_map,
-  TaggerResults,
+  type TaggerResults,
   taggerResults$,
 } from "../../service/tagger.service";
 import "./CategoryTree.scss";
@@ -39,6 +39,9 @@ interface PatternData {
   pattern: string; // text string pattern (eg) "I like"
   count: number; // number of instances of that pattern in the text.
 }
+
+// Tri-state checkbox states.
+type CheckboxState = "Empty" | "Indeterminate" | "Checked";
 
 interface TreeNode {
   parent: string;
@@ -100,7 +103,7 @@ const [useCategoryData, categoryData$] = bind(
           help: node.help,
           children: node.children?.map(dfsmap.bind(null, node.id)) ?? [],
           patterns: cat_pat_map.get(node.id) ?? [],
-          checked: CheckboxState.Empty,
+          checked: "Empty",
         });
         return common.tree.map(dfsmap.bind(null, ""));
       }
@@ -108,13 +111,6 @@ const [useCategoryData, categoryData$] = bind(
     })
   )
 );
-
-// Tri-state checkbox states.
-enum CheckboxState {
-  Empty,
-  Indeterminate,
-  Checked,
-}
 
 type PatternsProps = { data: PatternData[] };
 /**
@@ -203,13 +199,13 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
     const state = data.checked;
     if (checkRef.current) {
       const cb = checkRef.current as HTMLInputElement;
-      if (state === CheckboxState.Checked) {
+      if (state === "Checked") {
         cb.checked = true;
         cb.indeterminate = false;
-      } else if (state === CheckboxState.Empty) {
+      } else if (state === "Empty") {
         cb.checked = false;
         cb.indeterminate = false;
-      } else if (state === CheckboxState.Indeterminate) {
+      } else if (state === "Indeterminate") {
         cb.checked = false;
         cb.indeterminate = true;
       }
@@ -232,9 +228,7 @@ const CategoryNode: React.FC<CategoryNodeProps> = ({
 
   // handler of checkbox state change.
   const change = (e: ChangeEvent<HTMLInputElement>) => {
-    const state = e.currentTarget.checked
-      ? CheckboxState.Checked
-      : CheckboxState.Empty;
+    const state = e.currentTarget.checked ? "Checked" : "Empty";
     onChange(data, state);
   };
 
@@ -349,10 +343,10 @@ function parent(node: TreeNode, data: TreeNode[]): TreeNode | undefined {
 function findChecked(data: TreeNode[]): string[] {
   const ret: string[] = [];
   data.forEach((d) => {
-    if (d.checked === CheckboxState.Indeterminate) {
+    if (d.checked === "Indeterminate") {
       // indeterminate indicates that some descendants are checked
       ret.push(...findChecked(d.children));
-    } else if (d.checked === CheckboxState.Checked) {
+    } else if (d.checked === "Checked") {
       // if current is checked, no need to recurse.
       ret.push(d.id);
     }
@@ -393,15 +387,13 @@ const CategoryTreeTop: React.FC = () => {
     while (ancestor) {
       const desc = [...descendants(ancestor)].slice(1);
       if (
-        desc.every(
-          (d) => d.checked === CheckboxState.Checked || count_patterns(d) === 0
-        )
+        desc.every((d) => d.checked === "Checked" || count_patterns(d) === 0)
       ) {
-        ancestor.checked = CheckboxState.Checked;
-      } else if (desc.every((d) => d.checked === CheckboxState.Empty)) {
-        ancestor.checked = CheckboxState.Empty;
+        ancestor.checked = "Checked";
+      } else if (desc.every((d) => d.checked === "Empty")) {
+        ancestor.checked = "Empty";
       } else {
-        ancestor.checked = CheckboxState.Indeterminate;
+        ancestor.checked = "Indeterminate";
       }
       ancestor = parent(ancestor, data ?? []);
     }

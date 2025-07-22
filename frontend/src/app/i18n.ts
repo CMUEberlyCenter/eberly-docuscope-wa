@@ -17,3 +17,4 @@ i18n
       parse: (data: string) => parse(data),
     },
   });
+export default i18n;

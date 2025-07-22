@@ -127,6 +127,10 @@
           "description": "OS filename",
           "type": "string"
         },
+        "id": {
+          "description": "Identifier, a uri fragment",
+          "type": "string"
+        },
         "keywords": {
           "description": "Keywords, optionally prefixed with a special tag like \"category:\"",
           "items": {

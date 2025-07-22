@@ -1,17 +1,18 @@
 import {
   createContext,
-  Dispatch,
-  FC,
-  ReactNode,
+  type Dispatch,
+  type FC,
+  type ReactNode,
   use,
+  useContext,
   useEffect,
   useReducer,
 } from "react";
 
 type ReviewContextState = {
-  paragraphs?: string[];
-  sentences?: string[][];
-  text?: string;
+  paragraphs?: string[]; // List of paragraph ids to highlight.
+  sentences?: string[][]; // Lists of sentence ids to highlight for each highlighting level
+  text?: string; // HTML Text to display in the review tool.
 };
 const initialReviewContext: ReviewContextState = {
   paragraphs: [],
@@ -19,7 +20,8 @@ const initialReviewContext: ReviewContextState = {
 };
 
 /** Context for review tools. */
-export const ReviewContext = createContext<ReviewContextState | null>(null);
+const ReviewContext = createContext<ReviewContextState | null>(null);
+export const useReviewContext = () => useContext(ReviewContext);
 /** Context for dispatching actions to modify the review tools state. */
 export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
@@ -27,12 +29,12 @@ export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
 
 type ReviewAction =
   | {
-      type: "set";
+      type: "set"; // set highlighting
       sentences: string[][];
       paragraphs?: string[];
     }
   | {
-      type: "unset";
+      type: "unset"; // unset highlighting
       sentences?: undefined;
       paragraphs?: undefined;
     }
@@ -53,13 +55,13 @@ function reviewReducer(
   { type, sentences, paragraphs }: ReviewAction
 ) {
   switch (type) {
-    case "set":
+    case "set": // set sentences and paragraphs highlighting, clobbers existing
       return { ...review, sentences, paragraphs };
-    case "unset":
+    case "unset": // unset sentences and paragraphs highlighting, ignores parameters.
       return { ...review, sentences: [], paragraphs: [] };
-    case "update":
+    case "update": // replace text using sentences parameter.
       return { ...review, text: sentences };
-    case "remove":
+    case "remove": // nullify text which should then use the default text.
       return { ...review, text: undefined };
     default:
       console.warn(`Unknown action: ${type}`);
@@ -69,6 +71,7 @@ function reviewReducer(
 
 /**
  * A component for providing the contexts for review tools.
+ * This is for handling the displayed text and its highlighting.
  * @param param0.chidren the child nodes.
  * @returns
  */

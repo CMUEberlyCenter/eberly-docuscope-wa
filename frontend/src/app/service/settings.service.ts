@@ -15,7 +15,8 @@ import { fromFetch } from 'rxjs/fetch';
 
 // URL for settings.json, 'base' gets it to work with webpack.
 const SETTINGS_URL = new URL(
-  /* @vite-ignore */ '../settings/settings.json',
+  '/public/settings/settings.json',
+  /* @vite-ignore */ //'../settings/settings.json',
   import.meta.url
 );
 
@@ -26,6 +27,7 @@ const SETTINGS_URL = new URL(
 interface Settings {
   text2speech?: boolean; // Text to speech widgets
   scribe?: boolean; // global LLM tool availability, false disables all LLM tools
+  word_count_limit?: number; // Word Count limit for review tools.
   // Draft Tools
   notes2prose?: boolean; // Notes to Prose LLM tool
   notes2bullets?: boolean; // Notes to List LLM tool
@@ -57,12 +59,14 @@ interface Settings {
   tagger: string; // URL. Needed for impressions
 }
 
+const WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
 // Default json settings, in case of network failure.
 const DEFAULT: Settings = {
   common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   text2speech: true,
   scribe: true,
+  word_count_limit: WORD_COUNT_LIMIT,
 
   notes2prose: true,
   notes2bullets: true,
@@ -101,139 +105,4 @@ export const [useSettings, settings$] = bind(
     })
   ),
   DEFAULT
-);
-
-export const [useGlobalFeatureTextToSpeech, globalFeatureTextToSpeech$] = bind(
-  settings$.pipe(map((settings) => !!settings.text2speech)),
-  false
-);
-
-export const [useGlobalScribeAvailable, globalScribeAvailable$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe)),
-  true
-);
-
-export const [useGlobalFeatureNotes2Prose, globalFeatureNotes2Prose$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.notes2prose)
-  ),
-  false
-);
-export const [useGlobalFeatureNotes2Bullets, globalFeatureNotes2Bullets$] =
-  bind(
-    settings$.pipe(
-      map((settings) => !!settings.scribe && !!settings.notes2bullets)
-    ),
-    false
-  );
-export const [useGlobalFeatureExpectation, globalFeatureExpectation$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.assess_expectation)
-  ),
-  false
-);
-
-export const [useGlobalFeatureCopyedit, globalFeatureCopyedit$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.copyedit)),
-  false
-);
-
-export const [useGlobalFeatureFlow, globalFeatureFlow$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.flow)),
-  false
-);
-
-export const [useGlobalFeatureReview, globalFeatureReview$] = bind(
-  settings$.pipe(
-    map(
-      (settings) =>
-        !!settings.civil_tone ||
-        !!settings.credibility ||
-        !!settings.expectations ||
-        !!settings.lines_of_arguments ||
-        !!settings.logical_flow ||
-        !!settings.paragraph_clarity ||
-        !!settings.professional_tone ||
-        !!settings.prominent_topics ||
-        !!settings.sources ||
-        !!settings.term_matrix ||
-        !!settings.sentence_density
-    )
-  ),
-  false
-);
-
-export const [useGlobalFeatureCivilTone, globalFeatureCivilTone$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.civil_tone)),
-  false
-);
-export const [useGlobalFeatureCredibility, globalFeatureCredibility$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.credibility)
-  ),
-  false
-);
-export const [useGlobalFeatureExpectations, globalFeatureExpectations$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.expectations)
-  ),
-  false
-);
-export const [
-  useGlobalFeatureLinesOfArguments,
-  globalFeatureLinesOfArguments$,
-] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.lines_of_arguments)
-  ),
-  false
-);
-export const [useGlobalFeatureLogicalFlow, globalFeatureLogicalFlow$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.logical_flow)
-  ),
-  false
-);
-export const [
-  useGlobalFeatureParagraphClarity,
-  globalFeatureParagraphClarity$,
-] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.paragraph_clarity)
-  ),
-  false
-);
-export const [
-  useGlobalFeatureProfessionalTone,
-  globalFeatureProfessionalTone$,
-] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.scribe && !!settings.professional_tone)
-  ),
-  false
-);
-export const [useGlobalFeatureProminentTopics, globalFeatureProminentTopics$] =
-  bind(
-    settings$.pipe(
-      map((settings) => !!settings.scribe && !!settings.prominent_topics)
-    ),
-    false
-  );
-export const [useGlobalFeatureSources, globalFeatureSources$] = bind(
-  settings$.pipe(map((settings) => !!settings.scribe && !!settings.sources)),
-  false
-);
-
-export const [useGlobalFeatureTermMatrix, globalFeatureTermMatrix$] = bind(
-  settings$.pipe(map((settings) => !!settings.term_matrix)),
-  false
-);
-export const [useGlobalFeatureSentenceDensity, globalFeatureSentenceDensity$] =
-  bind(settings$.pipe(map((settings) => !!settings.sentence_density)), false);
-
-export const [useGlobalFeatureImpressions, globalFeatureImpressions$] = bind(
-  settings$.pipe(
-    map((settings) => !!settings.docuscope && !!settings.impressions)
-  ),
-  false
 );

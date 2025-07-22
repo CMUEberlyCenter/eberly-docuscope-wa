@@ -23,16 +23,18 @@
       it appears at least once on the left side of the main verb in a sentence within the paragraph.
 
  */
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
 import DataTable from "datatables.net-react";
 import {
-  FC,
-  HTMLProps,
+  type FC,
+  type HTMLProps,
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import {
@@ -46,11 +48,15 @@ import {
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData } from "../../../lib/ReviewResponse";
-import { useOnTopicData, useOnTopicProse } from "../../service/review.service";
+import {
+  isErrorData,
+  type OnTopicReviewData,
+} from "../../../lib/ReviewResponse";
 import { clearAllHighlights } from "../../service/topic.service";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./Organization.scss";
 import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
@@ -250,17 +256,59 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const data = useOnTopicData();
+  const document = useFileText();
+  const { task: writing_task } = useWritingTask();
+  const [data, setData] = useState<OnTopicReviewData | null>(null);
+  // const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selected, setSelected] = useState<SelectedRowCol>(null);
 
   // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
-  const ontopicProse = useOnTopicProse();
+  // const ontopicProse = useOnTopicProse();
   const dispatch = useContext(ReviewDispatchContext);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: { document: string }) => {
+      const { document } = data;
+      abortControllerRef.current = new AbortController();
+      const response = await fetch("/api/v2/review/ontopic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ document }),
+        signal: abortControllerRef.current.signal,
+      });
+      if (!response.ok) {
+        throw new Error("Failed to update sentences");
+      }
+      return response.json();
+    },
+    onSuccess: (data: OnTopicReviewData) => {
+      setData(data);
+      if (data.response.html)
+        dispatch({ type: "update", sentences: data.response.html });
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+    // TODO: handle error appropriately
+  });
   useEffect(() => {
-    if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
-  }, [ontopicProse]);
+    if (!document || !writing_task) return;
+    // Fetch the review data for Sentences
+    mutation.mutate({
+      document,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [document, writing_task]);
+
+  // useEffect(() => {
+  //   if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
+  // }, [ontopicProse]);
 
   // const [selectedParagraph, setSelectedParagraph] = useState(-1);
   // const [selectedSentence, setSelectedSentence] = useState(-1);
@@ -309,12 +357,12 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   useEffect(() => {
     clearAllHighlights();
     selected?.topic?.forEach((topic) =>
-      document
+      window.document
         .querySelectorAll(`.user-text .word[data-topic="${topic}"]`)
         .forEach((ele) => ele.classList.add("word-highlight"))
     );
     if (typeof selected?.paragraph === "number") {
-      const ele = document.querySelector(
+      const ele = window.document.querySelector(
         `.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`
       );
       ele?.scrollIntoView({ behavior: "smooth", block: "center" });

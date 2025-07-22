@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { FC, HTMLProps } from "react";
+import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
 import { About } from "../About/About";
 

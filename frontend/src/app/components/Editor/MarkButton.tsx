@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react";
+import type { FC, ReactNode } from "react";
 import { OverlayTrigger, Tooltip, Button } from "react-bootstrap";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";

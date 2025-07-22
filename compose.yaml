@@ -1,9 +1,9 @@
 ###################################################################################
 #
 # Default compose file, assumes development environment.
-# > docker-compose -f compose.yaml up -d
-# > docker-compose -f compose.yaml up -d --build frontend ontopic
-# > docker-compose -f compose.yaml --profile stats up -d
+# > docker compose -f compose.yaml up -d
+# > docker compose -f compose.yaml up -d --build frontend ontopic
+# > docker compose -f compose.yaml --profile stats up -d
 #
 ###################################################################################
 
@@ -58,6 +58,8 @@ services:
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       ANTHROPIC_MAX_TOKENS: 2048
       EXPIRE_REVIEW_SECONDS: 86400
+      GOOGLE_ANALYTICS: G-88EPY3554N
+      GOOGLE_CLIENT_ID: 1234 # Replace with your actual Google Client ID
       LTI_HOSTNAME: https://docuscope-sc-test.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
       MONGO_DB: myprose
@@ -71,6 +73,7 @@ services:
       SCRIBE_TEMPLATES: /app/resources/prompts/templates.json
       PROMPT_TEMPLATES: /app/resources/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
+      TOOL_SETTINGS: /app/build/app/settings/settings.json
       WRITING_TASKS: /app/resources/wtd_lib
     restart: always
     depends_on:

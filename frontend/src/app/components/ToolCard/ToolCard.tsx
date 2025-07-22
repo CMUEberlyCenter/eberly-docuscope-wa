@@ -1,16 +1,13 @@
-import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import React, {
+import {
   forwardRef,
-  HTMLProps,
+  type HTMLProps,
   useCallback,
   useId,
   useState,
 } from "react";
 import {
   Alert,
-  Button,
   ButtonGroup,
   ButtonToolbar,
   Card,
@@ -19,12 +16,9 @@ import {
   Stack,
   Tab,
 } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
-import type { Rule } from "../../../lib/WritingTask";
-import CheckExpectationIcon from "../../assets/icons/check_expectation_icon.svg?react";
 import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
@@ -35,23 +29,15 @@ import type { Tool, ToolResult } from "../../lib/ToolResults";
 import {
   postClarifyText,
   postConvertNotes,
-  postExpectation,
+  // postExpectation,
   postFlowText,
   useScribe,
 } from "../../service/scribe.service";
-import {
-  useGlobalFeatureCopyedit,
-  useGlobalFeatureExpectation,
-  useGlobalFeatureFlow,
-  useGlobalFeatureNotes2Bullets,
-  useGlobalFeatureNotes2Prose,
-  useGlobalFeatureReview,
-} from "../../service/settings.service";
-import { useWritingTask } from "../../service/writing-task.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
-import SelectExpectation from "../SelectExpectation/SelectExpectation";
+import { useSettingsContext } from "../Settings/SettingsContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
@@ -63,20 +49,13 @@ class NoSelectedTextError extends Error {}
  */
 const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ className, hasSelection, ...props }, ref) => {
+    const { task: writingTask } = useWritingTask();
     const { t } = useTranslation();
-    const writingTask = useWritingTask();
-    // TODO extend from global to global+assignment
-    const notes2proseFeature = useGlobalFeatureNotes2Prose();
-    const bulletsFeature = useGlobalFeatureNotes2Bullets();
-    const flowFeature = useGlobalFeatureFlow();
-    const copyEditFeature = useGlobalFeatureCopyedit();
-    const reviewFeature = useGlobalFeatureReview();
+    const settings = useSettingsContext();
     const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
     const [history, setHistory] = useState<ToolResult[]>([]);
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
     const scribe = useScribe();
-    const expectationFeature = useGlobalFeatureExpectation();
-    const [showSelectExpectation, setShowSelectExpectation] = useState(false);
 
     const editor = useSlate();
     const doTool = useCallback(
@@ -100,24 +79,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               const toolResult = { ...data, result };
               setCurrentTool(toolResult);
               addHistory(toolResult);
-              break;
-            }
-            case "expectation": {
-              if (emptyInput) {
-                throw new NoSelectedTextError(t("error.no_selection.default"));
-              }
-              if (data.expectation) {
-                const result = await postExpectation(
-                  data.input.text,
-                  data.expectation,
-                  writingTask
-                );
-                const toolResult = { ...data, result };
-                setCurrentTool(toolResult);
-                addHistory(toolResult);
-              } else {
-                setShowSelectExpectation(true);
-              }
               break;
             }
             case "copyedit": {
@@ -214,37 +175,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       }
     }, [history, currentTool]);
 
-    const onReview = useCallback(async () => {
-      const text = serialize(editor.children);
-      if (!text) {
-        // TODO error message about no content.
-        return;
-      }
-      const resp = await fetch("/api/v2/reviews/", {
-        method: "POST",
-        credentials: "same-origin",
-        redirect: "manual",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document: serializeHtml(editor.children), // Segmenting is handled server side
-          writing_task: writingTask,
-        }),
-      });
-      if (resp.redirected) {
-        return window.open(resp.url, "_blank");
-      }
-      if (!resp.ok) {
-        console.error(resp.status);
-        return; // TODO better error reporting
-      }
-      const reviewId = await resp.json();
-      return window.open(
-        `/review.html?id=${reviewId}`,
-        "_blank",
-        "scrollbars=no,resizable=yes,menubar=yes,toolbar=yes"
-      );
-    }, [writingTask, editor]);
-
     return (
       <aside
         className={classNames(
@@ -262,9 +192,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             >
               {/* <Nav variant="underline"> // underline or tabs conveys meaning better */}
               <Nav>
-                {(notes2proseFeature ||
-                  bulletsFeature ||
-                  expectationFeature) && (
+                {(settings.notes2prose || settings.notes2bullets) && (
                   <Nav.Item className="ms-3">
                     <Nav.Link
                       eventKey="generate"
@@ -274,32 +202,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     </Nav.Link>
                   </Nav.Item>
                 )}
-                {reviewFeature && (
-                  <Nav.Item>
-                    <Nav.Link
-                      disabled={!writingTask}
-                      eventKey={"review"}
-                      onClick={() => onReview()}
-                    >
-                      {t("tool.tab.review")}
-                      <FontAwesomeIcon
-                        icon={faArrowUpRightFromSquare}
-                        className="ms-1"
-                        style={{ fontSize: "0.65em" }}
-                      />
-                    </Nav.Link>
-                  </Nav.Item>
-                  // link button is a better usability choice
-                  // <Button variant="link" onClick={() => onReview()}>
-                  //   {t("tool.tab.review")}
-                  //   <FontAwesomeIcon
-                  //     icon={faArrowUpRightFromSquare}
-                  //     className="ms-1"
-                  //     style={{ fontSize: "0.7em" }}
-                  //   />
-                  // </Button>
-                )}
-                {(copyEditFeature || flowFeature) && (
+                {(settings.copyedit || settings.flow) && (
                   <Nav.Item>
                     <Nav.Link
                       eventKey="refine"
@@ -318,9 +221,9 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Tab.Pane eventKey="generate">
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
-                    {(notes2proseFeature || bulletsFeature) && (
+                    {(settings.notes2prose || settings.notes2bullets) && (
                       <ButtonGroup className="bg-white shadow-sm tools">
-                        {notes2proseFeature && (
+                        {settings.notes2prose && (
                           <ToolButton
                             tooltip={t("tool.button.prose.tooltip")}
                             title={t("tool.button.prose.title")}
@@ -329,26 +232,13 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                             disabled={!scribe || !hasSelection}
                           />
                         )}
-                        {bulletsFeature && (
+                        {settings.notes2bullets && (
                           <ToolButton
                             tooltip={t("tool.button.bullets.tooltip")}
                             title={t("tool.button.bullets.title")}
                             icon={<GenerateBulletsIcon />}
                             onClick={() => onTool("bullets")}
                             disabled={!scribe || !hasSelection}
-                          />
-                        )}
-                      </ButtonGroup>
-                    )}
-                    {expectationFeature && (
-                      <ButtonGroup className="bg-white shadow-sm tools ms-2">
-                        {expectationFeature && (
-                          <ToolButton
-                            tooltip={t("tool.button.expectation.tooltip")}
-                            title={t("tool.button.expectation.title")}
-                            icon={<CheckExpectationIcon />}
-                            disabled={!scribe || !writingTask || !hasSelection}
-                            onClick={() => onTool("expectation")}
                           />
                         )}
                       </ButtonGroup>
@@ -360,7 +250,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
                     <ButtonGroup className="bg-white shadow-sm tools">
-                      {flowFeature && (
+                      {settings.flow && (
                         <ToolButton
                           tooltip={t("tool.button.flow.tooltip")}
                           onClick={() => onTool("flow")}
@@ -369,7 +259,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           title={t("tool.button.flow.title")}
                         />
                       )}
-                      {copyEditFeature && (
+                      {settings.copyedit && (
                         <ToolButton
                           tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}
@@ -448,89 +338,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                   <Alert variant="danger">{t("error.no_results")}</Alert>
                 )}
               </ToolDisplay.Response>
-            </ToolDisplay.Root>
-          )}
-          {currentTool?.tool === "expectation" && currentTool.expectation && (
-            <ToolDisplay.Root
-              // icon={<CheckExpectationIcon />}
-              title={t("tool.button.expectation.tooltip")}
-              tool={currentTool}
-              onBookmark={onBookmark}
-            >
-              <ToolDisplay.Input tool={currentTool} />
-              <Card as="section" className="mx-1">
-                <Card.Body className="pb-0">
-                  <header className="d-flex align-items-center">
-                    <CheckExpectationIcon height={16} width={16} />
-                    <span className="ms-2 fw-bold">
-                      {t("tool.expectation")}
-                    </span>
-                  </header>
-                  {currentTool.expectation ? (
-                    <ToolDisplay.Fade>
-                      <p>{currentTool.expectation.name}</p>
-                      <p
-                        dangerouslySetInnerHTML={{
-                          __html: currentTool.expectation.description,
-                        }}
-                      />
-                    </ToolDisplay.Fade>
-                  ) : (
-                    <Button
-                      variant="primary"
-                      className="mb-1 mx-1"
-                      onClick={() => setShowSelectExpectation(true)}
-                    >
-                      {t("tool.select_expectation")}
-                    </Button>
-                  )}
-                </Card.Body>
-              </Card>
-
-              {currentTool.expectation && (
-                <ToolDisplay.Response
-                  tool={currentTool}
-                  regenerate={retry}
-                  text={
-                    `${currentTool.result?.general_assessment ?? ""}\n` +
-                    currentTool.result?.issues
-                      .map(
-                        ({ description, suggestions }) =>
-                          `${description} ${suggestions.join("\n")}`
-                      )
-                      .join("\n\n")
-                  }
-                >
-                  {currentTool.result ? (
-                    <ErrorBoundary fallback={<div>{t("error.unknown")}</div>}>
-                      {currentTool.result.rating ? (
-                        <Rating value={currentTool.result.rating} />
-                      ) : null}
-                      <p>{currentTool.result.general_assessment}</p>
-                      <dl>
-                        {currentTool.result.issues.map(
-                          ({ description, suggestions }, i) => (
-                            <React.Fragment key={`issue-${i}`}>
-                              <dt>{description}</dt>
-                              <dd>
-                                <ul>
-                                  {suggestions.map((suggestion, j) => (
-                                    <li key={`suggestion-${i}-${j}`}>
-                                      {suggestion}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </dd>
-                            </React.Fragment>
-                          )
-                        )}
-                      </dl>
-                    </ErrorBoundary>
-                  ) : (
-                    <Alert variant="danger">{t("error.no_results")}</Alert>
-                  )}
-                </ToolDisplay.Response>
-              )}
             </ToolDisplay.Root>
           )}
           {currentTool?.tool === "copyedit" && (
@@ -675,15 +482,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
           )}
         </article>
         <Legal />
-        <SelectExpectation
-          show={showSelectExpectation}
-          onHide={() => setShowSelectExpectation(false)}
-          select={(expectation: Rule | null) => {
-            if (currentTool?.tool === "expectation" && expectation) {
-              doTool({ ...currentTool, expectation });
-            }
-          }}
-        />
       </aside>
     );
   }

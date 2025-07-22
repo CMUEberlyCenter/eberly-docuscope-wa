@@ -1,4 +1,9 @@
-import { Meta, StoryObj } from "@storybook/react";
+/**
+ * @file About.stories.tsx
+ * @description Storybook configuration for the About component.
+ * @see About.tsx
+ */
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { About } from "./About";
 
 const meta = {

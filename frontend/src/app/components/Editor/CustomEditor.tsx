@@ -7,89 +7,33 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
 import { convertToHtml } from "mammoth";
-import { FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
   DropdownButton,
   Form,
-  ListGroup,
-  Toast,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
-import {
-  Editable,
-  type RenderElementProps,
-  type RenderLeafProps,
-  Slate,
-  withReact,
-} from "slate-react";
+import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
-import { useLtiInfo } from "../../service/lti.service";
-import { useWritingTask } from "../../service/writing-task.service";
 import { FileDownload } from "../FileDownload/FileDownload";
-import { FileUpload } from "../FileUpload/FileUpload";
+import {
+  useInitiateUploadFile,
+  useSetUploadErrors,
+  useUploadFile,
+} from "../FileUpload/FileUploadContext";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
-
-/** Component for rendering editor content nodes. */
-const Element: FC<RenderElementProps> = ({ attributes, children, element }) => {
-  switch (element.type) {
-    case "block-quote":
-      return <blockquote {...attributes}>{children}</blockquote>;
-    case "bulleted-list":
-      return <ul {...attributes}>{children}</ul>;
-    case "heading-one":
-      return <h1 {...attributes}>{children}</h1>;
-    case "heading-two":
-      return <h2 {...attributes}>{children}</h2>;
-    case "heading-three":
-      return <h3 {...attributes}>{children}</h3>;
-    case "heading-four":
-      return <h4 {...attributes}>{children}</h4>;
-    case "heading-five":
-      return <h5 {...attributes}>{children}</h5>;
-    case "heading-six":
-      return <h6 {...attributes}>{children}</h6>;
-    case "list-item":
-      return <li {...attributes}>{children}</li>;
-    case "numbered-list":
-      return <ol {...attributes}>{children}</ol>;
-    default:
-      return <p {...attributes}>{children}</p>;
-  }
-};
-
-/** Component for rendering editor content leaf nodes. */
-const Leaf: FC<RenderLeafProps> = ({ children, leaf, attributes }) => (
-  <span
-    {...attributes}
-    style={{
-      fontWeight: "bold" in leaf && leaf.bold ? "bold" : "normal",
-      textDecoration:
-        "underline" in leaf &&
-        "strikethrough" in leaf &&
-        leaf.underline &&
-        leaf.strikethrough
-          ? "underline line-through"
-          : "underline" in leaf && leaf.underline
-            ? "underline"
-            : "strikethrough" in leaf && leaf.strikethrough
-              ? "line-through"
-              : undefined,
-      fontStyle: "italic" in leaf && leaf.italic ? "italic" : "initial",
-    }}
-  >
-    {children}
-  </span>
-);
+import { renderElement, renderLeaf } from "./SlateElements";
 
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
@@ -102,20 +46,6 @@ const CustomEditor: FC = () => {
   );
   const [zoom, setZoom] = useState<number>(100);
   const [selection, setSelection] = useState<boolean>(false);
-
-  const renderLeaf = useCallback(
-    (props: RenderLeafProps) => <Leaf {...props} />,
-    []
-  );
-  const renderElement = useCallback(
-    (props: RenderElementProps) => <Element {...props} />,
-    []
-  );
-
-  // Update document title based on translation.
-  useEffect(() => {
-    window.document.title = t("document.title");
-  }, [t]);
 
   // useEffect(() => {
   //   console.log(selection);
@@ -130,13 +60,9 @@ const CustomEditor: FC = () => {
   // }, [selection])
 
   // Import a docx file
-  type Message =
-    | { type: "error"; message: string; error: unknown }
-    | { type: "warning"; message: string };
-  const [showUpload, setShowUpload] = useState(false);
-  const [upload, setUpload] = useState<File | null>(null);
-  const [errors, setErrors] = useState<Message[]>([]);
-  const [showErrors, setShowErrors] = useState(false);
+  const upload = useUploadFile();
+  const setErrors = useSetUploadErrors();
+
   const loadFile = useCallback(
     async (file: File) => {
       try {
@@ -154,7 +80,7 @@ const CustomEditor: FC = () => {
         );
         if (messages.length) {
           setErrors(messages);
-          setShowErrors(true);
+          // setShowErrors(true);
           console.log(messages);
         }
         const content = deserializeHtmlText(value);
@@ -165,7 +91,7 @@ const CustomEditor: FC = () => {
       } catch (err) {
         if (err instanceof Error) {
           setErrors([{ type: "error", message: err.message, error: err }]);
-          setShowErrors(true);
+          // setShowErrors(true);
           console.error(err);
         } else {
           console.error("Caught non-error", err);
@@ -190,45 +116,15 @@ const CustomEditor: FC = () => {
       },
     ],
   };
-
-  const uploadFile = useCallback(async () => {
-    if (
-      "showOpenFilePicker" in window &&
-      typeof window.showOpenFilePicker === "function"
-    ) {
-      try {
-        const [handle]: FileSystemFileHandle[] =
-          await window.showOpenFilePicker(loadSaveFileOps);
-        const file = await handle.getFile();
-        setUpload(file);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === "AbortError") {
-          return; // Skip cancel.
-        }
-        if (err instanceof DOMException && err.name === "SecurityError") {
-          // Security error, show custom upload dialog.  Usually due to being in a cross-orgin iframe.
-          setShowUpload(true);
-          return;
-        }
-        console.error(err);
-        if (err instanceof Error) {
-          setErrors([{ type: "error", message: err.message, error: err }]);
-          setShowErrors(true);
-        }
-      }
-    } else {
-      setShowUpload(true);
-    }
-  }, []);
+  const uploadFile = useInitiateUploadFile();
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
-  const writingTask = useWritingTask();
-  const lti = useLtiInfo();
+  const { task: writingTask, username, ltiActivityTitle } = useWritingTask();
   const saveAs = useCallback(async () => {
     if (content) {
       const blob = await Packer.toBlob(
-        serializeDocx(content, writingTask, lti?.userInfo?.name)
+        serializeDocx(content, writingTask, username)
       );
       if (
         "showSaveFilePicker" in window &&
@@ -236,7 +132,7 @@ const CustomEditor: FC = () => {
       ) {
         const rootname =
           upload?.name ||
-          lti?.resource.title ||
+          ltiActivityTitle ||
           writingTask?.rules.name ||
           "myProse";
         try {
@@ -250,7 +146,7 @@ const CustomEditor: FC = () => {
         } catch (err) {
           if (!(err instanceof DOMException)) {
             setErrors([{ type: "error", message: "Failed Write", error: err }]);
-            setShowErrors(true);
+            // setShowErrors(true);
             console.error(err);
             return;
           }
@@ -275,7 +171,7 @@ const CustomEditor: FC = () => {
     } else {
       setDocx(null);
     }
-  }, [content, lti, writingTask]);
+  }, [content, ltiActivityTitle, writingTask]);
 
   return (
     <Slate
@@ -327,9 +223,7 @@ const CustomEditor: FC = () => {
                   <FileDownload
                     content={docx}
                     title={
-                      lti?.resource.title ||
-                      writingTask?.rules.name ||
-                      "myProse"
+                      ltiActivityTitle || writingTask?.rules.name || "myProse"
                     }
                   />
                 )}
@@ -392,44 +286,6 @@ const CustomEditor: FC = () => {
         </main>
         <ToolCard hasSelection={selection} />
       </Split>
-      <FileUpload
-        show={showUpload}
-        onHide={() => setShowUpload(false)}
-        onFile={setUpload}
-      />
-      <Toast
-        bg="light"
-        className="position-absolute start-50 bottom-0 translate-middle"
-        show={showErrors}
-        onClose={() => setShowErrors(!showErrors)}
-      >
-        <Toast.Header className="justify-content-between">
-          {t("editor.upload.error.title")}
-        </Toast.Header>
-        <Toast.Body>
-          <p>{t("editor.upload.error.overview")}</p>
-          <ListGroup>
-            {errors.map((msg, i) => (
-              <ListGroup.Item
-                key={i}
-                variant={msg.type === "error" ? "danger" : "warning"}
-              >
-                {msg.type === "error"
-                  ? t("editor.upload.error.error")
-                  : t("editor.upload.error.warning")}{" "}
-                {(msg.message === "Security Error" &&
-                  t("editor.upload.error.security")) ||
-                  (msg.message === "Failed Write" &&
-                    t("editor.upload.error.failed_write")) ||
-                  (msg.type === "error" &&
-                    msg.error instanceof TypeError &&
-                    t("editor.upload.error.not_docx", { file: msg.message })) ||
-                  msg.message}
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
-        </Toast.Body>
-      </Toast>
     </Slate>
   );
 };

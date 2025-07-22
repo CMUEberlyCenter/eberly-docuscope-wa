@@ -1,14 +1,9 @@
 import { bind } from '@react-rxjs/core';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  AssessExpectationRequest,
-  NotesRequest,
-  TextRequest,
-} from '../../lib/Requests';
-import type { Rule, WritingTask } from '../../lib/WritingTask';
+import type { NotesRequest, TextRequest } from '../../lib/Requests';
+import type { WritingTask } from '../../lib/WritingTask';
 import type {
   CopyEditResponse,
-  ExpectationData,
   LocalCoherenceResponse,
   SelectedText,
 } from '../lib/ToolResults';
@@ -126,61 +121,61 @@ export const postClarifyText = (
 
 /*** Assess Expectations ***/
 
-const errorExpectationData: ExpectationData = {
-  rating: 0.0,
-  general_assessment: '',
-  issues: [],
-};
+// const errorExpectationData: ExpectationData = {
+//   rating: 0.0,
+//   general_assessment: '',
+//   issues: [],
+// };
 
-export async function postExpectation(
-  text: string,
-  { name, description }: Rule,
-  writing_task?: WritingTask | null
-): Promise<ExpectationData> {
-  const { user_lang, target_lang } = writing_task?.info ?? {};
-  const response = await fetch('/api/v2/scribe/assess_expectation', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      text,
-      user_lang,
-      target_lang,
-      expectation: name,
-      description,
-    } as AssessExpectationRequest),
-  });
-  if (!response.ok) {
-    const err = await response.text();
-    console.error(err);
-    // return { ...errorData, explanation: err };
-    return { ...errorExpectationData, general_assessment: err };
-  }
-  const data = await response.json();
-  if ('error' in data) {
-    console.error(data.message);
-    // return {
-    //   ...errorData,
-    //   explanation: data.message,
-    // };
-    return {
-      ...errorExpectationData,
-      general_assessment: data.message,
-    };
-  }
-  if ('choices' in data) {
-    const content = data.choices.at(0)?.message.content;
-    if (content) {
-      // return JSON.parse(content) as AssessmentData;
-      return JSON.parse(content) as ExpectationData;
-    }
-  }
-  console.error(data);
-  // return { ...errorData, explanation: 'Invalid respose from service.' };
-  return {
-    ...errorExpectationData,
-    general_assessment: 'Invalid respose from service.',
-  };
-}
+// export async function postExpectation(
+//   text: string,
+//   { name, description }: Rule,
+//   writing_task?: WritingTask | null
+// ): Promise<ExpectationData> {
+//   const { user_lang, target_lang } = writing_task?.info ?? {};
+//   const response = await fetch('/api/v2/scribe/assess_expectation', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({
+//       text,
+//       user_lang,
+//       target_lang,
+//       expectation: name,
+//       description,
+//     } as AssessExpectationRequest),
+//   });
+//   if (!response.ok) {
+//     const err = await response.text();
+//     console.error(err);
+//     // return { ...errorData, explanation: err };
+//     return { ...errorExpectationData, general_assessment: err };
+//   }
+//   const data = await response.json();
+//   if ('error' in data) {
+//     console.error(data.message);
+//     // return {
+//     //   ...errorData,
+//     //   explanation: data.message,
+//     // };
+//     return {
+//       ...errorExpectationData,
+//       general_assessment: data.message,
+//     };
+//   }
+//   if ('choices' in data) {
+//     const content = data.choices.at(0)?.message.content;
+//     if (content) {
+//       // return JSON.parse(content) as AssessmentData;
+//       return JSON.parse(content) as ExpectationData;
+//     }
+//   }
+//   console.error(data);
+//   // return { ...errorData, explanation: 'Invalid respose from service.' };
+//   return {
+//     ...errorExpectationData,
+//     general_assessment: 'Invalid respose from service.',
+//   };
+// }
 
 /****** Logical Flow Audit ******/
 

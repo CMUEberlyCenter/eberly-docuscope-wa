@@ -1,10 +1,10 @@
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  Dispatch,
-  FC,
-  HTMLProps,
-  SetStateAction,
+  type Dispatch,
+  type FC,
+  type HTMLProps,
+  type SetStateAction,
   useCallback,
   useEffect,
   useId,
@@ -20,7 +20,6 @@ import {
   type WritingTask,
 } from "../../../lib/WritingTask";
 import FilterIcon from "../../assets/icons/filter_icon.svg?react";
-import { useWritingTasks } from "../../service/writing-task.service";
 
 const sep = ":";
 const hasPrefix = (prefix: string, key: string) =>
@@ -105,27 +104,29 @@ const CategoryKeywords: FC<CategoryKeywordsProps> = ({
 };
 
 type WritingTaskFilterProps = {
+  tasks?: WritingTask[];
   update?: Dispatch<SetStateAction<WritingTask[]>>;
 } & HTMLProps<HTMLDivElement>;
 
 export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
+  tasks = [],
   update,
   ...props
 }) => {
   const { t } = useTranslation();
-  const { data, isLoading } = useWritingTasks(); // isLoading should be handled higher up.
+  // const { data, isLoading } = useWritingTasks(); // isLoading should be handled higher up.
 
-  const [keywords, setKeywords] = useState(extractKeywords(data ?? []));
+  const [keywords, setKeywords] = useState(extractKeywords(tasks));
   useEffect(() => {
-    setKeywords(extractKeywords(data ?? []));
-  }, [data]);
+    setKeywords(extractKeywords(tasks));
+  }, [tasks]);
 
   const [search, setSearch] = useState<string>("");
   const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
   useEffect(() => {
-    const tasks =
-      data
+    const ftasks =
+      tasks
         ?.filter(
           (task) =>
             activeKeywords.length === 0 || hasKeywords(task, activeKeywords)
@@ -142,8 +143,8 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
           if (task.rules.overview.includes(term)) return true;
           return false;
         }) ?? [];
-    update?.(tasks);
-  }, [data, activeKeywords, search, update]);
+    update?.(ftasks);
+  }, [tasks, activeKeywords, search, update]);
 
   const selectAll = useCallback(
     (prefix: string) => {
@@ -188,7 +189,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
           <Form.Control
             placeholder={t("select_task.placeholder")}
             onChange={(evt) => setSearch(evt.target.value)}
-            disabled={isLoading}
+            // disabled={isLoading}
             value={search}
           />
         </FloatingLabel>

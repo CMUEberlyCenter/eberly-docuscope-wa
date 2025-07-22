@@ -1,9 +1,11 @@
+import type { Optional } from '../index.d';
+
 /** Test if the argument is an array of strings. */
 function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
 }
 
-export type Topic = {
+type Topic = {
   lemma: string;
   /** True if topic is user generated. */
   user_defined: boolean;
@@ -62,10 +64,10 @@ function isRule(rule: Rule | unknown): rule is Rule {
     'is_group' in rule &&
     typeof rule.is_group === 'boolean' &&
     'children' in rule &&
-    rule.children instanceof Array &&
+    Array.isArray(rule.children) &&
     rule.children.every(isRule) &&
     ('topics' in rule
-      ? rule.topics instanceof Array && rule.topics.every(isTopic)
+      ? Array.isArray(rule.topics) && rule.topics.every(isTopic)
       : true) &&
     ('examples' in rule ? typeof rule.examples === 'string' : true)
   );
@@ -102,7 +104,7 @@ type ToolConfig = {
   enabled: boolean;
 };
 
-export type WritingTaskMetaData = {
+type WritingTaskMetaData = {
   /** Title of the Writing Task/Outline */
   name: string;
   /** String used to identify the version of the outline, expected to be a SemTag */
@@ -115,6 +117,8 @@ export type WritingTaskMetaData = {
   saved: string; // DateTime
   /** OS filename */
   filename: string;
+  /** Identifier, a uri fragment */
+  id?: string;
   /** Optional dictionary location. (UNUSED) */
   dict_path?: string;
   /** Optionally specify the input language for LLM templates. (Default configured in server settings) */
@@ -151,6 +155,13 @@ function isWritingTaskMetaData(
     'filename' in info &&
     typeof info.filename === 'string'
   );
+}
+
+/** Test if a given task uri identifier (info.id) is undefined or a valid uri fragment. */
+export function isWritingTaskIdValid(taskId?: string): boolean {
+  if (!taskId) return true; // No task ID means no task, so valid.
+  // Task ID should be a valid URI fragment, so it must not contain spaces or special characters.
+  return /^[a-zA-Z0-9_-]+$/.test(taskId);
 }
 
 /** Extract all keywords from an array of writing task definitions. */
@@ -191,8 +202,12 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
  * @param toolId tool identifier, often corresponds to prompt filename.
  * @returns true if the given tool is enabled for the writing task.
  */
-export function isEnabled(task: WritingTask, toolId: string): boolean {
+export function isEnabled(
+  task: Optional<WritingTask>,
+  toolId: string
+): boolean {
   // patch for #151 to support old WTDs
+  if (!task) return false;
   if (!task.info.review_tools) {
     return !['prominent_topics', 'pathos'].includes(toolId);
   }
@@ -203,14 +218,14 @@ export function isEnabled(task: WritingTask, toolId: string): boolean {
   );
 }
 
-export const ERROR_INFORMATION: WritingTaskMetaData = {
-  name: 'NOT SET ERROR',
-  version: 'ERROR',
-  author: '',
-  copyright: 'NONE',
-  saved: 'UNKNOWN',
-  filename: '',
-};
+// export const ERROR_INFORMATION: WritingTaskMetaData = {
+//   name: 'NOT SET ERROR',
+//   version: 'ERROR',
+//   author: '',
+//   copyright: 'NONE',
+//   saved: 'UNKNOWN',
+//   filename: '',
+// };
 
 /** Container for the list of rules for the writing task and its metadata. */
 type Rules = {
@@ -230,7 +245,7 @@ function isRules(rules: unknown): rules is Rules {
     'overview' in rules &&
     typeof rules.overview === 'string' &&
     'rules' in rules &&
-    rules.rules instanceof Array &&
+    Array.isArray(rules.rules) &&
     rules.rules.every(isRule)
   );
 }
@@ -286,6 +301,22 @@ export function isWritingTask(
     isImpressions(task.impressions) &&
     'info' in task &&
     isWritingTaskMetaData(task.info)
+  );
+}
+
+export function equivalentWritingTasks(
+  a: WritingTask | null,
+  b: WritingTask | null
+): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.info.name === b.info.name &&
+    a.info.version === b.info.version &&
+    a.info.author === b.info.author &&
+    a.info.copyright === b.info.copyright &&
+    a.info.saved === b.info.saved &&
+    JSON.stringify(a.rules) === JSON.stringify(b.rules)
   );
 }
 
