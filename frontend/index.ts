@@ -19,6 +19,7 @@ import { parse } from 'yaml';
 import {
   BadRequest,
   BadRequestError,
+  Forbidden,
   InternalServerError,
   UnprocessableContent,
   UnprocessableContentError
@@ -181,7 +182,7 @@ async function __main__() {
 
   Provider.onDynamicRegistration(async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (!req.query.openid_configuration) return res.status(400).send({ status: 400, error: 'Bad Request', details: { message: 'Missing parameter: "openid_configuration".' } })
+      if (!req.query.openid_configuration) return res.status(400).send(BadRequest('Missing parameter: "openid_configuration".'));
       const message = await Provider.DynamicRegistration.register(req.query.openid_configuration, req.query.registration_token, {
         'https://purl.imsglobal.org/spec/lti-tool-configuration': {
           messages: [
@@ -201,22 +202,22 @@ async function __main__() {
       console.log('Dynamic registration message:', message);
       res.send(message);
     } catch (err) {
-      if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send({ status: 403, error: 'Forbidden', details: { message: 'Platform already registered.' } })
-      return res.status(500).send({ status: 500, error: 'Internal Server Error', details: { message: err.message } })
+      if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send(Forbidden('Platform already registered.'));
+      return res.status(500).send(InternalServerError(err.message));
     }
   });
 
   Provider.app.delete('/lti/platforms/:platformId', async (req: Request, res: Response) => {
     const platformId = req.params.platformId;
     if (!platformId) {
-      return res.status(400).send({ status: 400, error: 'Bad Request', details: { message: 'Missing platformId parameter.' } });
+      return res.status(400).send(BadRequest('Missing platformId parameter.'));
     }
     try {
       await Provider.deletePlatformById(platformId);
       res.status(204).send(); // No Content
     } catch (err) {
       console.error('Error deleting platform:', err);
-      return res.status(500).send({ status: 500, error: 'Internal Server' });
+      return res.status(500).send(InternalServerError(err));
     }
   });
   /**
