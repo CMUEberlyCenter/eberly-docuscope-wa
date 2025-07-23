@@ -199,7 +199,6 @@ async function __main__() {
         }
       })
       res.setHeader('Content-type', 'text/html');
-      console.log('Dynamic registration message:', message);
       res.send(message);
     } catch (err) {
       if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send(Forbidden('Platform already registered.'));
