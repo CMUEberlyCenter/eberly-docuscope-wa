@@ -1,6 +1,6 @@
-import type { PageContextServer } from "vike/types";
-import { findWritingTaskById } from "../../src/server/data/mongo";
-import { isInstructor } from "../../src/server/model/lti";
+import type { PageContextServer } from 'vike/types';
+import { findWritingTaskById } from '../../src/server/data/mongo';
+import { isInstructor } from '../../src/server/model/lti';
 
 export async function data(pageContext: PageContextServer) {
   const taskId = pageContext.writing_task_id; // set if system specified
