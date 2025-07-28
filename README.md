@@ -10,19 +10,19 @@ The project code is supported and maintained by the [Eberly Center](https://www.
 
 This application requires several files in order to function:
 - Required sensitive information shared with the application via [Docker secrets](https://docs.docker.com/compose/how-tos/use-secrets/):
-  - `secrets/anthropic_api_key`: API key provided by Anthropic (default model is claude-3-5-sonnet-20241022)
+  - `secrets/anthropic_api_key`: API key provided by Anthropic (default model is claude-3-7-sonnet-latest)
   - `secrets/mongo_user`: Username to use to access the MongoDB database.
   - `secrets/mongo_pass`: Password to use to access the MongoDB database.
   - `secrets/token`: LTI token.
-- Required system files:
-  - `private/templates.json`: LLM Prompt templates 
-  - `private/writing_tasks/**`: Writing task specification files available to all users.
+- Required system files (available seperately):
+  - `../myprose-resources/prompts/**`: LLM Prompt templates (.md files for each prompt).
+  - `../pyprose-resources/wtd_lib/**`: Writing task specification files available to all users.
 
 ## Latest stable build using Docker
 
-1. Copy [docker-compose-production.yml](docker-compose-production.yml).
+1. Copy [compose.yml](compose.yaml) and [compose.production.yaml](compose.production.yaml).
 2. Setup required files as specified above.
-3. Run `docker compose -f docker-compose-production.yml up -d` to start the application.
+3. Run `docker compose -f compose.yaml -f compose.production.yaml up -d` to start the application.
 4. This web application is configured to use port 8888.
 
 ## Building from source using Docker
@@ -34,7 +34,7 @@ This application requires several files in order to function:
 
 ## Using from source without Docker for development
 This requires that the following are installed or otherwise available:
-- [NodeJS](https://nodejs.org/) >=22.0
+- [NodeJS](https://nodejs.org/) >=24.0
 - [Python](https://www.python.org/) >=3.12
 - [MongoDB](https://www.mongodb.com/) >=8.0
 
@@ -47,7 +47,7 @@ This requires that the following are installed or otherwise available:
   - MONGO_USER: MongoDB username.
   - MONGO_PASSWORD: MongoDB password for the given username.
   - PORT: Port to use for application (default: 8888)
-  - SCRIBE_TEMPLATES: path to the prompt templates file (default: "private/templates.json").
+  - PROMPT_TEMPLATES: path to the prompt templates directory (default: "private/templates").
   - WRITING_TASKS: path to the writing task specifications (default: "private/platforms/")
 3. Start the MongoDB server.
 4. Start onTopic service in the `ontopic/` directory:
@@ -55,8 +55,7 @@ This requires that the following are installed or otherwise available:
   2. Start service: `pipenv run python app.py`
 5. Start the application in the `frontend/` directory:
   1. Install dependencies: `npm ci`
-  2. Build interface: `npm run build:client`
-  3. Start service: `npm run dev:server`
+  2. Build interface: `npm run dev`
 
 # Acknowledgements
 

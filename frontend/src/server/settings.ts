@@ -15,7 +15,7 @@ program
 // )
 program.parse();
 // const options = program.opts();
-export const DEV = true; // process.env.NODE_ENV !== 'production'; // use token only, no cookies.
+export const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 
@@ -58,12 +58,12 @@ export const LTI_DB = {
 
 export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
 export const LTI_OPTIONS = {
-  devMode: false,
+  devMode: DEV,
   ltiaas: true,
-  // cookies: {
-  //   secure: !DEV, // Use secure cookies in production.
-  //   sameSite: 'None', // SameSite policy for cookies.
-  // },
+  cookies: {
+    secure: true, // Use secure cookies in production.
+    sameSite: 'None', // SameSite policy for cookies.
+  },
   dynReg: {
     url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
     name: PRODUCT, // Tool Provider name. Required field.
@@ -90,9 +90,9 @@ export const ANTHROPIC_MAX_TOKENS = envInt(
 );
 // export const ANTHROPIC_USER_ID = fromEnvFile('ANTHROPIC_USER_ID', 'myprose');
 
-// Path to prompts json file // depricated
+// Path to prompt json files directory
 export const PROMPT_TEMPLATES_PATH =
-  process.env['PROMPT_TEMPLATES'] ?? join('private', 'templates.json');
+  process.env['PROMPT_TEMPLATES'] ?? join('private', 'templates');
 // Path to writing task definition files
 export const WRITING_TASKS_PATH =
   process.env['WRITING_TASKS'] ?? join('private', 'writing_tasks');
