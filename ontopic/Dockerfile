@@ -1,4 +1,4 @@
-FROM docker.io/python:3.12 AS base
+FROM docker.io/python:3.13 AS base
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -20,7 +20,7 @@ ENV PATH="/.venv/bin:$PATH"
 RUN useradd --create-home appuser
 COPY --from=deps /.venv /.venv
 RUN python -m spacy download en_core_web_sm
-RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
+# RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
 USER appuser
 WORKDIR /home/appuser
 COPY . .
