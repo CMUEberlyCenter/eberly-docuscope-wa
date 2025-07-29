@@ -4,7 +4,7 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dslib.models.document import DSDocument
-from dslib import views
+# from dslib import views
 
 app = FastAPI(
     title="onTopic Tools",
@@ -171,7 +171,7 @@ async def ontopic(data: OnTopicRequest):
     document.loadFromHtmlString(f"<body>{data.base}</body>")
 
     coherence = document.generateGlobalVisData(
-        2, 1, views.TOPIC_SORT_APPEARANCE)
+        2, 1, 0) # views.TOPIC_SORT_APPEARANCE)
     clarity: list[ClarityData] = document.getSentStructureData()
     topics = document.getCurrentTopics()
 

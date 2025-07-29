@@ -41,7 +41,6 @@ from spacy.lang.en.stop_words import STOP_WORDS
 import spacy                                   # SpaCy NLP library
 # from spacy.attrs import ORTH, LEMMA, POS
 
-from dslib.utils import resource_path, remove_hrefs, inchesToDoubleQuotes
 import dslib.models.stat as ds_stat
 
 
@@ -156,8 +155,8 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
 
     try:
         if lang == 'en':
-            default_model = resource_path("data/default_model")
-            large_model = resource_path("data/large_model")
+            default_model = "data/default_model" # resource_path("data/default_model")
+            large_model = "data/large_model" # resource_path("data/large_model")
 
             if LOAD_TRAINED_MODEL and model == NLP_MODEL_DEFAULT and os.path.exists(default_model):
                 logging.info("Loading Spacy default model ...")
@@ -191,6 +190,42 @@ def removeQuotedSlashes(s):
         return res
     else:
         return s
+
+def remove_hrefs(text):
+    """
+    This function removes a URL from a string.
+    """
+    utlpattern = r"(https|http):[A-z0-9/.-]+"  # UTL regex pattern
+    for m in re.finditer(utlpattern, text):    # find one or more URL patterns,
+        text = text.replace(m.group(), "")     # remove the URL from the message.
+    return text
+
+def inchesToDoubleQuotes(p):
+    """
+    Helper function: Given a paragraph, replace all the inche
+    marks (i.e., '\"') to actual smart/curly quotes.
+    """
+
+    buf = ""
+
+    bQuote = False
+    for c in p:
+        if bQuote == False and c == "\"": # open
+            buf += "\u201C"
+            bQuote = True
+        # elif bQuote == False and c == "\u201C":
+            # buf += c
+            # bQuote = True
+        elif bQuote == True and c == "\"": # close
+            buf += "\u201D"
+            bQuote = False
+        # elif bQuote == False and c == "\u201D":
+            # buf += c
+            # bQuote = False
+        else:
+            buf += c
+
+    return buf
 
 ##
 #
