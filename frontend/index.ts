@@ -306,7 +306,7 @@ async function __main__() {
     const app = express();
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
-    app.use(express.json());
+    app.use(express.json({limit: '10mb'}));
     app.use(cors({ origin: '*' }));
 
     // Setup sessions
