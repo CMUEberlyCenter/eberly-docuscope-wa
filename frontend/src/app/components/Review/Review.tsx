@@ -1,6 +1,7 @@
 import classNames from "classnames";
 import { type FC, type HTMLProps, useEffect, useState } from "react";
 import {
+  Alert,
   ButtonGroup,
   ButtonToolbar,
   Dropdown,
@@ -35,6 +36,7 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
+import { ErrorBoundary } from "react-error-boundary";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -376,21 +378,33 @@ export const Review: FC = () => {
                       </Dropdown>
                     ) : null}
                   </ButtonToolbar>
-                  {(!otherTool || otherTool === "null") && (
-                    <NullTool text={t("null.fine_tuning")} />
-                  )}
-                  {otherTool === "logical_flow" && <LogicalFlow />}
-                  {otherTool === "civil_tone" && <CivilTone />}
-                  {otherTool === "credibility" && <Ethos />}
-                  {/* {otherTool === "impressions" && ( */}
-                  {/* <NullTool text={t("null.not_available")} /> */}
-                  {/* )} */}
-                  {otherTool === "organization" && <Organization />}
-                  {otherTool === "sentences" && <Sentences />}
-                  {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                  {otherTool === "professional_tone" && <ProfessionalTone />}
-                  {otherTool === "sources" && <Sources />}
-                  {/* Add more tool displays here. */}
+                  <ErrorBoundary
+                    fallbackRender={({ error }) => (
+                      <Alert>
+                        <Alert.Heading>{t("error.header")}</Alert.Heading>
+                        {t("error.content")}
+                        {t("error.details", {
+                          details: { message: error.message },
+                        })}
+                      </Alert>
+                    )}
+                  >
+                    {(!otherTool || otherTool === "null") && (
+                      <NullTool text={t("null.fine_tuning")} />
+                    )}
+                    {otherTool === "logical_flow" && <LogicalFlow />}
+                    {otherTool === "civil_tone" && <CivilTone />}
+                    {otherTool === "credibility" && <Ethos />}
+                    {/* {otherTool === "impressions" && ( */}
+                    {/* <NullTool text={t("null.not_available")} /> */}
+                    {/* )} */}
+                    {otherTool === "organization" && <Organization />}
+                    {otherTool === "sentences" && <Sentences />}
+                    {otherTool === "paragraph_clarity" && <ParagraphClarity />}
+                    {otherTool === "professional_tone" && <ProfessionalTone />}
+                    {otherTool === "sources" && <Sources />}
+                    {/* Add more tool displays here. */}
+                  </ErrorBoundary>
                 </div>
               </Tab>
             ) : null}
