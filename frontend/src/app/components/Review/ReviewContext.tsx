@@ -30,7 +30,15 @@ export const useReviewContext = () => useContext(ReviewContext);
 const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
 );
-/** Hook for accessing the dispatch function for review tools. */
+/**
+ * Hook for accessing the dispatch function for review tools.
+ * Actions:
+ *   - `set`: Set sentences and paragraphs highlighting.
+ *   - `unset`: Unset sentences and paragraphs highlighting.
+ *   - `update`: Replace text using sentences parameter.
+ *   - `remove`: Nullify text which should then use the default text.
+ * @returns Dispatch function for modifying the review state.
+ */
 export const useReviewDispatch = () => useContext(ReviewDispatchContext);
 
 type ReviewAction =
