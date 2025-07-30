@@ -193,6 +193,8 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/lines_of_arguments", {
         method: "POST",
         headers: {
@@ -229,9 +231,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
     if (!document || !writing_task) return;
     setCurrent(null);
     // Fetch the review data for Lines of Arguments
-    // const controller = new AbortController();
     mutation.mutate({ document, writing_task });
-    // TODO error handling
     return () => {
       abortControllerRef.current?.abort();
     };
