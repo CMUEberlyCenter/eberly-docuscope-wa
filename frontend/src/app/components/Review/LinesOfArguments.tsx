@@ -1,8 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -24,19 +24,19 @@ import {
   type Claim as ClaimProps,
   isErrorData,
   type LinesOfArgumentsData,
+  type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
-import { useFileText } from "../FileUpload/FileUploadContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { useMutation } from "@tanstack/react-query";
-import type { WritingTask } from "../../../lib/WritingTask";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import { ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
@@ -57,7 +57,7 @@ type ClaimsProps = AccordionProps & {
 
 /** Component for displaying a list of Claims. */
 const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const prefix = useId();
 
   return (
@@ -179,11 +179,12 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   // const review = useLinesOfArgumentsData();
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<LinesOfArgumentsData | null>(null);
+  const [review, setReview] =
+    useState<OptionalReviewData<LinesOfArgumentsData>>(null);
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -217,7 +218,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "lines_of_arguments", error });
       console.error("Error fetching Lines of Arguments review:", error);
     },
     onSettled: () => {

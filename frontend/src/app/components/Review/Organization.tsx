@@ -32,7 +32,6 @@ import {
   type FC,
   type HTMLProps,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -51,6 +50,7 @@ import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
   type OnTopicReviewData,
+  type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import { clearAllHighlights } from "../../service/topic.service";
 import { useFileText } from "../FileUpload/FileUploadContext";
@@ -58,7 +58,7 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./Organization.scss";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);
@@ -258,7 +258,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [data, setData] = useState<OnTopicReviewData | null>(null);
+  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   // const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
@@ -266,7 +266,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
 
   // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
   // const ontopicProse = useOnTopicProse();
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
@@ -293,7 +293,10 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
     onSettled: () => {
       abortControllerRef.current = null;
     },
-    // TODO: handle error appropriately
+    onError: (error) => {
+      setData({ tool: "ontopic", error });
+      console.error("Error fetching Organization review:", error);
+    },
   });
   useEffect(() => {
     if (!document || !writing_task) return;

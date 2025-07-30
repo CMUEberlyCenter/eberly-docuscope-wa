@@ -259,6 +259,8 @@ export function isErrorData(data: unknown): data is ErrorData {
   return !!data && typeof data === 'object' && 'error' in data && !!data.error;
 }
 
+export type OptionalReviewData<T> = T | ErrorData | null | undefined;
+
 export type Analysis =
   | CivilToneData
   | CredibilityData

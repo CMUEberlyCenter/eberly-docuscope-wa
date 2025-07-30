@@ -1,7 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -12,14 +11,18 @@ import {
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, type CivilToneData } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  type CivilToneData,
+  type OptionalReviewData,
+} from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Civil Tone Tool component. */
@@ -30,10 +33,10 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<CivilToneData | null>(null);
+  const [review, setReview] = useState<OptionalReviewData<CivilToneData>>(null);
   // const review = useCivilToneData();
   const id = useId();
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const mutation = useMutation({
@@ -62,7 +65,7 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "civil_tone", error });
       console.error("Error fetching Civil Tone review:", error);
     },
     onSettled: () => {
