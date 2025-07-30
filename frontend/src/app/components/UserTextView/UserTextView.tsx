@@ -29,44 +29,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const uploadFile = useInitiateUploadFile();
-  // const uploadedFile = useUploadFile();
-  // const setUploadErrors = useSetUploadErrors();
   const upload = useFileText();
-
-  // const loadFile = useCallback(async (file: Optional<File>) => {
-  //   if (!file) return;
-  //   try {
-  //     if (
-  //       file.type !==
-  //       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-  //     ) {
-  //       throw new TypeError(file.name);
-  //     }
-  //     const arrayBuffer = await file.arrayBuffer();
-  //     const { value, messages } = await convertToHtml(
-  //       { arrayBuffer },
-  //       { styleMap: "u => u" }
-  //     );
-  //     if (messages.length) {
-  //       setUploadErrors(messages);
-  //       console.log(messages);
-  //     }
-  //     setUpload(value);
-  //   } catch (err) {
-  //     if (err instanceof Error) {
-  //       setUploadErrors([{ type: "error", message: err.message, error: err }]);
-  //       console.error(err);
-  //     } else {
-  //       console.error("Caught non-error", err);
-  //     }
-  //   }
-  // }, []);
-  // useEffect(() => {
-  //   if (uploadedFile) {
-  //     loadFile(uploadedFile);
-  //   }
-  // }, [uploadedFile]);
-  // const prose = useSegmentedProse();
 
   const ctx = useReviewContext();
   const { t } = useTranslation();

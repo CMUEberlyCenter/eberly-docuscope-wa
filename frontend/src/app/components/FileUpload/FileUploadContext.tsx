@@ -12,13 +12,28 @@ import { ListGroup, Toast } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { FileUpload } from "./FileUpload";
 
+/** Context for storing the uploaded file. */
 const FileUploadContext = createContext<File | null>(null);
+/** Hook for accessing the uploaded file. */
 export const useUploadFile = () => useContext(FileUploadContext);
+/** Context for initiating the file upload dialog. */
 const InitiateOpenFileDispatch = createContext<() => void>(() => {});
+/**
+ * Hook for accessing the function to initiate the file upload dialog.
+ * This is used to open the file picker dialog.
+ */
 export const useInitiateUploadFile = () => useContext(InitiateOpenFileDispatch);
 const SetErrorsDispatch = createContext<(errors: Message[]) => void>(() => {});
+/** Hook for accessing the function to set upload errors. */
 export const useSetUploadErrors = () => useContext(SetErrorsDispatch);
+/**
+ * Context for the file text.
+ * This is used to store the html translation of the uploaded file.
+ */
 const FileTextContext = createContext<string | null>(null);
+/**
+ * Hook for accessing the html translation of the uploaded file.
+ */
 export const useFileText = () => useContext(FileTextContext);
 
 const loadSaveFileOps = {

@@ -10,9 +10,12 @@ import {
 } from "react";
 
 type ReviewContextState = {
-  paragraphs?: string[]; // List of paragraph ids to highlight.
-  sentences?: string[][]; // Lists of sentence ids to highlight for each highlighting level
-  text?: string; // HTML Text to display in the review tool.
+  /** List of paragraph ids to highlight. */
+  paragraphs?: string[];
+  /** Lists of sentence ids to highlight for each highlighting level */
+  sentences?: string[][];
+  /** HTML Text to display in the review tool. */
+  text?: string;
 };
 const initialReviewContext: ReviewContextState = {
   paragraphs: [],
@@ -21,11 +24,14 @@ const initialReviewContext: ReviewContextState = {
 
 /** Context for review tools. */
 const ReviewContext = createContext<ReviewContextState | null>(null);
+/** Hook for accessing the review context state. */
 export const useReviewContext = () => useContext(ReviewContext);
 /** Context for dispatching actions to modify the review tools state. */
-export const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
+const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
 );
+/** Hook for accessing the dispatch function for review tools. */
+export const useReviewDispatch = () => useContext(ReviewDispatchContext);
 
 type ReviewAction =
   | {

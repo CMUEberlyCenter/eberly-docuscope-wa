@@ -1,19 +1,13 @@
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import {
-  type FC,
-  type HTMLProps,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
+  type OptionalReviewData,
   type ProminentTopicsData,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
@@ -25,7 +19,7 @@ import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Prominent Topics tool. */
@@ -49,8 +43,9 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<ProminentTopicsData | null>(null);
-  const dispatch = useContext(ReviewDispatchContext);
+  const [review, setReview] =
+    useState<OptionalReviewData<ProminentTopicsData>>(null);
+  const dispatch = useReviewDispatch();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   useEffect(() => {
     if (
@@ -95,8 +90,8 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
-      console.error("Error fetching Civil Tone review:", error);
+      setReview({ tool: "prominent_topics", error });
+      console.error("Error fetching Prominent Topics review:", error);
     },
   });
 
