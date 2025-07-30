@@ -4,7 +4,6 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 from dslib.models.document import DSDocument
-# from dslib import views
 
 app = FastAPI(
     title="onTopic Tools",
@@ -15,28 +14,6 @@ app = FastAPI(
         'name': 'CC BY-NC-SA 4.0',
         'url': 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
     })
-
-# Unused, to be removed
-# @app.get("/api/v1/ping")
-# async def ping():
-#   """ Basic performance data.
-
-#   Much of this information should not be publicly exposed in production.
-#   """
-#   # handle response type (eg) html, json, text, etc.
-#   # https://docs.python.org/3/library/threading.html
-#   return f"""<html><body><table>
-#   <tr><td>{
-#       psutil.Process(os.getpid()).memory_info().rss / 1024 ** 2
-#   } MB</td></tr>
-#   <tr><td>{threading.active_count()} threads</td></tr>
-#   <tr><td>{platform.machine()}</td></tr>
-#   <tr><td>{platform.version()}</td></tr>
-#   <tr><td>{platform.platform()}</td></tr>
-#   <tr><td>{platform.uname()}</td></tr>
-#   <tr><td>{platform.system()}</td></tr>
-#   <tr><td>{platform.processor()}</td></tr>
-#   </table></body></html>"""
 
 # Unused, to be removed, replace with prometheus library
 # @app.get("/metrics")
