@@ -393,7 +393,8 @@ class AdjacencyStats():
 
         if lat in ('UNRECOGNIZED', ''):
             return
-
+        if self.controller is None:
+            return
         dim, clust = self.controller.getDimensionAndCluster(lat)
 
         if clust is None or dim is None:
@@ -775,9 +776,10 @@ class DSDocument():
 
     def setUserTopics(self, user_topics):
         res = []
-        doc = nlp(user_topics)
-        for t in doc:
-            res.append(t.lemma_)
+        if nlp is not None:
+            doc = nlp(user_topics)
+            for t in doc:
+                res.append(t.lemma_)
         self.userTopics = res
 
     def setKeySentTopics(self, keytopics):
@@ -890,91 +892,96 @@ class DSDocument():
         else:
             return None
 
-    def getSections(self):
-        if self.sections is not None:
-            return self.sections
-        else:
-            return []
+    # def getSections(self):
+    #     if self.sections is not None:
+    #         return self.sections
+    #     else:
+    #         return []
 
-    def getSectionCount(self):
-        return len(self.sections)
+    # def getSectionCount(self):
+    #     if self.sections is not None:
+    #         return len(self.sections)
+    #     else:
+    #         return 0
 
-    def getSectionAt(self, i):
-        if self.sections is not None and i < len(self.sections):
-            return self.sections[i]
-        else:
-            return None
+    # def getSectionAt(self, i):
+    #     if self.sections is not None and i < len(self.sections):
+    #         return self.sections[i]
+    #     else:
+    #         return None
 
-    def getCurrentTagDicts(self):
-        section = self.getCurrentSection()
-        if section is not None:
-            return section.get('tag_dicts', None)
-        else:
-            return None
+    # def getCurrentTagDicts(self):
+    #     section = self.getCurrentSection()
+    #     if section is not None:
+    #         return section.get('tag_dicts', None)
+    #     else:
+    #         return None
 
-    def getWordCount(self):
-        section = self.getCurrentSection()
-        if section is not None:
-            return section.get('num_tokens', None)
-        else:
-            return None
+    # def getWordCount(self):
+    #     section = self.getCurrentSection()
+    #     if section is not None:
+    #         return section.get('num_tokens', None)
+    #     else:
+    #         return None
 
-    def getParagraphs(self):
-        data = self.sections[self.current_section]['data']
-        return data['paragraphs']
+    # def getParagraphs(self):
+    #     data = self.sections[self.current_section]['data']
+    #     return data['paragraphs']
 
-    def getRealParaCount(self):
-        data = self.sections[self.current_section]['data']
-        return data['real_para_count']
+    # def getRealParaCount(self):
+    #     data = self.sections[self.current_section]['data']
+    #     return data['real_para_count']
 
-    def getParaCount(self):
-        data = self.sections[self.current_section]['data']
-        return len(data['paragraphs'])
+    # def getParaCount(self):
+    #     data = self.sections[self.current_section]['data']
+    #     return len(data['paragraphs'])
 
-    def getSentCount(self):
-        data = self.sections[self.current_section]['data']
-        sent_count = 0
-        for p in data['paragraphs']:
-            sent_count += len(p['sentences'])
-        return sent_count
+    # def getSentCount(self):
+    #     data = self.sections[self.current_section]['data']
+    #     sent_count = 0
+    #     for p in data['paragraphs']:
+    #         sent_count += len(p['sentences'])
+    #     return sent_count
 
-    def getSentCounts(self):
-        res = list()
-        data = self.sections[self.current_section]['data']
-        num_paras = len(data['paragraphs'])
-        for i in range(num_paras):
-            p = data['paragraphs'][i]
-            num_sents = len(p['sentences'])
-            res.append(num_sents)
-        return res
+    # def getSentCounts(self):
+    #     res = list()
+    #     data = self.sections[self.current_section]['data']
+    #     num_paras = len(data['paragraphs'])
+    #     for i in range(num_paras):
+    #         p = data['paragraphs'][i]
+    #         num_sents = len(p['sentences'])
+    #         res.append(num_sents)
+    #     return res
 
-    def getParaMenuItems(self, num_words=5):
-        """
-        Create a list of menu labels for the paragraphs in the text.
-        The first 'num_words' words from each paragraph are used for the label.
-        """
-        res = list()
-        pcount = 1
-        data = self.sections[self.current_section]['data']
-        for p in data['paragraphs']:        # for each paragraph
-            res.append("\u00B6{} {} ...".format(pcount, ' '.join(p['text'].split()[0:num_words])))
-            pcount += 1
-        return res
+    # def getParaMenuItems(self, num_words=5):
+    #     """
+    #     Create a list of menu labels for the paragraphs in the text.
+    #     The first 'num_words' words from each paragraph are used for the label.
+    #     """
+    #     res = list()
+    #     pcount = 1
+    #     data = self.sections[self.current_section]['data']
+    #     for p in data['paragraphs']:        # for each paragraph
+    #         res.append("\u00B6{} {} ...".format(pcount, ' '.join(p['text'].split()[0:num_words])))
+    #         pcount += 1
+    #     return res
 
     def getNumParagraphs(self):
+        if self.sections is None:
+            return 0
         data = self.sections[self.current_section]['data']
         if 'paragraphs' in data:
             return len(data['paragraphs'])
         return 0
 
-    def getNumSections(self):
-        if self.sections:
-            return len(self.sections)
-        else:
-            return 0
+    # def getNumSections(self):
+    #     if self.sections:
+    #         return len(self.sections)
+    #     else:
+    #         return 0
 
-    def getKeyTopics(self):
-        return self.keyTopics
+    # def getKeyTopics(self):
+    #     return self.keyTopics
 
     # def getKeyTopicsFirstSent(self):
     #     return self.keyTopicsFirstSent
@@ -982,23 +989,23 @@ class DSDocument():
     def getKeyParaTopics(self):
         return self.keyParaTopics
 
-    def setHighlightQuotes(self, val):
-        self.show_quotes = val
+    # def setHighlightQuotes(self, val):
+    #     self.show_quotes = val
 
-    def getNumQuotedWords(self):
-        return self.num_quoted_words
+    # def getNumQuotedWords(self):
+    #     return self.num_quoted_words
 
-    def getTotalWords(self):
-        return self.total_words
+    # def getTotalWords(self):
+    #     return self.total_words
 
-    def getFilename(self):
-        if self.filename is not None:
-            return self.filename
-        else:
-            return 'Undefined'
+    # def getFilename(self):
+    #     if self.filename is not None:
+    #         return self.filename
+    #     else:
+    #         return 'Undefined'
 
-    def getSelectedSentInfo(self):
-        return self.selected_sent_info
+    # def getSelectedSentInfo(self):
+    #     return self.selected_sent_info
 
     def findSentences(self, ruleset):
 
@@ -1420,15 +1427,7 @@ class DSDocument():
         # 2022 May 9. Use a python dictionary instead of SpaCy's Span object. So that we can convert
         # the 'sent_analysis' property to JSON easily later.
         res['NOUN_CHUNKS'] = [ {'text': np.text, 'start': np.start, 'end': np.end} for np in doc.noun_chunks]
-
-        tokens = []
-        for token in doc:
-            if token.dep_ == 'ROOT':
-                is_root = True
-            else:
-                is_root = False
-            tokens.append( {'text': token.text, 'is_root': is_root})
-        res['TOKENS'] = tokens
+        res['TOKENS'] = [ {'text': token.text, 'is_root': token.dep_ == 'ROOT'} for token in doc]
 
         advcl_root = None
         for token in doc:
@@ -1666,7 +1665,7 @@ class DSDocument():
         (re)Calculate given words at the sentence and the paragraph level.
         """
         if data is None:
-            if section < 0:
+            if section < 0 or self.sections is None:
                 # print("Error in recalculateGivenWords()")
                 return
             else:
@@ -3759,7 +3758,7 @@ class DSDocument():
                             bSkipPunct = True
                         else:
                             bSkipPunct = False
-                        res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
+                        res.append(tuple([p_count, s_count, s, bSkipPunct]))
                         s_count += 1
 
                     i += 1
@@ -3775,7 +3774,7 @@ class DSDocument():
                             s['text'] in left_quotes or \
                             s['text'] in right_quotes or \
                             s['text'] == ellipsis)
-                    res.append(tuple([p_count, s_count, s['sent_analysis'], s, bSkipPunct]))
+                    res.append(tuple([p_count, s_count, s, bSkipPunct]))
                     s_count += 1
 
                 i+= 1
@@ -5886,13 +5885,12 @@ class DSDocument():
 
         topics = self.global_topics
 
-        for key, value in self.local_topics_dict.items():
-            local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
-            topics += local_topics
+        if self.local_topics_dict is not None:
+            for _, value in self.local_topics_dict.items():
+                local_topics = [t[0] for t in value]             # make a list of lemma/topic strings
+                topics += local_topics
 
-        topics = list(set(topics))
-
-        return topics
+        return list(set(topics))
 
     def countSentencesWithTopic(self, topic):
         """
@@ -5984,7 +5982,7 @@ class DSDocument():
                 return ""
 
             np_positions = list()
-            analysis = sent_data[2]
+            analysis = sent_data[2]['sent_analysis']
             is_be_verb = analysis['BE_VERB']
 
             def getNPTag(wpos):
@@ -6052,6 +6050,7 @@ class DSDocument():
         first_sent = True
         sent_pos = 0
         para_count = 1
+        html_strs = list()
 
         for sent_data in data:
 
@@ -6062,9 +6061,7 @@ class DSDocument():
                 html_strs = list()
 
             elif not isinstance(sent_data[0], str) and first_sent:
-                sent_dict = sent_data[3]
-
-                w = sent_dict['text_w_info'][0] # get the first word
+                w = sent_data[2]['text_w_info'][0] # get the first word
                 first_word_pos = w[WORD_POS]
 
             s = generate_html(sent_data, sent_pos, first_word_pos)
