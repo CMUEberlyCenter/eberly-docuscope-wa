@@ -22,6 +22,11 @@ import type { ErrorData } from "../../../lib/ReviewResponse";
 //   </Translation>
 // );
 
+/**
+ * Component for displaying error content returned from the backend.
+ * @param param0.data - The error data to display.
+ * @returns
+ */
 export const ReviewErrorData: FC<AlertProps & { data: ErrorData }> = ({
   data,
   variant,

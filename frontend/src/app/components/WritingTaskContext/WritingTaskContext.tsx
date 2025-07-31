@@ -21,6 +21,11 @@ const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
   () => {}
 );
 
+/**
+ * Context provider component for the writing task context.
+ * Access the writing task using `useWritingTask` and
+ * the setter function using `useSetWritingTask`.
+ */
 export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -47,5 +52,7 @@ export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
   );
 };
 
+/** Hook to access the current writing task. */
 export const useWritingTask = () => useContext(WritingTaskContext);
+/** Hook to get the function to set the current writing task. */
 export const useSetWritingTask = () => useContext(WritingTaskDispatchContext);

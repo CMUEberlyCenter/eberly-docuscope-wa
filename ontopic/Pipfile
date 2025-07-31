@@ -4,23 +4,19 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-psutil = "*"
 pathlib = "*"
 python-docx = "*"
-nltk = "*"
 beautifulsoup4 = "*"
-ftfy = "*"
 spacy = "*"
 reportlab = "*"
-pydocx = "*"
 unidecode = "*"
-pyqt5 = "*"
 fastapi = "*"
 hypercorn = "*"
+regex = "*"
 
 [dev-packages]
 pylint = "*"
 pycodestyle = "*"
 
 [requires]
-python_version = "3.12"
+python_version = "3.13"

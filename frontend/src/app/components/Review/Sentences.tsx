@@ -1,13 +1,6 @@
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import {
-  type FC,
-  type HTMLProps,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
 import { Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
@@ -18,6 +11,7 @@ import {
 import {
   isErrorData,
   type OnTopicReviewData,
+  type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
 import { highlightSentence } from "../../service/topic.service";
@@ -26,7 +20,7 @@ import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
@@ -107,8 +101,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [data, setData] = useState<OnTopicReviewData | null>(null);
-  // const data = useOnTopicData();
+  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
@@ -117,12 +110,14 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
 
   // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
   // const ontopicProse = useOnTopicProse();
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
       const { document } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/ontopic", {
         method: "POST",
         headers: {
@@ -141,10 +136,18 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
       if (data.response.html)
         dispatch({ type: "update", sentences: data.response.html });
     },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+    onError: (error) => {
+      console.error("Error fetching Sentences review:", error);
+      setData({ tool: "ontopic", error: { message: error.message } });
+    },
   });
   useEffect(() => {
     if (!document || !writing_task) return;
     // Fetch the review data for Sentences
+    dispatch({ type: "remove" });
     mutation.mutate({
       document,
     });

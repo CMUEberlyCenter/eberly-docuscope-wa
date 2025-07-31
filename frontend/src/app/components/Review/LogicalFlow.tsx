@@ -1,8 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -11,7 +11,12 @@ import {
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { isErrorData, type LogicalFlowData } from "../../../lib/ReviewResponse";
+import {
+  isErrorData,
+  type LogicalFlowData,
+  type OptionalReviewData,
+} from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { useFileText } from "../FileUpload/FileUploadContext";
@@ -20,10 +25,8 @@ import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { useMutation } from "@tanstack/react-query";
-import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
@@ -46,9 +49,10 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<LogicalFlowData | null>(null); // useLogicalFlowData();
+  const [review, setReview] =
+    useState<OptionalReviewData<LogicalFlowData>>(null); // useLogicalFlowData();
   const id = useId();
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -57,6 +61,8 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/logical_flow", {
         method: "POST",
         headers: {
@@ -76,7 +82,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "logical_flow", error });
       console.error("Error fetching Logical Flow review:", error);
     },
   });

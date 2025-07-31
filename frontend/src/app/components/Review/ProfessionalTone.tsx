@@ -1,8 +1,8 @@
+import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -18,9 +18,11 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
+  type OptionalReviewData,
   type ProfessionalToneData,
   type ProfessionalToneOutput,
 } from "../../../lib/ReviewResponse";
+import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
@@ -28,10 +30,8 @@ import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
-import { useMutation } from "@tanstack/react-query";
-import type { WritingTask } from "../../../lib/WritingTask";
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
@@ -50,7 +50,7 @@ export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
 const SentenceToneIssues: FC<
   AccordionProps & { issues: ProfessionalToneOutput }
 > = ({ issues, ...props }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const id = useId();
   const { t } = useTranslation("review");
 
@@ -100,8 +100,9 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
   const { t } = useTranslation("review");
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<ProfessionalToneData | null>(null);
-  const dispatch = useContext(ReviewDispatchContext);
+  const [review, setReview] =
+    useState<OptionalReviewData<ProfessionalToneData>>(null);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -110,6 +111,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/professional_tone", {
         method: "POST",
         headers: {
@@ -135,7 +138,7 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "professional_tone", error });
       console.error("Error fetching Professional Tone review:", error);
     },
   });

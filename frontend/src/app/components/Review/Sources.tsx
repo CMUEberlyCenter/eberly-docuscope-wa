@@ -3,7 +3,6 @@ import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -14,6 +13,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
+  type OptionalReviewData,
   type Source,
   type SourcesData,
   type SourceType,
@@ -23,14 +23,14 @@ import { useFileText } from "../FileUpload/FileUploadContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
   AccordionProps & { citations?: Source[]; emptyText?: string }
 > = ({ citations, emptyText, ...props }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const id = useId();
   const { t } = useTranslation("review");
 
@@ -69,8 +69,8 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
   // const review = useSourcesData();
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<SourcesData | null>(null);
-  const dispatch = useContext(ReviewDispatchContext);
+  const [review, setReview] = useState<OptionalReviewData<SourcesData>>(null);
+  const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -79,6 +79,8 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/sources", {
         method: "POST",
         headers: {
@@ -98,7 +100,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "sources", error });
       console.error("Error fetching Sources review:", error);
     },
   });

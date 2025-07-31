@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -40,7 +39,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
@@ -86,7 +85,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
   setCurrent,
   ...props
 }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const { task } = useWritingTask();
   const document = useFileText();
   const [state, setState] = useState<
@@ -107,7 +106,8 @@ const ExpectationRule: FC<ExpectationProps> = ({
       setError(null);
       setCurrent?.(""); // Close any open accordion item
       abortControllerRef.current = new AbortController();
-
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/expectation", {
         method: "POST",
         headers: {

@@ -3,7 +3,6 @@ import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -16,6 +15,7 @@ import {
   type CredibilityData,
   type CredibilityOutput,
   isErrorData,
+  type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
@@ -24,14 +24,14 @@ import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewDispatchContext, ReviewReset } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying sentence assessments. */
 const SentenceAssessments: FC<
   AccordionProps & { assessments?: CredibilityOutput }
 > = ({ assessments, ...props }) => {
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const prefix = useId();
   return (
     <Translation ns="review">
@@ -83,10 +83,11 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   // credibility
   const { t } = useTranslation("review");
-  const dispatch = useContext(ReviewDispatchContext);
+  const dispatch = useReviewDispatch();
   const document = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<CredibilityData | null>(null);
+  const [review, setReview] =
+    useState<OptionalReviewData<CredibilityData>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
   const mutation = useMutation({
@@ -96,6 +97,8 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/credibility", {
         method: "POST",
         headers: {
@@ -115,7 +118,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
-      // TODO: handle error appropriately
+      setReview({ tool: "credibility", error });
       console.error("Error fetching Credibility review:", error);
     },
     onSettled: () => {
