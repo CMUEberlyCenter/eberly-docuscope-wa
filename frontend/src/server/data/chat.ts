@@ -57,7 +57,7 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: '{',
+    content: '',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -149,7 +149,7 @@ export async function doChat<T>(
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? (JSON.parse(`{${response}`) as T) : response;
+    response = json ? (JSON.parse(response) as T) : response;
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError
