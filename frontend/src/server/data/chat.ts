@@ -88,11 +88,12 @@ export async function doChat<T>(
         ...caching,
       ],
       messages: [
-        ...(json ? [json_assistant] : []),
         {
           role: 'user',
           content,
         },
+        // JSON response assistant needs to come last!
+        ...(json ? [json_assistant] : []),
       ],
       model: ANTHROPIC_MODEL,
       // metadata: {
@@ -148,7 +149,7 @@ export async function doChat<T>(
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? (JSON.parse(response) as T) : response;
+    response = json ? (JSON.parse(`{${response}`) as T) : response;
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError
