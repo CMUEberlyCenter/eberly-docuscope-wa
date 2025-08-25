@@ -25,7 +25,7 @@ civil_tone:
   prefix: 'Your Text:'
   issue: "Issue:"
   suggestion: "Suggestion:"
-ethos:
+credibility:
   title: Credibility (Ethos)
   tooltip: Establising credibility and ethical character builds genuine trust and authority with your readers.
   error: Error displaying Credibilty tool.

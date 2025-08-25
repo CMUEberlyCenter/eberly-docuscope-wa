@@ -45,11 +45,11 @@ const SentenceAssessments: FC<
               >
                 <Accordion.Header className="accordion-header-highlight">
                   <div className="fex-grow-1">
-                    <h6 className="d-inline">{t("ethos.assessment")}</h6>{" "}
+                    <h6 className="d-inline">{t("credibility.assessment")}</h6>{" "}
                     <span>{issue}</span>
                   </div>
                   <AlertIcon
-                    message={t("ethos.no_sentences")}
+                    message={t("credibility.no_sentences")}
                     show={sent_ids.length === 0}
                   />
                 </Accordion.Header>
@@ -69,7 +69,7 @@ const SentenceAssessments: FC<
             ))}
           </Accordion>
         ) : (
-          <Alert variant="warning">{t("ethos.null")}</Alert>
+          <Alert variant="warning">{t("credibility.null")}</Alert>
         )
       }
     </Translation>
@@ -77,11 +77,10 @@ const SentenceAssessments: FC<
 };
 
 /** Ethos review tool component. */
-export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
+export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props
 }) => {
-  // credibility
   const { t } = useTranslation("review");
   const dispatch = useReviewDispatch();
   const document = useFileText();
@@ -147,12 +146,12 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
           "container-fluid overflow-auto d-flex flex-column flex-grow-1"
         )}
       >
-        <ToolHeader title={t("ethos.title")} instructionsKey="ethos" />
+        <ToolHeader title={t("credibility.title")} instructionsKey="credibility" />
         {!review || mutation.isPending ? (
           <Loading />
         ) : (
           <ErrorBoundary
-            fallback={<Alert variant="danger">{t("ethos.error")}</Alert>}
+            fallback={<Alert variant="danger">{t("credibility.error")}</Alert>}
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             <Summary review={review} />
@@ -161,7 +160,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
                 <header>
                   <h5 className="text-primary">{t("insights")}</h5>
                   <Translation ns="instructions">
-                    {(t) => <p>{t("ethos_insights")}</p>}
+                    {(t) => <p>{t("credibility_insights")}</p>}
                   </Translation>
                 </header>
                 <section>
@@ -169,7 +168,7 @@ export const Ethos: FC<HTMLProps<HTMLDivElement>> = ({
                 </section>
               </section>
             ) : (
-              <Alert variant="warning">{t("ethos.null")}</Alert>
+              <Alert variant="warning">{t("credibility.null")}</Alert>
             )}
           </ErrorBoundary>
         )}

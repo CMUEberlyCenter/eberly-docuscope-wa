@@ -19,14 +19,14 @@ expectations: >
   <p>Addressing content gaps first ensures your writing meets readers' expectations and achieves its purpose effectively.</p>
 
 lines_of_arguments: >
-  <p>Evaluate how effectively your writing develops its thesis through claims, evidence, counterarguments, and rebuttals to create a cohesive and persuasive argument.</p>
+  <p>Evaluate how effectively your writing develops its thesis through claims and evidence to create a cohesive and persuasive argument.</p>
   <p>Strengthening your thesis and aligning claims enhances the persuasiveness and cohesion of your argument.</p>
 
 pathos: >
   <p>Review your communication for elements that create emotional resonance (<i>i.e.,</i> pathos) and meaningful connections with your audience.</p>
   <p>Refining emotional appeals ensures your message touches hearts while maintaining authenticity and ethical engagement.</p>
 
-ethos: >
+credibility: >
   <p>Review your communication for elements that establish and maintain credibility and ethical character (<i>i.e.,</i> ethos).</p>
   <p>Refining credibility ensures your message carries the weight of authority while demonstrating integrity and trustworthiness. The goal is not merely to showcase credentials, but to build genuine trust.<p>
 
@@ -65,35 +65,8 @@ sentence_density: >
 
 paragraph_clarity: >
   <p>Review your paragraphs with flow issues.</p>
-  <p>Improving flows within each paragraph enhance readability and ensures your ideas are communicated effectively.</p>
+  <p>Improving flow within each paragraph enhances readability and ensures your ideas are communicated effectively.</p>
 
-
-#
-# Instructions for specific pathos and ethos, used by the pathos/ethos review panel.
-#
-situational_pathos: >
-  The emotional impact created through carefully constructed scenarios and contexts.
-
-temporal_pathos: >
-  The emotional resonance achieved through strategic pacing and carefully timed disclosure of information.
-
-immersive_pathos: >
-  The emotional depth generated through rich sensory detail and vivid descriptions that make readers feel present in the moment.
-
-structural_pathos: >
-  The emotional effect achieved through technical elements (e.g., sentence structure, rhythm, pacing) that reinforce the intended feelings.
-
-expertise_ethos: >
-  The credibility a writer establishes by demonstrating expertise and sophisticated understanding of the subject matter.
-
-analytical_ethos: >
-  The authority a writer builds by demonstrating sound reasoning and clear thinking.
-
-balanced_ethos: >
-  The trustworthiness a writer earns by addressing multiple perspectives fairly and advancing clear positions against complex, interconnected issues
-
-experiential_ethos: >
-  The credibility a writer builds through relevant personal or professional experience.
 
 #
 # Instructions for Review Insights within each Review Tool
@@ -101,8 +74,8 @@ experiential_ethos: >
 lines_of_arguments_insights: >
   Check how your text develops its argument.
 
-ethos_insights: >
-  Check how your text establishes credibility (ethos).
+credibility_insights: >
+  Check how your text establishes credibility.
 
 pathos_insights: >
   Check how your text uses emotional appeal (pathos).
@@ -140,7 +113,7 @@ expectations_scope_note: >
 lines_of_arguments_scope_note: >
   Developing well-supported claims and addressing counterarguments strengthens your persuasiveness
 
-ethos_scope_note: >
+credibility_scope_note: >
   Establishing credibility and ethical character builds genuine trust and authority with your audience
 
 pathos_scope_note: >
@@ -192,4 +165,13 @@ guide: >
 # Message shown in the guide panel when a specific review tool is disabled.
 disabled_tool: >
   <p>This review tool is not applicable to the current writing type.</p>
+
+fine_tuning: >
+  <div align='center'><p>Use Fine-Tuning tools to review<br/>the clarity, style and tone of your writing</div>
+
+big_picture: >
+  <div align='center'><p>Use the Big-Picture tools to review <br/>the content expectations, <br/>overall structure and argument of your draft.</p></div>
+
+
+
 
