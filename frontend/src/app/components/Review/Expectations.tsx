@@ -102,18 +102,17 @@ const ExpectationRule: FC<ExpectationProps> = ({
       writing_task: WritingTask;
       expectation: string;
     }) => {
-      const { document, writing_task, expectation } = data;
+      setState("pending");
       setError(null);
       setCurrent?.(""); // Close any open accordion item
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
       const response = await fetch("/api/v2/review/expectation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ document, writing_task, expectation }),
+        body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
@@ -155,28 +154,35 @@ const ExpectationRule: FC<ExpectationProps> = ({
     },
   });
   useEffect(() => {
-    if (!task || !document || !rule || state === "unset") {
-      return;
-    }
-    // setState("pending");
-    if (state === "pending") {
-      mutation.mutate({
-        document,
-        writing_task: task,
-        expectation: rule.name,
-      });
-    }
     return () => {
+      // abort ongoing fetch request on component destruction.
       abortControllerRef.current?.abort();
     };
-  }, [task, document, rule, state]);
+  }, []);
+  useEffect(() => {
+    // Fix for #225 and #229
+    // if there is a change in the document or task, then unset context data
+    // so that it is cleared on import of document or change in task.
+    dispatch({ type: "unset" });
+    dispatch({ type: "remove" });
+    setState("unset");
+  }, [document, task]);
 
   return (
     <Accordion.Item eventKey={eventKey} {...props}>
       {state === "unset" ? (
         <div
+          role="button"
           className={style["fake-accordion-button"]}
-          onClick={() => setState("pending")}
+          onClick={() => {
+            if (document && task)
+              mutation.mutate({
+                document,
+                writing_task: task,
+                expectation: rule.name,
+              });
+          }}
+          aria-disabled={!document || !task || !rule}
         >
           <div className="flex-grow-1">{rule.name}</div>
           <FontAwesomeIcon icon={faEllipsis} />
@@ -295,7 +301,7 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
         {rule.children.map((rule, j) => (
           <ExpectationRule
             rule={rule}
-            key={`${id}-expectation-${j}`}
+            key={`${id}-expectation-${rule.name}-${j}`}
             eventKey={`${id}-expectation-${j}`}
             setCurrent={setCurrent}
           />
@@ -338,7 +344,7 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
         <section className="container-fluid overflow-auto position-relative flex-grow-1">
           {task?.rules.rules.map((rule, i) => (
             <ExpectationRules
-              key={`rule-${i}`}
+              key={`rule-${rule.name}-${i}`}
               rule={rule}
               setCurrent={setCurrent}
               onSelect={onSelect}
