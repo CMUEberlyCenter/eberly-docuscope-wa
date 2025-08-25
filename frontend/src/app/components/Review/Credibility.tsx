@@ -146,7 +146,10 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
           "container-fluid overflow-auto d-flex flex-column flex-grow-1"
         )}
       >
-        <ToolHeader title={t("credibility.title")} instructionsKey="credibility" />
+        <ToolHeader
+          title={t("credibility.title")}
+          instructionsKey="credibility"
+        />
         {!review || mutation.isPending ? (
           <Loading />
         ) : (
