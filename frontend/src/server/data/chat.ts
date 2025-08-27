@@ -57,7 +57,7 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: '{',
+    content: '',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -88,11 +88,12 @@ export async function doChat<T>(
         ...caching,
       ],
       messages: [
-        ...(json ? [json_assistant] : []),
         {
           role: 'user',
           content,
         },
+        // JSON response assistant needs to come last!
+        ...(json ? [json_assistant] : []),
       ],
       model: ANTHROPIC_MODEL,
       // metadata: {

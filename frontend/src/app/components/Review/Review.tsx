@@ -24,7 +24,7 @@ import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone } from "./CivilTone";
-import { Ethos } from "./Ethos";
+import { Credibility } from "./Credibility";
 import { Expectations, ExpectationsButton } from "./Expectations";
 import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
 import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
@@ -325,10 +325,10 @@ export const Review: FC = () => {
                               disabled={!ready}
                             >
                               <h6 className="text-primary">
-                                {t("ethos.title")}
+                                {t("credibility.title")}
                               </h6>
                               <div className="text-wrap">
-                                {t("instructions:ethos_scope_note")}
+                                {t("instructions:credibility_scope_note")}
                               </div>
                             </Dropdown.Item>
                           ) : null}
@@ -394,7 +394,7 @@ export const Review: FC = () => {
                     )}
                     {otherTool === "logical_flow" && <LogicalFlow />}
                     {otherTool === "civil_tone" && <CivilTone />}
-                    {otherTool === "credibility" && <Ethos />}
+                    {otherTool === "credibility" && <Credibility />}
                     {/* {otherTool === "impressions" && ( */}
                     {/* <NullTool text={t("null.not_available")} /> */}
                     {/* )} */}

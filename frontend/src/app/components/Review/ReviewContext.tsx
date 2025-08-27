@@ -34,8 +34,11 @@ const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
  * Hook for accessing the dispatch function for review tools.
  * Actions:
  *   - `set`: Set sentences and paragraphs highlighting.
+ *     - `sentences`: Array of arrays of sentence ids to highlight.
+ *     - `paragraphs`: Array of paragraph ids to highlight.
  *   - `unset`: Unset sentences and paragraphs highlighting.
  *   - `update`: Replace text using sentences parameter.
+ *     - `sentences`: New text content (html string).
  *   - `remove`: Nullify text which should then use the default text.
  * @returns Dispatch function for modifying the review state.
  */
@@ -44,8 +47,8 @@ export const useReviewDispatch = () => useContext(ReviewDispatchContext);
 type ReviewAction =
   | {
       type: "set"; // set highlighting
-      sentences: string[][];
-      paragraphs?: string[];
+      sentences: string[][]; // array of arrays of sentence ids
+      paragraphs?: string[]; // array of paragraph ids
     }
   | {
       type: "unset"; // unset highlighting
@@ -53,8 +56,8 @@ type ReviewAction =
       paragraphs?: undefined;
     }
   | {
-      type: "update";
-      sentences: string;
+      type: "update"; // set text content
+      sentences: string; // text content
       paragraphs?: undefined;
     }
   | {
