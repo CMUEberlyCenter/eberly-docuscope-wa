@@ -17,7 +17,7 @@ import {
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
-import { usePicker } from "../FileUpload/PickerContex";
+import { usePicker } from "../FileUpload/PickerContext";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**

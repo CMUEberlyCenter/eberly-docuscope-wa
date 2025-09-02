@@ -6,7 +6,7 @@ import {
   useState,
 } from "react";
 import { useData } from "vike-react/useData";
-import { PickerContext } from "../../src/app/components/FileUpload/PickerContex";
+import { PickerContext } from "../../src/app/components/FileUpload/PickerContext";
 import {
   useSetWritingTask,
   WritingTaskProvider,
