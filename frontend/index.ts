@@ -146,8 +146,10 @@ async function __main__() {
         const items: ContentItemType[] = [
           {
             type: 'ltiResourceLink',
-            title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
-            text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
+            // title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
+            // text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
+            title: response.locals.token.platformContext.deepLinkingSettings.title, // #236
+            text: `${writing_task.info.name} (${request.i18n.t(`deeplinking.option.${tool}`)})`,
             url: url.toString(),
             icon: {
               url: new URL('logo.svg', LTI_HOSTNAME).toString(),
@@ -488,4 +490,3 @@ async function __main__() {
   }
 }
 export default (await __main__());
-// __main__();
