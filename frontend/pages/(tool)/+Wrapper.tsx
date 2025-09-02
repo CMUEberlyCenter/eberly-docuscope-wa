@@ -35,17 +35,17 @@ const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
         console.warn("Google APIs not initialized yet.");
         return;
       }
-      console.log(tokenClient, import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID);
+      console.log(tokenClient, import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID, process.env.PUBLIC_ENV__GOOGLE_CLIENT_ID);
       if (!import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID) {
-        console.warn("Google Client ID is not defined.");
+        console.warn("Google Client ID is not defined.", import.meta.env);
         return;
       }
       if (!import.meta.env.PUBLIC_ENV__GOOGLE_API_KEY) {
-        console.warn("Google API Key is not defined.");
+        console.warn("Google API Key is not defined.", import.meta.env);
         return;
       }
       if (!import.meta.env.PUBLIC_ENV__GOOGLE_APP_KEY) {
-        console.warn("Google App Key is not defined.");
+        console.warn("Google App Key is not defined.", import.meta.env);
         return;
       }
       const client =

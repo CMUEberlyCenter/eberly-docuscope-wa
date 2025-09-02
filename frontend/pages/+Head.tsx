@@ -4,6 +4,7 @@ import type { FC } from "react";
 import logoUrl from "../src/app/assets/logo.svg";
 
 const HeadDefault: FC = () => {
+  const gaid = process.env.GOOGLE_ANALYTICS;
   return (
     <>
       <meta name="robots" content="none" />
@@ -29,7 +30,7 @@ const HeadDefault: FC = () => {
       />
       <script
         async
-        src={`https://www.googletagmanager.com/gtag/js?id=${import.meta.env.GOOGLE_ANALYTICS}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${gaid}`}
       ></script>
       <script
         dangerouslySetInnerHTML={{
