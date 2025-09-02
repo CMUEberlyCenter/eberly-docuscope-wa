@@ -437,6 +437,12 @@ async function __main__() {
         session: req.session,
         writing_task_id,
         settings: getSettings(),
+        google: {
+          analytics: process.env.GOOGLE_ANALYTICS,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          apiKey: process.env.GOOGLE_API_KEY,
+          appKey: process.env.GOOGLE_APP_KEY,
+        }
         // ltik,
         // headers: {
         //   'Content-Type': 'text/html',

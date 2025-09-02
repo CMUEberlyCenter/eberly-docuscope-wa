@@ -2,9 +2,11 @@
 
 import type { FC } from "react";
 import logoUrl from "../src/app/assets/logo.svg";
+import { usePageContext } from "vike-react/usePageContext";
 
 const HeadDefault: FC = () => {
-  const gaid = process.env.GOOGLE_ANALYTICS;
+  const pageContext = usePageContext();
+  const analytics = pageContext.google?.analytics;
   return (
     <>
       <meta name="robots" content="none" />
@@ -30,7 +32,7 @@ const HeadDefault: FC = () => {
       />
       <script
         async
-        src={`https://www.googletagmanager.com/gtag/js?id=${gaid}`}
+        src={`https://www.googletagmanager.com/gtag/js?id=${analytics}`}
       ></script>
       <script
         dangerouslySetInnerHTML={{
@@ -38,7 +40,7 @@ const HeadDefault: FC = () => {
           function gtag(){dataLayer.push(arguments);}
           gtag('js', new Date());
 
-          gtag('config', '${import.meta.env.GOOGLE_ANALYTICS}');`,
+          gtag('config', '${analytics}');`,
         }}
       ></script>
     </>

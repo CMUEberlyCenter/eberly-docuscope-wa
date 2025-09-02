@@ -12,6 +12,7 @@ import {
   WritingTaskProvider,
 } from "../../src/app/components/WritingTaskContext/WritingTaskContext";
 import type { Data } from "./+data";
+import { usePageContext } from "vike-react/usePageContext";
 
 const DataWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   const data = useData<Data>();
@@ -27,6 +28,7 @@ const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
     useState<google.accounts.oauth2.TokenClient | null>(null);
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
   // const [showPicker, setShowPicker] = useState(false);
+  const pageContext = usePageContext();
 
   const openPicker = useCallback(
     (callback: (doc?: google.picker.DocumentObject) => void) => {
@@ -35,23 +37,23 @@ const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
         console.warn("Google APIs not initialized yet.");
         return;
       }
-      console.log(tokenClient, import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID, process.env.PUBLIC_ENV__GOOGLE_CLIENT_ID);
-      if (!import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID) {
-        console.warn("Google Client ID is not defined.", import.meta.env);
+      console.log(tokenClient, pageContext.google?.clientId);
+      if (!pageContext.google?.clientId) {
+        console.warn("Google Client ID is not defined.");
         return;
       }
-      if (!import.meta.env.PUBLIC_ENV__GOOGLE_API_KEY) {
-        console.warn("Google API Key is not defined.", import.meta.env);
+      if (!pageContext.google?.apiKey) {
+        console.warn("Google API Key is not defined.");
         return;
       }
-      if (!import.meta.env.PUBLIC_ENV__GOOGLE_APP_KEY) {
-        console.warn("Google App Key is not defined.", import.meta.env);
+      if (!pageContext.google?.appKey) {
+        console.warn("Google App Key is not defined.");
         return;
       }
       const client =
         tokenClient ||
         google.accounts.oauth2.initTokenClient({
-          client_id: import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID,
+          client_id: pageContext.google?.clientId,
           scope: "https://www.googleapis.com/auth/drive.file",
           error_callback: (error) => {
             console.error("Error in token client:", error);
@@ -71,8 +73,8 @@ const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
             setAccessToken(token);
             const picker = new google.picker.PickerBuilder()
               // .enableFeature(google.picker.Feature.NAV_HIDDEN)
-              .setDeveloperKey(import.meta.env.PUBLIC_ENV__GOOGLE_API_KEY)
-              .setAppId(import.meta.env.PUBLIC_ENV__GOOGLE_APP_KEY)
+              .setDeveloperKey(pageContext.google?.apiKey ?? '')
+              .setAppId(pageContext.google?.appKey ?? '')
               .setOAuthToken(token)
               .addView(new google.picker.DocsView())
               // .addView(new google.picker.DocsUploadView())
