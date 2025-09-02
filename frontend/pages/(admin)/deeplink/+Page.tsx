@@ -1,6 +1,6 @@
 /* @overview: This is the configuration page for LTI deeplinking. The user can select a writing task from a list, or upload a custom writing task in JSON format. */
-import { type ChangeEvent, type FC, useState } from "react";
-import { Form, ListGroup } from "react-bootstrap";
+import { type ChangeEvent, type FC, useId, useRef, useState } from "react";
+import { Form, ListGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { WritingTaskFilter } from "../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
@@ -54,6 +54,9 @@ export const Page: FC = () => {
       }
     }
   };
+  const selectId = useId();
+  const [tool, setTool] = useState<string>("");
+  const target = useRef<HTMLButtonElement>(null);
 
   // TODO: error page when not in LTI context.
   return (
@@ -101,6 +104,7 @@ export const Page: FC = () => {
         </div>
         <footer className="d-flex justify-content-between">
           <Form.Group>
+            <Form.Label>{t("deeplinking.upload")}</Form.Label>
             <Form.Control
               type="file"
               onChange={onFileChange}
@@ -119,19 +123,49 @@ export const Page: FC = () => {
               className="d-none"
               readOnly={true}
             />
-            <select className="form-select" name="tool" required>
-              <option value="draft" selected>
-                {t("deeplinking.option.draft")}
-              </option>
-              <option value="review">{t("deeplinking.option.review")}</option>
-            </select>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={!selected}
+            <label htmlFor={selectId} className="">
+              {t("deeplinking.select_tool")}
+              <select
+                id={selectId}
+                className="form-select"
+                name="tool"
+                required
+                onChange={(e) => setTool(e.target.value)}
+                value={tool}
+              >
+                <option value="" selected>
+                  ---
+                </option>
+                <option value="draft">{t("deeplinking.option.draft")}</option>
+                <option value="review">{t("deeplinking.option.review")}</option>
+              </select>
+            </label>
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip>
+                  {t(
+                    !selected || !tool
+                      ? "deeplinking.disabled"
+                      : t("deeplinking.enabled")
+                  )}
+                </Tooltip>
+              }
             >
-              {t("select")}
-            </button>
+              <div>
+                <button
+                  ref={target}
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!selected || !tool}
+                  title={
+                    !selected || !tool ? t("deeplinking.disabled") : undefined
+                  }
+                >
+                  {t("select")}
+                </button>
+              </div>
+            </OverlayTrigger>
           </Form>
         </footer>
       </div>
