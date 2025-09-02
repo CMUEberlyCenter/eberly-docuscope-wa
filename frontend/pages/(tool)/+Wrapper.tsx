@@ -36,6 +36,18 @@ const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
         return;
       }
       console.log(tokenClient, import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID);
+      if (!import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID) {
+        console.warn("Google Client ID is not defined.");
+        return;
+      }
+      if (!import.meta.env.PUBLIC_ENV__GOOGLE_API_KEY) {
+        console.warn("Google API Key is not defined.");
+        return;
+      }
+      if (!import.meta.env.PUBLIC_ENV__GOOGLE_APP_KEY) {
+        console.warn("Google App Key is not defined.");
+        return;
+      }
       const client =
         tokenClient ||
         google.accounts.oauth2.initTokenClient({
