@@ -1,14 +1,14 @@
-import type { FC, ReactNode } from "react";
+import { type FC, type ReactNode } from "react";
+import { usePageContext } from "vike-react/usePageContext";
 import { FileUploadProvider } from "../../src/app/components/FileUpload/FileUploadContext";
-// import { PickerProvider } from "../../src/app/components/FileUpload/PickerContex";
-// import "@googleworkspace/drive-picker-element"
+import { PickerProvider } from "../../src/app/components/FileUpload/PickerContext";
 
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  // const clientId = import.meta.env.PUBLIC_ENV__GOOGLE_CLIENT_ID;
-  // const developerKey = import.meta.env.GOOGLE_API_KEY;
-  // const appId = import.meta.env.PUBLIC_ENV__GOOGLE_APP_KEY;
-
-  // return <FileUploadProvider><drive-picker client-id={clientId} app-id={appId}></drive-picker>{children}</FileUploadProvider>;
-  return <FileUploadProvider>{children}</FileUploadProvider>;
+  const pageContext = usePageContext();
+  return <FileUploadProvider>
+    <PickerProvider clientId={pageContext.google?.clientId} apiKey={pageContext.google?.apiKey} appId={pageContext.google?.appKey}>
+      {children}
+    </PickerProvider>
+  </FileUploadProvider>;
 };
 export default Layout;

@@ -99,7 +99,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
             </Dropdown.Item>
             <Dropdown.Item
               eventKey={"gdoc"}
-              onClick={() => gdocImport((doc) => console.log(doc))}
+              onClick={() => gdocImport(true)}
             >
               gdoc
             </Dropdown.Item>
