@@ -31,9 +31,13 @@ legal:
 deeplink: Select a text type for this assignment
 deeplinking:
   title: $t(document.title) LTI Deeplinking
+  disabled: Please select a tool and select or upload a Writing Task file to enable this button.
+  enabled: Click to select content.
+  select_tool: Select a tool
   option:
     draft: Draft
     review: Review
+  upload: Select a Writing Task or upload a custom Writing Task File
 genlink:
   title: $t(document.title) Writing Task Link Generator
   link: 'Links:'
