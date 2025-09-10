@@ -289,7 +289,7 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
-          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId}`);
+          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`);
         }
       }
     } catch (err) {
