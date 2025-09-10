@@ -20,3 +20,9 @@ pycodestyle = "*"
 
 [requires]
 python_version = "3.13"
+
+[scripts]
+start = "hypercorn -b 0.0.0.0:5000 --reload  --root-path / app:app"
+spacy-download = "python -m spacy download en_core_web_sm"
+lint-app = "pylint app.py"
+lint-document = "pylint dslib/models/document.py"
