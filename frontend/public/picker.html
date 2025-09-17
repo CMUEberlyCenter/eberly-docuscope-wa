@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Google Picker Example</title>
+  <script src="https://unpkg.com/@googleworkspace/drive-picker-element@0/dist/index.iife.min.js"></script>
+  <script type="text/javascript">
+    function onApiLoad() {
+      document.querySelector('drive-picker').visible = true;
+    }
+    const element = document.querySelector("drive-picker");
+    element.addEventListener("picker:authenticated", console.log);
+    element.addEventListener("picker:picked", console.log);
+    element.addEventListener("picker:canceled", console.log);
+    element.addEventListener("picker:error", console.error);
+  </script>
+</head>
+
+<body>
+  <button onclick="onApiLoad()">Launch Google Picker</button>
+  <drive-picker client-id="1093010947575-2v8r9vuvqoscspojohn1bs1d60vnlhcq.apps.googleusercontent.com"
+    app-id="1093010947575" developer-key="AIzaSyBSEc-ffgggpWHKXy2XVu6mdPIshnkPxHU" prompt="consent">
+    <drive-picker-docs-view></drive-picker-docs-view>
+  </drive-picker>
+</body>
+
+</html>
