@@ -30,7 +30,15 @@ export const UserTextView: FC<UserTextViewProps> = ({
   ...props
 }) => {
   const uploadFile = useInitiateUploadFile();
-  const gdocImport = usePicker();
+  const showPicker = usePicker();
+  const gdocImport = () => {
+      // const picker = document.querySelector("drive-picker");
+      // if (picker) {
+        // console.log("showing picker");
+        // picker.visible = true;
+      // }
+      showPicker(true);
+    };
   // const uploadedFile = useUploadFile();
   // const setUploadErrors = useSetUploadErrors();
   const upload = useFileText();
@@ -99,7 +107,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
             </Dropdown.Item>
             <Dropdown.Item
               eventKey={"gdoc"}
-              onClick={() => gdocImport(true)}
+              onClick={() => gdocImport()}
             >
               gdoc
             </Dropdown.Item>

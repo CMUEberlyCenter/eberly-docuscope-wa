@@ -7,22 +7,43 @@
   <script src="https://unpkg.com/@googleworkspace/drive-picker-element@0/dist/index.iife.min.js"></script>
   <script type="text/javascript">
     function onApiLoad() {
-      document.querySelector('drive-picker').visible = true;
+      const element = document.querySelector("drive-picker");
+      if (element) {
+        element.visible = true;
+        return;
+      }
+       // create the element dynamically
+       // you can also just put <drive-picker> in your HTML and it will work the same.
+       // just make sure to set the properties on the element after the element is defined.
+       // see below for an example of that.
+       // note: you must append the element to the document before setting properties on it.
+       //
+      const picker = document.createElement('drive-picker');
+      picker.setAttribute("client-id", "1093010947575-2v8r9vuvqoscspojohn1bs1d60vnlhcq.apps.googleusercontent.com");
+      picker.setAttribute("app-id", "1093010947575");
+      picker.setAttribute("developer-key", "AIzaSyBSEc-ffgggpWHKXy2XVu6mdPIshnkPxHU");
+      picker.setAttribute("prompt", "consent");
+      const docsView = document.createElement("drive-picker-docs-view");
+      picker.appendChild(docsView);
+       // listen for events
+      picker.addEventListener("picker:authenticated", console.log);
+      picker.addEventListener("picker:picked", console.log);
+      picker.addEventListener("picker:canceled", console.log);
+      picker.addEventListener("picker:error", console.error);
+       // ensure the element is registered before trying to use it, otherwise you'll get an error when trying to set properties on the custom element.
+      document.body.appendChild(picker);
+
+      picker.visible = true;
     }
-    const element = document.querySelector("drive-picker");
-    element.addEventListener("picker:authenticated", console.log);
-    element.addEventListener("picker:picked", console.log);
-    element.addEventListener("picker:canceled", console.log);
-    element.addEventListener("picker:error", console.error);
   </script>
 </head>
 
 <body>
   <button onclick="onApiLoad()">Launch Google Picker</button>
-  <drive-picker client-id="1093010947575-2v8r9vuvqoscspojohn1bs1d60vnlhcq.apps.googleusercontent.com"
+  <!-- <drive-picker client-id="1093010947575-2v8r9vuvqoscspojohn1bs1d60vnlhcq.apps.googleusercontent.com"
     app-id="1093010947575" developer-key="AIzaSyBSEc-ffgggpWHKXy2XVu6mdPIshnkPxHU" prompt="consent">
     <drive-picker-docs-view></drive-picker-docs-view>
-  </drive-picker>
+  </drive-picker> -->
 </body>
 
 </html>
