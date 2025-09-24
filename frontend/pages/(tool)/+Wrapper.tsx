@@ -18,6 +18,11 @@ const DataWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 };
 
 const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
-  return (<WritingTaskProvider><DataWrapper>{children}</DataWrapper></WritingTaskProvider>);
+  return (
+    <WritingTaskProvider>
+      <DataWrapper>
+        {children}
+      </DataWrapper>
+    </WritingTaskProvider>);
 };
 export default Wrapper;
