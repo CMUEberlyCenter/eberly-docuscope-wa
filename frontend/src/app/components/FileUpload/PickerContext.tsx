@@ -58,7 +58,6 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
     });
     picker.addEventListener("picker:picked", async (event) => {
       const { docs } = event.detail;
-      console.log("Picked files:", docs);
       const doc = docs?.at(0);
       if (!doc) {
         console.warn("No document selected");
@@ -81,7 +80,6 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
       }
       if (doc.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         try {
-          console.log("isa docx");
           const res = await gapi.client.drive.files.get({ fileId: doc.id, alt: 'media' }, { responseType: 'arraybuffer' });
           const { value, messages } = await convertToHtml({ arrayBuffer: res.body as unknown as ArrayBuffer }, { styleMap: "u => u" });
           console.log("Converted content:", value, messages);
@@ -96,10 +94,16 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
         }
       } else if (doc.mimeType === 'application/vnd.google-apps.document') {
         try {
-          console.log("isa gdoc");
           const res = await gapi.client.drive.files.export({ fileId: doc.id, mimeType: 'text/html' });
-          console.log("Exported content:", res);
-          setText(res.body);
+          // Extract html body content.
+          if (!res.body) {
+            showError({ type: "error", message: t("editor.gdoc.error.gdoc_empty"), error: new Error("Empty response body") });
+            console.error("Empty response body when exporting Google Doc");
+            return;
+          }
+          const parser = new DOMParser();
+          const parsed = parser.parseFromString(res.body, "text/html");
+          setText(parsed.body.innerHTML);
         } catch (err) {
           console.error("Error fetching or converting gdoc file:", err);
           showError({ type: "error", message: t("editor.gdoc.error.gdoc"), error: err });

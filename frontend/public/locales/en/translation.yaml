@@ -61,6 +61,7 @@ editor:
       google_drive_api: Google Drive API is not loaded.
       docx: Error fetching or converting docx file.
       gdoc: Error fetching or converting Google Doc file.
+      gdoc_empty: Google Doc export returned empty content.
       unknown_type: 'Unsupported file type: {{type}}'
   upload:
     title: Open
