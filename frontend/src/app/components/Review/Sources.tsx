@@ -19,7 +19,7 @@ import {
   type SourceType,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -67,7 +67,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   // const review = useSourcesData();
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<SourcesData>>(null);
   const dispatch = useReviewDispatch();

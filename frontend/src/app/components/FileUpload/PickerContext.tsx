@@ -1,15 +1,23 @@
 import "@googleworkspace/drive-picker-element";
-// import type { DrivePickerElement } from "@googleworkspace/drive-picker-element";
-import { createContext, useContext, type FC, type ReactNode } from 'react';
+import { convertToHtml } from "mammoth";
+import { createContext, useContext, useRef, type FC, type ReactNode } from 'react';
+import { useTranslation } from "react-i18next";
+import { useFileImportErrors } from "./FileImportErrors";
+import { useFileText } from "./FileTextContext";
 
 // type PickerCallback = (doc?: google.picker.DocumentObject) => void;
 // TODO file data
 const PickerContext = createContext<(show: boolean) => void>(
-  () => { }
+  () => undefined
 );
 export const usePicker = () => useContext(PickerContext);
 
 export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey?: string, appId?: string }> = ({ children, clientId, apiKey, appId }) => {
+  const { t } = useTranslation();
+  const filesApi = useRef(false);
+  const { showError } = useFileImportErrors();
+  const [_, setText] = useFileText();
+
   const showPicker = (show: boolean) => {
     const element = document.querySelector("drive-picker");
     if (element) {
@@ -18,14 +26,17 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
       return;
     }
     if (!clientId) {
+      showError({ type: "error", message: t("editor.gdoc.error.google_client_id"), error: new ReferenceError("Google Client ID is not defined.") });
       console.warn("Google Client ID is not defined.");
       return;
     }
     if (!apiKey) {
+      showError({ type: "error", message: t("editor.gdoc.error.google_api_key"), error: new ReferenceError("Google API Key is not defined.") });
       console.warn("Google API Key is not defined.");
       return;
     }
     if (!appId) {
+      showError({ type: "error", message: t("editor.gdoc.error.google_app_id"), error: new ReferenceError("Google App Key is not defined.") });
       console.warn("Google App Key is not defined.");
       return;
     }
@@ -34,11 +45,73 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
     picker.setAttribute("app-id", appId);
     picker.setAttribute("developer-key", apiKey);
     picker.setAttribute("prompt", "consent");
+    picker.setAttribute("multiselect", "false");
     const docsView = document.createElement("drive-picker-docs-view");
+    docsView.setAttribute("select-multiple", "false");
+    // docsView.setAttribute("starred", "true");
+    docsView.setAttribute("mime-types", "application/vnd.google-apps.document,application/vnd.openxmlformats-officedocument.wordprocessingml.document");
     picker.appendChild(docsView);
-    // listen for events
-    picker.addEventListener("picker:authenticated", console.log);
-    picker.addEventListener("picker:picked", console.log);
+
+    // set the token when authenticated
+    picker.addEventListener("picker:authenticated", ({ detail }) => {
+      gapi.client.setToken({ access_token: detail.token });
+    });
+    picker.addEventListener("picker:picked", async (event) => {
+      const { docs } = event.detail;
+      console.log("Picked files:", docs);
+      const doc = docs?.at(0);
+      if (!doc) {
+        console.warn("No document selected");
+        return;
+      }
+      if (!filesApi.current) {
+        try {
+          await gapi.client.load('drive', 'v3');
+          filesApi.current = true;
+        } catch (error) {
+          showError({ type: "error", message: t("editor.gdoc.error.google_drive_api"), error });
+          console.error("Error loading Drive API:", error);
+          return;
+        }
+      }
+      if (!('drive' in gapi.client) || gapi.client.drive === undefined || !filesApi.current) {
+        console.error("gapi.client.drive is undefined");
+        showError({ type: "error", message: t("editor.gdoc.error.google_drive_api"), error: new ReferenceError("Google Drive API is not loaded") });
+        return;
+      }
+      if (doc.mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        try {
+          console.log("isa docx");
+          const res = await gapi.client.drive.files.get({ fileId: doc.id, alt: 'media' }, { responseType: 'arraybuffer' });
+          const { value, messages } = await convertToHtml({ arrayBuffer: res.body as unknown as ArrayBuffer }, { styleMap: "u => u" });
+          console.log("Converted content:", value, messages);
+          if (messages.length) {
+            showError(...messages);
+            console.error(messages);
+          }
+          setText(value);
+        } catch (err) {
+          console.error("Error fetching or converting docx file:", err);
+          showError({ type: "error", message: t("editor.gdoc.error.docx"), error: err });
+        }
+      } else if (doc.mimeType === 'application/vnd.google-apps.document') {
+        try {
+          console.log("isa gdoc");
+          const res = await gapi.client.drive.files.export({ fileId: doc.id, mimeType: 'text/html' });
+          console.log("Exported content:", res);
+          setText(res.body);
+        } catch (err) {
+          console.error("Error fetching or converting gdoc file:", err);
+          showError({ type: "error", message: t("editor.gdoc.error.gdoc"), error: err });
+        }
+      } else {
+        console.warn("Unsupported file type:", doc.mimeType);
+        showError({ type: "error", message: t('editor.gdoc.error.unknown_type', { type: doc.mimeType }), error: new TypeError(doc.mimeType) });
+      }
+      // } catch (err) {
+      // console.error("Error exporting file:", err);
+      // }
+    });
     picker.addEventListener("picker:canceled", console.log);
     picker.addEventListener("picker:error", console.error);
     // ensure the element is registered before trying to use it, otherwise you'll get an error when trying to set properties on the custom element.
@@ -50,212 +123,3 @@ export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey
     {children}
   </PickerContext.Provider>;
 }
-/*
-export const PickerProvider: FC<{ children: ReactNode, clientId?: string, apiKey?: string, appId?: string }> = ({ children, clientId, apiKey, appId }) => {
-  // const [showPicker, setShowPicker] = useState(false);
-  const pickerApiInitialized = useRef(false);
-  const gisInitialized = useRef(false);
-  const tokenClient = useRef<google.accounts.oauth2.TokenClient | null>(null);
-  const accessToken = useRef<string | undefined>(undefined);
-
-  // most recent files
-  const loaded = useRef(false);
-  useEffect(() => {
-    if (loaded.current) return;
-    loaded.current = true;
-    // Load Google APIs
-    const onloadPickerApi = () =>
-      gapi.load("client:picker", async () => {
-        await gapi.client.load(
-          "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"
-        );
-        pickerApiInitialized.current = true;
-        console.log("Picker API loaded.");
-      });
-    const gapiScriptTag = document.createElement("script");
-    gapiScriptTag.src = "https://apis.google.com/js/api.js";
-    gapiScriptTag.async = true;
-    // gapiScriptTag.defer = true;
-    // gapiScriptTag.crossOrigin = "same-origin-allow-popups";
-    // gapiScriptTag.crossOrigin = "use-credentials";
-    gapiScriptTag.addEventListener("load", onloadPickerApi);
-    document.body.appendChild(gapiScriptTag);
-
-    // Load Google Identity Services
-    const onloadGisApi = () => {
-      gisInitialized.current = true;
-      // setTokenClient(google.accounts.oauth2.initTokenClient({
-      //   client_id: clientId ?? '',
-      //   scope: "https://www.googleapis.com/auth/drive.metadata.readonly",
-      //   callback: () => { console.log("Google Identity Services callback"); }, // defined later
-      // }));
-      tokenClient.current = google.accounts.oauth2.initTokenClient({
-          client_id: clientId ?? '',
-          scope: "https://www.googleapis.com/auth/drive.file",
-          error_callback: (error) => {
-            if (error.type === "popup_closed") {
-              console.warn('Popup closed', error);
-              return;
-            }
-            console.error("Error in token client:", error);
-            throw new Error(error.message);
-          },
-          callback: (tokenResponse) => {
-            console.log("Token response received:", tokenResponse);
-            if (tokenResponse.error) {
-              console.error(
-                "Error obtaining access token:",
-                tokenResponse.error
-              );
-              throw new Error(tokenResponse.error);
-            }
-            const token = tokenResponse.access_token;
-            console.log("Access token received:", token);
-            accessToken.current = token;
-            console.log(window.location.protocol + '//' + window.location.host);
-            const picker = new google.picker.PickerBuilder()
-              // .enableFeature(google.picker.Feature.NAV_HIDDEN)
-              .setDeveloperKey(apiKey??'')
-              .setAppId(appId??'')
-              .setOAuthToken(token)
-              .addView(new google.picker.DocsView())
-              .setOrigin(window.location.protocol + '//' + window.location.host)
-              // .addView(new google.picker.DocsUploadView())
-              .setCallback(async (data) => {
-                console.log("Picker callback data:", data);
-                if (
-                  data[google.picker.Response.ACTION] ===
-                  google.picker.Action.PICKED
-                ) {
-                  const document =
-                    data[google.picker.Response.DOCUMENTS]?.at(0);
-                  const fileId = document?.[google.picker.Document.ID];
-                  console.log("Selected document:", fileId);
-                  if (!fileId) {
-                    console.error("No file ID found in the selected document.");
-                    return;
-                  }
-                  const doc = await gapi.client.drive.files.get({
-                    fileId,
-                    fields: "*", // "id, name, mimeType, webContentLink, webViewLink"
-                  });
-                  console.log("Document details:", doc);
-                  // Handle the selected document
-                  // callback?.(doc.result);
-                }
-              })
-              .build();
-            picker.setVisible(true);
-          },
-        });
-      console.log("Google Identity Services initialized.");
-    };
-    const gisScriptTag = document.createElement("script");
-    gisScriptTag.src = "https://accounts.google.com/gsi/client";
-    gisScriptTag.async = true;
-    // gisScriptTag.defer = true;
-    // gisScriptTag.crossOrigin = "use-credentials";
-    gisScriptTag.addEventListener("load", onloadGisApi);
-    // TODO add error listener
-    document.body.appendChild(gisScriptTag);
-
-    return () => {
-      // Clean up script tags
-      // gapiScriptTag.removeEventListener("load", onloadPickerApi);
-      // document.body.removeChild(gapiScriptTag);
-      // gisScriptTag.removeEventListener("load", onloadGisApi);
-      // document.body.removeChild(gisScriptTag);
-    };
-  }, []);
-
-  const showPicker = () => {
-      console.log("Opening Google Picker...");
-      if (!pickerApiInitialized || !gisInitialized) {
-        console.warn("Google APIs not initialized yet.");
-        return;
-      }
-      if (!clientId) {
-        console.warn("Google Client ID is not defined.");
-        return;
-      }
-      if (!apiKey) {
-        console.warn("Google API Key is not defined.");
-        return;
-      }
-      if (!appId) {
-        console.warn("Google App Key is not defined.");
-        return;
-      }
-      console.log("Google APIs initialized, proceeding...");
-      // const client =
-      //   tokenClient ||
-      //   google.accounts.oauth2.initTokenClient({
-      //     client_id: clientId,
-      //     scope: "https://www.googleapis.com/auth/drive.file",
-      //     error_callback: (error) => {
-      //       if (error.type === "popup_closed") {
-      //         console.warn('Popup closed', error);
-      //         return;
-      //       }
-      //       console.error("Error in token client:", error);
-      //       throw new Error(error.message);
-      //     },
-      //     callback: (tokenResponse) => {
-      //       console.log("Token response received:", tokenResponse);
-      //       if (tokenResponse.error) {
-      //         console.error(
-      //           "Error obtaining access token:",
-      //           tokenResponse.error
-      //         );
-      //         throw new Error(tokenResponse.error);
-      //       }
-      //       const token = tokenResponse.access_token;
-      //       console.log("Access token received:", token);
-      //       setAccessToken(token);
-      //       console.log(window.location.protocol + '//' + window.location.host);
-      //       const picker = new google.picker.PickerBuilder()
-      //         // .enableFeature(google.picker.Feature.NAV_HIDDEN)
-      //         .setDeveloperKey(apiKey)
-      //         .setAppId(appId)
-      //         .setOAuthToken(token)
-      //         .addView(new google.picker.DocsView())
-      //         .setOrigin(window.location.protocol + '//' + window.location.host)
-      //         // .addView(new google.picker.DocsUploadView())
-      //         .setCallback(async (data) => {
-      //           console.log("Picker callback data:", data);
-      //           if (
-      //             data[google.picker.Response.ACTION] ===
-      //             google.picker.Action.PICKED
-      //           ) {
-      //             const document =
-      //               data[google.picker.Response.DOCUMENTS]?.at(0);
-      //             const fileId = document?.[google.picker.Document.ID];
-      //             console.log("Selected document:", fileId);
-      //             if (!fileId) {
-      //               console.error("No file ID found in the selected document.");
-      //               return;
-      //             }
-      //             const doc = await gapi.client.drive.files.get({
-      //               fileId,
-      //               fields: "*", // "id, name, mimeType, webContentLink, webViewLink"
-      //             });
-      //             console.log("Document details:", doc);
-      //             // Handle the selected document
-      //             // callback?.(doc.result);
-      //           }
-      //         })
-      //         .build();
-      //       picker.setVisible(true);
-      //     },
-      //   });
-      // setTokenClient(client);
-      // console.log('accessToken', accessToken);
-      // client.requestAccessToken({ prompt: accessToken ? "" : "consent" });
-      if (!tokenClient.current) console.log("Token client not initialized.");
-      tokenClient.current?.requestAccessToken({ prompt: "" });
-  };
-  return <PickerContext.Provider value={showPicker}>
-    {children}
-  </PickerContext.Provider>;
-};
-*/

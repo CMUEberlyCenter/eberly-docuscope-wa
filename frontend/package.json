@@ -177,6 +177,7 @@
     "@storybook/react-vite": {
       "vite": "$vite"
     },
-    "devalue": ">=5.3.2"
+    "devalue": ">=5.3.2",
+    "@types/node": "$@types/node"
   }
 }

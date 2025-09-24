@@ -15,7 +15,7 @@ import {
 } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
 import { highlightSentence } from "../../service/topic.service";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -99,7 +99,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   const [paragraphIndex, setParagraphIndex] = useState(-1);

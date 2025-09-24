@@ -19,7 +19,7 @@ import {
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -83,7 +83,7 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   const dispatch = useReviewDispatch();
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] =
     useState<OptionalReviewData<CredibilityData>>(null);

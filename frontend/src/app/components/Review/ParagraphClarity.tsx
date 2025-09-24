@@ -19,7 +19,7 @@ import {
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -47,7 +47,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] =
     useState<OptionalReviewData<ParagraphClarityData>>(null);

@@ -17,7 +17,7 @@ import type { ReviewTool } from "../../../lib/ReviewResponse";
 import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Legal } from "../Legal/Legal";
 import { useSettingsContext } from "../Settings/SettingsContext";
 import { StageHeader } from "../StageHeader/StageHeader";
@@ -71,7 +71,7 @@ export const Review: FC = () => {
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
   const [ready, setReady] = useState<boolean>(false);
-  const userText = useFileText();
+  const [userText] = useFileText();
   const { task: writingTask } = useWritingTask();
   const settings = useSettingsContext();
 

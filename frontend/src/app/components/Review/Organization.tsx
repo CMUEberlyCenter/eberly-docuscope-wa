@@ -53,7 +53,7 @@ import {
   type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import { clearAllHighlights } from "../../service/topic.service";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -256,7 +256,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   // const data = useOnTopicData();

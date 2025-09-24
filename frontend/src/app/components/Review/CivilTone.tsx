@@ -17,7 +17,7 @@ import {
   type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -31,7 +31,7 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<CivilToneData>>(null);
   // const review = useCivilToneData();

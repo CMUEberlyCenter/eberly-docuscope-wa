@@ -24,7 +24,6 @@ import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
 import { FileDownload } from "../FileDownload/FileDownload";
 import {
   useInitiateUploadFile,
-  useSetUploadErrors,
   useUploadFile,
 } from "../FileUpload/FileUploadContext";
 import ToolCard from "../ToolCard/ToolCard";
@@ -34,6 +33,7 @@ import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
+import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
@@ -61,7 +61,7 @@ const CustomEditor: FC = () => {
 
   // Import a docx file
   const upload = useUploadFile();
-  const setErrors = useSetUploadErrors();
+  const { showError } = useFileImportErrors();
 
   const loadFile = useCallback(
     async (file: File) => {
@@ -79,8 +79,7 @@ const CustomEditor: FC = () => {
           { styleMap: "u => u" }
         );
         if (messages.length) {
-          setErrors(messages);
-          // setShowErrors(true);
+          showError(...messages);
           console.log(messages);
         }
         const content = deserializeHtmlText(value);
@@ -90,8 +89,7 @@ const CustomEditor: FC = () => {
         }
       } catch (err) {
         if (err instanceof Error) {
-          setErrors([{ type: "error", message: err.message, error: err }]);
-          // setShowErrors(true);
+          showError({ type: "error", message: err.message, error: err });
           console.error(err);
         } else {
           console.error("Caught non-error", err);
@@ -145,8 +143,7 @@ const CustomEditor: FC = () => {
           await writable.close();
         } catch (err) {
           if (!(err instanceof DOMException)) {
-            setErrors([{ type: "error", message: "Failed Write", error: err }]);
-            // setShowErrors(true);
+            showError({ type: "error", message: t("editor.upload.error.failed_write"), error: err });
             console.error(err);
             return;
           }
@@ -156,10 +153,6 @@ const CustomEditor: FC = () => {
             case "SecurityError":
               // fallback to download if filesystem api is not available. (in iframe in LMS without filesystem access)
               setDocx(blob);
-              // setErrors([
-              //   { type: "error", message: "Security Error", error: err },
-              // ]);
-              // setShowErrors(true);
               break; // os reject
             default:
               console.error(err);

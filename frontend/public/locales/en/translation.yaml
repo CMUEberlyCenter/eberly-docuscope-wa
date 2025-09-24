@@ -53,6 +53,15 @@ audio:
   show: Show text to speech controls.
   hide: Hide text to speech controls.
 editor:
+  gdoc:
+    error:
+      google_client_id: 'Server configuration error: Google Client ID is not defined.'
+      google_api_key: 'Server configuration error: Google API Key is not defined.'
+      google_app_id: 'Server configuration error: Google App ID is not defined.'
+      google_drive_api: Google Drive API is not loaded.
+      docx: Error fetching or converting docx file.
+      gdoc: Error fetching or converting Google Doc file.
+      unknown_type: 'Unsupported file type: {{type}}'
   upload:
     title: Open
     file: File
@@ -60,15 +69,16 @@ editor:
     error:
       title: 'File Import Issues:'
       overview: 'Check the details below: Warnings likely indicate display differences while errors may indicate information loss.'
-      error: 'Error:'
-      warning: 'Warning:'
+      error: 'Error: {{message}}'
+      warning: 'Warning: {{message}}'
       fail: Single file selection only.
       not_docx: '{{file}} is not a docx file!'
       failed_write: Unable to save file.
       security: File rejected due to secuity error.
   menu:
     file: File
-    open: Import
+    open: Import from File
+    gdoc: Import from Google Docs
     save: Export
     view: Font
     view.font_size: 'Editor Font Size: {{zoom}}%'

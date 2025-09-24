@@ -10,14 +10,14 @@ import {
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
+import { useFileText } from "../FileUpload/FileTextContext";
 import {
-  useFileText,
   useInitiateUploadFile,
 } from "../FileUpload/FileUploadContext";
+import { usePicker } from "../FileUpload/PickerContext";
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import "./UserTextView.scss";
-import { usePicker } from "../FileUpload/PickerContext";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**
@@ -32,16 +32,16 @@ export const UserTextView: FC<UserTextViewProps> = ({
   const uploadFile = useInitiateUploadFile();
   const showPicker = usePicker();
   const gdocImport = () => {
-      // const picker = document.querySelector("drive-picker");
-      // if (picker) {
-        // console.log("showing picker");
-        // picker.visible = true;
-      // }
-      showPicker(true);
-    };
+    // const picker = document.querySelector("drive-picker");
+    // if (picker) {
+    // console.log("showing picker");
+    // picker.visible = true;
+    // }
+    showPicker(true);
+  };
   // const uploadedFile = useUploadFile();
   // const setUploadErrors = useSetUploadErrors();
-  const upload = useFileText();
+  const [upload] = useFileText();
 
   const ctx = useReviewContext();
   const { t } = useTranslation();
@@ -109,7 +109,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
               eventKey={"gdoc"}
               onClick={() => gdocImport()}
             >
-              gdoc
+              {t("editor.menu.gdoc")}
             </Dropdown.Item>
           </DropdownButton>
         </ButtonGroup>
