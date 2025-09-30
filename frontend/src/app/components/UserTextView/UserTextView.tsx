@@ -11,9 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 import { useFileText } from "../FileUpload/FileTextContext";
-import {
-  useInitiateUploadFile,
-} from "../FileUpload/FileUploadContext";
+import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
 import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
@@ -31,16 +29,6 @@ export const UserTextView: FC<UserTextViewProps> = ({
 }) => {
   const uploadFile = useInitiateUploadFile();
   const showPicker = usePicker();
-  const gdocImport = () => {
-    // const picker = document.querySelector("drive-picker");
-    // if (picker) {
-    // console.log("showing picker");
-    // picker.visible = true;
-    // }
-    showPicker(true);
-  };
-  // const uploadedFile = useUploadFile();
-  // const setUploadErrors = useSetUploadErrors();
   const [upload] = useFileText();
 
   const ctx = useReviewContext();
@@ -52,8 +40,8 @@ export const UserTextView: FC<UserTextViewProps> = ({
   // of highlighting, this is not a big deal for now.
   const maxHighlightLevels = 2;
   useEffect(() => {
-    setText(ctx?.text /*?? prose*/ ?? upload ?? ""); // if custom tool text use that, otherwise use prose
-  }, [/*prose,*/ ctx, upload]);
+    setText(ctx?.text ?? upload ?? ""); // if custom tool text use that, otherwise use prose
+  }, [ctx, upload]);
 
   useEffect(() => {
     if (!text) return;
@@ -105,10 +93,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
             <Dropdown.Item eventKey={"open"} onClick={() => uploadFile()}>
               {t("editor.menu.open")}
             </Dropdown.Item>
-            <Dropdown.Item
-              eventKey={"gdoc"}
-              onClick={() => gdocImport()}
-            >
+            <Dropdown.Item eventKey={"gdoc"} onClick={() => showPicker(true)}>
               {t("editor.menu.gdoc")}
             </Dropdown.Item>
           </DropdownButton>

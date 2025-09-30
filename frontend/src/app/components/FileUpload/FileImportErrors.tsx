@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, type FC, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type FC,
+  type ReactNode,
+} from "react";
 import { ListGroup, Toast } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -15,15 +21,17 @@ const FileImportErrorContext = createContext<{
   showError: (...error: Message[]) => void;
 }>({
   errors: [],
-  setErrors: () => { },
-  addError: () => { },
+  setErrors: () => {},
+  addError: () => {},
   showErrors: false,
-  setShowErrors: () => { },
-  showError: () => { },
+  setShowErrors: () => {},
+  showError: () => {},
 });
 export const useFileImportErrors = () => useContext(FileImportErrorContext);
 
-export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { t } = useTranslation();
   const [errors, setErrors] = useState<Message[]>([]);
   const [showErrors, setShowErrors] = useState(false);
@@ -33,34 +41,43 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({ children 
     setShowErrors(true);
   };
 
-  return <FileImportErrorContext.Provider
-    value={{ errors, setErrors, addError: (...error) => setErrors((prev) => [...prev, ...error]), showErrors, setShowErrors, showError }}
-  >
-    {children}
-    <Toast
-      bg="light"
-      className="position-absolute start-50 bottom-0 translate-middle"
-      show={showErrors}
-      onClose={() => setShowErrors(!showErrors)}
+  return (
+    <FileImportErrorContext.Provider
+      value={{
+        errors,
+        setErrors,
+        addError: (...error) => setErrors((prev) => [...prev, ...error]),
+        showErrors,
+        setShowErrors,
+        showError,
+      }}
     >
-      <Toast.Header className="justify-content-between">
-        {t("editor.upload.error.title")}
-      </Toast.Header>
-      <Toast.Body>
-        <p>{t("editor.upload.error.overview")}</p>
-        <ListGroup>
-          {errors.map((msg, i) => (
-            <ListGroup.Item
-              key={i}
-              variant={msg.type === "error" ? "danger" : "warning"}
-            >
-              {msg.type === "error"
-                ? t("editor.upload.error.error", msg)
-                : t("editor.upload.error.warning", msg)}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </Toast.Body>
-    </Toast>
-  </FileImportErrorContext.Provider>;
-}
+      {children}
+      <Toast
+        bg="light"
+        className="position-absolute start-50 bottom-0 translate-middle"
+        show={showErrors}
+        onClose={() => setShowErrors(!showErrors)}
+      >
+        <Toast.Header className="justify-content-between">
+          {t("editor.upload.error.title")}
+        </Toast.Header>
+        <Toast.Body>
+          <p>{t("editor.upload.error.overview")}</p>
+          <ListGroup>
+            {errors.map((msg, i) => (
+              <ListGroup.Item
+                key={i}
+                variant={msg.type === "error" ? "danger" : "warning"}
+              >
+                {msg.type === "error"
+                  ? t("editor.upload.error.error", msg)
+                  : t("editor.upload.error.warning", msg)}
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Toast.Body>
+      </Toast>
+    </FileImportErrorContext.Provider>
+  );
+};

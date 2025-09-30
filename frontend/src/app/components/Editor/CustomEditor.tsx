@@ -6,7 +6,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
-import { convertToHtml } from "mammoth";
 import { type FC, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
@@ -22,10 +21,10 @@ import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
 import { deserializeHtmlText, serialize, serializeDocx } from "../../lib/slate";
 import { FileDownload } from "../FileDownload/FileDownload";
-import {
-  useInitiateUploadFile,
-  useUploadFile,
-} from "../FileUpload/FileUploadContext";
+import { useFileImportErrors } from "../FileUpload/FileImportErrors";
+import { useFilename, useFileText } from "../FileUpload/FileTextContext";
+import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
+import { usePicker } from "../FileUpload/PickerContext";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -33,7 +32,6 @@ import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
-import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
@@ -60,49 +58,25 @@ const CustomEditor: FC = () => {
   // }, [selection])
 
   // Import a docx file
-  const upload = useUploadFile();
+  const [file] = useFilename();
+  const showPicker = usePicker();
+  const [upload] = useFileText();
   const { showError } = useFileImportErrors();
 
-  const loadFile = useCallback(
-    async (file: File) => {
-      try {
-        if (
-          file.type !==
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-        ) {
-          throw new TypeError(file.name);
-        }
-
-        const arrayBuffer = await file.arrayBuffer();
-        const { value, messages } = await convertToHtml(
-          { arrayBuffer },
-          { styleMap: "u => u" }
-        );
-        if (messages.length) {
-          showError(...messages);
-          console.log(messages);
-        }
-        const content = deserializeHtmlText(value);
-        if (content) {
-          // FIXME this currently appends content.
-          Transforms.insertNodes(editor, content);
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          showError({ type: "error", message: err.message, error: err });
-          console.error(err);
-        } else {
-          console.error("Caught non-error", err);
-        }
-      }
-    },
-    [editor]
-  );
   useEffect(() => {
     if (upload) {
-      loadFile(upload);
+      const content = deserializeHtmlText(upload);
+      if (content) {
+        Transforms.delete(editor, {
+          at: {
+            anchor: Editor.start(editor, []),
+            focus: Editor.end(editor, []),
+          },
+        });
+        Transforms.insertNodes(editor, content);
+      }
     }
-  }, [upload]);
+  }, [upload, editor]);
   const loadSaveFileOps = {
     id: "myprose",
     types: [
@@ -129,10 +103,7 @@ const CustomEditor: FC = () => {
         typeof window.showSaveFilePicker === "function"
       ) {
         const rootname =
-          upload?.name ||
-          ltiActivityTitle ||
-          writingTask?.rules.name ||
-          "myProse";
+          file || ltiActivityTitle || writingTask?.rules.name || "myProse";
         try {
           const handle: FileSystemFileHandle = await window.showSaveFilePicker({
             ...loadSaveFileOps,
@@ -143,7 +114,11 @@ const CustomEditor: FC = () => {
           await writable.close();
         } catch (err) {
           if (!(err instanceof DOMException)) {
-            showError({ type: "error", message: t("editor.upload.error.failed_write"), error: err });
+            showError({
+              type: "error",
+              message: t("editor.upload.error.failed_write"),
+              error: err,
+            });
             console.error(err);
             return;
           }
@@ -208,7 +183,12 @@ const CustomEditor: FC = () => {
                 <Dropdown.Item eventKey="open" onClick={() => uploadFile()}>
                   {t("editor.menu.open")}
                 </Dropdown.Item>
-                {/* TODO file upload form if filesystem api is not available. */}
+                <Dropdown.Item
+                  eventKey={"gdoc"}
+                  onClick={() => showPicker(true)}
+                >
+                  {t("editor.menu.gdoc")}
+                </Dropdown.Item>
                 <Dropdown.Item eventKey="save" onClick={() => saveAs()}>
                   {t("editor.menu.save")}
                 </Dropdown.Item>

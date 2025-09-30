@@ -1,31 +1,26 @@
 import { convertToHtml } from "mammoth";
 import {
   createContext,
-  type FC,
-  type ReactNode,
   useCallback,
   useContext,
   useEffect,
   useState,
+  type FC,
+  type ReactNode,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { useFileImportErrors } from "./FileImportErrors";
+import { useFileText, useFilename } from "./FileTextContext";
 import { FileUpload } from "./FileUpload";
-import { useFileText } from "./FileTextContext";
 
-/** Context for storing the uploaded file. */
-const FileUploadContext = createContext<File | null>(null);
-/** Hook for accessing the uploaded file. */
-export const useUploadFile = () => useContext(FileUploadContext);
 /** Context for initiating the file upload dialog. */
-const InitiateOpenFileDispatch = createContext<() => void>(() => { });
+const InitiateOpenFileDispatch = createContext<() => void>(() => {});
 
 /**
  * Hook for accessing the function to initiate the file upload dialog.
  * This is used to open the file picker dialog.
  */
 export const useInitiateUploadFile = () => useContext(InitiateOpenFileDispatch);
-
 
 const loadSaveFileOps = {
   id: "myprose",
@@ -50,8 +45,9 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
   const { t } = useTranslation();
   const { showError } = useFileImportErrors();
   const [showUpload, setShowUpload] = useState(false);
+  const [, setFilename] = useFilename();
   const [upload, setUpload] = useState<File | null>(null);
-  const [_, setText] = useFileText();
+  const [, setText] = useFileText();
   const uploadFile = useCallback(async () => {
     if (
       "showOpenFilePicker" in window &&
@@ -81,19 +77,22 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
     }
   }, []);
   useEffect(() => {
-    if (!upload) return;
+    if (!upload) {
+      setFilename(null);
+      return;
+    }
     if (
       upload.type !==
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     ) {
-      showError(
-        {
-          type: "error",
-          message: t("editor.upload.error.not_docx", { file: upload.name }),
-          error: new TypeError(upload.name),
-        });
+      showError({
+        type: "error",
+        message: t("editor.upload.error.not_docx", { file: upload.name }),
+        error: new TypeError(upload.name),
+      });
       return;
     }
+    setFilename(upload.name);
     upload
       .arrayBuffer()
       .then((arrayBuffer) =>
@@ -118,15 +117,13 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
   }, [upload]);
 
   return (
-    <FileUploadContext.Provider value={upload}>
-      <InitiateOpenFileDispatch.Provider value={uploadFile}>
-        {children}
-        <FileUpload
-          show={showUpload}
-          onHide={() => setShowUpload(false)}
-          onFile={setUpload}
-        />
-      </InitiateOpenFileDispatch.Provider>
-    </FileUploadContext.Provider>
+    <InitiateOpenFileDispatch.Provider value={uploadFile}>
+      {children}
+      <FileUpload
+        show={showUpload}
+        onHide={() => setShowUpload(false)}
+        onFile={setUpload}
+      />
+    </InitiateOpenFileDispatch.Provider>
   );
 };

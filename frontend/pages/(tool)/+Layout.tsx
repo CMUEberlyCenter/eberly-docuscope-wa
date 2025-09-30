@@ -5,7 +5,11 @@ import { ImportProvider } from "../../src/app/components/FileUpload/ImportProvid
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const pageContext = usePageContext();
   return (
-    <ImportProvider clientId={pageContext.google?.clientId} apiKey={pageContext.google?.apiKey} appId={pageContext.google?.appKey}>
+    <ImportProvider
+      clientId={pageContext.google?.clientId}
+      apiKey={pageContext.google?.apiKey}
+      appId={pageContext.google?.appKey}
+    >
       {children}
     </ImportProvider>
   );

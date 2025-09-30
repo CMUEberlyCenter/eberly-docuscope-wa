@@ -1,12 +1,8 @@
-import {
-  type FC,
-  type ReactNode,
-  useEffect
-} from "react";
+import { type FC, type ReactNode, useEffect } from "react";
 import { useData } from "vike-react/useData";
 import {
   useSetWritingTask,
-  WritingTaskProvider
+  WritingTaskProvider,
 } from "../../src/app/components/WritingTaskContext/WritingTaskContext";
 import type { Data } from "./+data";
 
@@ -20,9 +16,8 @@ const DataWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WritingTaskProvider>
-      <DataWrapper>
-        {children}
-      </DataWrapper>
-    </WritingTaskProvider>);
+      <DataWrapper>{children}</DataWrapper>
+    </WritingTaskProvider>
+  );
 };
 export default Wrapper;

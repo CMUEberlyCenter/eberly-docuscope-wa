@@ -4,10 +4,7 @@
   Because of drive-picker-element, this provider must be in a +Layout file so that
   HTMLElement is defined.
 */
-import {
-  type FC,
-  type ReactNode,
-} from "react";
+import { type FC, type ReactNode } from "react";
 import { FileImportErrorProvider } from "./FileImportErrors";
 import { FileTextProvider } from "./FileTextContext";
 import { FileUploadProvider } from "./FileUploadContext";
@@ -28,7 +25,12 @@ type Props = {
  * @param param0.appId - The Google App ID.
  * @returns
  */
-export const ImportProvider: FC<Props> = ({ children, clientId, apiKey, appId }) => {
+export const ImportProvider: FC<Props> = ({
+  children,
+  clientId,
+  apiKey,
+  appId,
+}) => {
   return (
     <FileImportErrorProvider>
       <FileTextProvider>

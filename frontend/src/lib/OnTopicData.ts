@@ -73,6 +73,25 @@ type ClaritySentenceData = {
   given_accum_lemmas: Lemma[];
   new_accum_lemmas: Lemma[];
 };
+const isClaritySentenceData = (data: unknown): data is ClaritySentenceData =>
+  !!data &&
+  typeof data === 'object' &&
+  'text' in data &&
+  'text_w_info' in data &&
+  Array.isArray(data.text_w_info) &&
+  'sent_analysis' in data &&
+  'lemmas' in data &&
+  Array.isArray(data.lemmas) &&
+  'accum_lemmas' in data &&
+  Array.isArray(data.accum_lemmas) &&
+  'given_lemmas' in data &&
+  Array.isArray(data.given_lemmas) &&
+  'new_lemmas' in data &&
+  Array.isArray(data.new_lemmas) &&
+  'given_accum_lemmas' in data &&
+  Array.isArray(data.given_accum_lemmas) &&
+  'new_accum_lemmas' in data &&
+  Array.isArray(data.new_accum_lemmas);
 // Best guess as to what this is supposed to be.
 export type ClarityData = Array<
   | string // for paragraph breaks
@@ -83,6 +102,18 @@ export type ClarityData = Array<
       boolean, // skip punctuation
     ]
 >;
+const isClarityData = (data: unknown): data is ClarityData =>
+  Array.isArray(data) &&
+  data.every(
+    (item) =>
+      typeof item === 'string' ||
+      (Array.isArray(item) &&
+        item.length === 4 &&
+        typeof item[0] === 'number' &&
+        typeof item[1] === 'number' &&
+        isClaritySentenceData(item[2]) &&
+        typeof item[3] === 'boolean')
+  );
 
 export type OnTopicData = {
   clarity?: ClarityData;
@@ -90,6 +121,24 @@ export type OnTopicData = {
   html?: string;
   html_sentences?: string[][];
   local?: LocalData[];
+};
+export const isOnTopicData = (data: unknown): data is OnTopicData => {
+  return (
+    !!data &&
+    typeof data === 'object' &&
+    ('clarity' in data ? isClarityData(data.clarity) : true) &&
+    ('coherence' in data ? data.coherence !== undefined : true) &&
+    ('html' in data ? typeof data.html === 'string' : true) &&
+    ('html_sentences' in data
+      ? Array.isArray(data.html_sentences) &&
+        data.html_sentences.every(
+          (para: unknown) =>
+            Array.isArray(para) &&
+            para.every((sent) => typeof sent === 'string')
+        )
+      : true) &&
+    ('local' in data ? Array.isArray(data.local) : true)
+  );
 };
 
 export const cleanAndRepairSentenceData = (data?: OnTopicData | null) => {

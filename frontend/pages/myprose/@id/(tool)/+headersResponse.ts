@@ -1,4 +1,4 @@
-import type { PageContextServer } from "vike/types";
+import type { PageContextServer } from 'vike/types';
 
 export async function headersResponse(_pageContext: PageContextServer) {
   // pageContext.headersResponse.delete('Cross-Origin-Embedder-Policy');
