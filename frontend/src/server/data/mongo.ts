@@ -129,6 +129,20 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
  * @returns id of the writing task in the database.
  */
 export async function upsertPublicWritingTask(path: string, data: WritingTask) {
+  client
+    .db(MONGO_DB)
+    .collection<WritingTaskDb>(WRITING_TASKS)
+    .updateMany(
+      { public: true, 'info.id': data.info.id },
+      {
+        $set: {
+          public: false,
+          'info.id': undefined, // probably unnecessary, but just in case.
+          // with future versions where the info.id is used preferentially,
+          // old versions with the same id should be deleted instead of made private.
+        },
+      }
+    );
   const collection = client
     .db(MONGO_DB)
     .collection<WritingTaskDb>(WRITING_TASKS);
