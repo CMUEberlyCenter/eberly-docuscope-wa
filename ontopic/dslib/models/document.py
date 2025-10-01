@@ -304,18 +304,16 @@ def is_skip(elem, left_count, topic_filter):
     if topic_filter == TOPIC_FILTER_LEFT:
 
         # if the left only mode is on
-        if elem[IS_TOPIC] == False:
+        if not elem[IS_TOPIC]:
             # skip, if it is not a topic word
             return True  # skip
 
-        elif left_count < 1 and elem[ISLEFT] == False:
+        if left_count < 1 and not elem[ISLEFT]:
             # skip if it's a right-side word and left_count < 1 (==0)
             return True  # skip
 
-        else:
-            return False  # otherwise, it's not a skip word.
-    else:
-        return False
+        return False  # otherwise, it's not a skip word.
+    return False
 
 
 def contains_html_tags(text):
@@ -444,12 +442,12 @@ class DSDocument:
     @classmethod
     def setUserDefinedSynonyms(cls, synsets):
         # convert a list of synonyms into a dictionary for faster look up
-        if synsets == [] or synsets == None:
+        if synsets == [] or synsets is None:
             DSDocument.user_defined_synonyms = None
             return
 
-        DSDocument.user_defined_synonyms = dict()
-        DSDocument.user_defined_synonym_names = list()
+        DSDocument.user_defined_synonyms = {}
+        DSDocument.user_defined_synonym_names = []
         undefined_count = 0
 
         for synset in synsets:
@@ -473,13 +471,8 @@ class DSDocument:
 
     @classmethod
     def isUserDefinedSynonym(cls, lemma):
-        if (
-            DSDocument.user_defined_synonyms is not None
+        return DSDocument.user_defined_synonyms is not None \
             and lemma in DSDocument.user_defined_synonym_names
-        ):
-            return True
-        else:
-            return False
 
     @classmethod
     def isUserDefinedSynonymDefined(cls, lemma):
@@ -491,11 +484,9 @@ class DSDocument:
                 if name == lemma:
                     if synonym.startswith("undefined_"):
                         return False
-                    else:
-                        return True
+                    return True
             return False
-        else:
-            return False
+        return False
 
     @classmethod
     def setMultiwordTopics(cls, topics):
@@ -515,10 +506,7 @@ class DSDocument:
 
     @classmethod
     def isUserDefinedTopic(cls, lemma):
-        if lemma in DSDocument.user_defined_topics:
-            return True
-        else:
-            return False
+        return lemma in DSDocument.user_defined_topics
 
     @classmethod
     def addUserDefinedTopic(cls, topic):
@@ -618,7 +606,7 @@ class DSDocument:
         self.elements = []
         self.soup = None
 
-        self.sections = list()
+        self.sections = []
         self.num_quoted_words = 0
         self.word_count = 0
         self.para_count = 0
@@ -690,7 +678,7 @@ class DSDocument:
             slist = [sent for sent in parsed_para.sents]  # list of sentences
 
             for s in slist:
-                sent_dict = dict()
+                sent_dict = {}
                 sent_dict["text"] = s.text.strip()
                 sent_dict["sent"] = s  # spacy's NLP object
                 data["sentences"].append(sent_dict)
@@ -720,7 +708,7 @@ class DSDocument:
             slist = [sent for sent in parsed_para.sents]  # list of sentences
 
             for s in slist:
-                sent_dict = dict()
+                sent_dict = {}
                 sent_dict["text"] = s.text.strip()
                 sent_dict["sent"] = s
                 data["sentences"].append(sent_dict)
@@ -750,7 +738,7 @@ class DSDocument:
             slist = [sent for sent in parsed_para.sents]
 
             for s in slist:
-                sent_dict = dict()
+                sent_dict = {}
                 sent_dict["text"] = s.text.strip()
                 sent_dict["sent"] = s
                 data["sentences"].append(sent_dict)
@@ -776,7 +764,7 @@ class DSDocument:
             text = get_text_preserve_inline(html_element)
 
             data["sentences"] = []
-            sent_dict = dict()
+            sent_dict = {}
             sent_dict["text"] = text.strip()
             sent_dict["sent"] = text
             data["sentences"].append(sent_dict)
@@ -817,7 +805,7 @@ class DSDocument:
             src = html_element.get("src", "")
             caption = self._get_image_caption(html_element)
 
-            display_text = f"[IMAGE"
+            display_text = "[IMAGE"
             if alt_text:
                 display_text += f": {alt_text}"
             if caption:
@@ -1017,19 +1005,19 @@ class DSDocument:
         if pos.startswith("NOUN") or pos.startswith("PROPN"):
             # res = self.noun
             return self.noun
-        elif pos.startswith("VERB"):
+        if pos.startswith("VERB"):
             # res = self.verb
             return self.verb
-        elif pos.startswith("ADJ"):
+        if pos.startswith("ADJ"):
             # res = self.adj
             return self.adj
-        elif pos.startswith("ADV"):
+        if pos.startswith("ADV"):
             # res = self.adv
             return self.adv
-        elif pos.startswith("PRP"):
+        if pos.startswith("PRP"):
             # res = self.prp      # pronoun, personal
             return self.prp
-        elif pos.startswith("PRON"):
+        if pos.startswith("PRON"):
             return True
 
         return False
@@ -1082,8 +1070,7 @@ class DSDocument:
     def getFilename(self):
         if self.filename is not None:
             return self.filename
-        else:
-            return "Undefined"
+        return "Undefined"
 
     def getSelectedSentInfo(self):
         return self.selected_sent_info
@@ -1104,7 +1091,7 @@ class DSDocument:
     #             lemmas = sent["lemmas"]
 
     #             # get the list of clusters (i.e., experiences)
-    #             clusters = list()
+    #             clusters = []
     #             for w in sent["text_w_info"]:
     #                 dsw = w[DS_DATA]  # docuscope word
     #                 if dsw is not None:
@@ -1149,7 +1136,7 @@ class DSDocument:
 
         def processHeading(heading):
             nonlocal word_pos
-            res = list()
+            res = []
             if nlp is None:
                 return res, ()
             spacy_doc = nlp(heading)
@@ -1236,11 +1223,11 @@ class DSDocument:
         else:
             incl_nsubj = True  # default
 
-        res = list()
+        res = []
         is_left = True
-        if type(sent) != str:  # sent is a spacy object
+        if not isinstance(sent, str):  # sent is a spacy object
             spacy_doc = sent
-            root = None
+            # root = None
 
             for token in spacy_doc:
                 lemma = ""
@@ -1435,7 +1422,7 @@ class DSDocument:
             if data[POS] == "NOUN" or data[POS] == "PRP":
                 res["NOUNS"] += 1
 
-                if data[ISLEFT] == True:
+                if data[ISLEFT] is True:
                     res["L_NOUNS"].append(data)
                 else:
                     res["R_NOUNS"].append(data)
@@ -1445,7 +1432,7 @@ class DSDocument:
             ):  # we may want to change SUBJECTS to DSDocument.noun_subject_options:
                 res["HNOUNS"] += 1
 
-                if data[ISLEFT] == True:
+                if data[ISLEFT] is True:
                     res["L_HNOUNS"] += 1
                 else:
                     res["R_HNOUNS"] += 1
@@ -1482,7 +1469,7 @@ class DSDocument:
         spacy_doc = nlp(text) if nlp is not None else None
 
         if content_type == ContentType.HEADING:
-            # if type(sent) == str:
+            # if isinstance(sent, str):
             res["HEADING"] = True
 
         for token in spacy_doc if spacy_doc is not None else {}:
@@ -1490,7 +1477,7 @@ class DSDocument:
                 root_pos = token.i
                 break
 
-        left_nps = list()
+        left_nps = []
         for np in spacy_doc.noun_chunks if spacy_doc is not None else []:
             if (np.end - 1) < root_pos:  # LEFT
                 res["L_NPS"] += 1
@@ -1507,10 +1494,7 @@ class DSDocument:
 
         tokens = []
         for token in spacy_doc if spacy_doc is not None else {}:
-            if token.dep_ == "ROOT":
-                is_root = True
-            else:
-                is_root = False
+            is_root = token.dep_ == "ROOT"
             tokens.append({"text": token.text, "is_root": is_root})
         res["TOKENS"] = tokens
 
@@ -1520,7 +1504,7 @@ class DSDocument:
                 token.dep_ == "ROOT"
             ):  # we are only intersted in the advcl before the main verb
                 break
-            elif token.dep_ == "advcl":
+            if token.dep_ == "advcl":
                 advcl_root = token
                 break
 
@@ -1539,7 +1523,7 @@ class DSDocument:
 
                 left_span += traverse(w, True)
                 count += 1
-            if bIgnore == False:
+            if not bIgnore:
                 for w in advcl_root.rights:
                     right_span += traverse(w, False)
 
@@ -1571,13 +1555,13 @@ class DSDocument:
         and find all the unique lemmas in each sentence, and in each paragraph.
         """
 
-        if isModelLoaded() == False:
+        if not isModelLoaded():
             logging.warning("Warning: language model not loaded yet, loading ...")
             setLanguageModel(self.lang, NLP_MODEL_DEFAULT)
 
-        if isModelLoaded() == False:
+        if not isModelLoaded():
             logging.error("Error: unable to load language model!")
-            return list()
+            return []
 
         logging.info("Language model appears to be loaded, processing text ...")
 
@@ -1593,8 +1577,8 @@ class DSDocument:
         def listLemmas(sent):
             global stop_words
 
-            lemmas = list()
-            temp = list()
+            lemmas = []
+            temp = []
 
             for w in sent:
                 if w[POS] is not None and w[LEMMA] not in stop_words:
@@ -1608,8 +1592,8 @@ class DSDocument:
 
         # Optimization. We are only interested in nouns now.
         def accumulateParaLemmas():
-            temp = list()
-            accum = list()
+            temp = []
+            accum = []
             # for para in paragraphs:
             for elem in self.elements:
                 elem_data = elem.data
@@ -1624,29 +1608,25 @@ class DSDocument:
 
         self.bQuote = False
         num_paras = len(self.elements)
-        count_para = 0
 
         skip_paras = self.skip_paras
 
-        for elem in self.elements:  # for each paragraph in the file.
-
-            count_para += 1
-
+        for count_para, elem in enumerate(self.elements, start=1):  # for each paragraph in the file.
             if count_para <= skip_paras:
                 continue
-            elif count_para > (skip_paras + self.max_paras):
+            if count_para > (skip_paras + self.max_paras):
                 break
 
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para / num_paras))
 
             para_dict = elem.data  # we assume that sentences are alraedy initialized
-            para_dict["lemmas"] = list()
-            para_dict["accum_lemmas"] = list()
-            para_dict["given_lemmas"] = list()
-            para_dict["new_lemmas"] = list()
-            para_dict["given_accum_lemmas"] = list()
-            para_dict["new_accum_lemmas"] = list()
+            para_dict["lemmas"] = []
+            para_dict["accum_lemmas"] = []
+            para_dict["given_lemmas"] = []
+            para_dict["new_lemmas"] = []
+            para_dict["given_accum_lemmas"] = []
+            para_dict["new_accum_lemmas"] = []
 
             # We only need to analyze lexical overlaps within these three block elements.
             if elem.content_type in [
@@ -1699,7 +1679,7 @@ class DSDocument:
                         ):  # if there is a match
                             match = True  # mark 'match' as True, and beak
                             break
-                    if match != True:
+                    if not match:
                         para_dict["lemmas"].append(sl)
 
                 sent_dict["accum_lemmas"] = list(para_dict["lemmas"])
@@ -1714,7 +1694,7 @@ class DSDocument:
         """
         if len(self.elements) == 0:
             return
-        elif self.lexical_overlaps_analyzed:
+        if self.lexical_overlaps_analyzed:
             return
 
         if self.progress_callback:
@@ -1738,21 +1718,19 @@ class DSDocument:
 
         if pos1 == pos2:
             # these 2 lemmas share the same POS tag.
-            if pronoun == False and pos1 == "PRP":
+            if not pronoun and pos1 == "PRP":
                 # we'll ignore this since they are pronouns and the pronoun display is OFF.
                 return False
-            elif l1 == l2:  # lemma 1 == lemma 2 and POS1 == POS1
+            if l1 == l2:  # lemma 1 == lemma 2 and POS1 == POS1
                 return True
-            else:
-                return False
+            return False
 
-        elif pronoun == True and pos1 == "PRP":
+        if pronoun is True and pos1 == "PRP":
             # The pronoun display is ON, and pos1 is a pronoun.
             # Pronouns are ALWAYS given.
             return True
 
-        else:
-            return False
+        return False
 
     def findGivenWordsSent(self):
         """
@@ -1779,8 +1757,8 @@ class DSDocument:
 
             prev_s = None
             for sent in para["sentences"]:  # for each sentence in the paragraph
-                sent["given_accum_lemmas"] = list()
-                sent["new_accum_lemmas"] = list()
+                sent["given_accum_lemmas"] = []
+                sent["new_accum_lemmas"] = []
 
                 if prev_s is not None:  # start with the 2nd sentence.
                     for gl in sent["lemmas"]:  # for each given lemmas in the sentence
@@ -1865,9 +1843,8 @@ class DSDocument:
             if self.progress_callback:
                 self.progress_callback(new_val=round(100 * count_para / num_paras))
 
-            para["given_accum_lemmas"] = list()
-            para["new_accum_lemmas"] = list()
-            foo = list()
+            para["given_accum_lemmas"] = []
+            para["new_accum_lemmas"] = []
             if prev_p is not None:  # start with the 2nd paragraph.
                 for gl in para["lemmas"]:  # for each lemma in the paragraph
 
@@ -1956,7 +1933,7 @@ class DSDocument:
         if self.progress_callback:
             self.progress_callback(max_val=10, msg="Opening file...")
 
-        self.sections = list()
+        self.sections = []
         docx_path = os.path.join(src_dir, file)
 
         # Convert with style preservation
@@ -1975,7 +1952,7 @@ class DSDocument:
         self.processDoc()
 
     def loadFromHtmlFile(self, src_dir, html_file):
-        with open(os.path.join(src_dir, html_file), errors="ignore") as fin:
+        with open(os.path.join(src_dir, html_file), errors="ignore", encoding="utf-8") as fin:
             html_str = fin.read()
         self.loadFromHtmlString(html_str)
 
@@ -1986,8 +1963,12 @@ class DSDocument:
     #
     ########################################
 
-    def toHtml(self, topics=[], para_pos=-1, font_info=default_font_info):
+    def toHtml(self, topics=None, para_pos=-1, font_info=None):
 
+        if topics is None:
+            topics = []
+        if font_info is None:
+            font_info = default_font_info
         prev_content_type = None
         tag = None
         pcount = 0
@@ -2000,7 +1981,7 @@ class DSDocument:
             if elem.content_type not in [ContentType.PARAGRAPH, ContentType.LISTITEM]:
                 # We only need to update sentences in paragraphns and lists.
                 continue
-            elif elem.content_type == ContentType.PARAGRAPH:
+            if elem.content_type == ContentType.PARAGRAPH:
                 para_id = elem.para_id
                 if self.soup:
                     tag = self.soup.find(
@@ -2044,10 +2025,7 @@ class DSDocument:
                 word_count = 0
 
                 # open <span> tag
-                html_str += '<span id="p{0}s{1}" class="sentence" data-ds-paragraph="{0}" data-ds-sentence="{1}"> '.format(
-                    para_id, scount
-                )
-
+                html_str += f'<span id="p{para_id}s{scount}" class="sentence" data-ds-paragraph="{para_id}" data-ds-sentence="{scount}"> '
                 while word_count < total_words:
 
                     w = sent["text_w_info"][word_count]
@@ -2059,9 +2037,7 @@ class DSDocument:
                     ):  # if w[LEMMA] in topics:
                         # we need to remove periods.
                         topic = unidecode.unidecode(w[LEMMA].replace(".", ""))
-                        html_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(
-                            para_id, scount, topic, word
-                        )
+                        html_word = f'<span class="word" data-ds-paragraph="{para_id}" data-ds-sentence="{scount}" data-topic="{topic}">{word}</span> '
                     else:
                         html_word = word
 
@@ -2174,9 +2150,7 @@ class DSDocument:
                                         topic = unidecode.unidecode(
                                             w[LEMMA].replace(".", "")
                                         )
-                                        html_temp_word = '<span class="word" data-ds-paragraph="{}" data-ds-sentence="{}" data-topic="{}">{}</span> '.format(
-                                            para_id, scount, topic, temp_w[WORD]
-                                        )
+                                        html_temp_word = f'<span class="word" data-ds-paragraph="{para_id}" data-ds-sentence="{scount}" data-topic="{topic}">{temp_w[WORD]}</span> '
                                     else:
                                         html_temp_word = temp_w[WORD]
 
@@ -2333,13 +2307,13 @@ class DSDocument:
 
         selected_paragraphs.sort()
 
-        all_lemmas = list()
-        temp = list()
+        all_lemmas = []
+        temp = []
 
         if self.elements is None or len(self.elements) == 0:
             return []
 
-        selected_elem_list = list()
+        selected_elem_list = []
         for pos in selected_paragraphs:
             if pos > len(self.elements):
                 break
@@ -2351,7 +2325,7 @@ class DSDocument:
             ]:
                 selected_elem_list.append(e)
 
-        if selected_elem_list is []:
+        if len(selected_elem_list) == 0:
             return []
 
         for elem in selected_elem_list:
@@ -2378,7 +2352,7 @@ class DSDocument:
             len(selected_paragraphs) > 1
         ):  # applicable if 2 or more paragrpahs are selected.
             temp_count = 0
-            p_all_lemmas = list()  # all the global given & new lemmas.
+            p_all_lemmas = []  # all the global given & new lemmas.
             p_temp = temp
             for elem in selected_elem_list:
                 p = elem.data
@@ -2408,7 +2382,7 @@ class DSDocument:
 
         all_lemmas.sort(key=lambda tup: tup[2])  # sort by the order of appearance.
 
-        res = list()
+        res = []
         res.append(all_lemmas)
         p_count = 1
 
@@ -2474,7 +2448,7 @@ class DSDocument:
                         set(s_lemmas) & set(s_given_accum_lemmas + prev_given_lemmas)
                     )
 
-                sres = list()  # get an empty list
+                sres = []  # get an empty list
                 for l in all_lemmas:
 
                     is_new = False
@@ -2513,7 +2487,7 @@ class DSDocument:
                                             True,
                                         ]
                                     )
-                                elif is_left == False:
+                                elif not is_left:
                                     t = sl + tuple(
                                         [
                                             p_count,
@@ -2534,7 +2508,7 @@ class DSDocument:
                             else:
                                 sres.append(t)
 
-                    if is_match == False:
+                    if not is_match:
                         sres.append(tuple([None, bSkipPunct]))
 
                 # for each lemmas in 'all_lemmas'
@@ -2565,8 +2539,8 @@ class DSDocument:
                 )  # otherwise, we'll generate new global_topical_prog_data
 
         # first we should make a list of given lemmas as they appear in the text
-        all_lemmas = list()
-        temp = list()
+        all_lemmas = []
+        temp = []
 
         for elem in self.elements:
             if elem.content_type not in [
@@ -2634,8 +2608,8 @@ class DSDocument:
         for t in para_topic_set:
             para_topic_counter[t[1]] += 1
 
-        all_lemmas = list()
-        temp = list()
+        all_lemmas = []
+        temp = []
 
         for elem in self.elements:
             if elem.content_type not in [
@@ -2671,12 +2645,11 @@ class DSDocument:
                 key=lambda tup: tup[3], reverse=True
             )  # sort by the total left count
 
-        res = list()
+        res = []
         res.append(all_lemmas)
-        collapsed_res = list()
+        collapsed_res = []
         res.append([-1] * (len(all_lemmas) + 2))
 
-        p_count = 1
         pres: List[Any] = [None] * (len(self.elements) + 2)
         pres[0] = all_lemmas
         pres[1] = [-1] * (len(all_lemmas) + 2)
@@ -2684,9 +2657,9 @@ class DSDocument:
         bSkipPunct = False
 
         # NOTE: Create a dictionary that keeps track of given/new counts
-        # given_new_counts = dict()
+        # given_new_counts = {}
 
-        for elem in self.elements:
+        for p_count, elem in enumerate(self.elements, start=1):
             if elem.content_type not in [
                 ContentType.PARAGRAPH,
                 ContentType.LIST,
@@ -2695,9 +2668,8 @@ class DSDocument:
                 continue
 
             p = elem.data
-            s_count = 1
 
-            for s in p["sentences"]:  # for each sentence
+            for s_count, s in enumerate(p["sentences"], start=1):  # for each sentence
                 # if s['text'] is a single character, and one of these punct chracters
                 # we'll make the row as bSkipPunct == True.
                 if len(s["text"]) == 1 and (
@@ -2711,7 +2683,7 @@ class DSDocument:
                 else:
                     bSkipPunct = False
 
-                sres = list()  # get an empty list
+                sres = []  # get an empty list
                 for l in all_lemmas:  # for each topic candidate
                     is_new = False
                     is_given = False
@@ -2750,7 +2722,7 @@ class DSDocument:
                                             is_left,
                                         ]
                                     )
-                                elif is_left == False:
+                                elif not is_left:
                                     t = sl + tuple(
                                         [
                                             p_count,
@@ -2773,7 +2745,7 @@ class DSDocument:
                                 pres[p_count + 1] = t
                                 sres.append(t)
 
-                    if is_match == False:
+                    if not is_match:
                         sres.append(tuple([None, bSkipPunct]))
 
                     # end of 'for l in all_lemmas:'
@@ -2782,12 +2754,9 @@ class DSDocument:
                 collapsed_res.append(pres)
                 res.append(sres)
 
-                s_count += 1
                 # end of 'for s in p['sentences']:'
 
             res.append([-1] * (len(all_lemmas) + 2))
-            p_count += 1
-
             # end of 'for p in data['paragraphs']:''
 
         self.global_topical_prog_data = {"data": res, "para_data": []}
@@ -2796,7 +2765,7 @@ class DSDocument:
 
     def getSentStructureData(self):
         p_count = 1
-        res = list()
+        res = []
 
         bSkipPunct = False
         prev_content_type = None
@@ -2859,10 +2828,9 @@ class DSDocument:
     ########################################
 
     def saveJSON(self, filepath):
-        filename = "{}.json".format(filepath)
-        fout = open(filename, "w")
-        fout.write(json.dumps(self.sections, indent=4))
-        fout.close()
+        """Save the document sections as a JSON file."""
+        with open(f"{filepath}.json", "w", encoding="utf-8") as fout:
+            fout.write(json.dumps(self.sections, indent=4))
 
     ###############################################################################
     #
@@ -2894,7 +2862,7 @@ class DSDocument:
 
         """
 
-        self.local_topics = list()
+        self.local_topics = []
 
         data = self.getLocalTopicalProgData(selected_paragraphs)
         if data is None:
@@ -2912,9 +2880,9 @@ class DSDocument:
         if ncols == 0:
             return {"error": "ncols is 0"}
 
-        vis_data = dict()
+        vis_data = {}
         vis_data["num_topics"] = ncols
-        vis_data["data"] = list()
+        vis_data["data"] = []
 
         if selected_paragraphs:
             sent_filter = self.filterLocalTopics(data, nrows, ncols)
@@ -2953,10 +2921,7 @@ class DSDocument:
                 if topic in self.global_topics:
                     is_global = True
 
-                if DSDocument.isUserDefinedSynonym(topic):
-                    is_tc = True
-                else:
-                    is_tc = False
+                is_tc = DSDocument.isUserDefinedSynonym(topic)
 
                 self.local_topics.append((topic, is_global))
 
@@ -2967,15 +2932,15 @@ class DSDocument:
                 for ri in range(1, nrows):  # for each row
                     elem = data[ri][ci]  # get the elem
 
-                    if type(elem) == int and elem < 0:
+                    if isinstance(elem, int) and elem < 0:
                         b_para_break = True
                     elif (
-                        type(elem) == tuple
+                        isinstance(elem, tuple)
                         and elem[0] is not None
-                        and is_skip(elem, true_left_count, topic_filter) == False
+                        and not is_skip(elem, true_left_count, topic_filter)
                     ):
-                        if elem[IS_SKIP] == False:
-                            d = dict()
+                        if not elem[IS_SKIP]:
+                            d = {}
                             # d['topic'] = elem
                             d["sent_pos"] = sent_id
                             d["para_pos"] = para_id
@@ -2990,13 +2955,13 @@ class DSDocument:
                             topic_info = elem
 
                     elif (
-                        type(elem) == tuple
+                        isinstance(elem, tuple)
                         and elem[0] is not None
-                        and is_skip(elem, true_left_count, topic_filter) == True
+                        and is_skip(elem, true_left_count, topic_filter)
                     ):
                         b_skip = True
 
-                    elif type(elem) == tuple and elem[0] is None:
+                    elif isinstance(elem, tuple) and elem[0] is None:
                         b_skip = True
 
                     if b_para_break:
@@ -3067,12 +3032,12 @@ class DSDocument:
         if ncols == 0:
             return {"error": "ncols is 0"}
 
-        vis_data = dict()
+        vis_data = {}
         vis_data["num_topics"] = ncols
         vis_data["data"] = []
 
         # Filters
-        para_filter = self.filterParaTopics(data, nrows, ncols)
+        # para_filter = self.filterParaTopics(data, nrows, ncols)
         sent_filter = self.filterTopics(data, nrows, ncols)
         topic_filter = TOPIC_FILTER_LEFT_RIGHT
 
@@ -3117,19 +3082,17 @@ class DSDocument:
 
             if (
                 count < min_topics
-            ):  # min_topics == 2 by default. Skip topics that do not apper in more than 2 paragraphs.
+            ):  # min_topics == 2 by default.
+                # Skip topics that do not apper in more than 2 paragraphs.
                 continue
 
             self.global_topics.append(
                 topic
             )  # if we get here, the topic is a global topic.
 
-            if DSDocument.isUserDefinedSynonym(
+            is_tc =  DSDocument.isUserDefinedSynonym(
                 topic
-            ):  # check if topic is a topic cluster.
-                is_tc = True
-            else:
-                is_tc = False
+            )  # check if topic is a topic cluster.
 
             topic_info = None
             sent_count = 0
@@ -3153,11 +3116,12 @@ class DSDocument:
 
                     curr_elem = topic_data[p_ri]
 
-                    # d['sent_id'] captures the sent id of the first occurence of the topic on the left side.
+                    # d['sent_id'] captures the sent id of the first occurence
+                    # of the topic on the left side.
                     if (
                         curr_elem is not None
-                        and elem[ISLEFT] == True
-                        and curr_elem["topic"][ISLEFT] == False
+                        and elem[ISLEFT] is True
+                        and curr_elem["topic"][ISLEFT] is False
                     ):
                         # 'elem' not the first instance for this paragraph
                         # the existing element 'curr_elem' is on the right side.
@@ -3176,11 +3140,11 @@ class DSDocument:
                         topic_data[p_ri] = d
 
                     elif curr_elem is None:
-                        d = dict()
+                        d = {}
                         d["topic"] = list(elem)
                         d["para_pos"] = p_ri
 
-                        if elem[ISLEFT] == True:
+                        if elem[ISLEFT] is True:
                             d["first_left_sent_id"] = sent_count
                             d["is_left"] = True
                         else:
@@ -3255,7 +3219,7 @@ class DSDocument:
         return vis_data
 
     def filterTopics(self, data, nrows, ncols):
-        res = dict()
+        res = {}
         for c in range(1, ncols + 1):  # for each topic
 
             l_start = -1  # left only
@@ -3295,7 +3259,7 @@ class DSDocument:
 
                     given_count += 1
 
-                elif type(elem) == int and elem < 0:
+                elif isinstance(elem, int) and elem < 0:
                     para_count += 1
 
             l_skip_lines = 0
@@ -3305,22 +3269,22 @@ class DSDocument:
                 elem = data[r][c - 1]
 
                 if r > l_start and r < l_end:
-                    if type(elem) == str and elem == "heading":
+                    if isinstance(elem, str) and elem == "heading":
                         l_skip_lines += 1
-                    elif type(elem) == str and elem == "title":
+                    elif isinstance(elem, str) and elem == "title":
                         l_skip_lines += 1
-                    elif type(elem) == int and elem < 0:
+                    elif isinstance(elem, int) and elem < 0:
                         l_skip_lines += 1
 
                 if r > start and r < end:
-                    if type(elem) == str and elem == "heading":
+                    if isinstance(elem, str) and elem == "heading":
                         skip_lines += 1
-                    elif type(elem) == str and elem == "title":
+                    elif isinstance(elem, str) and elem == "title":
                         skip_lines += 1
-                    elif type(elem) == int and elem < 0:
+                    elif isinstance(elem, int) and elem < 0:
                         skip_lines += 1
 
-                if type(elem) != str and type(elem) != int:
+                if not isinstance(elem, (str, int)):
                     sent_count += 1
 
             given_left_paras = list(set(given_left_paras))
@@ -3337,16 +3301,12 @@ class DSDocument:
                     is_topic = True
 
             # left only
-            l_span = (l_end - l_start + 1) - l_skip_lines
-            if l_span < 0:
-                l_span = 0
+            l_span = max((l_end - l_start + 1) - l_skip_lines, 0)
             norm_l_span = (l_span / sent_count) * 100
             norm_l_coverage = (given_left_count / sent_count) * 100
 
             # left or right
-            span = (end - start + 1) - skip_lines
-            if span < 0:
-                span = 0
+            span = max(0, (end - start + 1) - skip_lines)
             norm_span = (span / sent_count) * 100
             norm_coverage = (given_count / sent_count) * 100
 
@@ -3410,7 +3370,7 @@ class DSDocument:
                     given_paras.append(para_count)
                     given_count += 1
 
-                elif type(elem) == int and elem < 0:
+                elif isinstance(elem, int) and elem < 0:
                     para_count += 1
 
             para_count -= 1
@@ -3500,7 +3460,7 @@ class DSDocument:
             for r in range(1, nrows):
                 elem = data[r][c - 1]
 
-                if r > start and r < end:
+                if start < r < end:
                     if isinstance(elem, str) and elem == "heading":
                         skip_lines += 1
                     elif isinstance(elem, int) and elem < 0:
@@ -3673,7 +3633,7 @@ class DSDocument:
                 for r in range(1, nrows):
                     elem = data[r][c - 1]
 
-                    if r > start and r < end:
+                    if start < r < end:
                         if isinstance(elem, str) and elem == "heading":
                             skip_lines += 1
                         elif isinstance(elem, int) and elem < 0:
@@ -3784,7 +3744,7 @@ class DSDocument:
         Returns True if <topic> is a local topic.
         """
         if self.local_topics_dict is not None:
-            for key, value in self.local_topics_dict.items():  # for each paragraph
+            for _, value in self.local_topics_dict.items():  # for each paragraph
                 local_topics = [
                     t[0] for t in value
                 ]  # make a list of lemma/topic strings
@@ -3796,7 +3756,7 @@ class DSDocument:
 
         topics = self.global_topics
         if self.local_topics_dict is not None:
-            for key, value in self.local_topics_dict.items():
+            for _, value in self.local_topics_dict.items():
                 local_topics = [t[0] for t in value]  # make a list of lemma/topic strings
                 topics += local_topics
 
@@ -3809,7 +3769,8 @@ class DSDocument:
         Given a topic <string>, this method returns the toal number of sentences
         that includes the topic.
         """
-        locations = self.topic_location_dict.get(topic, None) if self.topic_location_dict is not None else None
+        locations = self.topic_location_dict.get(topic, None) \
+            if self.topic_location_dict is not None else None
 
         temp = []
         topic_positions = locations.getTopicPositions() if locations is not None else []
@@ -3844,14 +3805,9 @@ class DSDocument:
             topic_filter = TOPIC_FILTER_LEFT_RIGHT
 
             # Let's find which paragraphs/sentences the selected 'topic' is included.
-            pcount = 1
-            for para in data["paragraphs"]:
-                scount = 1
-
-                for sent in para["sentences"]:
-
-                    wcount = 1
-                    for w in sent["text_w_info"]:
+            for pcount, para in enumerate(data["paragraphs"], start=1):
+                for scount, sent in enumerate(para["sentences"], start=1):
+                    for wcount, w in enumerate(sent["text_w_info"]):
                         if w[LEMMA] == topic and (w[POS] == "NOUN" or w[POS] == "PRP"):
                             if (
                                 topic_filter == TOPIC_FILTER_LEFT and not w[ISLEFT]
@@ -3861,12 +3817,6 @@ class DSDocument:
                                 adj_stats.addParagraphID(pcount)
                                 adj_stats.addSentenceID(pcount, scount)
                                 adj_stats.addTopicPosition(pcount, scount, wcount)
-
-                        wcount += 1
-
-                    scount += 1
-
-                pcount += 1
 
             return adj_stats
 
@@ -3889,7 +3839,7 @@ class DSDocument:
             if isinstance(sent_data, str) and sent_data == "\n":
                 return ""
 
-            np_positions = list()
+            np_positions = []
             analysis = sent_data[2]
             is_be_verb = analysis["BE_VERB"]
 
@@ -3949,7 +3899,7 @@ class DSDocument:
                         html_str += " "
 
                 if token["is_root"]:
-                    html_str += '<span class="{}">{}</span>'.format(verb_class, w)
+                    html_str += f'<span class="{verb_class}">{w}</span>'
                 else:
                     html_str += f"{w}"
 
@@ -4098,7 +4048,7 @@ class DSDocument:
     #     if self.sections:
     #         data = self.data
 
-    #         sent_list = list()
+    #         sent_list = []
     #         pcount = 1
     #         for para in data["paragraphs"]:  # for each paragraph
 
