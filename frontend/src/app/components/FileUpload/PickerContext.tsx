@@ -69,6 +69,7 @@ export const PickerProvider: FC<{
     picker.setAttribute("prompt", "consent");
     picker.setAttribute("multiselect", "false");
     const docsView = document.createElement("drive-picker-docs-view");
+    docsView.setAttribute("mode", "LIST");
     docsView.setAttribute("select-multiple", "false");
     // docsView.setAttribute("starred", "true");
     docsView.setAttribute(
