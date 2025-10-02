@@ -599,7 +599,7 @@ class DSDocument:
         self.local_header = []
         self.global_topics = []
         self.local_topics = []
-        self.topic_location_dict = None
+        # self.topic_location_dict = None
 
         self.lexical_overlaps_analyzed = False
 
@@ -3184,7 +3184,7 @@ class DSDocument:
                     del d["topic"]
 
             is_non_local = not self.isLocalTopic(topic)
-            num_sents_per_topic = self.countSentencesWithTopic(topic)
+            # num_sents_per_topic = self.countSentencesWithTopic(topic)
 
             vis_data["data"].append(
                 {
@@ -3192,7 +3192,8 @@ class DSDocument:
                     "is_topic_cluster": is_tc,
                     "is_non_local": is_non_local,
                     "topic": list(topic_info[0:3]),
-                    "sent_count": num_sents_per_topic,
+                    "sent_count": 0,
+                    # "sent_count": num_sents_per_topic,
                 }
             )
 
@@ -3764,69 +3765,69 @@ class DSDocument:
 
         return topics
 
-    def countSentencesWithTopic(self, topic):
-        """
-        Given a topic <string>, this method returns the toal number of sentences
-        that includes the topic.
-        """
-        locations = self.topic_location_dict.get(topic, None) \
-            if self.topic_location_dict is not None else None
+    # def countSentencesWithTopic(self, topic):
+    #     """
+    #     Given a topic <string>, this method returns the toal number of sentences
+    #     that includes the topic.
+    #     """
+    #     locations = self.topic_location_dict.get(topic, None) \
+    #         if self.topic_location_dict is not None else None
 
-        temp = []
-        topic_positions = locations.getTopicPositions() if locations is not None else []
-        for t in topic_positions:
-            if t[:2] not in temp:
-                temp.append(t[:2])
+    #     temp = []
+    #     topic_positions = locations.getTopicPositions() if locations is not None else []
+    #     for t in topic_positions:
+    #         if t[:2] not in temp:
+    #             temp.append(t[:2])
 
-        count = len(temp)
-        return count
+    #     count = len(temp)
+    #     return count
 
-    def locateTopics(self, topics):
-        """
-        Given a set of topics, this method locates the topics in a current document,
-        and update self.topic_location_dict.
-        """
+    # def locateTopics(self, topics):
+    #     """
+    #     Given a set of topics, this method locates the topics in a current document,
+    #     and update self.topic_location_dict.
+    #     """
 
-        def locateATopic(topic):
-            """
-            This method is called by locateTopics(), and should not
-            """
+    #     def locateATopic(topic):
+    #         """
+    #         This method is called by locateTopics(), and should not
+    #         """
 
-            if self.sections is None:
-                return "Error in locateATopic()"
-            try:
-                data = self.sections[self.current_section]["data"]  ### TODO!!!
-                if data is None:
-                    raise ValueError
-            except:
-                return None
+    #         if self.sections is None:
+    #             return "Error in locateATopic()"
+    #         try:
+    #             data = self.sections[self.current_section]["data"]  ### TODO!!!
+    #             if data is None:
+    #                 raise ValueError
+    #         except:
+    #             return None
 
-            adj_stats = AdjacencyStats(topic=topic, controller=self.controller)
-            topic_filter = TOPIC_FILTER_LEFT_RIGHT
+    #         adj_stats = AdjacencyStats(topic=topic, controller=self.controller)
+    #         topic_filter = TOPIC_FILTER_LEFT_RIGHT
 
-            # Let's find which paragraphs/sentences the selected 'topic' is included.
-            for pcount, para in enumerate(data["paragraphs"], start=1):
-                for scount, sent in enumerate(para["sentences"], start=1):
-                    for wcount, w in enumerate(sent["text_w_info"]):
-                        if w[LEMMA] == topic and (w[POS] == "NOUN" or w[POS] == "PRP"):
-                            if (
-                                topic_filter == TOPIC_FILTER_LEFT and not w[ISLEFT]
-                            ):  ## NEW 3/2/21
-                                pass
-                            else:
-                                adj_stats.addParagraphID(pcount)
-                                adj_stats.addSentenceID(pcount, scount)
-                                adj_stats.addTopicPosition(pcount, scount, wcount)
+    #         # Let's find which paragraphs/sentences the selected 'topic' is included.
+    #         for pcount, para in enumerate(data["paragraphs"], start=1):
+    #             for scount, sent in enumerate(para["sentences"], start=1):
+    #                 for wcount, w in enumerate(sent["text_w_info"]):
+    #                     if w[LEMMA] == topic and (w[POS] == "NOUN" or w[POS] == "PRP"):
+    #                         if (
+    #                             topic_filter == TOPIC_FILTER_LEFT and not w[ISLEFT]
+    #                         ):  ## NEW 3/2/21
+    #                             pass
+    #                         else:
+    #                             adj_stats.addParagraphID(pcount)
+    #                             adj_stats.addSentenceID(pcount, scount)
+    #                             adj_stats.addTopicPosition(pcount, scount, wcount)
 
-            return adj_stats
+    #         return adj_stats
 
-        if topics is None or topics == []:
-            self.topic_location_dict = None
-            return None
+    #     if topics is None or topics == []:
+    #         self.topic_location_dict = None
+    #         return None
 
-        self.topic_location_dict = {}
-        for topic in topics:
-            self.topic_location_dict[topic] = locateATopic(topic)
+    #     self.topic_location_dict = {}
+    #     for topic in topics:
+    #         self.topic_location_dict[topic] = locateATopic(topic)
 
     def getHtmlSents(self, data):
         """
