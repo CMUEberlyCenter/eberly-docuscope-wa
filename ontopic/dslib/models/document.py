@@ -3006,12 +3006,12 @@ class DSDocument:
         self.updateLocalTopics()
         self.updateGlobalTopics(global_data)
 
-        topics = (
-            self.getCurrentTopics()
-        )  # These 2 lines create a data structure that allows us
-        self.locateTopics(
-            topics
-        )  # to count the # of sentences each topic appears later. 8/23/2022.
+        # topics = (
+        #     self.getCurrentTopics()
+        # )  # These 2 lines create a data structure that allows us
+        # self.locateTopics(
+        #     topics
+        # )  # to count the # of sentences each topic appears later. 8/23/2022.
 
         if global_data is None:
             return {"error": "ncols is 0"}
