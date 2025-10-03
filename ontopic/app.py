@@ -1,4 +1,5 @@
-""" onTopic Web API """
+"""onTopic Web API"""
+
 import logging
 from typing import Optional
 from fastapi import FastAPI
@@ -11,9 +12,10 @@ app = FastAPI(
     "and term matrix data for a given text.",
     version="2.0.0",
     license={
-        'name': 'CC BY-NC-SA 4.0',
-        'url': 'https://creativecommons.org/licenses/by-nc-sa/4.0/'
-    })
+        "name": "CC BY-NC-SA 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    },
+)
 
 # Unused, to be removed, replace with prometheus library
 # @app.get("/metrics")
@@ -22,7 +24,8 @@ app = FastAPI(
 
 
 class OnTopicRequest(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic input JSON. """
+    """onTopic input JSON."""
+
     base: str
     custom: Optional[str] = ""
     customStructured: Optional[list[str]] = []
@@ -30,19 +33,25 @@ class OnTopicRequest(BaseModel):  # pylint: disable=too-few-public-methods
 
 type Lemma = list[str | bool | None | int]
 
+
 class NounChunk(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Clarity noun chunk data. """
+    """onTopic Clarity noun chunk data."""
+
     text: str
     start: int
     end: int
 
+
 class Token(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic sentence Tokens. """
+    """onTopic sentence Tokens."""
+
     text: str
     is_root: bool
 
+
 class SentenceData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Clarity sentence statistics. """
+    """onTopic Clarity sentence statistics."""
+
     NOUNS: int  # total # of nouns
     HNOUNS: int  # total # of head nouns
     L_HNOUNS: int  # head nouns on the left
@@ -68,7 +77,8 @@ class SentenceData(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class ClaritySentenceData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Clarity sentence lemma support data. """
+    """onTopic Clarity sentence lemma support data."""
+
     text: str
     text_w_info: list[Lemma]
     sent_analysis: SentenceData
@@ -84,7 +94,8 @@ type ClarityData = str | tuple[int, int, ClaritySentenceData, bool]
 
 
 class CoherenceParagraph(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Coherence paragraph data. """
+    """onTopic Coherence paragraph data."""
+
     first_left_sent_id: int
     is_left: bool
     is_topic_sent: bool
@@ -92,7 +103,8 @@ class CoherenceParagraph(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class CoherenceDatum(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Coherence supporting data. """
+    """onTopic Coherence supporting data."""
+
     is_non_local: Optional[bool] = None
     is_topic_cluster: Optional[bool] = None
     paragraphs: list[CoherenceParagraph | None] = []
@@ -101,7 +113,8 @@ class CoherenceDatum(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class CoherenceData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic Coherence data. """
+    """onTopic Coherence data."""
+
     error: Optional[str] = None
     data: list[CoherenceDatum] = []
     num_paras: int = 0
@@ -109,7 +122,8 @@ class CoherenceData(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class LocalSentenceData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic local data item sentence data. """
+    """onTopic local data item sentence data."""
+
     is_left: bool
     is_topic_sent: bool
     para_pos: int
@@ -117,7 +131,8 @@ class LocalSentenceData(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class LocalDatum(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic local data list item. """
+    """onTopic local data list item."""
+
     is_global: bool
     is_non_local: Optional[bool] = None
     is_topic_cluster: Optional[bool] = None
@@ -127,13 +142,15 @@ class LocalDatum(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 class LocalData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic local data. """
+    """onTopic local data."""
+
     error: Optional[str] = None
     data: list[LocalDatum] = []
 
 
 class OnTopicData(BaseModel):  # pylint: disable=too-few-public-methods
-    """ onTopic JSON data. """
+    """onTopic JSON data."""
+
     clarity: Optional[list[ClarityData]] = []
     coherence: Optional[CoherenceData] = None
     html: Optional[str] = ""
@@ -143,23 +160,24 @@ class OnTopicData(BaseModel):  # pylint: disable=too-few-public-methods
 
 @app.post("/api/v2/ontopic")
 async def ontopic(data: OnTopicRequest):
-    """ Analyse the posted prose for coherence and clarity. """
+    """Analyse the posted prose for coherence and clarity."""
     document = DSDocument()
     document.loadFromHtmlString(f"<body>{data.base}</body>")
 
-    coherence = document.generateGlobalVisData(
-        2, 1, 0) # views.TOPIC_SORT_APPEARANCE)
+    coherence = document.generateGlobalVisData(2, 1, 0)  # views.TOPIC_SORT_APPEARANCE)
     clarity: list[ClarityData] = document.getSentStructureData()
     topics = document.getCurrentTopics()
 
-    num_paragraphs = coherence.get('num_paras')
+    num_paragraphs = coherence.get("num_paras")
     if num_paragraphs:
-        logging.info("Number of paragraphs processed: %d "
-                     "(might be 1 for very short text)", num_paragraphs)
+        logging.info(
+            "Number of paragraphs processed: %d (might be 1 for very short text)",
+            num_paragraphs,
+        )
     else:
         logging.warning(
-            "Error obtaining number of paragraphs from %d, setting to 0",
-            num_paragraphs)
+            "Error obtaining number of paragraphs from %d, setting to 0", num_paragraphs
+        )
         num_paragraphs = 0
 
     # Currently unused in visualization,
@@ -172,19 +190,20 @@ async def ontopic(data: OnTopicRequest):
         coherence=CoherenceData.model_validate(coherence),
         local=local,
         clarity=clarity,
-        html=document.toHtml_OTOnly(topics, -1),
-        html_sentences=document.getHtmlSents(clarity)
+        html=document.toHtml(topics, -1),
+        html_sentences=document.getHtmlSents(clarity),
     )
 
 
 class SegmentRequest(BaseModel):  # pylint: disable=too-few-public-methods
-    """ segment request input JSON """
+    """segment request input JSON"""
+
     text: str
 
 
 @app.post("/api/v2/segment")
 async def segment(data: SegmentRequest):
-    """ Segment the given text into sentences.
+    """Segment the given text into sentences.
 
     Returns the original text with added id attributes for paragraphs
     and spans with id attributes for deliminating the sentences.
@@ -192,6 +211,7 @@ async def segment(data: SegmentRequest):
     document = DSDocument()
     document.loadFromHtmlString(f"<body>{data.text}</body>")
     return document.toXml()
+
 
 # For production, start this with the following:
 # > hypercorn app:app --bind 0.0.0.0:5000 --root-path /
@@ -202,6 +222,7 @@ if __name__ == "__main__":
     import asyncio
     from hypercorn.asyncio import serve
     from hypercorn.config import Config
+
     config = Config()
     config.bind = ["0.0.0.0:5000"]
     config.loglevel = "info"
