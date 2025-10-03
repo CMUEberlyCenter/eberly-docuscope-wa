@@ -75,10 +75,19 @@ export const UserTextView: FC<UserTextViewProps> = ({
         document.getElementById(id)?.classList.add("no-blur");
       });
     }
-    document.querySelector(".user-text .highlight")?.scrollIntoView({
-      behavior: "smooth",
-      block: "center",
-    });
+    // scroll to first highlight if it exists, otherwise scroll to first no-blur
+    // else no scrolling.
+    if (document.querySelectorAll(".user-text .highlight").length > 0) {
+      document.querySelector(".user-text .highlight")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    } else if (document.querySelector(".user-text .no-blur")) {
+      document.querySelector(".user-text .no-blur")?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
   }, [ctx, text]);
 
   return (
