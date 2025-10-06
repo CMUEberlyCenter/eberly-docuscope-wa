@@ -138,9 +138,9 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
             task.info.keywords?.some((key) => key.toLowerCase().includes(term))
           )
             return true;
-          if (task.info.name.includes(term)) return true;
-          if (task.rules.name.includes(term)) return true;
-          if (task.rules.overview.includes(term)) return true;
+          if (task.info.name.toLowerCase().includes(term)) return true;
+          if (task.rules.name.toLowerCase().includes(term)) return true;
+          if (task.rules.overview.toLowerCase().includes(term)) return true;
           return false;
         }) ?? [];
     update?.(ftasks);
