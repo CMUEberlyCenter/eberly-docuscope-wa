@@ -2765,6 +2765,8 @@ class DSDocument:
 
     def getSentStructureData(self):
         p_count = 1
+        s_count = 1
+        para_id = 0
         res = []
 
         bSkipPunct = False
