@@ -76,8 +76,8 @@ export const Review: FC = () => {
   const settings = useSettingsContext();
 
   useEffect(() => {
-    setReady(!!userText && userText.trim().length > 0 && !!writingTask);
-  }, [userText, writingTask]);
+    setReady(!!userText && userText.trim().length > 0);
+  }, [userText]);
   // useUnload();
   // useEffect(() => {
   //   if (ready) {
@@ -101,38 +101,54 @@ export const Review: FC = () => {
   const [bigPictureFeature, setBigPictureFeature] = useState(false);
   const [fineTuningFeature, setFineTuningFeature] = useState(false);
   useEffect(() => {
+    // As per #230 most features are available even without a writing task if
+    // enabled in settings.  The server settings have priority over writing tasks.
     setCivilToneFeature(
-      settings.civil_tone && isEnabled(writingTask, "civil_tone")
+      settings.civil_tone &&
+        (!writingTask || isEnabled(writingTask, "civil_tone"))
     );
     setCredibilityFeature(
-      settings.credibility && isEnabled(writingTask, "credibility")
+      settings.credibility &&
+        (!writingTask || isEnabled(writingTask, "credibility"))
     );
     setExpectationsFeature(
-      settings.expectations && isEnabled(writingTask, "expectations")
+      settings.expectations &&
+        (!writingTask || isEnabled(writingTask, "expectations"))
     );
+    // Lines of arguments only available if enabled in writing task.
     setArgumentsFeature(
       settings.lines_of_arguments &&
         isEnabled(writingTask, "lines_of_arguments")
     );
     setLogicalFlowFeature(
-      settings.logical_flow && isEnabled(writingTask, "logical_flow")
+      settings.logical_flow &&
+        (!writingTask || isEnabled(writingTask, "logical_flow"))
     );
     setParagraphClarityFeature(
-      settings.paragraph_clarity && isEnabled(writingTask, "paragraph_clarity")
+      settings.paragraph_clarity &&
+        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
     );
     setProfessionalToneFeature(
-      settings.professional_tone && isEnabled(writingTask, "professional_tone")
+      settings.professional_tone &&
+        (!writingTask || isEnabled(writingTask, "professional_tone"))
     );
     setIdeasFeature(
-      settings.prominent_topics && isEnabled(writingTask, "prominent_topics")
+      settings.prominent_topics &&
+        (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
-    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setSourcesFeature(
+      settings.sources && (!writingTask || isEnabled(writingTask, "sources"))
+    );
     setSentencesFeature(
-      settings.sentence_density && isEnabled(writingTask, "sentence_density")
+      settings.sentence_density &&
+        (!writingTask || isEnabled(writingTask, "sentence_density"))
     );
-    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setSourcesFeature(
+      settings.sources && (!writingTask || isEnabled(writingTask, "sources"))
+    );
     setOrganizationFeature(
-      settings.term_matrix && isEnabled(writingTask, "term_matrix")
+      settings.term_matrix &&
+        (!writingTask || isEnabled(writingTask, "term_matrix"))
     );
     setImpressionsFeature(
       false
@@ -207,11 +223,29 @@ export const Review: FC = () => {
                 <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {expectationsFeature ? (
-                      <ExpectationsButton
-                        disabled={!ready}
-                        active={tool === "expectations"}
-                        onClick={() => setTool("expectations")}
-                      />
+                      !writingTask && ready ? (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>
+                              {t("instructions:expectations_scope_note")}
+                              <hr />
+                              {t("expectations.no_writing_task_tooltip")}
+                            </Tooltip>
+                          }
+                        >
+                          {/* div required to get tooltip overlay to work. */}
+                          <div>
+                            <ExpectationsButton disabled={true} />
+                          </div>
+                        </OverlayTrigger>
+                      ) : (
+                        <ExpectationsButton
+                          disabled={!ready}
+                          active={tool === "expectations"}
+                          onClick={() => setTool("expectations")}
+                        />
+                      )
                     ) : null}
                     {ideasFeature ? (
                       <ProminentTopicsButton

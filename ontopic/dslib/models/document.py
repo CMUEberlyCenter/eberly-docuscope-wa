@@ -80,6 +80,7 @@ be_verbs = [
 ##################################################
 
 import spacy  # SpaCy NLP library
+
 # import dslib.models.stat as ds_stat
 
 NLP_MODEL_DEFAULT = 0
@@ -471,8 +472,10 @@ class DSDocument:
 
     @classmethod
     def isUserDefinedSynonym(cls, lemma):
-        return DSDocument.user_defined_synonyms is not None \
+        return (
+            DSDocument.user_defined_synonyms is not None
             and lemma in DSDocument.user_defined_synonym_names
+        )
 
     @classmethod
     def isUserDefinedSynonymDefined(cls, lemma):
@@ -646,7 +649,9 @@ class DSDocument:
         self.para_count = 0  # paragraph count/ID (exclude non paragraphs)
         self.word_count = 0
 
-        all_elements = self.soup.find_all(element_not_in_table_cell) if self.soup else []
+        all_elements = (
+            self.soup.find_all(element_not_in_table_cell) if self.soup else []
+        )
 
         for html_element in all_elements:
             doc_element = self._process_element(html_element, position)
@@ -1039,7 +1044,7 @@ class DSDocument:
 
     def getParaCount(self) -> int:
         return len(self.elements)
-    
+
     def getSentCount(self) -> int:
         sent_count = 0
         for elem in self.elements:
@@ -1487,10 +1492,14 @@ class DSDocument:
             res["NPS"].append(np.text)
         res["NUM_NPS"] = len(res["NPS"])
 
-        res["NOUN_CHUNKS"] = [
-            {"text": np.text, "start": np.start, "end": np.end}
-            for np in spacy_doc.noun_chunks
-        ] if spacy_doc is not None else []
+        res["NOUN_CHUNKS"] = (
+            [
+                {"text": np.text, "start": np.start, "end": np.end}
+                for np in spacy_doc.noun_chunks
+            ]
+            if spacy_doc is not None
+            else []
+        )
 
         tokens = []
         for token in spacy_doc if spacy_doc is not None else {}:
@@ -1611,7 +1620,9 @@ class DSDocument:
 
         skip_paras = self.skip_paras
 
-        for count_para, elem in enumerate(self.elements, start=1):  # for each paragraph in the file.
+        for count_para, elem in enumerate(
+            self.elements, start=1
+        ):  # for each paragraph in the file.
             if count_para <= skip_paras:
                 continue
             if count_para > (skip_paras + self.max_paras):
@@ -1952,7 +1963,9 @@ class DSDocument:
         self.processDoc()
 
     def loadFromHtmlFile(self, src_dir, html_file):
-        with open(os.path.join(src_dir, html_file), errors="ignore", encoding="utf-8") as fin:
+        with open(
+            os.path.join(src_dir, html_file), errors="ignore", encoding="utf-8"
+        ) as fin:
             html_str = fin.read()
         self.loadFromHtmlString(html_str)
 
@@ -2981,7 +2994,11 @@ class DSDocument:
                         "is_topic_cluster": is_tc,
                         "is_global": is_global,
                         "num_sents": len(topic_data),
-                        "topic": list(topic_info[0:3]),
+                        "topic": (
+                            list(topic_info[0:3])
+                            if topic_info is not None
+                            else [None, None, None]
+                        ),
                     }
                 )
                 num_topics += 1
@@ -3056,9 +3073,8 @@ class DSDocument:
             p_ri = 0  # initialize the row index w/in paragraph
 
             if topic is not None:  # topic exists
-                if (
-                    not self.isLocalTopic(topic)
-                    and not DSDocument.isUserDefinedSynonym(topic)
+                if not self.isLocalTopic(topic) and not DSDocument.isUserDefinedSynonym(
+                    topic
                 ):  # topic cluster = user defined synonym
                     # if the topic is NOT a local topic AND it is NOT a topic cluster,
                     # we should skip this topic.
@@ -3082,9 +3098,7 @@ class DSDocument:
                         else:
                             count = l_count
 
-            if (
-                count < min_topics
-            ):  # min_topics == 2 by default.
+            if count < min_topics:  # min_topics == 2 by default.
                 # Skip topics that do not apper in more than 2 paragraphs.
                 continue
 
@@ -3092,7 +3106,7 @@ class DSDocument:
                 topic
             )  # if we get here, the topic is a global topic.
 
-            is_tc =  DSDocument.isUserDefinedSynonym(
+            is_tc = DSDocument.isUserDefinedSynonym(
                 topic
             )  # check if topic is a topic cluster.
 
@@ -3542,9 +3556,8 @@ class DSDocument:
             count = -1
 
             if topic is not None:
-                if (
-                    not self.isLocalTopic(topic)
-                    and not DSDocument.isUserDefinedSynonym(topic)
+                if not self.isLocalTopic(topic) and not DSDocument.isUserDefinedSynonym(
+                    topic
                 ):
                     continue
 
@@ -3760,7 +3773,9 @@ class DSDocument:
         topics = self.global_topics
         if self.local_topics_dict is not None:
             for _, value in self.local_topics_dict.items():
-                local_topics = [t[0] for t in value]  # make a list of lemma/topic strings
+                local_topics = [
+                    t[0] for t in value
+                ]  # make a list of lemma/topic strings
                 topics += local_topics
 
         topics = list(set(topics))
@@ -3934,15 +3949,17 @@ class DSDocument:
             # elif not isinstance(sent_data[0], str) and first_sent:
             #     sent_dict = sent_data[3]
 
-                # w = sent_dict["text_w_info"][0]  # get the first word
-                # first_word_pos = w[WORD_POS]
+            #     w = sent_dict["text_w_info"][0]  # get the first word
+            #    first_word_pos = w[WORD_POS]
 
             s = generate_html(sent_data)
 
             if s != "<p></p>":
                 html_strs.append(s)
 
-            if isinstance(sent_data[0], str) and sent_data[0] == "\n":  # paragraph break
+            if (
+                isinstance(sent_data[0], str) and sent_data[0] == "\n"
+            ):  # paragraph break
                 # first_sent = True
                 sent_pos = 0
             else:

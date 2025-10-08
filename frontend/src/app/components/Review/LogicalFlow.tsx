@@ -11,6 +11,7 @@ import {
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import type { Optional } from "../../..";
 import {
   isErrorData,
   type LogicalFlowData,
@@ -57,7 +58,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
-      writing_task: WritingTask;
+      writing_task: Optional<WritingTask>;
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
@@ -86,9 +87,9 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
       console.error("Error fetching Logical Flow review:", error);
     },
   });
+  // When the document or writing task changes, fetch a new review
   useEffect(() => {
-    if (!document || !writing_task) return;
-    // Fetch the review data for Logical Flow
+    if (!document) return;
     mutation.mutate({
       document,
       writing_task,

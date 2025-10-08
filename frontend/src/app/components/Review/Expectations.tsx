@@ -59,21 +59,6 @@ export const ExpectationsButton: FC<ButtonProps> = (props) => {
   );
 };
 
-// export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-//   <Translation ns={"review"}>
-//     {(t) => (
-//       <span {...props}>
-//         <Icon />
-//         {t("expectations.title")}
-//       </span>
-//     )}
-//   </Translation>
-// );
-
-// function useExpectation(elementRef: Ref<HTMLDivElement>, rule: Rule) {
-
-// }
-
 type ExpectationProps = AccordionItemProps & {
   rule: Rule;
   setCurrent?: (key: AccordionEventKey) => void;

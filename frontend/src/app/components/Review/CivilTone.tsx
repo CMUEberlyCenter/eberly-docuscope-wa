@@ -11,6 +11,7 @@ import {
 import { Accordion, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import type { Optional } from "../../..";
 import {
   isErrorData,
   type CivilToneData,
@@ -42,9 +43,8 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
-      writing_task: WritingTask;
+      writing_task: Optional<WritingTask>;
     }) => {
-      const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
@@ -53,7 +53,7 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ document, writing_task }),
+        body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
       if (!response.ok) {
@@ -75,9 +75,9 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
     },
   });
 
+  // When the document or writing task changes, fetch a new review
   useEffect(() => {
-    if (!document || !writing_task) return;
-    // Fetch the review data for Civil Tone
+    if (!document) return;
     mutation.mutate({
       document,
       writing_task,

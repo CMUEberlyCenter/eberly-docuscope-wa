@@ -19,7 +19,6 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
@@ -100,7 +99,6 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
   const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
@@ -145,7 +143,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
     },
   });
   useEffect(() => {
-    if (!document || !writing_task) return;
+    if (!document) return;
     // Fetch the review data for Sentences
     dispatch({ type: "remove" });
     mutation.mutate({
@@ -154,7 +152,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [document, writing_task]);
+  }, [document]);
   // useEffect(() => {
   //   if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
   // }, [ontopicProse]);

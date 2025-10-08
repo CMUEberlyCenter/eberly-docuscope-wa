@@ -56,7 +56,6 @@ import { clearAllHighlights } from "../../service/topic.service";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./Organization.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
@@ -198,8 +197,6 @@ const Legend: FC<ContainerProps> = (props) => (
           <Col>
             <span
               className="fake-btn border rounded border-primary text-center text-primary"
-              // className="border rounded border-primary text-center px-2 text-primary"
-              // className="btn btn-primary btn-sm"
               title={t("organization.legend.boxed_number")}
             >
               1
@@ -257,15 +254,11 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
   const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
-  // const data = useOnTopicData();
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selected, setSelected] = useState<SelectedRowCol>(null);
 
-  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
-  // const ontopicProse = useOnTopicProse();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
@@ -300,24 +293,16 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
       console.error("Error fetching Organization review:", error);
     },
   });
+  // When the document changes, fetch a new ontopic review
   useEffect(() => {
-    if (!document || !writing_task) return;
-    // Fetch the review data for Sentences
+    if (!document) return;
     mutation.mutate({
       document,
     });
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [document, writing_task]);
-
-  // useEffect(() => {
-  //   if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
-  // }, [ontopicProse]);
-
-  // const [selectedParagraph, setSelectedParagraph] = useState(-1);
-  // const [selectedSentence, setSelectedSentence] = useState(-1);
-  // const [selectedTopic, setSelectedTopic] = useState<string[]>([]);
+  }, [document]);
 
   useEffect(() => {
     if (data && "response" in data) {

@@ -108,12 +108,7 @@ logical_flow:
   suggestion: "Suggestion:"
 expectations:
   title: Content Expectations
-  error:
-    no_task: No text type specified!
-  sentences: 'Sentences:'
-  suggestions: 'Suggestions:'
-  warning: This expectation is not addressed in your draft.
-  no_sentences: No relevant text was located in your draft.
+  no_writing_task_tooltip: Please select a writing type to see the content expectations.
 organization:
   title: Topical Progression
   error: 'Error loading Topical Progression data:'
