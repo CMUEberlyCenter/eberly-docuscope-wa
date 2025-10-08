@@ -22,5 +22,6 @@ declare module 'ltijs' {
       }
     ) => void;
     app: Express;
+    getAllPlatforms: () => Promise<unknown[]>; // LTIPlatform[]
   };
 }
