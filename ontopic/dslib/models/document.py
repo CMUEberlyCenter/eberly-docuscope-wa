@@ -80,6 +80,9 @@ be_verbs = [
 ##################################################
 
 import spacy  # SpaCy NLP library
+from spacy.language import Language
+from spacy.tokenizer import Tokenizer
+
 # import dslib.models.stat as ds_stat
 
 NLP_MODEL_DEFAULT = 0
@@ -229,6 +232,20 @@ es_extra_stop_words = []  # TBD
 es_pronouns = []  # TBD
 
 
+@Language.component("tag_sentencizer")
+def tag_sentencizer(doc):
+    for token in doc:
+        # ONLY break sentences for image tags
+        if re.match(r'<img\d+/?>', token.text):
+            # This token starts a sentence
+            if token.i > 0:
+                doc[token.i].is_sent_start = True
+            # Next token also starts a sentence
+            if token.i < len(doc) - 1:
+                doc[token.i + 1].is_sent_start = True
+    
+    return doc
+
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     """Set the language model used by SpaCy."""
     global nlp
@@ -265,6 +282,19 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
 
         if nlp is None:
             return
+
+        # Pattern to match any HTML tag (so they all stay intact during tokenization)
+        # This prevents < and > from being split
+        html_tag_pattern = r'</?[a-zA-Z][^>]*/?>'
+
+        nlp.tokenizer = Tokenizer(
+            nlp.vocab,
+            token_match=re.compile(html_tag_pattern).match
+        )
+
+        # Add the component to the pipeline, before the 'parser'            
+        nlp.add_pipe("tag_sentencizer", before="parser")
+
         # initialize the list of stop_words in the current language
         stop_words = list(
             nlp.Defaults.stop_words
@@ -366,6 +396,31 @@ def get_text_preserve_inline(element, inline_tags=None):
     html = re.sub(r"\s+", " ", html).strip()
 
     return html
+
+def extract_and_replace_images(html_string):
+    """
+    Replaces <img> tags with numbered IDs and extracts them into a dictionary.
+    
+    Args:
+        html_string: HTML string containing <p> tag with images
+        
+    Returns:
+        tuple: (modified_string, dict_of_image_tags)
+    """
+    images = {}
+    counter = [0]  # Using list to make it mutable in nested function
+    
+    def replace_img(match):
+        counter[0] += 1
+        img_tag = match.group(0)
+        replacement = f"<img{counter[0]:02d}/>"
+        images[replacement] = img_tag
+        return replacement
+    
+    # Find and replace all <img> tags
+    modified_string = re.sub(r'<img[^>]*>', replace_img, html_string)
+    
+    return modified_string, images
 
 
 ##################
@@ -636,6 +691,7 @@ class DSDocument:
                 "h5",
                 "h6",
                 "table",
+                "img",
                 "ul",
                 "ol",
                 "li",
@@ -673,14 +729,25 @@ class DSDocument:
 
             text = get_text_preserve_inline(html_element)
 
+            text, images = extract_and_replace_images(text)
+
             data["sentences"] = []
             parsed_para = nlp(text)
             slist = [sent for sent in parsed_para.sents]  # list of sentences
 
             for s in slist:
+                if s.text.startswith("<img"):
+                    text = images[s.text]
+                    is_image = True
+                    s = text
+                else:
+                    text = s.text.strip()
+                    is_image = False
+
                 sent_dict = {}
-                sent_dict["text"] = s.text.strip()
+                sent_dict["text"] = text
                 sent_dict["sent"] = s  # spacy's NLP object
+                sent_dict["is_image"] = is_image
                 data["sentences"].append(sent_dict)
 
             html_element["data-ds-paragraph"] = f"{self.para_count}"
@@ -1652,9 +1719,12 @@ class DSDocument:
                         sent_dict["text"], start=word_pos + 1
                     )
                 else:
-                    sent_dict["text_w_info"], NPs, word_pos = self.processSent(
-                        sent_dict["sent"], start=word_pos + 1
-                    )
+                    if sent_dict.get("is_image", False):
+                        continue
+                    else:
+                        sent_dict["text_w_info"], NPs, word_pos = self.processSent(
+                            sent_dict["sent"], start=word_pos + 1
+                        )
 
                 sent_dict["sent_analysis"] = self.analyzeSent(
                     sent_dict, elem.content_type
@@ -1969,6 +2039,7 @@ class DSDocument:
             topics = []
         if font_info is None:
             font_info = default_font_info
+
         prev_content_type = None
         tag = None
         pcount = 0
@@ -1981,6 +2052,7 @@ class DSDocument:
             if elem.content_type not in [ContentType.PARAGRAPH, ContentType.LISTITEM]:
                 # We only need to update sentences in paragraphns and lists.
                 continue
+
             if elem.content_type == ContentType.PARAGRAPH:
                 para_id = elem.para_id
                 if self.soup:
@@ -2019,6 +2091,13 @@ class DSDocument:
             for sent in elem.data[
                 "sentences"
             ]:  # for each sentence within this element.
+
+                if sent.get("is_image", False):
+                    html_str += sent["text"]
+                    html_str += " "
+                    scount += 1
+                    continue
+
                 total_words = len(sent["text_w_info"])  # get the total # of words
                 is_combo = False
                 combo_word = ""
@@ -2282,11 +2361,9 @@ class DSDocument:
         if self.soup is None:
             logging.error("Error: soup is None, cannot convert to XML!")
             return ""
-        allowed_attrs = ["id"]
+        allowed_attrs = ["id", "alt", "src"]
 
         soup_copy = copy.deepcopy(self.soup)
-
-        ## TODO -- The attributes of <span>  tags are stripped
 
         for tag in soup_copy.find_all():
             if isinstance(tag, Tag) and tag.attrs:
@@ -2331,6 +2408,8 @@ class DSDocument:
         for elem in selected_elem_list:
             p = elem.data
             for s in p["sentences"]:  # for each sentence
+                if s.get("is_image", False):
+                    continue
                 for l in s["new_accum_lemmas"]:  # for each new lemma
                     t = (l[POS], l[LEMMA])  # tuple = (POS, LEMMA)
                     if t not in temp:  # if the lemma 'l' is not already in the list,
@@ -2399,6 +2478,8 @@ class DSDocument:
 
             # we'll need to find a sentence with a single punctuation character.
             for s in p["sentences"]:
+                if s.get("is_image", False):
+                    continue
                 if len(s["text"]) == 1 and (
                     s["text"] in dashes
                     or s["text"] in hyphen_slash
@@ -2583,6 +2664,8 @@ class DSDocument:
 
             s_count = 1
             for s in p["sentences"]:  # for each sentence
+                if s.get("is_image", False):
+                    continue
                 for l in all_lemmas:  # for each topic candidate
                     is_new = False
                     is_given = False
@@ -2797,6 +2880,8 @@ class DSDocument:
                 prev_content_type = elem.content_type
 
                 for s in p["sentences"]:  # for each sentence
+                    if s.get("is_image", False):
+                        continue
                     if len(s["text"]) == 1 and (
                         s["text"] in dashes
                         or s["text"] in hyphen_slash
@@ -3005,13 +3090,6 @@ class DSDocument:
         global_data = self.getGlobalTopicalProgData(sort_by=sort_by)
         self.updateLocalTopics()
         self.updateGlobalTopics(global_data)
-
-        # topics = (
-        #     self.getCurrentTopics()
-        # )  # These 2 lines create a data structure that allows us
-        # self.locateTopics(
-        #     topics
-        # )  # to count the # of sentences each topic appears later. 8/23/2022.
 
         if global_data is None:
             return {"error": "ncols is 0"}
