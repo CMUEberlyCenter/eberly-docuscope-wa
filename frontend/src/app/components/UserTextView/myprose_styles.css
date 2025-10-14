@@ -54,3 +54,17 @@ ul {
   margin-bottom: 9pt;
   /* color: #303030; */
 }
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+td,
+th {
+  border: 1px solid #ddd;
+  padding: 4px;
+}
