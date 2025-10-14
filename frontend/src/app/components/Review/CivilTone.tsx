@@ -35,7 +35,6 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
   const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<CivilToneData>>(null);
-  // const review = useCivilToneData();
   const id = useId();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);

@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useState } from "react";
+import { Activity, type FC, type HTMLProps, useEffect, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -11,6 +11,7 @@ import {
   Tabs,
   Tooltip,
 } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
@@ -36,7 +37,6 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
-import { ErrorBoundary } from "react-error-boundary";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -269,9 +269,9 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {(!tool || tool === "null") && (
+                  <Activity mode={(!tool || tool === "null") ? "visible" : "hidden"}>
                     <NullTool text={t("null.big_picture")} />
-                  )}
+                  </Activity>
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
@@ -423,9 +423,9 @@ export const Review: FC = () => {
                       </Alert>
                     )}
                   >
-                    {(!otherTool || otherTool === "null") && (
+                    <Activity mode={(!otherTool || otherTool === "null") ? "visible" : "hidden"}>
                       <NullTool text={t("null.fine_tuning")} />
-                    )}
+                    </Activity>
                     {otherTool === "logical_flow" && <LogicalFlow />}
                     {otherTool === "civil_tone" && <CivilTone />}
                     {otherTool === "credibility" && <Credibility />}
