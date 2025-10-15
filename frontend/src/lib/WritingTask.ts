@@ -305,11 +305,11 @@ export function isWritingTask(
 }
 
 export function equivalentWritingTasks(
-  a: WritingTask | null,
-  b: WritingTask | null
+  a: Optional<WritingTask>,
+  b: Optional<WritingTask>
 ): boolean {
+  if (!isWritingTask(a) || !isWritingTask(b)) return false;
   if (a === b) return true;
-  if (!a || !b) return false;
   return (
     a.info.name === b.info.name &&
     a.info.version === b.info.version &&

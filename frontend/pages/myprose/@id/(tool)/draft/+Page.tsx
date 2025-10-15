@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import CustomEditor from "../../../../src/app/components/Editor/CustomEditor";
+import CustomEditor from "../../../../../src/app/components/Editor/CustomEditor";
 
 const Page: FC = () => {
   return <CustomEditor />;

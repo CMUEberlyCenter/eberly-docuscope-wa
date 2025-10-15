@@ -1,0 +1,173 @@
+---
+
+#
+# Main instructions for Tools
+#
+revision_plan: >
+  <p>Aquí están los pasos para revisar y corregir tu borrador:</p>
+  <ol>
+  <li>Comienza tu revisión examinando las <b>expectativas de contenido</b>, ya que esto forma la base de una retroalimentación efectiva de escritura.</li>
+  <li>Una vez evaluado el contenido, examina la <b>estructura global y la lógica</b>, analizando cómo fluyen los argumentos y qué tan efectivamente se conectan las ideas entre secciones.</li>
+  <li>Luego, evalúa el uso de <b>evidencia y estrategias de escritura que generan confianza</b> con los lectores.</li>
+  <li>A continuación, pasando a un nivel más detallado, revisa la <b>claridad de párrafos y oraciones</b>.</li>
+  <li>Finalmente, refina el <b>estilo de escritura y tono</b> para pulir tu trabajo.</li>
+  </ol>
+  <p>Recuerda enfocarte en mejoras generales antes de perfeccionar oraciones y detalles del lenguaje.</p>
+
+expectations: >
+  <p>Verifica si tu escritura incluye toda la información que los lectores esperan encontrar en tu texto, e incorpora los elementos faltantes antes de abordar otros problemas.</p>
+  <p>Abordar primero las brechas de contenido asegura que tu escritura cumpla con las expectativas de los lectores y logre su propósito de manera efectiva.</p>
+
+lines_of_arguments: >
+  <p>Evalúa qué tan efectivamente tu escritura desarrolla su tesis a través de afirmaciones y evidencias para crear un argumento cohesivo y persuasivo.</p>
+  <p>Fortalecer tu tesis y alinear las afirmaciones mejora la persuasión y cohesión de tu argumento.</p>
+
+pathos: >
+  <p>Revisa tu comunicación en busca de elementos que creen resonancia emocional (<i>es decir,</i> pathos) y conexiones significativas con tu audiencia.</p>
+  <p>Refinar los recursos emocionales asegura que tu mensaje llegue al corazón mientras mantiene la autenticidad y el compromiso ético.</p>
+
+credibility: >
+  <p>Revisa tu comunicación en busca de elementos que establezcan y mantengan la credibilidad y el carácter ético (<i>es decir,</i> ethos).</p>
+  <p>Refinar la credibilidad asegura que tu mensaje tenga el peso de la autoridad mientras demuestra integridad y confiabilidad. El objetivo no es simplemente mostrar credenciales, sino construir confianza genuina.<p>
+
+prominent_topics: >
+  <p>Examina los temas prominentes en tu escritura y evalúa si los has elaborado con suficientes detalles.</p>
+  <p>Los temas bien elaborados captan a los lectores y dejan una impresión duradera al proporcionar una comprensión clara y perspectivas significativas.</p>
+
+logical_flow: >
+  <p>Identifica interrupciones organizativas que impactan el flujo de lectura y la comprensión, como ideas fuera de orden o conceptos dispersos.</p>
+  <p>Un flujo lógico mejorado aumenta la legibilidad y ayuda a los lectores a comprender mejor tu texto.</p>
+
+term_matrix: >
+  <p>Observa cómo se organizan términos específicos en tu borrador.</p>
+  <p>Utiliza la visualización interactiva para explorar conexiones y la ubicación de términos importantes.</p>
+  <p>Refinar la estructura y el flujo de ideas asegura una mayor cohesión en tu escritura.</p>
+
+sources: >
+  <p>Revisa los problemas asociados con cómo se referencian las fuentes. Además, verifica si la credibilidad de las fuentes se asigna adecuadamente revisando cómo se utiliza cada fuente en tu borrador.</p>
+  <p>Integrar fuentes apropiadamente fortalece la credibilidad y el respaldo de tu texto.</p>
+
+professional_tone: >
+  <p>Revisa oraciones con características lingüísticas que puedan restar valor a un tono apropiado.</p>
+  <p>Refinar el tono asegura que tu escritura cumpla con los estándares de contextos académicos y profesionales.</p>
+
+civil_tone: >
+  <p>Revisa tu comunicación en busca de características lingüísticas que mantengan un discurso respetuoso, constructivo y equilibrado.</p>
+  <p>Refinar el tono asegura que tu mensaje promueva la comprensión y el diálogo colaborativo mientras respeta diversas perspectivas.</p>
+
+clarity: >
+  <p>Revisa oraciones con muchos sintagmas nominales, ya que estas oraciones más largas con estructuras potencialmente complejas pueden reducir la legibilidad.</p>  
+  <p>Mejorar la claridad de las oraciones aumenta la legibilidad y asegura que tus ideas se comuniquen efectivamente.</p>
+
+sentence_density: >
+  <p>Identifica oraciones que pueden ser difíciles de leer utilizando la visualización. Concéntrate en oraciones con muchos sintagmas nominales y revisa según sea necesario.</p>  
+  <p>Mejorar la claridad de las oraciones aumenta la legibilidad y asegura que tus ideas se comuniquen efectivamente.</p>
+
+paragraph_clarity: >
+  <p>Revisa tus párrafos con problemas de flujo.</p>
+  <p>Mejorar el flujo dentro de cada párrafo aumenta la legibilidad y asegura que tus ideas se comuniquen efectivamente.</p>
+
+
+#
+# Instructions for Review Insights within each Review Tool
+#
+lines_of_arguments_insights: >
+  Verifica cómo tu texto desarrolla su argumento.
+
+credibility_insights: >
+  Verifica cómo tu texto establece credibilidad.
+
+pathos_insights: >
+  Verifica cómo tu texto utiliza el recurso emocional (pathos).
+
+prominent_topics_insights: >
+  Verifica qué temas son prominentes en tu texto y cómo están elaborados.
+
+logical_flow_insights: >
+  Verifica posibles problemas de flujo entre párrafos.
+
+sources_insights: >
+  Verifica cómo tu texto utiliza las fuentes.
+
+professional_tone_insights: >
+  Verifica problemas de tono profesional.
+
+civil_tone_insights: >
+  Verifica cualquier lenguaje descortés.  
+
+paragraph_clarity_insights: >
+  Verifica párrafos con problemas de flujo.
+
+sentence_density_insights: >
+  Verifica oraciones que pueden ser difíciles de leer.
+
+#
+# Scope notes used by menu items for review tools.
+#
+guide_scope_note: >
+  Crear un plan de revisión asegura una comunicación efectiva
+
+expectations_scope_note: >
+  Abordar las brechas de contenido asegura que tu escritura cumpla con las expectativas de los lectores
+
+lines_of_arguments_scope_note: >
+  Desarrollar afirmaciones bien respaldadas y abordar contraargumentos fortalece tu capacidad de persuasión
+
+credibility_scope_note: >
+  Establecer credibilidad y carácter ético construye confianza genuina y autoridad con tu audiencia
+
+pathos_scope_note: >
+  Crear resonancia emocional y conexiones significativas fortalece el compromiso de la audiencia
+
+term_matrix_scope_note: >
+  Refinar la estructura temática asegura una mayor cohesión en tu escritura.
+
+prominent_topics_scope_note: >
+  Elaborar temas prominentes con suficiente detalle ayuda a los lectores a captar ideas clave
+
+logical_flow_scope_note: >
+  Organizar ideas coherentemente mejora la legibilidad y la comprensión del lector
+
+sources_scope_note: >
+  Integrar y citar fuentes apropiadamente fortalece la credibilidad y la evidencia de respaldo de tu texto
+
+professional_tone_scope_note: >
+  Mantener características lingüísticas apropiadas ayuda a que tu escritura cumpla con estándares profesionales
+
+civil_tone_scope_note: >
+  Usar lenguaje respetuoso y equilibrado promueve el diálogo colaborativo entre diversas perspectivas
+
+paragraph_clarity_scope_note: >
+  Mejorar el flujo de párrafos aumenta la legibilidad y la comunicación efectiva de ideas
+
+sentence_density_scope_note: >
+  Simplificar oraciones complejas mejora la legibilidad y la efectividad de la comunicación
+
+notes_to_prose_scope_note: >
+  Genera texto en prosa a partir de tus notas para un párrafo.
+
+notes_to_bullets_scope_note: >
+  Genera una lista con viñetas a partir de tus notas
+
+copyedit_scope_note: >
+  Revisa tu borrador para mejorar claridad y gramática
+
+additional_tools_scope_note: >
+  Refina tu borrador con herramientas de revisión adicionales
+
+disabled_scope_note: >
+  Esta herramienta de revisión no es aplicable al tipo de escritura actual
+
+# Instructions used after the general feedback (i.e., after 'What's working' and 'Revision opportunities')
+guide: >
+  <p><b>¿Listo para revisar?</b> Recuerda revisar primero las expectativas de contenido; luego trabaja en mejoras generales antes de perfeccionar oraciones y detalles del lenguaje.</p>
+
+# Message shown in the guide panel when a specific review tool is disabled.
+disabled_tool: >
+  <p>Esta herramienta de revisión no es aplicable al tipo de escritura actual.</p>
+
+fine_tuning: >
+  <div align='center'><p>Utiliza las herramientas de Ajuste Fino para revisar<br/>la claridad, estilo y tono de tu escritura</div>
+
+big_picture: >
+  <div align='center'><p>Utiliza las herramientas de Visión General para revisar <br/>las expectativas de contenido, <br/>la estructura general y el argumento de tu borrador.</p></div>

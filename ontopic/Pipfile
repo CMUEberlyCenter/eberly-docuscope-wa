@@ -13,6 +13,7 @@ unidecode = "*"
 fastapi = "*"
 hypercorn = "*"
 regex = "*"
+mammoth = "*"
 
 [dev-packages]
 pylint = "*"

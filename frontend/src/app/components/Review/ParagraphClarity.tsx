@@ -11,6 +11,7 @@ import {
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import type { Optional } from "../../..";
 import {
   isErrorData,
   type OptionalReviewData,
@@ -19,7 +20,7 @@ import {
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -47,7 +48,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] =
     useState<OptionalReviewData<ParagraphClarityData>>(null);
@@ -58,7 +59,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
-      writing_task: WritingTask;
+      writing_task: Optional<WritingTask>;
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
@@ -96,8 +97,9 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
       abortControllerRef.current = null;
     },
   });
+  // When the document or writing task changes, fetch a new review
   useEffect(() => {
-    if (!document || !writing_task) return;
+    if (!document) return;
     // Fetch the review data for Paragraph Clarity
     mutation.mutate({ document, writing_task });
     // TODO error handling

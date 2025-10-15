@@ -33,7 +33,7 @@ import {
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -59,21 +59,6 @@ export const ExpectationsButton: FC<ButtonProps> = (props) => {
   );
 };
 
-// export const ExpectationsTitle: FC<HTMLProps<HTMLSpanElement>> = (props) => (
-//   <Translation ns={"review"}>
-//     {(t) => (
-//       <span {...props}>
-//         <Icon />
-//         {t("expectations.title")}
-//       </span>
-//     )}
-//   </Translation>
-// );
-
-// function useExpectation(elementRef: Ref<HTMLDivElement>, rule: Rule) {
-
-// }
-
 type ExpectationProps = AccordionItemProps & {
   rule: Rule;
   setCurrent?: (key: AccordionEventKey) => void;
@@ -87,7 +72,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
 }) => {
   const dispatch = useReviewDispatch();
   const { task } = useWritingTask();
-  const document = useFileText();
+  const [document] = useFileText();
   const [state, setState] = useState<
     "unset" | "pending" | "fulfilled" | "rejected"
   >("unset");

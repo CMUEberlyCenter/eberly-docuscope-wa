@@ -202,7 +202,7 @@ async function __main__() {
       })
       res.setHeader('Content-type', 'text/html');
       res.send(message);
-    } catch (err) {
+    } catch (err: Error | any) {
       if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send(Forbidden('Platform already registered.'));
       return res.status(500).send(InternalServerError(err.message));
     }
@@ -289,13 +289,13 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
-          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId}`);
+          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`);
         }
       }
     } catch (err) {
       console.error(err);
     } finally {
-      const platforms = await Provider.getAllPlatforms();
+      const platforms: { platformId: () => Promise<string>; platformName: () => Promise<string>; platformUrl: () => Promise<string>; platformActive: () => Promise<boolean>; }[] = await Provider.getAllPlatforms();
       platforms.forEach(async (platform) => {
         const platformId = await platform.platformId();
         const name = await platform.platformName();
@@ -309,7 +309,12 @@ async function __main__() {
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
     app.use(express.json({limit: '10mb'}));
-    app.use(cors({ origin: '*' }));
+    // app.use(cors({ origin: '*' }));
+    app.use(cors());
+    // app.use((_req, res, next) => {
+    //   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    //   next();
+    // });
 
     // Setup sessions
     const MongoDBSessionStore = MongoDBStore(session);
@@ -437,6 +442,12 @@ async function __main__() {
         session: req.session,
         writing_task_id,
         settings: getSettings(),
+        google: {
+          analytics: process.env.GOOGLE_ANALYTICS,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          apiKey: process.env.GOOGLE_API_KEY,
+          appKey: process.env.GOOGLE_APP_KEY,
+        }
         // ltik,
         // headers: {
         //   'Content-Type': 'text/html',
@@ -458,6 +469,9 @@ async function __main__() {
           res.writeEarlyHints({ link: earlyHints.map((hint) => hint.earlyHintLink) });
         }
         headers.forEach(([name, value]) => res.setHeader(name, value));
+        // Remove COEP/COOP headers to allow use of Google Drive Picker
+        res.removeHeader('Cross-Origin-Embedder-Policy');
+        res.removeHeader('Cross-Origin-Resource-Policy');
         res.status(statusCode).send(body);
       }
     });

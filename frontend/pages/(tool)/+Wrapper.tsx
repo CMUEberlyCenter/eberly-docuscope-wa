@@ -12,6 +12,7 @@ const DataWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   useEffect(() => setTask(data), [data, setTask]);
   return <>{children}</>;
 };
+
 const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WritingTaskProvider>

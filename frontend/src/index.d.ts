@@ -1,5 +1,5 @@
-import type { Analysis } from './src/lib/ReviewResponse';
-import type { WritingTask } from './src/lib/WritingTask';
+import type { Analysis } from './lib/ReviewResponse';
+import type { WritingTask } from './lib/WritingTask';
 
 type Optional<T> = T | undefined | null;
 

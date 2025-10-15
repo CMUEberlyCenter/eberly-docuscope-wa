@@ -25,6 +25,7 @@ import {
   isWritingTask,
   type WritingTask,
 } from '../../lib/WritingTask';
+import { getSettings } from '../../ToolSettings';
 import { doChat } from '../data/chat';
 import { insertLog } from '../data/mongo';
 import { validate } from '../model/validate';
@@ -263,7 +264,7 @@ reviews.post(
     body('writing_task')
       .isObject()
       .custom(isWritingTask)
-      .withMessage('Invalid writing task object')
+      .withMessage('Invalid writing task')
   ),
   validate(
     body('expectation')
@@ -272,12 +273,17 @@ reviews.post(
       .withMessage('Expectation is required')
   ),
   async (request: Request, response: Response) => {
+    if (!getSettings().expectations) {
+      return response
+        .status(403)
+        .send(Forbidden('Expectations tool is not available!'));
+    }
     const { document, writing_task, expectation } =
       request.body as AnalysisBody;
     if (!isWritingTask(writing_task)) {
       return response
         .status(422)
-        .send(UnprocessableContent('Invalid writing task object'));
+        .send(UnprocessableContent('Invalid writing task'));
     }
     if (!isEnabled(writing_task, 'expectations')) {
       return response
@@ -360,14 +366,26 @@ reviews.post(
  */
 reviews.post(
   '/:analysis',
-  validate(body('document').isString().notEmpty()),
-  validate(body('writing_task').isObject().custom(isWritingTask)),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
+  validate(body('document').isString().notEmpty()),
   async (request: Request, response: Response) => {
     const { analysis } = request.params;
+    // Check if the tool is enabled in settings
+    const settings = getSettings();
+    if (analysis in settings && !settings[analysis as keyof typeof settings]) {
+      return response
+        .status(403)
+        .send(Forbidden(`${analysis} tool is not available!`));
+    }
     const { document, writing_task } = request.body as AnalysisBody;
     // const token: IdToken | undefined = response.locals.token;
-    if (!isEnabled(writing_task, analysis as ReviewPrompt)) {
+    if (writing_task && !isWritingTask(writing_task)) {
+      // conditional validation as writing_task is optional #230
+      return response
+        .status(422)
+        .send(UnprocessableContent('Invalid writing task'));
+    }
+    if (writing_task && !isEnabled(writing_task, analysis as ReviewPrompt)) {
       return response.status(403).send(Forbidden(`${analysis} is disabled!`));
     }
     const controller = new AbortController();

@@ -165,7 +165,11 @@ async def ontopic(data: OnTopicRequest):
     document.loadFromHtmlString(f"<body>{data.base}</body>")
 
     coherence = document.generateGlobalVisData(2, 1, 0)  # views.TOPIC_SORT_APPEARANCE)
-    clarity: list[ClarityData] = document.getSentStructureData()
+    clarity = document.getSentStructureData()
+    # Remove redundant data as it is unexpected in the frontend.
+    clarity_data: list[ClarityData] = [
+        d[:2] + d[3:] if isinstance(d, tuple) else d for d in clarity
+    ]
     topics = document.getCurrentTopics()
 
     num_paragraphs = coherence.get("num_paras")
@@ -189,7 +193,7 @@ async def ontopic(data: OnTopicRequest):
     return OnTopicData(
         coherence=CoherenceData.model_validate(coherence),
         local=local,
-        clarity=clarity,
+        clarity=clarity_data,
         html=document.toHtml(topics, -1),
         html_sentences=document.getHtmlSents(clarity),
     )

@@ -35,11 +35,7 @@ function fromEnvFile(base: string, defaultValue?: string): string {
   if (file) {
     return readFileSync(file, 'utf-8').trim();
   }
-  const env = process.env[base];
-  if (env) {
-    return env;
-  }
-  return defaultValue ?? '';
+  return process.env[base] ?? defaultValue ?? '';
 }
 
 export const SESSION_KEY = fromEnvFile('SESSION_KEY', randomUUID());

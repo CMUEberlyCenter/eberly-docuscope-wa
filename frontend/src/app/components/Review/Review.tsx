@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useState } from "react";
+import { Activity, type FC, type HTMLProps, useEffect, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -11,13 +11,14 @@ import {
   Tabs,
   Tooltip,
 } from "react-bootstrap";
+import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
 import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Legal } from "../Legal/Legal";
 import { useSettingsContext } from "../Settings/SettingsContext";
 import { StageHeader } from "../StageHeader/StageHeader";
@@ -36,7 +37,6 @@ import "./Review.scss";
 import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
-import { ErrorBoundary } from "react-error-boundary";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -71,13 +71,13 @@ export const Review: FC = () => {
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
   const [ready, setReady] = useState<boolean>(false);
-  const userText = useFileText();
+  const [userText] = useFileText();
   const { task: writingTask } = useWritingTask();
   const settings = useSettingsContext();
 
   useEffect(() => {
-    setReady(!!userText && userText.trim().length > 0 && !!writingTask);
-  }, [userText, writingTask]);
+    setReady(!!userText && userText.trim().length > 0);
+  }, [userText]);
   // useUnload();
   // useEffect(() => {
   //   if (ready) {
@@ -101,38 +101,51 @@ export const Review: FC = () => {
   const [bigPictureFeature, setBigPictureFeature] = useState(false);
   const [fineTuningFeature, setFineTuningFeature] = useState(false);
   useEffect(() => {
+    // As per #230 most features are available even without a writing task if
+    // enabled in settings.  The server settings have priority over writing tasks.
     setCivilToneFeature(
-      settings.civil_tone && isEnabled(writingTask, "civil_tone")
+      settings.civil_tone &&
+        (!writingTask || isEnabled(writingTask, "civil_tone"))
     );
     setCredibilityFeature(
-      settings.credibility && isEnabled(writingTask, "credibility")
+      settings.credibility &&
+        (!writingTask || isEnabled(writingTask, "credibility"))
     );
     setExpectationsFeature(
-      settings.expectations && isEnabled(writingTask, "expectations")
+      settings.expectations &&
+        (!writingTask || isEnabled(writingTask, "expectations"))
     );
+    // Lines of arguments only available if enabled in writing task.
     setArgumentsFeature(
       settings.lines_of_arguments &&
         isEnabled(writingTask, "lines_of_arguments")
     );
     setLogicalFlowFeature(
-      settings.logical_flow && isEnabled(writingTask, "logical_flow")
+      settings.logical_flow &&
+        (!writingTask || isEnabled(writingTask, "logical_flow"))
     );
     setParagraphClarityFeature(
-      settings.paragraph_clarity && isEnabled(writingTask, "paragraph_clarity")
+      settings.paragraph_clarity &&
+        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
     );
     setProfessionalToneFeature(
-      settings.professional_tone && isEnabled(writingTask, "professional_tone")
+      settings.professional_tone &&
+        (!writingTask || isEnabled(writingTask, "professional_tone"))
     );
     setIdeasFeature(
-      settings.prominent_topics && isEnabled(writingTask, "prominent_topics")
+      settings.prominent_topics &&
+        (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
-    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
     setSentencesFeature(
-      settings.sentence_density && isEnabled(writingTask, "sentence_density")
+      settings.sentence_density &&
+        (!writingTask || isEnabled(writingTask, "sentence_density"))
     );
-    setSourcesFeature(settings.sources && isEnabled(writingTask, "sources"));
+    setSourcesFeature(
+      settings.sources && (!writingTask || isEnabled(writingTask, "sources"))
+    );
     setOrganizationFeature(
-      settings.term_matrix && isEnabled(writingTask, "term_matrix")
+      settings.term_matrix &&
+        (!writingTask || isEnabled(writingTask, "term_matrix"))
     );
     setImpressionsFeature(
       false
@@ -207,11 +220,29 @@ export const Review: FC = () => {
                 <div className="h-100 d-flex flex-column overflow-auto">
                   <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                     {expectationsFeature ? (
-                      <ExpectationsButton
-                        disabled={!ready}
-                        active={tool === "expectations"}
-                        onClick={() => setTool("expectations")}
-                      />
+                      !writingTask && ready ? (
+                        <OverlayTrigger
+                          placement="bottom"
+                          overlay={
+                            <Tooltip>
+                              {t("instructions:expectations_scope_note")}
+                              <hr />
+                              {t("expectations.no_writing_task_tooltip")}
+                            </Tooltip>
+                          }
+                        >
+                          {/* div required to get tooltip overlay to work. */}
+                          <div>
+                            <ExpectationsButton disabled={true} />
+                          </div>
+                        </OverlayTrigger>
+                      ) : (
+                        <ExpectationsButton
+                          disabled={!ready}
+                          active={tool === "expectations"}
+                          onClick={() => setTool("expectations")}
+                        />
+                      )
                     ) : null}
                     {ideasFeature ? (
                       <ProminentTopicsButton
@@ -235,9 +266,11 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  {(!tool || tool === "null") && (
+                  <Activity
+                    mode={!tool || tool === "null" ? "visible" : "hidden"}
+                  >
                     <NullTool text={t("null.big_picture")} />
-                  )}
+                  </Activity>
                   {tool === "expectations" && <Expectations />}
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
@@ -389,9 +422,15 @@ export const Review: FC = () => {
                       </Alert>
                     )}
                   >
-                    {(!otherTool || otherTool === "null") && (
+                    <Activity
+                      mode={
+                        !otherTool || otherTool === "null"
+                          ? "visible"
+                          : "hidden"
+                      }
+                    >
                       <NullTool text={t("null.fine_tuning")} />
-                    )}
+                    </Activity>
                     {otherTool === "logical_flow" && <LogicalFlow />}
                     {otherTool === "civil_tone" && <CivilTone />}
                     {otherTool === "credibility" && <Credibility />}

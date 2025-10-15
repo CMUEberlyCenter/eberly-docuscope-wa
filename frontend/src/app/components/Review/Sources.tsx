@@ -19,12 +19,13 @@ import {
   type SourceType,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
-import { useFileText } from "../FileUpload/FileUploadContext";
+import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import { ReviewErrorData } from "./ReviewError";
+import type { Optional } from "../../..";
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
@@ -67,7 +68,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   // const review = useSourcesData();
-  const document = useFileText();
+  const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<SourcesData>>(null);
   const dispatch = useReviewDispatch();
@@ -75,7 +76,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
   const mutation = useMutation({
     mutationFn: async (data: {
       document: string;
-      writing_task: WritingTask;
+      writing_task: Optional<WritingTask>;
     }) => {
       const { document, writing_task } = data;
       abortControllerRef.current = new AbortController();
@@ -104,11 +105,10 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
       console.error("Error fetching Sources review:", error);
     },
   });
+  // When the document or writing task changes, fetch a new review
   useEffect(() => {
-    if (!document || !writing_task) return;
-    // Fetch the review data for Sources
+    if (!document) return;
     mutation.mutate({ document, writing_task });
-    // TODO error handling
     return () => {
       abortControllerRef.current?.abort();
     };
