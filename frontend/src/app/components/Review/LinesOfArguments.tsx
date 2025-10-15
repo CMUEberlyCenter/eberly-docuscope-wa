@@ -177,7 +177,6 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  // const review = useLinesOfArgumentsData();
   const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] =
