@@ -1,0 +1,186 @@
+about:
+  title: Acerca de
+  overview: 'Descripción del proyecto:'
+  project_link_title: Futuro de la Escritura
+  build: 'Compilación:'
+  version: 'Versión: {{version}} compilada el {{date}}'
+  template: 'Información de plantillas:'
+  templates: Plantillas compiladas el {{date}}
+  task: 'Tarea de escritura:'
+  task_name: 'Nombre: {{name}}'
+  acknowledgements:
+    title: 'Agradecimientos:'
+    content: >
+      Este proyecto ha sido parcialmente apoyado por la Fundación A.W. Mellon,
+      la Subvención Inicial de la Iniciativa Simon de Carnegie Mellon,
+      el Fondo de Desarrollo Docente Berkman,
+      y el Programa de Subvenciones Iniciales para Investigación y Desarrollo de Herramientas
+      Educativas Habilitadas por IA Generativa, Facultad Dietrich de Humanidades y Ciencias Sociales,
+      Centro Eberly para la Excelencia en la Enseñanza e Innovación Educativa,
+      Departamento de Inglés, y Centro para la Transferencia de Tecnología y Creación de Empresas.
+  cmu: Universidad Carnegie Mellon
+  simon: Iniciativa Simon
+document.title: myProse
+document.description: $t(document.title) es un entorno para estructurar tareas de escritura con la ayuda de inteligencia artificial generativa y otras herramientas de análisis de lenguaje natural.
+loading: Analizando...
+wait: Esto puede tardar unos segundos...
+legal:
+  myprose: Aviso de Privacidad de $t(document.title)
+  cmu: Legal
+  privacy: Aviso de Privacidad
+deeplink: Seleccione un tipo de texto para esta tarea
+deeplinking:
+  title: $t(document.title) LTI Deeplinking
+  disabled: Por favor seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
+  enabled: Haga clic para seleccionar contenido.
+  select_tool: Seleccione una herramienta
+  option:
+    draft: Borrador
+    review: Revisión
+  upload: Seleccione una Tarea de Escritura o cargue un archivo personalizado de Tarea de Escritura
+genlink:
+  title: Generador de Enlaces de Tareas de Escritura de $t(document.title)
+  link: 'Enlaces:'
+  draft: Borrador de $t(document.title)
+  review: Revisión de $t(document.title)
+  top_template: "$t(document.title): {{title}}"
+  draft_template: "Borrador de $t(document.title): {{title}}"
+  review_template: "Revisión de $t(document.title): {{title}}"
+audio:
+  play: Reproducir
+  pause: Pausar
+  stop: Rebobinar
+  show: Mostrar controles de texto a voz.
+  hide: Ocultar controles de texto a voz.
+editor:
+  gdoc:
+    error:
+      google_client_id: 'Error de configuración del servidor: ID de Cliente de Google no está definido.'
+      google_api_key: 'Error de configuración del servidor: Clave API de Google no está definida.'
+      google_app_id: 'Error de configuración del servidor: ID de Aplicación de Google no está definido.'
+      google_drive_api: API de Google Drive no está cargada.
+      docx: Error al obtener o convertir el archivo docx.
+      gdoc: Error al obtener o convertir el archivo de Google Doc.
+      gdoc_empty: La exportación de Google Doc devolvió contenido vacío.
+      unknown_type: 'Tipo de archivo no compatible: {{type}}'
+  upload:
+    title: Abrir
+    file: Archivo
+    open: Abrir
+    error:
+      title: 'Problemas de importación de archivo:'
+      overview: 'Revise los detalles a continuación: Las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
+      error: 'Error: {{message}}'
+      warning: 'Advertencia: {{message}}'
+      fail: Solo se permite seleccionar un archivo.
+      not_docx: '¡{{file}} no es un archivo docx!'
+      failed_write: No se puede guardar el archivo.
+      security: Archivo rechazado debido a error de seguridad.
+  menu:
+    file: Archivo
+    open: Importar desde archivo
+    gdoc: Importar desde Google Docs
+    save: Exportar
+    view: Fuente
+    view.font_size: 'Tamaño de fuente del editor: {{zoom}}%'
+    paragraph: Párrafo
+    h1: Encabezado 1
+    h2: Encabezado 2
+    h3: Encabezado 3
+    h4: Encabezado 4
+    h5: Encabezado 5
+    h6: Encabezado 6
+    list: Lista
+    numbered: Lista numerada
+    bold: Negrita
+    italic: Cursiva
+    underline: Subrayado
+    strike: Tachado
+    task: 'Expectativas de contenido:'
+    no_task: Ninguno seleccionado
+    no_edit: El texto no es editable.
+tool:
+  tab:
+    generate: Borrador
+    refine: Refinar
+    review: Revisar
+  button:
+    prose:
+      title: Prosa
+      tooltip: Generar prosa a partir de notas
+    bullets:
+      title: Viñetas
+      tooltip: Generar lista con viñetas a partir de notas
+    expectation:
+      title: Verificar
+      tooltip: Verificar expectativas de contenido
+    expectations:
+      title: Verificar todo
+      tooltip: Verificar todas las expectativas de contenido
+    flow:
+      title: Fluidez
+      tooltip: Verificar fluidez entre oraciones
+    copyedit:
+      title: Corrección
+      tooltip: Corrección de estilo
+      overview: 'Esta herramienta proporciona sugerencias para hacer tu escritura más clara y concisa. Ofrece dos versiones: una que muestra el texto revisado, y otra que marca los cambios sugeridos. Las explicaciones acompañan cada sugerencia, ayudándote a mejorar tu escritura mientras mantienes tu mensaje original.'
+    grammar:
+      title: Gramática
+      tooltip: Corregir gramática
+    view:
+      title: 'Abrir expectativas de contenido: {{title}}'
+  initial: Escriba y resalte texto para acciones adicionales.
+  bookmark: Marcar
+  bookmarked: Marcado
+  input: Su entrada
+  no_selection: Por favor seleccione algún texto antes de usar esta herramienta.
+  output: Respuesta de I.A.
+  regenerate: Regenerar
+  paste: Pegar texto
+  expectation: Expectativa seleccionada
+  select_expectation: Seleccione una expectativa
+  explanation: 'Explicación:'
+  suggestion: 'Revisión:'
+  tracking: 'Revisión con seguimiento:'
+clipboard: Copiar al portapapeles
+error:
+  unknown: Se produjo un error desconocido al procesar los resultados.
+  no_selection:
+    prose: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
+    bullets: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
+    default: No hay texto seleccionado. Resalte el texto primero.
+  no_results: No hay resultados válidos.
+expectation:
+  title: Seleccione una expectativa
+flow:
+  issue: 'Problema:'
+  suggestions: 'Sugerencias:'
+select_task:
+  title: Seleccionar tipo de escritura
+  filters: Filtros
+  label: Búsqueda de texto
+  placeholder: Ingrese título o palabras clave...
+  search: Buscar
+  context: Contexto
+  mode: Modo primario
+  upload: Cargar tipo de texto personalizado
+  invalid_upload: ¡El archivo cargado no es una especificación válida de tipo de texto!
+  "null": Sin tipo de texto
+  version: 'Versión: {{version}}'
+  copyright: 'Derechos de autor: {{copyright}}'
+  multiple_file_error: Cargue solo un archivo a la vez.
+  malformed_json: El contenido no pudo ser analizado como JSON.
+  select: Seleccionar categoría
+  select_all: Seleccionar todo
+  all_category: Todos
+cancel: Cancelar
+select: Seleccionar
+next: Siguiente
+select_insert: Seleccionar e insertar
+details:
+  include: Incluir detalles
+  insert: Insertar
+  overview: Resumen
+  about:
+    expectation: 'Acerca de esta expectativa:'
+    section: 'Acerca de esta sección:'
