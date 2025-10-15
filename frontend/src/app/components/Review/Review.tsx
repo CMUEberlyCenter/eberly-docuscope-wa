@@ -136,9 +136,6 @@ export const Review: FC = () => {
       settings.prominent_topics &&
         (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
-    setSourcesFeature(
-      settings.sources && (!writingTask || isEnabled(writingTask, "sources"))
-    );
     setSentencesFeature(
       settings.sentence_density &&
         (!writingTask || isEnabled(writingTask, "sentence_density"))

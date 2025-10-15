@@ -278,7 +278,7 @@ function isProfessionalToneOutput(
         'suggestion' in item &&
         typeof item.suggestion === 'string' &&
         'tone_type' in item &&
-        item.tone_type in ['confidence', 'subjectivity', 'emotional']
+        ['confidence', 'subjectivity', 'emotional'].includes(item.tone_type)
     )
   );
 }
