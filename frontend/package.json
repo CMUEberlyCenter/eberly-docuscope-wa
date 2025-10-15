@@ -136,7 +136,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "i18next-http-middleware": "^3.8.1",
-    "ltijs": "=5.9.7",
+    "ltijs": "=5.9.5",
     "mammoth": "^1.11.0",
     "mongodb": "^6.20.0",
     "prom-client": "^15.1.3",
