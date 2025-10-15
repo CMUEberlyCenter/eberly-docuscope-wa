@@ -278,13 +278,13 @@ def isbinary(s):
         return True
 
     # remove all text characters from file chunk, get remaining length
-    binary_length = len(data.translate(None,TEXT_CHARACTERS))
+    binary_length = len(data.translate(None, TEXT_CHARACTERS))
 
     # if percentage of binary characters above threshold, binary file
     if (float(binary_length) / data_length) >= CHAR_THRESHOLD:
-        True
+        return True
     else:
-        False
+        return False
 
 def remove_hrefs(text):
     """
