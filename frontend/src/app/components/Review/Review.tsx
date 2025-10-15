@@ -269,7 +269,9 @@ export const Review: FC = () => {
                       />
                     ) : null}
                   </ButtonToolbar>
-                  <Activity mode={(!tool || tool === "null") ? "visible" : "hidden"}>
+                  <Activity
+                    mode={!tool || tool === "null" ? "visible" : "hidden"}
+                  >
                     <NullTool text={t("null.big_picture")} />
                   </Activity>
                   {tool === "expectations" && <Expectations />}
@@ -423,7 +425,13 @@ export const Review: FC = () => {
                       </Alert>
                     )}
                   >
-                    <Activity mode={(!otherTool || otherTool === "null") ? "visible" : "hidden"}>
+                    <Activity
+                      mode={
+                        !otherTool || otherTool === "null"
+                          ? "visible"
+                          : "hidden"
+                      }
+                    >
                       <NullTool text={t("null.fine_tuning")} />
                     </Activity>
                     {otherTool === "logical_flow" && <LogicalFlow />}

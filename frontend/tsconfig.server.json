@@ -10,5 +10,5 @@
   "ts-node": {
     "esm": true
   },
-  "include": ["src/server/**.ts", "src/lib/**.ts", "index*.ts"],
+  "include": ["./src/server/**.ts", "./src/lib/**.ts", "./vike.d.ts", "./src/ltijs.d.ts", "./src/index.d.ts", "./index.ts"],
 }

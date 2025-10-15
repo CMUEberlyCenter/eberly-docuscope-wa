@@ -8,5 +8,5 @@ export default {
   output: {
     dir: 'build/server',
   },
-  plugins: [commonjs(), resolve({ preferBuiltins: true }), json(), typescript({ tsconfig: 'tsconfig.server.json' })]
+  plugins: [commonjs(), resolve({ preferBuiltins: true }), json(), typescript({ tsconfig: './tsconfig.server.json' })]
 };

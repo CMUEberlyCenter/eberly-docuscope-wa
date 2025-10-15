@@ -65,7 +65,7 @@ type WindowProps = {
   targetName?: string;
   width?: number; // int
   height?: number; // int
-  windowReatures?: string; // comma-separated list
+  windowFeatures?: string; // comma-separated list
 };
 type StartEndDate = {
   startDateTime?: string; // ISO8601

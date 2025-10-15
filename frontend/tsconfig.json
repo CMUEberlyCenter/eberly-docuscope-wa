@@ -4,6 +4,5 @@
   "compilerOptions": {
     "target": "ES2024",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "vike-react", "./vike.d.ts", "gapi", "google.accounts", "google.picker", "gapi.drive"],
   }
 }
