@@ -1,6 +1,5 @@
-import type { Express, NextFunction, Request, Response } from 'express';
-
 declare module 'ltijs' {
+  import { Express, NextFunction, Request, Response } from 'express';
   export interface PlatformContext {
     context: {
       id: string;
@@ -201,7 +200,7 @@ declare module 'ltijs' {
     // platformAccessTokenEndpoint(accesstokenEndpoint?: string): Promise<string | boolean>;
   }
 
-  export class Provider {
+  declare class Provider {
     app: Express;
 
     // Database: Database;
@@ -287,4 +286,6 @@ declare module 'ltijs' {
       ): Promise<string>;
     };
   }
+  declare const defaultProvider: Provider;
+  export = { Provider: defaultProvider };
 }

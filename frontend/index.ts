@@ -295,7 +295,7 @@ async function __main__() {
     } catch (err) {
       console.error(err);
     } finally {
-      const platforms: { platformId: () => Promise<string>; platformName: () => Promise<string>; platformUrl: () => Promise<string>; platformActive: () => Promise<boolean>; }[] = await Provider.getAllPlatforms();
+      const platforms = await Provider.getAllPlatforms();
       platforms.forEach(async (platform) => {
         const platformId = await platform.platformId();
         const name = await platform.platformName();
@@ -336,19 +336,24 @@ async function __main__() {
       })
     );
     i18n.use(Backend).use(LanguageDetector).use(initReactI18next).init({
-      preload: ['en-US'],
-      fallbackLng: 'en-US',
+      preload: ['en'],
+      fallbackLng: 'en',
       interpolation: { escapeValue: false },
       backend: {
         loadPath: '/locales/{{lng}}/{{ns}}.yaml',
         parse: (data: string) => parse(data),
       },
       resources: {
-        'en-US': {
+        'en': {
           translation: parse(
             readFileSync(join(root, 'public/locales/en/translation.yaml'), 'utf-8')
           )
-        }
+        },
+        // 'es': {
+        //   translation: parse(
+        //     readFileSync(join(root, 'public/locales/es/translation.yaml'), 'utf-8')
+        //   )
+        // }
       }
     })
     app.use(handle(i18n));

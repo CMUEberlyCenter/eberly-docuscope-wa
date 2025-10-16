@@ -9,6 +9,7 @@ RUN npm ci
 RUN cp -a /tmp/node_modules /app
 WORKDIR /app
 COPY . /app
+ENV NODE_ENV=production
 RUN npm run build
 RUN npm run build:server
 
@@ -17,6 +18,7 @@ LABEL org.opencontainers.image.description="myProse web application"
 LABEL org.opencontainers.image.licenses=CC-BY-NC-SA-4.0
 EXPOSE 8888
 ENV PORT=8888
+ENV NODE_ENV=production
 WORKDIR /app
 COPY ./package.json .
 COPY --from=build /app/dist/ /app/dist/

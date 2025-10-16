@@ -10,7 +10,7 @@
     "build": "cross-env NODE_ENV=production npx vike build",
     "build:server": "cross-env NODE_ENV=production rollup -c",
     "preview": "cross-env NODE_ENV=production npx tsx ./index.ts",
-    "start": "npm run dev",
+    "start": "npm run preview",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
     "prettier": "npx prettier -c src/",
