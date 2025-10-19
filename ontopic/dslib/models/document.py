@@ -26,6 +26,10 @@ import spacy  # SpaCy NLP library
 from spacy.language import Language
 from spacy.tokenizer import Tokenizer
 
+from PIL import Image
+import io
+import base64
+
 no_space_patterns = [
     "\u2019ve",
     "n\u2019t",
@@ -411,8 +415,9 @@ def extract_and_replace_images(html_string):
     def replace_img(match):
         counter[0] += 1
         img_tag = match.group(0)
-        replacement = f"<img{counter[0]:02d}/>"
-        images[replacement] = img_tag
+        replacement = f" <img{counter[0]:02d}/> "
+        replacement_key = replacement.strip()
+        images[replacement_key] = img_tag
         return replacement
 
     # Find and replace all <img> tags
@@ -420,6 +425,28 @@ def extract_and_replace_images(html_string):
 
     return modified_string, images
 
+def convert_image(image):
+    """
+    This function is used by mammoth.convert_to_html(). Since images embedded
+    in a Word file can be very large and mammoth doesn't give us the scalling factors,
+    we will shrink them if they are greater than 400x400px.
+    """
+    with image.open() as image_bytes:
+        # Open with PIL
+        pil_image = Image.open(io.BytesIO(image_bytes.read()))
+        
+        # Reduce resolution - resize to a maximum width/height
+        max_size = (400,400)  # Adjust as needed
+        pil_image.thumbnail(max_size, Image.Resampling.LANCZOS)
+        
+        # Save to bytes with reduced quality
+        output = io.BytesIO()
+        pil_image.save(output, format='PNG', optimize=True)
+        output.seek(0)
+        
+        return {
+            "src": "data:image/png;base64," + base64.b64encode(output.getvalue()).decode('utf-8')
+        }
 
 ##################
 #
@@ -748,7 +775,7 @@ class DSDocument:
 
                 sent_dict = {}
                 sent_dict["text"] = text
-                sent_dict["sent"] = s  # spacy's NLP object
+                sent_dict["sent"] = s  # spacy's NLP object if it's not an image.
                 sent_dict["is_image"] = is_image
                 data["sentences"].append(sent_dict)
 
@@ -2005,7 +2032,8 @@ class DSDocument:
 
         # Convert with style preservation
         with open(docx_path, "rb") as docx_file:
-            result = mammoth.convert_to_html(docx_file)
+            result = mammoth.convert_to_html(docx_file,
+                           convert_image=mammoth.images.img_element(convert_image))
             html_str = result.value
 
         # Process with style extraction
@@ -2092,6 +2120,7 @@ class DSDocument:
             ]:  # for each sentence within this element.
                 next_char = ""
                 if sent.get("is_image", False):
+                    html_str += " "
                     html_str += sent["text"]
                     html_str += " "
                     scount += 1
@@ -2352,17 +2381,27 @@ class DSDocument:
     #
     ########################################
 
-    def toXml(self):
-        """Convert the document to XML format."""
+    def toXml(self, removed_tags=[]):
+        """
+        Convert the document to XML format.
+        removed_tags: A list of tags to be removed.
+        """
+
         if self.elements is None or len(self.elements) == 0:
             logging.error("Error: no elements found, document is unprocessed.")
             return ""
         if self.soup is None:
             logging.error("Error: soup is None, cannot convert to XML!")
             return ""
+
         allowed_attrs = ["id", "alt", "src"]
 
         soup_copy = copy.deepcopy(self.soup)
+
+        if removed_tags:
+            # Remove the tags in removed_tags from the html string.
+            for tag in soup_copy.find_all(['img', 'table']):
+                tag.decompose()
 
         for tag in soup_copy.find_all():
             if isinstance(tag, Tag) and tag.attrs:
