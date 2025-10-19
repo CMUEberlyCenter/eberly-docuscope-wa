@@ -425,29 +425,38 @@ def extract_and_replace_images(html_string):
 
     return modified_string, images
 
-def convert_image(image):
-    """
-    This function is used by mammoth.convert_to_html(). Since images embedded
-    in a Word file can be very large and mammoth doesn't give us the scalling factors,
-    we will shrink them if they are greater than 400x400px.
-    """
-    with image.open() as image_bytes:
-        # Open with PIL
-        pil_image = Image.open(io.BytesIO(image_bytes.read()))
-        
-        # Reduce resolution - resize to a maximum width/height
-        max_size = (400,400)  # Adjust as needed
-        pil_image.thumbnail(max_size, Image.Resampling.LANCZOS)
-        
-        # Save to bytes with reduced quality
-        output = io.BytesIO()
-        pil_image.save(output, format='PNG', optimize=True)
-        output.seek(0)
-        
-        return {
-            "src": "data:image/png;base64," + base64.b64encode(output.getvalue()).decode('utf-8')
-        }
 
+def resized_image_handler(image):
+    """
+    mammoth.convert_to_html() will use this function to determine the display
+    dimensions of the image. Without this function, high-resolution
+    images will be displayed using their original pixel dimensions since
+    the img tag will not have width and height attributes.
+    """    
+    with image.open() as image_bytes:
+        # Open the image to get its actual dimensions
+        img_data = image_bytes.read()
+        img = PILImage.open(BytesIO(img_data))
+        
+        # Get original dimensions
+        original_width, original_height = img.size
+        
+        # Set max dimensions in case we can't find them.
+        max_width = 800
+        max_height = 600
+        
+        # Resize while maintaining aspect ratio
+        img.thumbnail((max_width, max_height), PILImage.Resampling.LANCZOS)
+        
+        # Re-encode
+        buffer = BytesIO()
+        img.save(buffer, format='PNG')
+        encoded = base64.b64encode(buffer.getvalue()).decode('ascii')
+    
+    return {
+        "src": f"data:image/png;base64,{encoded}"
+    }
+    
 ##################
 #
 ##################
