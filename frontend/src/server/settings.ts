@@ -15,7 +15,7 @@ program
 // )
 program.parse();
 // const options = program.opts();
-export const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
+const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 // const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 

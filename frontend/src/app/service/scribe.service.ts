@@ -1,5 +1,3 @@
-import { bind } from '@react-rxjs/core';
-import { BehaviorSubject } from 'rxjs';
 import type { NotesRequest, TextRequest } from '../../lib/Requests';
 import type { WritingTask } from '../../lib/WritingTask';
 import type {
@@ -7,15 +5,6 @@ import type {
   LocalCoherenceResponse,
   SelectedText,
 } from '../lib/ToolResults';
-
-// If scribe is currently enabled by user.
-const optIn = true; // sessionStorage.getItem('enable_scribe') === true.toString();
-const scribe = new BehaviorSubject<boolean>(optIn); // Opt-out
-// export const enableScribe = (enable: boolean) => scribe.next(enable);
-export const [useScribe, scribe$] = bind(scribe, optIn);
-// scribe.subscribe((enable) =>
-//   sessionStorage.setItem('enable_scribe', enable.toString())
-// );
 
 /*** Notes to Prose ***/
 

@@ -128,7 +128,7 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
  * @param data JSON read from filesystem.
  * @returns id of the writing task in the database.
  */
-export async function upsertPublicWritingTask(path: string, data: WritingTask) {
+async function upsertPublicWritingTask(path: string, data: WritingTask) {
   client
     .db(MONGO_DB)
     .collection<WritingTaskDb>(WRITING_TASKS)

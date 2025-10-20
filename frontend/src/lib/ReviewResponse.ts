@@ -471,14 +471,14 @@ export interface OnTopicReviewData extends ReviewData<OnTopicData> {
   tool: 'ontopic';
 }
 
-export function isOnTopicReviewData(data: unknown): data is OnTopicReviewData {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'tool' in data &&
-    data.tool === 'ontopic'
-  );
-}
+// export function isOnTopicReviewData(data: unknown): data is OnTopicReviewData {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'tool' in data &&
+//     data.tool === 'ontopic'
+//   );
+// }
 
 export type ErrorData = {
   tool: ReviewTool;

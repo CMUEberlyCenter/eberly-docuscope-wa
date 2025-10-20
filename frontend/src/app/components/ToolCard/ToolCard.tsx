@@ -29,9 +29,7 @@ import type { Tool, ToolResult } from "../../lib/ToolResults";
 import {
   postClarifyText,
   postConvertNotes,
-  // postExpectation,
   postFlowText,
-  useScribe,
 } from "../../service/scribe.service";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
@@ -55,7 +53,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
     const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
     const [history, setHistory] = useState<ToolResult[]>([]);
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
-    const scribe = useScribe();
+    const scribe = true; // Originally for useScribe(); for opt-in check.
 
     const editor = useSlate();
     const doTool = useCallback(
