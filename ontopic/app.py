@@ -2,8 +2,10 @@
 
 import logging
 from typing import Optional
+
 from fastapi import FastAPI
 from pydantic import BaseModel
+
 from dslib.models.document import DSDocument
 
 app = FastAPI(
@@ -224,6 +226,7 @@ async def segment(data: SegmentRequest):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     import asyncio
+
     from hypercorn.asyncio import serve
     from hypercorn.config import Config
 

@@ -6,29 +6,29 @@
 __author__ = "Suguru Ishizaki"
 __copyright__ = "2017-25 Suguru Ishizaki, Carnegie Mellon University"
 
-import logging
+import copy
 import json
-import re
-import string
+import logging
 import os
 import pprint  # pretty prnting for debugging
-import copy
-from typing import Any, List, Dict, Union
+import re
+import string
+from base64 import b64encode
+from collections import Counter, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import Counter, namedtuple
-import regex
-import unidecode
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Union
 
-from bs4 import Tag, BeautifulSoup as bs
 import mammoth
+import regex
 import spacy  # SpaCy NLP library
+import unidecode
+from bs4 import BeautifulSoup as bs
+from bs4 import Tag
+from PIL import Image
 from spacy.language import Language
 from spacy.tokenizer import Tokenizer
-
-from PIL import Image
-import io
-import base64
 
 no_space_patterns = [
     "\u2019ve",
@@ -432,31 +432,30 @@ def resized_image_handler(image):
     dimensions of the image. Without this function, high-resolution
     images will be displayed using their original pixel dimensions since
     the img tag will not have width and height attributes.
-    """    
+    """
     with image.open() as image_bytes:
         # Open the image to get its actual dimensions
         img_data = image_bytes.read()
-        img = PILImage.open(BytesIO(img_data))
-        
+        img = Image.open(BytesIO(img_data))
+
         # Get original dimensions
         original_width, original_height = img.size
-        
+
         # Set max dimensions in case we can't find them.
         max_width = 800
         max_height = 600
-        
+
         # Resize while maintaining aspect ratio
-        img.thumbnail((max_width, max_height), PILImage.Resampling.LANCZOS)
-        
+        img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+
         # Re-encode
         buffer = BytesIO()
-        img.save(buffer, format='PNG')
-        encoded = base64.b64encode(buffer.getvalue()).decode('ascii')
-    
-    return {
-        "src": f"data:image/png;base64,{encoded}"
-    }
-    
+        img.save(buffer, format="PNG")
+        encoded = b64encode(buffer.getvalue()).decode("ascii")
+
+    return {"src": f"data:image/png;base64,{encoded}"}
+
+
 ##################
 #
 ##################
@@ -2041,8 +2040,10 @@ class DSDocument:
 
         # Convert with style preservation
         with open(docx_path, "rb") as docx_file:
-            result = mammoth.convert_to_html(docx_file,
-                           convert_image=mammoth.images.img_element(convert_image))
+            result = mammoth.convert_to_html(
+                docx_file,
+                convert_image=mammoth.images.img_element(resized_image_handler),
+            )
             html_str = result.value
 
         # Process with style extraction
@@ -2390,10 +2391,12 @@ class DSDocument:
     #
     ########################################
 
-    def toXml(self, removed_tags=[]):
-        """
-        Convert the document to XML format.
-        removed_tags: A list of tags to be removed.
+    def toXml(self, remove_tags: Optional[list[str]] = None):
+        """Convert the document to XML format.
+
+        Arguments:
+            remove_tags (list[str], optional): A list of tags to be removed. Defaults to None.
+                For example: ["img", "table"]
         """
 
         if self.elements is None or len(self.elements) == 0:
@@ -2407,9 +2410,9 @@ class DSDocument:
 
         soup_copy = copy.deepcopy(self.soup)
 
-        if removed_tags:
-            # Remove the tags in removed_tags from the html string.
-            for tag in soup_copy.find_all(['img', 'table']):
+        if remove_tags:
+            # Remove the tags in remove_tags from the html representation.
+            for tag in soup_copy.find_all(remove_tags):
                 tag.decompose()
 
         for tag in soup_copy.find_all():
