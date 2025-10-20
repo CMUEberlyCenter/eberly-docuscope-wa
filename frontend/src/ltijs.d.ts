@@ -151,12 +151,15 @@ declare module 'ltijs' {
     ): Promise<string | false>;
   }
 
+  interface ExpressCallback {
+    (req: Request, res: Response, next?: NextFunction): Response | void | Promise<Response | void>;
+  }
   interface OnConnectCallback {
     (
       token: IdToken,
       req: Request,
       res: Response,
-      next?: NextFunctionFunction
+      next?: NextFunction
     ): Response | void | Promise<Response | void>;
   }
   interface OnConnectOptions {
@@ -254,7 +257,7 @@ declare module 'ltijs' {
     close(options?: { silent?: boolean }): Promise<true>;
     onConnect(cb: OnConnectCallback, options?: OnConnectOptions): true;
     onDeepLinking(cb: OnConnectCallback, options?: OnConnectOptions): true;
-    onDynamicRegistration(cb: any): Promise<true>;
+    onDynamicRegistration(cb: ExpressCallback): Promise<true>;
     // onSessionTimeout: (cb: Express.Application.Router.HandlerArgument) => true;
     // onInvalidToken: (cb: Express.Application.Router.HandlerArgument) => true;
     // onUnregisteredPlatform: (cb: Express.Application.Router.HandlerArgument) => true;
@@ -280,8 +283,8 @@ declare module 'ltijs' {
     ): Promise<void>;
     DynamicRegistration: {
       register(
-        openid_configuration: any,
-        registration_token: any,
+        openid_configuration: string,
+        registration_token: string,
         custom?: Record<string, unknown>
       ): Promise<string>;
     };
