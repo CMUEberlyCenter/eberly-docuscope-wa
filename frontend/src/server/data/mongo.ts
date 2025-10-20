@@ -162,6 +162,7 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
       upsert: true,
     }
   );
+  console.log(`Upserted writing task ${data.info.name} v${data.info.version}`);
   return ins.upsertedId;
 }
 
@@ -180,6 +181,7 @@ export async function deleteWritingTaskByPath(path: string) {
       `Delete operation for Writing Task at '${path}' failed`
     );
   }
+  console.log(`Deleted writing task at path '${path}'`);
   return del.acknowledged;
 }
 
