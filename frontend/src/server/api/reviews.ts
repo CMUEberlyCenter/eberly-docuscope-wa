@@ -31,6 +31,7 @@ import { insertLog } from '../data/mongo';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
+import { parse } from 'node-html-parser';
 
 export const reviews = Router();
 
@@ -312,7 +313,7 @@ reviews.post(
         'expectations',
         {
           ...reviewData({
-            segmented: request.session.segmented ?? '',
+            segmented: stripIrrelevantTags(request.session.segmented),
             writing_task: writing_task ?? null,
           }),
           expectation,
@@ -353,6 +354,17 @@ reviews.post(
     }
   }
 );
+
+function stripIrrelevantTags(
+  text: string | undefined,
+  tags: string[] = ['img', 'table']
+): string {
+  if (!text) return '';
+  if (tags.length === 0) return text;
+  const doc = parse(text);
+  doc.querySelectorAll(tags.join(', ')).forEach((el) => el.remove());
+  return doc.toString();
+}
 
 /**
  * @route POST <reviews>/:analysis
@@ -404,7 +416,7 @@ reviews.post(
       const chat = await doChat<ReviewResponse>(
         analysis as ReviewPrompt,
         reviewData({
-          segmented: request.session.segmented ?? '',
+          segmented: stripIrrelevantTags(request.session.segmented),
           writing_task: writing_task ?? null,
         }),
         controller.signal,
