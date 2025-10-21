@@ -141,6 +141,7 @@
     "react-error-boundary": "^6.0.0",
     "react-i18next": "^16.1.0",
     "react-split": "^2.0.14",
+    "react-streaming": "=0.4.10",
     "sanitize-html": "^2.17.0",
     "slate": "^0.118.1",
     "slate-dom": "^0.118.1",
@@ -151,7 +152,7 @@
     "swr": "^2.3.6",
     "systeminformation": "^5.27.11",
     "vike": "^0.4.242",
-    "vike-react": "^0.6.9",
+    "vike-react": "=0.6.9",
     "vike-react-query": "^0.1.10",
     "yaml": "^2.8.1"
   },
@@ -163,6 +164,7 @@
     },
     "whatwg-url": ">=15.0.0",
     "devalue": ">=5.3.2",
-    "@types/node": "$@types/node"
+    "@types/node": "$@types/node",
+    "react-streaming": "$react-streaming"
   }
 }
