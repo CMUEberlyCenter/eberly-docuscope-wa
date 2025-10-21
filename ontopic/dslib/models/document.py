@@ -6,23 +6,27 @@
 __author__ = "Suguru Ishizaki"
 __copyright__ = "2017-25 Suguru Ishizaki, Carnegie Mellon University"
 
-import logging
+import copy
 import json
-import re
-import string
+import logging
 import os
 import pprint  # pretty prnting for debugging
-import copy
-from typing import Any, List, Dict, Union
+import re
+import string
+from base64 import b64encode
+from collections import Counter, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum
-from collections import Counter, namedtuple
-import regex
-import unidecode
+from io import BytesIO
+from typing import Any, Dict, List, Optional, Union
 
-from bs4 import Tag, BeautifulSoup as bs
 import mammoth
+import regex
 import spacy  # SpaCy NLP library
+import unidecode
+from bs4 import BeautifulSoup as bs
+from bs4 import Tag
+from PIL import Image
 from spacy.language import Language
 from spacy.tokenizer import Tokenizer
 
@@ -411,14 +415,45 @@ def extract_and_replace_images(html_string):
     def replace_img(match):
         counter[0] += 1
         img_tag = match.group(0)
-        replacement = f"<img{counter[0]:02d}/>"
-        images[replacement] = img_tag
+        replacement = f" <img{counter[0]:02d}/> "
+        replacement_key = replacement.strip()
+        images[replacement_key] = img_tag
         return replacement
 
     # Find and replace all <img> tags
     modified_string = re.sub(r"<img[^>]*>", replace_img, html_string)
 
     return modified_string, images
+
+
+def resized_image_handler(image):
+    """
+    mammoth.convert_to_html() will use this function to determine the display
+    dimensions of the image. Without this function, high-resolution
+    images will be displayed using their original pixel dimensions since
+    the img tag will not have width and height attributes.
+    """
+    with image.open() as image_bytes:
+        # Open the image to get its actual dimensions
+        img_data = image_bytes.read()
+        img = Image.open(BytesIO(img_data))
+
+        # Get original dimensions
+        original_width, original_height = img.size
+
+        # Set max dimensions in case we can't find them.
+        max_width = 800
+        max_height = 600
+
+        # Resize while maintaining aspect ratio
+        img.thumbnail((max_width, max_height), Image.Resampling.LANCZOS)
+
+        # Re-encode
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        encoded = b64encode(buffer.getvalue()).decode("ascii")
+
+    return {"src": f"data:image/png;base64,{encoded}"}
 
 
 ##################
@@ -748,7 +783,7 @@ class DSDocument:
 
                 sent_dict = {}
                 sent_dict["text"] = text
-                sent_dict["sent"] = s  # spacy's NLP object
+                sent_dict["sent"] = s  # spacy's NLP object if it's not an image.
                 sent_dict["is_image"] = is_image
                 data["sentences"].append(sent_dict)
 
@@ -2005,7 +2040,10 @@ class DSDocument:
 
         # Convert with style preservation
         with open(docx_path, "rb") as docx_file:
-            result = mammoth.convert_to_html(docx_file)
+            result = mammoth.convert_to_html(
+                docx_file,
+                convert_image=mammoth.images.img_element(resized_image_handler),
+            )
             html_str = result.value
 
         # Process with style extraction
@@ -2092,6 +2130,7 @@ class DSDocument:
             ]:  # for each sentence within this element.
                 next_char = ""
                 if sent.get("is_image", False):
+                    html_str += " "
                     html_str += sent["text"]
                     html_str += " "
                     scount += 1
@@ -2352,17 +2391,29 @@ class DSDocument:
     #
     ########################################
 
-    def toXml(self):
-        """Convert the document to XML format."""
+    def toXml(self, remove_tags: Optional[list[str]] = None):
+        """Convert the document to XML format.
+
+        Arguments:
+            remove_tags (list[str], optional): A list of tags to be removed. Defaults to None.
+                For example: ["img", "table"]
+        """
+
         if self.elements is None or len(self.elements) == 0:
             logging.error("Error: no elements found, document is unprocessed.")
             return ""
         if self.soup is None:
             logging.error("Error: soup is None, cannot convert to XML!")
             return ""
+
         allowed_attrs = ["id", "alt", "src"]
 
         soup_copy = copy.deepcopy(self.soup)
+
+        if remove_tags:
+            # Remove the tags in remove_tags from the html representation.
+            for tag in soup_copy.find_all(remove_tags):
+                tag.decompose()
 
         for tag in soup_copy.find_all():
             if isinstance(tag, Tag) and tag.attrs:

@@ -10,6 +10,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { useFileImportErrors } from "./FileImportErrors";
 import { useFilename, useFileText } from "./FileTextContext";
+import { convertOptions } from "./convertOptions";
 
 // type PickerCallback = (doc?: google.picker.DocumentObject) => void;
 // TODO file data
@@ -128,7 +129,7 @@ export const PickerProvider: FC<{
           );
           const { value, messages } = await convertToHtml(
             { arrayBuffer: res.body as unknown as ArrayBuffer },
-            { styleMap: "u => u" }
+            convertOptions
           );
           console.log("Converted content:", value, messages);
           if (messages.length) {

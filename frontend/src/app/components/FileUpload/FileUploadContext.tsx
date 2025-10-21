@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { useFileImportErrors } from "./FileImportErrors";
 import { useFileText, useFilename } from "./FileTextContext";
 import { FileUpload } from "./FileUpload";
+import { convertOptions } from "./convertOptions";
 
 /** Context for initiating the file upload dialog. */
 const InitiateOpenFileDispatch = createContext<() => void>(() => {});
@@ -96,7 +97,7 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
     upload
       .arrayBuffer()
       .then((arrayBuffer) =>
-        convertToHtml({ arrayBuffer }, { styleMap: "u => u" }).then(
+        convertToHtml({ arrayBuffer }, convertOptions).then(
           ({ value, messages }) => {
             if (messages.length) {
               showError(...messages);
