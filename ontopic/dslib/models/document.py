@@ -18,7 +18,7 @@ from collections import Counter, namedtuple
 from dataclasses import dataclass, field
 from enum import Enum
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple
 
 import mammoth
 import regex
@@ -129,7 +129,7 @@ POS = 0  # Part of Speech
 WORD = 1  # Original Word
 LEMMA = 2  # Lemmatized word
 ISLEFT = 3  # True if the word is on the left side of the main verb
-SUBJ = 3  # True if the word is on the left side of the main verb (SUBJ = ISLEFT) same thing!!
+# SUBJ = 3  # True if the word is on the left side of the main verb (SUBJ = ISLEFT) same thing!!
 DEP = 4  # Dependency Type (e.g., 'pobj', 'nsubj', etc.)
 STEM = 5  # Stem of the word
 LINKS = 6  # If it is a verb, it is the total # of links from the verb. Otherwise, None.
@@ -142,6 +142,25 @@ NEW = 12  # New noun phrase
 GIVEN = 13  # Given noun phrase
 IS_SKIP = 14  # If true, it should be skipped
 IS_TOPIC = 15  # True if it is a topic
+
+class TextWordInfo(NamedTuple):
+    POS: str # 0 Part of Speech
+    WORD: str # 1 Original Word
+    LEMMA: str # 2 Lemmatized word
+    ISLEFT: bool # 3 True if the word is on the left side of the main verb
+    # SUBJ: bool # 3 True if the word is on the left side of the main verb (SUBJ = ISLEFT) same thing!!
+    DEP: str # 4 Dependency Type (e.g., 'pobj', 'nsubj', etc.)
+    STEM: str # 5 Stem of the word
+    LINKS: Optional[int] # 6 If it is a verb, it is the total # of links from the verb. Otherwise, None.
+    QUOTE: bool # 7 QUOTED or not
+    WORD_POS: int # 8 Indexes between 8 and 13 have been changed on July 17.
+    DS_DATA: Optional[Dict[str, Any]] # 9 DocuScope Data (i.e., models.DSWord)
+    PARA_POS: int # 10 Paragraph Position
+    SENT_POS: int # 11 Sentence Position
+    NEW: bool # 12 New noun phrase
+    GIVEN: bool # 13 Given noun phrase
+    IS_SKIP: bool # 14 If true, it should be skipped
+    IS_TOPIC: bool # 15 True if it is a topic
 
 IGNORE_ADVCL_FIRST_WORDS = [
     "after",
@@ -247,7 +266,6 @@ def tag_sentencizer(doc):
 
     return doc
 
-
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     """Set the language model used by SpaCy."""
     global nlp
@@ -277,7 +295,7 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
             extra_stop_words = en_extra_stop_words
 
         elif lang == "es":
-            nlp = spacy.load("es_core_web_sm")
+            nlp = spacy.load("es_core_news_sm")
 
             pronouns = es_pronouns
             extra_stop_words = es_extra_stop_words
@@ -310,7 +328,7 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     else:
         logging.info("Spacy language model loaded successfully")
         logging.info(spacy.info())  # type: ignore
-
+setLanguageModel("en")  # Set default language model to English to preload it.
 
 def isModelLoaded():
     """Check if the SpaCy model is loaded."""
@@ -497,6 +515,23 @@ class DocumentElement:
         """
         self.data = data
 
+class TokenTuple(NamedTuple):
+    POS: str  # 0
+    WORD: str # 1 
+    LEMMA: str # 2
+    ISLEFT: bool # 3
+    DEP: str # 4
+    STEM: str # 5
+    LINKS: Optional[List[str]] # 6 (for ROOT)
+    QUOTE: bool # 7
+    WORD_POS: int # 8
+    DS_DATA: Optional[Dict[str, Any]] # 9
+    # PARA_POS: int # 10
+    # SENT_POS: int # 11
+    # NEW: bool # 12
+    # GIVEN: bool # 13
+    # IS_SKIP: bool # 14
+    # IS_TOPIC: bool # 15
 
 ##########
 #
@@ -751,11 +786,10 @@ class DSDocument:
 
     def _process_element(
         self, html_element, position: int
-    ) -> Union[DocumentElement, None]:
+    ) -> Optional[DocumentElement]:
         """Process individual HTML element"""
         tag_name = html_element.name.lower()
         styles = {}
-        data = {}
 
         if nlp is None:
             logging.warning("SpaCy model is not loaded.")
@@ -764,28 +798,19 @@ class DSDocument:
         if tag_name in ["p"]:
             self.para_count += 1  # increment the paragraph ID.
 
-            text = get_text_preserve_inline(html_element)
+            text, images = extract_and_replace_images(get_text_preserve_inline(html_element))
 
-            text, images = extract_and_replace_images(text)
-
-            data["sentences"] = []
             parsed_para = nlp(text)
-            slist = list(parsed_para.sents)  # list of sentences
+            sentences = []
 
-            for s in slist:
-                if s.text.startswith("<img"):
-                    text = images[s.text]
-                    is_image = True
-                    s = text
-                else:
-                    text = s.text.strip()
-                    is_image = False
-
-                sent_dict = {}
-                sent_dict["text"] = text
-                sent_dict["sent"] = s  # spacy's NLP object if it's not an image.
-                sent_dict["is_image"] = is_image
-                data["sentences"].append(sent_dict)
+            for s in parsed_para.sents:  # list of sentences
+                is_image = s.text.startswith("<img")
+                sent_dict = {
+                    "text": images[s.text] if is_image else s.text.strip(),
+                    "sent": images[s.text] if is_image else s,  # spacy's NLP object if it's not an image.
+                    "is_image": is_image
+                }
+                sentences.append(sent_dict)
 
             html_element["data-ds-paragraph"] = f"{self.para_count}"
             html_element["id"] = f"p{self.para_count}"
@@ -794,7 +819,7 @@ class DSDocument:
             return DocumentElement(
                 content_type=ContentType.PARAGRAPH,
                 text=text,
-                data=data,
+                data={"sentences": sentences},
                 html=str(html_element),
                 position=position,
                 para_id=self.para_count,
@@ -807,15 +832,8 @@ class DSDocument:
 
             text = get_text_preserve_inline(html_element)
 
-            data["sentences"] = []
             parsed_para = nlp(text)
-            slist = list(parsed_para.sents)  # list of sentences
-
-            for s in slist:
-                sent_dict = {}
-                sent_dict["text"] = s.text.strip()
-                sent_dict["sent"] = s
-                data["sentences"].append(sent_dict)
+            sentences = [{"text": s.text.strip(), "sent": s} for s in parsed_para.sents]
 
             html_element["data-ds-paragraph"] = f"{self.para_count}"
             html_element["id"] = f"p{self.para_count}"
@@ -824,7 +842,7 @@ class DSDocument:
             return DocumentElement(
                 content_type=ContentType.LISTITEM,
                 text=text,
-                data=data,
+                data={"sentences": sentences},
                 html=str(html_element),
                 position=position,
                 para_id=self.para_count,
@@ -837,15 +855,9 @@ class DSDocument:
 
             text = html_element.get_text()
 
-            data["sentences"] = []
             parsed_para = nlp(text)
-            slist = list(parsed_para.sents)
 
-            for s in slist:
-                sent_dict = {}
-                sent_dict["text"] = s.text.strip()
-                sent_dict["sent"] = s
-                data["sentences"].append(sent_dict)
+            sentences = [{"text": s.text.strip(), "sent": s} for s in parsed_para.sents]
 
             html_element["data-ds-paragraph"] = f"{self.para_count}"
             html_element["id"] = f"p{self.para_count}"
@@ -854,7 +866,7 @@ class DSDocument:
             return DocumentElement(
                 content_type=ContentType.LIST,
                 text=text,
-                data=data,
+                data={"sentences": sentences},
                 html=str(html_element),
                 position=position,
                 para_id=self.para_count,
@@ -867,12 +879,6 @@ class DSDocument:
 
             text = get_text_preserve_inline(html_element)
 
-            data["sentences"] = []
-            sent_dict = {}
-            sent_dict["text"] = text.strip()
-            sent_dict["sent"] = text
-            data["sentences"].append(sent_dict)
-
             # html_element['id'] = f"h{position}"
             html_element["id"] = f"p{self.para_count}"
             html_element["class"] = tag_name
@@ -880,7 +886,7 @@ class DSDocument:
             return DocumentElement(
                 content_type=ContentType.HEADING,
                 text=text,
-                data=data,
+                data={"sentences": [{"text": text.strip(), "sent": text}]},
                 html=str(html_element),
                 position=position,
                 para_id=self.para_count,
@@ -889,15 +895,13 @@ class DSDocument:
             )
 
         if tag_name == "table":
-            data = {"sentences": []}
-
             html_element["id"] = f"table{position}"
             html_element["class"] = tag_name
 
             return DocumentElement(
                 content_type=ContentType.TABLE,
                 text=f"[TABLE: {self._get_table_summary(html_element)}]",
-                data=data,
+                data={"sentences": []},
                 html=str(html_element),
                 position=position,
                 styles=styles,
@@ -916,15 +920,13 @@ class DSDocument:
                 display_text += f" - {caption}"
             display_text += "]"
 
-            data = {"sentences": []}
-
             html_element["id"] = f"img{position}"
             html_element["class"] = tag_name
 
             return DocumentElement(
                 content_type=ContentType.IMAGE,
                 text=display_text,
-                data=data,
+                data={"sentences": []},
                 html=str(html_element),
                 position=position,
                 styles=styles,
@@ -1225,7 +1227,7 @@ class DSDocument:
     #
     ########################################
 
-    def processSent(self, sent, start=0):
+    def processSent(self, sent, start=0) -> tuple[List[TokenTuple], Tuple[str, ...], int]:
         """
         Given a sentence 'sent' in a string format, return a list [] of analyzed words.
         Each entry in the list is a tuple (POS, Word, Lemma, bLeft_of_the_Main_Verb).
@@ -1234,7 +1236,7 @@ class DSDocument:
 
         word_pos = start
 
-        def processHeading(heading):
+        def processHeading(heading) -> Tuple[List[TokenTuple], Tuple[str, ...]]:
             nonlocal word_pos
             res = []
             if nlp is None:
@@ -1265,9 +1267,8 @@ class DSDocument:
                     pos = "NOUN"
                 else:  # Everything else
                     pos = token.pos_
-
                 res.append(
-                    (
+                    TokenTuple(
                         pos,
                         token.text,
                         token.lemma_.lower(),
@@ -1294,7 +1295,7 @@ class DSDocument:
 
             return res, noun_phrases
 
-        def getPronounLemma(t):
+        def getPronounLemma(t: str) -> str:
             lemma = None
             if t in ["he", "his", "him", "himself"]:
                 lemma = "he"
@@ -1414,7 +1415,7 @@ class DSDocument:
                 else:
                     left = is_left
 
-                w = (
+                w = TokenTuple(
                     pos,
                     token.text,
                     lemma,
@@ -1481,7 +1482,7 @@ class DSDocument:
         #                 return True
         #     return False
 
-        sent_data = sent_dict["text_w_info"]
+        # sent_data = sent_dict["text_w_info"]
 
         res = {}  # create a dictionary
 
@@ -1511,7 +1512,7 @@ class DSDocument:
 
         word_count = 1
         root_pos = -1
-        for data in sent_data:
+        for data in sent_dict["text_w_info"] if "text_w_info" in sent_dict else []:
             if data[POS] == "NOUN" or data[POS] == "PRP":
                 res["NOUNS"] += 1
 
@@ -1679,9 +1680,7 @@ class DSDocument:
             for w in sent:
                 if w[POS] is not None and w[LEMMA] not in stop_words:
                     if w[POS] in ("NOUN", "PRP"):
-                        # FIXME: this if condition will always be true since
-                        # the shape of the tuple and what is in temp differ.
-                        if (w[POS], w[LEMMA]) not in temp:
+                        if (w[WORD], w[POS], w[LEMMA]) not in temp:
                             temp.append(
                                 (w[WORD], w[POS], w[LEMMA])
                             )  # 'they' + 'NOUN' + 'man'
@@ -1751,9 +1750,12 @@ class DSDocument:
                     sent_dict["text_w_info"], NPs, word_pos = self.processSent(
                         sent_dict["text"], start=word_pos + 1
                     )
+                elif sent_dict.get("is_image", False):
+                    sent_dict["text_w_info"] = []
+                    NPs = ()
+                    # word_pos += 1
+                # TODO handle tables?
                 else:
-                    if sent_dict.get("is_image", False):
-                        continue
                     sent_dict["text_w_info"], NPs, word_pos = self.processSent(
                         sent_dict["sent"], start=word_pos + 1
                     )
@@ -1859,6 +1861,9 @@ class DSDocument:
 
             prev_s = None
             for sent in para["sentences"]:  # for each sentence in the paragraph
+                if "lemmas" not in sent:
+                    logging.warning("Warning: 'lemmas' not found in sentence.", sent)
+                    continue
                 sent["given_accum_lemmas"] = []
                 sent["new_accum_lemmas"] = []
 
@@ -1890,9 +1895,10 @@ class DSDocument:
                                 temp_sent == sent
                             ):  # break if temp_sent is the currente sent.
                                 break
-                            for cl in temp_sent[
-                                "accum_lemmas"
-                            ]:  # for each accum_lemma in the sentence
+                            if "accum_lemmas" not in temp_sent:
+                                continue
+                            for cl in temp_sent["accum_lemmas"]:
+                                # for each accum_lemma in the sentence
                                 # if a lemma ('gl') is in the sentence AND their POSs maatch
                                 # Note: POS is no longer checked for optmization.
                                 if self.isGiven(
@@ -2837,6 +2843,8 @@ class DSDocument:
                     if is_new or is_given:  # if 'l' is given or new
                         is_left = False
                         left_t = None
+                        if "lemmas" not in s:
+                            continue
                         for sl in s["lemmas"]:
                             # and the lemma is also in the sentence.
                             if sl[LEMMA] == l[1] and sl[POS] == l[0]:
@@ -2909,7 +2917,7 @@ class DSDocument:
         prev_content_type = None
 
         for elem in self.elements:
-
+            logging.warning(f"Processing element {p_count} of type {elem.content_type}")
             if elem.content_type == ContentType.LISTITEM:
                 if prev_content_type != ContentType.LISTITEM:
                     res.append("\n")
@@ -2935,8 +2943,8 @@ class DSDocument:
                 prev_content_type = elem.content_type
 
                 for s in p["sentences"]:  # for each sentence
-                    if s.get("is_image", False):
-                        continue
+                    # if s.get("is_image", False):
+                    #     continue
                     bSkipPunct = bool(
                         len(s["text"]) == 1
                         and (
@@ -2955,7 +2963,8 @@ class DSDocument:
 
                 p_count += 1
             elif elem.content_type in [ContentType.TABLE, ContentType.IMAGE]:
-                res.append(tuple([para_id, s_count, None, elem.text, bSkipPunct]))
+                res.append(elem.text)
+                # res.append(tuple([para_id, s_count, None, elem.text, bSkipPunct]))
 
         res.append("\n")
 
@@ -3367,6 +3376,8 @@ class DSDocument:
             # first_new_paras = []
 
             for r in range(1, nrows):
+                if len(data[r]) < c:
+                    continue
                 elem = data[r][c - 1]
 
                 if isinstance(elem, tuple) and elem[0] is not None:
@@ -3396,6 +3407,8 @@ class DSDocument:
             skip_lines = 0
             sent_count = 0
             for r in range(1, nrows):
+                if len(data[r]) < c:
+                    continue
                 elem = data[r][c - 1]
 
                 if l_start < r < l_end:
@@ -3813,6 +3826,8 @@ class DSDocument:
             data = local_data
 
             topic_filter = TOPIC_FILTER_LEFT_RIGHT
+            if data is None or len(data) == 0:
+                return []
             header = data[0]
             nrows = len(data)
             ncols = len(header)

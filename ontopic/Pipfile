@@ -25,6 +25,10 @@ python_version = "3.13"
 
 [scripts]
 start = "hypercorn -b 0.0.0.0:5000 --reload  --root-path / app:app"
-spacy-download = "python -m spacy download en_core_web_sm"
+spacy-download-en = "python -m spacy download en_core_web_sm"
+spacy-download-es = "python -m spacy download es_core_news_sm"
 lint-app = "pylint app.py"
 lint-document = "pylint dslib/models/document.py"
+lint = "pylint app.py dslib/models/document.py"
+sort-imports = "isort app.py dslib/models/document.py"
+format-code = "black app.py dslib/models/document.py"
