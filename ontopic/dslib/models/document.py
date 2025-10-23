@@ -1921,6 +1921,8 @@ class DSDocument:
 
             prev_s = None
             for sent in para["sentences"]:  # for each sentence in the paragraph
+                if sent.get("is_image", False):
+                    continue
                 sent["given_accum_lemmas"] = []
                 sent["new_accum_lemmas"] = []
 
@@ -1947,6 +1949,8 @@ class DSDocument:
 
                         # commented out 9/16/2021
                         for temp_sent in para["sentences"]:
+                            if temp_sent.get("is_image", False):
+                                continue
                             # for each sentence in the paragraph
                             if (
                                 temp_sent == sent
@@ -2869,6 +2873,8 @@ class DSDocument:
             for s_count, s in enumerate(p["sentences"], start=1):  # for each sentence
                 # if s['text'] is a single character, and one of these punct chracters
                 # we'll make the row as bSkipPunct == True.
+                if s.get("is_image", False):
+                    continue
                 bSkipPunct = bool(
                     len(s["text"]) == 1
                     and (
