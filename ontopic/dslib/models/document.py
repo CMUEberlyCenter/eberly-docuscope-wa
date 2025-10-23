@@ -358,9 +358,30 @@ def contains_html_tags(text):
     return match is not None
 
 
-def get_text_preserve_inline(element, inline_tags=None):
+def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
+
+    """
+    Extract text content from an HTML element while preserving specified inline tags.
+    
+    Removes block-level tags (div, p, h1-h6, etc.) and unwanted inline tags, keeping
+    only the inline tags specified in inline_tags. Optionally removes specific tags
+    that contain certain attributes.
+
+    By default, <span> tags that are inserted by myProse are removed.
+
+    Args:
+        element: BeautifulSoup element to process
+        inline_tags: List of inline tag names to preserve
+        remove_with_attrs: Dict mapping tag names to lists of attributes. Tags with 
+                          these attributes will be removed (e.g., {'span': ['id']})
+    
+    Returns:
+        String containing HTML with preserved inline tags and cleaned whitespace
+    """
+
     if inline_tags is None:
         inline_tags = [
+            "img",
             "strong",
             "em",
             "b",
@@ -374,10 +395,13 @@ def get_text_preserve_inline(element, inline_tags=None):
             "sub",
             "sup",
         ]
-
+    
+    if remove_with_attrs is None:        
+        remove_with_attrs = {'span': ['id']}
+    
     # Get the inner HTML
     html = element.decode_contents()
-
+    
     # Remove block-level tags but keep their content
     block_tags = [
         "div",
@@ -392,7 +416,41 @@ def get_text_preserve_inline(element, inline_tags=None):
     ]
     for tag in block_tags:
         html = re.sub(f"</?{tag}[^>]*>", " ", html)
-
+    
+    # Remove inline tags that are NOT in the inline_tags list
+    # OR are in the remove_with_attrs list
+    def replace_tag(match):
+        full_tag = match.group(0)
+        tag_name = match.group(1).lower()
+        
+        # Handle closing tags
+        if tag_name.startswith('/'):
+            tag_name = tag_name[1:].split()[0]
+            # Remove closing tag if opening tag should be removed
+            if tag_name in remove_with_attrs:
+                return ""
+            elif tag_name in inline_tags:
+                return full_tag
+            else:
+                return ""
+        
+        # Opening tag
+        tag_name_only = tag_name.split()[0]
+        
+        # Check if this tag+attribute combination should be removed
+        if tag_name_only in remove_with_attrs:
+            for attr in remove_with_attrs[tag_name_only]:
+                if re.search(rf'\b{attr}\s*=', full_tag):
+                    return ""  # Remove this tag
+        
+        # Keep the tag if it's in inline_tags
+        if tag_name_only in inline_tags:
+            return full_tag
+        else:
+            return ""
+    
+    html = re.sub(r'<(/?\w+)[^>]*>', replace_tag, html)
+    
     # Clean up extra whitespace
     html = re.sub(r"\s+", " ", html).strip()
 
@@ -725,8 +783,8 @@ class DSDocument:
                 "h4",
                 "h5",
                 "h6",
-                "table",
-                "img",
+                # "table",
+                # "img",                
                 "ul",
                 "ol",
                 "li",
@@ -1785,6 +1843,10 @@ class DSDocument:
                         para_dict["lemmas"].append(sl)
 
                 sent_dict["accum_lemmas"] = list(para_dict["lemmas"])
+
+                # we need to remove the 'sent' key and its value sincd the value
+                # is usually a spaCy object, which can't be JSONified later.
+                sent_dict.pop('sent', None)  
 
             para_dict["accum_lemmas"] = accumulateParaLemmas()
 
