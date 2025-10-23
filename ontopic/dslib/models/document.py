@@ -480,6 +480,7 @@ def extract_and_replace_images(html_string):
 
     # Find and replace all <img> tags
     modified_string = re.sub(r"<img[^>]*>", replace_img, html_string)
+    modified_string = re.sub(r' +', ' ', modified_string)  # remove multiple spaces.
 
     return modified_string, images
 
@@ -2117,10 +2118,10 @@ class DSDocument:
         self.processDoc()
 
     def loadFromHtmlString(self, html_str):
-
         # Process with style extraction
         self.setHtml(html_str)
         self.processDoc()
+        self.toHtml()  # tag sentences.        
 
     def loadFromHtmlFile(self, src_dir, html_file):
         with open(
@@ -2199,7 +2200,6 @@ class DSDocument:
                     html_str += " "
                     html_str += sent["text"]
                     html_str += " "
-                    scount += 1
                     continue
 
                 total_words = len(sent["text_w_info"])  # get the total # of words
@@ -3003,7 +3003,7 @@ class DSDocument:
                 prev_content_type = elem.content_type
 
                 for s in p["sentences"]:  # for each sentence
-                    if s.get("is_image", False):
+                    if s.get("is_image", False) or len(s["text"]) == 0:
                         continue
                     bSkipPunct = bool(
                         len(s["text"]) == 1
