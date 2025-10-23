@@ -285,13 +285,12 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if nlp is None:
             return
 
-        # Pattern to match any HTML tag (so they all stay intact during tokenization)
-        # This prevents < and > from being split
-        html_tag_pattern = r"</?[a-zA-Z][^>]*/?>"
-
-        nlp.tokenizer = Tokenizer(
-            nlp.vocab, token_match=re.compile(html_tag_pattern).match
-        )
+        # Get default infixes and remove the ones that would split HTML tags
+        # spaCy's sentence segmentation will work normally while keeping HTML tags intact.
+        infixes = nlp.Defaults.infixes
+        infixes = [x for x in infixes if not any(char in str(x) for char in ['<', '>'])]
+        infix_re = spacy.util.compile_infix_regex(infixes)
+        nlp.tokenizer.infix_finditer = infix_re.finditer
 
         # Add the component to the pipeline, before the 'parser'
         nlp.add_pipe("tag_sentencizer", before="parser")
