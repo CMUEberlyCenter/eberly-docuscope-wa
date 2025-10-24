@@ -28,7 +28,6 @@ from bs4 import BeautifulSoup as bs
 from bs4 import Tag
 from PIL import Image
 from spacy.language import Language
-from spacy.tokenizer import Tokenizer
 
 no_space_patterns = [
     "\u2019ve",
@@ -288,9 +287,12 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         # Get default infixes and remove the ones that would split HTML tags
         # spaCy's sentence segmentation will work normally while keeping HTML tags intact.
         infixes = nlp.Defaults.infixes
-        infixes = [x for x in infixes if not any(char in str(x) for char in ['<', '>'])]
-        infix_re = spacy.util.compile_infix_regex(infixes)
-        nlp.tokenizer.infix_finditer = infix_re.finditer
+        if infixes is not None:
+            infixes = [
+                x for x in infixes if not any(char in str(x) for char in ["<", ">"])
+            ]
+            infix_re = spacy.util.compile_infix_regex(infixes)
+            nlp.tokenizer.infix_finditer = infix_re.finditer
 
         # Add the component to the pipeline, before the 'parser'
         nlp.add_pipe("tag_sentencizer", before="parser")
@@ -358,10 +360,9 @@ def contains_html_tags(text):
 
 
 def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
-
     """
     Extract text content from an HTML element while preserving specified inline tags.
-    
+
     Removes block-level tags (div, p, h1-h6, etc.) and unwanted inline tags, keeping
     only the inline tags specified in inline_tags. Optionally removes specific tags
     that contain certain attributes.
@@ -371,9 +372,9 @@ def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
     Args:
         element: BeautifulSoup element to process
         inline_tags: List of inline tag names to preserve
-        remove_with_attrs: Dict mapping tag names to lists of attributes. Tags with 
+        remove_with_attrs: Dict mapping tag names to lists of attributes. Tags with
                           these attributes will be removed (e.g., {'span': ['id']})
-    
+
     Returns:
         String containing HTML with preserved inline tags and cleaned whitespace
     """
@@ -394,13 +395,13 @@ def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
             "sub",
             "sup",
         ]
-    
-    if remove_with_attrs is None:        
-        remove_with_attrs = {'span': ['id']}
-    
+
+    if remove_with_attrs is None:
+        remove_with_attrs = {"span": ["id"]}
+
     # Get the inner HTML
     html = element.decode_contents()
-    
+
     # Remove block-level tags but keep their content
     block_tags = [
         "div",
@@ -415,15 +416,15 @@ def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
     ]
     for tag in block_tags:
         html = re.sub(f"</?{tag}[^>]*>", " ", html)
-    
+
     # Remove inline tags that are NOT in the inline_tags list
     # OR are in the remove_with_attrs list
     def replace_tag(match):
         full_tag = match.group(0)
         tag_name = match.group(1).lower()
-        
+
         # Handle closing tags
-        if tag_name.startswith('/'):
+        if tag_name.startswith("/"):
             tag_name = tag_name[1:].split()[0]
             # Remove closing tag if opening tag should be removed
             if tag_name in remove_with_attrs:
@@ -432,24 +433,24 @@ def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
                 return full_tag
             else:
                 return ""
-        
+
         # Opening tag
         tag_name_only = tag_name.split()[0]
-        
+
         # Check if this tag+attribute combination should be removed
         if tag_name_only in remove_with_attrs:
             for attr in remove_with_attrs[tag_name_only]:
-                if re.search(rf'\b{attr}\s*=', full_tag):
+                if re.search(rf"\b{attr}\s*=", full_tag):
                     return ""  # Remove this tag
-        
+
         # Keep the tag if it's in inline_tags
         if tag_name_only in inline_tags:
             return full_tag
         else:
             return ""
-    
-    html = re.sub(r'<(/?\w+)[^>]*>', replace_tag, html)
-    
+
+    html = re.sub(r"<(/?\w+)[^>]*>", replace_tag, html)
+
     # Clean up extra whitespace
     html = re.sub(r"\s+", " ", html).strip()
 
@@ -479,7 +480,7 @@ def extract_and_replace_images(html_string):
 
     # Find and replace all <img> tags
     modified_string = re.sub(r"<img[^>]*>", replace_img, html_string)
-    modified_string = re.sub(r' +', ' ', modified_string)  # remove multiple spaces.
+    modified_string = re.sub(r" +", " ", modified_string)  # remove multiple spaces.
 
     return modified_string, images
 
@@ -784,7 +785,7 @@ class DSDocument:
                 "h5",
                 "h6",
                 # "table",
-                # "img",                
+                # "img",
                 "ul",
                 "ol",
                 "li",
@@ -1846,7 +1847,7 @@ class DSDocument:
 
                 # we need to remove the 'sent' key and its value sincd the value
                 # is usually a spaCy object, which can't be JSONified later.
-                sent_dict.pop('sent', None)  
+                sent_dict.pop("sent", None)
 
             para_dict["accum_lemmas"] = accumulateParaLemmas()
 
@@ -2120,7 +2121,7 @@ class DSDocument:
         # Process with style extraction
         self.setHtml(html_str)
         self.processDoc()
-        self.toHtml()  # tag sentences.        
+        self.toHtml()  # tag sentences.
 
     def loadFromHtmlFile(self, src_dir, html_file):
         with open(
