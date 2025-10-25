@@ -231,21 +231,19 @@ en_pronouns = [
 es_extra_stop_words = []  # TBD
 es_pronouns = []  # TBD
 
-
-@Language.component("tag_sentencizer")
-def tag_sentencizer(doc):
-    for token in doc:
-        # ONLY break sentences for image tags
-        if re.match(r"<img\d+/?>", token.text):
-            # This token starts a sentence
-            if token.i > 0:
-                doc[token.i].is_sent_start = True
-            # Next token also starts a sentence
-            if token.i < len(doc) - 1:
-                doc[token.i + 1].is_sent_start = True
-
+@Language.component("html_sentence_splitter")
+def html_sentence_splitter(doc):
+    # Define which tags should trigger sentence splits
+    split_tags = re.compile(r'^<img\d+/>$')  # Add your tags here
+    
+    for i, token in enumerate(doc):
+        # Only split on specific tags
+        if split_tags.match(token.text):
+            token.is_sent_start = True
+            if i + 1 < len(doc):
+                doc[i + 1].is_sent_start = True
+    
     return doc
-
 
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     """Set the language model used by SpaCy."""
@@ -284,18 +282,9 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if nlp is None:
             return
 
-        # Get default infixes and remove the ones that would split HTML tags
-        # spaCy's sentence segmentation will work normally while keeping HTML tags intact.
-        infixes = nlp.Defaults.infixes
-        if infixes is not None:
-            infixes = [
-                x for x in infixes if not any(char in str(x) for char in ["<", ">"])
-            ]
-            infix_re = spacy.util.compile_infix_regex(infixes)
-            nlp.tokenizer.infix_finditer = infix_re.finditer
-
-        # Add the component to the pipeline, before the 'parser'
-        nlp.add_pipe("tag_sentencizer", before="parser")
+        html_pattern = re.compile(r'<[^>]+>')
+        nlp.tokenizer.token_match = html_pattern.match
+        nlp.add_pipe("html_sentence_splitter", before="parser")
 
         # initialize the list of stop_words in the current language
         stop_words = list(
