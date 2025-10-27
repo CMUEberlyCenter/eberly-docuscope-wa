@@ -267,7 +267,13 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
                                   .map(({ text }) => text)
                                   .join(" ")}
                               />
-                            ) : (
+                            ) : /* there exists a root that is a verb in the sentence Tokens */
+                            sentence[2].sent_analysis.TOKENS.some(
+                                ({ is_root }, i) =>
+                                  is_root &&
+                                  sentence[2].text_w_info.at(i)?.at(0) ===
+                                    "VERB"
+                              ) ? (
                               <ActiveVerbIcon
                                 title={sentence[2].sent_analysis.TOKENS.filter(
                                   ({ is_root }) => is_root
@@ -275,7 +281,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
                                   .map(({ text }) => text)
                                   .join(" ")}
                               />
-                            )}
+                            ) : null}
                           </td>
                           <td className="text-start">
                             {sentence[2].sent_analysis.NPS.slice(
