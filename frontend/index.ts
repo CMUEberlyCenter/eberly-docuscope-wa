@@ -1,7 +1,11 @@
 // import { toNodeHandler } from 'better-auth/node';
 import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
-import express, { NextFunction, Request, Response } from 'express';
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from 'express';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
@@ -17,28 +21,24 @@ import { initReactI18next } from 'react-i18next';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
-  BadRequest,
   BadRequestError,
-  Forbidden,
-  InternalServerError,
-  UnprocessableContent,
-  UnprocessableContentError
+  FileNotFoundError,
+  ForbiddenError,
+  handleError,
+  UnprocessableContentError,
 } from './src/lib/ProblemDetails';
 import { validateWritingTask } from './src/lib/schemaValidate';
-import { isWritingTask, WritingTask } from './src/lib/WritingTask';
+import { isWritingTask, type WritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
 import { writingTasks } from './src/server/api/tasks';
-import {
-  initDatabase,
-  insertWritingTask
-} from './src/server/data/mongo';
+import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
-import {
+import type {
   ContentItemType,
   IdToken,
-  LTIPlatform
+  LTIPlatform,
 } from './src/server/model/lti';
 import { validate } from './src/server/model/validate';
 import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
@@ -52,7 +52,7 @@ import {
   PLATFORMS_PATH,
   PORT,
   PRODUCT,
-  SESSION_KEY
+  SESSION_KEY,
 } from './src/server/settings';
 import { getSettings, watchSettings } from './src/ToolSettings';
 // import { auth } from './src/utils/auth';
@@ -64,7 +64,7 @@ import { getSettings, watchSettings } from './src/ToolSettings';
 // both development and production environments work correctly.
 const __dirname = process.cwd(); //dirname(__filename);
 const root = __dirname;
-const PUBLIC = __dirname;// join(__dirname, './build/app');
+const PUBLIC = __dirname; // join(__dirname, './build/app');
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -112,18 +112,18 @@ async function __main__() {
       Provider.redirect(res, '/deeplink')
   );
   Provider.app.post(
-    // TODO validate(checkSchema({})),
     '/deeplink',
-    async (request: Request, response: Response) => {
-      const url = new URL('/myprose', LTI_HOSTNAME);
+    // TODO validate(checkSchema({})),
+    async (request: Request, response: Response, next: NextFunction) => {
       try {
         const task = JSON.parse(request.body.file) as {
           _id?: string;
         } & WritingTask;
-        const tool = ['draft', 'review'].includes(request.body.tool) ? request.body.tool : 'draft';
-        url.pathname = `/${tool}`;
+        const tool = ['draft', 'review'].includes(request.body.tool)
+          ? request.body.tool
+          : 'draft';
+        const url = new URL(tool, LTI_HOSTNAME);
         const { _id, ...writing_task } = task;
-        // url.pathname = `myprose/${_id}/${tool}`;
         const valid = validateWritingTask(writing_task);
         if (!valid) {
           throw new UnprocessableContentError(
@@ -139,27 +139,24 @@ async function __main__() {
         }
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
-        // if (writing_task_id) {
-        //   url.pathname = `${url.pathname}/${writing_task_id}/${tool}`;
-        //   // url.searchParams.append('writing_task', writing_task_id);
-        // }
         const items: ContentItemType[] = [
           {
             type: 'ltiResourceLink',
             // title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
             // text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
-            title: response.locals.token.platformContext.deepLinkingSettings.title, // #236
+            title:
+              response.locals.token.platformContext.deepLinkingSettings.title, // #236
             text: `${writing_task.info.name} (${request.i18n.t(`deeplinking.option.${tool}`)})`,
             url: url.toString(),
             icon: {
               url: new URL('logo.svg', LTI_HOSTNAME).toString(),
               width: 500,
-              height: 160
+              height: 160,
             },
             custom: {
               writing_task_id,
               writing_task: JSON.stringify(writing_task),
-              tool
+              tool,
             },
           },
         ];
@@ -169,112 +166,151 @@ async function __main__() {
         ); // {message: 'Success'}
         response.send(form);
       } catch (err) {
-        if (err instanceof SyntaxError) {
-          response.status(422).send(UnprocessableContent(err));
-        } else if (err instanceof UnprocessableContentError) {
-          response.status(422).send(UnprocessableContent(err));
-        } else if (err instanceof BadRequestError) {
-          response.status(400).send(BadRequest(err));
-        } else {
-          response.status(500).send(InternalServerError(err));
-        }
+        next(err);
       }
     }
   );
 
-  Provider.onDynamicRegistration(async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      if (!req.query.openid_configuration) return res.status(400).send(BadRequest('Missing parameter: "openid_configuration".'));
-      const message = await Provider.DynamicRegistration.register(req.query.openid_configuration, req.query.registration_token, {
-        'https://purl.imsglobal.org/spec/lti-tool-configuration': {
-          messages: [
-            {
-              type: 'LtiResourceLinkRequest',
-            },
-            {
-              type: 'LtiDeepLinkingRequest',
-              label: PRODUCT,
-              placements: ["ContentArea", "assignment_selection", "link_selection"], // Add placements for Canvas
-              supported_types: ['LtiResourceLink'], // match what is produced in deep linking
-            }
-          ]
+  Provider.onDynamicRegistration(
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        if (!req.query.openid_configuration) {
+          throw new BadRequestError(
+            'Missing parameter: "openid_configuration".'
+          );
         }
-      })
-      res.setHeader('Content-type', 'text/html');
-      res.send(message);
-    } catch (err: Error | any) {
-      if (err.message === 'PLATFORM_ALREADY_REGISTERED') return res.status(403).send(Forbidden('Platform already registered.'));
-      return res.status(500).send(InternalServerError(err.message));
+        const message = await Provider.DynamicRegistration.register(
+          req.query.openid_configuration,
+          req.query.registration_token,
+          {
+            'https://purl.imsglobal.org/spec/lti-tool-configuration': {
+              messages: [
+                {
+                  type: 'LtiResourceLinkRequest',
+                },
+                {
+                  type: 'LtiDeepLinkingRequest',
+                  label: PRODUCT,
+                  placements: [
+                    'ContentArea',
+                    'assignment_selection',
+                    'link_selection',
+                  ], // Add placements for Canvas
+                  supported_types: ['LtiResourceLink'], // match what is produced in deep linking
+                },
+              ],
+            },
+          }
+        );
+        res.setHeader('Content-type', 'text/html');
+        res.send(message);
+      } catch (err: Error | any) {
+        if (err.message === 'PLATFORM_ALREADY_REGISTERED') {
+          return next(new ForbiddenError('Platform already registered.'));
+        }
+        next(err);
+      }
     }
-  });
+  );
 
-  Provider.app.delete('/lti/platforms/:platformId', async (req: Request, res: Response) => {
-    const platformId = req.params.platformId;
-    if (!platformId) {
-      return res.status(400).send(BadRequest('Missing platformId parameter.'));
+  Provider.app.delete(
+    '/lti/platforms/:platformId',
+    async (req: Request, res: Response, next: NextFunction) => {
+      const platformId = req.params.platformId;
+      try {
+        if (!platformId) {
+          throw new BadRequestError('Missing platformId parameter.');
+        }
+        if ((await Provider.getPlatformById(platformId)) === false) {
+          throw new FileNotFoundError('Platform not found.');
+        }
+        await Provider.deletePlatformById(platformId);
+        res.status(204).send(); // No Content
+      } catch (err) {
+        console.error('Error deleting platform:', err);
+        next(err);
+      }
     }
-    try {
-      await Provider.deletePlatformById(platformId);
-      res.status(204).send(); // No Content
-    } catch (err) {
-      console.error('Error deleting platform:', err);
-      return res.status(500).send(InternalServerError(err));
-    }
-  });
+  );
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
    */
-  Provider.app.get('/lti/configuration', async (_req: Request, res: Response) => {
-    res.json({
-      title: PRODUCT,
-      description: 'myProse Editing and Review tools',
-      oidc_initiation_url: new URL(Provider.loginRoute(), LTI_HOSTNAME).toString(),
-      target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-      scopes: [
-        // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-        // "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-        // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-        // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
-        // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
-        // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
-        // "https://canvas.instructure.com/lti/public_jwk/scope/update"
-      ],
-      extensions: [
-        {
-          domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
-          tool_id: PRODUCT,
-          platform: "canvas.instructure.com",
-          privacy_level: "public",
-          settings: {
-            text: 'myProse Editing and Review tools',
-            labels: {
-              en: "myProse Editing and Review tools",
+  Provider.app.get(
+    '/lti/configuration',
+    async (_req: Request, res: Response) => {
+      res.json({
+        title: PRODUCT,
+        description: 'myProse Editing and Review tools',
+        oidc_initiation_url: new URL(
+          Provider.loginRoute(),
+          LTI_HOSTNAME
+        ).toString(),
+        target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+        scopes: [
+          // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
+          // "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
+          // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+          // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
+          // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+          // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
+          // "https://canvas.instructure.com/lti/public_jwk/scope/update"
+        ],
+        extensions: [
+          {
+            domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
+            tool_id: PRODUCT,
+            platform: 'canvas.instructure.com',
+            privacy_level: 'public',
+            settings: {
+              text: 'myProse Editing and Review tools',
+              labels: {
+                en: 'myProse Editing and Review tools',
+              },
+              icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+              placements: [
+                {
+                  text: PRODUCT,
+                  placement: 'assignment_selection',
+                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  message_type: 'LtiDeepLinkingRequest',
+                  target_link_uri: new URL(
+                    Provider.appRoute(),
+                    LTI_HOSTNAME
+                  ).toString(),
+                },
+                {
+                  text: PRODUCT,
+                  placement: 'link_selection',
+                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  message_type: 'LtiDeepLinkingRequest',
+                  target_link_uri: new URL(
+                    Provider.appRoute(),
+                    LTI_HOSTNAME
+                  ).toString(),
+                },
+              ],
             },
-            icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-            placements: [
-              {
-                text: PRODUCT,
-                placement: "assignment_selection",
-                icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                message_type: "LtiDeepLinkingRequest",
-                target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-              },
-              {
-                text: PRODUCT,
-                placement: "link_selection",
-                icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                message_type: "LtiDeepLinkingRequest",
-                target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-              },
-            ]
-          }
-        }
-      ],
-      public_jwk_url: new URL(Provider.keysetRoute(), LTI_HOSTNAME).toString(),
-    });
-  });
+          },
+        ],
+        public_jwk_url: new URL(
+          Provider.keysetRoute(),
+          LTI_HOSTNAME
+        ).toString(),
+      });
+    }
+  );
 
-  Provider.whitelist(Provider.appRoute(), /\w+\.html$/, '/genlink', /draft/, /review/, '/', /locales/, /myprose/, /lti/);
+  Provider.whitelist(
+    Provider.appRoute(),
+    /\w+\.html$/,
+    '/genlink',
+    /draft/,
+    /review/,
+    '/',
+    /locales/,
+    /myprose/,
+    /lti/
+  );
   try {
     // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
@@ -289,7 +325,9 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
-          console.log(`Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`);
+          console.log(
+            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`
+          );
         }
       }
     } catch (err) {
@@ -302,13 +340,15 @@ async function __main__() {
         const url = await platform.platformUrl();
         const active = await platform.platformActive();
         console.log('Registered platforms:');
-        console.log(`${active ? '+' : 'o'} Platform: ${name} (${platformId}), URL: ${url}, Active: ${active}`);
+        console.log(
+          `${active ? '+' : 'o'} Platform: ${name} (${platformId}), URL: ${url}, Active: ${active}`
+        );
       });
     }
     const app = express();
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
-    app.use(express.json({limit: '10mb'}));
+    app.use(express.json({ limit: '10mb' }));
     // app.use(cors({ origin: '*' }));
     app.use(cors());
     // app.use((_req, res, next) => {
@@ -335,27 +375,34 @@ async function __main__() {
         cookie: { secure: 'auto' },
       })
     );
-    i18n.use(Backend).use(LanguageDetector).use(initReactI18next).init({
-      preload: ['en'],
-      fallbackLng: 'en',
-      interpolation: { escapeValue: false },
-      backend: {
-        loadPath: '/locales/{{lng}}/{{ns}}.yaml',
-        parse: (data: string) => parse(data),
-      },
-      resources: {
-        'en': {
-          translation: parse(
-            readFileSync(join(root, 'public/locales/en/translation.yaml'), 'utf-8')
-          )
+    i18n
+      .use(Backend)
+      .use(LanguageDetector)
+      .use(initReactI18next)
+      .init({
+        preload: ['en'],
+        fallbackLng: 'en',
+        interpolation: { escapeValue: false },
+        backend: {
+          loadPath: '/locales/{{lng}}/{{ns}}.yaml',
+          parse: (data: string) => parse(data),
         },
-        // 'es': {
-        //   translation: parse(
-        //     readFileSync(join(root, 'public/locales/es/translation.yaml'), 'utf-8')
-        //   )
-        // }
-      }
-    })
+        resources: {
+          en: {
+            translation: parse(
+              readFileSync(
+                join(root, 'public/locales/en/translation.yaml'),
+                'utf-8'
+              )
+            ),
+          },
+          // 'es': {
+          //   translation: parse(
+          //     readFileSync(join(root, 'public/locales/es/translation.yaml'), 'utf-8')
+          //   )
+          // }
+        },
+      });
     app.use(handle(i18n));
 
     if (process.env.NODE_ENV === 'production') {
@@ -381,37 +428,51 @@ async function __main__() {
       document?: string;
       writing_task?: WritingTask;
       writing_task_id?: string;
-    }
-    app.post('/api/v2/session', validate(body('document').isString()),
-      async (req: Request, res: Response) => {
-        const { document, writing_task, writing_task_id } = req.body as SessionData;
-        if (req.session.document !== document) {
-          req.session.document = document;
-          req.session.segmented = undefined;
-          req.session.analysis = undefined;
-        }
-        if (writing_task_id && req.session.writing_task_id !== writing_task_id) {
-          req.session.writing_task = undefined;
-          req.session.writing_task_id = writing_task_id;
-        } else if (writing_task && req.session.writing_task !== writing_task) {
-          const valid = validateWritingTask(writing_task);
-          if (!valid) {
-            throw new UnprocessableContentError(
-              validateWritingTask.errors,
-              'Invalid JSON'
-            );
+    };
+    app.post(
+      '/api/v2/session',
+      validate(body('document').isString()),
+      async (req: Request, _res: Response, next: NextFunction) => {
+        try {
+          const { document, writing_task, writing_task_id } =
+            req.body as SessionData;
+          if (req.session.document !== document) {
+            req.session.document = document;
+            req.session.segmented = undefined;
+            req.session.analysis = undefined;
           }
-          if (!isWritingTask(writing_task)) {
-            throw new UnprocessableContentError(
-              ['Failed type checking!'],
-              'Invalid JSON'
-            );
+          if (
+            writing_task_id &&
+            req.session.writing_task_id !== writing_task_id
+          ) {
+            req.session.writing_task = undefined;
+            req.session.writing_task_id = writing_task_id;
+          } else if (
+            writing_task &&
+            req.session.writing_task !== writing_task
+          ) {
+            const valid = validateWritingTask(writing_task);
+            if (!valid) {
+              throw new UnprocessableContentError(
+                validateWritingTask.errors,
+                'Invalid JSON'
+              );
+            }
+            if (!isWritingTask(writing_task)) {
+              throw new UnprocessableContentError(
+                ['Failed type checking!'],
+                'Invalid JSON'
+              );
+            }
+            req.session.writing_task = writing_task;
+            req.session.writing_task_id = undefined;
+            req.session.analysis = undefined;
           }
-          req.session.writing_task = writing_task;
-          req.session.writing_task_id = undefined;
-          req.session.analysis = undefined;
+        } catch (err) {
+          next(err);
         }
-      });
+      }
+    );
 
     // app.use('/api/v2/performance', promptPerformance);
     // Metrics
@@ -436,8 +497,14 @@ async function __main__() {
     // apply(app);
     app.all('{*vike}', async (req: Request, res: Response, next) => {
       const token: IdToken | undefined = res.locals.token;
-      const query = typeof req.query.writing_task === 'string' ? req.query.writing_task : undefined;
-      const writing_task_id: string | undefined = token?.platformContext.custom?.writing_task_id || query || req.session.writing_task_id;
+      const query =
+        typeof req.query.writing_task === 'string'
+          ? req.query.writing_task
+          : undefined;
+      const writing_task_id: string | undefined =
+        token?.platformContext.custom?.writing_task_id ||
+        query ||
+        req.session.writing_task_id;
       const pageContextInit = {
         urlOriginal: req.url,
         headersOriginal: req.headers,
@@ -452,7 +519,7 @@ async function __main__() {
           clientId: process.env.GOOGLE_CLIENT_ID,
           apiKey: process.env.GOOGLE_API_KEY,
           appKey: process.env.GOOGLE_APP_KEY,
-        }
+        },
         // ltik,
         // headers: {
         //   'Content-Type': 'text/html',
@@ -460,10 +527,10 @@ async function __main__() {
         // },
       };
       const pageContext = await renderPage(pageContextInit);
-      pageContext.urlParsed?.search
+      pageContext.urlParsed?.search;
       if (pageContext.errorWhileRendering) {
         console.error('Error rendering page:', pageContext.errorWhileRendering);
-        // return res.status(500).send(InternalServerError('Error rendering page'));
+        return next(new Error(`$${pageContext.errorWhileRendering}`));
       }
       const { httpResponse } = pageContext;
       if (!httpResponse) {
@@ -471,7 +538,9 @@ async function __main__() {
       } else {
         const { body, statusCode, headers, earlyHints } = httpResponse;
         if (res.writeEarlyHints) {
-          res.writeEarlyHints({ link: earlyHints.map((hint) => hint.earlyHintLink) });
+          res.writeEarlyHints({
+            link: earlyHints.map((hint) => hint.earlyHintLink),
+          });
         }
         headers.forEach(([name, value]) => res.setHeader(name, value));
         // Remove COEP/COOP headers to allow use of Google Drive Picker
@@ -480,6 +549,9 @@ async function __main__() {
         res.status(statusCode).send(body);
       }
     });
+
+    app.use(handleError);
+
     const server = app.listen(PORT, () =>
       console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
     );
@@ -508,4 +580,4 @@ async function __main__() {
     console.error(err);
   }
 }
-export default (await __main__());
+export default await __main__();

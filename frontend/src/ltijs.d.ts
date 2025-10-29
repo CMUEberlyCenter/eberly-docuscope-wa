@@ -151,16 +151,22 @@ declare module 'ltijs' {
     ): Promise<string | false>;
   }
 
+  type SyncOrAsync<T> = T | Promise<T>;
+  type ExpressCallbackReturnType = SyncOrAsync<Response | void>;
   interface ExpressCallback {
-    (req: Request, res: Response, next?: NextFunction): Response | void | Promise<Response | void>;
+    (
+      req: Request,
+      res: Response,
+      next: NextFunction
+    ): ExpressCallbackReturnType;
   }
   interface OnConnectCallback {
     (
       token: IdToken,
       req: Request,
       res: Response,
-      next?: NextFunction
-    ): Response | void | Promise<Response | void>;
+      next: NextFunction
+    ): ExpressCallbackReturnType;
   }
   interface OnConnectOptions {
     sessionTimeout?: (request: Request, response: Response) => Response;
@@ -271,7 +277,7 @@ declare module 'ltijs' {
     ): string[];
     registerPlatform(platform: PlatformConfig): Promise<unknown | false>;
     // getPlatrform
-    // getPlatformById
+    getPlatformById(id: string): Promise<Platform | false>;
     // updatePlatformById
     deletePlatform(url: string, clientId: string): Promise<boolean>;
     deletePlatformById(id: string): Promise<boolean>;
@@ -283,8 +289,8 @@ declare module 'ltijs' {
     ): Promise<void>;
     DynamicRegistration: {
       register(
-        openid_configuration: string,
-        registration_token: string,
+        openid_configuration: string | ParsedQs | (string | ParsedQs)[],
+        registration_token: string | ParsedQs | (string | ParsedQs)[],
         custom?: Record<string, unknown>
       ): Promise<string>;
     };

@@ -1,3 +1,5 @@
+import type { Request, Response, NextFunction } from 'express';
+
 /* Type declaration for RFC-9457 problem details */
 type ProblemDetails<Details = string> = {
   type?: string; // URI
@@ -9,6 +11,7 @@ type ProblemDetails<Details = string> = {
   [key: string]: unknown;
 };
 
+export class FileNotFoundError extends Error {}
 /** Generate File Not Found message. */
 export const FileNotFound = (
   err: Error | string,
@@ -21,6 +24,7 @@ export const FileNotFound = (
   instance,
 });
 
+export class ForbiddenError extends Error {}
 /** Generate Forbidden message. */
 export const Forbidden = (
   err: Error | string,
@@ -100,3 +104,30 @@ export const UnprocessableContent = (
   instance,
   errors: err instanceof UnprocessableContentError ? err.validation : undefined,
 });
+
+/** Express error handling middleware */
+export const handleError = (
+  err: Error,
+  _req: Request,
+  response: Response,
+  _next: NextFunction
+) => {
+  if (err instanceof ForbiddenError) {
+    return response.status(403).send(Forbidden(err));
+  }
+  // TODO: Unauthorized
+  if (err instanceof FileNotFoundError) {
+    return response.status(404).send(FileNotFound(err));
+  }
+  if (err instanceof SyntaxError) {
+    return response.status(422).send(UnprocessableContent(err));
+  }
+  if (err instanceof UnprocessableContentError) {
+    return response.status(422).send(UnprocessableContent(err));
+  }
+  if (err instanceof BadRequestError) {
+    return response.status(400).send(BadRequest(err));
+  }
+  console.error('Unhandled error:', err);
+  return response.status(500).json(InternalServerError(err));
+};
