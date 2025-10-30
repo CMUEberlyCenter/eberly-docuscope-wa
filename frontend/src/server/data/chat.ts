@@ -1,4 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type {
+  MessageParam,
+  TextBlockParam,
+} from '@anthropic-ai/sdk/resources/index.mjs';
 import format from 'string-format';
 import type { PromptType } from '../model/prompt';
 import {
@@ -7,10 +11,6 @@ import {
   ANTHROPIC_MODEL,
 } from '../settings';
 import { findPromptById } from './prompts';
-import type {
-  MessageParam,
-  TextBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs';
 
 const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
@@ -57,7 +57,7 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: '',
+    content: '{',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -125,6 +125,10 @@ export async function doChat<T>(
       throw new Error('No stop_sequence handler.', { cause: chat }); // Currently unused
     case 'end_turn':
       break;
+    case 'refusal':
+      throw new Error('The model refused to answer.', { cause: chat });
+    default:
+      console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
   }
   // TODO handle server errors, 400-529, 413 in particular (request_too_large)
   /* try {
@@ -149,7 +153,7 @@ export async function doChat<T>(
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? (JSON.parse(response) as T) : response;
+    response = json ? (JSON.parse(`${json_assistant.content}${response}`) as T) : response;
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError
