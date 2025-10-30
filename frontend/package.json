@@ -6,9 +6,9 @@
   "private": true,
   "scripts": {
     "dev": "npx tsx ./index.ts",
-    "build": "cross-env NODE_ENV=production npx vike build",
-    "build:server": "cross-env NODE_ENV=production rollup -c",
-    "preview": "cross-env NODE_ENV=production npx tsx ./index.ts",
+    "build": "npx vike build",
+    "build:server": "rollup -c",
+    "preview": "npx tsx ./index.ts",
     "start": "npm run preview",
     "test": "vitest run",
     "coverage": "vitest run --coverage",
