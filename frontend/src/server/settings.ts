@@ -79,7 +79,7 @@ export const SEGMENT_URL = new URL('api/v2/segment', ONTOPIC_SERVER);
 
 export const ANTHROPIC_API_KEY = fromEnvFile('ANTHROPIC_API_KEY');
 export const ANTHROPIC_MODEL =
-  process.env.ANTHROPIC_MODEL ?? 'claude-3-7-sonnet-latest';
+  process.env.ANTHROPIC_MODEL ?? 'claude-sonnet-4-5';
 export const ANTHROPIC_MAX_TOKENS = envInt(
   process.env.ANTHROPIC_MAX_TOKENS,
   1024
