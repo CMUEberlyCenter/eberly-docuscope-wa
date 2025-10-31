@@ -1,8 +1,27 @@
 {
-  "extends": "@tsconfig/vite-react/tsconfig.json",
   "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./index.ts"],
+  "exclude": ["dist"],
   "compilerOptions": {
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "module": "ESNext",
+    "noEmit": true,
+    "moduleResolution": "Bundler",
     "target": "ES2024",
-    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
+    "types": [
+      "vite/client",
+      "vike-react"
+    ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }

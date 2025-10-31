@@ -1,5 +1,6 @@
 FROM docker.io/node:24-slim AS base
 RUN mkdir -p /app
+ENV NODE_ENV=production
 
 FROM base AS build
 # ci in /tmp to take advantage of layer caching
