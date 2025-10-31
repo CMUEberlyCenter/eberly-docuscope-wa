@@ -1,3 +1,5 @@
+import type { Optional } from '..';
+
 type CoherenceParagraph = {
   first_left_sent_id: number;
   is_left: boolean;
@@ -38,7 +40,25 @@ type LocalData = {
   num_topics: number;
 };
 
-type Lemma = Array<string | boolean | null | number>;
+// type Lemma = Array<string | boolean | null | number>;
+type Lemma = [
+  POS: string, // 0
+  WORD: string, // 1
+  LEMMA: string, // 2
+  ISLEFT: boolean, // 3
+  DEP: string, // 4
+  STEM: string, // 5
+  LINKS: Optional<number>, // 6
+  QUOTE: boolean, // 7
+  WORD_POS: number, // 8
+  DS_DATA: Optional<Map<string, unknown>>, // 9
+  // PARA_POS: number, // 10
+  // SENT_POS: number, // 11
+  // NEW: boolean, // 12
+  // GIVEN: boolean, // 13
+  // IS_SKIP: boolean, // 14
+  // IS_TOPIC: boolean, // 15
+];
 type SentenceData = {
   NOUNS: number; // total # of nouns
   HNOUNS: number; // total # of head nouns

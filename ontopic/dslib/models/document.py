@@ -28,7 +28,6 @@ from bs4 import BeautifulSoup as bs
 from bs4 import Tag
 from PIL import Image
 from spacy.language import Language
-from spacy.tokenizer import Tokenizer
 
 no_space_patterns = [
     "\u2019ve",
@@ -232,21 +231,19 @@ en_pronouns = [
 es_extra_stop_words = []  # TBD
 es_pronouns = []  # TBD
 
-
-@Language.component("tag_sentencizer")
-def tag_sentencizer(doc):
-    for token in doc:
-        # ONLY break sentences for image tags
-        if re.match(r"<img\d+/?>", token.text):
-            # This token starts a sentence
-            if token.i > 0:
-                doc[token.i].is_sent_start = True
-            # Next token also starts a sentence
-            if token.i < len(doc) - 1:
-                doc[token.i + 1].is_sent_start = True
-
+@Language.component("html_sentence_splitter")
+def html_sentence_splitter(doc):
+    # Define which tags should trigger sentence splits
+    split_tags = re.compile(r'^<img\d+/>$')  # Add your tags here
+    
+    for i, token in enumerate(doc):
+        # Only split on specific tags
+        if split_tags.match(token.text):
+            token.is_sent_start = True
+            if i + 1 < len(doc):
+                doc[i + 1].is_sent_start = True
+    
     return doc
-
 
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
     """Set the language model used by SpaCy."""
@@ -285,16 +282,9 @@ def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
         if nlp is None:
             return
 
-        # Pattern to match any HTML tag (so they all stay intact during tokenization)
-        # This prevents < and > from being split
-        html_tag_pattern = r"</?[a-zA-Z][^>]*/?>"
-
-        nlp.tokenizer = Tokenizer(
-            nlp.vocab, token_match=re.compile(html_tag_pattern).match
-        )
-
-        # Add the component to the pipeline, before the 'parser'
-        nlp.add_pipe("tag_sentencizer", before="parser")
+        html_pattern = re.compile(r'<[^>]+>')
+        nlp.tokenizer.token_match = html_pattern.match
+        nlp.add_pipe("html_sentence_splitter", before="parser")
 
         # initialize the list of stop_words in the current language
         stop_words = list(
@@ -358,9 +348,29 @@ def contains_html_tags(text):
     return match is not None
 
 
-def get_text_preserve_inline(element, inline_tags=None):
+def get_text_preserve_inline(element, inline_tags=None, remove_with_attrs=None):
+    """
+    Extract text content from an HTML element while preserving specified inline tags.
+
+    Removes block-level tags (div, p, h1-h6, etc.) and unwanted inline tags, keeping
+    only the inline tags specified in inline_tags. Optionally removes specific tags
+    that contain certain attributes.
+
+    By default, <span> tags that are inserted by myProse are removed.
+
+    Args:
+        element: BeautifulSoup element to process
+        inline_tags: List of inline tag names to preserve
+        remove_with_attrs: Dict mapping tag names to lists of attributes. Tags with
+                          these attributes will be removed (e.g., {'span': ['id']})
+
+    Returns:
+        String containing HTML with preserved inline tags and cleaned whitespace
+    """
+
     if inline_tags is None:
         inline_tags = [
+            "img",
             "strong",
             "em",
             "b",
@@ -374,6 +384,9 @@ def get_text_preserve_inline(element, inline_tags=None):
             "sub",
             "sup",
         ]
+
+    if remove_with_attrs is None:
+        remove_with_attrs = {"span": ["id"]}
 
     # Get the inner HTML
     html = element.decode_contents()
@@ -392,6 +405,40 @@ def get_text_preserve_inline(element, inline_tags=None):
     ]
     for tag in block_tags:
         html = re.sub(f"</?{tag}[^>]*>", " ", html)
+
+    # Remove inline tags that are NOT in the inline_tags list
+    # OR are in the remove_with_attrs list
+    def replace_tag(match):
+        full_tag = match.group(0)
+        tag_name = match.group(1).lower()
+
+        # Handle closing tags
+        if tag_name.startswith("/"):
+            tag_name = tag_name[1:].split()[0]
+            # Remove closing tag if opening tag should be removed
+            if tag_name in remove_with_attrs:
+                return ""
+            elif tag_name in inline_tags:
+                return full_tag
+            else:
+                return ""
+
+        # Opening tag
+        tag_name_only = tag_name.split()[0]
+
+        # Check if this tag+attribute combination should be removed
+        if tag_name_only in remove_with_attrs:
+            for attr in remove_with_attrs[tag_name_only]:
+                if re.search(rf"\b{attr}\s*=", full_tag):
+                    return ""  # Remove this tag
+
+        # Keep the tag if it's in inline_tags
+        if tag_name_only in inline_tags:
+            return full_tag
+        else:
+            return ""
+
+    html = re.sub(r"<(/?\w+)[^>]*>", replace_tag, html)
 
     # Clean up extra whitespace
     html = re.sub(r"\s+", " ", html).strip()
@@ -422,6 +469,7 @@ def extract_and_replace_images(html_string):
 
     # Find and replace all <img> tags
     modified_string = re.sub(r"<img[^>]*>", replace_img, html_string)
+    modified_string = re.sub(r" +", " ", modified_string)  # remove multiple spaces.
 
     return modified_string, images
 
@@ -725,8 +773,8 @@ class DSDocument:
                 "h4",
                 "h5",
                 "h6",
-                "table",
-                "img",
+                # "table",
+                # "img",
                 "ul",
                 "ol",
                 "li",
@@ -1786,6 +1834,10 @@ class DSDocument:
 
                 sent_dict["accum_lemmas"] = list(para_dict["lemmas"])
 
+                # we need to remove the 'sent' key and its value sincd the value
+                # is usually a spaCy object, which can't be JSONified later.
+                sent_dict.pop("sent", None)
+
             para_dict["accum_lemmas"] = accumulateParaLemmas()
 
             self.word_count = word_pos + 1
@@ -1859,6 +1911,8 @@ class DSDocument:
 
             prev_s = None
             for sent in para["sentences"]:  # for each sentence in the paragraph
+                if sent.get("is_image", False):
+                    continue
                 sent["given_accum_lemmas"] = []
                 sent["new_accum_lemmas"] = []
 
@@ -1885,6 +1939,8 @@ class DSDocument:
 
                         # commented out 9/16/2021
                         for temp_sent in para["sentences"]:
+                            if temp_sent.get("is_image", False):
+                                continue
                             # for each sentence in the paragraph
                             if (
                                 temp_sent == sent
@@ -2051,10 +2107,10 @@ class DSDocument:
         self.processDoc()
 
     def loadFromHtmlString(self, html_str):
-
         # Process with style extraction
         self.setHtml(html_str)
         self.processDoc()
+        self.toHtml()  # tag sentences.
 
     def loadFromHtmlFile(self, src_dir, html_file):
         with open(
@@ -2133,7 +2189,6 @@ class DSDocument:
                     html_str += " "
                     html_str += sent["text"]
                     html_str += " "
-                    scount += 1
                     continue
 
                 total_words = len(sent["text_w_info"])  # get the total # of words
@@ -2807,6 +2862,8 @@ class DSDocument:
             for s_count, s in enumerate(p["sentences"], start=1):  # for each sentence
                 # if s['text'] is a single character, and one of these punct chracters
                 # we'll make the row as bSkipPunct == True.
+                if s.get("is_image", False):
+                    continue
                 bSkipPunct = bool(
                     len(s["text"]) == 1
                     and (
@@ -2935,7 +2992,7 @@ class DSDocument:
                 prev_content_type = elem.content_type
 
                 for s in p["sentences"]:  # for each sentence
-                    if s.get("is_image", False):
+                    if s.get("is_image", False) or len(s["text"]) == 0:
                         continue
                     bSkipPunct = bool(
                         len(s["text"]) == 1
