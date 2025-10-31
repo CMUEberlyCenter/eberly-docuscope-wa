@@ -57,7 +57,7 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: '{',
+    content: content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ?? '',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -153,11 +153,22 @@ export async function doChat<T>(
   }
   // TODO catch json parsing errors, either here or in calling code
   try {
-    response = json ? (JSON.parse(`${json_assistant.content}${response}`) as T) : response;
+    if (json) {
+      // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
+      // Using json_assistant and looking for "begin with" seems to help with this
+      // but leaving this in case the model still fences it or fails to find the magic string.
+      const unfenced = response.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+      response = JSON.parse(`${json_assistant.content}${unfenced}`) as T;
+    }
   } catch (err) {
     // Output the json that failed to parse.
     console.error(err); // Most likely a SyntaxError
+    console.error('---- Prompt used ----');
+    console.error(content);
+    console.error('---- end of prompt ----');
+    console.error('---- Failed to parse JSON response ----');
     console.error(response);
+    console.error('---- end of response ----');
     throw err;
   }
   const finished = new Date();

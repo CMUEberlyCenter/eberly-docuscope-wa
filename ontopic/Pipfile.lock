@@ -302,12 +302,12 @@
         },
         "fastapi": {
             "hashes": [
-                "sha256:4c5ab43e2a90335bbd8326d1b659eac0f3dbcc015e2af573c4f5de406232c4ac",
-                "sha256:bedcf2c14240e43d56cb9a339b32bcf15104fe6b5897c0222603cb7ec416c8eb"
+                "sha256:17db50718ee86c9e01e54f9d8600abf130f6f762711cd0d8f02eb392668271ba",
+                "sha256:bfee21c98db9128dc425a686eafd14899e26e4471aab33076bff2427fd6dcd22"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==0.120.2"
+            "version": "==0.120.3"
         },
         "h11": {
             "hashes": [
@@ -1317,11 +1317,11 @@
         },
         "smart-open": {
             "hashes": [
-                "sha256:5c20f09026875e6dec708e9610e0cd13d24d91f0a2c12e6511b9e478a566b4a0",
-                "sha256:f52cb9bc897c7676dfc6996735332bd2465dfb048c73bfa9dfcdc829f48018cc"
+                "sha256:5e53a2604d62979a3940f80472c3d42c508250cec709ad4d25854f597d15036f",
+                "sha256:648b5619297cb32720cdfed4ffbcb15209defb531e0904497721a9b24fdcdcac"
             ],
             "markers": "python_version >= '3.9' and python_version < '4.0'",
-            "version": "==7.4.1"
+            "version": "==7.4.2"
         },
         "sniffio": {
             "hashes": [
