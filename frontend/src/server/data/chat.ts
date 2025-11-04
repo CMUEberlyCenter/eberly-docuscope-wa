@@ -57,7 +57,9 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ?? '',
+    content:
+      content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
+      '',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -157,7 +159,9 @@ export async function doChat<T>(
       // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
       // Using json_assistant and looking for "begin with" seems to help with this
       // but leaving this in case the model still fences it or fails to find the magic string.
-      const unfenced = response.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+      const unfenced = response
+        .replace(/^```json\s*/, '')
+        .replace(/\s*```$/, '');
       response = JSON.parse(`${json_assistant.content}${unfenced}`) as T;
     }
   } catch (err) {
