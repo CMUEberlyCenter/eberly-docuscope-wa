@@ -4,6 +4,7 @@ import type {
   TextBlockParam,
 } from '@anthropic-ai/sdk/resources/index.mjs';
 import format from 'string-format';
+import { ChatStopError } from '../../lib/ProblemDetails';
 import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
@@ -120,17 +121,18 @@ export async function doChat<T>(
   }
   switch (chat.stop_reason) {
     case 'max_tokens':
-      throw new Error('Token limit exceeded.', { cause: chat });
+      throw new ChatStopError('Token limit exceeded.', { cause: chat });
     case 'tool_use':
-      throw new Error('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
+      throw new ChatStopError('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
     case 'stop_sequence':
-      throw new Error('No stop_sequence handler.', { cause: chat }); // Currently unused
+      throw new ChatStopError('No stop_sequence handler.', { cause: chat }); // Currently unused
     case 'end_turn':
       break;
     case 'refusal':
-      throw new Error('The model refused to answer.', { cause: chat });
+      throw new ChatStopError('The model refused to answer.', { cause: chat });
     default:
       console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+      throw new ChatStopError('Unknown stop reason.', { cause: chat });
   }
   // TODO handle server errors, 400-529, 413 in particular (request_too_large)
   /* try {

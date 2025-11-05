@@ -1,10 +1,9 @@
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
+import { parse } from 'node-html-parser';
 import type { OnTopicData } from '../../lib/OnTopicData';
 import {
-  Forbidden,
-  InternalServerError,
-  UnprocessableContent,
+  ForbiddenError,
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
@@ -31,7 +30,6 @@ import { insertLog } from '../data/mongo';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
 import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
-import { parse } from 'node-html-parser';
 
 export const reviews = Router();
 
@@ -62,6 +60,7 @@ const doOnTopic = async (
     console.error(
       `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
     );
+    // TODO check for response codes and throw specific errors.
     throw new Error(`onTopic Response status: ${res.status}`);
   }
   const data = (await res.json()) as OnTopicData;
@@ -125,38 +124,53 @@ const reviewData = ({
 });
 
 /**
- * @route POST <reviews>/segment
- * @summary Segment text into sentences.
- * @description Segments the given text into sentences and labels them using the onTopic service.
- * This is used to prepare the text for analysis.
- * @param document The text to be segmented.
- * @returns Segmented text.
- * @returns { status: 422, body: @type{UnprocessableContent}}
- * @returns { status: 500: body: @type{InternalServerError}}
+ * @swagger
+ * <reviews>/segment:
+ *   post:
+ *     summary: Segment text into sentences.
+ *     description: Segments the given text into sentences and labels them using the onTopic service. This is used to prepare the text for analysis.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         plain/text:
+ *           schema:
+ *             type: string
+ *             description: The text to be segmented.
+ *     responses:
+ *       '200':
+ *         description: Segmented text.
+ *         content:
+ *           plain/text:
+ *             schema:
+ *               type: string
+ *       '422':
+ *         description: Unprocessable Content Error.
+ *         content:
+ *           application/problem+json:
+ *             schema:
+ *               $ref: '#/components/schemas/UnprocessableContent'
  */
 reviews.post(
   '/segment',
   validate(body().isString().notEmpty()),
   async (request: Request, response: Response) => {
-    try {
-      const segmented = await segmentText(request.body as string);
-      if (segmented.trim() === '') {
-        throw new UnprocessableContentError(['Unable to segment document']);
-      }
-      request.session.document = request.body; // save original document
-      request.session.segmented = segmented; // save segmented document
-      response.send(segmented);
-    } catch (err) {
-      console.error(err);
-      if (err instanceof UnprocessableContentError) {
-        response.status(422).send(UnprocessableContent(err));
-      } else {
-        response.status(500).send(InternalServerError(err));
-      }
+    const segmented = await segmentText(request.body as string);
+    if (segmented.trim() === '') {
+      throw new UnprocessableContentError(['Unable to segment document']);
     }
+    request.session.document = request.body; // save original document
+    request.session.segmented = segmented; // save segmented document
+    response.send(segmented);
   }
 );
 
+/**
+ * Update the session data with the given document and writing task.
+ * @param request Request object.
+ * @param document user's document text.
+ * @param writing_task the writing task.
+ * @throws {UnprocessableContentError} if validation fails.
+ */
 async function updateSession(
   request: Request,
   document?: string,
@@ -205,8 +219,8 @@ type AnalysisBody = {
  * @description Analyzes the given text for topic relevance using the onTopic service.
  * @param document The text to be analyzed.
  * @returns Analysis results.
- * @returns { status: 422, body: @type{UnprocessableContent}}
- * @returns { status: 500: body: @type{InternalServerError}}
+ * @throws {UnprocessableContentError}
+ * @throws {InternalServerError}
  */
 reviews.post(
   '/ontopic',
@@ -217,32 +231,22 @@ reviews.post(
       controller.abort();
     });
     const { document } = request.body as AnalysisBody;
-    try {
-      await updateSession(request, document);
-      const cached = request.session.analysis?.find(
-        (a) => a.tool === 'ontopic'
-      );
-      if (cached) {
-        response.json(cached);
-        return;
-      }
-      const data = await doOnTopic(
-        request.session.document ?? '',
-        controller.signal
-      );
-      if (controller.signal.aborted) {
-        return;
-      }
-      if (!data) throw new Error(`NULL onTopic results.`);
-      request.session.analysis = [...(request.session.analysis ?? []), data];
-      response.json(data);
-    } catch (err) {
-      if (err instanceof UnprocessableContentError) {
-        response.status(422).send(UnprocessableContent(err));
-      } else {
-        response.status(500).send(InternalServerError(err));
-      }
+    await updateSession(request, document);
+    const cached = request.session.analysis?.find((a) => a.tool === 'ontopic');
+    if (cached) {
+      response.json(cached);
+      return;
     }
+    const data = await doOnTopic(
+      request.session.document ?? '',
+      controller.signal
+    );
+    if (controller.signal.aborted) {
+      return;
+    }
+    if (!data) throw new Error(`NULL onTopic results.`);
+    request.session.analysis = [...(request.session.analysis ?? []), data];
+    response.json(data);
   }
 );
 
@@ -275,83 +279,69 @@ reviews.post(
   ),
   async (request: Request, response: Response) => {
     if (!getSettings().expectations) {
-      return response
-        .status(403)
-        .send(Forbidden('Expectations tool is not available!'));
+      throw new ForbiddenError('Expectations tool is not available!');
     }
     const { document, writing_task, expectation } =
       request.body as AnalysisBody;
     if (!isWritingTask(writing_task)) {
-      return response
-        .status(422)
-        .send(UnprocessableContent('Invalid writing task'));
+      throw new UnprocessableContentError('Invalid writing task');
     }
     if (!isEnabled(writing_task, 'expectations')) {
-      return response
-        .status(403)
-        .send(Forbidden('Expectations tool is disabled!'));
+      throw new ForbiddenError(
+        'Expectations tool is disabled for this writing task!'
+      );
     }
     if (!expectation) {
-      return response
-        .status(422)
-        .send(UnprocessableContent('Expectation is required'));
+      throw new UnprocessableContentError('Expectation is required');
     }
     const controller = new AbortController();
     request.on('close', () => {
       controller.abort();
     });
-    try {
-      await updateSession(request, document, writing_task);
-      const cached = request.session.analysis?.find(
-        (a) => isExpectationsData(a) && a.expectation === expectation
-      );
-      if (cached) {
-        response.json({ input: request.session.segmented, data: cached });
-        return;
-      }
-      const chat = await doChat<ExpectationsOutput>(
-        'expectations',
-        {
-          ...reviewData({
-            segmented: stripIrrelevantTags(request.session.segmented),
-            writing_task: writing_task ?? null,
-          }),
-          expectation,
-          description:
-            getExpectations(writing_task ?? null).find(
-              (rule) => rule.name === expectation
-            )?.description ?? '',
-        },
-        controller.signal,
-        true,
-        true
-      );
-      if (controller.signal.aborted) {
-        return;
-      }
-      countPrompt(chat);
-      insertLog(request.sessionID ?? '', chat);
-      const { response: chat_response, finished: datetime } = chat;
-      if (!chat_response) throw new Error(`NULL results for ${expectation}`);
-      if (!isExpectationsOutput(chat_response)) {
-        console.error(`Malformed results for ${expectation}`, chat_response);
-        throw new Error(`Malformed results for ${expectation}`);
-      }
-      const data: ExpectationsData = {
-        tool: 'expectations',
-        datetime,
-        expectation,
-        response: chat_response,
-      };
-      request.session.analysis = [...(request.session.analysis ?? []), data];
-      response.json({ input: request.session.segmented, data });
-    } catch (err) {
-      if (err instanceof UnprocessableContentError) {
-        response.status(422).send(UnprocessableContent(err));
-      } else {
-        response.status(500).send(InternalServerError(err));
-      }
+    await updateSession(request, document, writing_task);
+    const cached = request.session.analysis?.find(
+      (a) => isExpectationsData(a) && a.expectation === expectation
+    );
+    if (cached) {
+      response.json({ input: request.session.segmented, data: cached });
+      return;
     }
+    const chat = await doChat<ExpectationsOutput>(
+      'expectations',
+      {
+        ...reviewData({
+          segmented: stripIrrelevantTags(request.session.segmented),
+          writing_task: writing_task ?? null,
+        }),
+        expectation,
+        description:
+          getExpectations(writing_task ?? null).find(
+            (rule) => rule.name === expectation
+          )?.description ?? '',
+      },
+      controller.signal,
+      true,
+      true
+    );
+    if (controller.signal.aborted) {
+      return;
+    }
+    countPrompt(chat);
+    insertLog(request.sessionID ?? '', chat);
+    const { response: chat_response, finished: datetime } = chat;
+    if (!chat_response) throw new Error(`NULL results for ${expectation}`);
+    if (!isExpectationsOutput(chat_response)) {
+      console.error(`Malformed results for ${expectation}`, chat_response);
+      throw new Error(`Malformed results for ${expectation}`);
+    }
+    const data: ExpectationsData = {
+      tool: 'expectations',
+      datetime,
+      expectation,
+      response: chat_response,
+    };
+    request.session.analysis = [...(request.session.analysis ?? []), data];
+    response.json({ input: request.session.segmented, data });
   }
 );
 
@@ -385,67 +375,55 @@ reviews.post(
     // Check if the tool is enabled in settings
     const settings = getSettings();
     if (analysis in settings && !settings[analysis as keyof typeof settings]) {
-      return response
-        .status(403)
-        .send(Forbidden(`${analysis} tool is not available!`));
+      throw new ForbiddenError(`${analysis} tool is not available!`);
     }
     const { document, writing_task } = request.body as AnalysisBody;
     // const token: IdToken | undefined = response.locals.token;
     if (writing_task && !isWritingTask(writing_task)) {
       // conditional validation as writing_task is optional #230
-      return response
-        .status(422)
-        .send(UnprocessableContent('Invalid writing task'));
+      throw new UnprocessableContentError('Invalid writing task');
     }
     if (writing_task && !isEnabled(writing_task, analysis as ReviewPrompt)) {
-      return response.status(403).send(Forbidden(`${analysis} is disabled!`));
+      throw new ForbiddenError(`${analysis} is disabled!`);
     }
     const controller = new AbortController();
     request.on('close', () => {
       controller.abort();
     });
 
-    try {
-      await updateSession(request, document, writing_task);
-      const cached = request.session.analysis?.find((a) => a.tool === analysis);
-      if (cached) {
-        console.log(`Returning cached analysis for ${analysis}`);
-        response.json({ input: request.session.segmented, data: cached });
-        return;
-      }
-      const chat = await doChat<ReviewResponse>(
-        analysis as ReviewPrompt,
-        reviewData({
-          segmented: stripIrrelevantTags(request.session.segmented),
-          writing_task: writing_task ?? null,
-        }),
-        controller.signal,
-        true,
-        true
-      );
-      if (controller.signal.aborted) {
-        return;
-      }
-      countPrompt(chat);
-      insertLog(request.sessionID ?? '', chat);
-      const { response: chat_response, finished: datetime } = chat;
-      if (!chat_response) throw new Error(`NULL chat response for ${analysis}`);
-      if (typeof chat_response === 'string') {
-        throw new Error(chat_response); // if string, throw as error
-      }
-      const data: Analysis = {
-        tool: analysis as ReviewPrompt,
-        datetime,
-        response: chat_response,
-      } as Analysis; // FIXME typescript shenanigans
-      request.session.analysis = [...(request.session.analysis ?? []), data];
-      response.json({ input: request.session.segmented, data });
-    } catch (err) {
-      if (err instanceof UnprocessableContentError) {
-        response.status(422).send(UnprocessableContent(err));
-      } else {
-        response.status(500).send(InternalServerError(err));
-      }
+    await updateSession(request, document, writing_task);
+    const cached = request.session.analysis?.find((a) => a.tool === analysis);
+    if (cached) {
+      console.log(`Returning cached analysis for ${analysis}`);
+      response.json({ input: request.session.segmented, data: cached });
+      return;
     }
+    const chat = await doChat<ReviewResponse>(
+      analysis as ReviewPrompt,
+      reviewData({
+        segmented: stripIrrelevantTags(request.session.segmented),
+        writing_task: writing_task ?? null,
+      }),
+      controller.signal,
+      true,
+      true
+    );
+    if (controller.signal.aborted) {
+      return;
+    }
+    countPrompt(chat);
+    insertLog(request.sessionID ?? '', chat);
+    const { response: chat_response, finished: datetime } = chat;
+    if (!chat_response) throw new Error(`NULL chat response for ${analysis}`);
+    if (typeof chat_response === 'string') {
+      throw new Error(chat_response); // if string, throw as error
+    }
+    const data: Analysis = {
+      tool: analysis as ReviewPrompt,
+      datetime,
+      response: chat_response,
+    } as Analysis; // FIXME typescript shenanigans
+    request.session.analysis = [...(request.session.analysis ?? []), data];
+    response.json({ input: request.session.segmented, data });
   }
 );

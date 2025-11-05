@@ -111,12 +111,6 @@ tool:
     bullets:
       title: Bullets
       tooltip: Generate Bulleted List from Notes
-    expectation:
-      title: Check
-      tooltip: Check Content Expectations
-    expectations:
-      title: Check All
-      tooltip: Check All Content Expectations
     flow:
       title: Flow
       tooltip: Check Flow Between Sentences
@@ -139,7 +133,6 @@ tool:
   paste: Paste Text
   expectation: Selected Expectation
   select_expectation: Select an Expectation
-  explanation: 'Explanation:'
   suggestion: 'Revision:'
   tracking: 'Revision with tracking:'
 clipboard: Copy to Clipboard
@@ -150,8 +143,6 @@ error:
     bullets: It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable list.
     default: No text is selected. Highlight text first.
   no_results: No valid results.
-expectation:
-  title: Select an Expectation
 flow:
   issue: 'Issue:'
   suggestions: 'Suggestions:'

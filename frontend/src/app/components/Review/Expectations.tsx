@@ -128,10 +128,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
       }
       setError({
         tool: "expectations",
-        error: {
-          message:
-            error.message || "An error occurred while fetching expectation.",
-        },
+        error,
       });
     },
     onSettled: () => {

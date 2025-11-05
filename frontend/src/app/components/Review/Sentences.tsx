@@ -20,7 +20,7 @@ import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
 /** Button component for selecting the Sentences tool. */
@@ -124,9 +124,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to update sentences");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: (data: OnTopicReviewData) => {
@@ -139,7 +137,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
     },
     onError: (error) => {
       console.error("Error fetching Sentences review:", error);
-      setData({ tool: "ontopic", error: { message: error.message } });
+      setData({ tool: "ontopic", error });
     },
   });
   useEffect(() => {

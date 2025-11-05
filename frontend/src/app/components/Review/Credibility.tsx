@@ -26,7 +26,7 @@ import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying sentence assessments. */
 const SentenceAssessments: FC<
@@ -106,9 +106,7 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Credibility review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: CredibilityData }) => {

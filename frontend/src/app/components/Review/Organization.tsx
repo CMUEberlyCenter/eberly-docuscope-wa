@@ -58,7 +58,7 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 DataTable.use(DT);
 
@@ -275,9 +275,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to update sentences");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: (data: OnTopicReviewData) => {

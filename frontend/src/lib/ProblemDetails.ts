@@ -1,3 +1,8 @@
+import {
+  APIConnectionTimeoutError,
+  APIError,
+  APIUserAbortError,
+} from '@anthropic-ai/sdk';
 import type { Request, Response, NextFunction } from 'express';
 
 /* Type declaration for RFC-9457 problem details */
@@ -11,6 +16,7 @@ type ProblemDetails<Details = string> = {
   [key: string]: unknown;
 };
 
+/** File Not Found Error */
 export class FileNotFoundError extends Error {}
 /** Generate File Not Found message. */
 export const FileNotFound = (
@@ -24,12 +30,10 @@ export const FileNotFound = (
   instance,
 });
 
+/** Forbidden Error */
 export class ForbiddenError extends Error {}
 /** Generate Forbidden message. */
-export const Forbidden = (
-  err: Error | string,
-  instance?: string
-): ProblemDetails => ({
+const Forbidden = (err: Error | string, instance?: string): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/403',
   title: 'Forbidden',
   detail: err instanceof Error ? err.message : err,
@@ -81,6 +85,17 @@ export const Unauthorized = (
   instance,
 });
 
+const ContentTooLarge = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/413',
+  title: 'Content Too Large',
+  detail: err instanceof Error ? err.message : err,
+  status: 413,
+  instance,
+});
+
 export class UnprocessableContentError extends Error {
   validation: unknown = undefined;
   constructor(
@@ -105,6 +120,42 @@ export const UnprocessableContent = (
   errors: err instanceof UnprocessableContentError ? err.validation : undefined,
 });
 
+const BadGateway = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/502',
+  title: 'Bad Gateway',
+  detail: err instanceof Error ? err.message : err,
+  status: 502,
+  instance,
+  errors: err instanceof APIError ? err.error.response.status : undefined,
+});
+
+const GatewayTimeout = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/504',
+  title: 'Gateway Timeout',
+  detail: err instanceof Error ? err.message : err,
+  status: 504,
+  instance,
+});
+
+const ServiceUnavailable = (
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/503',
+  title: 'Service Unavailable',
+  detail: err instanceof Error ? err.message : err,
+  status: 503,
+  instance,
+});
+
+export class ChatStopError extends Error {}
+
 /** Express error handling middleware */
 export const handleError = (
   err: Error,
@@ -112,21 +163,43 @@ export const handleError = (
   response: Response,
   _next: NextFunction
 ) => {
+  if (err instanceof BadRequestError) {
+    return response.status(400).json(BadRequest(err));
+  }
   if (err instanceof ForbiddenError) {
-    return response.status(403).send(Forbidden(err));
+    return response.status(403).json(Forbidden(err));
   }
   // TODO: Unauthorized
   if (err instanceof FileNotFoundError) {
-    return response.status(404).send(FileNotFound(err));
+    return response.status(404).json(FileNotFound(err));
+  }
+  if (err instanceof ReferenceError) {
+    return response.status(404).json(FileNotFound(err));
   }
   if (err instanceof SyntaxError) {
-    return response.status(422).send(UnprocessableContent(err));
+    return response.status(422).json(UnprocessableContent(err));
   }
   if (err instanceof UnprocessableContentError) {
-    return response.status(422).send(UnprocessableContent(err));
+    return response.status(422).json(UnprocessableContent(err));
   }
-  if (err instanceof BadRequestError) {
-    return response.status(400).send(BadRequest(err));
+  if (err instanceof APIUserAbortError) {
+    return response.status(502).json(BadGateway(err));
+  }
+  if (err instanceof APIConnectionTimeoutError) {
+    return response.status(504).json(GatewayTimeout(err));
+  }
+  if (err instanceof APIError) {
+    if (err.error.response.status === 400) {
+      return response.status(500).json(InternalServerError(err));
+    }
+    if (err.error.response.status === 413) {
+      return response.status(413).json(ContentTooLarge(err));
+    }
+    return response.status(503).json(ServiceUnavailable(err));
+    // TODO check err.response.status for other specific handling
+  }
+  if (err instanceof ChatStopError) {
+    return response.status(503).json(ServiceUnavailable(err));
   }
   console.error('Unhandled error:', err);
   return response.status(500).json(InternalServerError(err));

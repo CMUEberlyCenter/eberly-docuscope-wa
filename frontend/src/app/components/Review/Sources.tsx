@@ -24,8 +24,9 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 import type { Optional } from "../../..";
+import { check } from "better-auth";
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
@@ -90,9 +91,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document, writing_task }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Sources review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: SourcesData }) => {
@@ -103,6 +102,9 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
     onError: (error) => {
       setReview({ tool: "sources", error });
       console.error("Error fetching Sources review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
     },
   });
   // When the document or writing task changes, fetch a new review

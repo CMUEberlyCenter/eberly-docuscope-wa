@@ -27,7 +27,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Paragraph Clarity tool. */
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
@@ -73,9 +73,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document, writing_task }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Paragraph Clarity review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({

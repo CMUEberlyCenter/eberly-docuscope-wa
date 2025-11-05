@@ -14,6 +14,8 @@ error:
   header: Error Loading Review!
   content: There was an error retrieving the review data.
   details: 'Details: {{message}}'
+  too_large: The document is too large to process. Please shorten your text and try again.
+  service_unavailable: The review service is temporarily unavailable. Please try again later.
 additional_tools:
   title: Additional Tools
   tooltip: Refine your draft with additional review.

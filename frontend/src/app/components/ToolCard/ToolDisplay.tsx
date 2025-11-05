@@ -205,7 +205,6 @@ const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
         } else if (text.match(/^\s*<ul/)) {
           nodes.push(...(deserializeHtmlText(text) ?? []));
         } else if (text.match(/^\w*-/)) {
-          [...text.matchAll(/^\s*-\s*(.*)$/g)].forEach(console.log);
           // is a list
           nodes.push({
             type: "bulleted-list",

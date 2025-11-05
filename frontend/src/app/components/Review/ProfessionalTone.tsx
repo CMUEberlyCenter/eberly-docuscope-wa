@@ -32,7 +32,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
@@ -122,9 +122,7 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document, writing_task }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Professional Tone review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({
@@ -141,6 +139,9 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
     onError: (error) => {
       setReview({ tool: "professional_tone", error });
       console.error("Error fetching Professional Tone review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
     },
   });
 

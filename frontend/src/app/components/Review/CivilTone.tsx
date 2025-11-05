@@ -24,7 +24,7 @@ import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
+import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 /** Civil Tone Tool component. */
 export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
@@ -55,9 +55,7 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Civil Tone review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: CivilToneData }) => {
