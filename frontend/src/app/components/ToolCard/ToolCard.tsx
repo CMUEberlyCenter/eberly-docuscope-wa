@@ -126,7 +126,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               range: editor.selection,
             },
             result: null,
-            // document: editorContent,
           });
         } else {
           // error task, do not add to history
@@ -138,7 +137,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             },
             result: null,
             error: new NoSelectedTextError(t("error.no_selection.default")),
-            // document: editorContent,
           });
         }
       },
@@ -283,7 +281,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Stack>
           )}
           {/* Maybe use Carousel for history? */}
-          {currentTool?.tool === "prose" && (
+          {currentTool?.tool === "prose" ? (
             <ToolDisplay.Root
               // icon={<GenerateProseIcon />}
               title={t("tool.button.prose.tooltip")}
@@ -301,8 +299,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <Card.Text as="div">{currentTool.result}</Card.Text>
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
-          {currentTool?.tool === "bullets" && (
+          ) : null}
+          {currentTool?.tool === "bullets" ? (
             <ToolDisplay.Root
               // icon={<GenerateBulletsIcon />}
               title={t("tool.button.bullets.tooltip")}
@@ -337,8 +335,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
-          {currentTool?.tool === "copyedit" && (
+          ) : null}
+          {currentTool?.tool === "copyedit" ? (
             <ToolDisplay.Root
               // icon={<CopyEditIcon />}
               title={t("tool.button.copyedit.tooltip")}
@@ -384,8 +382,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
-          {currentTool?.tool === "grammar" && (
+          ) : null}
+          {currentTool?.tool === "grammar" ? (
             <ToolDisplay.Root
               title={t("tool.button.grammar.tooltip")}
               tool={currentTool}
@@ -420,8 +418,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
-          {currentTool?.tool === "flow" && (
+          ) : null}
+          {currentTool?.tool === "flow" ? (
             <ToolDisplay.Root
               // icon={<LocalCoherenceIcon />}
               title={t("tool.button.flow.tooltip")}
@@ -477,7 +475,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          )}
+          ) : null}
         </article>
         <Legal />
       </aside>

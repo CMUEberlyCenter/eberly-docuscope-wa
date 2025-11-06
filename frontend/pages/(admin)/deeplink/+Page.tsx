@@ -68,16 +68,18 @@ export const Page: FC = () => {
         >
           <WritingTaskFilter tasks={tasks} update={setData} />
           <ListGroup className="overflow-auto w-100">
-            {data.map((task) => (
-              <ListGroup.Item
-                key={task.info.name}
-                action
-                active={selected === task}
-                onClick={() => setSelected(task)}
-              >
-                {task.info.name}
-              </ListGroup.Item>
-            ))}
+            {data
+              .toSorted((a, b) => a.info.name.localeCompare(b.info.name))
+              .map((task) => (
+                <ListGroup.Item
+                  key={task.info.name}
+                  action
+                  active={selected === task}
+                  onClick={() => setSelected(task)}
+                >
+                  {task.info.name}
+                </ListGroup.Item>
+              ))}
             {custom && (
               <ListGroup.Item
                 key={"custom"}
