@@ -6,8 +6,9 @@ FROM base AS build
 # ci in /tmp to take advantage of layer caching
 WORKDIR /tmp
 COPY ./package*.json /tmp/
-RUN npm ci
-RUN npx -y bun ci
+COPY ./bun.lock* /tmp/
+# RUN npm ci
+RUN npx -y bun ci --frozen-lockfile
 RUN cp -a /tmp/node_modules /app
 WORKDIR /app
 COPY . /app
