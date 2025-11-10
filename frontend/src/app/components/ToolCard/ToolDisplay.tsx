@@ -29,8 +29,29 @@ import type { ToolResult } from "../../lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
+import {
+  InputTooLargeError,
+  ServiceUnavailableError,
+} from "../Review/ReviewError";
 import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
 
+const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
+  const { t } = useTranslation();
+  if (!tool.error) {
+    return null;
+  }
+  if (tool.error instanceof InputTooLargeError) {
+    return <Alert variant="warning">{t("error.input_too_large_error")}</Alert>;
+  }
+  if (tool.error instanceof ServiceUnavailableError) {
+    return <Alert variant="warning">{t("error.service_unavailable")}</Alert>;
+  }
+  return (
+    <Alert variant="warning">
+      {t("error.unknown_error")}: {tool.error.message}
+    </Alert>
+  );
+};
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
   icon: ReactNode;
@@ -93,7 +114,7 @@ const ToolRoot: FC<ToolRootProps> = ({
         </h6>
       </header>
       {tool && tool.error ? (
-        <Alert variant="warning">{tool.error.message}</Alert>
+        <ToolErrorHandler tool={tool} />
       ) : (
         <>
           {children}

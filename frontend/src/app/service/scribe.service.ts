@@ -1,5 +1,6 @@
 import type { NotesRequest, TextRequest } from '../../lib/Requests';
 import type { WritingTask } from '../../lib/WritingTask';
+import { checkReviewResponse } from '../components/Review/ReviewError';
 import type {
   CopyEditResponse,
   LocalCoherenceResponse,
@@ -26,10 +27,10 @@ export async function postConvertNotes(
     } as NotesRequest),
   });
   if (!response.ok) {
-    const err = await response.text();
-    //throw new Error(`${response.status}: ${err}`);
-    // TODO improve error reporting.
-    return err;
+    checkReviewResponse(response);
+    // throw new Error(`HTTP error status: ${response.status}`, {
+    //   cause: await response.json(),
+    // });
   }
   const data = await response.json();
   if (typeof data === 'string') {

@@ -41,7 +41,7 @@ export async function doChat<T>(
   cache?: boolean
 ) {
   if (!ANTHROPIC_API_KEY) {
-    throw new Error('No LLM configured.');
+    throw new Error('No LLM configured.'); // should this be 502?
   }
   const started = new Date();
   const template = await findPromptById(key);

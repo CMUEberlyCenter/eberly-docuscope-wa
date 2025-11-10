@@ -129,41 +129,18 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
  * @returns id of the writing task in the database.
  */
 async function upsertPublicWritingTask(path: string, data: WritingTask) {
-  client
-    .db(MONGO_DB)
-    .collection<WritingTaskDb>(WRITING_TASKS)
-    .updateMany(
-      { public: true, 'info.id': data.info.id },
-      {
-        $set: {
-          public: false,
-          'info.id': undefined, // probably unnecessary, but just in case.
-          // with future versions where the info.id is used preferentially,
-          // old versions with the same id should be deleted instead of made private.
-        },
-      }
-    );
   const collection = client
     .db(MONGO_DB)
     .collection<WritingTaskDb>(WRITING_TASKS);
-  const ins = await collection.replaceOne(
-    {
-      'info.name': data.info.name,
-      'info.version': data.info.version,
-      path: path,
-    },
-    {
-      ...data,
-      public: data.info.access === ACCESS_LEVEL,
-      path,
-      modified: new Date(),
-    },
-    {
-      upsert: true,
-    }
-  );
-  console.log(`Upserted writing task ${data.info.name} v${data.info.version}`);
-  return ins.upsertedId;
+  await collection.deleteMany({ 'info.id': data.info.id });
+  const ins = await collection.insertOne({
+    ...data,
+    public: data.info.access === ACCESS_LEVEL,
+    path,
+    modified: new Date(),
+  });
+  console.log(`Inserted writing task ${data.info.name} v${data.info.version}`);
+  return ins.insertedId;
 }
 
 /**
@@ -241,40 +218,6 @@ export async function initDatabase() {
     return client.close();
   };
 }
-
-/**
- * Retrieve all of the writing tasks from the filesystem.
- * This is to be initiated in the public writing task root directory.
- * @param dir directory where to look for writing task files.
- * @returns List of valid writing tasks.
- */
-// async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
-//   const ret: WritingTask[] = [];
-//   try {
-//     const files = await readdir(dir);
-//     for (const file of files) {
-//       const path = join(dir.toString(), file);
-//       const stats = await stat(path);
-//       if (stats.isFile() && file.endsWith('.json')) {
-//         const content = await readFile(path, { encoding: 'utf8' });
-//         const json = JSON.parse(content);
-//         if (isWritingTask(json)) {
-//           // only add valid writing tasks.
-//           ret.push(json);
-//         }
-//       } else if (stats.isDirectory()) {
-//         const subdir = await readPublicWritingTasks(path);
-//         ret.push(...subdir);
-//       }
-//       // if not a directory or a json file, skip.
-//       // this recursion is unneccessary once fs.glob(join(dir, '**/*.json)) is finalized.
-//     }
-//     return ret;
-//   } catch (err) {
-//     console.error(err);
-//     return ret; // Should this return [] or current progress?
-//   }
-// }
 
 /**
  * Retrieves the stored review data.
