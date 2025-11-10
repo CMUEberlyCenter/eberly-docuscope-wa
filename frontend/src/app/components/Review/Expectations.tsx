@@ -34,6 +34,7 @@ import {
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -41,7 +42,6 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>

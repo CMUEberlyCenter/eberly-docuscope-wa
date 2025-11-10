@@ -3,9 +3,19 @@ import { Alert, type AlertProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Optional } from "../../..";
 import type { ErrorData } from "../../../lib/ReviewResponse";
+import { ToolResult } from "../../lib/ToolResults";
 
-export class InputTooLargeError extends Error {}
-export class ServiceUnavailableError extends Error {}
+class InputTooLargeError extends Error {}
+class ServiceUnavailableError extends Error {}
+
+/**
+ * Checks the HTTP response for errors and returns the corresponding error data.
+ * @param response HTTP response object.
+ * @returns null.
+ * @throws InputTooLargeError if the response status is 413.
+ * @throws ServiceUnavailableError if the response status is 502, 503, or 504.
+ * @throws Error for other non-OK responses.
+ */
 export function checkReviewResponse(response: Response): Optional<ErrorData> {
   if (!response.ok) {
     switch (response.status) {
@@ -21,6 +31,29 @@ export function checkReviewResponse(response: Response): Optional<ErrorData> {
   }
   return null;
 }
+
+/**
+ * Component for displaying tool errors.
+ * @param param0.tool - The tool result containing error information.
+ * @returns
+ */
+export const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
+  const { t } = useTranslation();
+  if (!tool.error) {
+    return null;
+  }
+  if (tool.error instanceof InputTooLargeError) {
+    return <Alert variant="warning">{t("error.input_too_large_error")}</Alert>;
+  }
+  if (tool.error instanceof ServiceUnavailableError) {
+    return <Alert variant="warning">{t("error.service_unavailable")}</Alert>;
+  }
+  return (
+    <Alert variant="warning">
+      {t("error.unknown_error")}: {tool.error.message}
+    </Alert>
+  );
+};
 
 /**
  * Component for displaying error content returned from the backend.

@@ -14,6 +14,10 @@ import {
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -21,7 +25,6 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {

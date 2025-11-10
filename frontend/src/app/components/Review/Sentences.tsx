@@ -15,12 +15,15 @@ import {
 } from "../../../lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
 import { highlightSentence } from "../../service/topic.service";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
 import "./Sentences.scss";
 
 /** Button component for selecting the Sentences tool. */

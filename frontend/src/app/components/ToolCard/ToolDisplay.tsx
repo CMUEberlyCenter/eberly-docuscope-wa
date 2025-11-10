@@ -27,31 +27,11 @@ import YourInputIcon from "../../assets/icons/YourInput.svg?react";
 import { deserializeHtmlText } from "../../lib/slate";
 import type { ToolResult } from "../../lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
+import { ToolErrorHandler } from "../ErrorHandler/ErrorHandler";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
-import {
-  InputTooLargeError,
-  ServiceUnavailableError,
-} from "../Review/ReviewError";
 import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
 
-const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
-  const { t } = useTranslation();
-  if (!tool.error) {
-    return null;
-  }
-  if (tool.error instanceof InputTooLargeError) {
-    return <Alert variant="warning">{t("error.input_too_large_error")}</Alert>;
-  }
-  if (tool.error instanceof ServiceUnavailableError) {
-    return <Alert variant="warning">{t("error.service_unavailable")}</Alert>;
-  }
-  return (
-    <Alert variant="warning">
-      {t("error.unknown_error")}: {tool.error.message}
-    </Alert>
-  );
-};
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
   icon: ReactNode;
@@ -78,10 +58,10 @@ type ToolProp = { tool?: ToolResult | null };
 type ToolRootProps = HTMLProps<HTMLDivElement> &
   ToolProp & {
     title: string;
-    // icon?: ReactNode;
     onBookmark: () => void;
     actions?: ReactNode;
   };
+/** Root component for displaying a tool card with header, content, and footer. */
 const ToolRoot: FC<ToolRootProps> = ({
   tool,
   children,
@@ -190,7 +170,6 @@ const ToolResponse: FC<ToolResponseProps> = ({
               </span>
             </Button>
           )}
-          {/* {!tool?.result && <LoadingSmall />} */}
         </ButtonToolbar>
       </header>
       {tool?.result ? children : <Loading />}
@@ -210,19 +189,6 @@ const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
         if (text.match(/<p.*>/)) {
           // is html
           nodes.push(...(deserializeHtmlText(text) ?? []));
-          // nodes.push(
-          //   ...[...text.matchAll(/<p>(.*)<\/p>/gi)]
-          //     .filter((p) => p.at(0) && p.at(1))
-          //     .map((element) =>
-          //       jsx(
-          //         "element",
-          //         {
-          //           type: "paragraph",
-          //         },
-          //         jsx("text", {}, element.at(1) ?? "")
-          //       )
-          //     )
-          // );
         } else if (text.match(/^\s*<ul/)) {
           nodes.push(...(deserializeHtmlText(text) ?? []));
         } else if (text.match(/^\w*-/)) {

@@ -1,6 +1,6 @@
 import type { NotesRequest, TextRequest } from '../../lib/Requests';
 import type { WritingTask } from '../../lib/WritingTask';
-import { checkReviewResponse } from '../components/Review/ReviewError';
+import { checkReviewResponse } from '../components/ErrorHandler/ErrorHandler';
 import type {
   CopyEditResponse,
   LocalCoherenceResponse,

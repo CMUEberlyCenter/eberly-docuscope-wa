@@ -11,6 +11,7 @@ import {
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import type { Optional } from "../../..";
 import {
   isErrorData,
   type OptionalReviewData,
@@ -19,14 +20,15 @@ import {
   type SourceType,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { checkReviewResponse, ReviewErrorData } from "./ReviewError";
-import type { Optional } from "../../..";
-import { check } from "better-auth";
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
