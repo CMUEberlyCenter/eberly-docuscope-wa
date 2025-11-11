@@ -281,7 +281,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             </Stack>
           )}
           {/* Maybe use Carousel for history? */}
-          {currentTool?.tool === "prose" ? (
+          {currentTool?.tool === "prose" && (
             <ToolDisplay.Root
               // icon={<GenerateProseIcon />}
               title={t("tool.button.prose.tooltip")}
@@ -299,8 +299,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <Card.Text as="div">{currentTool.result}</Card.Text>
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          ) : null}
-          {currentTool?.tool === "bullets" ? (
+          )}
+          {currentTool?.tool === "bullets" && (
             <ToolDisplay.Root
               // icon={<GenerateBulletsIcon />}
               title={t("tool.button.bullets.tooltip")}
@@ -335,8 +335,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          ) : null}
-          {currentTool?.tool === "copyedit" ? (
+          )}
+          {currentTool?.tool === "copyedit" && (
             <ToolDisplay.Root
               // icon={<CopyEditIcon />}
               title={t("tool.button.copyedit.tooltip")}
@@ -382,8 +382,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          ) : null}
-          {currentTool?.tool === "grammar" ? (
+          )}
+          {currentTool?.tool === "grammar" && (
             <ToolDisplay.Root
               title={t("tool.button.grammar.tooltip")}
               tool={currentTool}
@@ -418,8 +418,8 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          ) : null}
-          {currentTool?.tool === "flow" ? (
+          )}
+          {currentTool?.tool === "flow" && (
             <ToolDisplay.Root
               // icon={<LocalCoherenceIcon />}
               title={t("tool.button.flow.tooltip")}
@@ -475,7 +475,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 )}
               </ToolDisplay.Response>
             </ToolDisplay.Root>
-          ) : null}
+          )}
         </article>
         <Legal />
       </aside>

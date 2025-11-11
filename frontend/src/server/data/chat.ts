@@ -119,20 +119,25 @@ export async function doChat<T>(
     console.error(chat);
     throw new Error(err.error.message, { cause: chat });
   }
-  switch (chat.stop_reason) {
-    case 'max_tokens':
-      throw new ChatStopError('Token limit exceeded.', { cause: chat });
-    case 'tool_use':
-      throw new ChatStopError('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
-    case 'stop_sequence':
-      throw new ChatStopError('No stop_sequence handler.', { cause: chat }); // Currently unused
-    case 'end_turn':
-      break;
-    case 'refusal':
-      throw new ChatStopError('The model refused to answer.', { cause: chat });
-    default:
-      console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
-      throw new ChatStopError('Unknown stop reason.', { cause: chat });
+  if (chat.stop_reason) {
+    switch (chat.stop_reason) {
+      case 'max_tokens':
+        throw new ChatStopError('Token limit exceeded.', { cause: chat });
+      case 'tool_use':
+        throw new ChatStopError('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
+      case 'stop_sequence':
+        throw new ChatStopError('No stop_sequence handler.', { cause: chat }); // Currently unused
+      case 'end_turn':
+        break;
+      case 'refusal':
+        throw new ChatStopError('The model refused to answer.', {
+          cause: chat,
+        });
+      case 'pause_turn':
+        break;
+      default:
+        console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+    }
   }
   // TODO handle server errors, 400-529, 413 in particular (request_too_large)
   /* try {

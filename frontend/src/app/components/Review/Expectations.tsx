@@ -149,7 +149,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
           role="button"
           className={style["fake-accordion-button"]}
           onClick={() => {
-            if (document && task && rule)
+            if (document && task)
               mutation.mutate({
                 document,
                 writing_task: task,
