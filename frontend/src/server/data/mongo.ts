@@ -132,7 +132,12 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
   const collection = client
     .db(MONGO_DB)
     .collection<WritingTaskDb>(WRITING_TASKS);
-  await collection.deleteMany({ 'info.id': data.info.id });
+  const del = await collection.deleteMany({ 'info.id': data.info.id });
+  if (!del.acknowledged) {
+    throw new Error(
+      `Failed database write while deleting writing tasks with id ${data.info.id}`
+    );
+  }
   const ins = await collection.insertOne({
     ...data,
     public: data.info.access === ACCESS_LEVEL,

@@ -129,7 +129,7 @@ const BadGateway = (
   detail: err instanceof Error ? err.message : err,
   status: 502,
   instance,
-  errors: err instanceof APIError ? err.error.response.status : undefined,
+  errors: err instanceof APIError ? err.error?.response?.status : undefined,
 });
 
 const GatewayTimeout = (
@@ -189,12 +189,19 @@ export const handleError = (
     return response.status(504).json(GatewayTimeout(err));
   }
   if (err instanceof APIError) {
-    if (err.error.response.status === 400) {
+    if (err.error?.response?.status === 400) {
       return response.status(500).json(InternalServerError(err));
     }
-    if (err.error.response.status === 413) {
+    if (err.error?.response?.status === 413) {
       return response.status(413).json(ContentTooLarge(err));
     }
+    // https://docs.claude.com/en/api/errors
+    // 401 authentication_error
+    // 403 permission_error
+    // 404 not_found_error
+    // 429 rate_limit_error
+    // 500 api_error
+    // 529 overloaded_error
     return response.status(503).json(ServiceUnavailable(err));
     // TODO check err.response.status for other specific handling
   }
