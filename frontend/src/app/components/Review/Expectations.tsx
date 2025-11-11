@@ -280,15 +280,15 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
   );
 };
 
-async function hashString(str: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(str);
-  const hashBuffer = await crypto.subtle.digest("SHA-1", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return hashHex;
+/** Simple hash function for strings, no cryptographic guarantees. */
+function simpleHashString(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char; // A common pattern for combining hash values
+    hash |= 0; // Ensure the hash remains a 32-bit integer
+  }
+  return hash.toString();
 }
 
 /** Content Expectations tool component. */
@@ -304,7 +304,7 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   const [hash, setHash] = useState<string>("null");
   useEffect(() => {
     // compute hash of document for use in keys
-    hashString(document || "").then((h) => setHash(h));
+    setHash(simpleHashString(document || ""));
   }, [document]);
 
   const [current, setCurrent] = useState<AccordionEventKey>(null);
