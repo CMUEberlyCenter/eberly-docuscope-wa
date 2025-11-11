@@ -139,28 +139,12 @@ export async function doChat<T>(
         console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
     }
   }
-  // TODO handle server errors, 400-529, 413 in particular (request_too_large)
-  /* try {
-  await anthropic..create({...});
-  } catch (err) {
-    if (err.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("API Error:", error.response.status, error.response.data);
-    } else if (err.request) {
-      // The request was made but no response was received
-      console.error("Network Error:", error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error("Error:", error.message);  }*/
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
-    // console.log(response);
   } else {
     console.warn(resp);
   }
-  // TODO catch json parsing errors, either here or in calling code
   try {
     if (json) {
       // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
