@@ -54,7 +54,7 @@ import {
   PRODUCT,
   SESSION_KEY,
 } from './src/server/settings';
-import { getSettings, watchSettings } from './src/ToolSettings';
+import { getSettings, watchSettings } from './src/server/getSettings';
 // import { auth } from './src/utils/auth';
 // import { apply } from 'vike-server/express'
 // import { serve } from 'vike-server/express/serve';

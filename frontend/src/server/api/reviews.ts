@@ -24,7 +24,7 @@ import {
   isWritingTask,
   type WritingTask,
 } from '../../lib/WritingTask';
-import { getSettings } from '../../ToolSettings';
+import { getSettings } from '../getSettings';
 import { doChat } from '../data/chat';
 import { insertLog } from '../data/mongo';
 import { validate } from '../model/validate';
