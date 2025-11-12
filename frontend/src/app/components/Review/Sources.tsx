@@ -11,6 +11,7 @@ import {
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import type { Optional } from "../../..";
 import {
   isErrorData,
   type OptionalReviewData,
@@ -19,13 +20,15 @@ import {
   type SourceType,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
-import type { Optional } from "../../..";
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
@@ -90,9 +93,7 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document, writing_task }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Sources review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: SourcesData }) => {
@@ -103,6 +104,9 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({
     onError: (error) => {
       setReview({ tool: "sources", error });
       console.error("Error fetching Sources review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
     },
   });
   // When the document or writing task changes, fetch a new review

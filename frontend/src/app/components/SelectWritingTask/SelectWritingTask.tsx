@@ -37,6 +37,7 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 
 /**
  * A modal dialog for selecting and displaying meta information about a writing task.
+ * Includes copying to clipboard and inserting into the editor for drafting tool.
  * @param param0.show if true, show the modal.
  * @param param0.onHide callback to execute when modal is closed.
  * @returns
@@ -46,14 +47,12 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { data: writingTasks } = useWritingTasks(); // all public tasks
   const { task: writingTask, isInstructor, isLTI } = useWritingTask(); // current task
   const setWritingTask = useSetWritingTask();
-  // const inLti = useLti(); // in LTI context
   const [selected, setSelected] = useState<WritingTask | undefined | null>(
     writingTask
   );
   useEffect(() => setSelected(writingTask), [writingTask]);
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
-  // useEffect(() => setCustom(ltiInfo?.writing_task ?? null), [ltiInfo]);
   const [showFile, setShowFile] = useState(false);
   const [data, setData] = useState<WritingTask[]>([]); // filtered list of tasks.
   const [showDetails, setShowDetails] = useState(false);
@@ -89,7 +88,6 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   }, [onHide]);
   const commit = useCallback(() => {
     setWritingTask({ task: selected });
-    // writingTask.next(selected);
     hide();
   }, [hide, selected]);
   const editor = useSlate();
@@ -135,16 +133,18 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
             />
             <div className="w-100 h-0">
               <ListGroup className="overflow-auto w-100 mh-100">
-                {data.map((task) => (
-                  <ListGroup.Item
-                    key={task.info.name}
-                    active={selected === task}
-                    action
-                    onClick={() => setSelected(task)}
-                  >
-                    {task.info.name}
-                  </ListGroup.Item>
-                ))}
+                {data
+                  .toSorted((a, b) => a.info.name.localeCompare(b.info.name))
+                  .map((task) => (
+                    <ListGroup.Item
+                      key={task.info.name}
+                      active={selected === task}
+                      action
+                      onClick={() => setSelected(task)}
+                    >
+                      {task.info.name}
+                    </ListGroup.Item>
+                  ))}
                 {custom && (
                   <ListGroup.Item
                     action

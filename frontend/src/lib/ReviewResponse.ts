@@ -483,10 +483,7 @@ export interface OnTopicReviewData extends ReviewData<OnTopicData> {
 export type ErrorData = {
   tool: ReviewTool;
   datetime?: Date;
-  error: {
-    message: string;
-    details?: unknown;
-  };
+  error: Error;
 };
 export function isErrorData(data: unknown): data is ErrorData {
   return !!data && typeof data === 'object' && 'error' in data && !!data.error;

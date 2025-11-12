@@ -75,6 +75,13 @@ export const Review: FC = () => {
   const { task: writingTask } = useWritingTask();
   const settings = useSettingsContext();
 
+  const toggleTool = (selectedTool: Tool) => {
+    setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+  };
+  const toggleOtherTool = (selectedTool: Tool) => {
+    setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+  };
+
   useEffect(() => {
     setReady(!!userText && userText.trim().length > 0);
   }, [userText]);
@@ -240,7 +247,7 @@ export const Review: FC = () => {
                         <ExpectationsButton
                           disabled={!ready}
                           active={tool === "expectations"}
-                          onClick={() => setTool("expectations")}
+                          onClick={() => toggleTool("expectations")}
                         />
                       )
                     ) : null}
@@ -248,21 +255,21 @@ export const Review: FC = () => {
                       <ProminentTopicsButton
                         disabled={!ready}
                         active={tool === "prominent_topics"}
-                        onClick={() => setTool("prominent_topics")}
+                        onClick={() => toggleTool("prominent_topics")}
                       />
                     ) : null}
                     {argumentsFeature ? (
                       <LinesOfArgumentsButton
                         disabled={!ready}
                         active={tool === "lines_of_arguments"}
-                        onClick={() => setTool("lines_of_arguments")}
+                        onClick={() => toggleTool("lines_of_arguments")}
                       />
                     ) : null}
                     {logicalFlowFeature ? (
                       <LogicalFlowButton
                         disabled={!ready}
                         active={tool === "logical_flow"}
-                        onClick={() => setTool("logical_flow")}
+                        onClick={() => toggleTool("logical_flow")}
                       />
                     ) : null}
                   </ButtonToolbar>
@@ -271,7 +278,11 @@ export const Review: FC = () => {
                   >
                     <NullTool text={t("null.big_picture")} />
                   </Activity>
-                  {tool === "expectations" && <Expectations />}
+                  <Activity
+                    mode={tool === "expectations" ? "visible" : "hidden"}
+                  >
+                    <Expectations />
+                  </Activity>
                   {tool === "prominent_topics" && <ProminentTopics />}
                   {tool === "lines_of_arguments" && <LinesOfArguments />}
                   {tool === "logical_flow" && <LogicalFlow />}
@@ -291,21 +302,21 @@ export const Review: FC = () => {
                       <ParagraphClarityButton
                         disabled={!ready}
                         active={otherTool === "paragraph_clarity"}
-                        onClick={() => setOtherTool("paragraph_clarity")}
+                        onClick={() => toggleOtherTool("paragraph_clarity")}
                       />
                     ) : null}
                     {sentencesFeature ? (
                       <SentencesButton
                         disabled={!ready}
                         active={otherTool === "sentences"}
-                        onClick={() => setOtherTool("sentences")}
+                        onClick={() => toggleOtherTool("sentences")}
                       />
                     ) : null}
                     {professionalToneFeature ? (
                       <ProfessionalToneButton
                         disabled={!ready}
                         active={otherTool === "professional_tone"}
-                        onClick={() => setOtherTool("professional_tone")}
+                        onClick={() => toggleOtherTool("professional_tone")}
                       />
                     ) : null}
                     {additionalToolsFeature ? (
@@ -339,7 +350,7 @@ export const Review: FC = () => {
                         <Dropdown.Menu className="additional-tools-menu">
                           {sourcesFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("sources")}
+                              onClick={() => toggleOtherTool("sources")}
                               active={otherTool === "sources"}
                               disabled={!ready}
                             >
@@ -353,7 +364,7 @@ export const Review: FC = () => {
                           ) : null}
                           {credibilityFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("credibility")}
+                              onClick={() => toggleOtherTool("credibility")}
                               active={otherTool === "credibility"}
                               disabled={!ready}
                             >
@@ -367,7 +378,7 @@ export const Review: FC = () => {
                           ) : null}
                           {organizationFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("organization")}
+                              onClick={() => toggleOtherTool("organization")}
                               active={otherTool === "organization"}
                               disabled={!ready}
                             >
@@ -381,7 +392,7 @@ export const Review: FC = () => {
                           ) : null}
                           {civilToneFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("civil_tone")}
+                              onClick={() => toggleOtherTool("civil_tone")}
                               active={otherTool === "civil_tone"}
                               disabled={!ready}
                             >
@@ -395,7 +406,7 @@ export const Review: FC = () => {
                           ) : null}
                           {impressionsFeature ? (
                             <Dropdown.Item
-                              onClick={() => setOtherTool("impressions")}
+                              onClick={() => toggleOtherTool("impressions")}
                               active={otherTool === "impressions"}
                               disabled={!ready}
                             >

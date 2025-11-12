@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
+  Activity,
   useEffect,
   useId,
   useRef,
@@ -33,6 +34,7 @@ import {
 import type { Rule, WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/expectations_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -40,7 +42,6 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
 
 /** Test if the suggestion is the "none" fail state in the LLM response. */
 const isNone = (suggestion: string): boolean =>
@@ -63,6 +64,13 @@ type ExpectationProps = AccordionItemProps & {
   rule: Rule;
   setCurrent?: (key: AccordionEventKey) => void;
 };
+class ExpectationError extends Error {
+  data: ErrorData;
+  constructor(data: ErrorData) {
+    super(data.error.message);
+    this.data = data;
+  }
+}
 /** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationProps> = ({
   eventKey,
@@ -73,13 +81,9 @@ const ExpectationRule: FC<ExpectationProps> = ({
   const dispatch = useReviewDispatch();
   const { task } = useWritingTask();
   const [document] = useFileText();
-  const [state, setState] = useState<
-    "unset" | "pending" | "fulfilled" | "rejected"
-  >("unset");
   const [error, setError] = useState<ErrorData | null>(null);
   const { t } = useTranslation("expectations");
   const id = useId();
-  const [expectation, setExpectation] = useState<ExpectationsData | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -87,7 +91,6 @@ const ExpectationRule: FC<ExpectationProps> = ({
       writing_task: WritingTask;
       expectation: string;
     }) => {
-      setState("pending");
       setError(null);
       setCurrent?.(""); // Close any open accordion item
       abortControllerRef.current = new AbortController();
@@ -106,14 +109,9 @@ const ExpectationRule: FC<ExpectationProps> = ({
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: ExpectationsData }) => {
-      setExpectation(data);
       if (isErrorData(data)) {
-        dispatch({ type: "unset" });
-        setState("rejected");
-        setError(data);
-        return;
+        throw new ExpectationError(data);
       }
-      setState("fulfilled");
       dispatch({ type: "update", sentences: input });
       dispatch({
         type: "set",
@@ -123,15 +121,14 @@ const ExpectationRule: FC<ExpectationProps> = ({
     },
     onError: (error) => {
       console.error("Error fetching expectation:", error);
-      setState("rejected");
-      setExpectation(null);
       dispatch({ type: "unset" });
+      if (error instanceof ExpectationError) {
+        setError(error.data);
+        return;
+      }
       setError({
         tool: "expectations",
-        error: {
-          message:
-            error.message || "An error occurred while fetching expectation.",
-        },
+        error,
       });
     },
     onSettled: () => {
@@ -144,18 +141,10 @@ const ExpectationRule: FC<ExpectationProps> = ({
       abortControllerRef.current?.abort();
     };
   }, []);
-  useEffect(() => {
-    // Fix for #225 and #229
-    // if there is a change in the document or task, then unset context data
-    // so that it is cleared on import of document or change in task.
-    dispatch({ type: "unset" });
-    dispatch({ type: "remove" });
-    setState("unset");
-  }, [document, task]);
 
   return (
     <Accordion.Item eventKey={eventKey} {...props}>
-      {state === "unset" ? (
+      {mutation.isIdle ? (
         <div
           role="button"
           className={style["fake-accordion-button"]}
@@ -173,13 +162,13 @@ const ExpectationRule: FC<ExpectationProps> = ({
           <FontAwesomeIcon icon={faEllipsis} />
         </div>
       ) : null}
-      {mutation.isPending || state === "pending" ? (
+      {mutation.isPending ? (
         <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{rule.name}</div>
           <LoadingSmall />
         </div>
       ) : null}
-      {state === "rejected" ? (
+      {mutation.isError ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">{rule.name}</div>
@@ -196,57 +185,58 @@ const ExpectationRule: FC<ExpectationProps> = ({
           </Accordion.Body>
         </>
       ) : null}
-      {state === "fulfilled" &&
-      isExpectationsData(expectation) &&
-      isNone(expectation.response.suggestion) ? (
+      {mutation.isSuccess &&
+      isExpectationsData(mutation.data?.data) &&
+      isNone(mutation.data.data.response.suggestion) ? (
         <div className={style["fake-accordion-button"]}>
-          <div className="flex-grow-1">{expectation.expectation}</div>
-          <AlertIcon message={t("warning")} show />
+          <div className="flex-grow-1">{mutation.data.data.expectation}</div>
+          <AlertIcon message={t("warning")} show={true} />
         </div>
       ) : null}
-      {state === "fulfilled" &&
-      isExpectationsData(expectation) &&
-      !isNone(expectation.response.suggestion) ? (
+      {mutation.isSuccess &&
+      isExpectationsData(mutation.data.data) &&
+      !isNone(mutation.data.data.response.suggestion) ? (
         <>
           <Accordion.Header className="accordion-header-highlight">
-            <div className="flex-grow-1">{expectation.expectation}</div>
+            <div className="flex-grow-1">{mutation.data.data.expectation}</div>
             <AlertIcon
               message={t("no_sentences")}
-              show={expectation.response.sent_ids.length === 0}
+              show={mutation.data.data.response.sent_ids.length === 0}
             />
           </Accordion.Header>
           <Accordion.Body
-            onEntered={() =>
-              isExpectationsData(expectation)
+            onEntered={() => {
+              dispatch({ type: "update", sentences: mutation.data.input });
+              isExpectationsData(mutation.data.data)
                 ? dispatch({
-                    sentences: [expectation.response.sent_ids],
+                    sentences: [mutation.data.data.response.sent_ids],
                     type: "set",
                   })
-                : dispatch({ type: "unset" })
-            }
+                : dispatch({ type: "unset" });
+            }}
             onExit={() => dispatch({ type: "unset" })}
           >
             <>
-              {isExpectationsData(expectation) &&
-              expectation.response.assessment ? (
+              {isExpectationsData(mutation.data.data) &&
+              mutation.data.data.response.assessment ? (
                 <div>
                   <h6 className="d-inline">{t("assessment")}</h6>{" "}
                   <span key={`${id}-assessment`}>
-                    {expectation.response.assessment}
+                    {mutation.data.data.response.assessment}
                   </span>
                 </div>
               ) : null}
-              {isExpectationsData(expectation) &&
-              expectation.response.suggestion ? (
+              {isExpectationsData(mutation.data.data) &&
+              mutation.data.data.response.suggestion ? (
                 <div>
                   <h6 className="d-inline">{t("suggestion")}</h6>{" "}
                   <span key={`${id}-suggestion`}>
-                    {expectation.response.suggestion}
+                    {mutation.data.data.response.suggestion}
                   </span>
                 </div>
               ) : null}
-              {isExpectationsData(expectation) &&
-              !expectation.response.suggestion ? (
+              {isExpectationsData(mutation.data.data) &&
+              !mutation.data.data.response.suggestion ? (
                 <div>
                   <h6 className="d-inline">{t("suggestion")}</h6>{" "}
                   <span key={`${id}-suggestion`}>{t("no_suggestions")}</span>
@@ -256,12 +246,6 @@ const ExpectationRule: FC<ExpectationProps> = ({
           </Accordion.Body>
         </>
       ) : null}
-      {/* {!expectation ? (
-        <div className={style["fake-accordion-button"]}>
-          <div className="flex-grow-1">{rule.name}</div>
-          <LoadingSmall />
-        </div>
-      ) : null} */}
     </Accordion.Item>
   );
 };
@@ -296,6 +280,17 @@ const ExpectationRules: FC<ExpectationRulesProps> = ({
   );
 };
 
+/** Simple hash function for strings, no cryptographic guarantees. */
+function simpleHashString(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char; // A common pattern for combining hash values
+    hash |= 0; // Ensure the hash remains a 32-bit integer
+  }
+  return hash.toString();
+}
+
 /** Content Expectations tool component. */
 export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   className,
@@ -303,10 +298,35 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   const { task } = useWritingTask();
+  const dispatch = useReviewDispatch();
+  const [document] = useFileText();
+  /** Document hash to force rerender of expectation on change of document. */
+  const [hash, setHash] = useState<string>("null");
+  useEffect(() => {
+    // compute hash of document for use in keys
+    setHash(simpleHashString(document || ""));
+  }, [document]);
+
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) => {
     setCurrent(eventKey);
   };
+
+  useEffect(() => {
+    // on task or document change, reset current accordion item
+    setCurrent(null);
+    // also reset review context
+    dispatch({ type: "unset" });
+    dispatch({ type: "remove" });
+  }, [task, document, dispatch]);
+
+  useEffect(() => {
+    // on unmount, reset review context
+    return () => {
+      dispatch({ type: "unset" });
+      dispatch({ type: "remove" });
+    };
+  }, [dispatch]);
 
   return (
     <ReviewReset>
@@ -321,15 +341,16 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("expectations.title")}
           instructionsKey="expectations"
         />
-        {/* <Suspense fallback={<Loading />}>
-          {!task ? (
-            <Loading />
-          ) : ( */}
-        {/* TODO null content report, but should not be accessable without task */}
         <section className="container-fluid overflow-auto position-relative flex-grow-1">
+          {/* null task error, but should not be accessable without task */}
+          <Activity mode={!task ? "visible" : "hidden"}>
+            <div className="alert alert-warning" role="alert">
+              {t("no_task_selected")}
+            </div>
+          </Activity>
           {task?.rules.rules.map((rule, i) => (
             <ExpectationRules
-              key={`rule-${rule.name}-${i}`}
+              key={`${hash}-rule-${rule.name}-${i}`}
               rule={rule}
               setCurrent={setCurrent}
               onSelect={onSelect}
@@ -337,8 +358,6 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
             />
           ))}
         </section>
-        {/* )}
-        </Suspense> */}
       </article>
     </ReviewReset>
   );

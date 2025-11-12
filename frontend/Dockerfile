@@ -1,4 +1,4 @@
-FROM docker.io/node:24-slim AS base
+FROM docker.io/node:25-slim AS base
 RUN mkdir -p /app
 ENV NODE_ENV=production
 
@@ -6,11 +6,12 @@ FROM base AS build
 # ci in /tmp to take advantage of layer caching
 WORKDIR /tmp
 COPY ./package*.json /tmp/
-RUN npm ci
+COPY ./bun.lock* /tmp/
+# RUN npm ci
+RUN npx -y bun ci --frozen-lockfile
 RUN cp -a /tmp/node_modules /app
 WORKDIR /app
 COPY . /app
-ENV NODE_ENV=production
 RUN npm run build
 RUN npm run build:server
 
@@ -19,7 +20,6 @@ LABEL org.opencontainers.image.description="myProse web application"
 LABEL org.opencontainers.image.licenses=CC-BY-NC-SA-4.0
 EXPOSE 8888
 ENV PORT=8888
-ENV NODE_ENV=production
 WORKDIR /app
 COPY ./package.json .
 COPY --from=build /app/dist/ /app/dist/

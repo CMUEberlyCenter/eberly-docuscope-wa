@@ -34,7 +34,7 @@ const Page: FC = () => {
   const [custom, setCustom] = useState<IdWritingTask | null>(null); // Uploaded file content.
   const [valid, setValid] = useState(true); // Uploaded file validity.
   const [error, setError] = useState(""); // Error messages for uploaded file.
-  const hostname = new URL("/draft", window.location.href); // base url for link
+  const hostname = new URL(import.meta.env.BASE_URL, window.location.href); // base url for link
   const [data, setData] = useState<WritingTask[]>([]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -103,16 +103,18 @@ const Page: FC = () => {
               tasks={tasks}
             />
             <ListGroup className="overflow-auto w-100 mh-100">
-              {data.map((task) => (
-                <ListGroup.Item
-                  key={task.info.name}
-                  active={selected === task}
-                  action
-                  onClick={() => setSelected(task)}
-                >
-                  {task.info.name}
-                </ListGroup.Item>
-              ))}
+              {data
+                .toSorted((a, b) => a.info.name.localeCompare(b.info.name))
+                .map((task) => (
+                  <ListGroup.Item
+                    key={task.info.name}
+                    active={selected === task}
+                    action
+                    onClick={() => setSelected(task)}
+                  >
+                    {task.info.name}
+                  </ListGroup.Item>
+                ))}
               {custom && (
                 <ListGroup.Item
                   key="custom"

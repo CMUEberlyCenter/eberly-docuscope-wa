@@ -192,16 +192,18 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
             />
             <div className="w-100 h-0">
               <ListGroup className="overflow-auto w-100 mh-100">
-                {data.map((task) => (
-                  <ListGroup.Item
-                    key={task.info.name}
-                    active={selected === task}
-                    action
-                    onClick={() => setSelected(task)}
-                  >
-                    {task.info.name}
-                  </ListGroup.Item>
-                ))}
+                {data
+                  .toSorted((a, b) => a.info.name.localeCompare(b.info.name))
+                  .map((task) => (
+                    <ListGroup.Item
+                      key={task.info.name}
+                      active={selected === task}
+                      action
+                      onClick={() => setSelected(task)}
+                    >
+                      {task.info.name}
+                    </ListGroup.Item>
+                  ))}
                 {custom && (
                   <ListGroup.Item
                     action

@@ -126,7 +126,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               range: editor.selection,
             },
             result: null,
-            // document: editorContent,
           });
         } else {
           // error task, do not add to history
@@ -138,7 +137,6 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             },
             result: null,
             error: new NoSelectedTextError(t("error.no_selection.default")),
-            // document: editorContent,
           });
         }
       },

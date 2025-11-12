@@ -4,6 +4,7 @@ import type {
   TextBlockParam,
 } from '@anthropic-ai/sdk/resources/index.mjs';
 import format from 'string-format';
+import { ChatStopError } from '../../lib/ProblemDetails';
 import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
@@ -40,7 +41,7 @@ export async function doChat<T>(
   cache?: boolean
 ) {
   if (!ANTHROPIC_API_KEY) {
-    throw new Error('No LLM configured.');
+    throw new Error('No LLM configured.'); // should this be 502?
   }
   const started = new Date();
   const template = await findPromptById(key);
@@ -57,7 +58,9 @@ export async function doChat<T>(
   let response: string | T = '';
   const json_assistant: MessageParam = {
     role: 'assistant',
-    content: content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ?? '',
+    content:
+      content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
+      '',
   };
   const caching: TextBlockParam[] = [];
   if (cache) {
@@ -116,48 +119,40 @@ export async function doChat<T>(
     console.error(chat);
     throw new Error(err.error.message, { cause: chat });
   }
-  switch (chat.stop_reason) {
-    case 'max_tokens':
-      throw new Error('Token limit exceeded.', { cause: chat });
-    case 'tool_use':
-      throw new Error('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
-    case 'stop_sequence':
-      throw new Error('No stop_sequence handler.', { cause: chat }); // Currently unused
-    case 'end_turn':
-      break;
-    case 'refusal':
-      throw new Error('The model refused to answer.', { cause: chat });
-    default:
-      console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+  if (chat.stop_reason) {
+    switch (chat.stop_reason) {
+      case 'max_tokens':
+        throw new ChatStopError('Token limit exceeded.', { cause: chat });
+      case 'tool_use':
+        throw new ChatStopError('No tool_use handler.', { cause: chat }); // TODO when implementing tools (eg) json formatting.
+      case 'stop_sequence':
+        throw new ChatStopError('No stop_sequence handler.', { cause: chat }); // Currently unused
+      case 'end_turn':
+        break;
+      case 'refusal':
+        throw new ChatStopError('The model refused to answer.', {
+          cause: chat,
+        });
+      case 'pause_turn':
+        break;
+      default:
+        console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+    }
   }
-  // TODO handle server errors, 400-529, 413 in particular (request_too_large)
-  /* try {
-  await anthropic..create({...});
-  } catch (err) {
-    if (err.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error("API Error:", error.response.status, error.response.data);
-    } else if (err.request) {
-      // The request was made but no response was received
-      console.error("Network Error:", error.request);
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error("Error:", error.message);  }*/
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
-    // console.log(response);
   } else {
     console.warn(resp);
   }
-  // TODO catch json parsing errors, either here or in calling code
   try {
     if (json) {
       // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
       // Using json_assistant and looking for "begin with" seems to help with this
       // but leaving this in case the model still fences it or fails to find the magic string.
-      const unfenced = response.replace(/^```json\s*/, "").replace(/\s*```$/, "");
+      const unfenced = response
+        .replace(/^```json\s*/, '')
+        .replace(/\s*```$/, '');
       response = JSON.parse(`${json_assistant.content}${unfenced}`) as T;
     }
   } catch (err) {

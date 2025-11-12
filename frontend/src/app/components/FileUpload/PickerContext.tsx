@@ -32,7 +32,6 @@ export const PickerProvider: FC<{
   const showPicker = (show: boolean) => {
     const element = document.querySelector("drive-picker");
     if (element) {
-      console.log("Found existing picker element", element);
       element.visible = show || true;
       return;
     }
@@ -131,7 +130,6 @@ export const PickerProvider: FC<{
             { arrayBuffer: res.body as unknown as ArrayBuffer },
             convertOptions
           );
-          console.log("Converted content:", value, messages);
           if (messages.length) {
             showError(...messages);
             console.error(messages);
@@ -184,7 +182,7 @@ export const PickerProvider: FC<{
       // console.error("Error exporting file:", err);
       // }
     });
-    picker.addEventListener("picker:canceled", console.log);
+    // picker.addEventListener("picker:canceled", console.log);
     picker.addEventListener("picker:error", console.error);
     // ensure the element is registered before trying to use it, otherwise you'll get an error when trying to set properties on the custom element.
     document.body.appendChild(picker);

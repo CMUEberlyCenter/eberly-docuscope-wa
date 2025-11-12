@@ -20,6 +20,10 @@ import {
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -27,7 +31,6 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
@@ -72,9 +75,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify({ document, writing_task }),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Logical Flow review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: LogicalFlowData }) => {
@@ -85,6 +86,9 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
     onError: (error) => {
       setReview({ tool: "logical_flow", error });
       console.error("Error fetching Logical Flow review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
     },
   });
   // When the document or writing task changes, fetch a new review

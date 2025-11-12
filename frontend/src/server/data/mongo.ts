@@ -1,14 +1,7 @@
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
-import type { Analysis } from '../../lib/ReviewResponse';
 import type { WritingTask } from '../../lib/WritingTask';
-import type { Review } from '../model/review';
-import {
-  ACCESS_LEVEL,
-  EXPIRE_REVIEW_SECONDS,
-  MONGO_CLIENT,
-  MONGO_DB,
-} from '../settings';
+import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
 
@@ -16,8 +9,6 @@ const client = new MongoClient(MONGO_CLIENT);
 
 /** Database collection for storing writing tasks. */
 const WRITING_TASKS = 'writing_tasks';
-/** Database collection for storing reviews.  */
-const REVIEW = 'review';
 /** Database collection for logging. */
 const LOGGING = 'logging';
 
@@ -48,8 +39,9 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
       return rules;
     }
     const rules = await collection.findOne<WritingTask>(
-      { 'info.id': id, public: true }, // Find if the id exists in the public tasks.
+      { 'info.id': id, public: true, 'info.access': ACCESS_LEVEL }, // Find if the id exists in the public tasks.
       // Only use public tasks so that instructor submittend tasks are not returned.
+      // Unsure if ACCESS_LEVEL is necessary here.  ACCESS_LEVEL's meaning is not well defined.
       { projection: { _id: 0, path: 0, modified: 0 }, sort: { modified: -1 } }
     );
     if (!rules) {
@@ -60,21 +52,6 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
     console.error(err);
     throw err;
   }
-}
-
-/** Make all public writing tasks private. */
-async function privatizeWritingTasks() {
-  return client
-    .db(MONGO_DB)
-    .collection<WritingTaskDb>(WRITING_TASKS)
-    .updateMany(
-      { public: true },
-      {
-        $set: {
-          public: false,
-        },
-      }
-    );
 }
 
 /**
@@ -97,12 +74,12 @@ export async function insertWritingTask(
 }
 
 /**
- * Retrieve the list of public writing task specifications.
- * This is used for populating writing task selection actions for publicly
+ * Generate the public writing task specifications.
+ * This is used for populating writing task selections for publicly
  * facing versions.
- * @returns Array of writing tasks where the public attribute is true.
+ * @returns writing tasks where the public attribute is true.
  */
-export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
+export async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
   try {
     const collection = client
       .db(MONGO_DB)
@@ -113,13 +90,22 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
     );
     const ret: WritingTask[] = [];
     for await (const doc of cursor) {
-      ret.push(doc);
+      yield doc;
     }
-    return ret;
   } catch (err) {
     console.error(err);
     throw err;
   }
+}
+
+/**
+ * Retrieve the list of public writing task specifications.
+ * This is used for populating writing task selection actions for publicly
+ * facing versions.
+ * @returns Array of writing tasks where the public attribute is true.
+ */
+export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
+  return Array.fromAsync(generateAllPublicWritingTasks());
 }
 
 /**
@@ -129,40 +115,17 @@ export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
  * @returns id of the writing task in the database.
  */
 async function upsertPublicWritingTask(path: string, data: WritingTask) {
-  client
-    .db(MONGO_DB)
-    .collection<WritingTaskDb>(WRITING_TASKS)
-    .updateMany(
-      { public: true, 'info.id': data.info.id },
-      {
-        $set: {
-          public: false,
-          'info.id': undefined, // probably unnecessary, but just in case.
-          // with future versions where the info.id is used preferentially,
-          // old versions with the same id should be deleted instead of made private.
-        },
-      }
-    );
   const collection = client
     .db(MONGO_DB)
     .collection<WritingTaskDb>(WRITING_TASKS);
+  // There should only be one public writing task with a given id.
+  // _id is the unique identifier for the document in MongoDB and is used for private tasks.
   const ins = await collection.replaceOne(
-    {
-      'info.name': data.info.name,
-      'info.version': data.info.version,
-      path: path,
-    },
-    {
-      ...data,
-      public: data.info.access === ACCESS_LEVEL,
-      path,
-      modified: new Date(),
-    },
-    {
-      upsert: true,
-    }
+    { 'info.id': data.info.id, public: true },
+    { ...data, public: true, path, modified: new Date() },
+    { upsert: true }
   );
-  console.log(`Upserted writing task ${data.info.name} v${data.info.version}`);
+  console.log(`Inserted writing task ${data.info.name} v${data.info.version}`);
   return ins.upsertedId;
 }
 
@@ -210,17 +173,12 @@ export async function initDatabase() {
       await timeout(sleep);
     }
   }
-  const collection = await client.db(MONGO_DB).createCollection<Review>(REVIEW);
-  // Add expire index if necessary.
-  const ExpireIndexName = 'expire';
-  const indx = (await collection.indexes()).find((idx) => 'created' in idx.key);
-  if (indx?.expireAfterSeconds !== EXPIRE_REVIEW_SECONDS) {
-    if (indx?.name) await collection.dropIndex(indx.name);
-    await collection.createIndex(
-      { created: 1 },
-      { name: ExpireIndexName, expireAfterSeconds: EXPIRE_REVIEW_SECONDS }
-    );
-  }
+
+  // Make sure collection exists and has index on id
+  const collection = client.db(MONGO_DB).collection<WritingTask>(WRITING_TASKS);
+  await collection.createIndex({ 'info.id': 1, public: 1 });
+  // Delete all public writing tasks to maintain consistency with filesystem.
+  await collection.deleteMany({ public: true });
 
   await client.db(MONGO_DB).createCollection<LogData>(LOGGING, {
     timeseries: {
@@ -230,8 +188,6 @@ export async function initDatabase() {
     expireAfterSeconds: 3.154e7, // 1 year // 7.884e+6, // 3 months //
   });
 
-  await privatizeWritingTasks(); // "expire" old tasks from public listings without deleting them.
-  // Want to keep old ones around so that already distributed links do not break.
   const wtdShutdown = await initWritingTasks(
     upsertPublicWritingTask,
     deleteWritingTaskByPath
@@ -241,154 +197,6 @@ export async function initDatabase() {
     return client.close();
   };
 }
-
-/**
- * Retrieve all of the writing tasks from the filesystem.
- * This is to be initiated in the public writing task root directory.
- * @param dir directory where to look for writing task files.
- * @returns List of valid writing tasks.
- */
-// async function readPublicWritingTasks(dir: PathLike): Promise<WritingTask[]> {
-//   const ret: WritingTask[] = [];
-//   try {
-//     const files = await readdir(dir);
-//     for (const file of files) {
-//       const path = join(dir.toString(), file);
-//       const stats = await stat(path);
-//       if (stats.isFile() && file.endsWith('.json')) {
-//         const content = await readFile(path, { encoding: 'utf8' });
-//         const json = JSON.parse(content);
-//         if (isWritingTask(json)) {
-//           // only add valid writing tasks.
-//           ret.push(json);
-//         }
-//       } else if (stats.isDirectory()) {
-//         const subdir = await readPublicWritingTasks(path);
-//         ret.push(...subdir);
-//       }
-//       // if not a directory or a json file, skip.
-//       // this recursion is unneccessary once fs.glob(join(dir, '**/*.json)) is finalized.
-//     }
-//     return ret;
-//   } catch (err) {
-//     console.error(err);
-//     return ret; // Should this return [] or current progress?
-//   }
-// }
-
-/**
- * Retrieves the stored review data.
- * @param id Identifier for the cached review data.
- * @returns The current state of the review.
- * @throws ReferenceError
- */
-export async function findReviewById(id: string) {
-  try {
-    const _id = new ObjectId(id);
-    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
-    const review = await collection.findOne<Review>({ _id });
-    if (!review) {
-      throw new ReferenceError(`Document ${id} not found.`);
-    }
-    return review;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
-
-/**
- * Inserts the initial version of the review data with an empty
- * analysis array.
- * @param document HTML version of input.
- * @param segmented Segmented version of document.  This is INVALID content for onTopic.
- * @param writing_task Writing task to use for analysis.
- * @param user User identifier from LMS.
- * @param assignment Assignment identifier from LMS.
- * @returns Identifier of the inserted review.
- */
-export async function insertReview(
-  document: string,
-  segmented: string,
-  writing_task: WritingTask | null,
-  user?: string,
-  assignment?: string
-) {
-  try {
-    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
-    const ins = await collection.insertOne({
-      writing_task,
-      assignment,
-      user,
-      document,
-      segmented,
-      analysis: [],
-      created: new Date(),
-    });
-    return ins.insertedId;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
-
-/**
- * Add the given analysis to a review.  Used for updating entry as analyses
- * are completed.
- * @param id Identifier for the review.
- * @param analyses An analysis result to add to the array of analyses.
- * @returns The updated review including the added analysis.
- */
-export async function updateReviewByIdAddAnalysis(
-  id: string,
-  ...analyses: Analysis[]
-) {
-  try {
-    const _id = new ObjectId(id);
-    const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
-    const result = await collection.findOneAndUpdate(
-      { _id },
-      { $push: { analysis: { $each: analyses } } }
-    );
-    // TODO error handling.
-    return result;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-}
-
-/**
- * Attempt to delete Review from the database.
- * @param id The review identifier.
- * @throws ReferenceError
- */
-export async function deleteReviewById(id: string) {
-  const _id = new ObjectId(id);
-  const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
-  const result = await collection.deleteOne({ _id });
-  if (!result.acknowledged || result.deletedCount !== 1) {
-    throw new ReferenceError(`Deletion operation for Review ${id} failed.`);
-  }
-}
-
-// export async function avgAnalysisTime() {
-//   const collection = client.db(MONGO_DB).collection<Review>(REVIEW);
-//   const avg = await collection.aggregate([
-//     {
-//       '$unwind': {
-//         'path': '$analysis',
-//         'preserveNullAndEmptyArrays': false
-//       }
-//     },
-//     {
-//       "$group": {
-//         _id: "$tool",
-//         avg_ms: { $avg: "$analysis.delta_ms" }
-//       }
-//     }]);
-//   return avg;
-// }
 
 type LogData = {
   _id?: string;

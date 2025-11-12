@@ -20,13 +20,16 @@ import {
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
 
 /** Accordion component for displaying sentence assessments. */
 const SentenceAssessments: FC<
@@ -106,9 +109,7 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Credibility review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({ input, data }: { input: string; data: CredibilityData }) => {

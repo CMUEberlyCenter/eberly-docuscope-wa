@@ -14,6 +14,10 @@ import {
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
@@ -21,7 +25,6 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { ReviewErrorData } from "./ReviewError";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
@@ -75,9 +78,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
       });
-      if (!response.ok) {
-        throw new Error("Failed to fetch Prominent Topics review");
-      }
+      checkReviewResponse(response);
       return response.json();
     },
     onSuccess: ({
@@ -92,8 +93,12 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
       setReview(data);
     },
     onError: (error) => {
+      if (error.name === "AbortError") return;
       setReview({ tool: "prominent_topics", error });
       console.error("Error fetching Prominent Topics review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
     },
   });
 

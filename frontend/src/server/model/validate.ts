@@ -8,7 +8,7 @@ export const validate = (...validations: ContextRunner[]) => {
     for (const validation of validations) {
       const valid = await validation.run(req);
       if (!valid.isEmpty()) {
-        res.status(400).send(BadRequest(JSON.stringify(valid.array())));
+        res.status(400).json(BadRequest(JSON.stringify(valid.array())));
         return; // abort on any error.
       }
     }
