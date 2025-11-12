@@ -79,7 +79,7 @@ export async function insertWritingTask(
  * facing versions.
  * @returns writing tasks where the public attribute is true.
  */
-export async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
+async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
   try {
     const collection = client
       .db(MONGO_DB)
@@ -134,7 +134,7 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
  * @param path path on the host filesystem (secondary identifier).
  * @returns true if deletion is acknowledged.
  */
-export async function deleteWritingTaskByPath(path: string) {
+async function deleteWritingTaskByPath(path: string) {
   const del = await client
     .db(MONGO_DB)
     .collection(WRITING_TASKS)

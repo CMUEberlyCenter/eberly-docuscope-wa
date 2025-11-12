@@ -402,20 +402,20 @@ export type ReviewResponse =
   | ProminentTopicsOutput
   | SourcesOutput
   | OnTopicData;
-export const isReviewResponse = (data: unknown): data is ReviewResponse => {
-  return (
-    isCivilToneOutput(data) ||
-    isCredibilityOutput(data) ||
-    isExpectationsOutput(data) ||
-    isLinesOfArgumentsOutput(data) ||
-    isLogicalFlowOutput(data) ||
-    isParagraphClarityOutput(data) ||
-    isProfessionalToneOutput(data) ||
-    isProminentTopicsOutput(data) ||
-    isSourcesOutput(data) ||
-    isOnTopicData(data)
-  );
-};
+// const isReviewResponse = (data: unknown): data is ReviewResponse => {
+//   return (
+//     isCivilToneOutput(data) ||
+//     isCredibilityOutput(data) ||
+//     isExpectationsOutput(data) ||
+//     isLinesOfArgumentsOutput(data) ||
+//     isLogicalFlowOutput(data) ||
+//     isParagraphClarityOutput(data) ||
+//     isProfessionalToneOutput(data) ||
+//     isProminentTopicsOutput(data) ||
+//     isSourcesOutput(data) ||
+//     isOnTopicData(data)
+//   );
+// };
 
 interface ReviewData<T extends ReviewResponse> {
   tool: ReviewTool;
