@@ -106,11 +106,5 @@ export const DEFAULT_LANGUAGE_SETTINGS: LanguageSettingsRequest = {
   target_lang: DEFAULT_LANGUAGE,
 };
 
-const SIX_MONTHS = 60 * 60 * 24 * 30 * 6; // (seconds/minute)(minutes/hour)(hours/day)(days/month)(months)
-export const EXPIRE_REVIEW_SECONDS = envInt(
-  process.env.EXPIRE_REVIEW_SECONDS,
-  SIX_MONTHS
-);
-
 // Identifier for the info.access category in writing task definitions that are treated as public
 export const ACCESS_LEVEL = process.env.ACCESS_LEVEL ?? 'Public';
