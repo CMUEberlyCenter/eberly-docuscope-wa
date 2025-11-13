@@ -14,13 +14,13 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import Split from "react-split";
+import { usePageContext } from "vike-react/usePageContext";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
 import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Legal } from "../Legal/Legal";
-import { useSettingsContext } from "../Settings/SettingsContext";
 import { StageHeader } from "../StageHeader/StageHeader";
 import { UserTextView } from "../UserTextView/UserTextView";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -73,7 +73,7 @@ export const Review: FC = () => {
   const [ready, setReady] = useState<boolean>(false);
   const [userText] = useFileText();
   const { task: writingTask } = useWritingTask();
-  const settings = useSettingsContext();
+  const { settings } = usePageContext();
 
   const toggleTool = (selectedTool: Tool) => {
     setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
@@ -111,47 +111,47 @@ export const Review: FC = () => {
     // As per #230 most features are available even without a writing task if
     // enabled in settings.  The server settings have priority over writing tasks.
     setCivilToneFeature(
-      settings.civil_tone &&
+      !!settings?.civil_tone &&
         (!writingTask || isEnabled(writingTask, "civil_tone"))
     );
     setCredibilityFeature(
-      settings.credibility &&
+      !!settings?.credibility &&
         (!writingTask || isEnabled(writingTask, "credibility"))
     );
     setExpectationsFeature(
-      settings.expectations &&
+      !!settings?.expectations &&
         (!writingTask || isEnabled(writingTask, "expectations"))
     );
     // Lines of arguments only available if enabled in writing task.
     setArgumentsFeature(
-      settings.lines_of_arguments &&
+      !!settings?.lines_of_arguments &&
         isEnabled(writingTask, "lines_of_arguments")
     );
     setLogicalFlowFeature(
-      settings.logical_flow &&
+      !!settings?.logical_flow &&
         (!writingTask || isEnabled(writingTask, "logical_flow"))
     );
     setParagraphClarityFeature(
-      settings.paragraph_clarity &&
+      !!settings?.paragraph_clarity &&
         (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
     );
     setProfessionalToneFeature(
-      settings.professional_tone &&
+      !!settings?.professional_tone &&
         (!writingTask || isEnabled(writingTask, "professional_tone"))
     );
     setIdeasFeature(
-      settings.prominent_topics &&
+      !!settings?.prominent_topics &&
         (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
     setSentencesFeature(
-      settings.sentence_density &&
+      !!settings?.sentence_density &&
         (!writingTask || isEnabled(writingTask, "sentence_density"))
     );
     setSourcesFeature(
-      settings.sources && (!writingTask || isEnabled(writingTask, "sources"))
+      !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"))
     );
     setOrganizationFeature(
-      settings.term_matrix &&
+      !!settings?.term_matrix &&
         (!writingTask || isEnabled(writingTask, "term_matrix"))
     );
     setImpressionsFeature(

@@ -19,6 +19,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
+import { usePageContext } from "vike-react/usePageContext";
 import CopyEditIcon from "../../assets/icons/copyedit_icon.svg?react";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
@@ -34,7 +35,6 @@ import {
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { Rating } from "../Rating/Rating";
-import { useSettingsContext } from "../Settings/SettingsContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
@@ -49,7 +49,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
   ({ className, hasSelection, ...props }, ref) => {
     const { task: writingTask } = useWritingTask();
     const { t } = useTranslation();
-    const settings = useSettingsContext();
+    const { settings } = usePageContext();
     const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
     const [history, setHistory] = useState<ToolResult[]>([]);
     const addHistory = (tool: ToolResult) => setHistory([...history, tool]);
@@ -188,7 +188,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
             >
               {/* <Nav variant="underline"> // underline or tabs conveys meaning better */}
               <Nav>
-                {(settings.notes2prose || settings.notes2bullets) && (
+                {(settings?.notes2prose || settings?.notes2bullets) && (
                   <Nav.Item className="ms-3">
                     <Nav.Link
                       eventKey="generate"
@@ -198,7 +198,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                     </Nav.Link>
                   </Nav.Item>
                 )}
-                {(settings.copyedit || settings.flow) && (
+                {(settings?.copyedit || settings?.flow) && (
                   <Nav.Item>
                     <Nav.Link
                       eventKey="refine"
@@ -217,7 +217,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
               <Tab.Pane eventKey="generate">
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
-                    {(settings.notes2prose || settings.notes2bullets) && (
+                    {(settings?.notes2prose || settings?.notes2bullets) && (
                       <ButtonGroup className="bg-white shadow-sm tools">
                         {settings.notes2prose && (
                           <ToolButton
@@ -246,7 +246,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                 <div className="d-flex justify-content-around">
                   <ButtonToolbar className="mb-2 mx-auto">
                     <ButtonGroup className="bg-white shadow-sm tools">
-                      {settings.flow && (
+                      {settings?.flow && (
                         <ToolButton
                           tooltip={t("tool.button.flow.tooltip")}
                           onClick={() => onTool("flow")}
@@ -255,7 +255,7 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
                           title={t("tool.button.flow.title")}
                         />
                       )}
-                      {settings.copyedit && (
+                      {settings?.copyedit && (
                         <ToolButton
                           tooltip={t("tool.button.copyedit.overview")}
                           onClick={() => onTool("copyedit")}

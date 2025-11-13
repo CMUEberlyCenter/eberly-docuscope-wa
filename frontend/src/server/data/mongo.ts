@@ -242,7 +242,7 @@ type AggregateLogData = {
   maxCacheRead: number; // cache_read_input_tokens
 };
 
-export async function getLogData(): Promise<AggregateLogData[]> {
+async function* generateLogData(): AsyncGenerator<AggregateLogData> {
   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<AggregateLogData>([
     {
@@ -269,9 +269,11 @@ export async function getLogData(): Promise<AggregateLogData[]> {
   ]);
   const ret: AggregateLogData[] = [];
   for await (const doc of cursor) {
-    ret.push(doc);
+    yield doc;
   }
-  return ret;
+}
+export function getLogData(): Promise<AggregateLogData[]> {
+  return Array.fromAsync(generateLogData());
 }
 
 export async function getLatestLogData(prompt: string): Promise<LogData[]> {

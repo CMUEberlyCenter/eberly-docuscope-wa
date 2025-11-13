@@ -12,19 +12,21 @@ interface GoogleSettings {
 
 declare global {
   namespace Vike {
+    interface GlobalContext {
+      google?: GoogleSettings;
+    }
     interface PageContextServer {
       i18n?: i18n;
-      t?: TFunction;
       token?: IdToken
       session?: SessionData;
       writing_task_id?: string;
       settings?: Settings;
-      google?: GoogleSettings;
     }
     interface PageContext {
       locale?: string;
       settings?: Settings;
       google?: GoogleSettings;
+      user?: string;
     }
   }
 }

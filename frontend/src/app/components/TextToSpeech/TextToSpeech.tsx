@@ -14,7 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type FC, useCallback, useEffect, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useSettingsContext } from "../Settings/SettingsContext";
+import { usePageContext } from "vike-react/usePageContext";
 
 /**
  * Component for adding text to speech controls.
@@ -35,7 +35,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
-  const enabled = useSettingsContext().text2speech;
+  const enabled = usePageContext().settings?.text2speech;
 
   useEffect(() => {
     return () => {

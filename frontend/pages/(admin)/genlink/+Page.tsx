@@ -1,4 +1,8 @@
-/* @overview: This page allows the user to generate a link for a writing task. The user can select a writing task from a list, or upload a custom writing task file. The page also displays the generated link and allows the user to copy it to the clipboard. */
+/* @overview: Generate link administrative tool.
+This page allows the user to generate a link for a writing task.
+The user can select a writing task from a list, or upload a custom writing task file.
+The page also displays the generated link and allows the user to copy it to the clipboard.
+*/
 import { type ChangeEvent, type FC, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";

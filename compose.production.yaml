@@ -26,7 +26,7 @@ services:
   frontend:
     # ports: !reset [] # use if redirect is enabled
     environment:
-      ANTHROPIC_MODEL: claude-3-7-sonnet-20250219
+      # ANTHROPIC_MODEL: claude-3-7-sonnet-20250219
       LTI_HOSTNAME: https://docuscope-sc.eberly.cmu.edu/
     volumes:
       - "/srv/scribe/myprose-resources:/app/resources:ro"

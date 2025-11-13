@@ -2,7 +2,7 @@ import type { PageContextServer } from 'vike/types';
 
 export function title(pageContext: PageContextServer) {
   return (
-    pageContext.t?.('document.title', {
+    pageContext.i18n?.t('document.title', {
       ns: 'review',
       defaultValue: 'myProse Review',
     }) ?? 'myProse Review'
