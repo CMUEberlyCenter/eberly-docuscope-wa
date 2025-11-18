@@ -4,6 +4,7 @@ import type { WritingTask } from '../../lib/WritingTask';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
+import { start } from 'node:repl';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -234,12 +235,16 @@ type AggregateLogData = {
   _id: string;
   count: number;
   avgTime: number;
+  minTime: number;
+  maxTime: number;
   avgInputTokens: number; // input_tokens
   avgOutputTokens: number; // output_tokens
   avgCacheCreate: number; // cache_creation_input_tokens
   maxCacheCreate: number; // cache_creation_input_tokens
   avgCacheRead: number; // cache_read_input_tokens
   maxCacheRead: number; // cache_read_input_tokens
+  startTime: Date;
+  endTime: Date;
 };
 
 async function* generateLogData(): AsyncGenerator<AggregateLogData> {
@@ -249,7 +254,11 @@ async function* generateLogData(): AsyncGenerator<AggregateLogData> {
       $group: {
         _id: '$meta.prompt',
         count: { $count: {} },
+        startTime: { $min: '$timestamp' },
+        endTime: { $max: '$timestamp' },
         avgTime: { $avg: '$performance_data.delta_ms' },
+        minTime: { $min: '$performance_data.delta_ms' },
+        maxTime: { $max: '$performance_data.delta_ms' },
         avgInputTokens: { $avg: '$performance_data.usage.input_tokens' },
         avgOutputTokens: { $avg: '$performance_data.usage.output_tokens' },
         avgCacheCreate: {
@@ -267,7 +276,6 @@ async function* generateLogData(): AsyncGenerator<AggregateLogData> {
       },
     },
   ]);
-  const ret: AggregateLogData[] = [];
   for await (const doc of cursor) {
     yield doc;
   }
@@ -276,7 +284,7 @@ export function getLogData(): Promise<AggregateLogData[]> {
   return Array.fromAsync(generateLogData());
 }
 
-export async function getLatestLogData(prompt: string): Promise<LogData[]> {
+async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {
   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<LogData>(
     [
@@ -290,9 +298,10 @@ export async function getLatestLogData(prompt: string): Promise<LogData[]> {
     ],
     { maxTimeMS: 60000, allowDiskUse: true }
   );
-  const ret: LogData[] = [];
   for await (const doc of cursor) {
-    ret.push(doc);
+    yield doc;
   }
-  return ret;
+}
+export function getLatestLogData(prompt: string): Promise<LogData[]> {
+  return Array.fromAsync(generateLatestLogData(prompt));
 }

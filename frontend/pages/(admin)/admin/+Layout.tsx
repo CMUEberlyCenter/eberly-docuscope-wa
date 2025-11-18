@@ -8,7 +8,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
     <main className="container-fluid vh-100 w-100 d-flex flex-column align-items-stretch overflow-none">
       <Navbar>
         <Container>
-          <Navbar.Brand href="/">
+          <Navbar.Brand>
             <Logo /> Admin Dashboard
           </Navbar.Brand>
           <Navbar.Toggle aria-controls={id} />
