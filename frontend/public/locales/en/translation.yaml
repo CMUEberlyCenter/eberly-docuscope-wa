@@ -102,7 +102,6 @@ editor:
 tool:
   tab:
     generate: Draft
-    refine: Refine
     review: Review
   button:
     prose:
@@ -111,16 +110,6 @@ tool:
     bullets:
       title: Bullets
       tooltip: Generate Bulleted List from Notes
-    flow:
-      title: Flow
-      tooltip: Check Flow Between Sentences
-    copyedit:
-      title: Copy Edit
-      tooltip: Copy Edit
-      overview: 'This tool provides suggestions to make your writing clearer and more concise. It offers two versions: one showing the revised text, and another marking the suggested changes. Explanations accompany each suggestion, helping you improve your writing while retaining your original message.'
-    grammar:
-      title: Grammar
-      tooltip: Fix Grammar
     view:
       title: 'Open content expectations: {{title}}'
   initial: Write & highlight text for further actions.
@@ -131,10 +120,6 @@ tool:
   output: A.I. Response
   regenerate: Regenerate
   paste: Paste Text
-  expectation: Selected Expectation
-  select_expectation: Select an Expectation
-  suggestion: 'Revision:'
-  tracking: 'Revision with tracking:'
 clipboard: Copy to Clipboard
 error:
   unknown: Unknown error occurred while processing results.
@@ -146,9 +131,6 @@ error:
   unknown_error: An error occurred.
   too_large: The input text is too large to process. Please reduce the length of your selected text and try again.
   service_unavailable: The service is currently unavailable. Please try again later.
-flow:
-  issue: 'Issue:'
-  suggestions: 'Suggestions:'
 select_task:
   title: Select Writing Type
   filters: Filters
