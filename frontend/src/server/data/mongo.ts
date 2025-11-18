@@ -4,7 +4,6 @@ import type { WritingTask } from '../../lib/WritingTask';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
-import { start } from 'node:repl';
 
 const client = new MongoClient(MONGO_CLIENT);
 
@@ -89,7 +88,6 @@ async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
       { public: true, 'info.access': ACCESS_LEVEL },
       { projection: { path: 0, modified: 0 } }
     );
-    const ret: WritingTask[] = [];
     for await (const doc of cursor) {
       yield doc;
     }

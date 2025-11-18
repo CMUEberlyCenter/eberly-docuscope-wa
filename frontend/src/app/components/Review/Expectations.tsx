@@ -207,12 +207,12 @@ const ExpectationRule: FC<ExpectationProps> = ({
           <Accordion.Body
             onEntered={() => {
               dispatch({ type: "update", sentences: mutation.data.input });
-              isExpectationsData(mutation.data.data)
-                ? dispatch({
-                    sentences: [mutation.data.data.response.sent_ids],
-                    type: "set",
-                  })
-                : dispatch({ type: "unset" });
+              if (isExpectationsData(mutation.data.data))
+                dispatch({
+                  sentences: [mutation.data.data.response.sent_ids],
+                  type: "set",
+                });
+              else dispatch({ type: "unset" });
             }}
             onExit={() => dispatch({ type: "unset" })}
           >

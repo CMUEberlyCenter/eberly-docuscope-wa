@@ -1,4 +1,4 @@
-import { isOnTopicData, type OnTopicData } from './OnTopicData';
+import { type OnTopicData } from './OnTopicData';
 
 export type ReviewPrompt =
   | 'civil_tone'
@@ -59,25 +59,25 @@ type CivilToneOutput = {
   suggestion: string;
   sent_id: string;
 }[];
-function isCivilToneOutput(data: unknown): data is CivilToneOutput {
-  return (
-    !!data &&
-    Array.isArray(data) &&
-    data.every(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'text' in item &&
-        typeof item.text === 'string' &&
-        'assessment' in item &&
-        typeof item.assessment === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'sent_id' in item &&
-        typeof item.sent_id === 'string'
-    )
-  );
-}
+// function isCivilToneOutput(data: unknown): data is CivilToneOutput {
+//   return (
+//     !!data &&
+//     Array.isArray(data) &&
+//     data.every(
+//       (item) =>
+//         typeof item === 'object' &&
+//         item !== null &&
+//         'text' in item &&
+//         typeof item.text === 'string' &&
+//         'assessment' in item &&
+//         typeof item.assessment === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'sent_id' in item &&
+//         typeof item.sent_id === 'string'
+//     )
+//   );
+// }
 
 /** List of identified credibility issues in the text */
 export type CredibilityOutput = {
@@ -85,24 +85,24 @@ export type CredibilityOutput = {
   suggestion: string;
   sent_ids: string[];
 }[];
-function isCredibilityOutput(data: unknown): data is CredibilityOutput {
-  return (
-    !!data &&
-    Array.isArray(data) &&
-    data.every(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'issue' in item &&
-        typeof item.issue === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'sent_ids' in item &&
-        Array.isArray(item.sent_ids) &&
-        item.sent_ids.every((id: unknown) => typeof id === 'string')
-    )
-  );
-}
+// function isCredibilityOutput(data: unknown): data is CredibilityOutput {
+//   return (
+//     !!data &&
+//     Array.isArray(data) &&
+//     data.every(
+//       (item) =>
+//         typeof item === 'object' &&
+//         item !== null &&
+//         'issue' in item &&
+//         typeof item.issue === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'sent_ids' in item &&
+//         Array.isArray(item.sent_ids) &&
+//         item.sent_ids.every((id: unknown) => typeof id === 'string')
+//     )
+//   );
+// }
 
 export type ExpectationsOutput = {
   /** List of span ids */
@@ -141,25 +141,25 @@ export type Claim = {
   /** One sentence description of how suggested revisions will strengthen the thesis. */
   impact?: string;
 };
-function isClaim(data: unknown): data is Claim {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'claim' in data &&
-    typeof data.claim === 'string' &&
-    'support' in data &&
-    Array.isArray(data.support) &&
-    data.support.every((s) => typeof s === 'string') &&
-    'claim_sent_ids' in data &&
-    Array.isArray(data.claim_sent_ids) &&
-    data.claim_sent_ids.every((id) => typeof id === 'string') &&
-    'support_sent_ids' in data &&
-    Array.isArray(data.support_sent_ids) &&
-    data.support_sent_ids.every((id) => typeof id === 'string') &&
-    ('suggestion' in data ? typeof data.suggestion === 'string' : true) &&
-    ('impact' in data ? typeof data.impact === 'string' : true)
-  );
-}
+// function isClaim(data: unknown): data is Claim {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'claim' in data &&
+//     typeof data.claim === 'string' &&
+//     'support' in data &&
+//     Array.isArray(data.support) &&
+//     data.support.every((s) => typeof s === 'string') &&
+//     'claim_sent_ids' in data &&
+//     Array.isArray(data.claim_sent_ids) &&
+//     data.claim_sent_ids.every((id) => typeof id === 'string') &&
+//     'support_sent_ids' in data &&
+//     Array.isArray(data.support_sent_ids) &&
+//     data.support_sent_ids.every((id) => typeof id === 'string') &&
+//     ('suggestion' in data ? typeof data.suggestion === 'string' : true) &&
+//     ('impact' in data ? typeof data.impact === 'string' : true)
+//   );
+// }
 
 /** JSON structure for the results of the arguments prompt. */
 type LinesOfArgumentsOutput = {
@@ -172,27 +172,27 @@ type LinesOfArgumentsOutput = {
   /** List of claims that supports the thesis */
   claims: Claim[];
 } & Partial<GeneralAssessment>;
-function isLinesOfArgumentsOutput(
-  data: unknown
-): data is LinesOfArgumentsOutput {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'thesis' in data &&
-    typeof data.thesis === 'string' &&
-    'strategies' in data &&
-    Array.isArray(data.strategies) &&
-    data.strategies.every((s) => typeof s === 'string') &&
-    ('sent_ids' in data
-      ? Array.isArray(data.sent_ids) &&
-        data.sent_ids.every((id) => typeof id === 'string')
-      : true) &&
-    'claims' in data &&
-    Array.isArray(data.claims) &&
-    data.claims.every((claim) => isClaim(claim)) &&
-    ('assessment' in data ? isAssessment(data) : true)
-  );
-}
+// function isLinesOfArgumentsOutput(
+//   data: unknown
+// ): data is LinesOfArgumentsOutput {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'thesis' in data &&
+//     typeof data.thesis === 'string' &&
+//     'strategies' in data &&
+//     Array.isArray(data.strategies) &&
+//     data.strategies.every((s) => typeof s === 'string') &&
+//     ('sent_ids' in data
+//       ? Array.isArray(data.sent_ids) &&
+//         data.sent_ids.every((id) => typeof id === 'string')
+//       : true) &&
+//     'claims' in data &&
+//     Array.isArray(data.claims) &&
+//     data.claims.every((claim) => isClaim(claim)) &&
+//     ('assessment' in data ? isAssessment(data) : true)
+//   );
+// }
 
 /** List of identified logical flow issues (i.e., disruptions). */
 type LogicalFlowOutput = {
@@ -201,27 +201,27 @@ type LogicalFlowOutput = {
   sent_ids: string[];
   para_ids: string[];
 }[];
-function isLogicalFlowOutput(data: unknown): data is LogicalFlowOutput {
-  return (
-    !!data &&
-    Array.isArray(data) &&
-    data.every(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'issue' in item &&
-        typeof item.issue === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'sent_ids' in item &&
-        Array.isArray(item.sent_ids) &&
-        item.sent_ids.every((id: unknown) => typeof id === 'string') &&
-        'para_ids' in item &&
-        Array.isArray(item.para_ids) &&
-        item.para_ids.every((id: unknown) => typeof id === 'string')
-    )
-  );
-}
+// function isLogicalFlowOutput(data: unknown): data is LogicalFlowOutput {
+//   return (
+//     !!data &&
+//     Array.isArray(data) &&
+//     data.every(
+//       (item) =>
+//         typeof item === 'object' &&
+//         item !== null &&
+//         'issue' in item &&
+//         typeof item.issue === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'sent_ids' in item &&
+//         Array.isArray(item.sent_ids) &&
+//         item.sent_ids.every((id: unknown) => typeof id === 'string') &&
+//         'para_ids' in item &&
+//         Array.isArray(item.para_ids) &&
+//         item.para_ids.every((id: unknown) => typeof id === 'string')
+//     )
+//   );
+// }
 
 type ParagraphClarityOutput = {
   issue: string;
@@ -229,28 +229,28 @@ type ParagraphClarityOutput = {
   sent_ids: string[];
   para_id: string;
 }[];
-function isParagraphClarityOutput(
-  data: unknown
-): data is ParagraphClarityOutput {
-  return (
-    !!data &&
-    Array.isArray(data) &&
-    data.every(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'issue' in item &&
-        typeof item.issue === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'sent_ids' in item &&
-        Array.isArray(item.sent_ids) &&
-        item.sent_ids.every((id: unknown) => typeof id === 'string') &&
-        'para_id' in item &&
-        typeof item.para_id === 'string'
-    )
-  );
-}
+// function isParagraphClarityOutput(
+//   data: unknown
+// ): data is ParagraphClarityOutput {
+//   return (
+//     !!data &&
+//     Array.isArray(data) &&
+//     data.every(
+//       (item) =>
+//         typeof item === 'object' &&
+//         item !== null &&
+//         'issue' in item &&
+//         typeof item.issue === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'sent_ids' in item &&
+//         Array.isArray(item.sent_ids) &&
+//         item.sent_ids.every((id: unknown) => typeof id === 'string') &&
+//         'para_id' in item &&
+//         typeof item.para_id === 'string'
+//     )
+//   );
+// }
 
 export type ProfessionalToneOutput = {
   text: string;
@@ -259,29 +259,29 @@ export type ProfessionalToneOutput = {
   suggestion: string;
   tone_type: 'confidence' | 'subjectivity' | 'emotional';
 }[];
-function isProfessionalToneOutput(
-  data: unknown
-): data is ProfessionalToneOutput {
-  return (
-    !!data &&
-    Array.isArray(data) &&
-    data.every(
-      (item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        'text' in item &&
-        typeof item.text === 'string' &&
-        'sent_id' in item &&
-        typeof item.sent_id === 'string' &&
-        'issue' in item &&
-        typeof item.issue === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'tone_type' in item &&
-        ['confidence', 'subjectivity', 'emotional'].includes(item.tone_type)
-    )
-  );
-}
+// function isProfessionalToneOutput(
+//   data: unknown
+// ): data is ProfessionalToneOutput {
+//   return (
+//     !!data &&
+//     Array.isArray(data) &&
+//     data.every(
+//       (item) =>
+//         typeof item === 'object' &&
+//         item !== null &&
+//         'text' in item &&
+//         typeof item.text === 'string' &&
+//         'sent_id' in item &&
+//         typeof item.sent_id === 'string' &&
+//         'issue' in item &&
+//         typeof item.issue === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'tone_type' in item &&
+//         ['confidence', 'subjectivity', 'emotional'].includes(item.tone_type)
+//     )
+//   );
+// }
 
 /** JSON structure for the results of the prominent_topics prompt. */
 type ProminentTopicsOutput = {
@@ -298,42 +298,42 @@ type ProminentTopicsOutput = {
     impact?: string;
   }[];
 };
-function isProminentTopicsOutput(data: unknown): data is ProminentTopicsOutput {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'main_idea' in data &&
-    typeof data.main_idea === 'string' &&
-    'strategies' in data &&
-    Array.isArray(data.strategies) &&
-    data.strategies.every((s) => typeof s === 'string') &&
-    'sent_ids' in data &&
-    Array.isArray(data.sent_ids) &&
-    data.sent_ids.every((id) => typeof id === 'string') &&
-    'topics' in data &&
-    Array.isArray(data.topics) &&
-    data.topics.every(
-      (topic) =>
-        !!topic &&
-        typeof topic === 'object' &&
-        'topic' in topic &&
-        typeof topic.topic === 'string' &&
-        'techniques' in topic &&
-        Array.isArray(topic.techniques) &&
-        topic.techniques.every((t: unknown) => typeof t === 'string') &&
-        'topic_sents_ids' in topic &&
-        Array.isArray(topic.topic_sents_ids) &&
-        topic.topic_sents_ids.every((id: unknown) => typeof id === 'string') &&
-        'elaboration_sents_ids' in topic &&
-        Array.isArray(topic.elaboration_sents_ids) &&
-        topic.elaboration_sents_ids.every(
-          (id: unknown) => typeof id === 'string'
-        ) &&
-        ('suggestion' in topic ? typeof topic.suggestion === 'string' : true) &&
-        ('impact' in topic ? typeof topic.impact === 'string' : true)
-    )
-  );
-}
+// function isProminentTopicsOutput(data: unknown): data is ProminentTopicsOutput {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'main_idea' in data &&
+//     typeof data.main_idea === 'string' &&
+//     'strategies' in data &&
+//     Array.isArray(data.strategies) &&
+//     data.strategies.every((s) => typeof s === 'string') &&
+//     'sent_ids' in data &&
+//     Array.isArray(data.sent_ids) &&
+//     data.sent_ids.every((id) => typeof id === 'string') &&
+//     'topics' in data &&
+//     Array.isArray(data.topics) &&
+//     data.topics.every(
+//       (topic) =>
+//         !!topic &&
+//         typeof topic === 'object' &&
+//         'topic' in topic &&
+//         typeof topic.topic === 'string' &&
+//         'techniques' in topic &&
+//         Array.isArray(topic.techniques) &&
+//         topic.techniques.every((t: unknown) => typeof t === 'string') &&
+//         'topic_sents_ids' in topic &&
+//         Array.isArray(topic.topic_sents_ids) &&
+//         topic.topic_sents_ids.every((id: unknown) => typeof id === 'string') &&
+//         'elaboration_sents_ids' in topic &&
+//         Array.isArray(topic.elaboration_sents_ids) &&
+//         topic.elaboration_sents_ids.every(
+//           (id: unknown) => typeof id === 'string'
+//         ) &&
+//         ('suggestion' in topic ? typeof topic.suggestion === 'string' : true) &&
+//         ('impact' in topic ? typeof topic.impact === 'string' : true)
+//     )
+//   );
+// }
 
 export type SourceType = 'supporting' | 'hedged' | 'alternative' | 'neutral';
 export type Source = {
@@ -342,23 +342,23 @@ export type Source = {
   sent_ids: string[];
   src_type: SourceType;
 };
-function isSource(data: unknown): data is Source {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'names' in data &&
-    typeof data.names === 'string' &&
-    'assessment' in data &&
-    typeof data.assessment === 'string' &&
-    'sent_ids' in data &&
-    Array.isArray(data.sent_ids) &&
-    data.sent_ids.every((id) => typeof id === 'string') &&
-    'src_type' in data &&
-    ['supporting', 'hedged', 'alternative', 'neutral'].includes(
-      data.src_type as string
-    )
-  );
-}
+// function isSource(data: unknown): data is Source {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'names' in data &&
+//     typeof data.names === 'string' &&
+//     'assessment' in data &&
+//     typeof data.assessment === 'string' &&
+//     'sent_ids' in data &&
+//     Array.isArray(data.sent_ids) &&
+//     data.sent_ids.every((id) => typeof id === 'string') &&
+//     'src_type' in data &&
+//     ['supporting', 'hedged', 'alternative', 'neutral'].includes(
+//       data.src_type as string
+//     )
+//   );
+// }
 type SourcesOutput = {
   sources: Source[];
   issues: {
@@ -367,29 +367,29 @@ type SourcesOutput = {
     sent_ids: string[];
   }[];
 };
-function isSourcesOutput(data: unknown): data is SourcesOutput {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'sources' in data &&
-    Array.isArray(data.sources) &&
-    data.sources.every((source) => isSource(source)) &&
-    'issues' in data &&
-    Array.isArray(data.issues) &&
-    data.issues.every(
-      (item) =>
-        !!item &&
-        typeof item === 'object' &&
-        'issue' in item &&
-        typeof item.issue === 'string' &&
-        'suggestion' in item &&
-        typeof item.suggestion === 'string' &&
-        'sent_ids' in item &&
-        Array.isArray(item.sent_ids) &&
-        item.sent_ids.every((id: unknown) => typeof id === 'string')
-    )
-  );
-}
+// function isSourcesOutput(data: unknown): data is SourcesOutput {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     'sources' in data &&
+//     Array.isArray(data.sources) &&
+//     data.sources.every((source) => isSource(source)) &&
+//     'issues' in data &&
+//     Array.isArray(data.issues) &&
+//     data.issues.every(
+//       (item) =>
+//         !!item &&
+//         typeof item === 'object' &&
+//         'issue' in item &&
+//         typeof item.issue === 'string' &&
+//         'suggestion' in item &&
+//         typeof item.suggestion === 'string' &&
+//         'sent_ids' in item &&
+//         Array.isArray(item.sent_ids) &&
+//         item.sent_ids.every((id: unknown) => typeof id === 'string')
+//     )
+//   );
+// }
 
 export type ReviewResponse =
   | CivilToneOutput
