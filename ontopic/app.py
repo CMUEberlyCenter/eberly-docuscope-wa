@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from dslib.models.document import DSDocument, setLanguageModel
+from dslib.models.document import DSDocument
 
 app = FastAPI(
     title="onTopic Tools",
@@ -229,10 +229,6 @@ if __name__ == "__main__":
 
     from hypercorn.asyncio import serve
     from hypercorn.config import Config
-
-    setLanguageModel("en") # Preload the language model
-    # This should be done for each language supported with
-    # the most expected language last.
 
     config = Config()
     config.bind = ["0.0.0.0:5000"]

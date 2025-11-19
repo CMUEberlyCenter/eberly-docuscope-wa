@@ -805,9 +805,9 @@ class DSDocument:
         styles = {}
         data = {}
 
-        if nlp is None:
+        while nlp is None:
             logging.warning("SpaCy model is not loaded.")
-            return None
+            setLanguageModel(self.lang, NLP_MODEL_DEFAULT)
 
         if tag_name in ["p"]:
             self.para_count += 1  # increment the paragraph ID.
