@@ -45,18 +45,6 @@ const CustomEditor: FC = () => {
   const [zoom, setZoom] = useState<number>(100);
   const [selection, setSelection] = useState<boolean>(false);
 
-  // useEffect(() => {
-  //   console.log(selection);
-  //   // if (!selection) return;
-  //   // const [match] = [...Editor.nodes(editor, {
-  //   //   at: Editor.unhangRange(editor, selection),
-  //   //   match: (n) =>
-  //   //     !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
-  //   // })];
-  //   // return !!match;
-
-  // }, [selection])
-
   // Import a docx file
   const [file] = useFilename();
   const showPicker = usePicker();
@@ -148,7 +136,6 @@ const CustomEditor: FC = () => {
       onChange={(content: Descendant[]) => {
         // only if change is not selection change.
         if (editor.operations.some((op) => "set_selection" !== op.type)) {
-          // editorText.next(content); // FIXME does not have initial // unneccesary with useSlate
           setContent(content);
           sessionStorage.setItem("content", JSON.stringify(content));
         } else {

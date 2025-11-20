@@ -30,7 +30,7 @@ import {
   UnprocessableContentError,
 } from './src/lib/ProblemDetails';
 import { validateWritingTask } from './src/lib/schemaValidate';
-import { isWritingTask, type WritingTask } from './src/lib/WritingTask';
+import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
@@ -118,9 +118,7 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
-        const task = JSON.parse(request.body.file) as {
-          _id?: string;
-        } & WritingTask;
+        const task = JSON.parse(request.body.file) as DbWritingTask;
         const tool = ['draft', 'review'].includes(request.body.tool)
           ? request.body.tool
           : 'draft';
@@ -139,6 +137,8 @@ async function __main__() {
             'Invalid JSON'
           );
         }
+        // FIXME task should not be inserted. Use writing_task directly.
+        // Requires changing LTI front-end to use writing_task in custom.
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
         const items: ContentItemType[] = [

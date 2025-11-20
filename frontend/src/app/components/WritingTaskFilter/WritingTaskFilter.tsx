@@ -114,8 +114,6 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  // const { data, isLoading } = useWritingTasks(); // isLoading should be handled higher up.
-
   const [keywords, setKeywords] = useState(extractKeywords(tasks));
   useEffect(() => {
     setKeywords(extractKeywords(tasks));

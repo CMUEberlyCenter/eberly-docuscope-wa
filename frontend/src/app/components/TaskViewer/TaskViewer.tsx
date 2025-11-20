@@ -196,7 +196,7 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
                   .toSorted((a, b) => a.info.name.localeCompare(b.info.name))
                   .map((task) => (
                     <ListGroup.Item
-                      key={task.info.name}
+                      key={task.info.id ?? task.info.name}
                       active={selected === task}
                       action
                       onClick={() => setSelected(task)}

@@ -1,6 +1,6 @@
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
-import type { WritingTask } from '../../lib/WritingTask';
+import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
@@ -79,12 +79,12 @@ export async function insertWritingTask(
  * facing versions.
  * @returns writing tasks where the public attribute is true.
  */
-async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
+async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
   try {
     const collection = client
       .db(MONGO_DB)
-      .collection<WritingTask>(WRITING_TASKS);
-    const cursor = collection.find<WritingTask>(
+      .collection<DbWritingTask>(WRITING_TASKS);
+    const cursor = collection.find<DbWritingTask>(
       { public: true, 'info.access': ACCESS_LEVEL },
       { projection: { path: 0, modified: 0 } }
     );
@@ -103,7 +103,7 @@ async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
  * facing versions.
  * @returns Array of writing tasks where the public attribute is true.
  */
-export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
+export async function findAllPublicWritingTasks(): Promise<DbWritingTask[]> {
   return Array.fromAsync(generateAllPublicWritingTasks());
 }
 
