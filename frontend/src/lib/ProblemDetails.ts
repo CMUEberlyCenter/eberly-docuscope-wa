@@ -177,6 +177,7 @@ export const handleError = (
     return response.status(404).json(FileNotFound(err));
   }
   if (err instanceof SyntaxError) {
+    // likely JSON parse error
     return response.status(422).json(UnprocessableContent(err));
   }
   if (err instanceof UnprocessableContentError) {

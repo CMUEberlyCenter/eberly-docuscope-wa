@@ -20,6 +20,55 @@ about:
       Department of English, and Center for Technology Transfer and Enterprise Creation.
   cmu: Carnegie Mellon University
   simon: Simon Initiative
+admin:
+  title: Administration Dashboard
+  home: Home
+  welcome: Welcome to the admin dashboard. Use the navigation to manage various aspects of the myProse application.
+  settings:
+    tab: Settings
+    title: Global Settings
+    text_to_speech: 'Text-to-Speech: '
+    scribe: 'A.I. Tools: '
+    model: 'Anthropic Model: '
+    word_count_limit: 'Word Count Limit: '
+    notes_to_prose: '$t(tool.button.prose.tooltip) $t(tool.tab.generate) Tool: '
+    notes_to_bullets: '$t(tool.button.bullets.tooltip) $t(tool.tab.generate) Tool: '
+    civil_tone: '$t(review:civil_tone.title) $t(review:title) Tool: '
+    credibility: '$t(review:credibility.title) $t(review:title) Tool: '
+    expectations: '$t(review:expectations.title) $t(review:title) Tool: '
+    sentence_clarity: '$t(review:sentences.title) $t(review:title) Tool: '
+    lines_of_arguments: '$t(review:lines_of_arguments.title) $t(review:title) Tool: '
+    logical_flow: '$t(review:logical_flow.title) $t(review:title) Tool: '
+    paragraph_clarity: '$t(review:paragraph_clarity.title) $t(review:title) Tool: '
+    professional_tone: '$t(review:professional_tone.title) $t(review:title) Tool: '
+    prominent_topics: '$t(review:prominent_topics.title) $t(review:title) Tool: '
+    sentences: '$t(review:sentences.title) $t(review:title) Tool: '
+    sources: '$t(review:sources.title) $t(review:title) Tool: '
+    organization: '$t(review:organization.title) $t(review:title) Tool: '
+    language: 'Default Language: '
+    access_level: 'WTD access level: '
+    available: 'Available'
+    unavailable: 'All Disabled'
+    enabled: Enabled
+    disabled: No
+    unlimited: No Limit
+  platforms:
+    tab: Platforms
+    title: Registered LTI Platforms
+  performance:
+    tab: Performance
+    title: Performance Metrics
+    no_data: No performance data available.
+  genlink:
+    tab: Generate Links
+    title: Writing Task and Preview Link Generator
+    description: Use this tool to generate links for specific Writing Tasks within myProse.
+    document:
+      title: Preview Document
+      description: Use this link to preview the document for the selected Writing Task.
+      upload: Upload Document
+      tools: 'Select Enabled Tools:'
+    submit: Launch
 document.title: myProse
 document.description: $t(document.title) is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...

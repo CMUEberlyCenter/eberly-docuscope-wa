@@ -1,7 +1,8 @@
 import { FC } from "react";
+import { Card } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
-import { Card } from "react-bootstrap";
 
 const msToDuration = (ms: number) => ({
   months: Math.floor(ms / 2592000000),
@@ -24,12 +25,13 @@ const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
 };
 export const Page: FC = () => {
   const { performance } = useData<Data>();
+  const { t } = useTranslation();
   return (
     <Card>
-      <Card.Header>Performance Data</Card.Header>
+      <Card.Header>{t("admin.performance.title")}</Card.Header>
       <Card.Body>
         <Card.Text as="div">
-          {performance.length === 0 && <p>No performance data available.</p>}
+          {performance.length === 0 && <p>{t("admin.performance.no_data")}</p>}
           {performance.map((entry) => (
             <div key={entry._id} style={{ marginBottom: "1em" }}>
               <h5>Prompt: {entry._id}</h5>

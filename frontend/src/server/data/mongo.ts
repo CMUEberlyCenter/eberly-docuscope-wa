@@ -1,5 +1,6 @@
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
+import { Analysis } from '../../lib/ReviewResponse';
 import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
@@ -11,6 +12,8 @@ const client = new MongoClient(MONGO_CLIENT);
 const WRITING_TASKS = 'writing_tasks';
 /** Database collection for logging. */
 const LOGGING = 'logging';
+/** Database collection for static previews. */
+const PREVIEWS = 'previews';
 
 /** Extra information stored in database about the writing task */
 type WritingTaskDb = WritingTask & {
@@ -19,6 +22,91 @@ type WritingTaskDb = WritingTask & {
   modified?: Date;
 };
 
+type Preview = {
+  _id?: ObjectId;
+  timestamp: Date;
+  task: WritingTask;
+  file: string; // html encoded
+  segmented: string;
+  tool_config: string[];
+  analyses: Analysis[];
+};
+export async function findPreviewById(id: string): Promise<Preview> {
+  try {
+    const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+    if (!ObjectId.isValid(id) || id.length !== 24) {
+      throw new ReferenceError(`Preview ${id} not found.`);
+    }
+    const _id = new ObjectId(id);
+    const preview = await collection.findOne<Preview>(
+      { _id },
+      { projection: { _id: 0 } }
+    );
+    if (!preview) {
+      throw new ReferenceError(`Preview ${id} not found.`);
+    }
+    return preview;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+export async function insertPreview(
+  task: WritingTask,
+  file: string,
+  segmented: string,
+  tool_config?: string[],
+  analyses?: Analysis[]
+): Promise<ObjectId> {
+  tool_config = tool_config ?? [];
+  analyses = analyses ?? [];
+  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const ins = await collection.insertOne({
+    task,
+    file,
+    segmented,
+    tool_config,
+    analyses,
+    timestamp: new Date(),
+  });
+  return ins.insertedId;
+}
+export async function deletePreviewById(id: string) {
+  if (!ObjectId.isValid(id) || id.length !== 24) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const del = await client.db(MONGO_DB).collection(PREVIEWS).deleteOne({ _id });
+  if (!del.acknowledged || del.deletedCount !== 1) {
+    throw new ReferenceError(`Delete operation for Preview ${id} failed`);
+  }
+  console.log(`Deleted preview with id '${id}'`);
+  return del.acknowledged;
+}
+export async function updatePreviewReviewsById(
+  id: string | ObjectId,
+  ...analyses: Analysis[]
+) {
+  if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const upd = await client
+    .db(MONGO_DB)
+    .collection<Preview>(PREVIEWS)
+    .findOneAndUpdate(
+      { _id },
+      {
+        $push: { analyses: { $each: analyses } },
+        $set: { timestamp: new Date() },
+      }
+    );
+  if (!upd) {
+    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+  }
+  console.log(`Updated reviews for preview with id '${id}'`);
+  return upd._id;
+}
 /**
  * Retrieves a given writing task specification from the database.
  * @param id the identifier for the desired writing task specification.

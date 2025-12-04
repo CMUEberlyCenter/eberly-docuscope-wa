@@ -1,6 +1,5 @@
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
-import { parse } from 'node-html-parser';
 import type { OnTopicData } from '../../lib/OnTopicData';
 import {
   ForbiddenError,
@@ -24,12 +23,13 @@ import {
   isWritingTask,
   type WritingTask,
 } from '../../lib/WritingTask';
-import { getSettings } from '../getSettings';
-import { doChat } from '../data/chat';
+import { doChat, reviewData } from '../data/chat';
 import { insertLog } from '../data/mongo';
+import { segmentText } from '../data/segmentText';
+import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
-import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
+import { ONTOPIC_URL } from '../settings';
 
 export const reviews = Router();
 
@@ -70,58 +70,6 @@ const doOnTopic = async (
     response: data,
   };
 };
-
-/**
- * Segments the given text into sentences.
- * @param text content of editor.
- * @returns HTML string.
- * @throws Error on bad service status.
- * @throws Network errors.
- * @throws JSON parse errors.
- */
-const segmentText = async (text: string): Promise<string> => {
-  const res = await fetch(SEGMENT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ text }),
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!res.ok) {
-    console.error(
-      `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
-    );
-    throw new Error(`Bad service response from 'segment': ${res.status}`);
-  }
-  const data = (await res.json()) as string;
-  return data.trim();
-};
-
-/**
- * Extract data from a Review's writing task used for the templates.
- * @param review A review object from the database.
- * @returns Acceptable object for "format" function.
- */
-const reviewData = ({
-  segmented,
-  writing_task,
-}: {
-  segmented: string;
-  writing_task: WritingTask | null;
-}): Record<string, string> => ({
-  text: segmented, // use content which has already been segmented into sentences.
-  user_lang:
-    (isWritingTask(writing_task) ? writing_task.info.user_lang : undefined) ??
-    DEFAULT_LANGUAGE,
-  target_lang:
-    (isWritingTask(writing_task) ? writing_task.info.target_lang : undefined) ??
-    DEFAULT_LANGUAGE,
-  extra_instructions:
-    (isWritingTask(writing_task)
-      ? writing_task.extra_instructions
-      : undefined) ?? '',
-});
 
 /**
  * @swagger
@@ -310,7 +258,7 @@ reviews.post(
       'expectations',
       {
         ...reviewData({
-          segmented: stripIrrelevantTags(request.session.segmented),
+          segmented: request.session.segmented,
           writing_task: writing_task ?? null,
         }),
         expectation,
@@ -344,17 +292,6 @@ reviews.post(
     response.json({ input: request.session.segmented, data });
   }
 );
-
-function stripIrrelevantTags(
-  text: string | undefined,
-  tags: string[] = ['img', 'table']
-): string {
-  if (!text) return '';
-  if (tags.length === 0) return text;
-  const doc = parse(text);
-  doc.querySelectorAll(tags.join(', ')).forEach((el) => el.remove());
-  return doc.toString();
-}
 
 /**
  * @route POST <reviews>/:analysis
@@ -401,7 +338,7 @@ reviews.post(
     const chat = await doChat<ReviewResponse>(
       analysis as ReviewPrompt,
       reviewData({
-        segmented: stripIrrelevantTags(request.session.segmented),
+        segmented: request.session.segmented,
         writing_task: writing_task ?? null,
       }),
       controller.signal,

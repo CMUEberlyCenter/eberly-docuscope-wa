@@ -26,9 +26,10 @@ const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
  * Access the writing task using `useWritingTask` and
  * the setter function using `useSetWritingTask`.
  */
-export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const WritingTaskProvider: FC<{
+  children: ReactNode;
+  initial?: WritingTaskContext;
+}> = ({ children, initial }) => {
   const [task, setTask] = useReducer(
     (state: WritingTaskContext, newState: WritingTaskContext) => ({
       ...state,
@@ -41,6 +42,7 @@ export const WritingTaskProvider: FC<{ children: ReactNode }> = ({
       ltiActivityTitle: undefined,
       isLTI: false,
       isInstructor: false,
+      ...initial,
     }
   );
   return (

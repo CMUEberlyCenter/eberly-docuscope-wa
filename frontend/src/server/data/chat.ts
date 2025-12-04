@@ -3,13 +3,16 @@ import type {
   MessageParam,
   TextBlockParam,
 } from '@anthropic-ai/sdk/resources/index.mjs';
+import { parse } from 'node-html-parser';
 import format from 'string-format';
 import { ChatStopError } from '../../lib/ProblemDetails';
+import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
 import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
+  DEFAULT_LANGUAGE,
 } from '../settings';
 import { findPromptById } from './prompts';
 
@@ -179,3 +182,39 @@ export async function doChat<T>(
 }
 
 export type ChatResponse<T = string> = Awaited<ReturnType<typeof doChat<T>>>;
+
+function stripIrrelevantTags(
+  text: string | undefined,
+  tags: string[] = ['img', 'table']
+): string {
+  if (!text) return '';
+  if (tags.length === 0) return text;
+  const doc = parse(text);
+  doc.querySelectorAll(tags.join(', ')).forEach((el) => el.remove());
+  return doc.toString();
+}
+
+/**
+ * Extract data from a Review's writing task used for the templates.
+ * @param review A review object from the database.
+ * @returns Acceptable object for "format" function.
+ */
+export const reviewData = ({
+  segmented,
+  writing_task,
+}: {
+  segmented: string | undefined;
+  writing_task: WritingTask | null;
+}): Record<string, string> => ({
+  text: stripIrrelevantTags(segmented), // use content which has already been segmented into sentences.
+  user_lang:
+    (isWritingTask(writing_task) ? writing_task.info.user_lang : undefined) ??
+    DEFAULT_LANGUAGE,
+  target_lang:
+    (isWritingTask(writing_task) ? writing_task.info.target_lang : undefined) ??
+    DEFAULT_LANGUAGE,
+  extra_instructions:
+    (isWritingTask(writing_task)
+      ? writing_task.extra_instructions
+      : undefined) ?? '',
+});

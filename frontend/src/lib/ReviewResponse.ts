@@ -446,19 +446,16 @@ export const isExpectationsData = (
   'response' in data &&
   isExpectationsOutput(data.response);
 
-export interface LinesOfArgumentsData
-  extends ReviewData<LinesOfArgumentsOutput> {
+export interface LinesOfArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
   tool: 'lines_of_arguments';
 }
 export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
   tool: 'logical_flow';
 }
-export interface ParagraphClarityData
-  extends ReviewData<ParagraphClarityOutput> {
+export interface ParagraphClarityData extends ReviewData<ParagraphClarityOutput> {
   tool: 'paragraph_clarity';
 }
-export interface ProfessionalToneData
-  extends ReviewData<ProfessionalToneOutput> {
+export interface ProfessionalToneData extends ReviewData<ProfessionalToneOutput> {
   tool: 'professional_tone';
 }
 export interface ProminentTopicsData extends ReviewData<ProminentTopicsOutput> {

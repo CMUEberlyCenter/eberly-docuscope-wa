@@ -32,6 +32,7 @@ import {
 import { validateWritingTask } from './src/lib/schemaValidate';
 import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
+import { preview } from './src/server/api/preview';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
 import { writingTasks } from './src/server/api/tasks';
@@ -207,8 +208,11 @@ async function __main__() {
         );
         res.setHeader('Content-type', 'text/html');
         res.send(message);
-      } catch (err: Error | any) {
-        if (err.message === 'PLATFORM_ALREADY_REGISTERED') {
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message === 'PLATFORM_ALREADY_REGISTERED'
+        ) {
           return next(new ForbiddenError('Platform already registered.'));
         }
         next(err);
@@ -434,6 +438,8 @@ async function __main__() {
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
     app.use('/api/v2/review', reviews);
+    // Preview Endpoints for static content.
+    app.use('/api/v2/preview', preview);
 
     // app.use('/api/v2/performance', promptPerformance);
     // Metrics

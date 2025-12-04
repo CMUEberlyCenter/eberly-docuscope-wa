@@ -26,9 +26,12 @@ const FileTextContext = createContext<
  */
 export const useFileText = () => useContext(FileTextContext);
 
-export const FileTextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [text, setText] = useState<string | null>(null);
-  const [file, setFile] = useState<string | null>(null);
+export const FileTextProvider: FC<{
+  children: ReactNode;
+  initial?: { text?: string | null; file?: string | null };
+}> = ({ children, initial }) => {
+  const [text, setText] = useState<string | null>(initial?.text ?? null);
+  const [file, setFile] = useState<string | null>(initial?.file ?? null);
 
   return (
     <FileTextContext.Provider value={[text, setText]}>

@@ -1,15 +1,14 @@
 import { FC } from "react";
 import { Card } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 export const Page: FC = () => {
+  const { t } = useTranslation();
   return (
     <Card>
-      <Card.Header>Admin Dashboard</Card.Header>
+      <Card.Header>{t("admin.home")}</Card.Header>
       <Card.Body>
-        <Card.Text>
-          Welcome to the admin dashboard. Use the navigation to manage
-          platforms, users, and settings.
-        </Card.Text>
+        <Card.Text>{t("admin.welcome")}</Card.Text>
       </Card.Body>
     </Card>
   );

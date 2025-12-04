@@ -1,16 +1,7 @@
 import type { FC } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 
-declare global {
-  namespace Vike {
-    interface PageContext {
-      abortReason?: string | { notAdmin?: true };
-      abortStatusCode?: number;
-    }
-  }
-}
-
-const Page: FC = () => {
+export const Page: FC = () => {
   const pageContext = usePageContext();
   const { abortReason, abortStatusCode } = pageContext;
   let msg = "An unexpected error occurred.";
@@ -43,4 +34,3 @@ const Page: FC = () => {
     </div>
   );
 };
-export default Page;
