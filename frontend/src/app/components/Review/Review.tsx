@@ -13,7 +13,6 @@ import {
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
-import Split from "react-split";
 import { usePageContext } from "vike-react/usePageContext";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
 import { isEnabled } from "../../../lib/WritingTask";
@@ -22,7 +21,6 @@ import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Legal } from "../Legal/Legal";
 import { StageHeader } from "../StageHeader/StageHeader";
-import { UserTextView } from "../UserTextView/UserTextView";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone } from "./CivilTone";
 import { Credibility } from "./Credibility";
@@ -34,7 +32,6 @@ import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
 import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
 import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
 import "./Review.scss";
-import { ReviewProvider } from "./ReviewContext";
 import { Sentences, SentencesButton } from "./Sentences";
 import { Sources } from "./Sources";
 
@@ -112,47 +109,47 @@ export const Review: FC = () => {
     // enabled in settings.  The server settings have priority over writing tasks.
     setCivilToneFeature(
       !!settings?.civil_tone &&
-        (!writingTask || isEnabled(writingTask, "civil_tone"))
+      (!writingTask || isEnabled(writingTask, "civil_tone"))
     );
     setCredibilityFeature(
       !!settings?.credibility &&
-        (!writingTask || isEnabled(writingTask, "credibility"))
+      (!writingTask || isEnabled(writingTask, "credibility"))
     );
     setExpectationsFeature(
       !!settings?.expectations &&
-        (!writingTask || isEnabled(writingTask, "expectations"))
+      (!writingTask || isEnabled(writingTask, "expectations"))
     );
     // Lines of arguments only available if enabled in writing task.
     setArgumentsFeature(
       !!settings?.lines_of_arguments &&
-        isEnabled(writingTask, "lines_of_arguments")
+      isEnabled(writingTask, "lines_of_arguments")
     );
     setLogicalFlowFeature(
       !!settings?.logical_flow &&
-        (!writingTask || isEnabled(writingTask, "logical_flow"))
+      (!writingTask || isEnabled(writingTask, "logical_flow"))
     );
     setParagraphClarityFeature(
       !!settings?.paragraph_clarity &&
-        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
+      (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
     );
     setProfessionalToneFeature(
       !!settings?.professional_tone &&
-        (!writingTask || isEnabled(writingTask, "professional_tone"))
+      (!writingTask || isEnabled(writingTask, "professional_tone"))
     );
     setIdeasFeature(
       !!settings?.prominent_topics &&
-        (!writingTask || isEnabled(writingTask, "prominent_topics"))
+      (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
     setSentencesFeature(
       !!settings?.sentence_density &&
-        (!writingTask || isEnabled(writingTask, "sentence_density"))
+      (!writingTask || isEnabled(writingTask, "sentence_density"))
     );
     setSourcesFeature(
       !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"))
     );
     setOrganizationFeature(
       !!settings?.term_matrix &&
-        (!writingTask || isEnabled(writingTask, "term_matrix"))
+      (!writingTask || isEnabled(writingTask, "term_matrix"))
     );
     setImpressionsFeature(
       false
@@ -162,18 +159,18 @@ export const Review: FC = () => {
   useEffect(() => {
     setBigPictureFeature(
       expectationsFeature ||
-        argumentsFeature ||
-        ideasFeature ||
-        logicalFlowFeature
+      argumentsFeature ||
+      ideasFeature ||
+      logicalFlowFeature
     );
   }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
   useEffect(() => {
     setAdditionalToolsFeature(
       civilToneFeature ||
-        credibilityFeature ||
-        sourcesFeature ||
-        organizationFeature ||
-        impressionsFeature
+      credibilityFeature ||
+      sourcesFeature ||
+      organizationFeature ||
+      impressionsFeature
     );
   }, [
     civilToneFeature,
@@ -185,9 +182,9 @@ export const Review: FC = () => {
   useEffect(() => {
     setFineTuningFeature(
       additionalToolsFeature ||
-        paragraphClarityFeature ||
-        professionalToneFeature ||
-        sentencesFeature
+      paragraphClarityFeature ||
+      professionalToneFeature ||
+      sentencesFeature
     );
   }, [
     additionalToolsFeature,
@@ -197,271 +194,261 @@ export const Review: FC = () => {
   ]);
 
   return (
-    <ReviewProvider>
-      <Split
-        className="container-fluid vh-100 w-100 d-flex flex-row review align-items-stretch"
-        sizes={[60, 40]}
-        minSize={[400, 320]}
-        expandToMin={true}
+    <aside className="my-1 border rounded bg-light d-flex flex-column">
+      <StageHeader title={tt("tool.tab.review")} />
+      {!bigPictureFeature && !fineTuningFeature && (
+        <NullTool text={t("null.no_writing_task")} />
+      )}
+      <Tabs
+        activeKey={tab}
+        onSelect={(k) => {
+          setTab(k as TabKey);
+        }}
+        variant="underline"
+        className="justify-content-around inverse-color"
       >
-        <UserTextView className="my-1" />
-        <aside className="my-1 border rounded bg-light d-flex flex-column">
-          <StageHeader title={tt("tool.tab.review")} />
-          {!bigPictureFeature && !fineTuningFeature && (
-            <NullTool text={t("null.no_writing_task")} />
-          )}
-          <Tabs
-            activeKey={tab}
-            onSelect={(k) => {
-              setTab(k as TabKey);
-            }}
-            variant="underline"
-            className="justify-content-around inverse-color"
+        {bigPictureFeature ? (
+          <Tab
+            eventKey="big_picture"
+            title={t("tabs.big_picture")}
+            className="h-100"
           >
-            {bigPictureFeature ? (
-              <Tab
-                eventKey="big_picture"
-                title={t("tabs.big_picture")}
-                className="h-100"
-              >
-                <div className="h-100 d-flex flex-column overflow-auto">
-                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                    {expectationsFeature ? (
-                      !writingTask && ready ? (
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>
-                              {t("instructions:expectations_scope_note")}
-                              <hr />
-                              {t("expectations.no_writing_task_tooltip")}
-                            </Tooltip>
-                          }
-                        >
-                          {/* div required to get tooltip overlay to work. */}
-                          <div>
-                            <ExpectationsButton disabled={true} />
-                          </div>
-                        </OverlayTrigger>
-                      ) : (
-                        <ExpectationsButton
-                          disabled={!ready}
-                          active={tool === "expectations"}
-                          onClick={() => toggleTool("expectations")}
-                        />
-                      )
-                    ) : null}
-                    {ideasFeature ? (
-                      <ProminentTopicsButton
-                        disabled={!ready}
-                        active={tool === "prominent_topics"}
-                        onClick={() => toggleTool("prominent_topics")}
-                      />
-                    ) : null}
-                    {argumentsFeature ? (
-                      <LinesOfArgumentsButton
-                        disabled={!ready}
-                        active={tool === "lines_of_arguments"}
-                        onClick={() => toggleTool("lines_of_arguments")}
-                      />
-                    ) : null}
-                    {logicalFlowFeature ? (
-                      <LogicalFlowButton
-                        disabled={!ready}
-                        active={tool === "logical_flow"}
-                        onClick={() => toggleTool("logical_flow")}
-                      />
-                    ) : null}
-                  </ButtonToolbar>
-                  <Activity
-                    mode={!tool || tool === "null" ? "visible" : "hidden"}
-                  >
-                    <NullTool text={t("null.big_picture")} />
-                  </Activity>
-                  <Activity
-                    mode={tool === "expectations" ? "visible" : "hidden"}
-                  >
-                    <Expectations />
-                  </Activity>
-                  {tool === "prominent_topics" && <ProminentTopics />}
-                  {tool === "lines_of_arguments" && <LinesOfArguments />}
-                  {tool === "logical_flow" && <LogicalFlow />}
-                  {/* Add Big Picture tools here. */}
-                </div>
-              </Tab>
-            ) : null}
-            {fineTuningFeature ? (
-              <Tab
-                eventKey="fine_tuning"
-                title={t("tabs.fine_tuning")}
-                className="h-100"
-              >
-                <div className="h-100 d-flex flex-column overflow-auto">
-                  <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                    {paragraphClarityFeature ? (
-                      <ParagraphClarityButton
-                        disabled={!ready}
-                        active={otherTool === "paragraph_clarity"}
-                        onClick={() => toggleOtherTool("paragraph_clarity")}
-                      />
-                    ) : null}
-                    {sentencesFeature ? (
-                      <SentencesButton
-                        disabled={!ready}
-                        active={otherTool === "sentences"}
-                        onClick={() => toggleOtherTool("sentences")}
-                      />
-                    ) : null}
-                    {professionalToneFeature ? (
-                      <ProfessionalToneButton
-                        disabled={!ready}
-                        active={otherTool === "professional_tone"}
-                        onClick={() => toggleOtherTool("professional_tone")}
-                      />
-                    ) : null}
-                    {additionalToolsFeature ? (
-                      <Dropdown
-                        as={ButtonGroup}
-                        className="bg-white shadow-sm rounded-2"
-                      >
-                        <OverlayTrigger
-                          placement="bottom"
-                          overlay={
-                            <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
-                          }
-                        >
-                          <Dropdown.Toggle
-                            variant="outline-primary"
-                            className="tool_button tool_dropdown"
-                            active={[
-                              "sources",
-                              "credibility",
-                              "organization",
-                              "civil_tone",
-                              "impressions",
-                            ].includes(otherTool)}
-                          >
-                            <Stack>
-                              <AdditionalToolsIcon />
-                              <span>{t("additional_tools.title")}</span>
-                            </Stack>
-                          </Dropdown.Toggle>
-                        </OverlayTrigger>
-                        <Dropdown.Menu className="additional-tools-menu">
-                          {sourcesFeature ? (
-                            <Dropdown.Item
-                              onClick={() => toggleOtherTool("sources")}
-                              active={otherTool === "sources"}
-                              disabled={!ready}
-                            >
-                              <h6 className="text-primary">
-                                {t("sources.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {t("instructions:sources_scope_note")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                          {credibilityFeature ? (
-                            <Dropdown.Item
-                              onClick={() => toggleOtherTool("credibility")}
-                              active={otherTool === "credibility"}
-                              disabled={!ready}
-                            >
-                              <h6 className="text-primary">
-                                {t("credibility.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {t("instructions:credibility_scope_note")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                          {organizationFeature ? (
-                            <Dropdown.Item
-                              onClick={() => toggleOtherTool("organization")}
-                              active={otherTool === "organization"}
-                              disabled={!ready}
-                            >
-                              <h6 className="text-primary">
-                                {t("organization.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {t("instructions:term_matrix_scope_note")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                          {civilToneFeature ? (
-                            <Dropdown.Item
-                              onClick={() => toggleOtherTool("civil_tone")}
-                              active={otherTool === "civil_tone"}
-                              disabled={!ready}
-                            >
-                              <h6 className="text-primary">
-                                {t("civil_tone.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {t("instructions:civil_tone_scope_note")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                          {impressionsFeature ? (
-                            <Dropdown.Item
-                              onClick={() => toggleOtherTool("impressions")}
-                              active={otherTool === "impressions"}
-                              disabled={!ready}
-                            >
-                              <h6 className="text-primary">
-                                {t("impressions.title")}
-                              </h6>
-                              <div className="text-wrap">
-                                {t("impressions.tooltip")}
-                              </div>
-                            </Dropdown.Item>
-                          ) : null}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    ) : null}
-                  </ButtonToolbar>
-                  <ErrorBoundary
-                    fallbackRender={({ error }) => (
-                      <Alert>
-                        <Alert.Heading>{t("error.header")}</Alert.Heading>
-                        {t("error.content")}
-                        {t("error.details", {
-                          details: { message: error.message },
-                        })}
-                      </Alert>
-                    )}
-                  >
-                    <Activity
-                      mode={
-                        !otherTool || otherTool === "null"
-                          ? "visible"
-                          : "hidden"
+            <div className="h-100 d-flex flex-column overflow-auto">
+              <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                {expectationsFeature ? (
+                  !writingTask && ready ? (
+                    <OverlayTrigger
+                      placement="bottom"
+                      overlay={
+                        <Tooltip>
+                          {t("instructions:expectations_scope_note")}
+                          <hr />
+                          {t("expectations.no_writing_task_tooltip")}
+                        </Tooltip>
                       }
                     >
-                      <NullTool text={t("null.fine_tuning")} />
-                    </Activity>
-                    {otherTool === "logical_flow" && <LogicalFlow />}
-                    {otherTool === "civil_tone" && <CivilTone />}
-                    {otherTool === "credibility" && <Credibility />}
-                    {/* {otherTool === "impressions" && ( */}
-                    {/* <NullTool text={t("null.not_available")} /> */}
-                    {/* )} */}
-                    {otherTool === "organization" && <Organization />}
-                    {otherTool === "sentences" && <Sentences />}
-                    {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                    {otherTool === "professional_tone" && <ProfessionalTone />}
-                    {otherTool === "sources" && <Sources />}
-                    {/* Add more tool displays here. */}
-                  </ErrorBoundary>
-                </div>
-              </Tab>
-            ) : null}
-          </Tabs>
-          <Legal />
-        </aside>
-      </Split>
-    </ReviewProvider>
+                      {/* div required to get tooltip overlay to work. */}
+                      <div>
+                        <ExpectationsButton disabled={true} />
+                      </div>
+                    </OverlayTrigger>
+                  ) : (
+                    <ExpectationsButton
+                      disabled={!ready}
+                      active={tool === "expectations"}
+                      onClick={() => toggleTool("expectations")}
+                    />
+                  )
+                ) : null}
+                {ideasFeature ? (
+                  <ProminentTopicsButton
+                    disabled={!ready}
+                    active={tool === "prominent_topics"}
+                    onClick={() => toggleTool("prominent_topics")}
+                  />
+                ) : null}
+                {argumentsFeature ? (
+                  <LinesOfArgumentsButton
+                    disabled={!ready}
+                    active={tool === "lines_of_arguments"}
+                    onClick={() => toggleTool("lines_of_arguments")}
+                  />
+                ) : null}
+                {logicalFlowFeature ? (
+                  <LogicalFlowButton
+                    disabled={!ready}
+                    active={tool === "logical_flow"}
+                    onClick={() => toggleTool("logical_flow")}
+                  />
+                ) : null}
+              </ButtonToolbar>
+              <Activity
+                mode={!tool || tool === "null" ? "visible" : "hidden"}
+              >
+                <NullTool text={t("null.big_picture")} />
+              </Activity>
+              <Activity
+                mode={tool === "expectations" ? "visible" : "hidden"}
+              >
+                <Expectations />
+              </Activity>
+              {tool === "prominent_topics" && <ProminentTopics />}
+              {tool === "lines_of_arguments" && <LinesOfArguments />}
+              {tool === "logical_flow" && <LogicalFlow />}
+              {/* Add Big Picture tools here. */}
+            </div>
+          </Tab>
+        ) : null}
+        {fineTuningFeature ? (
+          <Tab
+            eventKey="fine_tuning"
+            title={t("tabs.fine_tuning")}
+            className="h-100"
+          >
+            <div className="h-100 d-flex flex-column overflow-auto">
+              <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
+                {paragraphClarityFeature ? (
+                  <ParagraphClarityButton
+                    disabled={!ready}
+                    active={otherTool === "paragraph_clarity"}
+                    onClick={() => toggleOtherTool("paragraph_clarity")}
+                  />
+                ) : null}
+                {sentencesFeature ? (
+                  <SentencesButton
+                    disabled={!ready}
+                    active={otherTool === "sentences"}
+                    onClick={() => toggleOtherTool("sentences")}
+                  />
+                ) : null}
+                {professionalToneFeature ? (
+                  <ProfessionalToneButton
+                    disabled={!ready}
+                    active={otherTool === "professional_tone"}
+                    onClick={() => toggleOtherTool("professional_tone")}
+                  />
+                ) : null}
+                {additionalToolsFeature ? (
+                  <Dropdown
+                    as={ButtonGroup}
+                    className="bg-white shadow-sm rounded-2"
+                  >
+                    <OverlayTrigger
+                      placement="bottom"
+                      overlay={
+                        <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
+                      }
+                    >
+                      <Dropdown.Toggle
+                        variant="outline-primary"
+                        className="tool_button tool_dropdown"
+                        active={[
+                          "sources",
+                          "credibility",
+                          "organization",
+                          "civil_tone",
+                          "impressions",
+                        ].includes(otherTool)}
+                      >
+                        <Stack>
+                          <AdditionalToolsIcon />
+                          <span>{t("additional_tools.title")}</span>
+                        </Stack>
+                      </Dropdown.Toggle>
+                    </OverlayTrigger>
+                    <Dropdown.Menu className="additional-tools-menu">
+                      {sourcesFeature ? (
+                        <Dropdown.Item
+                          onClick={() => toggleOtherTool("sources")}
+                          active={otherTool === "sources"}
+                          disabled={!ready}
+                        >
+                          <h6 className="text-primary">
+                            {t("sources.title")}
+                          </h6>
+                          <div className="text-wrap">
+                            {t("instructions:sources_scope_note")}
+                          </div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {credibilityFeature ? (
+                        <Dropdown.Item
+                          onClick={() => toggleOtherTool("credibility")}
+                          active={otherTool === "credibility"}
+                          disabled={!ready}
+                        >
+                          <h6 className="text-primary">
+                            {t("credibility.title")}
+                          </h6>
+                          <div className="text-wrap">
+                            {t("instructions:credibility_scope_note")}
+                          </div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {organizationFeature ? (
+                        <Dropdown.Item
+                          onClick={() => toggleOtherTool("organization")}
+                          active={otherTool === "organization"}
+                          disabled={!ready}
+                        >
+                          <h6 className="text-primary">
+                            {t("organization.title")}
+                          </h6>
+                          <div className="text-wrap">
+                            {t("instructions:term_matrix_scope_note")}
+                          </div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {civilToneFeature ? (
+                        <Dropdown.Item
+                          onClick={() => toggleOtherTool("civil_tone")}
+                          active={otherTool === "civil_tone"}
+                          disabled={!ready}
+                        >
+                          <h6 className="text-primary">
+                            {t("civil_tone.title")}
+                          </h6>
+                          <div className="text-wrap">
+                            {t("instructions:civil_tone_scope_note")}
+                          </div>
+                        </Dropdown.Item>
+                      ) : null}
+                      {impressionsFeature ? (
+                        <Dropdown.Item
+                          onClick={() => toggleOtherTool("impressions")}
+                          active={otherTool === "impressions"}
+                          disabled={!ready}
+                        >
+                          <h6 className="text-primary">
+                            {t("impressions.title")}
+                          </h6>
+                          <div className="text-wrap">
+                            {t("impressions.tooltip")}
+                          </div>
+                        </Dropdown.Item>
+                      ) : null}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                ) : null}
+              </ButtonToolbar>
+              <ErrorBoundary
+                fallbackRender={({ error }) => (
+                  <Alert>
+                    <Alert.Heading>{t("error.header")}</Alert.Heading>
+                    {t("error.content")}
+                    {t("error.details", {
+                      details: { message: error.message },
+                    })}
+                  </Alert>
+                )}
+              >
+                <Activity
+                  mode={
+                    !otherTool || otherTool === "null"
+                      ? "visible"
+                      : "hidden"
+                  }
+                >
+                  <NullTool text={t("null.fine_tuning")} />
+                </Activity>
+                {otherTool === "logical_flow" && <LogicalFlow />}
+                {otherTool === "civil_tone" && <CivilTone />}
+                {otherTool === "credibility" && <Credibility />}
+                {/* {otherTool === "impressions" && ( */}
+                {/* <NullTool text={t("null.not_available")} /> */}
+                {/* )} */}
+                {otherTool === "organization" && <Organization />}
+                {otherTool === "sentences" && <Sentences />}
+                {otherTool === "paragraph_clarity" && <ParagraphClarity />}
+                {otherTool === "professional_tone" && <ProfessionalTone />}
+                {otherTool === "sources" && <Sources />}
+                {/* Add more tool displays here. */}
+              </ErrorBoundary>
+            </div>
+          </Tab>
+        ) : null}
+      </Tabs>
+      <Legal />
+    </aside>
   );
 };
