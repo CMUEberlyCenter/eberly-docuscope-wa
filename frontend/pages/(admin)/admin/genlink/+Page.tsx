@@ -9,6 +9,7 @@ import { WritingTaskInfo } from "../../../../src/app/components/WritingTaskInfo/
 import { validateWritingTask } from "../../../../src/lib/schemaValidate";
 import {
   type DbWritingTask,
+  isEnabled,
   isWritingTask,
   WritingTask,
 } from "../../../../src/lib/WritingTask";
@@ -194,12 +195,12 @@ export const Page: FC = () => {
                     .map(({ tool, enabled }) => (
                       <Form.Check
                         className="col-lg-2 col-md-4 col-sm-6"
-                        disabled={!selected}
+                        disabled={!selected || !isEnabled(selected, tool)}
                         key={tool}
                         label={tr(`review:${tool}.title`)}
                         type="checkbox"
                         name={`tool_config`}
-                        checked={enabled}
+                        defaultChecked={enabled}
                         value={tool}
                       />
                     ))}
