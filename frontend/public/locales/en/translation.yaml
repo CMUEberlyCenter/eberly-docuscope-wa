@@ -69,6 +69,7 @@ admin:
       upload: Upload Document
       tools: 'Select Enabled Tools:'
     submit: Launch
+    existing_previews: Existing Previews
 document.title: myProse
 document.description: $t(document.title) is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...
@@ -151,7 +152,6 @@ editor:
 tool:
   tab:
     generate: Draft
-    review: Review
   button:
     prose:
       title: Prose

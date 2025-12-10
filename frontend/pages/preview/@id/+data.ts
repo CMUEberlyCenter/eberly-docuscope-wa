@@ -7,6 +7,7 @@ export const data = async (pageContext: PageContextServer) => {
 
   return {
     ...preview,
+    id
   };
 };
 

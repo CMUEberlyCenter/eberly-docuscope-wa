@@ -331,7 +331,7 @@ reviews.post(
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find((a) => a.tool === analysis);
     if (cached) {
-      console.log(`Returning cached analysis for ${analysis}`);
+      // console.log(`Returning cached analysis for ${analysis}`);
       response.json({ input: request.session.segmented, data: cached });
       return;
     }

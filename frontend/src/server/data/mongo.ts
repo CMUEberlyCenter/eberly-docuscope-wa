@@ -32,6 +32,15 @@ type Preview = {
   tool_config: string[];
   analyses: Analysis[];
 };
+
+export async function findAllPreviews(): Promise<Preview[]> {
+  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const previews = await collection
+    .find<Preview>({})
+    .toArray();
+  return previews;
+}
+
 export async function findPreviewById(id: string): Promise<Preview> {
   try {
     const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);

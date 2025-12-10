@@ -43,7 +43,6 @@ type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t } = useTranslation("review");
-  const { t: tt } = useTranslation();
   const [tab, setTab] = useState<TabKey>("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
@@ -169,7 +168,7 @@ export const Review: FC = () => {
 
   return (
     <aside className="my-1 border rounded bg-light d-flex flex-column">
-      <StageHeader title={tt("tool.tab.review")} />
+      <StageHeader title={t("title")} />
       {!bigPictureFeature && !fineTuningFeature && (
         <NullTool text={t("null.no_writing_task")} />
       )}
@@ -405,7 +404,6 @@ export const Review: FC = () => {
                 >
                   <NullTool text={t("null.fine_tuning")} />
                 </Activity>
-                {otherTool === "logical_flow" && <LogicalFlow />}
                 {otherTool === "civil_tone" && <CivilTone />}
                 {otherTool === "credibility" && <Credibility />}
                 {/* {otherTool === "impressions" && ( */}

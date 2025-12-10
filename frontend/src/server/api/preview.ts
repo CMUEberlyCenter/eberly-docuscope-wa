@@ -2,10 +2,15 @@ import { Router } from 'express';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
 import { convertOptions } from '../../app/components/FileUpload/convertOptions';
-import { BadRequestError } from '../../lib/ProblemDetails';
-import { isWritingTask } from '../../lib/WritingTask';
-import { insertPreview } from '../data/mongo';
+import { BadRequestError, ForbiddenError } from '../../lib/ProblemDetails';
+import { isEnabled, isWritingTask } from '../../lib/WritingTask';
+import { deletePreviewById, findAllPreviews, findPreviewById, insertPreview, updatePreviewReviewsById } from '../data/mongo';
 import { segmentText } from '../data/segmentText';
+import { validate } from '../model/validate';
+import { param } from 'express-validator';
+import { Analysis, BasicReviewPrompts, ReviewPrompt, ReviewResponse } from '../../lib/ReviewResponse';
+import { getSettings } from '../getSettings';
+import { doChat, reviewData } from '../data/chat';
 
 export const preview = Router();
 const storage = multer.memoryStorage();
@@ -45,4 +50,68 @@ preview.post('/', upload.single('document'), async (request, response) => {
   const segmented = await segmentText(value);
   const dbId = await insertPreview(writingTask, value, segmented, request.file.originalname, tools);
   response.redirect(`/preview/${dbId.toString()}`);
+});
+
+preview.get('/:id', validate(param('id').isMongoId()), async (request, response) => {
+  const id = request.params.id;
+  response.send(await findPreviewById(id));
+});
+preview.delete('/:id', validate(param('id').isMongoId()), async (request, response) => {
+  const id = request.params.id;
+  await deletePreviewById(id);
+  response.status(204).send();
+});
+
+preview.get('/:id/:analysis', validate(param('id').isMongoId()), validate(param('analysis').isString().isIn(BasicReviewPrompts)), async (request, response) => {
+  const { id, analysis } = request.params;
+  const settings = getSettings();
+  if (analysis in settings && !settings[analysis as keyof typeof settings]) {
+    throw new ForbiddenError(`${analysis} tool is not available!`);
+  }
+  const preview = await findPreviewById(id);
+  if (!isEnabled(preview.task, analysis)) {
+    throw new ForbiddenError(`Analysis ${analysis} not enabled for this writing task.`);
+  }
+  if (!preview.tool_config.includes(analysis)) {
+    throw new ForbiddenError(`Analysis ${analysis} not configured for this preview.`);
+  }
+  const analysisData = preview.analyses.find(a => a.tool === analysis);
+  if (analysisData) {
+    return response.send(analysisData);
+  }
+  // generate analysis on the fly
+  const controller = new AbortController();
+  request.on('close', () => {
+    controller.abort();
+  });
+  const chat = await doChat<ReviewResponse>(
+    analysis as ReviewPrompt,
+    reviewData({
+      segmented: preview.segmented,
+      writing_task: preview.task ?? null,
+    }),
+    controller.signal,
+    true,
+    true
+  );
+  if (controller.signal.aborted) {
+    return;
+  }
+  const { response: chat_response, finished: datetime } = chat;
+  if (!chat_response) throw new Error(`NULL chat response for ${analysis}`);
+  if (typeof chat_response === 'string') {
+    throw new Error(chat_response); // if string, throw as error
+  }
+  const data: Analysis = {
+    tool: analysis as ReviewPrompt,
+    datetime,
+    response: chat_response,
+  } as Analysis; // FIXME typescript shenanigans
+  await updatePreviewReviewsById(id, data);
+  response.json(data);
+});
+
+preview.get('/', async (_request, response) => {
+  const previews = await findAllPreviews();
+  response.send(previews);
 });

@@ -11,12 +11,13 @@ import { CivilTone } from "../../../src/app/components/Review/CivilTone";
 import { Credibility } from "../../../src/app/components/Review/Credibility";
 import { Expectations, ExpectationsButton } from "../../../src/app/components/Review/Expectations";
 import { LinesOfArguments, LinesOfArgumentsButton } from "../../../src/app/components/Review/LinesOfArguments";
-import { LogicalFlow, LogicalFlowButton } from "../../../src/app/components/Review/LogicalFlow";
+import { LogicalFlowButton, LogicalFlowPreview } from "../../../src/app/components/Review/LogicalFlow";
 import { NullTool } from "../../../src/app/components/Review/NullTool";
 import { Organization } from "../../../src/app/components/Review/Organization";
 import { ParagraphClarity, ParagraphClarityButton } from "../../../src/app/components/Review/ParagraphClarity";
 import { ProfessionalTone, ProfessionalToneButton } from "../../../src/app/components/Review/ProfessionalTone";
 import { ProminentTopics, ProminentTopicsButton } from "../../../src/app/components/Review/ProminentTopics";
+import "../../../src/app/components/Review/Review.scss";
 import { Sentences, SentencesButton } from "../../../src/app/components/Review/Sentences";
 import { Sources } from "../../../src/app/components/Review/Sources";
 import { StageHeader } from "../../../src/app/components/StageHeader/StageHeader";
@@ -27,13 +28,16 @@ import { ReviewTool } from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
+
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
 // tool event keys
 type Tool = ReviewTool | "sentence_density" | "organization" | "impressions" | "null";
 
 export const Page: FC = () => {
-  const { filename, file, tool_config, task } = useData<Data>();
+  const preview = useData<Data>();
+  const { id: reviewID, filename, file, tool_config, task, analyses } = preview;
+  console.log("Preview Page data:", preview);
   const { settings } = usePageContext();
   const { t } = useTranslation("review");
   const [tab, setTab] = useState<TabKey>("big_picture");
@@ -49,6 +53,9 @@ export const Page: FC = () => {
   const disabled = (tool: Tool): boolean => {
     return !tool_config.includes(tool);
   };
+  const getAnalysis = (tool: ReviewTool) => {
+    return analyses.find((a) => a.tool === tool);
+  }
 
   return <SplitLayout>
     <main className={"d-flex flex-column my-1"}>
@@ -126,7 +133,7 @@ export const Page: FC = () => {
             </Activity>
             {tool === "prominent_topics" && <ProminentTopics />}
             {tool === "lines_of_arguments" && <LinesOfArguments />}
-            {tool === "logical_flow" && <LogicalFlow />}
+            {tool === "logical_flow" && <LogicalFlowPreview reviewID={reviewID} analysis={getAnalysis("logical_flow")} />}
             {/* Add Big Picture tools here. */}
           </div>
         </Tab>
@@ -265,7 +272,6 @@ export const Page: FC = () => {
               >
                 <NullTool text={t("null.fine_tuning")} />
               </Activity>
-              {secondaryTool === "logical_flow" && <LogicalFlow />}
               {secondaryTool === "civil_tone" && <CivilTone />}
               {secondaryTool === "credibility" && <Credibility />}
               {/* {secondaryTool === "impressions" && ( */}
