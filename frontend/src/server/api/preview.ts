@@ -33,7 +33,6 @@ preview.post('/', upload.single('document'), async (request, response) => {
     throw new BadRequestError('Uploaded document is not a valid .docx file.');
   }
   // TODO: check file size limits
-  console.log(typeof request.file.buffer.buffer);
   const { value, messages } = await convertToHtml(
     { buffer: request.file.buffer },
     convertOptions
@@ -44,6 +43,6 @@ preview.post('/', upload.single('document'), async (request, response) => {
     );
   }
   const segmented = await segmentText(value);
-  const dbId = await insertPreview(writingTask, value, segmented, tools);
+  const dbId = await insertPreview(writingTask, value, segmented, request.file.originalname, tools);
   response.redirect(`/preview/${dbId.toString()}`);
 });

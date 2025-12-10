@@ -1,20 +1,16 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useState } from "react";
+import { type FC, type HTMLProps } from "react";
 import {
   ButtonGroup,
   Dropdown,
-  DropdownButton,
-  OverlayTrigger,
-  Placeholder,
-  Tooltip,
+  DropdownButton
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
-import { useFileText } from "../FileUpload/FileTextContext";
 import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
-import { useReviewContext } from "../Review/ReviewContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
+import { UneditableIcon } from "../UneditableIcon/UneditableIcon";
+import { UserText } from "./UserText";
 import "./UserTextView.scss";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
@@ -29,67 +25,9 @@ export const UserTextView: FC<UserTextViewProps> = ({
 }) => {
   const uploadFile = useInitiateUploadFile();
   const showPicker = usePicker();
-  const [upload] = useFileText();
 
-  const ctx = useReviewContext();
   const { t } = useTranslation();
   const cl = classNames(className, "d-flex flex-column");
-  const [text, setText] = useState<string>("");
-  // TODO make this so that it is aware of the previous number of levels and
-  // removes them instead of hard coding.  As there is only 2 levels
-  // of highlighting, this is not a big deal for now.
-  const maxHighlightLevels = 2;
-  useEffect(() => {
-    setText(ctx?.text ?? upload ?? ""); // if custom tool text use that, otherwise use prose
-  }, [ctx, upload]);
-
-  useEffect(() => {
-    if (!text) return;
-    const highlightClasses = [
-      "highlight",
-      ...Array(maxHighlightLevels)
-        .keys()
-        .map((i) => `highlight-${i}`),
-    ];
-    document.querySelectorAll(".user-text .highlight").forEach((ele) => {
-      ele.classList.remove(...highlightClasses);
-    });
-    if (ctx?.sentences && ctx.sentences.length > 0) {
-      ctx.sentences.forEach((ids, index) => {
-        ids.forEach((id) =>
-          document
-            .getElementById(id)
-            ?.classList.add("highlight", `highlight-${index}`)
-        );
-      });
-    }
-    // remove blur by removing the no-blur classes.
-    document.querySelectorAll(".user-text .no-blur").forEach((ele) => {
-      ele.classList.remove("no-blur");
-    });
-
-    // add no-blur to the paragraphs that are focused.
-    // This will cause other paragraphs to blur through css.
-    if (ctx?.paragraphs && ctx.paragraphs.length > 0) {
-      ctx.paragraphs.forEach((id) => {
-        document.getElementById(id)?.classList.add("no-blur");
-      });
-    }
-    // scroll to first highlight if it exists, otherwise scroll to first no-blur
-    // else no scrolling.
-    if (document.querySelectorAll(".user-text .highlight").length > 0) {
-      document.querySelector(".user-text .highlight")?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    } else if (document.querySelector(".user-text .no-blur")) {
-      document.querySelector(".user-text .no-blur")?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [ctx, text]);
-
   return (
     <main className={cl} {...props}>
       <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
@@ -108,27 +46,9 @@ export const UserTextView: FC<UserTextViewProps> = ({
           </DropdownButton>
         </ButtonGroup>
         <TaskViewerButton />
-        <OverlayTrigger
-          placement="bottom"
-          overlay={<Tooltip>{t("editor.menu.no_edit")}</Tooltip>}
-        >
-          <NoEditIcon
-            role="status"
-            aria-label={t("editor.menu.no_edit")}
-            title={t("editor.menu.no_edit")}
-          />
-        </OverlayTrigger>
+        <UneditableIcon />
       </header>
-      <article className="overflow-auto border-top flex-grow-1">
-        {text.trim() === "" ? (
-          <Placeholder></Placeholder>
-        ) : (
-          <div
-            className={classNames("p-2 flex-grow-1 user-text")}
-            dangerouslySetInnerHTML={{ __html: text }}
-          />
-        )}
-      </article>
+      <UserText className="overflow-auto border-top flex-grow-1"/>
     </main>
   );
 };

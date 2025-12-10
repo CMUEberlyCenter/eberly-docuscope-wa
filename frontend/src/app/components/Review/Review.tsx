@@ -82,12 +82,6 @@ export const Review: FC = () => {
   useEffect(() => {
     setReady(!!userText && userText.trim().length > 0);
   }, [userText]);
-  // useUnload();
-  // useEffect(() => {
-  //   if (ready) {
-  //     window.document.title = t("document.title");
-  //   }
-  // }, [t, ready]);
 
   const [civilToneFeature, setCivilToneFeature] = useState(false);
   const [credibilityFeature, setCredibilityFeature] = useState(false);

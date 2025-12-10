@@ -27,6 +27,7 @@ type Preview = {
   timestamp: Date;
   task: WritingTask;
   file: string; // html encoded
+  filename?: string;
   segmented: string;
   tool_config: string[];
   analyses: Analysis[];
@@ -55,6 +56,7 @@ export async function insertPreview(
   task: WritingTask,
   file: string,
   segmented: string,
+  filename?: string,
   tool_config?: string[],
   analyses?: Analysis[]
 ): Promise<ObjectId> {
@@ -64,6 +66,7 @@ export async function insertPreview(
   const ins = await collection.insertOne({
     task,
     file,
+    filename,
     segmented,
     tool_config,
     analyses,
