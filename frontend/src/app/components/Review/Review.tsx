@@ -1,5 +1,4 @@
-import classNames from "classnames";
-import { Activity, type FC, type HTMLProps, useEffect, useState } from "react";
+import { Activity, type FC, useEffect, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -17,7 +16,6 @@ import { usePageContext } from "vike-react/usePageContext";
 import type { ReviewTool } from "../../../lib/ReviewResponse";
 import { isEnabled } from "../../../lib/WritingTask";
 import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
-import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { Legal } from "../Legal/Legal";
 import { StageHeader } from "../StageHeader/StageHeader";
@@ -27,6 +25,7 @@ import { Credibility } from "./Credibility";
 import { Expectations, ExpectationsButton } from "./Expectations";
 import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
 import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import { NullTool } from "./NullTool";
 import { Organization } from "./Organization";
 import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
 import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
@@ -40,31 +39,12 @@ type TabKey = "big_picture" | "fine_tuning";
 // tool event keys
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
-/** No selected tool component. */
-const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({
-  className,
-  text,
-  ...props
-}) => (
-  <article
-    {...props}
-    className={classNames(
-      className,
-      "container-fluid flex-grow-1 overflow-auto d-flex flex-column position-relative"
-    )}
-  >
-    <Stack className="position-absolute top-50 start-50 translate-middle w-75">
-      <ReviewIcon className="mx-auto text-primary md-icon" />
-      <span className="mx-auto text-center">{text}</span>
-    </Stack>
-  </article>
-);
 
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const { t: tt } = useTranslation();
-  const [tab, setTab] = useState<"big_picture" | "fine_tuning">("big_picture");
+  const [tab, setTab] = useState<TabKey>("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
   const [ready, setReady] = useState<boolean>(false);
