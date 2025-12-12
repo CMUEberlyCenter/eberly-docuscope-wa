@@ -331,12 +331,12 @@
         },
         "fastapi": {
             "hashes": [
-                "sha256:d106de125c8dd3d4341517fa2ae36d9cffe82a6500bd910d3c080e6c42b1b490",
-                "sha256:d7c8db95f61d398f7e1491ad52e6b2362755f8ec61c7a740b29e70f18a2901e3"
+                "sha256:0e9422e8d6b797515f33f500309f6e1c98ee4e85563ba0f2debb282df6343763",
+                "sha256:6d1e703698443ccb89e50abe4893f3c84d9d6689c0cf1ca4fad6d3c15cf69f15"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.8'",
-            "version": "==0.123.8"
+            "version": "==0.124.4"
         },
         "h11": {
             "hashes": [
@@ -1249,12 +1249,12 @@
         },
         "reportlab": {
             "hashes": [
-                "sha256:0457d642aa76df7b36b0235349904c58d8f9c606a872456ed04436aafadc1510",
-                "sha256:849773d7cd5dde2072fedbac18c8bc909506c8befba8f088ba7b09243c6684cc"
+                "sha256:8792c87c23dd034d17530e6ebe4164d61bcc8f7b0eac203fe13cc03cc2c1c607",
+                "sha256:c7c31d5c815bae7c76fc17f64ffc417e68992901acddb24504296cc39b065424"
             ],
             "index": "pypi",
             "markers": "python_version >= '3.9' and python_version < '4'",
-            "version": "==4.4.5"
+            "version": "==4.4.6"
         },
         "requests": {
             "hashes": [
@@ -1504,11 +1504,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:3fc47733c7e419d4bc3f6b3dc2b4f890bb743906a30d56ba4a5bfa4bbff92760",
-                "sha256:e6b01673c0fa6a13e374b50871808eb3bf7046c4b125b216f6bf1cc604cff0dc"
+                "sha256:016f9c98bb7e98085cb2b4b17b87d2c702975664e4f060c6532e64d1c1a5e797",
+                "sha256:ec21cddfe7724fc7cb4ba4bea7aa8e2ef36f607a4bab81aa6ce42a13dc3f03dd"
             ],
             "markers": "python_version >= '3.9'",
-            "version": "==2.5.0"
+            "version": "==2.6.2"
         },
         "wasabi": {
             "hashes": [
