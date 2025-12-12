@@ -13,6 +13,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
+  Analysis,
   isErrorData,
   type OptionalReviewData,
   type ParagraphClarityData,
@@ -108,6 +109,138 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
       abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
+
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
+        <ToolHeader
+          title={t("paragraph_clarity.title")}
+          instructionsKey="paragraph_clarity"
+        />
+        {!review || mutation.isPending ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">{t("paragraph_clarity.error")}</Alert>
+            }
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            <section>
+              <header>
+                <h5 className="text-primary">{t("insights")}</h5>
+                <Translation ns="instructions">
+                  {(t) => <p>{t("paragraph_clarity_insights")}</p>}
+                </Translation>
+              </header>
+              {"response" in review ? (
+                <Accordion>
+                  {review.response.map(
+                    ({ issue, suggestion, sent_ids, para_id }, i) => (
+                      <Accordion.Item
+                        key={`${id}-${i}`}
+                        eventKey={`${id}-${i}`}
+                      >
+                        <Accordion.Header className="accordion-header-highlight">
+                          <div className="flex-grow-1">{issue}</div>
+                          <AlertIcon
+                            show={sent_ids.length === 0 && !para_id}
+                            message={t("logical_flow.no_sentences")}
+                          />
+                        </Accordion.Header>
+                        <Accordion.Body
+                          onEntered={() =>
+                            dispatch({
+                              type: "set",
+                              sentences: [sent_ids],
+                              paragraphs: [para_id],
+                            })
+                          }
+                          onExit={() => dispatch({ type: "unset" })}
+                        >
+                          <h6 className="d-inline">
+                            {t("paragraph_clarity.suggestion")}
+                          </h6>{" "}
+                          <p className="d-inline">{suggestion}</p>
+                        </Accordion.Body>
+                      </Accordion.Item>
+                    )
+                  )}
+                </Accordion>
+              ) : null}
+            </section>
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
+};
+
+export const ParagraphClarityPreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, reviewID, analysis, ...props }) => {
+  const { t } = useTranslation("review");
+  const [review, setReview] = useState<
+    OptionalReviewData<ParagraphClarityData>
+  >((analysis as OptionalReviewData<ParagraphClarityData>) ?? null);
+  const id = useId();
+  const dispatch = useReviewDispatch();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const { id } = data;
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
+      const response = await fetch(`/api/v2/preview/${id}/paragraph_clarity`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: abortControllerRef.current.signal,
+      });
+      checkReviewResponse(response);
+      return response.json();
+    },
+    onSuccess: (data: ParagraphClarityData) => {
+      dispatch({ type: "unset" });
+      // dispatch({ type: "update", sentences:  });
+      setReview(data);
+    },
+    onError: (error) => {
+      setReview({ tool: "paragraph_clarity", error });
+      console.error("Error fetching Paragraph Clarity review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+  });
+  useEffect(() => {
+    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
+    if (!reviewID) return;
+    if (analysis && analysis.tool === "paragraph_clarity") {
+      console.log("Using pre-fetched Paragraph Clarity analysis data.");
+      setReview(analysis as OptionalReviewData<ParagraphClarityData>);
+      return;
+    }
+    console.log("Fetching Paragraph Clarity analysis data.");
+    mutation.mutate({
+      id: reviewID,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [reviewID, analysis]);
 
   return (
     <ReviewReset>

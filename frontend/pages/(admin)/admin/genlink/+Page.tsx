@@ -221,33 +221,41 @@ export const Page: FC = () => {
       <Card>
         <Card.Header>{t("admin.genlink.existing_previews")}</Card.Header>
         <ListGroup variant="flush">
-          {previews.map(
-            ({ id, task, filename, timestamp }) => (
-              <ListGroup.Item
-                key={`${id}`}
+          {previews.map(({ id, task, filename, timestamp }) => (
+            <ListGroup.Item key={`${id}`}>
+              <a href={`/preview/${id}`}>
+                {task.info.name}: {filename} (
+                {new Date(timestamp).toLocaleString()})
+              </a>
+              <ClipboardIconButton
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    new URL(`/preview/${id}`, hostname).toString()
+                  )
+                }
+              />
+              <Button
+                variant="icon"
+                className="text-danger"
+                onClick={() => {
+                  fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
+                    .then((response) => {
+                      if (response.ok) {
+                        // Optionally, you can add logic to remove the deleted preview from the UI
+                        window.location.reload();
+                      } else {
+                        console.error("Failed to delete preview");
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error deleting preview:", error);
+                    });
+                }}
               >
-                <a href={`/preview/${id}`}>{task.info.name}: {filename} ({new Date(timestamp).toLocaleString()})</a>
-                <ClipboardIconButton onClick={() => navigator.clipboard.writeText(new URL(`/preview/${id}`, hostname).toString())} />
-                <Button variant="icon" className="text-danger"
-                  onClick={() => {
-                    fetch(`/api/v2/preview/${id}`, { method: 'DELETE' })
-                      .then(response => {
-                        if (response.ok) {
-                          // Optionally, you can add logic to remove the deleted preview from the UI
-                          window.location.reload();
-                        } else {
-                          console.error('Failed to delete preview');
-                        }
-                      })
-                      .catch(error => {
-                        console.error('Error deleting preview:', error);
-                      });
-                  }}>
-                  <FontAwesomeIcon icon={faTrash} />
-                </Button>
-              </ListGroup.Item>
-            )
-          )}
+                <FontAwesomeIcon icon={faTrash} />
+              </Button>
+            </ListGroup.Item>
+          ))}
         </ListGroup>
       </Card>
     </>

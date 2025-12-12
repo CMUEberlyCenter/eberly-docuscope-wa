@@ -48,6 +48,7 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
+  Analysis,
   isErrorData,
   type OnTopicReviewData,
   type OptionalReviewData,
@@ -62,6 +63,7 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import { Optional } from "../../..";
 
 DataTable.use(DT);
 
@@ -604,6 +606,275 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
                   </table>
                 </div>
               )} */}
+            </ErrorBoundary>
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
+};
+
+export const OrganizationPreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, reviewID, analysis, ...props }) => {
+  const { t } = useTranslation("review");
+  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
+  const showToggle = false;
+  const [paragraphRange, setParagraphRange] = useState<number[]>([]);
+  const [selected, setSelected] = useState<SelectedRowCol>(null);
+
+  const dispatch = useReviewDispatch();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
+      const response = await fetch(`/api/v2/preview/${id}/ontopic`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: abortControllerRef.current.signal,
+      });
+      checkReviewResponse(response);
+      return response.json();
+    },
+    onSuccess: (data: OnTopicReviewData) => {
+      setData(data);
+      if (data.response.html)
+        dispatch({ type: "update", sentences: data.response.html });
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+    onError: (error) => {
+      setData({ tool: "ontopic", error });
+      console.error("Error fetching Organization review:", error);
+    },
+  });
+  // When the document changes, fetch a new ontopic review
+  useEffect(() => {
+    if (!reviewID) return;
+    if (analysis && analysis.tool === "ontopic") {
+      console.log("Using pre-fetched Organization analysis data.");
+      setData(analysis as OptionalReviewData<OnTopicReviewData>);
+      return;
+    }
+    mutation.mutate({
+      id: reviewID,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [reviewID, analysis]);
+
+  useEffect(() => {
+    if (data && "response" in data) {
+      setParagraphRange([
+        ...Array(data.response.coherence?.num_paras ?? 0).keys(),
+      ]);
+    } else {
+      setParagraphRange([]);
+    }
+    setSelected(null);
+  }, [data]);
+
+  const onSelectTopic = useCallback(
+    (topic: Topic) => {
+      setSelected({
+        ...selected,
+        topic: topic === selected?.topic ? undefined : topic,
+      });
+    },
+    [selected]
+  );
+  const onSelectParagraph = useCallback(
+    (paragraph: number) => {
+      setSelected({
+        ...selected,
+        paragraph: selected?.paragraph === paragraph ? undefined : paragraph,
+      });
+    },
+    [selected]
+  );
+  const onSelectCell = useCallback(
+    (topic: Topic, paragraph: number) => {
+      setSelected(
+        selected?.paragraph === paragraph && selected?.topic === topic
+          ? null
+          : { paragraph, topic }
+      );
+    },
+    [selected]
+  );
+
+  useEffect(() => {
+    clearAllHighlights();
+    selected?.topic?.forEach((topic) =>
+      window.document
+        .querySelectorAll(`.user-text .word[data-topic="${topic}"]`)
+        .forEach((ele) => ele.classList.add("word-highlight"))
+    );
+    if (typeof selected?.paragraph === "number") {
+      const ele = window.document.querySelector(
+        `.user-text .paragraph[data-ds-paragraph="${selected.paragraph + 1}"]`
+      );
+      ele?.scrollIntoView({ behavior: "smooth", block: "center" });
+      ele?.classList.add("paragraph-highlight");
+    }
+  }, [selected]);
+
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid organization overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
+        <ToolHeader
+          title={t("organization.title")}
+          instructionsKey="term_matrix"
+        />
+        {!data ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary FallbackComponent={OrganizationErrorFallback}>
+            {/* {data.datetime && (
+              <Card.Subtitle className="text-center">
+                {new Date(data.datetime).toLocaleString()}
+              </Card.Subtitle>
+            )} */}
+            <Legend />
+            <ErrorBoundary FallbackComponent={CoherenceErrorFallback}>
+              <div className="mt-1 mw-100 flex-grow-1">
+                {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
+                {"response" in data && paragraphRange.length > 0 && (
+                  <DataTable
+                    options={{
+                      paging: false,
+                      order: [],
+                      scrollCollapse: true,
+                      scrollX: true,
+                      scrollY: "50vh",
+                      columnDefs: [
+                        { targets: "no-sort", orderable: false },
+                        { target: 0 },
+                      ],
+                      fixedColumns: { start: 1 },
+                      caption: t("organization.coherence.title"),
+                      searching: false,
+                    }}
+                  >
+                    {/* <caption>{t("organization.coherence.title")}</caption> */}
+                    <thead>
+                      <tr>
+                        <th>{t("organization.coherence.paragraphs")}</th>
+                        {paragraphRange.map((i) => (
+                          <th
+                            key={`key-paragraph-${i}`}
+                            data-dt-order={false}
+                            className="no-sort p-0 text-center"
+                            onClick={() => onSelectParagraph(i)}
+                          >
+                            <Button
+                              size="sm"
+                              variant="outline-primary"
+                              active={i === selected?.paragraph}
+                            >
+                              {`${i + 1}`}
+                            </Button>
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Visualization Topics */}
+                      {data?.response.coherence?.error
+                        ? null
+                        : data?.response.coherence?.data
+                            .filter(
+                              ({ is_topic_cluster }) =>
+                                is_topic_cluster || !showToggle
+                            )
+                            .map(
+                              (
+                                { topic, is_non_local, paragraphs, sent_count },
+                                i
+                              ) => {
+                                const topi =
+                                  topic.at(2)?.replaceAll("_", " ") ?? "";
+                                const [left, right] = ["l", "r"].map((lr) =>
+                                  is_non_local ? lr : lr.toUpperCase()
+                                );
+                                const paraIconClass = is_non_local
+                                  ? "topic-icon-small"
+                                  : "topic-icon-large";
+                                return (
+                                  <tr
+                                    key={`topic-paragraph-key-${i}`}
+                                    className={
+                                      topic === selected?.topic
+                                        ? "bg-highlight"
+                                        : ""
+                                    }
+                                  >
+                                    <td
+                                      data-search={topi}
+                                      data-order={sent_count}
+                                      className="p-0"
+                                    >
+                                      <Button
+                                        className="w-100 text-primary text-start"
+                                        variant="none"
+                                        active={topic === selected?.topic}
+                                        onClick={() => onSelectTopic(topic)}
+                                      >
+                                        {topi}
+                                      </Button>
+                                    </td>
+                                    {paragraphs.map((paraType, j) => {
+                                      const paraContent = `${
+                                        paraType?.is_left ? left : right
+                                      }${paraType?.is_topic_sent ? "" : "*"}`;
+                                      return (
+                                        <td
+                                          key={`topic-key-${i}-${j}`}
+                                          className={classNames(
+                                            "p-0 text-center",
+                                            selected?.paragraph === j
+                                              ? "bg-highlight"
+                                              : ""
+                                          )}
+                                        >
+                                          {paraType ? (
+                                            <Button
+                                              variant="icon"
+                                              title={paraContent}
+                                              className={paraIconClass}
+                                              onClick={() =>
+                                                onSelectCell(topic, j)
+                                              }
+                                            >
+                                              <IndicatorIcon unit={paraType} />
+                                            </Button>
+                                          ) : null}
+                                        </td>
+                                      );
+                                    })}
+                                  </tr>
+                                );
+                              }
+                            )}
+                    </tbody>
+                  </DataTable>
+                )}
+              </div>
             </ErrorBoundary>
           </ErrorBoundary>
         )}

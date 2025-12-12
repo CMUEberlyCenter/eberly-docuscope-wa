@@ -15,5 +15,6 @@ export const UneditableIcon: FC = () => {
         aria-label={t("editor.menu.no_edit")}
         title={t("editor.menu.no_edit")}
       />
-    </OverlayTrigger>);
+    </OverlayTrigger>
+  );
 };

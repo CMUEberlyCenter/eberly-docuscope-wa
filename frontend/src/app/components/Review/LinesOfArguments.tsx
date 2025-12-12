@@ -22,6 +22,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
+  Analysis,
   type Claim as ClaimProps,
   isErrorData,
   type LinesOfArgumentsData,
@@ -249,6 +250,152 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
       dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
   }, [current, review, dispatch]);
+
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1 h-100"
+        )}
+      >
+        <ToolHeader
+          title={t("lines_of_arguments.title")}
+          instructionsKey="lines_of_arguments"
+        />
+        {mutation.isPending || !review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">{t("lines_of_arguments.error")}</Alert>
+            }
+          >
+            {/* {review.datetime && (
+            <Card.Subtitle className="text-center">
+              {new Date(review.datetime).toLocaleString()}
+            </Card.Subtitle>
+          )} */}
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("lines_of_arguments_insights")}</p>}
+                  </Translation>
+                </header>
+                <section className="mt-3">
+                  {review.response.thesis ? (
+                    <div>
+                      <h6 className="d-inline">
+                        {t("lines_of_arguments.main")}
+                      </h6>{" "}
+                      <p
+                        className={classNames(
+                          "d-inline",
+                          !current ? "highlight highlight-0" : ""
+                        )}
+                      >
+                        {review.response.thesis}
+                      </p>
+                    </div>
+                  ) : null}
+                  {"strategies" in review.response &&
+                  Array.isArray(review.response.strategies) ? (
+                    <section className="mt-3">
+                      <h6>{t("lines_of_arguments.strategies")}</h6>
+                      <ul>
+                        {review.response.strategies.map((strat, i) => (
+                          <li key={`loa-strat-${i}`}>{strat}</li>
+                        ))}
+                      </ul>
+                    </section>
+                  ) : null}
+                  <Claims
+                    onSelect={onSelect}
+                    activeKey={current}
+                    claims={review.response.claims}
+                  />
+                  {!review.response.thesis &&
+                  !review.response.strategies?.length &&
+                  !review.response.claims?.length ? (
+                    <Alert variant="warning">
+                      {t("lines_of_arguments.null")}
+                    </Alert>
+                  ) : null}
+                </section>
+              </section>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
+};
+
+export const LinesOfArgumentsPreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, reviewID, analysis, ...props }) => {
+  const { t } = useTranslation("review");
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
+    setCurrent(eventKey);
+  const [review, setReview] = useState<
+    OptionalReviewData<LinesOfArgumentsData>
+  >((analysis as OptionalReviewData<LinesOfArgumentsData>) ?? null);
+  const dispatch = useReviewDispatch();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const { id } = data;
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
+      const response = await fetch(`/api/v2/preview/${id}/logical_flow`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: abortControllerRef.current.signal,
+      });
+      checkReviewResponse(response);
+      return response.json();
+    },
+    onSuccess: (data: LinesOfArgumentsData) => {
+      dispatch({ type: "unset" });
+      // dispatch({ type: "update", sentences:  });
+      setReview(data);
+    },
+    onError: (error) => {
+      setReview({ tool: "lines_of_arguments", error });
+      console.error("Error fetching Lines of Arguments review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+  });
+  useEffect(() => {
+    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
+    if (!reviewID) return;
+    if (analysis && analysis.tool === "lines_of_arguments") {
+      console.log("Using pre-fetched Lines of Arguments analysis data.");
+      setReview(analysis as OptionalReviewData<LinesOfArgumentsData>);
+      return;
+    }
+    console.log("Fetching Lines of Arguments analysis data.");
+    mutation.mutate({
+      id: reviewID,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [reviewID, analysis]);
 
   return (
     <ReviewReset>

@@ -1,10 +1,6 @@
 import classNames from "classnames";
 import { type FC, type HTMLProps } from "react";
-import {
-  ButtonGroup,
-  Dropdown,
-  DropdownButton
-} from "react-bootstrap";
+import { ButtonGroup, Dropdown, DropdownButton } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
@@ -48,7 +44,7 @@ export const UserTextView: FC<UserTextViewProps> = ({
         <TaskViewerButton />
         <UneditableIcon />
       </header>
-      <UserText className="overflow-auto border-top flex-grow-1"/>
+      <UserText className="overflow-auto border-top flex-grow-1" />
     </main>
   );
 };

@@ -18,6 +18,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
+  Analysis,
   isErrorData,
   type OptionalReviewData,
   type ProfessionalToneData,
@@ -159,6 +160,132 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
       abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
+
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
+        <ToolHeader
+          title={t("professional_tone.title")}
+          instructionsKey="professional_tone"
+        />
+        {!review || mutation.isPending ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={
+              <Alert variant="danger">{t("professional_tone.error")}</Alert>
+            }
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("professional_tone_insights")}</p>}
+                  </Translation>
+                </header>
+                <section>
+                  <h5>{t("professional_tone.confidence")}</h5>
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "confidence"
+                    )}
+                  />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.subjectivity")}</h5>
+                  <SentenceToneIssues
+                    issues={review.response.filter(({ tone_type }) =>
+                      ["subjective", "subjectivity"].includes(tone_type)
+                    )}
+                  />
+                </section>
+                <section>
+                  <h5>{t("professional_tone.sentiment")}</h5>
+                  <SentenceToneIssues
+                    issues={review.response.filter(
+                      ({ tone_type }) => tone_type === "emotional"
+                    )}
+                  />
+                </section>
+              </section>
+            ) : null}
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
+};
+
+export const ProfessionalTonePreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, reviewID, analysis, ...props }) => {
+  const { t } = useTranslation("review");
+  const [review, setReview] = useState<
+    OptionalReviewData<ProfessionalToneData>
+  >((analysis as OptionalReviewData<ProfessionalToneData>) ?? null);
+  const dispatch = useReviewDispatch();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const { id } = data;
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
+      const response = await fetch(`/api/v2/preview/${id}/professional_tone`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: abortControllerRef.current.signal,
+      });
+      checkReviewResponse(response);
+      return response.json();
+    },
+    onSuccess: (data: ProfessionalToneData) => {
+      dispatch({ type: "unset" });
+      // dispatch({ type: "update", sentences:  });
+      setReview(data);
+    },
+    onError: (error) => {
+      setReview({ tool: "professional_tone", error });
+      console.error("Error fetching Professional Tone review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+  });
+  useEffect(() => {
+    console.log(
+      "ProfessionalTonePreview useEffect triggered.",
+      reviewID,
+      analysis
+    );
+    if (!reviewID) return;
+    if (analysis && analysis.tool === "professional_tone") {
+      console.log("Using pre-fetched Professional Tone analysis data.");
+      setReview(analysis as OptionalReviewData<ProfessionalToneData>);
+      return;
+    }
+    console.log("Fetching Professional Tone analysis data.");
+    mutation.mutate({
+      id: reviewID,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [reviewID, analysis]);
 
   return (
     <ReviewReset>

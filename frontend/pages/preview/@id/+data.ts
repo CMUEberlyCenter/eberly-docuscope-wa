@@ -3,11 +3,12 @@ import { findPreviewById } from '../../../src/server/data/mongo';
 
 export const data = async (pageContext: PageContextServer) => {
   const id = pageContext.routeParams.id;
+  // TODO handle not found
   const preview = await findPreviewById(id);
 
   return {
     ...preview,
-    id
+    id,
   };
 };
 

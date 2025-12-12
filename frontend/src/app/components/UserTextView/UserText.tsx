@@ -69,7 +69,13 @@ export const UserText: FC<UserTextProps> = ({ ...props }) => {
     }
   }, [ctx, content, id]);
 
-  return <article {...props} >
-    <div id={id} className="user-text p-2" dangerouslySetInnerHTML={{ __html: content }}></div>
-  </article>;
-}
+  return (
+    <article {...props}>
+      <div
+        id={id}
+        className="user-text p-2"
+        dangerouslySetInnerHTML={{ __html: content }}
+      ></div>
+    </article>
+  );
+};

@@ -5,7 +5,6 @@ import { SplitLayout } from "../../../../../layouts/SplitLayout";
 import { UserTextView } from "../../../../../src/app/components/UserTextView/UserTextView";
 
 const Page: FC = () => {
-
   return (
     <SplitLayout>
       <UserTextView className="my-1" />

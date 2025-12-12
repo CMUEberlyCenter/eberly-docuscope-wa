@@ -1,8 +1,8 @@
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
-import type { OnTopicData } from '../../lib/OnTopicData';
 import {
   ForbiddenError,
+  GatewayError,
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
@@ -12,7 +12,6 @@ import {
   type ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
-  type OnTopicReviewData,
   type ReviewPrompt,
   type ReviewResponse,
 } from '../../lib/ReviewResponse';
@@ -29,47 +28,9 @@ import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
-import { ONTOPIC_URL } from '../settings';
+import { doOnTopic } from '../data/ontopic';
 
 export const reviews = Router();
-
-/**
- * Submit data to onTopic for processing.
- * @param review Review data to be sent to onTopic
- * @returns Processed data.
- * @throws fetch errors
- * @throws Bad onTopic response status
- * @throws JSON.parse errors
- */
-const doOnTopic = async (
-  document: string,
-  signal?: AbortSignal
-): Promise<OnTopicReviewData | undefined> => {
-  const res = await fetch(ONTOPIC_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      base: document,
-    }),
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    signal,
-  });
-  if (!res.ok) {
-    console.error(
-      `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
-    );
-    // TODO check for response codes and throw specific errors.
-    throw new Error(`onTopic Response status: ${res.status}`);
-  }
-  const data = (await res.json()) as OnTopicData;
-  return {
-    tool: 'ontopic',
-    datetime: new Date(),
-    response: data,
-  };
-};
 
 /**
  * @swagger
@@ -192,7 +153,7 @@ reviews.post(
     if (controller.signal.aborted) {
       return;
     }
-    if (!data) throw new Error(`NULL onTopic results.`);
+    if (!data) throw new GatewayError(`NULL onTopic results.`);
     request.session.analysis = [...(request.session.analysis ?? []), data];
     response.json(data);
   }

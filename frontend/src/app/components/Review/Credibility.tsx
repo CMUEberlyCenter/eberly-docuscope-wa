@@ -13,6 +13,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
+  Analysis,
   type CredibilityData,
   type CredibilityOutput,
   isErrorData,
@@ -137,6 +138,108 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({
       abortControllerRef.current?.abort();
     };
   }, [document, writing_task]);
+
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
+        <ToolHeader
+          title={t("credibility.title")}
+          instructionsKey="credibility"
+        />
+        {!review || mutation.isPending ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{t("credibility.error")}</Alert>}
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {"response" in review ? (
+              <section>
+                <header>
+                  <h5 className="text-primary">{t("insights")}</h5>
+                  <Translation ns="instructions">
+                    {(t) => <p>{t("credibility_insights")}</p>}
+                  </Translation>
+                </header>
+                <section>
+                  <SentenceAssessments assessments={review.response} />
+                </section>
+              </section>
+            ) : (
+              <Alert variant="warning">{t("credibility.null")}</Alert>
+            )}
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
+};
+
+/** Ethos review tool component. */
+export const CredibilityPreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, reviewID, analysis, ...props }) => {
+  const { t } = useTranslation("review");
+  const [review, setReview] = useState<OptionalReviewData<CredibilityData>>(
+    (analysis as OptionalReviewData<CredibilityData>) ?? null
+  );
+  const dispatch = useReviewDispatch();
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const mutation = useMutation({
+    mutationFn: async (data: { id: string }) => {
+      const { id } = data;
+      abortControllerRef.current = new AbortController();
+      dispatch({ type: "unset" }); // probably not needed, but just in case
+      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
+      const response = await fetch(`/api/v2/preview/${id}/credibility`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: abortControllerRef.current.signal,
+      });
+      checkReviewResponse(response);
+      return response.json();
+    },
+    onSuccess: (data: CredibilityData) => {
+      dispatch({ type: "unset" });
+      // dispatch({ type: "update", sentences:  });
+      setReview(data);
+    },
+    onError: (error) => {
+      setReview({ tool: "credibility", error });
+      console.error("Error fetching Credibility review:", error);
+    },
+    onSettled: () => {
+      abortControllerRef.current = null;
+    },
+  });
+  useEffect(() => {
+    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
+    if (!reviewID) return;
+    if (analysis && analysis.tool === "credibility") {
+      console.log("Using pre-fetched Credibility analysis data.");
+      setReview(analysis as OptionalReviewData<CredibilityData>);
+      return;
+    }
+    console.log("Fetching Credibility analysis data.");
+    mutation.mutate({
+      id: reviewID,
+    });
+    return () => {
+      abortControllerRef.current?.abort();
+    };
+  }, [reviewID, analysis]);
 
   return (
     <ReviewReset>

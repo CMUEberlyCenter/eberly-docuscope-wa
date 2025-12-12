@@ -16,7 +16,7 @@ import {
   Analysis,
   isErrorData,
   type LogicalFlowData,
-  type OptionalReviewData
+  type OptionalReviewData,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
@@ -181,22 +181,21 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 /** Logical Flow review tool component. */
-export const LogicalFlowPreview: FC<HTMLProps<HTMLDivElement> & {reviewID?: string, analysis?: Optional<Analysis>}> = ({
-  className,
-  analysis,
-  reviewID,
-  ...props
-}) => {
+export const LogicalFlowPreview: FC<
+  HTMLProps<HTMLDivElement> & {
+    reviewID?: string;
+    analysis?: Optional<Analysis>;
+  }
+> = ({ className, analysis, reviewID, ...props }) => {
   const { t } = useTranslation("review");
-  const [review, setReview] =
-    useState<OptionalReviewData<LogicalFlowData>>(analysis as OptionalReviewData<LogicalFlowData> ?? null );
+  const [review, setReview] = useState<OptionalReviewData<LogicalFlowData>>(
+    (analysis as OptionalReviewData<LogicalFlowData>) ?? null
+  );
   const id = useId();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
-    mutationFn: async (data: {
-      id: string,
-    }) => {
+    mutationFn: async (data: { id: string }) => {
       const { id } = data;
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
@@ -211,7 +210,7 @@ export const LogicalFlowPreview: FC<HTMLProps<HTMLDivElement> & {reviewID?: stri
       checkReviewResponse(response);
       return response.json();
     },
-    onSuccess: ( data: LogicalFlowData ) => {
+    onSuccess: (data: LogicalFlowData) => {
       dispatch({ type: "unset" });
       // dispatch({ type: "update", sentences:  });
       setReview(data);

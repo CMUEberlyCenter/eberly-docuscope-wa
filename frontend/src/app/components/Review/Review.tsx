@@ -39,7 +39,6 @@ type TabKey = "big_picture" | "fine_tuning";
 // tool event keys
 type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
-
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t } = useTranslation("review");
@@ -82,47 +81,47 @@ export const Review: FC = () => {
     // enabled in settings.  The server settings have priority over writing tasks.
     setCivilToneFeature(
       !!settings?.civil_tone &&
-      (!writingTask || isEnabled(writingTask, "civil_tone"))
+        (!writingTask || isEnabled(writingTask, "civil_tone"))
     );
     setCredibilityFeature(
       !!settings?.credibility &&
-      (!writingTask || isEnabled(writingTask, "credibility"))
+        (!writingTask || isEnabled(writingTask, "credibility"))
     );
     setExpectationsFeature(
       !!settings?.expectations &&
-      (!writingTask || isEnabled(writingTask, "expectations"))
+        (!writingTask || isEnabled(writingTask, "expectations"))
     );
     // Lines of arguments only available if enabled in writing task.
     setArgumentsFeature(
       !!settings?.lines_of_arguments &&
-      isEnabled(writingTask, "lines_of_arguments")
+        isEnabled(writingTask, "lines_of_arguments")
     );
     setLogicalFlowFeature(
       !!settings?.logical_flow &&
-      (!writingTask || isEnabled(writingTask, "logical_flow"))
+        (!writingTask || isEnabled(writingTask, "logical_flow"))
     );
     setParagraphClarityFeature(
       !!settings?.paragraph_clarity &&
-      (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
+        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
     );
     setProfessionalToneFeature(
       !!settings?.professional_tone &&
-      (!writingTask || isEnabled(writingTask, "professional_tone"))
+        (!writingTask || isEnabled(writingTask, "professional_tone"))
     );
     setIdeasFeature(
       !!settings?.prominent_topics &&
-      (!writingTask || isEnabled(writingTask, "prominent_topics"))
+        (!writingTask || isEnabled(writingTask, "prominent_topics"))
     );
     setSentencesFeature(
       !!settings?.sentence_density &&
-      (!writingTask || isEnabled(writingTask, "sentence_density"))
+        (!writingTask || isEnabled(writingTask, "sentence_density"))
     );
     setSourcesFeature(
       !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"))
     );
     setOrganizationFeature(
       !!settings?.term_matrix &&
-      (!writingTask || isEnabled(writingTask, "term_matrix"))
+        (!writingTask || isEnabled(writingTask, "term_matrix"))
     );
     setImpressionsFeature(
       false
@@ -132,18 +131,18 @@ export const Review: FC = () => {
   useEffect(() => {
     setBigPictureFeature(
       expectationsFeature ||
-      argumentsFeature ||
-      ideasFeature ||
-      logicalFlowFeature
+        argumentsFeature ||
+        ideasFeature ||
+        logicalFlowFeature
     );
   }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
   useEffect(() => {
     setAdditionalToolsFeature(
       civilToneFeature ||
-      credibilityFeature ||
-      sourcesFeature ||
-      organizationFeature ||
-      impressionsFeature
+        credibilityFeature ||
+        sourcesFeature ||
+        organizationFeature ||
+        impressionsFeature
     );
   }, [
     civilToneFeature,
@@ -155,9 +154,9 @@ export const Review: FC = () => {
   useEffect(() => {
     setFineTuningFeature(
       additionalToolsFeature ||
-      paragraphClarityFeature ||
-      professionalToneFeature ||
-      sentencesFeature
+        paragraphClarityFeature ||
+        professionalToneFeature ||
+        sentencesFeature
     );
   }, [
     additionalToolsFeature,
@@ -235,14 +234,10 @@ export const Review: FC = () => {
                   />
                 ) : null}
               </ButtonToolbar>
-              <Activity
-                mode={!tool || tool === "null" ? "visible" : "hidden"}
-              >
+              <Activity mode={!tool || tool === "null" ? "visible" : "hidden"}>
                 <NullTool text={t("null.big_picture")} />
               </Activity>
-              <Activity
-                mode={tool === "expectations" ? "visible" : "hidden"}
-              >
+              <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
                 <Expectations />
               </Activity>
               {tool === "prominent_topics" && <ProminentTopics />}
@@ -316,9 +311,7 @@ export const Review: FC = () => {
                           active={otherTool === "sources"}
                           disabled={!ready}
                         >
-                          <h6 className="text-primary">
-                            {t("sources.title")}
-                          </h6>
+                          <h6 className="text-primary">{t("sources.title")}</h6>
                           <div className="text-wrap">
                             {t("instructions:sources_scope_note")}
                           </div>
@@ -397,9 +390,7 @@ export const Review: FC = () => {
               >
                 <Activity
                   mode={
-                    !otherTool || otherTool === "null"
-                      ? "visible"
-                      : "hidden"
+                    !otherTool || otherTool === "null" ? "visible" : "hidden"
                   }
                 >
                   <NullTool text={t("null.fine_tuning")} />

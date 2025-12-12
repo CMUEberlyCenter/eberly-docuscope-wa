@@ -1,4 +1,7 @@
-import { findAllPreviews, findAllPublicWritingTasks } from '../../../../src/server/data/mongo';
+import {
+  findAllPreviews,
+  findAllPublicWritingTasks,
+} from '../../../../src/server/data/mongo';
 
 export const data = async () => {
   const tasks = await findAllPublicWritingTasks();

@@ -10,5 +10,6 @@ export const SplitLayout: FC<{ children: ReactNode }> = ({ children }) => {
       expandToMin={true}
     >
       {children}
-    </Split>);
+    </Split>
+  );
 };
