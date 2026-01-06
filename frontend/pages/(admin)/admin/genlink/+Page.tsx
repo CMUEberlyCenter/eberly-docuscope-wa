@@ -197,16 +197,22 @@ export const Page: FC = () => {
                           settings[tool as keyof typeof settings]
                       )
                       .map(({ tool, enabled }) => (
-                        <Form.Check
-                          className="col-lg-2 col-md-4 col-sm-6"
-                          disabled={!selected || !isEnabled(selected, tool)}
+                        <div
+                          className="col-lg-2 col-md-4 col-sm-6 form-check"
                           key={tool}
-                          label={tr(`review:${tool}.title`)}
-                          type="checkbox"
-                          name={`tool_config`}
-                          defaultChecked={enabled}
-                          value={tool}
-                        />
+                        >
+                          <label className="form-check-label">
+                            <input
+                              type="checkbox"
+                              className="form-check-input"
+                              disabled={!selected || !isEnabled(selected, tool)}
+                              name={`tool_config[]`}
+                              value={tool}
+                              defaultChecked={enabled}
+                            />
+                            {tr(`review:${tool}.title`)}
+                          </label>
+                        </div>
                       ))}
                   </div>
                 </Form.Group>

@@ -1,4 +1,4 @@
-import { images } from "mammoth";
+import { images } from 'mammoth';
 
 const MAX_WIDTH = 800;
 const MAX_HEIGHT = 600;
@@ -14,7 +14,7 @@ function createResizedImageConverter(maxWidth: number, maxHeight: number) {
       const img = new Image();
       img.onload = () => {
         URL.revokeObjectURL(imageUrl);
-        const canvas = document.createElement("canvas");
+        const canvas = document.createElement('canvas');
         let width = img.naturalWidth;
         let height = img.naturalHeight;
 
@@ -33,7 +33,7 @@ function createResizedImageConverter(maxWidth: number, maxHeight: number) {
 
         canvas.width = width;
         canvas.height = height;
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
         ctx?.drawImage(img, 0, 0, width, height);
 
         // Get the base64 string from the canvas
@@ -52,5 +52,5 @@ function createResizedImageConverter(maxWidth: number, maxHeight: number) {
 
 export const convertOptions = {
   convertImage: createResizedImageConverter(MAX_WIDTH, MAX_HEIGHT),
-  styleMap: "u => u", // Preserve underline styles (str | str[] | regexp)
+  styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
 };
