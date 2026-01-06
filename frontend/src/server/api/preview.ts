@@ -1,13 +1,20 @@
 import { Router } from 'express';
+import { param } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
-import { convertOptions } from '../../app/components/FileUpload/convertOptions';
 import {
   BadRequestError,
   ForbiddenError,
   GatewayError,
 } from '../../lib/ProblemDetails';
+import {
+  Analysis,
+  BasicReviewPrompts,
+  ReviewPrompt,
+  ReviewResponse,
+} from '../../lib/ReviewResponse';
 import { isEnabled, isWritingTask } from '../../lib/WritingTask';
+import { doChat, reviewData } from '../data/chat';
 import {
   deletePreviewById,
   findAllPreviews,
@@ -15,18 +22,10 @@ import {
   insertPreview,
   updatePreviewReviewsById,
 } from '../data/mongo';
-import { segmentText } from '../data/segmentText';
-import { validate } from '../model/validate';
-import { param } from 'express-validator';
-import {
-  Analysis,
-  BasicReviewPrompts,
-  ReviewPrompt,
-  ReviewResponse,
-} from '../../lib/ReviewResponse';
-import { getSettings } from '../getSettings';
-import { doChat, reviewData } from '../data/chat';
 import { doOnTopic } from '../data/ontopic';
+import { segmentText } from '../data/segmentText';
+import { getSettings } from '../getSettings';
+import { validate } from '../model/validate';
 
 export const preview = Router();
 const storage = multer.memoryStorage();
@@ -56,9 +55,12 @@ preview.post('/', upload.single('document'), async (request, response) => {
     throw new BadRequestError('Uploaded document is not a valid .docx file.');
   }
   // TODO: check file size limits
+  // TODO: handle image resizing server-side
   const { value, messages } = await convertToHtml(
     { buffer: request.file.buffer },
-    convertOptions
+    {
+      styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
+    }
   );
   if (messages.length) {
     throw new BadRequestError(
