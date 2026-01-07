@@ -47,6 +47,7 @@ import {
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
+import { Optional } from "../../..";
 import {
   Analysis,
   isErrorData,
@@ -63,7 +64,6 @@ import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
-import { Optional } from "../../..";
 
 DataTable.use(DT);
 
@@ -662,6 +662,9 @@ export const OrganizationPreview: FC<
     if (analysis && analysis.tool === "ontopic") {
       console.log("Using pre-fetched Organization analysis data.");
       setData(analysis as OptionalReviewData<OnTopicReviewData>);
+      if ("response" in analysis && analysis.response.html) {
+        dispatch({ type: "update", sentences: analysis.response.html });
+      }
       return;
     }
     mutation.mutate({

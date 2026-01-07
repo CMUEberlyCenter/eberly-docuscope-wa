@@ -122,6 +122,7 @@ export type ClarityData = Array<
       boolean, // skip punctuation
     ]
 >;
+/** Type guard for ClarityData */
 const isClarityData = (data: unknown): data is ClarityData =>
   Array.isArray(data) &&
   data.every(
@@ -142,6 +143,7 @@ export type OnTopicData = {
   html_sentences?: string[][];
   local?: LocalData[];
 };
+/** Type guard for OnTopicData */
 export const isOnTopicData = (data: unknown): data is OnTopicData => {
   return (
     !!data &&
@@ -161,10 +163,11 @@ export const isOnTopicData = (data: unknown): data is OnTopicData => {
   );
 };
 
+/** Removes empty sentences from the html_sentences data. */
 export const cleanAndRepairSentenceData = (data?: OnTopicData | null) => {
   return (
     data?.html_sentences?.map((paragraph) =>
-      paragraph.filter((sentence) => sentence !== '')
+      paragraph.filter((sentence) => sentence.trim() !== '')
     ) ?? null
-  ); // sentence.trim()?
+  );
 };

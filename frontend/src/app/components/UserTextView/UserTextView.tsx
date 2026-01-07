@@ -7,7 +7,6 @@ import { usePicker } from "../FileUpload/PickerContext";
 import { TaskViewerButton } from "../TaskViewer/TaskViewer";
 import { UneditableIcon } from "../UneditableIcon/UneditableIcon";
 import { UserText } from "./UserText";
-import "./UserTextView.scss";
 
 type UserTextViewProps = HTMLProps<HTMLDivElement>;
 /**

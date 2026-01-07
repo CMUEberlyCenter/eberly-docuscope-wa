@@ -4,9 +4,10 @@ import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
 import { Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
+import { Optional } from "../../..";
 import {
   type ClarityData,
-  cleanAndRepairSentenceData,
+  cleanAndRepairSentenceData
 } from "../../../lib/OnTopicData";
 import {
   Analysis,
@@ -26,7 +27,6 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { ReviewReset, useReviewDispatch } from "./ReviewContext";
 import "./Sentences.scss";
-import { Optional } from "../../..";
 
 /** Button component for selecting the Sentences tool. */
 export const SentencesButton: FC<ButtonProps> = (props) => {
@@ -357,6 +357,9 @@ export const SentencesPreview: FC<
     if (analysis && analysis.tool === "ontopic") {
       console.log("Using pre-fetched Organization analysis data.");
       setData(analysis as OptionalReviewData<OnTopicReviewData>);
+      if ("response" in analysis && analysis.response.html) {
+        dispatch({ type: "update", sentences: analysis.response.html });
+      }
       return;
     }
     mutation.mutate({
