@@ -20,10 +20,7 @@ import AdditionalToolsIcon from "../../../src/app/assets/icons/additional_tools_
 import { Legal } from "../../../src/app/components/Legal/Legal";
 import { CivilTonePreview } from "../../../src/app/components/Review/CivilTone";
 import { CredibilityPreview } from "../../../src/app/components/Review/Credibility";
-import {
-  ExpectationsButton,
-  ExpectationsPreview,
-} from "../../../src/app/components/Review/Expectations";
+import { ExpectationsButton } from "../../../src/app/components/Review/Expectations";
 import {
   LinesOfArgumentsButton,
   LinesOfArgumentsPreview,
@@ -73,6 +70,7 @@ import {
 } from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
 import { Data } from "./+data";
+import { ExpectationsPreview } from "../components/ExpectationsPreview";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";

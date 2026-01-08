@@ -446,6 +446,16 @@ export const isExpectationsData = (
   'response' in data &&
   isExpectationsOutput(data.response);
 
+/** Test if the string is the "none" fail state in the LLM response. */
+const isNone = (suggestion: string): boolean =>
+  suggestion.match(/^none/i) !== null;
+
+export function isExpectationsDataSuggestionNone(
+  data: ExpectationsData
+): boolean {
+  return isNone(data.response.suggestion);
+}
+
 export interface LinesOfArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
   tool: 'lines_of_arguments';
 }
