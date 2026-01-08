@@ -27,8 +27,9 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
 
@@ -91,7 +92,7 @@ const SentenceToneIssues: FC<
   );
 };
 
-const Content: FC<ReviewToolProps<ProfessionalToneData>> = ({
+const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
   review,
   ...props
 }) => {
@@ -210,10 +211,7 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 export const ProfessionalTonePreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<ProfessionalToneData>;
-  }
+  PreviewCardProps<ProfessionalToneData>
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
   const [review, setReview] =

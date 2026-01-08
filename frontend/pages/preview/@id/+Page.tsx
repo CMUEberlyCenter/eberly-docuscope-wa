@@ -21,8 +21,8 @@ import { Legal } from "../../../src/app/components/Legal/Legal";
 import { CivilTonePreview } from "../../../src/app/components/Review/CivilTone";
 import { CredibilityPreview } from "../../../src/app/components/Review/Credibility";
 import {
-  Expectations,
   ExpectationsButton,
+  ExpectationsPreview,
 } from "../../../src/app/components/Review/Expectations";
 import {
   LinesOfArgumentsButton,
@@ -60,6 +60,7 @@ import {
   Analysis,
   CivilToneData,
   CredibilityData,
+  isExpectationsData,
   LinesOfArgumentsData,
   LogicalFlowData,
   OnTopicReviewData,
@@ -107,6 +108,7 @@ export const Page: FC = () => {
   ): OptionalReviewData<T> {
     return analyses.find((a) => a.tool === tool) as OptionalReviewData<T>;
   }
+  const getExpectations = () => analyses.filter(isExpectationsData);
 
   return (
     <SplitLayout>
@@ -188,7 +190,11 @@ export const Page: FC = () => {
                 <NullTool text={t("null.big_picture")} />
               </Activity>
               <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
-                <Expectations />
+                <ExpectationsPreview
+                  reviewID={reviewID}
+                  analysis={getExpectations()}
+                  task={task}
+                />
               </Activity>
               {tool === "prominent_topics" && (
                 <ProminentTopicsPreview

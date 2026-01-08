@@ -10,10 +10,17 @@ import {
 import {
   Analysis,
   BasicReviewPrompts,
+  ExpectationsData,
+  ExpectationsOutput,
+  isExpectationsData,
   ReviewPrompt,
   ReviewResponse,
 } from '../../lib/ReviewResponse';
-import { isEnabled, isWritingTask } from '../../lib/WritingTask';
+import {
+  getExpectationByIndex,
+  isEnabled,
+  isWritingTask,
+} from '../../lib/WritingTask';
 import { doChat, reviewData } from '../data/chat';
 import {
   deletePreviewById,
@@ -131,6 +138,79 @@ preview.get(
 );
 
 preview.get(
+  '/:id/expectation/:index',
+  validate(param('id').isMongoId()),
+  validate(param('index').isInt({ min: 0 })),
+  async (request, response) => {
+    const { id, index } = request.params;
+    const indexNum = parseInt(index, 10);
+    const settings = getSettings();
+    if (!settings.expectations) {
+      throw new ForbiddenError('Expectation Analysis tool is not available!');
+    }
+    const preview = await findPreviewById(id);
+    if (!isEnabled(preview.task, 'expectations')) {
+      throw new ForbiddenError(
+        `Expectation analysis is not enabled for this writing task.`
+      );
+    }
+    if (!preview.tool_config.includes('expectations')) {
+      throw new ForbiddenError(
+        `Expectation analysis is not configured for this preview.`
+      );
+    }
+    const target = getExpectationByIndex(preview.task, indexNum);
+    if (!target) {
+      throw new ReferenceError(`No expectation found at index ${index}.`);
+    }
+    const analysisData = preview.analyses
+      .filter((data) => isExpectationsData(data))
+      .find(({ expectation }) => expectation === target.name);
+    if (analysisData) {
+      return response.send(analysisData);
+    }
+    // generate analysis on the fly
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
+    const chat = await doChat<ExpectationsOutput>(
+      'expectations',
+      {
+        ...reviewData({
+          segmented: request.session.segmented,
+          writing_task: preview.task ?? null,
+        }),
+        expectation: target.name,
+        description: target.description ?? '',
+      },
+      controller.signal,
+      true,
+      true
+    );
+    if (controller.signal.aborted) {
+      return;
+    }
+    const { response: chat_response, finished: datetime } = chat;
+    if (!chat_response)
+      throw new Error(
+        `NULL chat response for expectation ${index}: ${target.name}`
+      );
+    if (typeof chat_response === 'string') {
+      throw new Error(chat_response); // if string, throw as error
+    }
+    const data: ExpectationsData = {
+      tool: 'expectations',
+      datetime,
+      expectation: target.name,
+      response: chat_response,
+    };
+    await updatePreviewReviewsById(id, data);
+    response.json(data);
+  }
+);
+
+preview.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
@@ -144,12 +224,12 @@ preview.get(
     const preview = await findPreviewById(id);
     if (!isEnabled(preview.task, analysis)) {
       throw new ForbiddenError(
-        `Analysis ${analysis} not enabled for this writing task.`
+        `Analysis ${analysis} is not enabled for this writing task.`
       );
     }
     if (!preview.tool_config.includes(analysis)) {
       throw new ForbiddenError(
-        `Analysis ${analysis} not configured for this preview.`
+        `Analysis ${analysis} is not configured for this preview.`
       );
     }
     const analysisData = preview.analyses.find((a) => a.tool === analysis);

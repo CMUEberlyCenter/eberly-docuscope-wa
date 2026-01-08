@@ -22,10 +22,12 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
+import { Preview } from "@storybook/react-vite";
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
@@ -40,7 +42,7 @@ export const LogicalFlowButton: FC<ButtonProps> = (props) => {
   );
 };
 
-const LogicalFlowContent: FC<ReviewToolProps<LogicalFlowData>> = ({
+const LogicalFlowContent: FC<ReviewToolContentProps<LogicalFlowData>> = ({
   review,
   ...props
 }) => {
@@ -165,17 +167,14 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
 };
 
 /** Logical Flow review tool component. */
-export const LogicalFlowPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<LogicalFlowData>;
-  }
-> = ({ className, analysis, reviewID, ...props }) => {
-  const { t } = useTranslation("review");
-  const [review, setReview] = useState<OptionalReviewData<LogicalFlowData>>(
-    (analysis as OptionalReviewData<LogicalFlowData>) ?? null
-  );
-  const id = useId();
+export const LogicalFlowPreview: FC<PreviewCardProps<LogicalFlowData>> = ({
+  className,
+  analysis,
+  reviewID,
+  ...props
+}) => {
+  const [review, setReview] =
+    useState<OptionalReviewData<LogicalFlowData>>(analysis);
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
@@ -208,14 +207,11 @@ export const LogicalFlowPreview: FC<
     },
   });
   useEffect(() => {
-    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
     if (!reviewID) return;
     if (analysis && analysis.tool === "logical_flow") {
-      console.log("Using pre-fetched Logical Flow analysis data.");
       setReview(analysis as OptionalReviewData<LogicalFlowData>);
       return;
     }
-    console.log("Fetching Logical Flow analysis data.");
     mutation.mutate({
       id: reviewID,
     });

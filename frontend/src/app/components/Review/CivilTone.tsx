@@ -19,12 +19,13 @@ import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
 
-const CivilToneContent: FC<ReviewToolProps<CivilToneData>> = ({
+const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
   review,
   ...props
 }) => {
@@ -156,12 +157,11 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 /** Civil Tone preview component. */
-export const CivilTonePreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<CivilToneData>;
-  }
-> = ({ analysis, reviewID, ...props }) => {
+export const CivilTonePreview: FC<PreviewCardProps<CivilToneData>> = ({
+  analysis,
+  reviewID,
+  ...props
+}) => {
   const [review, setReview] =
     useState<OptionalReviewData<CivilToneData>>(analysis);
   const dispatch = useReviewDispatch();

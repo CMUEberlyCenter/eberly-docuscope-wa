@@ -95,6 +95,33 @@ export function getExpectations(task: WritingTask | null) {
     : [];
 }
 
+/**
+ * Retrieve a specific leaf rule (expectation) by index.
+ * @param task Writing task
+ * @param index index of the expectation.
+ * @returns
+ */
+export function getExpectationByIndex(
+  task: WritingTask,
+  index: number
+): Rule | undefined {
+  return getExpectations(task).at(index);
+}
+
+/**
+ * Retrieve the index of a specific leaf rule (expectation) in the writing task.
+ * @param task The writing task specification.
+ * @param expectation An expectation in the writing task.
+ * @returns
+ */
+export function getIndexOfExpectation(
+  task: WritingTask,
+  expectation: Rule
+): number {
+  const expectations = getExpectations(task);
+  return expectations.findIndex((exp) => exp.name === expectation.name);
+}
+
 type ToolConfig = {
   /** Tool identifier */
   tool: string;

@@ -21,8 +21,9 @@ import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
 
@@ -60,7 +61,7 @@ const Citations: FC<
   );
 };
 
-const SourcesContent: FC<ReviewToolProps<SourcesData>> = ({
+const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
   review,
   ...props
 }) => {
@@ -229,13 +230,11 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
   );
 };
 
-export const SourcesPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<SourcesData>;
-  }
-> = ({ className, reviewID, analysis, ...props }) => {
-  const { t } = useTranslation("review");
+export const SourcesPreview: FC<PreviewCardProps<SourcesData>> = ({
+  reviewID,
+  analysis,
+  ...props
+}) => {
   const [review, setReview] =
     useState<OptionalReviewData<SourcesData>>(analysis);
   const dispatch = useReviewDispatch();
@@ -272,11 +271,9 @@ export const SourcesPreview: FC<
   useEffect(() => {
     if (!reviewID) return;
     if (analysis && analysis.tool === "sources") {
-      console.log("Using pre-fetched Sources analysis data.");
       setReview(analysis as OptionalReviewData<SourcesData>);
       return;
     }
-    console.log("Fetching Sources analysis data.");
     mutation.mutate({
       id: reviewID,
     });

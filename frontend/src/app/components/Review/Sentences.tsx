@@ -23,7 +23,11 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  PreviewCardProps,
+  ReviewReset,
+  useReviewDispatch,
+} from "./ReviewContext";
 import "./Sentences.scss";
 
 /** Button component for selecting the Sentences tool. */
@@ -305,12 +309,12 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   );
 };
 
-export const SentencesPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<OnTopicReviewData>;
-  }
-> = ({ className, reviewID, analysis, ...props }) => {
+export const SentencesPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
+  className,
+  reviewID,
+  analysis,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const [data, setData] =
     useState<OptionalReviewData<OnTopicReviewData>>(analysis);
@@ -354,7 +358,6 @@ export const SentencesPreview: FC<
   useEffect(() => {
     if (!reviewID) return;
     if (analysis && analysis.tool === "ontopic") {
-      console.log("Using pre-fetched Organization analysis data.");
       setData(analysis as OptionalReviewData<OnTopicReviewData>);
       if ("response" in analysis && analysis.response.html) {
         dispatch({ type: "update", sentences: analysis.response.html });

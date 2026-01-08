@@ -24,7 +24,11 @@ import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  PreviewCardProps,
+  ReviewReset,
+  useReviewDispatch,
+} from "./ReviewContext";
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
@@ -270,10 +274,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 export const ProminentTopicsPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<ProminentTopicsData>;
-  }
+  PreviewCardProps<ProminentTopicsData>
 > = ({ className, reviewID, analysis, ...props }) => {
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const { t } = useTranslation("review");
@@ -311,18 +312,11 @@ export const ProminentTopicsPreview: FC<
     },
   });
   useEffect(() => {
-    console.log(
-      "ProminentTopicsPreview useEffect triggered.",
-      reviewID,
-      analysis
-    );
     if (!reviewID) return;
     if (analysis && analysis.tool === "prominent_topics") {
-      console.log("Using pre-fetched Prominent Topics analysis data.");
       setReview(analysis as OptionalReviewData<ProminentTopicsData>);
       return;
     }
-    console.log("Fetching Prominent Topics analysis data.");
     mutation.mutate({
       id: reviewID,
     });

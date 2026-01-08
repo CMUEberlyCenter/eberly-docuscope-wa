@@ -22,8 +22,9 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
 
@@ -40,10 +41,9 @@ export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
   );
 };
 
-const ParagraphClarityContent: FC<ReviewToolProps<ParagraphClarityData>> = ({
-  review,
-  ...props
-}) => {
+const ParagraphClarityContent: FC<
+  ReviewToolContentProps<ParagraphClarityData>
+> = ({ review, ...props }) => {
   const { t } = useTranslation("review");
   const id = useId();
   const dispatch = useReviewDispatch();
@@ -170,15 +170,10 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 export const ParagraphClarityPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<ParagraphClarityData>;
-  }
+  PreviewCardProps<ParagraphClarityData>
 > = ({ className, reviewID, analysis, ...props }) => {
-  const { t } = useTranslation("review");
   const [review, setReview] =
     useState<OptionalReviewData<ParagraphClarityData>>(analysis);
-  const id = useId();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
@@ -211,14 +206,11 @@ export const ParagraphClarityPreview: FC<
     },
   });
   useEffect(() => {
-    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
     if (!reviewID) return;
     if (analysis && analysis.tool === "paragraph_clarity") {
-      console.log("Using pre-fetched Paragraph Clarity analysis data.");
       setReview(analysis as OptionalReviewData<ParagraphClarityData>);
       return;
     }
-    console.log("Fetching Paragraph Clarity analysis data.");
     mutation.mutate({
       id: reviewID,
     });

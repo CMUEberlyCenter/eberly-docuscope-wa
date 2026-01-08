@@ -11,7 +11,7 @@ import {
   useReducer,
 } from "react";
 import Alert from "react-bootstrap/esm/Alert";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import {
   Analysis,
   isErrorData,
@@ -138,19 +138,23 @@ export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
   return children;
 };
 
-export type ReviewToolProps<T> = HTMLProps<HTMLDivElement> & {
+export type ReviewToolContentProps<T> = HTMLProps<HTMLDivElement> & {
   isPending: boolean;
   review: OptionalReviewData<T>;
 };
 
+/** Preview card properties. */
+export type PreviewCardProps<T> = HTMLProps<HTMLDivElement> & {
+  reviewID?: string;
+  analysis?: OptionalReviewData<T>;
+};
+
 export const ReviewToolCard: FC<
-  ReviewToolProps<Analysis> & {
+  ReviewToolContentProps<Analysis> & {
     children: ReactNode;
-    // isPending: boolean,
     title: string;
     instructionsKey: string;
     errorMessage: string;
-    // review: OptionalReviewData<Analysis>,
   }
 > = ({
   children,
@@ -176,7 +180,16 @@ export const ReviewToolCard: FC<
           <Loading />
         ) : (
           <ErrorBoundary
-            fallback={<Alert variant="danger">{errorMessage}</Alert>}
+            fallbackRender={({
+              error /*, resetErrorBoundary*/,
+            }: FallbackProps) => (
+              <Alert variant="danger">
+                <p>{errorMessage}</p>
+                {error.message && <pre className="mt-2">{error.message}</pre>}
+                {/* needs onReset <Button variant="primary" onClick={resetErrorBoundary}>Try again</Button> */}
+              </Alert>
+            )}
+            // onReset={(details) => mutation.reset()}
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
             <Summary review={review} />

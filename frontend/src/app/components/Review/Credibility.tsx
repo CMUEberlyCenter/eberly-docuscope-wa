@@ -20,12 +20,13 @@ import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
+  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolProps,
+  ReviewToolContentProps,
   useReviewDispatch,
 } from "./ReviewContext";
 
-const CredibilityContent: FC<ReviewToolProps<CredibilityData>> = ({
+const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
   review,
   ...props
 }) => {
@@ -158,12 +159,11 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
 };
 
 /** Ethos preview tool component. */
-export const CredibilityPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<CredibilityData>;
-  }
-> = ({ reviewID, analysis, ...props }) => {
+export const CredibilityPreview: FC<PreviewCardProps<CredibilityData>> = ({
+  reviewID,
+  analysis,
+  ...props
+}) => {
   const [review, setReview] =
     useState<OptionalReviewData<CredibilityData>>(analysis);
   const dispatch = useReviewDispatch();

@@ -61,7 +61,12 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import "./Organization.scss";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  PreviewCardProps,
+  ReviewReset,
+  useReviewDispatch,
+} from "./ReviewContext";
+import { Preview } from "@storybook/react-vite";
 
 DataTable.use(DT);
 
@@ -612,12 +617,12 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
   );
 };
 
-export const OrganizationPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<OnTopicReviewData>;
-  }
-> = ({ className, reviewID, analysis, ...props }) => {
+export const OrganizationPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
+  className,
+  reviewID,
+  analysis,
+  ...props
+}) => {
   const { t } = useTranslation("review");
   const [data, setData] =
     useState<OptionalReviewData<OnTopicReviewData>>(analysis);

@@ -40,7 +40,11 @@ import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  PreviewCardProps,
+  ReviewReset,
+  useReviewDispatch,
+} from "./ReviewContext";
 
 /** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
@@ -336,10 +340,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
 };
 
 export const LinesOfArgumentsPreview: FC<
-  HTMLProps<HTMLDivElement> & {
-    reviewID?: string;
-    analysis?: OptionalReviewData<LinesOfArgumentsData>;
-  }
+  PreviewCardProps<LinesOfArgumentsData>
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
   const [current, setCurrent] = useState<AccordionEventKey>(null);
