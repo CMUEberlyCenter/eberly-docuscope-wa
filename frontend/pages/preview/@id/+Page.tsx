@@ -48,7 +48,6 @@ import {
 } from "../../../src/app/components/Review/ProminentTopics";
 import "../../../src/app/components/Review/Review.scss";
 import {
-  Sentences,
   SentencesButton,
   SentencesPreview,
 } from "../../../src/app/components/Review/Sentences";
@@ -57,7 +56,20 @@ import { StageHeader } from "../../../src/app/components/StageHeader/StageHeader
 import { TaskViewerButton } from "../../../src/app/components/TaskViewer/TaskViewer";
 import { UneditableIcon } from "../../../src/app/components/UneditableIcon/UneditableIcon";
 import { UserText } from "../../../src/app/components/UserTextView/UserText";
-import { ReviewTool } from "../../../src/lib/ReviewResponse";
+import {
+  Analysis,
+  CivilToneData,
+  CredibilityData,
+  LinesOfArgumentsData,
+  LogicalFlowData,
+  OnTopicReviewData,
+  OptionalReviewData,
+  ParagraphClarityData,
+  ProfessionalToneData,
+  ProminentTopicsData,
+  ReviewTool,
+  SourcesData,
+} from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
@@ -90,9 +102,11 @@ export const Page: FC = () => {
   const disabled = (tool: Tool): boolean => {
     return !tool_config.includes(tool);
   };
-  const getAnalysis = (tool: ReviewTool) => {
-    return analyses.find((a) => a.tool === tool);
-  };
+  function getAnalysis<T extends Analysis>(
+    tool: ReviewTool
+  ): OptionalReviewData<T> {
+    return analyses.find((a) => a.tool === tool) as OptionalReviewData<T>;
+  }
 
   return (
     <SplitLayout>
@@ -179,19 +193,23 @@ export const Page: FC = () => {
               {tool === "prominent_topics" && (
                 <ProminentTopicsPreview
                   reviewID={reviewID}
-                  analysis={getAnalysis("prominent_topics")}
+                  analysis={getAnalysis<ProminentTopicsData>(
+                    "prominent_topics"
+                  )}
                 />
               )}
               {tool === "lines_of_arguments" && (
                 <LinesOfArgumentsPreview
                   reviewID={reviewID}
-                  analysis={getAnalysis("lines_of_arguments")}
+                  analysis={getAnalysis<LinesOfArgumentsData>(
+                    "lines_of_arguments"
+                  )}
                 />
               )}
               {tool === "logical_flow" && (
                 <LogicalFlowPreview
                   reviewID={reviewID}
-                  analysis={getAnalysis("logical_flow")}
+                  analysis={getAnalysis<LogicalFlowData>("logical_flow")}
                 />
               )}
               {/* Add Big Picture tools here. */}
@@ -334,13 +352,13 @@ export const Page: FC = () => {
                 {secondaryTool === "civil_tone" && (
                   <CivilTonePreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("civil_tone")}
+                    analysis={getAnalysis<CivilToneData>("civil_tone")}
                   />
                 )}
                 {secondaryTool === "credibility" && (
                   <CredibilityPreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("credibility")}
+                    analysis={getAnalysis<CredibilityData>("credibility")}
                   />
                 )}
                 {/* {secondaryTool === "impressions" && ( */}
@@ -349,31 +367,35 @@ export const Page: FC = () => {
                 {secondaryTool === "organization" && (
                   <OrganizationPreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("ontopic")}
+                    analysis={getAnalysis<OnTopicReviewData>("ontopic")}
                   />
                 )}
                 {secondaryTool === "sentence_density" && (
                   <SentencesPreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("ontopic")}
+                    analysis={getAnalysis<OnTopicReviewData>("ontopic")}
                   />
                 )}
                 {secondaryTool === "paragraph_clarity" && (
                   <ParagraphClarityPreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("paragraph_clarity")}
+                    analysis={getAnalysis<ParagraphClarityData>(
+                      "paragraph_clarity"
+                    )}
                   />
                 )}
                 {secondaryTool === "professional_tone" && (
                   <ProfessionalTonePreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("professional_tone")}
+                    analysis={getAnalysis<ProfessionalToneData>(
+                      "professional_tone"
+                    )}
                   />
                 )}
                 {secondaryTool === "sources" && (
                   <SourcesPreview
                     reviewID={reviewID}
-                    analysis={getAnalysis("sources")}
+                    analysis={getAnalysis<SourcesData>("sources")}
                   />
                 )}
                 {/* Add more tool displays here. */}

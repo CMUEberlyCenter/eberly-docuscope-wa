@@ -1,13 +1,26 @@
+import classNames from "classnames";
 import {
   createContext,
   type Dispatch,
   type FC,
+  HTMLProps,
   type ReactNode,
   use,
   useContext,
   useEffect,
   useReducer,
 } from "react";
+import Alert from "react-bootstrap/esm/Alert";
+import { ErrorBoundary } from "react-error-boundary";
+import {
+  Analysis,
+  isErrorData,
+  OptionalReviewData,
+} from "../../../lib/ReviewResponse";
+import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
+import { Loading } from "../Loading/Loading";
+import { Summary } from "../Summary/Summary";
+import { ToolHeader } from "../ToolHeader/ToolHeader";
 
 type ReviewContextState = {
   /** List of paragraph ids to highlight. */
@@ -123,4 +136,54 @@ export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
     };
   }, []);
   return children;
+};
+
+export type ReviewToolProps<T> = HTMLProps<HTMLDivElement> & {
+  isPending: boolean;
+  review: OptionalReviewData<T>;
+};
+
+export const ReviewToolCard: FC<
+  ReviewToolProps<Analysis> & {
+    children: ReactNode;
+    // isPending: boolean,
+    title: string;
+    instructionsKey: string;
+    errorMessage: string;
+    // review: OptionalReviewData<Analysis>,
+  }
+> = ({
+  children,
+  className,
+  isPending,
+  title,
+  instructionsKey,
+  errorMessage,
+  review,
+  ...props
+}) => {
+  return (
+    <ReviewReset>
+      <article
+        {...props}
+        className={classNames(
+          className,
+          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
+        )}
+      >
+        <ToolHeader title={title} instructionsKey={instructionsKey} />
+        {isPending || !review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallback={<Alert variant="danger">{errorMessage}</Alert>}
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            <Summary review={review} />
+            {children}
+          </ErrorBoundary>
+        )}
+      </article>
+    </ReviewReset>
+  );
 };

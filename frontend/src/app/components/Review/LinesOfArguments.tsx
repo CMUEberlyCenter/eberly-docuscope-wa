@@ -22,7 +22,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
-  Analysis,
   type Claim as ClaimProps,
   isErrorData,
   type LinesOfArgumentsData,
@@ -339,7 +338,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
 export const LinesOfArgumentsPreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<LinesOfArgumentsData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");

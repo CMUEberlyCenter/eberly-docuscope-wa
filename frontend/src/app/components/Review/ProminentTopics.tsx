@@ -7,7 +7,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
-  Analysis,
   isErrorData,
   type OptionalReviewData,
   type ProminentTopicsData,
@@ -273,14 +272,13 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
 export const ProminentTopicsPreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<ProminentTopicsData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const { t } = useTranslation("review");
-  const [review, setReview] = useState<OptionalReviewData<ProminentTopicsData>>(
-    (analysis as OptionalReviewData<ProminentTopicsData>) ?? null
-  );
+  const [review, setReview] =
+    useState<OptionalReviewData<ProminentTopicsData>>(analysis);
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({

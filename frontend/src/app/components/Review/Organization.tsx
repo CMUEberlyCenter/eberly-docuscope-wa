@@ -47,9 +47,7 @@ import {
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import { Optional } from "../../..";
 import {
-  Analysis,
   isErrorData,
   type OnTopicReviewData,
   type OptionalReviewData,
@@ -617,11 +615,12 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = ({
 export const OrganizationPreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<OnTopicReviewData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
-  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
+  const [data, setData] =
+    useState<OptionalReviewData<OnTopicReviewData>>(analysis);
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
   const [selected, setSelected] = useState<SelectedRowCol>(null);

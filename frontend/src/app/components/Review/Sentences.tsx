@@ -4,13 +4,11 @@ import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
 import { Alert, type ButtonProps } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
-import { Optional } from "../../..";
 import {
   type ClarityData,
-  cleanAndRepairSentenceData
+  cleanAndRepairSentenceData,
 } from "../../../lib/OnTopicData";
 import {
-  Analysis,
   isErrorData,
   type OnTopicReviewData,
   type OptionalReviewData,
@@ -310,11 +308,12 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
 export const SentencesPreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<OnTopicReviewData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
-  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
+  const [data, setData] =
+    useState<OptionalReviewData<OnTopicReviewData>>(analysis);
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);

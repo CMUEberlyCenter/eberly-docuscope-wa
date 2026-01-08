@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
@@ -8,30 +7,25 @@ import {
   useRef,
   useState,
 } from "react";
-import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
+import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
-  Analysis,
-  isErrorData,
   type OptionalReviewData,
   type ParagraphClarityData,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import {
-  checkReviewResponse,
-  ReviewErrorData,
-} from "../ErrorHandler/ErrorHandler";
+import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
-import { Loading } from "../Loading/Loading";
-import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  ReviewToolCard,
+  ReviewToolProps,
+  useReviewDispatch,
+} from "./ReviewContext";
 
 /** Button component for selecting the Paragraph Clarity tool. */
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
@@ -46,18 +40,74 @@ export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
   );
 };
 
-/** Paragraph Clarity review tool component. */
-export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
+const ParagraphClarityContent: FC<ReviewToolProps<ParagraphClarityData>> = ({
+  review,
   ...props
 }) => {
   const { t } = useTranslation("review");
+  const id = useId();
+  const dispatch = useReviewDispatch();
+  return (
+    <ReviewToolCard
+      title={t("paragraph_clarity.title")}
+      instructionsKey={"paragraph_clarity"}
+      errorMessage={t("paragraph_clarity.error")}
+      review={review}
+      {...props}
+    >
+      <section>
+        <header>
+          <h5 className="text-primary">{t("insights")}</h5>
+          <Translation ns="instructions">
+            {(t) => <p>{t("paragraph_clarity_insights")}</p>}
+          </Translation>
+        </header>
+        {review && "response" in review ? (
+          <Accordion>
+            {review.response.map(
+              ({ issue, suggestion, sent_ids, para_id }, i) => (
+                <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+                  <Accordion.Header className="accordion-header-highlight">
+                    <div className="flex-grow-1">{issue}</div>
+                    <AlertIcon
+                      show={sent_ids.length === 0 && !para_id}
+                      message={t("logical_flow.no_sentences")}
+                    />
+                  </Accordion.Header>
+                  <Accordion.Body
+                    onEntered={() =>
+                      dispatch({
+                        type: "set",
+                        sentences: [sent_ids],
+                        paragraphs: [para_id],
+                      })
+                    }
+                    onExit={() => dispatch({ type: "unset" })}
+                  >
+                    <h6 className="d-inline">
+                      {t("paragraph_clarity.suggestion")}
+                    </h6>{" "}
+                    <p className="d-inline">{suggestion}</p>
+                  </Accordion.Body>
+                </Accordion.Item>
+              )
+            )}
+          </Accordion>
+        ) : null}
+      </section>
+    </ReviewToolCard>
+  );
+};
+
+/** Paragraph Clarity review tool component. */
+export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
+  ...props
+}) => {
   const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] =
     useState<OptionalReviewData<ParagraphClarityData>>(null);
 
-  const id = useId();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
@@ -111,88 +161,23 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   }, [document, writing_task]);
 
   return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader
-          title={t("paragraph_clarity.title")}
-          instructionsKey="paragraph_clarity"
-        />
-        {!review || mutation.isPending ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("paragraph_clarity.error")}</Alert>
-            }
-          >
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            <section>
-              <header>
-                <h5 className="text-primary">{t("insights")}</h5>
-                <Translation ns="instructions">
-                  {(t) => <p>{t("paragraph_clarity_insights")}</p>}
-                </Translation>
-              </header>
-              {"response" in review ? (
-                <Accordion>
-                  {review.response.map(
-                    ({ issue, suggestion, sent_ids, para_id }, i) => (
-                      <Accordion.Item
-                        key={`${id}-${i}`}
-                        eventKey={`${id}-${i}`}
-                      >
-                        <Accordion.Header className="accordion-header-highlight">
-                          <div className="flex-grow-1">{issue}</div>
-                          <AlertIcon
-                            show={sent_ids.length === 0 && !para_id}
-                            message={t("logical_flow.no_sentences")}
-                          />
-                        </Accordion.Header>
-                        <Accordion.Body
-                          onEntered={() =>
-                            dispatch({
-                              type: "set",
-                              sentences: [sent_ids],
-                              paragraphs: [para_id],
-                            })
-                          }
-                          onExit={() => dispatch({ type: "unset" })}
-                        >
-                          <h6 className="d-inline">
-                            {t("paragraph_clarity.suggestion")}
-                          </h6>{" "}
-                          <p className="d-inline">{suggestion}</p>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    )
-                  )}
-                </Accordion>
-              ) : null}
-            </section>
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
+    <ParagraphClarityContent
+      review={review}
+      isPending={mutation.isPending}
+      {...props}
+    />
   );
 };
 
 export const ParagraphClarityPreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<ParagraphClarityData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
-  const [review, setReview] = useState<
-    OptionalReviewData<ParagraphClarityData>
-  >((analysis as OptionalReviewData<ParagraphClarityData>) ?? null);
+  const [review, setReview] =
+    useState<OptionalReviewData<ParagraphClarityData>>(analysis);
   const id = useId();
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -243,74 +228,10 @@ export const ParagraphClarityPreview: FC<
   }, [reviewID, analysis]);
 
   return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader
-          title={t("paragraph_clarity.title")}
-          instructionsKey="paragraph_clarity"
-        />
-        {!review || mutation.isPending ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("paragraph_clarity.error")}</Alert>
-            }
-          >
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            <section>
-              <header>
-                <h5 className="text-primary">{t("insights")}</h5>
-                <Translation ns="instructions">
-                  {(t) => <p>{t("paragraph_clarity_insights")}</p>}
-                </Translation>
-              </header>
-              {"response" in review ? (
-                <Accordion>
-                  {review.response.map(
-                    ({ issue, suggestion, sent_ids, para_id }, i) => (
-                      <Accordion.Item
-                        key={`${id}-${i}`}
-                        eventKey={`${id}-${i}`}
-                      >
-                        <Accordion.Header className="accordion-header-highlight">
-                          <div className="flex-grow-1">{issue}</div>
-                          <AlertIcon
-                            show={sent_ids.length === 0 && !para_id}
-                            message={t("logical_flow.no_sentences")}
-                          />
-                        </Accordion.Header>
-                        <Accordion.Body
-                          onEntered={() =>
-                            dispatch({
-                              type: "set",
-                              sentences: [sent_ids],
-                              paragraphs: [para_id],
-                            })
-                          }
-                          onExit={() => dispatch({ type: "unset" })}
-                        >
-                          <h6 className="d-inline">
-                            {t("paragraph_clarity.suggestion")}
-                          </h6>{" "}
-                          <p className="d-inline">{suggestion}</p>
-                        </Accordion.Body>
-                      </Accordion.Item>
-                    )
-                  )}
-                </Accordion>
-              ) : null}
-            </section>
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
+    <ParagraphClarityContent
+      review={review}
+      isPending={mutation.isPending}
+      {...props}
+    />
   );
 };

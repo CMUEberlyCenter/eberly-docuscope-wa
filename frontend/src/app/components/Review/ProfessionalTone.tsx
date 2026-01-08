@@ -1,5 +1,4 @@
 import { useMutation } from "@tanstack/react-query";
-import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
@@ -14,29 +13,24 @@ import {
   Alert,
   type ButtonProps,
 } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import type { Optional } from "../../..";
 import {
-  Analysis,
-  isErrorData,
   type OptionalReviewData,
   type ProfessionalToneData,
   type ProfessionalToneOutput,
 } from "../../../lib/ReviewResponse";
 import type { WritingTask } from "../../../lib/WritingTask";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
-import {
-  checkReviewResponse,
-  ReviewErrorData,
-} from "../ErrorHandler/ErrorHandler";
+import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
-import { Loading } from "../Loading/Loading";
-import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import {
+  ReviewToolCard,
+  ReviewToolProps,
+  useReviewDispatch,
+} from "./ReviewContext";
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
@@ -97,9 +91,60 @@ const SentenceToneIssues: FC<
   );
 };
 
+const Content: FC<ReviewToolProps<ProfessionalToneData>> = ({
+  review,
+  ...props
+}) => {
+  const { t } = useTranslation("review");
+
+  return (
+    <ReviewToolCard
+      title={t("professional_tone.title")}
+      instructionsKey={"professional_tone"}
+      errorMessage={t("professional_tone.error")}
+      review={review}
+      {...props}
+    >
+      {review && "response" in review ? (
+        <section>
+          <header>
+            <h5 className="text-primary">{t("insights")}</h5>
+            <Translation ns="instructions">
+              {(t) => <p>{t("professional_tone_insights")}</p>}
+            </Translation>
+          </header>
+          <section>
+            <h5>{t("professional_tone.confidence")}</h5>
+            <SentenceToneIssues
+              issues={review.response.filter(
+                ({ tone_type }) => tone_type === "confidence"
+              )}
+            />
+          </section>
+          <section>
+            <h5>{t("professional_tone.subjectivity")}</h5>
+            <SentenceToneIssues
+              issues={review.response.filter(({ tone_type }) =>
+                ["subjective", "subjectivity"].includes(tone_type)
+              )}
+            />
+          </section>
+          <section>
+            <h5>{t("professional_tone.sentiment")}</h5>
+            <SentenceToneIssues
+              issues={review.response.filter(
+                ({ tone_type }) => tone_type === "emotional"
+              )}
+            />
+          </section>
+        </section>
+      ) : null}
+    </ReviewToolCard>
+  );
+};
+
 /** Professional Tone review tool component. */
 export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
   ...props
 }) => {
   const { t } = useTranslation("review");
@@ -161,80 +206,18 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
     };
   }, [document, writing_task]);
 
-  return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader
-          title={t("professional_tone.title")}
-          instructionsKey="professional_tone"
-        />
-        {!review || mutation.isPending ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("professional_tone.error")}</Alert>
-            }
-          >
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            {"response" in review ? (
-              <section>
-                <header>
-                  <h5 className="text-primary">{t("insights")}</h5>
-                  <Translation ns="instructions">
-                    {(t) => <p>{t("professional_tone_insights")}</p>}
-                  </Translation>
-                </header>
-                <section>
-                  <h5>{t("professional_tone.confidence")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "confidence"
-                    )}
-                  />
-                </section>
-                <section>
-                  <h5>{t("professional_tone.subjectivity")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(({ tone_type }) =>
-                      ["subjective", "subjectivity"].includes(tone_type)
-                    )}
-                  />
-                </section>
-                <section>
-                  <h5>{t("professional_tone.sentiment")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "emotional"
-                    )}
-                  />
-                </section>
-              </section>
-            ) : null}
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
-  );
+  return <Content review={review} isPending={mutation.isPending} {...props} />;
 };
 
 export const ProfessionalTonePreview: FC<
   HTMLProps<HTMLDivElement> & {
     reviewID?: string;
-    analysis?: Optional<Analysis>;
+    analysis?: OptionalReviewData<ProfessionalToneData>;
   }
 > = ({ className, reviewID, analysis, ...props }) => {
   const { t } = useTranslation("review");
-  const [review, setReview] = useState<
-    OptionalReviewData<ProfessionalToneData>
-  >((analysis as OptionalReviewData<ProfessionalToneData>) ?? null);
+  const [review, setReview] =
+    useState<OptionalReviewData<ProfessionalToneData>>(analysis);
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
@@ -287,66 +270,5 @@ export const ProfessionalTonePreview: FC<
     };
   }, [reviewID, analysis]);
 
-  return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader
-          title={t("professional_tone.title")}
-          instructionsKey="professional_tone"
-        />
-        {!review || mutation.isPending ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("professional_tone.error")}</Alert>
-            }
-          >
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            {"response" in review ? (
-              <section>
-                <header>
-                  <h5 className="text-primary">{t("insights")}</h5>
-                  <Translation ns="instructions">
-                    {(t) => <p>{t("professional_tone_insights")}</p>}
-                  </Translation>
-                </header>
-                <section>
-                  <h5>{t("professional_tone.confidence")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "confidence"
-                    )}
-                  />
-                </section>
-                <section>
-                  <h5>{t("professional_tone.subjectivity")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(({ tone_type }) =>
-                      ["subjective", "subjectivity"].includes(tone_type)
-                    )}
-                  />
-                </section>
-                <section>
-                  <h5>{t("professional_tone.sentiment")}</h5>
-                  <SentenceToneIssues
-                    issues={review.response.filter(
-                      ({ tone_type }) => tone_type === "emotional"
-                    )}
-                  />
-                </section>
-              </section>
-            ) : null}
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
-  );
+  return <Content review={review} isPending={mutation.isPending} {...props} />;
 };
