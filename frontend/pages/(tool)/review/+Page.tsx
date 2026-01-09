@@ -1,8 +1,8 @@
 /* @overview: This is the review tools page. The user reviews a structured writing task with feedback from LLM's. */
 import { type FC } from "react";
 import { SplitLayout } from "../../../layouts/SplitLayout";
-import { Review } from "../../../src/app/components/Review/Review";
-import { UserTextView } from "../../../src/app/components/UserTextView/UserTextView";
+import { Review } from "../../../components/Review/Review";
+import { UserTextView } from "../../../components/UserTextView/UserTextView";
 
 const Page: FC = () => {
   return (

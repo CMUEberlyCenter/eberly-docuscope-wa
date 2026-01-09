@@ -1,7 +1,7 @@
 import { FC, ReactNode, useId } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Logo } from "../../../src/app/components/Logo/Logo";
+import { Logo } from "../../../components/Logo/Logo";
 
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { t } = useTranslation();

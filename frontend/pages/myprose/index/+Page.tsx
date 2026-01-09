@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { useTranslation } from "react-i18next";
-import { Logo } from "../../../src/app/components/Logo/Logo";
+import { Logo } from "../../../components/Logo/Logo";
 
 const Page: FC = () => {
   const { t } = useTranslation();

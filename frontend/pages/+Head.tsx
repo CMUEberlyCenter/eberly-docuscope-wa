@@ -1,7 +1,7 @@
 // https://vike.dev/Head
 
 import type { FC } from "react";
-import logoUrl from "../src/app/assets/logo.svg";
+import logoUrl from "../assets/logo.svg";
 import { usePageContext } from "vike-react/usePageContext";
 
 const HeadDefault: FC = () => {

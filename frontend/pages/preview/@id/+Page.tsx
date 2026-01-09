@@ -16,43 +16,43 @@ import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { SplitLayout } from "../../../layouts/SplitLayout";
-import AdditionalToolsIcon from "../../../src/app/assets/icons/additional_tools_icon.svg?react";
-import { Legal } from "../../../src/app/components/Legal/Legal";
-import { CivilTonePreview } from "../../../src/app/components/Review/CivilTone";
-import { CredibilityPreview } from "../../../src/app/components/Review/Credibility";
-import { ExpectationsButton } from "../../../src/app/components/Review/Expectations";
+import AdditionalToolsIcon from "../../../assets/icons/additional_tools_icon.svg?react";
+import { Legal } from "../../../components/Legal/Legal";
+import { CivilTonePreview } from "../../../components/Review/CivilTone";
+import { CredibilityPreview } from "../../../components/Review/Credibility";
+import { ExpectationsButton } from "../../../components/Review/Expectations";
 import {
   LinesOfArgumentsButton,
   LinesOfArgumentsPreview,
-} from "../../../src/app/components/Review/LinesOfArguments";
+} from "../../../components/Review/LinesOfArguments";
 import {
   LogicalFlowButton,
   LogicalFlowPreview,
-} from "../../../src/app/components/Review/LogicalFlow";
-import { NullTool } from "../../../src/app/components/Review/NullTool";
-import { OrganizationPreview } from "../../../src/app/components/Review/Organization";
+} from "../../../components/Review/LogicalFlow";
+import { NullTool } from "../../../components/Review/NullTool";
+import { OrganizationPreview } from "../../../components/Review/Organization";
 import {
   ParagraphClarityButton,
   ParagraphClarityPreview,
-} from "../../../src/app/components/Review/ParagraphClarity";
+} from "../../../components/Review/ParagraphClarity";
 import {
   ProfessionalToneButton,
   ProfessionalTonePreview,
-} from "../../../src/app/components/Review/ProfessionalTone";
+} from "../../../components/Review/ProfessionalTone";
 import {
   ProminentTopicsButton,
   ProminentTopicsPreview,
-} from "../../../src/app/components/Review/ProminentTopics";
-import "../../../src/app/components/Review/Review.scss";
+} from "../../../components/Review/ProminentTopics";
+import "../../../components/Review/Review.scss";
 import {
   SentencesButton,
   SentencesPreview,
-} from "../../../src/app/components/Review/Sentences";
-import { SourcesPreview } from "../../../src/app/components/Review/Sources";
-import { StageHeader } from "../../../src/app/components/StageHeader/StageHeader";
-import { TaskViewerButton } from "../../../src/app/components/TaskViewer/TaskViewer";
-import { UneditableIcon } from "../../../src/app/components/UneditableIcon/UneditableIcon";
-import { UserText } from "../../../src/app/components/UserTextView/UserText";
+} from "../../../components/Review/Sentences";
+import { SourcesPreview } from "../../../components/Review/Sources";
+import { StageHeader } from "../../../components/StageHeader/StageHeader";
+import { TaskViewerButton } from "../../../components/TaskViewer/TaskViewer";
+import { UneditableIcon } from "../../../components/UneditableIcon/UneditableIcon";
+import { UserText } from "../../../components/UserTextView/UserText";
 import {
   Analysis,
   CivilToneData,

@@ -144,24 +144,24 @@ export type OnTopicData = {
   local?: LocalData[];
 };
 /** Type guard for OnTopicData */
-export const isOnTopicData = (data: unknown): data is OnTopicData => {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    ('clarity' in data ? isClarityData(data.clarity) : true) &&
-    ('coherence' in data ? data.coherence !== undefined : true) &&
-    ('html' in data ? typeof data.html === 'string' : true) &&
-    ('html_sentences' in data
-      ? Array.isArray(data.html_sentences) &&
-        data.html_sentences.every(
-          (para: unknown) =>
-            Array.isArray(para) &&
-            para.every((sent) => typeof sent === 'string')
-        )
-      : true) &&
-    ('local' in data ? Array.isArray(data.local) : true)
-  );
-};
+// export const isOnTopicData = (data: unknown): data is OnTopicData => {
+//   return (
+//     !!data &&
+//     typeof data === 'object' &&
+//     ('clarity' in data ? isClarityData(data.clarity) : true) &&
+//     ('coherence' in data ? data.coherence !== undefined : true) &&
+//     ('html' in data ? typeof data.html === 'string' : true) &&
+//     ('html_sentences' in data
+//       ? Array.isArray(data.html_sentences) &&
+//         data.html_sentences.every(
+//           (para: unknown) =>
+//             Array.isArray(para) &&
+//             para.every((sent) => typeof sent === 'string')
+//         )
+//       : true) &&
+//     ('local' in data ? Array.isArray(data.local) : true)
+//   );
+// };
 
 /** Removes empty sentences from the html_sentences data. */
 export const cleanAndRepairSentenceData = (data?: OnTopicData | null) => {

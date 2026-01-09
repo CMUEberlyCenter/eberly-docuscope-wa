@@ -5,10 +5,10 @@ import { Button, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import { ClipboardIconButton } from "../../../../src/app/components/ClipboardIconButton/ClipboardIconButton";
-import { MyProseLinks } from "../../../../src/app/components/MyProseLinks/MyProseLinks";
-import { WritingTaskFilter } from "../../../../src/app/components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../../src/app/components/WritingTaskInfo/WritingTaskInfo";
+import { ClipboardIconButton } from "../../../../components/ClipboardIconButton/ClipboardIconButton";
+import { MyProseLinks } from "../../../../components/MyProseLinks/MyProseLinks";
+import { WritingTaskFilter } from "../../../../components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "../../../../components/WritingTaskInfo/WritingTaskInfo";
 import { validateWritingTask } from "../../../../src/lib/schemaValidate";
 import {
   type DbWritingTask,

@@ -1,6 +1,6 @@
 import type { NotesRequest, TextRequest } from '../../lib/Requests';
 import type { WritingTask } from '../../lib/WritingTask';
-import { checkReviewResponse } from '../components/ErrorHandler/ErrorHandler';
+import { checkReviewResponse } from '../../../components/ErrorHandler/ErrorHandler';
 import type {
   CopyEditResponse,
   LocalCoherenceResponse,
@@ -53,61 +53,61 @@ export async function postConvertNotes(
 
 /*** Clarify selected text ***/
 
-async function postText<
-  T extends { explanation: string } | { general_assessment: string },
->(
-  endpoint: string,
-  errorData: T,
-  { text }: SelectedText,
-  writing_task?: WritingTask | null
-): Promise<T> {
-  const { user_lang, target_lang } = writing_task?.info ?? {};
-  const response = await fetch(`/api/v2/scribe/${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, user_lang, target_lang } as TextRequest),
-  });
-  if (!response.ok) {
-    const err = await response.text();
-    console.error(err);
-    return { ...errorData, explanation: err };
-  }
-  const data = await response.json();
-  if ('error' in data) {
-    console.error(data.message);
-    return { ...errorData, explanation: data.message };
-  }
-  // if ('choices' in data) {
-  const content = data; // data.choices.at(0)?.message.content;
-  if (content) {
-    try {
-      return content as T;
-    } catch (err) {
-      console.log(content);
-      console.error(err);
-      if (err instanceof Error) {
-        return { ...errorData, explanation: err.message };
-      }
-    }
-  }
-  // }
-  console.error(data);
-  return { ...errorData, explanation: 'Invalid response from service.' };
-}
-export const postClarifyText = (
-  selected: SelectedText,
-  writing_task?: WritingTask | null
-) =>
-  postText<CopyEditResponse>(
-    'copyedit',
-    {
-      revision: '',
-      clean_revision: '',
-      explanation: '',
-    },
-    selected,
-    writing_task
-  );
+// async function postText<
+//   T extends { explanation: string } | { general_assessment: string },
+// >(
+//   endpoint: string,
+//   errorData: T,
+//   { text }: SelectedText,
+//   writing_task?: WritingTask | null
+// ): Promise<T> {
+//   const { user_lang, target_lang } = writing_task?.info ?? {};
+//   const response = await fetch(`/api/v2/scribe/${endpoint}`, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ text, user_lang, target_lang } as TextRequest),
+//   });
+//   if (!response.ok) {
+//     const err = await response.text();
+//     console.error(err);
+//     return { ...errorData, explanation: err };
+//   }
+//   const data = await response.json();
+//   if ('error' in data) {
+//     console.error(data.message);
+//     return { ...errorData, explanation: data.message };
+//   }
+//   // if ('choices' in data) {
+//   const content = data; // data.choices.at(0)?.message.content;
+//   if (content) {
+//     try {
+//       return content as T;
+//     } catch (err) {
+//       console.log(content);
+//       console.error(err);
+//       if (err instanceof Error) {
+//         return { ...errorData, explanation: err.message };
+//       }
+//     }
+//   }
+//   // }
+//   console.error(data);
+//   return { ...errorData, explanation: 'Invalid response from service.' };
+// }
+// export const postClarifyText = (
+//   selected: SelectedText,
+//   writing_task?: WritingTask | null
+// ) =>
+//   postText<CopyEditResponse>(
+//     'copyedit',
+//     {
+//       revision: '',
+//       clean_revision: '',
+//       explanation: '',
+//     },
+//     selected,
+//     writing_task
+//   );
 
 /*** Assess Expectations ***/
 
@@ -169,17 +169,17 @@ export const postClarifyText = (
 
 /****** Logical Flow Audit ******/
 
-export const postFlowText = (
-  selected: SelectedText,
-  writing_task?: WritingTask | null
-) =>
-  postText<LocalCoherenceResponse>(
-    'local_coherence',
-    {
-      rating: 0,
-      general_assessment: '',
-      issues: [],
-    },
-    selected,
-    writing_task
-  );
+// export const postFlowText = (
+//   selected: SelectedText,
+//   writing_task?: WritingTask | null
+// ) =>
+//   postText<LocalCoherenceResponse>(
+//     'local_coherence',
+//     {
+//       rating: 0,
+//       general_assessment: '',
+//       issues: [],
+//     },
+//     selected,
+//     writing_task
+//   );
