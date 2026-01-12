@@ -92,9 +92,7 @@ const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
 };
 
 /** Civil Tone review tool component. */
-export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({
-  ...props
-}) => {
+export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
   const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<CivilToneData>>(null);

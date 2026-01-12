@@ -39,6 +39,29 @@ export async function findAllPreviews(): Promise<Preview[]> {
   return previews;
 }
 
+/**
+ * Find all previews with minimal information.
+ * Used for listing previews without loading full data.
+ * @returns Array of previews with only _id, filename, timestamp, task.info.name, and tool_config.
+ */
+export async function findAllPreviewsBasic(): Promise<Preview[]> {
+  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const previews = await collection
+    .find<Preview>(
+      {},
+      {
+        projection: {
+          filename: 1,
+          timestamp: 1,
+          'task.info.name': 1,
+          tool_config: 1,
+        },
+      }
+    )
+    .toArray();
+  return previews;
+}
+
 export async function findPreviewById(id: string): Promise<Preview> {
   try {
     const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);

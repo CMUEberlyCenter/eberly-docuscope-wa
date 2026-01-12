@@ -17,6 +17,7 @@ export const ClipboardIconButton: FC<ButtonProps> = ({
         {...props}
         variant="icon"
         className={classNames("text-primary", className)}
+        title={t("clipboard")}
       >
         <ClipboardIcon />
         <span className="visually-hidden sr-only">{t("clipboard")}</span>

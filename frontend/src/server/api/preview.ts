@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { param, query } from 'express-validator';
+import { body, param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
 import {
@@ -21,11 +21,11 @@ import {
   isEnabled,
   isWritingTask,
 } from '../../lib/WritingTask';
+import { basicAuthMiddleware } from '../../utils/basicAuth';
 import { doChat, reviewData } from '../data/chat';
 import {
   clearPreviewAnalysesById,
   deletePreviewById,
-  findAllPreviews,
   findPreviewById,
   insertPreview,
   updatePreviewReviewsById,
@@ -39,52 +39,55 @@ export const preview = Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-preview.post('/', upload.single('document'), async (request, response) => {
-  // should this be behind authentication?
-  const { task, tool_config } = request.body;
-  const writingTask = JSON.parse(task);
-  if (!Array.isArray(tool_config)) {
-    throw new BadRequestError('Tool config must be an array.');
-  }
-  if (tool_config.some((tool: unknown) => typeof tool !== 'string')) {
-    throw new BadRequestError('Tool config must be an array of strings.');
-  }
-  const tools = tool_config as string[];
-  if (!isWritingTask(writingTask)) {
-    throw new BadRequestError('Invalid writing task JSON.');
-  }
-  if (!request.file) {
-    throw new BadRequestError('No document uploaded.');
-  }
-  if (
-    request.file.mimetype !==
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  ) {
-    throw new BadRequestError('Uploaded document is not a valid .docx file.');
-  }
-  // TODO: check file size limits
-  // TODO: handle image resizing server-side
-  const { value, messages } = await convertToHtml(
-    { buffer: request.file.buffer },
-    {
-      styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
+preview.post(
+  '/',
+  basicAuthMiddleware,
+  upload.single('document'),
+  validate(body('tool_config').isArray()),
+  validate(body('tool_config.*').isString()),
+  validate(
+    body('task')
+      .isString()
+      .custom((value) => isWritingTask(JSON.parse(value)))
+      .withMessage('Invalid writing task JSON.')
+  ),
+  async (request, response) => {
+    const { task, tool_config } = request.body;
+    const writingTask = JSON.parse(task);
+    const tools = tool_config as string[];
+    if (!request.file) {
+      throw new BadRequestError('No document uploaded.');
     }
-  );
-  if (messages.length) {
-    throw new BadRequestError(
-      `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
+    if (
+      request.file.mimetype !==
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ) {
+      throw new BadRequestError('Uploaded document is not a valid .docx file.');
+    }
+    // TODO: check file size limits
+    // TODO: handle image resizing server-side
+    const { value, messages } = await convertToHtml(
+      { buffer: request.file.buffer },
+      {
+        styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
+      }
     );
+    if (messages.length) {
+      throw new BadRequestError(
+        `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
+      );
+    }
+    const segmented = await segmentText(value);
+    const dbId = await insertPreview(
+      writingTask,
+      value,
+      segmented,
+      request.file.originalname,
+      tools
+    );
+    response.redirect(`/preview/${dbId.toString()}`);
   }
-  const segmented = await segmentText(value);
-  const dbId = await insertPreview(
-    writingTask,
-    value,
-    segmented,
-    request.file.originalname,
-    tools
-  );
-  response.redirect(`/preview/${dbId.toString()}`);
-});
+);
 
 preview.get(
   '/:id',
@@ -96,10 +99,10 @@ preview.get(
 );
 preview.delete(
   '/:id',
+  basicAuthMiddleware,
   validate(param('id').isMongoId()),
   validate(query('cache_only').optional().isBoolean()),
   async (request, response) => {
-    // TODO: add authentication/authorization
     const id = request.params.id;
     const cache = request.query.cache_only === 'true';
     if (cache) {
@@ -276,7 +279,8 @@ preview.get(
   }
 );
 
-preview.get('/', async (_request, response) => {
-  const previews = await findAllPreviews();
-  response.send(previews);
-});
+// UNUSED API endpoint to get all previews
+// preview.get('/', async (_request, response) => {
+//   const previews = await findAllPreviews();
+//   response.send(previews);
+// });

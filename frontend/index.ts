@@ -9,7 +9,7 @@ import express, {
   type Request,
   type Response,
 } from 'express';
-import basicAuth from 'express-basic-auth';
+import type { IBasicAuthedRequest } from 'express-basic-auth';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
@@ -58,6 +58,7 @@ import {
   PRODUCT,
   SESSION_KEY,
 } from './src/server/settings';
+import { basicAuthMiddleware } from './src/utils/basicAuth';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
 
@@ -358,11 +359,7 @@ async function __main__() {
     const app = express();
     app.use(
       '/admin',
-      basicAuth({
-        users: { admin: ADMIN_PASSWORD },
-        challenge: true,
-        realm: 'myProse Admin Area',
-      })
+      basicAuthMiddleware
     );
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
@@ -491,7 +488,7 @@ async function __main__() {
           token,
           session: req.session,
           writing_task_id,
-          user: (req as basicAuth.IBasicAuthedRequest).auth?.user,
+          user: (req as IBasicAuthedRequest).auth?.user,
           // ltik,
           // headers: {
           //   'Content-Type': 'text/html',

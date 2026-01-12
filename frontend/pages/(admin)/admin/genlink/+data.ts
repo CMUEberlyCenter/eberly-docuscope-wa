@@ -1,11 +1,11 @@
 import {
-  findAllPreviews,
+  findAllPreviewsBasic,
   findAllPublicWritingTasks,
 } from '../../../../src/server/data/mongo';
 
 export const data = async () => {
   const tasks = await findAllPublicWritingTasks();
-  const previews = (await findAllPreviews()).map((preview, i) => ({
+  const previews = (await findAllPreviewsBasic()).map((preview, i) => ({
     ...preview,
     _id: undefined,
     id: preview._id?.toString() ?? `preview_${i}`,

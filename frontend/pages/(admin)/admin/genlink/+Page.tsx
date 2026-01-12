@@ -1,4 +1,4 @@
-import { faRefresh, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faBroom, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Activity, ChangeEvent, FC, useState } from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
@@ -224,62 +224,69 @@ export const Page: FC = () => {
           </div>
         </Card.Body>
       </Card>
-      <Card>
-        <Card.Header>{t("admin.genlink.existing_previews")}</Card.Header>
-        <ListGroup variant="flush">
-          {previews.map(({ id, task, filename, timestamp }) => (
-            <ListGroup.Item key={`${id}`}>
-              <a href={`/preview/${id}`}>
-                {task.info.name}: {filename} (
-                {new Date(timestamp).toLocaleString()})
-              </a>
-              <ClipboardIconButton
-                onClick={() =>
-                  navigator.clipboard.writeText(
-                    new URL(`/preview/${id}`, hostname).toString()
-                  )
-                }
-              />
-              <Button variant="icon" className="text-danger"
-                title={t("admin.genlink.refresh_preview")}
-                onClick={() => {
-                  fetch(`/api/v2/preview/${id}?cache_only=true`, { method: "DELETE" })
-                    .then((response) => {
-                      if (!response.ok) {
-                        console.error("Failed to refresh preview");
-                      }
+      {previews.length > 0 && (
+        <Card>
+          <Card.Header>{t("admin.genlink.existing_previews")}</Card.Header>
+          <ListGroup variant="flush">
+            {previews.map(({ id, task, filename, timestamp }) => (
+              <ListGroup.Item key={`${id}`}>
+                <a href={`/preview/${id}`}>
+                  {task.info.name}: {filename} (
+                  {new Date(timestamp).toLocaleString()})
+                </a>
+                <ClipboardIconButton
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      new URL(`/preview/${id}`, hostname).toString()
+                    )
+                  }
+                />
+                <Button
+                  variant="icon"
+                  className="text-danger"
+                  title={t("admin.genlink.refresh_preview")}
+                  onClick={() => {
+                    fetch(`/api/v2/preview/${id}?cache_only=true`, {
+                      method: "DELETE",
                     })
-                    .catch((error) => {
-                      console.error("Error refreshing preview:", error);
-                    });
-                }}>
-                <FontAwesomeIcon icon={faRefresh} />
-              </Button>
-              <Button
-                variant="icon"
-                className="text-danger"
-                onClick={() => {
-                  fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
-                    .then((response) => {
-                      if (response.ok) {
-                        // Optionally, you can add logic to remove the deleted preview from the UI
-                        window.location.reload();
-                      } else {
-                        console.error("Failed to delete preview");
-                      }
-                    })
-                    .catch((error) => {
-                      console.error("Error deleting preview:", error);
-                    });
-                }}
-                title={t("admin.genlink.delete_preview")}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </Button>
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </Card>
+                      .then((response) => {
+                        if (!response.ok) {
+                          console.error("Failed to refresh preview");
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("Error refreshing preview:", error);
+                      });
+                  }}
+                >
+                  <FontAwesomeIcon icon={faBroom} />
+                </Button>
+                <Button
+                  variant="icon"
+                  className="text-danger"
+                  onClick={() => {
+                    fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
+                      .then((response) => {
+                        if (response.ok) {
+                          // Optionally, you can add logic to remove the deleted preview from the UI
+                          window.location.reload();
+                        } else {
+                          console.error("Failed to delete preview");
+                        }
+                      })
+                      .catch((error) => {
+                        console.error("Error deleting preview:", error);
+                      });
+                  }}
+                  title={t("admin.genlink.delete_preview")}
+                >
+                  <FontAwesomeIcon icon={faTrash} />
+                </Button>
+              </ListGroup.Item>
+            ))}
+          </ListGroup>
+        </Card>
+      )}
     </>
   );
 };
