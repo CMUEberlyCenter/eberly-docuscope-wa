@@ -1,4 +1,4 @@
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faRefresh, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Activity, ChangeEvent, FC, useState } from "react";
 import { Button, Card, Form, ListGroup } from "react-bootstrap";
@@ -240,6 +240,21 @@ export const Page: FC = () => {
                   )
                 }
               />
+              <Button variant="icon" className="text-danger"
+                title={t("admin.genlink.refresh_preview")}
+                onClick={() => {
+                  fetch(`/api/v2/preview/${id}?cache_only=true`, { method: "DELETE" })
+                    .then((response) => {
+                      if (!response.ok) {
+                        console.error("Failed to refresh preview");
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error refreshing preview:", error);
+                    });
+                }}>
+                <FontAwesomeIcon icon={faRefresh} />
+              </Button>
               <Button
                 variant="icon"
                 className="text-danger"
@@ -257,6 +272,7 @@ export const Page: FC = () => {
                       console.error("Error deleting preview:", error);
                     });
                 }}
+                title={t("admin.genlink.delete_preview")}
               >
                 <FontAwesomeIcon icon={faTrash} />
               </Button>

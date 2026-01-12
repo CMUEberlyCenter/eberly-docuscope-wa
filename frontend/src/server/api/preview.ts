@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { param } from 'express-validator';
+import { param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
 import {
@@ -23,6 +23,7 @@ import {
 } from '../../lib/WritingTask';
 import { doChat, reviewData } from '../data/chat';
 import {
+  clearPreviewAnalysesById,
   deletePreviewById,
   findAllPreviews,
   findPreviewById,
@@ -96,11 +97,17 @@ preview.get(
 preview.delete(
   '/:id',
   validate(param('id').isMongoId()),
+  validate(query('cache_only').optional().isBoolean()),
   async (request, response) => {
     // TODO: add authentication/authorization
     const id = request.params.id;
-    await deletePreviewById(id);
-    response.status(204).send();
+    const cache = request.query.cache_only === 'true';
+    if (cache) {
+      await clearPreviewAnalysesById(id);
+    } else {
+      await deletePreviewById(id);
+    }
+    response.status(200).send();
   }
 );
 

@@ -70,6 +70,8 @@ admin:
       tools: 'Select Enabled Tools:'
     submit: Launch
     existing_previews: Existing Previews
+    delete_preview: Delete Preview
+    refresh_previews: Reanalyze Previews by clearing cache
 document.title: myProse
 document.description: $t(document.title) is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...

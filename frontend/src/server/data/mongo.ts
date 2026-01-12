@@ -81,6 +81,11 @@ export async function insertPreview(
   });
   return ins.insertedId;
 }
+/**
+ * Delete a preview by its ID.
+ * @param id the identifier for the preview to delete.
+ * @returns true if deletion is acknowledged.
+ */
 export async function deletePreviewById(id: string) {
   if (!ObjectId.isValid(id) || id.length !== 24) {
     throw new ReferenceError(`Preview ${id} not found.`);
@@ -93,6 +98,13 @@ export async function deletePreviewById(id: string) {
   console.log(`Deleted preview with id '${id}'`);
   return del.acknowledged;
 }
+
+/**
+ * Add new analyses to a preview.
+ * @param id the identifier for the preview to update.
+ * @param analyses the analyses to add to the preview.
+ * @returns the id of the updated preview.
+ */
 export async function updatePreviewReviewsById(
   id: string | ObjectId,
   ...analyses: Analysis[]
@@ -117,6 +129,28 @@ export async function updatePreviewReviewsById(
   console.log(`Updated reviews for preview with id '${id}'`);
   return upd._id;
 }
+
+export async function clearPreviewAnalysesById(id: string | ObjectId) {
+  if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const upd = await client
+    .db(MONGO_DB)
+    .collection<Preview>(PREVIEWS)
+    .findOneAndUpdate(
+      { _id },
+      {
+        $set: { analyses: [], timestamp: new Date() },
+      }
+    );
+  if (!upd) {
+    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+  }
+  console.log(`Cleared analyses for preview with id '${id}'`);
+  return upd._id;
+}
+
 /**
  * Retrieves a given writing task specification from the database.
  * @param id the identifier for the desired writing task specification.
