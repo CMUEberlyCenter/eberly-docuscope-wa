@@ -80,7 +80,7 @@ type CivilToneOutput = {
 // }
 
 /** List of identified credibility issues in the text */
-export type CredibilityOutput = {
+type CredibilityOutput = {
   issue: string;
   suggestion: string;
   sent_ids: string[];

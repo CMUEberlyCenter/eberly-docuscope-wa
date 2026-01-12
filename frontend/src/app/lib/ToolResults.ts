@@ -46,11 +46,11 @@ interface BulletTool extends ToolData<string> {
 // }
 
 /** Expected form of result for 'copyedit' */
-export type CopyEditResponse = {
-  revision: string; // html
-  clean_revision: string; // html
-  explanation: string; // html
-};
+// export type CopyEditResponse = {
+//   revision: string; // html
+//   clean_revision: string; // html
+//   explanation: string; // html
+// };
 
 // interface CopyEditTool extends ToolData<CopyEditResponse> {
 //   tool: 'copyedit';
@@ -60,11 +60,11 @@ export type CopyEditResponse = {
 //   tool: 'grammar';
 // }
 
-export type LocalCoherenceResponse = {
-  rating?: number;
-  general_assessment: string;
-  issues: { description: string; suggestions: string[] }[];
-};
+// export type LocalCoherenceResponse = {
+//   rating?: number;
+//   general_assessment: string;
+//   issues: { description: string; suggestions: string[] }[];
+// };
 
 // interface FlowTool extends ToolData<LocalCoherenceResponse> {
 //   tool: 'flow'; // local-coherence

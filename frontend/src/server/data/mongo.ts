@@ -33,11 +33,12 @@ type Preview = {
   analyses: Analysis[];
 };
 
-export async function findAllPreviews(): Promise<Preview[]> {
-  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
-  const previews = await collection.find<Preview>({}).toArray();
-  return previews;
-}
+// Unused
+// export async function findAllPreviews(): Promise<Preview[]> {
+//   const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+//   const previews = await collection.find<Preview>({}).toArray();
+//   return previews;
+// }
 
 /**
  * Find all previews with minimal information.
@@ -437,24 +438,24 @@ export function getLogData(): Promise<AggregateLogData[]> {
   return Array.fromAsync(generateLogData());
 }
 
-async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {
-  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
-  const cursor = collection.aggregate<LogData>(
-    [
-      {
-        $match: {
-          'meta.prompt': prompt,
-        },
-      },
-      { $sort: { timestamp: -1 } },
-      { $limit: 1 },
-    ],
-    { maxTimeMS: 60000, allowDiskUse: true }
-  );
-  for await (const doc of cursor) {
-    yield doc;
-  }
-}
-export function getLatestLogData(prompt: string): Promise<LogData[]> {
-  return Array.fromAsync(generateLatestLogData(prompt));
-}
+// async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {
+//   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+//   const cursor = collection.aggregate<LogData>(
+//     [
+//       {
+//         $match: {
+//           'meta.prompt': prompt,
+//         },
+//       },
+//       { $sort: { timestamp: -1 } },
+//       { $limit: 1 },
+//     ],
+//     { maxTimeMS: 60000, allowDiskUse: true }
+//   );
+//   for await (const doc of cursor) {
+//     yield doc;
+//   }
+// }
+// export function getLatestLogData(prompt: string): Promise<LogData[]> {
+//   return Array.fromAsync(generateLatestLogData(prompt));
+// }
