@@ -24,7 +24,11 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import { serialize, serializeHtml } from "../../src/app/lib/slate";
-import type { SelectedText, Tool, ToolResult } from "../../src/app/lib/ToolResults";
+import type {
+  SelectedText,
+  Tool,
+  ToolResult,
+} from "../../src/app/lib/ToolResults";
 import { NotesRequest } from "../../src/lib/Requests";
 import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
@@ -35,20 +39,20 @@ import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
-class NoSelectedTextError extends Error { }
+class NoSelectedTextError extends Error {}
 
 /*** Notes to Prose ***/
 async function postConvertNotes(
   { text }: SelectedText,
-  output: 'prose' | 'bullets' = 'prose',
+  output: "prose" | "bullets" = "prose",
   writing_task?: WritingTask | null
 ): Promise<string> {
   const endpoint =
-    output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
+    output === "bullets" ? "convert_to_bullets" : "convert_to_prose";
   const { user_lang, target_lang } = writing_task?.info ?? {};
   const response = await fetch(`/api/v2/scribe/${endpoint}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       notes: text,
       user_lang,
@@ -62,11 +66,11 @@ async function postConvertNotes(
     // });
   }
   const data = await response.json();
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     return data;
   }
   // TODO fix this for server errors instead of openai errors.
-  if ('error' in data) {
+  if ("error" in data) {
     console.error(data.message);
     return data.message;
   }
@@ -75,7 +79,7 @@ async function postConvertNotes(
   //   return data.choices[0].message.content ?? '';
   // }
   console.error(data);
-  return '';
+  return "";
 }
 
 /**

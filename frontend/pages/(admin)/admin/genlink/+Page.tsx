@@ -18,6 +18,7 @@ import {
 } from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
+/** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
   const { t } = useTranslation();
   const { t: tr } = useTranslation("review");

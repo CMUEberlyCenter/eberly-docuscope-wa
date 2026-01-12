@@ -357,10 +357,7 @@ async function __main__() {
       });
     }
     const app = express();
-    app.use(
-      '/admin',
-      basicAuthMiddleware
-    );
+    app.use('/admin', basicAuthMiddleware);
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
     app.use(express.json({ limit: '10mb' }));

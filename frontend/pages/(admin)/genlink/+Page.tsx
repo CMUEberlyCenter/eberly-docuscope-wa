@@ -2,6 +2,8 @@
 This page allows the user to generate a link for a writing task.
 The user can select a writing task from a list, or upload a custom writing task file.
 The page also displays the generated link and allows the user to copy it to the clipboard.
+
+To be replaced by the admin genlink page.
 */
 import { type ChangeEvent, type FC, useState } from "react";
 import { Form, ListGroup } from "react-bootstrap";
