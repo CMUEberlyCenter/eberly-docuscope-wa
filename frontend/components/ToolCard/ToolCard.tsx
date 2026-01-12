@@ -24,8 +24,10 @@ import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?re
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
 import { serialize, serializeHtml } from "../../src/app/lib/slate";
-import type { Tool, ToolResult } from "../../src/app/lib/ToolResults";
-import { postConvertNotes } from "../../src/app/service/scribe.service";
+import type { SelectedText, Tool, ToolResult } from "../../src/app/lib/ToolResults";
+import { NotesRequest } from "../../src/lib/Requests";
+import { WritingTask } from "../../src/lib/WritingTask";
+import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { Legal } from "../Legal/Legal";
 import { Logo } from "../Logo/Logo";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -33,7 +35,48 @@ import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
-class NoSelectedTextError extends Error {}
+class NoSelectedTextError extends Error { }
+
+/*** Notes to Prose ***/
+async function postConvertNotes(
+  { text }: SelectedText,
+  output: 'prose' | 'bullets' = 'prose',
+  writing_task?: WritingTask | null
+): Promise<string> {
+  const endpoint =
+    output === 'bullets' ? 'convert_to_bullets' : 'convert_to_prose';
+  const { user_lang, target_lang } = writing_task?.info ?? {};
+  const response = await fetch(`/api/v2/scribe/${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      notes: text,
+      user_lang,
+      target_lang,
+    } as NotesRequest),
+  });
+  if (!response.ok) {
+    checkReviewResponse(response);
+    // throw new Error(`HTTP error status: ${response.status}`, {
+    //   cause: await response.json(),
+    // });
+  }
+  const data = await response.json();
+  if (typeof data === 'string') {
+    return data;
+  }
+  // TODO fix this for server errors instead of openai errors.
+  if ('error' in data) {
+    console.error(data.message);
+    return data.message;
+  }
+  // if ('choices' in data) {
+  //   logCovertNotes(text, data);
+  //   return data.choices[0].message.content ?? '';
+  // }
+  console.error(data);
+  return '';
+}
 
 /**
  * Top level framework for writing tools display.
