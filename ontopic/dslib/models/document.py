@@ -235,14 +235,14 @@ es_pronouns = []  # TBD
 def html_sentence_splitter(doc):
     # Define which tags should trigger sentence splits
     split_tags = re.compile(r'^<img\d+/>$')  # Add your tags here
-    
+
     for i, token in enumerate(doc):
         # Only split on specific tags
         if split_tags.match(token.text):
             token.is_sent_start = True
             if i + 1 < len(doc):
                 doc[i + 1].is_sent_start = True
-    
+
     return doc
 
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
@@ -487,7 +487,7 @@ def resized_image_handler(image):
         img = Image.open(BytesIO(img_data))
 
         # Get original dimensions
-        original_width, original_height = img.size
+        # original_width, original_height = img.size
 
         # Set max dimensions in case we can't find them.
         max_width = 800
@@ -1068,7 +1068,7 @@ class DSDocument:
     def setHeaderLabels(self, val):
         self.header_labels = val
 
-    def getHeaderLabels(self, val):
+    def getHeaderLabels(self):
         return self.header_labels
 
     def setPronounsVisible(self, val):
@@ -2960,7 +2960,7 @@ class DSDocument:
 
         for elem in self.elements:
 
-            if elem.content_type == ContentType.LISTITEM:    
+            if elem.content_type == ContentType.LISTITEM:
                 pass
             else:
                 res.append("\n")
@@ -3862,7 +3862,7 @@ class DSDocument:
             data = local_data
 
             topic_filter = TOPIC_FILTER_LEFT_RIGHT
-            
+
             if data == []:
                 return []
 
