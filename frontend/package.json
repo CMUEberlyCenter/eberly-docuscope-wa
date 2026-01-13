@@ -9,7 +9,7 @@
     "tdev": "npx tsx ./index.ts",
     "build": "npx -y bun vike build",
     "xbuild": "npx vite build",
-    "build:server": "npx bun build index.ts --outdir=./build/server --target=node25",
+    "build:server": "npx bun build index.ts --outdir=./build/server --target=node",
     "test": "npx bun test",
     "test:watch": "npx bun test --watch",
     "preview": "cross-env NODE_ENV=production npx bun ./index.ts",
