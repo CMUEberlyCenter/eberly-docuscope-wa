@@ -12,19 +12,20 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: true, // always true for storybook
     minify: false, // always false for storybook
-    target: "ES2022",
+    target: 'ES2022',
   },
   css: {
     preprocessorOptions: {
       scss: {
         // quiet warnings from bootstrap, monitor this when bootstrap updates.
         quietDeps: true,
-        silenceDeprecations: ['legacy-js-api', 'color-functions', 'import']
-      }
-    }
+        silenceDeprecations: ['legacy-js-api', 'color-functions', 'import'],
+      },
+    },
   },
   define: {
     __APP_VERSION__: JSON.stringify(version),
-    __BUILD_DATE__: JSON.stringify(new Date().toISOString())
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+    __BUILD_MODE__: JSON.stringify(mode),
   },
-}))
+}));

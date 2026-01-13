@@ -34,6 +34,8 @@ credibility:
   assessment: "Observation:"
   no_sentences: No relevant text found in your draft.
   'null': No feedback.
+sentence_density:
+  title: $t(sentences.title)
 sentences:
   title: Sentence Clarity
   error: 'Error displaying Sentence data:'
@@ -111,6 +113,8 @@ logical_flow:
 expectations:
   title: Content Expectations
   no_writing_task_tooltip: Please select a writing type to see the content expectations.
+term_matrix:
+  title: $t(organization.title)
 organization:
   title: Topical Progression
   error: 'Error loading Topical Progression data:'

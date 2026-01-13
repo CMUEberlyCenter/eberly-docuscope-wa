@@ -1,9 +1,8 @@
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
-import { parse } from 'node-html-parser';
-import type { OnTopicData } from '../../lib/OnTopicData';
 import {
   ForbiddenError,
+  GatewayError,
   UnprocessableContentError,
 } from '../../lib/ProblemDetails';
 import {
@@ -13,7 +12,6 @@ import {
   type ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
-  type OnTopicReviewData,
   type ReviewPrompt,
   type ReviewResponse,
 } from '../../lib/ReviewResponse';
@@ -24,104 +22,15 @@ import {
   isWritingTask,
   type WritingTask,
 } from '../../lib/WritingTask';
-import { getSettings } from '../getSettings';
-import { doChat } from '../data/chat';
+import { doChat, reviewData } from '../data/chat';
 import { insertLog } from '../data/mongo';
+import { segmentText } from '../data/segmentText';
+import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
-import { DEFAULT_LANGUAGE, ONTOPIC_URL, SEGMENT_URL } from '../settings';
+import { doOnTopic } from '../data/ontopic';
 
 export const reviews = Router();
-
-/**
- * Submit data to onTopic for processing.
- * @param review Review data to be sent to onTopic
- * @returns Processed data.
- * @throws fetch errors
- * @throws Bad onTopic response status
- * @throws JSON.parse errors
- */
-const doOnTopic = async (
-  document: string,
-  signal?: AbortSignal
-): Promise<OnTopicReviewData | undefined> => {
-  const res = await fetch(ONTOPIC_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      base: document,
-    }),
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    signal,
-  });
-  if (!res.ok) {
-    console.error(
-      `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
-    );
-    // TODO check for response codes and throw specific errors.
-    throw new Error(`onTopic Response status: ${res.status}`);
-  }
-  const data = (await res.json()) as OnTopicData;
-  return {
-    tool: 'ontopic',
-    datetime: new Date(),
-    response: data,
-  };
-};
-
-/**
- * Segments the given text into sentences.
- * @param text content of editor.
- * @returns HTML string.
- * @throws Error on bad service status.
- * @throws Network errors.
- * @throws JSON parse errors.
- */
-const segmentText = async (text: string): Promise<string> => {
-  const res = await fetch(SEGMENT_URL, {
-    method: 'POST',
-    body: JSON.stringify({ text }),
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!res.ok) {
-    console.error(
-      `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
-    );
-    throw new Error(`Bad service response from 'segment': ${res.status}`);
-  }
-  const data = (await res.json()) as string;
-  return data.trim();
-};
-
-/**
- * Extract data from a Review's writing task used for the templates.
- * @param review A review object from the database.
- * @returns Acceptable object for "format" function.
- */
-const reviewData = ({
-  segmented,
-  writing_task,
-}: {
-  segmented: string;
-  writing_task: WritingTask | null;
-}): Record<string, string> => ({
-  text: segmented, // use content which has already been segmented into sentences.
-  user_lang:
-    (isWritingTask(writing_task) ? writing_task.info.user_lang : undefined) ??
-    DEFAULT_LANGUAGE,
-  target_lang:
-    (isWritingTask(writing_task) ? writing_task.info.target_lang : undefined) ??
-    DEFAULT_LANGUAGE,
-  extra_instructions:
-    (isWritingTask(writing_task)
-      ? writing_task.extra_instructions
-      : undefined) ?? '',
-});
 
 /**
  * @swagger
@@ -244,7 +153,7 @@ reviews.post(
     if (controller.signal.aborted) {
       return;
     }
-    if (!data) throw new Error(`NULL onTopic results.`);
+    if (!data) throw new GatewayError(`NULL onTopic results.`);
     request.session.analysis = [...(request.session.analysis ?? []), data];
     response.json(data);
   }
@@ -310,7 +219,7 @@ reviews.post(
       'expectations',
       {
         ...reviewData({
-          segmented: stripIrrelevantTags(request.session.segmented),
+          segmented: request.session.segmented,
           writing_task: writing_task ?? null,
         }),
         expectation,
@@ -344,17 +253,6 @@ reviews.post(
     response.json({ input: request.session.segmented, data });
   }
 );
-
-function stripIrrelevantTags(
-  text: string | undefined,
-  tags: string[] = ['img', 'table']
-): string {
-  if (!text) return '';
-  if (tags.length === 0) return text;
-  const doc = parse(text);
-  doc.querySelectorAll(tags.join(', ')).forEach((el) => el.remove());
-  return doc.toString();
-}
 
 /**
  * @route POST <reviews>/:analysis
@@ -394,14 +292,14 @@ reviews.post(
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find((a) => a.tool === analysis);
     if (cached) {
-      console.log(`Returning cached analysis for ${analysis}`);
+      // console.log(`Returning cached analysis for ${analysis}`);
       response.json({ input: request.session.segmented, data: cached });
       return;
     }
     const chat = await doChat<ReviewResponse>(
       analysis as ReviewPrompt,
       reviewData({
-        segmented: stripIrrelevantTags(request.session.segmented),
+        segmented: request.session.segmented,
         writing_task: writing_task ?? null,
       }),
       controller.signal,

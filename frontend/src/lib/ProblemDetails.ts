@@ -120,6 +120,8 @@ export const UnprocessableContent = (
   errors: err instanceof UnprocessableContentError ? err.validation : undefined,
 });
 
+export class GatewayError extends Error {}
+
 const BadGateway = (
   err: Error | string,
   instance?: string
@@ -177,10 +179,14 @@ export const handleError = (
     return response.status(404).json(FileNotFound(err));
   }
   if (err instanceof SyntaxError) {
+    // likely JSON parse error
     return response.status(422).json(UnprocessableContent(err));
   }
   if (err instanceof UnprocessableContentError) {
     return response.status(422).json(UnprocessableContent(err));
+  }
+  if (err instanceof GatewayError) {
+    return response.status(502).json(BadGateway(err));
   }
   if (err instanceof APIUserAbortError) {
     return response.status(502).json(BadGateway(err));

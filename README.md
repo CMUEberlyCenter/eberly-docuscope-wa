@@ -10,6 +10,7 @@ The project code is supported and maintained by the [Eberly Center](https://www.
 
 This application requires several files in order to function:
 - Required sensitive information shared with the application via [Docker secrets](https://docs.docker.com/compose/how-tos/use-secrets/):
+  - `secrets/admin_password`: Password for the admin account to access /admin endpoint.
   - `secrets/anthropic_api_key`: API key provided by Anthropic (default model is claude-3-7-sonnet-latest)
   - `secrets/mongo_user`: Username to use to access the MongoDB database.
   - `secrets/mongo_pass`: Password to use to access the MongoDB database.

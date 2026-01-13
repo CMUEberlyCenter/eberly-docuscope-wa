@@ -1,4 +1,7 @@
-// import { toNodeHandler } from 'better-auth/node';
+/* @fileoverview Frontend server main entry.
+
+Sets up and starts the expressjs server for handling requests for the myProse application.
+*/
 import MongoDBStore from 'connect-mongodb-session';
 import cors from 'cors';
 import express, {
@@ -6,10 +9,10 @@ import express, {
   type Request,
   type Response,
 } from 'express';
+import type { IBasicAuthedRequest } from 'express-basic-auth';
 import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
-import { body } from 'express-validator';
 import { readFileSync } from 'fs';
 import { readdir, readFile, stat } from 'fs/promises';
 import i18n from 'i18next';
@@ -22,27 +25,28 @@ import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
   BadRequestError,
-  FileNotFoundError,
   ForbiddenError,
   handleError,
   UnprocessableContentError,
 } from './src/lib/ProblemDetails';
 import { validateWritingTask } from './src/lib/schemaValidate';
-import { isWritingTask, type WritingTask } from './src/lib/WritingTask';
+import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
+import { preview } from './src/server/api/preview';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
+import { watchSettings } from './src/server/getSettings';
 import type {
   ContentItemType,
   IdToken,
   LTIPlatform,
 } from './src/server/model/lti';
-import { validate } from './src/server/model/validate';
 import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
 import {
+  ADMIN_PASSWORD,
   LTI_DB,
   LTI_HOSTNAME,
   LTI_KEY,
@@ -54,16 +58,16 @@ import {
   PRODUCT,
   SESSION_KEY,
 } from './src/server/settings';
-import { getSettings, watchSettings } from './src/server/getSettings';
+import { basicAuthMiddleware } from './src/utils/basicAuth';
+// import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
-// import { apply } from 'vike-server/express'
-// import { serve } from 'vike-server/express/serve';
 
 // const __filename = fileURLToPath(import.meta.url);
 // use process.cwd() to get the current working directory so that
 // both development and production environments work correctly.
 const __dirname = process.cwd(); //dirname(__filename);
 const root = __dirname;
+/** Root directory for the public server files. */
 const PUBLIC = __dirname; // join(__dirname, './build/app');
 
 async function __main__() {
@@ -74,6 +78,8 @@ async function __main__() {
   const shutdownPrompts = await initPrompts();
   // watch interface settings file
   const shutdownSettings = await watchSettings();
+
+  // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
   Provider.app.use(fileUpload({ createParentPath: true }));
@@ -85,15 +91,12 @@ async function __main__() {
 
   Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
     if (token) {
+      // if LTI token is present
       if (token.platformContext.custom?.tool) {
+        // if tool is specified in deep linking settings, redirect accordingly
         return Provider.redirect(res, `/${token.platformContext.custom.tool}`);
       }
-      // if instructor and torus (no deep linking) redirect to admin/instructor
-      // if (token.platformContext.custom?.writing_task_id) {
-      //   console.log('onConnect writing_task_id', token.platformContext.custom.writing_task_id);
-      //   Provider.redirect(res, '/myprose/${token.platformContext.custom.writing_task_id}/${token.platformContext.custom.tool ?? 'draft'}');
-      // // } else if (token.platformContext.custom?.writing_task) {
-      // }
+      // default to non-specified writing type drafting tool.
       return Provider.redirect(res, '/draft'); //'/index.html');
     }
     if (req.query.writing_task) {
@@ -102,6 +105,7 @@ async function __main__() {
     Provider.redirect(res, '/draft');
     // Provider.redirect(res, '/index'); //'/index.html');
   });
+  // Could be used to provide a custom response for invalid tokens
   // Provider.onInvalidToken(async (req: Request, res: Response) => {
   //   console.log('InvalidToken');
   //   return res.sendFile(join(PUBLIC, 'index.html'));
@@ -116,9 +120,7 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
-        const task = JSON.parse(request.body.file) as {
-          _id?: string;
-        } & WritingTask;
+        const task = JSON.parse(request.body.file) as DbWritingTask;
         const tool = ['draft', 'review'].includes(request.body.tool)
           ? request.body.tool
           : 'draft';
@@ -137,6 +139,8 @@ async function __main__() {
             'Invalid JSON'
           );
         }
+        // FIXME task should not be inserted. Use writing_task directly.
+        // Requires changing LTI front-end to use writing_task in custom.
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
         const items: ContentItemType[] = [
@@ -171,6 +175,7 @@ async function __main__() {
     }
   );
 
+  // Handle LTI dynamic registration requests
   Provider.onDynamicRegistration(
     async (req: Request, res: Response, next: NextFunction) => {
       try {
@@ -204,8 +209,11 @@ async function __main__() {
         );
         res.setHeader('Content-type', 'text/html');
         res.send(message);
-      } catch (err: Error | any) {
-        if (err.message === 'PLATFORM_ALREADY_REGISTERED') {
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message === 'PLATFORM_ALREADY_REGISTERED'
+        ) {
           return next(new ForbiddenError('Platform already registered.'));
         }
         next(err);
@@ -213,25 +221,27 @@ async function __main__() {
     }
   );
 
-  Provider.app.delete(
-    '/lti/platforms/:platformId',
-    async (req: Request, res: Response, next: NextFunction) => {
-      const platformId = req.params.platformId;
-      try {
-        if (!platformId) {
-          throw new BadRequestError('Missing platformId parameter.');
-        }
-        if ((await Provider.getPlatformById(platformId)) === false) {
-          throw new FileNotFoundError('Platform not found.');
-        }
-        await Provider.deletePlatformById(platformId);
-        res.status(204).send(); // No Content
-      } catch (err) {
-        console.error('Error deleting platform:', err);
-        next(err);
-      }
-    }
-  );
+  // For platform management, should not be exposed publicly
+  // Provider.app.delete(
+  //   '/lti/platforms/:platformId',
+  //   async (req: Request, res: Response, next: NextFunction) => {
+  //     const platformId = req.params.platformId;
+  //     try {
+  //       if (!platformId) {
+  //         throw new BadRequestError('Missing platformId parameter.');
+  //       }
+  //       if ((await Provider.getPlatformById(platformId)) === false) {
+  //         throw new FileNotFoundError('Platform not found.');
+  //       }
+  //       await Provider.deletePlatformById(platformId);
+  //       res.status(204).send(); // No Content
+  //     } catch (err) {
+  //       console.error('Error deleting platform:', err);
+  //       next(err);
+  //     }
+  //   }
+  // );
+
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
    */
@@ -303,13 +313,14 @@ async function __main__() {
   Provider.whitelist(
     Provider.appRoute(),
     /\w+\.html$/,
-    '/genlink',
-    /draft/,
-    /review/,
+    '/genlink', // Eventually to be moved to admin endpoints
+    /draft/, // Eventually to be removed so only available in LTI
+    /review/, // Eventually to be removed so only available in LTI
     '/',
-    /locales/,
-    /myprose/,
-    /lti/
+    /locales/, // Localization files need to be public
+    /myprose/, // These should be the "public" tools.
+    /lti/, // additional public lti "well-known" endpoints
+    /admin/ // Admin routes, security should be handled outside LTI
   );
   try {
     // await Provider.deploy({ port: PORT });
@@ -346,15 +357,12 @@ async function __main__() {
       });
     }
     const app = express();
+    app.use('/admin', basicAuthMiddleware);
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
     app.use(express.json({ limit: '10mb' }));
     // app.use(cors({ origin: '*' }));
     app.use(cors());
-    // app.use((_req, res, next) => {
-    //   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-    //   next();
-    // });
 
     // Setup sessions
     const MongoDBSessionStore = MongoDBStore(session);
@@ -371,10 +379,11 @@ async function __main__() {
         secret: SESSION_KEY,
         store,
         resave: false,
-        saveUninitialized: true,
+        saveUninitialized: false,
         cookie: { secure: 'auto' },
       })
     );
+    // Configure i18n middleware
     i18n
       .use(Backend)
       .use(LanguageDetector)
@@ -423,56 +432,8 @@ async function __main__() {
     app.use('/api/v2/ontopic', ontopic);
     // Reviews Endpoints
     app.use('/api/v2/review', reviews);
-
-    type SessionData = {
-      document?: string;
-      writing_task?: WritingTask;
-      writing_task_id?: string;
-    };
-    app.post(
-      '/api/v2/session',
-      validate(body('document').isString()),
-      async (req: Request, _res: Response, next: NextFunction) => {
-        try {
-          const { document, writing_task, writing_task_id } =
-            req.body as SessionData;
-          if (req.session.document !== document) {
-            req.session.document = document;
-            req.session.segmented = undefined;
-            req.session.analysis = undefined;
-          }
-          if (
-            writing_task_id &&
-            req.session.writing_task_id !== writing_task_id
-          ) {
-            req.session.writing_task = undefined;
-            req.session.writing_task_id = writing_task_id;
-          } else if (
-            writing_task &&
-            req.session.writing_task !== writing_task
-          ) {
-            const valid = validateWritingTask(writing_task);
-            if (!valid) {
-              throw new UnprocessableContentError(
-                validateWritingTask.errors,
-                'Invalid JSON'
-              );
-            }
-            if (!isWritingTask(writing_task)) {
-              throw new UnprocessableContentError(
-                ['Failed type checking!'],
-                'Invalid JSON'
-              );
-            }
-            req.session.writing_task = writing_task;
-            req.session.writing_task_id = undefined;
-            req.session.analysis = undefined;
-          }
-        } catch (err) {
-          next(err);
-        }
-      }
-    );
+    // Preview Endpoints for static content.
+    app.use('/api/v2/preview', preview);
 
     // app.use('/api/v2/performance', promptPerformance);
     // Metrics
@@ -494,74 +455,76 @@ async function __main__() {
       }
       Provider.redirect(res, '/draft');
     });
-    // apply(app);
-    app.all('{*vike}', async (req: Request, res: Response, next) => {
-      const token: IdToken | undefined = res.locals.token;
-      const query =
-        typeof req.query.writing_task === 'string'
-          ? req.query.writing_task
-          : undefined;
-      const writing_task_id: string | undefined =
-        token?.platformContext.custom?.writing_task_id ||
-        query ||
-        req.session.writing_task_id;
-      const pageContextInit = {
-        urlOriginal: req.url,
-        headersOriginal: req.headers,
-        t: req.i18n.t,
-        i18n: req.i18n,
-        token,
-        session: req.session,
-        writing_task_id,
-        settings: getSettings(),
-        google: {
-          analytics: process.env.GOOGLE_ANALYTICS,
-          clientId: process.env.GOOGLE_CLIENT_ID,
-          apiKey: process.env.GOOGLE_API_KEY,
-          appKey: process.env.GOOGLE_APP_KEY,
-        },
-        // ltik,
-        // headers: {
-        //   'Content-Type': 'text/html',
-        //   'Cache-Control': 'no-cache',
-        // },
-      };
-      const pageContext = await renderPage(pageContextInit);
-      pageContext.urlParsed?.search;
-      if (pageContext.errorWhileRendering) {
-        console.error('Error rendering page:', pageContext.errorWhileRendering);
-        return next(new Error(`$${pageContext.errorWhileRendering}`));
-      }
-      const { httpResponse } = pageContext;
-      if (!httpResponse) {
-        return next();
-      } else {
-        const { body, statusCode, headers, earlyHints } = httpResponse;
-        if (res.writeEarlyHints) {
-          res.writeEarlyHints({
-            link: earlyHints.map((hint) => hint.earlyHintLink),
-          });
-        }
-        headers.forEach(([name, value]) => res.setHeader(name, value));
+    // Handle all other routes with Vike
+    app.all(
+      '{*vike}',
+      async (_req, res, next) => {
         // Remove COEP/COOP headers to allow use of Google Drive Picker
         res.removeHeader('Cross-Origin-Embedder-Policy');
         res.removeHeader('Cross-Origin-Resource-Policy');
-        res.status(statusCode).send(body);
+        next();
+      },
+      async (req: Request, res: Response, next) => {
+        // need to do this here as without vike-photon pageContext.runtime.res is not available in hooks.
+        const token: IdToken | undefined = res.locals.token;
+        const query =
+          typeof req.query.writing_task === 'string'
+            ? req.query.writing_task
+            : undefined;
+        const writing_task_id: string | undefined =
+          // from LTI
+          token?.platformContext.custom?.writing_task_id ||
+          // from query parameter
+          query ||
+          // from session
+          req.session.writing_task_id;
+        const pageContextInit = {
+          urlOriginal: req.url,
+          headersOriginal: req.headers,
+          i18n: req.i18n,
+          token,
+          session: req.session,
+          writing_task_id,
+          user: (req as IBasicAuthedRequest).auth?.user,
+          // ltik,
+          // headers: {
+          //   'Content-Type': 'text/html',
+          //   'Cache-Control': 'no-cache',
+          // },
+        };
+        const pageContext = await renderPage(pageContextInit);
+        // pageContext.urlParsed?.search;
+        if (pageContext.errorWhileRendering) {
+          console.error(
+            'Error rendering page:',
+            pageContext.errorWhileRendering
+          );
+          return next(new Error(`$${pageContext.errorWhileRendering}`));
+        }
+        const { httpResponse } = pageContext;
+        if (!httpResponse) {
+          return next();
+        } else {
+          const { body, statusCode, headers, earlyHints } = httpResponse;
+          if (res.writeEarlyHints) {
+            res.writeEarlyHints({
+              link: earlyHints.map((hint) => hint.earlyHintLink),
+            });
+          }
+          headers.forEach(([name, value]) => res.setHeader(name, value));
+          res.status(statusCode).send(body);
+        }
       }
-    });
+    );
 
+    // Global error handler/formatter
     app.use(handleError);
 
     const server = app.listen(PORT, () =>
-      console.log(` > Ready on ${LTI_HOSTNAME.toString()}`)
+      console.log(
+        ` > Ready on ${LTI_HOSTNAME.toString()}\n Admin password: ${ADMIN_PASSWORD}`
+      )
     );
-    // const server2 = serve(app, {
-    //   port: PORT,
-    //   hostname: LTI_HOSTNAME.toString(),
-    //   onReady: () => {
-    //     console.log(` > Ready on ${LTI_HOSTNAME.toString()}:${PORT}`);
-    //   },
-    // });
     const shutdown = () => {
       server.close(async () => {
         console.log('HTTP server closed.');
@@ -572,9 +535,8 @@ async function __main__() {
         process.exit(0);
       });
     };
-    ['SIGTERM', 'SIGINT', 'SIGINT'].forEach((signal) =>
-      process.on(signal, shutdown)
-    );
+    // Handle termination signals for graceful shutdown
+    ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, shutdown));
     return server;
   } catch (err) {
     console.error(err);

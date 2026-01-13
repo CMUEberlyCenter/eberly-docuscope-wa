@@ -1,7 +1,7 @@
 about:
   title: Acerca de
-  overview: 'Descripción del proyecto:'
-  project_link_title: Futuro de la Escritura
+  overview: 'Descripción general del proyecto:'
+  project_link_title: Future of Writing
   build: 'Compilación:'
   version: 'Versión: {{version}} compilada el {{date}}'
   template: 'Información de plantillas:'
@@ -11,35 +11,35 @@ about:
   acknowledgements:
     title: 'Agradecimientos:'
     content: >
-      Este proyecto ha sido parcialmente apoyado por la Fundación A.W. Mellon,
-      la Subvención Inicial de la Iniciativa Simon de Carnegie Mellon,
-      el Fondo de Desarrollo Docente Berkman,
-      y el Programa de Subvenciones Iniciales para Investigación y Desarrollo de Herramientas
-      Educativas Habilitadas por IA Generativa, Facultad Dietrich de Humanidades y Ciencias Sociales,
-      Centro Eberly para la Excelencia en la Enseñanza e Innovación Educativa,
-      Departamento de Inglés, y Centro para la Transferencia de Tecnología y Creación de Empresas.
-  cmu: Universidad Carnegie Mellon
-  simon: Iniciativa Simon
+      Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
+      la Subvención Semilla de la Iniciativa Simon de Carnegie Mellon,
+      el Fondo de Desarrollo de la Facultad Berkman
+      y el Programa de Subvenciones Semilla para Investigación y Desarrollo de Herramientas
+      Educativas Habilitadas por IA Generativa, Dietrich College of Humanities & Social Sciences,
+      Eberly Center for Teaching Excellence and Educational Innovation,
+      Department of English y Center for Technology Transfer and Enterprise Creation.
+  cmu: Carnegie Mellon University
+  simon: Simon Initiative
 document.title: myProse
 document.description: $t(document.title) es un entorno para estructurar tareas de escritura con la ayuda de inteligencia artificial generativa y otras herramientas de análisis de lenguaje natural.
 loading: Analizando...
 wait: Esto puede tardar unos segundos...
 legal:
-  myprose: Aviso de Privacidad de $t(document.title)
+  myprose: Aviso de privacidad de $t(document.title)
   cmu: Legal
-  privacy: Aviso de Privacidad
-deeplink: Seleccione un tipo de texto para esta tarea
+  privacy: Aviso de privacidad
+deeplink: Seleccione un tipo de texto para esta asignación
 deeplinking:
-  title: $t(document.title) LTI Deeplinking
-  disabled: Por favor seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
+  title: Vinculación profunda LTI de $t(document.title)
+  disabled: Seleccione una herramienta y seleccione o cargue un archivo de tarea de escritura para habilitar este botón.
   enabled: Haga clic para seleccionar contenido.
   select_tool: Seleccione una herramienta
   option:
     draft: Borrador
     review: Revisión
-  upload: Seleccione una Tarea de Escritura o cargue un archivo personalizado de Tarea de Escritura
+  upload: Seleccione una tarea de escritura o cargue un archivo de tarea de escritura personalizado
 genlink:
-  title: Generador de Enlaces de Tareas de Escritura de $t(document.title)
+  title: Generador de enlaces de tareas de escritura de $t(document.title)
   link: 'Enlaces:'
   draft: Borrador de $t(document.title)
   review: Revisión de $t(document.title)
@@ -55,27 +55,27 @@ audio:
 editor:
   gdoc:
     error:
-      google_client_id: 'Error de configuración del servidor: ID de Cliente de Google no está definido.'
-      google_api_key: 'Error de configuración del servidor: Clave API de Google no está definida.'
-      google_app_id: 'Error de configuración del servidor: ID de Aplicación de Google no está definido.'
-      google_drive_api: API de Google Drive no está cargada.
+      google_client_id: 'Error de configuración del servidor: el ID de cliente de Google no está definido.'
+      google_api_key: 'Error de configuración del servidor: la clave de API de Google no está definida.'
+      google_app_id: 'Error de configuración del servidor: el ID de aplicación de Google no está definido.'
+      google_drive_api: La API de Google Drive no está cargada.
       docx: Error al obtener o convertir el archivo docx.
-      gdoc: Error al obtener o convertir el archivo de Google Doc.
-      gdoc_empty: La exportación de Google Doc devolvió contenido vacío.
+      gdoc: Error al obtener o convertir el archivo de Google Docs.
+      gdoc_empty: La exportación de Google Docs devolvió contenido vacío.
       unknown_type: 'Tipo de archivo no compatible: {{type}}'
   upload:
     title: Abrir
     file: Archivo
     open: Abrir
     error:
-      title: 'Problemas de importación de archivo:'
+      title: 'Problemas de importación de archivos:'
       overview: 'Revise los detalles a continuación: Las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
       error: 'Error: {{message}}'
       warning: 'Advertencia: {{message}}'
-      fail: Solo se permite seleccionar un archivo.
-      not_docx: '¡{{file}} no es un archivo docx!'
+      fail: Solo se permite la selección de un archivo.
+      not_docx: '{{file}} no es un archivo docx.'
       failed_write: No se puede guardar el archivo.
-      security: Archivo rechazado debido a error de seguridad.
+      security: Archivo rechazado debido a un error de seguridad.
   menu:
     file: Archivo
     open: Importar desde archivo
@@ -97,13 +97,12 @@ editor:
     underline: Subrayado
     strike: Tachado
     task: 'Expectativas de contenido:'
-    no_task: Ninguno seleccionado
+    no_task: Ninguna seleccionada
     no_edit: El texto no es editable.
 tool:
   tab:
     generate: Borrador
-    refine: Refinar
-    review: Revisar
+    review: Revisión
   button:
     prose:
       title: Prosa
@@ -111,50 +110,27 @@ tool:
     bullets:
       title: Viñetas
       tooltip: Generar lista con viñetas a partir de notas
-    expectation:
-      title: Verificar
-      tooltip: Verificar expectativas de contenido
-    expectations:
-      title: Verificar todo
-      tooltip: Verificar todas las expectativas de contenido
-    flow:
-      title: Fluidez
-      tooltip: Verificar fluidez entre oraciones
-    copyedit:
-      title: Corrección
-      tooltip: Corrección de estilo
-      overview: 'Esta herramienta proporciona sugerencias para hacer tu escritura más clara y concisa. Ofrece dos versiones: una que muestra el texto revisado, y otra que marca los cambios sugeridos. Las explicaciones acompañan cada sugerencia, ayudándote a mejorar tu escritura mientras mantienes tu mensaje original.'
-    grammar:
-      title: Gramática
-      tooltip: Corregir gramática
     view:
       title: 'Abrir expectativas de contenido: {{title}}'
-  initial: Escriba y resalte texto para acciones adicionales.
-  bookmark: Marcar
+  initial: Escriba y resalte texto para realizar más acciones.
+  bookmark: Marcador
   bookmarked: Marcado
   input: Su entrada
-  no_selection: Por favor seleccione algún texto antes de usar esta herramienta.
+  no_selection: Seleccione texto antes de usar esta herramienta.
   output: Respuesta de I.A.
   regenerate: Regenerar
   paste: Pegar texto
-  expectation: Expectativa seleccionada
-  select_expectation: Seleccione una expectativa
-  explanation: 'Explicación:'
-  suggestion: 'Revisión:'
-  tracking: 'Revisión con seguimiento:'
 clipboard: Copiar al portapapeles
 error:
   unknown: Se produjo un error desconocido al procesar los resultados.
   no_selection:
-    prose: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
-    bullets: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
+    prose: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
+    bullets: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
     default: No hay texto seleccionado. Resalte el texto primero.
   no_results: No hay resultados válidos.
-expectation:
-  title: Seleccione una expectativa
-flow:
-  issue: 'Problema:'
-  suggestions: 'Sugerencias:'
+  unknown_error: Se produjo un error.
+  too_large: El texto de entrada es demasiado grande para procesar. Reduzca la longitud del texto seleccionado e inténtelo de nuevo.
+  service_unavailable: El servicio no está disponible actualmente. Inténtelo de nuevo más tarde.
 select_task:
   title: Seleccionar tipo de escritura
   filters: Filtros
@@ -162,17 +138,17 @@ select_task:
   placeholder: Ingrese título o palabras clave...
   search: Buscar
   context: Contexto
-  mode: Modo primario
+  mode: Modo principal
   upload: Cargar tipo de texto personalizado
-  invalid_upload: ¡El archivo cargado no es una especificación válida de tipo de texto!
+  invalid_upload: El archivo cargado no es una especificación de tipo de texto válida.
   "null": Sin tipo de texto
   version: 'Versión: {{version}}'
   copyright: 'Derechos de autor: {{copyright}}'
   multiple_file_error: Cargue solo un archivo a la vez.
-  malformed_json: El contenido no pudo ser analizado como JSON.
+  malformed_json: El contenido no se pudo analizar como JSON.
   select: Seleccionar categoría
   select_all: Seleccionar todo
-  all_category: Todos
+  all_category: Todo
 cancel: Cancelar
 select: Seleccionar
 next: Siguiente
@@ -180,7 +156,7 @@ select_insert: Seleccionar e insertar
 details:
   include: Incluir detalles
   insert: Insertar
-  overview: Resumen
+  overview: Descripción general
   about:
     expectation: 'Acerca de esta expectativa:'
     section: 'Acerca de esta sección:'

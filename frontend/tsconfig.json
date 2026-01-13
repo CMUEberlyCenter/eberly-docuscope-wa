@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./index.ts"],
+  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./index.ts", "components/**/*"],
   "exclude": ["dist"],
   "compilerOptions": {
     "strict": true,

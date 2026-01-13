@@ -1,10 +1,10 @@
-document.title: Análisis de Expectativas de myProse
-title: Verificar Expectativas de Contenido
+document.title: Análisis de expectativas de myProse
+title: Verificar expectativas de contenido
 error:
-  no_task: ¡No se ha especificado ningún tipo de texto!
+  no_task: ¡No se especificó el tipo de texto!
 sentences: 'Oraciones:'
 assessment: "Lo que funciona:"
 suggestion: 'Sugerencia:'
 no_suggestions: Sin comentarios. Se ve muy bien.
-warning: Esta expectativa no está abordada en tu borrador.
-no_sentences: No se encontró texto relevante en tu borrador.
+warning: Esta expectativa no se aborda en su borrador.
+no_sentences: No se localizó texto relevante en su borrador.

@@ -3,7 +3,7 @@ document.title: Revisión de myProse
 title: Revisión
 select_tool: Seleccione una herramienta
 tabs:
-  big_picture: Visión General
+  big_picture: Panorama General
   fine_tuning: Ajuste Fino
 summary:
   title: Resumen
@@ -12,22 +12,24 @@ summary:
 insights: Perspectivas de Revisión
 error:
   header: ¡Error al Cargar la Revisión!
-  content: Hubo un error al recuperar los datos de la revisión.
+  content: Hubo un error al recuperar los datos de revisión.
   details: 'Detalles: {{message}}'
+  too_large: El documento es demasiado grande para procesar. Por favor, acorte su texto e intente nuevamente.
+  service_unavailable: El servicio de revisión no está disponible temporalmente. Por favor, intente más tarde.
 additional_tools:
   title: Herramientas Adicionales
-  tooltip: Refine su borrador con revisión adicional.
+  tooltip: Perfeccione su borrador con revisión adicional.
 civil_tone:
-  title: Tono Civil
-  tooltip: Usar un lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
-  error: Error al mostrar la herramienta de Tono Civil.
+  title: Tono Cortés
+  tooltip: El uso de lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
+  error: Error al mostrar la herramienta de Tono Cortés.
   'null': No se encontraron problemas.
   prefix: 'Su Texto:'
   issue: "Problema:"
   suggestion: "Sugerencia:"
 credibility:
   title: Credibilidad (Ethos)
-  tooltip: Establecer credibilidad y carácter ético construye confianza genuina y autoridad con sus lectores.
+  tooltip: Establecer credibilidad y carácter ético genera confianza genuina y autoridad con sus lectores.
   error: Error al mostrar la herramienta de Credibilidad.
   assessment: "Observación:"
   no_sentences: No se encontró texto relevante en su borrador.
@@ -43,8 +45,8 @@ sentences:
   details:
     overview: Puede perder <b>claridad</b> si intenta incluir demasiadas ideas en una oración.
     description: Este panel muestra cada una de sus oraciones como una secuencia de frases nominales que aparecen antes y después del verbo principal. Concéntrese en las oraciones con muchas frases nominales antes del verbo principal pero también después. Haga clic en la línea de la oración a la izquierda para ver su oración real.
-    read_aloud: Lea la oración en voz alta cuando la sienta. Si tropieza o se queda sin aliento, probablemente está incluyendo demasiada información en una sola oración.
-    passive: No hay nada malo en usar <b>verbos ser/estar</b> para señalar "existencia". Pero una dependencia excesiva de los <b>verbos ser/estar</b> puede resultar en una escritura débil. Si encuentra que tiene demasiados <b>verbos ser/estar</b>, intente revisar algunas de las oraciones con <b>verbos activos</b>.
+    read_aloud: Lea la oración en voz alta cuando la sienta. Si tropieza o se queda sin aliento, lo más probable es que esté incluyendo demasiada información en una sola oración.
+    passive: No hay nada de malo en los <b>verbos ser/estar</b> para señalar "existencia". Pero una dependencia excesiva de los <b>verbos ser/estar</b> puede resultar en una escritura débil. Si encuentra que tiene demasiados <b>verbos ser/estar</b>, intente revisar algunas de las oraciones con <b>verbos activos</b>.
 global_coherence:
   title: Problemas de Progresión Lógica
   overview: "<p>Esta herramienta identifica interrupciones en la organización que dificultan el flujo de lectura y la comprensión, como presentar ideas fuera de orden, separar detalles relacionados o dispersar conceptos conectados.</p><p>Revise cada problema identificado y aborde aquellos comentarios que encuentre útiles.</p>"
@@ -58,13 +60,13 @@ global_coherence:
     text: 'Su Texto:'
     explanation: 'Problema(s):'
     suggestions: 'Sugerencias:'
-  'null': No se pudo generar retroalimentación sobre la progresión lógica a partir de su borrador.
+  'null': No se pudo generar comentarios sobre la progresión lógica a partir de su borrador.
 prominent_topics:
-  title: Temas Destacados
-  tooltip: Elaborar sobre temas destacados con suficiente detalle ayuda a los lectores a comprender las ideas clave.
+  title: Temas Prominentes
+  tooltip: Elaborar temas prominentes con suficiente detalle ayuda a los lectores a comprender las ideas clave.
   main_idea: "Idea Principal:"
   strategies: Estrategias Utilizadas
-  error: Error al leer datos de Temas Destacados.
+  error: Error al leer datos de Temas Prominentes.
   no_sentences: No se encontró texto relevante que aborde este tema en su borrador.
   idea: 'Tema:'
   elaborations: Técnicas de Elaboración
@@ -75,7 +77,7 @@ prominent_topics:
 lines_of_arguments:
   title: Líneas de Argumentación
   error: Error al leer datos de Líneas de Argumentación.
-  no_sentences: No se encontraron oraciones para apoyar esta afirmación en su borrador.
+  no_sentences: No se encontraron oraciones que respalden esta afirmación en su borrador.
   strategies: Estrategias Utilizadas
   main: "Tesis:"
   arguments: Argumentos
@@ -83,21 +85,21 @@ lines_of_arguments:
   no_counter_examples: No se encontraron contraargumentos obvios.
   rebuttals: Refutaciones
   claim: 'Afirmación:'
-  support: 'Apoyo:'
+  support: 'Respaldo:'
   sentences: Oraciones
   suggestions: 'Comentarios:'
   no_suggestions: Sin comentarios. Se ve muy bien.
   'null': No se detectaron líneas de argumentación en su borrador.
 logical_flow:
   title: Problemas de Flujo Lógico
-  tooltip: Organizar ideas coherentemente mejora la legibilidad y la comprensión del lector.
+  tooltip: Organizar las ideas de manera coherente mejora la legibilidad y la comprensión del lector.
   error: Error al mostrar la herramienta de Problemas de Flujo Lógico.
   no_sentences: No se encontraron oraciones relevantes en su borrador.
   issue: "Problema:"
   suggestion: "Sugerencia:"
 expectations:
   title: Expectativas de Contenido
-  no_writing_task_tooltip: Por favor seleccione un tipo de escritura para ver las expectativas de contenido.
+  no_writing_task_tooltip: Por favor, seleccione un tipo de escritura para ver las expectativas de contenido.
 organization:
   title: Progresión Temática
   error: 'Error al cargar datos de Progresión Temática:'
@@ -112,18 +114,18 @@ organization:
     after_topic: Tema después del verbo principal de una oración temática.
     dot_outline_circle: Un círculo vacío con un pequeño círculo en la esquina superior izquierda.
     location: Número de párrafo.
-    boxed_number: Un número enmarcado.
-  description: El Panel de Coherencia traza el flujo de sus grupos temáticos a través de y dentro de los párrafos. Los círculos oscuros indican que un grupo temático particular se discute prominentemente en un párrafo particular. Los círculos blancos y los espacios indican que un grupo temático particular se menciona pero no prominentemente o no se menciona en absoluto en el párrafo. Estudie la visualización de círculos oscuros/blancos y espacios y vea si los cambios en los grupos temáticos y su prominencia se ajustan a un plan de escritura que sus lectores puedan seguir fácilmente.
+    boxed_number: Un número en recuadro.
+  description: El Panel de Coherencia traza el flujo de sus grupos temáticos a través y dentro de los párrafos. Los círculos oscuros indican que un grupo temático particular se discute prominentemente en un párrafo particular. Los círculos blancos y los espacios indican que un grupo temático particular se menciona pero no prominentemente o no se menciona en absoluto en el párrafo. Estudie la visualización en busca de círculos oscuros/blancos y espacios y vea si los cambios en los grupos temáticos y su prominencia se ajustan a un plan de escritura que sus lectores puedan seguir fácilmente.
   coherence:
-    title: Términos a través de Párrafos
+    title: Términos a Través de Párrafos
     topic_only: 'Mostrar solo grupos temáticos:'
     paragraphs: Tema
-    sentences_in_paragraph: 'Coherencia entre oraciones en el párrafo: {{paragraph}}'
+    sentences_in_paragraph: 'Coherencia a través de oraciones en el párrafo: {{paragraph}}'
     sentences: 'Oraciones:'
 paragraph_clarity:
-  title: Claridad de Párrafos
-  tooltip: Mejorar el flujo de párrafos mejora la legibilidad y la comunicación efectiva.
-  error: Error al mostrar la herramienta de Claridad de Párrafos.
+  title: Claridad de Párrafo
+  tooltip: Mejorar el flujo del párrafo mejora la legibilidad y la comunicación efectiva.
+  error: Error al mostrar la herramienta de Claridad de Párrafo.
   suggestion: "Sugerencia:"
 professional_tone:
   title: Tono Profesional
@@ -142,17 +144,17 @@ sources:
   issue: "Problema:"
   source: "Fuente(s):"
   supportive:
-    title: Cita de Apoyo
-    "null": No se utiliza estilo de cita de apoyo en este borrador.
+    title: Citación de Apoyo
+    "null": No se utiliza estilo de citación de apoyo en este borrador.
   hedged:
-    title: Cita Matizada
-    "null": No se utiliza estilo de cita matizada en este borrador.
+    title: Citación Cautelosa
+    "null": No se utiliza estilo de citación cautelosa en este borrador.
   alternative:
-    title: Cita Alternativa
-    "null": No se utiliza estilo de cita alternativa en este borrador.
+    title: Citación Alternativa
+    "null": No se utiliza estilo de citación alternativa en este borrador.
   neutral:
-    title: Cita Neutral
-    "null": No se utiliza estilo de cita neutral en este borrador.
+    title: Citación Neutral
+    "null": No se utiliza estilo de citación neutral en este borrador.
   no_issues: No se encontraron problemas significativos de citación en su borrador.
   'null': Sin comentarios.
   types:
@@ -161,7 +163,7 @@ sources:
 impressions:
   title: Impresiones
 'null':
-  big_picture: Utilice las herramientas de Visión General para revisar las expectativas de contenido, la estructura general y el argumento de su borrador.
-  fine_tuning: Utilice las herramientas de Ajuste Fino para revisar la claridad, el estilo y el tono de su escritura.
+  big_picture: Use las herramientas de Panorama General para revisar las expectativas de contenido, la estructura general y el argumento de su borrador.
+  fine_tuning: Use las herramientas de Ajuste Fino para revisar la claridad, el estilo y el tono de su escritura.
   not_available: Esta herramienta no está disponible actualmente.
-  no_writing_task: Por favor seleccione un tipo de escritura para ver las herramientas de revisión.
+  no_writing_task: Por favor, seleccione un tipo de escritura para ver las herramientas de revisión.

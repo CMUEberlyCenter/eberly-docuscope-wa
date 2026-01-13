@@ -38,6 +38,11 @@ function fromEnvFile(base: string, defaultValue?: string): string {
   return process.env[base] ?? defaultValue ?? '';
 }
 
+export const ADMIN_PASSWORD = fromEnvFile(
+  'ADMIN_PASSWORD',
+  // Use crypto module to generate a random password if not set
+  crypto.getRandomValues(new BigUint64Array(1))[0].toString(36)
+);
 export const SESSION_KEY = fromEnvFile('SESSION_KEY', randomUUID());
 export const LTI_KEY = fromEnvFile('LTI_KEY'); // As it is shared with the LMS, it should always exist.
 export const LTI_HOSTNAME = new URL(

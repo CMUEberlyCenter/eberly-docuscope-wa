@@ -235,14 +235,14 @@ es_pronouns = []  # TBD
 def html_sentence_splitter(doc):
     # Define which tags should trigger sentence splits
     split_tags = re.compile(r'^<img\d+/>$')  # Add your tags here
-    
+
     for i, token in enumerate(doc):
         # Only split on specific tags
         if split_tags.match(token.text):
             token.is_sent_start = True
             if i + 1 < len(doc):
                 doc[i + 1].is_sent_start = True
-    
+
     return doc
 
 def setLanguageModel(lang, model=NLP_MODEL_DEFAULT):
@@ -487,7 +487,7 @@ def resized_image_handler(image):
         img = Image.open(BytesIO(img_data))
 
         # Get original dimensions
-        original_width, original_height = img.size
+        # original_width, original_height = img.size
 
         # Set max dimensions in case we can't find them.
         max_width = 800
@@ -851,10 +851,7 @@ class DSDocument:
             )
 
         if tag_name in ["li"]:
-            self.para_count += 1  # increment the paragraph ID.
-
             text = get_text_preserve_inline(html_element)
-
             data["sentences"] = []
             parsed_para = nlp(text)
             slist = list(parsed_para.sents)  # list of sentences
@@ -866,7 +863,7 @@ class DSDocument:
                 data["sentences"].append(sent_dict)
 
             html_element["data-ds-paragraph"] = f"{self.para_count}"
-            html_element["id"] = f"p{self.para_count}"
+            html_element["id"] = f"li{position}"
             html_element["class"] = tag_name
 
             return DocumentElement(
@@ -1071,7 +1068,7 @@ class DSDocument:
     def setHeaderLabels(self, val):
         self.header_labels = val
 
-    def getHeaderLabels(self, val):
+    def getHeaderLabels(self):
         return self.header_labels
 
     def setPronounsVisible(self, val):
@@ -2147,6 +2144,7 @@ class DSDocument:
                 continue
 
             if elem.content_type == ContentType.PARAGRAPH:
+                pcount = elem.position
                 para_id = elem.para_id
                 if self.soup:
                     tag = self.soup.find(
@@ -2163,11 +2161,6 @@ class DSDocument:
                     )  # find the tag with the id = elem.position
                     if isinstance(tag, Tag):
                         tag.clear()
-                    tag = self.soup.find(
-                        id=f"p{pcount}"
-                    )  # find the tag with the id = elem.position
-                    if isinstance(tag, Tag):
-                        tag.clear()  # clear the content
 
             if (
                 elem.content_type == ContentType.LISTITEM
@@ -2968,8 +2961,7 @@ class DSDocument:
         for elem in self.elements:
 
             if elem.content_type == ContentType.LISTITEM:
-                if prev_content_type != ContentType.LISTITEM:
-                    res.append("\n")
+                pass
             else:
                 res.append("\n")
 
@@ -3870,6 +3862,10 @@ class DSDocument:
             data = local_data
 
             topic_filter = TOPIC_FILTER_LEFT_RIGHT
+
+            if data == []:
+                return []
+
             header = data[0]
             nrows = len(data)
             ncols = len(header)
@@ -3951,70 +3947,6 @@ class DSDocument:
         topics = list(set(topics))
 
         return topics
-
-    # def countSentencesWithTopic(self, topic):
-    #     """
-    #     Given a topic <string>, this method returns the toal number of sentences
-    #     that includes the topic.
-    #     """
-    #     locations = self.topic_location_dict.get(topic, None) \
-    #         if self.topic_location_dict is not None else None
-
-    #     temp = []
-    #     topic_positions = locations.getTopicPositions() if locations is not None else []
-    #     for t in topic_positions:
-    #         if t[:2] not in temp:
-    #             temp.append(t[:2])
-
-    #     count = len(temp)
-    #     return count
-
-    # def locateTopics(self, topics):
-    #     """
-    #     Given a set of topics, this method locates the topics in a current document,
-    #     and update self.topic_location_dict.
-    #     """
-
-    #     def locateATopic(topic):
-    #         """
-    #         This method is called by locateTopics(), and should not
-    #         """
-
-    #         if self.sections is None:
-    #             return "Error in locateATopic()"
-    #         try:
-    #             data = self.sections[self.current_section]["data"]  ### TODO!!!
-    #             if data is None:
-    #                 raise ValueError
-    #         except:
-    #             return None
-
-    #         adj_stats = AdjacencyStats(topic=topic, controller=self.controller)
-    #         topic_filter = TOPIC_FILTER_LEFT_RIGHT
-
-    #         # Let's find which paragraphs/sentences the selected 'topic' is included.
-    #         for pcount, para in enumerate(data["paragraphs"], start=1):
-    #             for scount, sent in enumerate(para["sentences"], start=1):
-    #                 for wcount, w in enumerate(sent["text_w_info"]):
-    #                     if w[LEMMA] == topic and (w[POS] == "NOUN" or w[POS] == "PRP"):
-    #                         if (
-    #                             topic_filter == TOPIC_FILTER_LEFT and not w[ISLEFT]
-    #                         ):  ## NEW 3/2/21
-    #                             pass
-    #                         else:
-    #                             adj_stats.addParagraphID(pcount)
-    #                             adj_stats.addSentenceID(pcount, scount)
-    #                             adj_stats.addTopicPosition(pcount, scount, wcount)
-
-    #         return adj_stats
-
-    #     if topics is None or topics == []:
-    #         self.topic_location_dict = None
-    #         return None
-
-    #     self.topic_location_dict = {}
-    #     for topic in topics:
-    #         self.topic_location_dict[topic] = locateATopic(topic)
 
     def getHtmlSents(self, data):
         """

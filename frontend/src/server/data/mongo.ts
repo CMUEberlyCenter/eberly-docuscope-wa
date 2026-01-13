@@ -1,6 +1,7 @@
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
-import type { WritingTask } from '../../lib/WritingTask';
+import { Analysis } from '../../lib/ReviewResponse';
+import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
@@ -11,6 +12,8 @@ const client = new MongoClient(MONGO_CLIENT);
 const WRITING_TASKS = 'writing_tasks';
 /** Database collection for logging. */
 const LOGGING = 'logging';
+/** Database collection for static previews. */
+const PREVIEWS = 'previews';
 
 /** Extra information stored in database about the writing task */
 type WritingTaskDb = WritingTask & {
@@ -18,6 +21,159 @@ type WritingTaskDb = WritingTask & {
   path?: string;
   modified?: Date;
 };
+
+type Preview = {
+  _id?: ObjectId;
+  timestamp: Date;
+  task: WritingTask;
+  file: string; // html encoded
+  filename?: string;
+  segmented: string;
+  tool_config: string[];
+  analyses: Analysis[];
+};
+
+// Unused
+// export async function findAllPreviews(): Promise<Preview[]> {
+//   const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+//   const previews = await collection.find<Preview>({}).toArray();
+//   return previews;
+// }
+
+/**
+ * Find all previews with minimal information.
+ * Used for listing previews without loading full data.
+ * @returns Array of previews with only _id, filename, timestamp, task.info.name, and tool_config.
+ */
+export async function findAllPreviewsBasic(): Promise<Preview[]> {
+  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const previews = await collection
+    .find<Preview>(
+      {},
+      {
+        projection: {
+          filename: 1,
+          timestamp: 1,
+          'task.info.name': 1,
+          tool_config: 1,
+        },
+      }
+    )
+    .toArray();
+  return previews;
+}
+
+export async function findPreviewById(id: string): Promise<Preview> {
+  try {
+    const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+    if (!ObjectId.isValid(id) || id.length !== 24) {
+      throw new ReferenceError(`Preview ${id} not found.`);
+    }
+    const _id = new ObjectId(id);
+    const preview = await collection.findOne<Preview>(
+      { _id },
+      { projection: { _id: 0 } }
+    );
+    if (!preview) {
+      throw new ReferenceError(`Preview ${id} not found.`);
+    }
+    return preview;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+export async function insertPreview(
+  task: WritingTask,
+  file: string,
+  segmented: string,
+  filename?: string,
+  tool_config?: string[],
+  analyses?: Analysis[]
+): Promise<ObjectId> {
+  tool_config = tool_config ?? [];
+  analyses = analyses ?? [];
+  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const ins = await collection.insertOne({
+    task,
+    file,
+    filename,
+    segmented,
+    tool_config,
+    analyses,
+    timestamp: new Date(),
+  });
+  return ins.insertedId;
+}
+/**
+ * Delete a preview by its ID.
+ * @param id the identifier for the preview to delete.
+ * @returns true if deletion is acknowledged.
+ */
+export async function deletePreviewById(id: string) {
+  if (!ObjectId.isValid(id) || id.length !== 24) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const del = await client.db(MONGO_DB).collection(PREVIEWS).deleteOne({ _id });
+  if (!del.acknowledged || del.deletedCount !== 1) {
+    throw new ReferenceError(`Delete operation for Preview ${id} failed`);
+  }
+  console.log(`Deleted preview with id '${id}'`);
+  return del.acknowledged;
+}
+
+/**
+ * Add new analyses to a preview.
+ * @param id the identifier for the preview to update.
+ * @param analyses the analyses to add to the preview.
+ * @returns the id of the updated preview.
+ */
+export async function updatePreviewReviewsById(
+  id: string | ObjectId,
+  ...analyses: Analysis[]
+) {
+  if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const upd = await client
+    .db(MONGO_DB)
+    .collection<Preview>(PREVIEWS)
+    .findOneAndUpdate(
+      { _id },
+      {
+        $push: { analyses: { $each: analyses } },
+        $set: { timestamp: new Date() },
+      }
+    );
+  if (!upd) {
+    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+  }
+  console.log(`Updated reviews for preview with id '${id}'`);
+  return upd._id;
+}
+
+export async function clearPreviewAnalysesById(id: string | ObjectId) {
+  if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
+    throw new ReferenceError(`Preview ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const upd = await client
+    .db(MONGO_DB)
+    .collection<Preview>(PREVIEWS)
+    .findOneAndUpdate(
+      { _id },
+      {
+        $set: { analyses: [], timestamp: new Date() },
+      }
+    );
+  if (!upd) {
+    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+  }
+  console.log(`Cleared analyses for preview with id '${id}'`);
+  return upd._id;
+}
 
 /**
  * Retrieves a given writing task specification from the database.
@@ -79,16 +235,15 @@ export async function insertWritingTask(
  * facing versions.
  * @returns writing tasks where the public attribute is true.
  */
-async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
+async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
   try {
     const collection = client
       .db(MONGO_DB)
-      .collection<WritingTask>(WRITING_TASKS);
-    const cursor = collection.find<WritingTask>(
+      .collection<DbWritingTask>(WRITING_TASKS);
+    const cursor = collection.find<DbWritingTask>(
       { public: true, 'info.access': ACCESS_LEVEL },
       { projection: { path: 0, modified: 0 } }
     );
-    const ret: WritingTask[] = [];
     for await (const doc of cursor) {
       yield doc;
     }
@@ -104,7 +259,7 @@ async function* generateAllPublicWritingTasks(): AsyncGenerator<WritingTask> {
  * facing versions.
  * @returns Array of writing tasks where the public attribute is true.
  */
-export async function findAllPublicWritingTasks(): Promise<WritingTask[]> {
+export async function findAllPublicWritingTasks(): Promise<DbWritingTask[]> {
   return Array.fromAsync(generateAllPublicWritingTasks());
 }
 
@@ -234,22 +389,30 @@ type AggregateLogData = {
   _id: string;
   count: number;
   avgTime: number;
+  minTime: number;
+  maxTime: number;
   avgInputTokens: number; // input_tokens
   avgOutputTokens: number; // output_tokens
   avgCacheCreate: number; // cache_creation_input_tokens
   maxCacheCreate: number; // cache_creation_input_tokens
   avgCacheRead: number; // cache_read_input_tokens
   maxCacheRead: number; // cache_read_input_tokens
+  startTime: Date;
+  endTime: Date;
 };
 
-export async function getLogData(): Promise<AggregateLogData[]> {
+async function* generateLogData(): AsyncGenerator<AggregateLogData> {
   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<AggregateLogData>([
     {
       $group: {
         _id: '$meta.prompt',
         count: { $count: {} },
+        startTime: { $min: '$timestamp' },
+        endTime: { $max: '$timestamp' },
         avgTime: { $avg: '$performance_data.delta_ms' },
+        minTime: { $min: '$performance_data.delta_ms' },
+        maxTime: { $max: '$performance_data.delta_ms' },
         avgInputTokens: { $avg: '$performance_data.usage.input_tokens' },
         avgOutputTokens: { $avg: '$performance_data.usage.output_tokens' },
         avgCacheCreate: {
@@ -267,30 +430,32 @@ export async function getLogData(): Promise<AggregateLogData[]> {
       },
     },
   ]);
-  const ret: AggregateLogData[] = [];
   for await (const doc of cursor) {
-    ret.push(doc);
+    yield doc;
   }
-  return ret;
+}
+export function getLogData(): Promise<AggregateLogData[]> {
+  return Array.fromAsync(generateLogData());
 }
 
-export async function getLatestLogData(prompt: string): Promise<LogData[]> {
-  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
-  const cursor = collection.aggregate<LogData>(
-    [
-      {
-        $match: {
-          'meta.prompt': prompt,
-        },
-      },
-      { $sort: { timestamp: -1 } },
-      { $limit: 1 },
-    ],
-    { maxTimeMS: 60000, allowDiskUse: true }
-  );
-  const ret: LogData[] = [];
-  for await (const doc of cursor) {
-    ret.push(doc);
-  }
-  return ret;
-}
+// async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {
+//   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+//   const cursor = collection.aggregate<LogData>(
+//     [
+//       {
+//         $match: {
+//           'meta.prompt': prompt,
+//         },
+//       },
+//       { $sort: { timestamp: -1 } },
+//       { $limit: 1 },
+//     ],
+//     { maxTimeMS: 60000, allowDiskUse: true }
+//   );
+//   for await (const doc of cursor) {
+//     yield doc;
+//   }
+// }
+// export function getLatestLogData(prompt: string): Promise<LogData[]> {
+//   return Array.fromAsync(generateLatestLogData(prompt));
+// }
