@@ -13,21 +13,10 @@ defaults:
 jobs:
   build:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        bun-version: [1.x]
-        # See supported Bun.js release schedule at https://bun.sh/docs/installation#github-actions
-
     steps:
     - uses: actions/checkout@v6
-    - name: Use Bun.js ${{ matrix.bun-version }}
-      uses: oven-sh/setup-bun@v2
-      with:
-        bun-version: ${{ matrix.bun-version }}
-        cache: true
+    - uses: oven-sh/setup-bun@v2
     - run: bun install
-      working-directory: ./frontend
     - run: bun run build
     - run: bun test
       continue-on-error: true
