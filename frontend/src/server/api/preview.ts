@@ -13,6 +13,7 @@ import {
   ExpectationsData,
   ExpectationsOutput,
   isExpectationsData,
+  isExpectationsOutput,
   ReviewPrompt,
   ReviewResponse,
 } from '../../lib/ReviewResponse';
@@ -188,7 +189,7 @@ preview.get(
       'expectations',
       {
         ...reviewData({
-          segmented: request.session.segmented,
+          segmented: preview.segmented,
           writing_task: preview.task ?? null,
         }),
         expectation: target.name,
@@ -206,8 +207,12 @@ preview.get(
       throw new Error(
         `NULL chat response for expectation ${index}: ${target.name}`
       );
-    if (typeof chat_response === 'string') {
-      throw new Error(chat_response); // if string, throw as error
+    if (!isExpectationsOutput(chat_response)) {
+      console.error(
+        `Malformed results for ${index}: ${target.name}`,
+        chat_response
+      );
+      throw new Error(`Malformed results for ${index}: ${target.name}`);
     }
     const data: ExpectationsData = {
       tool: 'expectations',

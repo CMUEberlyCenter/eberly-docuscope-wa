@@ -8,7 +8,7 @@ import { act } from "react";
 describe("About", () => {
   test("link creation", async () => {
     render(<About />);
-    const title = screen.getByText(/about.title/)
+    const title = screen.getByText(/about.title/);
     expect(title).toBeInTheDocument();
     const null_link = screen.queryByText(/about.project_link_title/);
     expect(null_link).not.toBeInTheDocument();
