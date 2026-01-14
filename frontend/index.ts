@@ -62,13 +62,12 @@ import { basicAuthMiddleware } from './src/utils/basicAuth';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
 
-// const __filename = fileURLToPath(import.meta.url);
 // use process.cwd() to get the current working directory so that
 // both development and production environments work correctly.
-const __dirname = process.cwd(); //dirname(__filename);
+const __dirname = process.cwd();
 const root = __dirname;
 /** Root directory for the public server files. */
-const PUBLIC = __dirname; // join(__dirname, './build/app');
+const PUBLIC = __dirname;
 
 async function __main__() {
   console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -323,7 +322,6 @@ async function __main__() {
     /admin/ // Admin routes, security should be handled outside LTI
   );
   try {
-    // await Provider.deploy({ port: PORT });
     await Provider.deploy({ serverless: true });
 
     // Register manually configured platforms.

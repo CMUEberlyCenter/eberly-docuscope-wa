@@ -188,6 +188,7 @@ export const Page: FC = () => {
               method="POST"
               action={"/api/v2/preview"}
               encType="multipart/form-data"
+              target="_blank"
             >
               <input
                 type="hidden"
@@ -309,7 +310,7 @@ export const Page: FC = () => {
           <ListGroup variant="flush">
             {previews.map(({ id, task, filename, timestamp }) => (
               <ListGroup.Item key={`${id}`}>
-                <a href={`/preview/${id}`}>
+                <a href={`/preview/${id}`} target="_blank">
                   {task.info.name}: {filename} (
                   {new Date(timestamp).toLocaleString()})
                 </a>
