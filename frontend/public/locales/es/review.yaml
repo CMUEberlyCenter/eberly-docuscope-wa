@@ -12,7 +12,7 @@ summary:
 insights: Perspectivas de Revisión
 error:
   header: ¡Error al Cargar la Revisión!
-  content: Hubo un error al recuperar los datos de revisión.
+  content: Se produjo un error al recuperar los datos de revisión.
   details: 'Detalles: {{message}}'
   too_large: El documento es demasiado grande para procesar. Por favor, acorte su texto e intente nuevamente.
   service_unavailable: El servicio de revisión no está disponible temporalmente. Por favor, intente más tarde.
@@ -20,9 +20,9 @@ additional_tools:
   title: Herramientas Adicionales
   tooltip: Perfeccione su borrador con revisión adicional.
 civil_tone:
-  title: Tono Cortés
+  title: Tono Civil
   tooltip: El uso de lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
-  error: Error al mostrar la herramienta de Tono Cortés.
+  error: Error al mostrar la herramienta de Tono Civil.
   'null': No se encontraron problemas.
   prefix: 'Su Texto:'
   issue: "Problema:"
@@ -34,6 +34,8 @@ credibility:
   assessment: "Observación:"
   no_sentences: No se encontró texto relevante en su borrador.
   'null': Sin comentarios.
+sentence_density:
+  title: $t(sentences.title)
 sentences:
   title: Claridad de Oraciones
   error: 'Error al mostrar datos de Oraciones:'
@@ -100,6 +102,8 @@ logical_flow:
 expectations:
   title: Expectativas de Contenido
   no_writing_task_tooltip: Por favor, seleccione un tipo de escritura para ver las expectativas de contenido.
+term_matrix:
+  title: $t(organization.title)
 organization:
   title: Progresión Temática
   error: 'Error al cargar datos de Progresión Temática:'
@@ -123,9 +127,9 @@ organization:
     sentences_in_paragraph: 'Coherencia a través de oraciones en el párrafo: {{paragraph}}'
     sentences: 'Oraciones:'
 paragraph_clarity:
-  title: Claridad de Párrafo
-  tooltip: Mejorar el flujo del párrafo mejora la legibilidad y la comunicación efectiva.
-  error: Error al mostrar la herramienta de Claridad de Párrafo.
+  title: Claridad de Párrafos
+  tooltip: Mejorar el flujo de párrafos mejora la legibilidad y la comunicación efectiva.
+  error: Error al mostrar la herramienta de Claridad de Párrafos.
   suggestion: "Sugerencia:"
 professional_tone:
   title: Tono Profesional

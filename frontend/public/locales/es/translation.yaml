@@ -1,45 +1,100 @@
 about:
   title: Acerca de
-  overview: 'Descripción general del proyecto:'
-  project_link_title: Future of Writing
+  overview: 'Descripción General del Proyecto:'
+  project_link_title: Futuro de la Escritura
   build: 'Compilación:'
   version: 'Versión: {{version}} compilada el {{date}}'
-  template: 'Información de plantillas:'
+  template: 'Información de Plantillas:'
   templates: Plantillas compiladas el {{date}}
-  task: 'Tarea de escritura:'
+  task: 'Tarea de Escritura:'
   task_name: 'Nombre: {{name}}'
   acknowledgements:
     title: 'Agradecimientos:'
     content: >
       Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
-      la Subvención Semilla de la Iniciativa Simon de Carnegie Mellon,
-      el Fondo de Desarrollo de la Facultad Berkman
-      y el Programa de Subvenciones Semilla para Investigación y Desarrollo de Herramientas
+      la Beca Semilla de la Iniciativa Simon de Carnegie Mellon,
+      el Fondo de Desarrollo de Profesorado Berkman,
+      y el Programa de Becas Semilla para Investigación y Desarrollo de Herramientas
       Educativas Habilitadas por IA Generativa, Dietrich College of Humanities & Social Sciences,
       Eberly Center for Teaching Excellence and Educational Innovation,
-      Department of English y Center for Technology Transfer and Enterprise Creation.
+      Department of English, y Center for Technology Transfer and Enterprise Creation.
   cmu: Carnegie Mellon University
-  simon: Simon Initiative
+  simon: Iniciativa Simon
+admin:
+  title: Panel de Administración
+  home: Inicio
+  welcome: Bienvenido al panel de administración. Utilice la navegación para gestionar diversos aspectos de la aplicación myProse.
+  settings:
+    tab: Configuración
+    title: Configuración Global
+    text_to_speech: 'Texto a Voz: '
+    scribe: 'Herramientas de I.A.: '
+    model: 'Modelo Anthropic: '
+    word_count_limit: 'Límite de Recuento de Palabras: '
+    notes_to_prose: 'Herramienta de $t(tool.tab.generate) $t(tool.button.prose.tooltip): '
+    notes_to_bullets: 'Herramienta de $t(tool.tab.generate) $t(tool.button.bullets.tooltip): '
+    civil_tone: 'Herramienta de $t(review:title) $t(review:civil_tone.title): '
+    credibility: 'Herramienta de $t(review:title) $t(review:credibility.title): '
+    expectations: 'Herramienta de $t(review:title) $t(review:expectations.title): '
+    sentence_clarity: 'Herramienta de $t(review:title) $t(review:sentences.title): '
+    lines_of_arguments: 'Herramienta de $t(review:title) $t(review:lines_of_arguments.title): '
+    logical_flow: 'Herramienta de $t(review:title) $t(review:logical_flow.title): '
+    paragraph_clarity: 'Herramienta de $t(review:title) $t(review:paragraph_clarity.title): '
+    professional_tone: 'Herramienta de $t(review:title) $t(review:professional_tone.title): '
+    prominent_topics: 'Herramienta de $t(review:title) $t(review:prominent_topics.title): '
+    sentences: 'Herramienta de $t(review:title) $t(review:sentences.title): '
+    sources: 'Herramienta de $t(review:title) $t(review:sources.title): '
+    organization: 'Herramienta de $t(review:title) $t(review:organization.title): '
+    language: 'Idioma Predeterminado: '
+    access_level: 'Nivel de acceso WTD: '
+    available: 'Disponible'
+    unavailable: 'Todas Deshabilitadas'
+    enabled: Habilitado
+    disabled: No
+    unlimited: Sin Límite
+  platforms:
+    tab: Plataformas
+    title: Plataformas LTI Registradas
+  performance:
+    tab: Rendimiento
+    title: Métricas de Rendimiento
+    no_data: No hay datos de rendimiento disponibles.
+  genlink:
+    tab: Generar Enlaces
+    title: Generador de Enlaces de Tarea de Escritura y Vista Previa
+    description: Utilice esta herramienta para generar enlaces para Tareas de Escritura específicas dentro de myProse.
+    document:
+      title: Vista Previa del Documento
+      description: Utilice este enlace para obtener una vista previa del documento para la Tarea de Escritura seleccionada.
+      upload: Cargar Documento
+      tools: 'Seleccionar Herramientas Habilitadas:'
+      select_label: Seleccionar Todas / Deseleccionar Todas
+      select_all: Seleccionar Todas
+      deselect_all: Deseleccionar Todas
+    submit: Iniciar
+    existing_previews: Vistas Previas Existentes
+    delete_preview: Eliminar Vista Previa
+    refresh_preview: Limpiar caché de análisis
 document.title: myProse
 document.description: $t(document.title) es un entorno para estructurar tareas de escritura con la ayuda de inteligencia artificial generativa y otras herramientas de análisis de lenguaje natural.
 loading: Analizando...
 wait: Esto puede tardar unos segundos...
 legal:
-  myprose: Aviso de privacidad de $t(document.title)
+  myprose: Aviso de Privacidad de $t(document.title)
   cmu: Legal
-  privacy: Aviso de privacidad
+  privacy: Aviso de Privacidad
 deeplink: Seleccione un tipo de texto para esta asignación
 deeplinking:
-  title: Vinculación profunda LTI de $t(document.title)
-  disabled: Seleccione una herramienta y seleccione o cargue un archivo de tarea de escritura para habilitar este botón.
+  title: LTI Deeplinking de $t(document.title)
+  disabled: Seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
   enabled: Haga clic para seleccionar contenido.
   select_tool: Seleccione una herramienta
   option:
     draft: Borrador
     review: Revisión
-  upload: Seleccione una tarea de escritura o cargue un archivo de tarea de escritura personalizado
+  upload: Seleccione una Tarea de Escritura o cargue un archivo de Tarea de Escritura personalizado
 genlink:
-  title: Generador de enlaces de tareas de escritura de $t(document.title)
+  title: Generador de Enlaces de Tarea de Escritura de $t(document.title)
   link: 'Enlaces:'
   draft: Borrador de $t(document.title)
   review: Revisión de $t(document.title)
@@ -55,34 +110,34 @@ audio:
 editor:
   gdoc:
     error:
-      google_client_id: 'Error de configuración del servidor: el ID de cliente de Google no está definido.'
-      google_api_key: 'Error de configuración del servidor: la clave de API de Google no está definida.'
-      google_app_id: 'Error de configuración del servidor: el ID de aplicación de Google no está definido.'
+      google_client_id: 'Error de configuración del servidor: el ID de Cliente de Google no está definido.'
+      google_api_key: 'Error de configuración del servidor: la Clave de API de Google no está definida.'
+      google_app_id: 'Error de configuración del servidor: el ID de Aplicación de Google no está definido.'
       google_drive_api: La API de Google Drive no está cargada.
       docx: Error al obtener o convertir el archivo docx.
-      gdoc: Error al obtener o convertir el archivo de Google Docs.
-      gdoc_empty: La exportación de Google Docs devolvió contenido vacío.
+      gdoc: Error al obtener o convertir el archivo de Google Doc.
+      gdoc_empty: La exportación de Google Doc devolvió contenido vacío.
       unknown_type: 'Tipo de archivo no compatible: {{type}}'
   upload:
     title: Abrir
     file: Archivo
     open: Abrir
     error:
-      title: 'Problemas de importación de archivos:'
-      overview: 'Revise los detalles a continuación: Las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
+      title: 'Problemas de Importación de Archivo:'
+      overview: 'Revise los detalles a continuación: Las advertencias probablemente indican diferencias de visualización mientras que los errores pueden indicar pérdida de información.'
       error: 'Error: {{message}}'
       warning: 'Advertencia: {{message}}'
       fail: Solo se permite la selección de un archivo.
-      not_docx: '{{file}} no es un archivo docx.'
+      not_docx: '¡{{file}} no es un archivo docx!'
       failed_write: No se puede guardar el archivo.
-      security: Archivo rechazado debido a un error de seguridad.
+      security: Archivo rechazado debido a error de seguridad.
   menu:
     file: Archivo
-    open: Importar desde archivo
+    open: Importar desde Archivo
     gdoc: Importar desde Google Docs
     save: Exportar
     view: Fuente
-    view.font_size: 'Tamaño de fuente del editor: {{zoom}}%'
+    view.font_size: 'Tamaño de Fuente del Editor: {{zoom}}%'
     paragraph: Párrafo
     h1: Encabezado 1
     h2: Encabezado 2
@@ -91,72 +146,71 @@ editor:
     h5: Encabezado 5
     h6: Encabezado 6
     list: Lista
-    numbered: Lista numerada
+    numbered: Lista Numerada
     bold: Negrita
     italic: Cursiva
     underline: Subrayado
     strike: Tachado
-    task: 'Expectativas de contenido:'
-    no_task: Ninguna seleccionada
+    task: 'Expectativas de Contenido:'
+    no_task: Ninguna Seleccionada
     no_edit: El texto no es editable.
 tool:
   tab:
     generate: Borrador
-    review: Revisión
   button:
     prose:
       title: Prosa
-      tooltip: Generar prosa a partir de notas
+      tooltip: Generar Prosa desde Notas
     bullets:
       title: Viñetas
-      tooltip: Generar lista con viñetas a partir de notas
+      tooltip: Generar Lista con Viñetas desde Notas
     view:
       title: 'Abrir expectativas de contenido: {{title}}'
   initial: Escriba y resalte texto para realizar más acciones.
   bookmark: Marcador
   bookmarked: Marcado
-  input: Su entrada
-  no_selection: Seleccione texto antes de usar esta herramienta.
+  input: Su Entrada
+  no_selection: Seleccione algún texto antes de usar esta herramienta.
   output: Respuesta de I.A.
   regenerate: Regenerar
-  paste: Pegar texto
-clipboard: Copiar al portapapeles
+  paste: Pegar Texto
+clipboard: Copiar al Portapapeles
 error:
-  unknown: Se produjo un error desconocido al procesar los resultados.
+  unknown: Ocurrió un error desconocido al procesar los resultados.
   no_selection:
     prose: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
     bullets: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
     default: No hay texto seleccionado. Resalte el texto primero.
   no_results: No hay resultados válidos.
-  unknown_error: Se produjo un error.
-  too_large: El texto de entrada es demasiado grande para procesar. Reduzca la longitud del texto seleccionado e inténtelo de nuevo.
-  service_unavailable: El servicio no está disponible actualmente. Inténtelo de nuevo más tarde.
+  unknown_error: Ocurrió un error.
+  too_large: El texto de entrada es demasiado grande para procesar. Reduzca la longitud del texto seleccionado e intente nuevamente.
+  service_unavailable: El servicio no está disponible actualmente. Intente nuevamente más tarde.
 select_task:
-  title: Seleccionar tipo de escritura
+  title: Seleccionar Tipo de Escritura
   filters: Filtros
-  label: Búsqueda de texto
+  label: Búsqueda de Texto
   placeholder: Ingrese título o palabras clave...
   search: Buscar
   context: Contexto
-  mode: Modo principal
-  upload: Cargar tipo de texto personalizado
-  invalid_upload: El archivo cargado no es una especificación de tipo de texto válida.
-  "null": Sin tipo de texto
+  mode: Modo Principal
+  upload: Cargar Tipo de Texto Personalizado
+  invalid_upload: ¡El archivo cargado no es una especificación de tipo de texto válida!
+  "null": Sin Tipo de Texto
   version: 'Versión: {{version}}'
-  copyright: 'Derechos de autor: {{copyright}}'
+  copyright: 'Derechos de Autor: {{copyright}}'
   multiple_file_error: Cargue solo un archivo a la vez.
-  malformed_json: El contenido no se pudo analizar como JSON.
+  malformed_json: El contenido no pudo ser analizado como JSON.
   select: Seleccionar categoría
-  select_all: Seleccionar todo
-  all_category: Todo
+  select_all: Seleccionar Todas
+  all_category: Todas
 cancel: Cancelar
 select: Seleccionar
 next: Siguiente
-select_insert: Seleccionar e insertar
+select_insert: Seleccionar e Insertar
 details:
-  include: Incluir detalles
+  include: Incluir Detalles
   insert: Insertar
-  overview: Descripción general
+  overview: Descripción General
   about:
-    expectation: 'Acerca de esta expectativa:'
-    section: 'Acerca de esta sección:'
+    expectation: 'Acerca de esta Expectativa:'
+    section: 'Acerca de esta Sección:'
