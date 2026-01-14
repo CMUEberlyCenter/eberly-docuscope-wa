@@ -118,8 +118,9 @@ export function getIndexOfExpectation(
   task: WritingTask,
   expectation: Rule
 ): number {
-  const expectations = getExpectations(task);
-  return expectations.findIndex((exp) => exp.name === expectation.name);
+  return getExpectations(task).findIndex(
+    (exp) => exp.name === expectation.name
+  );
 }
 
 type ToolConfig = {

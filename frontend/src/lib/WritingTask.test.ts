@@ -1,12 +1,16 @@
 import { describe, expect, test } from 'vitest';
 import * as CoverLetter from '../../test/CoverLetter.json';
 import {
+  equivalentWritingTasks,
   extractKeywords,
+  getExpectationByIndex,
   getExpectations,
+  getIndexOfExpectation,
   groupByCategory,
   hasKeywords,
   isEnabled,
   isWritingTask,
+  WritingTask,
 } from './WritingTask';
 
 describe('isWritingTask', () => {
@@ -45,6 +49,45 @@ describe('extractKeywords', () => {
     const keywords = extractKeywords([CoverLetter]);
     expect(keywords.length).toBe(2);
   });
+  test('given multiple writing tasks then unique keywords', () => {
+    const task1: WritingTask = {
+      ...CoverLetter,
+      ...{
+        info: {
+          ...CoverLetter.info,
+          name: 'Task 1',
+          keywords: ['context:Academic', 'mode:Informative'],
+        },
+      },
+    };
+    const task2: WritingTask = {
+      ...CoverLetter,
+      ...{
+        info: {
+          ...CoverLetter.info,
+          name: 'Task 2',
+          keywords: ['context:Professional', 'mode:Persuasive'],
+        },
+      },
+    };
+    const task3: WritingTask = {
+      ...CoverLetter,
+      ...{
+        info: {
+          ...CoverLetter.info,
+          name: 'Task 3',
+          keywords: ['context:Academic', 'style:Formal'],
+        },
+      },
+    };
+    const keywords = extractKeywords([task1, task2, task3]);
+    expect(keywords.length).toBe(5);
+    expect(keywords).toContain('context:Academic');
+    expect(keywords).toContain('mode:Informative');
+    expect(keywords).toContain('context:Professional');
+    expect(keywords).toContain('mode:Persuasive');
+    expect(keywords).toContain('style:Formal');
+  });
 });
 
 describe('groupByCategory', () => {
@@ -62,6 +105,20 @@ describe('groupByCategory', () => {
     expect('mode' in grouped).toBeTruthy();
     expect(grouped['context']?.length).toBe(1);
     expect(grouped['mode']?.length).toBe(1);
+  });
+  test('given multiple keywords then grouped categories', () => {
+    const keywords = [
+      'context:Academic',
+      'mode:Informative',
+      'context:Professional',
+      'mode:Persuasive',
+      'style:Formal',
+    ];
+    const grouped = groupByCategory(keywords);
+    expect(Object.keys(grouped).length).toBe(3);
+    expect(grouped['context']?.length).toBe(2);
+    expect(grouped['mode']?.length).toBe(2);
+    expect(grouped['style']?.length).toBe(1);
   });
 });
 
@@ -98,6 +155,43 @@ describe('hasKeywords', () => {
       hasKeywords(CoverLetter, ['context:Professional', 'mode:Persuasive'])
     ).toBe(true);
   });
+  test('given writing task and multiple keywords then correct boolean', () => {
+    const task: WritingTask = {
+      ...CoverLetter,
+      ...{
+        info: {
+          ...CoverLetter.info,
+          name: 'Task',
+          keywords: ['context:Academic', 'mode:Informative', 'style:Formal'],
+        },
+      },
+    };
+    expect(hasKeywords(task, [])).toBe(false);
+    expect(hasKeywords(task, ['context:Academic'])).toBe(true);
+    expect(hasKeywords(task, ['mode:Informative'])).toBe(true);
+    expect(hasKeywords(task, ['style:Formal'])).toBe(true);
+    expect(hasKeywords(task, ['context:Professional'])).toBe(false);
+    expect(hasKeywords(task, ['context:Academic', 'mode:Informative'])).toBe(
+      true
+    );
+    expect(hasKeywords(task, ['context:Academic', 'mode:Persuasive'])).toBe(
+      false
+    );
+    expect(
+      hasKeywords(task, [
+        'context:Academic',
+        'mode:Informative',
+        'style:Formal',
+      ])
+    ).toBe(true);
+    expect(
+      hasKeywords(task, [
+        'context:Academic',
+        'mode:Informative',
+        'style:Casual',
+      ])
+    ).toBe(false);
+  });
 });
 
 describe('isEnabled', () => {
@@ -121,5 +215,72 @@ describe('isEnabled', () => {
   test('given CoverLetter and "prominent_topics" then false', () => {
     // test if disabled then false.
     expect(isEnabled(CoverLetter, 'prominent_topics')).toBeFalsy();
+  });
+  test('given null and any tool then false', () => {
+    expect(isEnabled(null, 'expectations')).toBeFalsy();
+  });
+});
+
+describe('equivalentWritingTasks', () => {
+  test('given two identical writing tasks then true', () => {
+    expect(equivalentWritingTasks(CoverLetter, CoverLetter)).toBeTruthy();
+  });
+  test('given WritingTask and null then false', () => {
+    expect(equivalentWritingTasks(CoverLetter, null)).toBeFalsy();
+  });
+  test('given two different writing tasks then false', () => {
+    const modified: typeof CoverLetter = {
+      ...CoverLetter,
+      ...{
+        info: { ...CoverLetter.info, ...{ name: 'Modified Task' } },
+      },
+    };
+    expect(equivalentWritingTasks(CoverLetter, modified)).toBeFalsy();
+  });
+  test('given two null writing tasks then false', () => {
+    expect(equivalentWritingTasks(null, null)).toBeFalsy();
+  });
+  test('given WritingTask and undefined then false', () => {
+    expect(equivalentWritingTasks(CoverLetter, undefined)).toBeFalsy();
+  });
+  test('given two different but equivalent writing tasks then true', () => {
+    const modified: typeof CoverLetter = {
+      ...CoverLetter,
+      ...{
+        info: { ...CoverLetter.info, ...{ name: 'Cover Letter' } },
+        extra_field: 'This field is extra and should be ignored',
+      },
+    };
+    expect(equivalentWritingTasks(CoverLetter, modified)).toBeTruthy();
+  });
+});
+
+describe('getExpectationByIndex', () => {
+  test('given CoverLetter and valid index then Rule', () => {
+    const rule = getExpectationByIndex(CoverLetter, 2);
+    expect(rule).toBeDefined();
+    expect(rule?.name).toBe('What job are you applying for?');
+  });
+  test('given CoverLetter and invalid index then undefined', () => {
+    const rule = getExpectationByIndex(CoverLetter, 10);
+    expect(rule).toBeUndefined();
+  });
+});
+
+describe('getIndexOfExpectation', () => {
+  test('given CoverLetter and existing Rule then valid index', () => {
+    const rule = getExpectationByIndex(CoverLetter, 3);
+    expect(rule).toBeDefined();
+    expect(getIndexOfExpectation(CoverLetter, rule!)).toBe(3);
+  });
+  test('given CoverLetter and non-existing Rule then -1', () => {
+    const nonExistingRule = {
+      name: 'Non-existing',
+      description: '',
+      type: 'rule',
+      is_group: false,
+      children: [],
+    };
+    expect(getIndexOfExpectation(CoverLetter, nonExistingRule)).toBe(-1);
   });
 });
