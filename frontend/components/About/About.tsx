@@ -98,6 +98,7 @@ const AboutModal: FC<ModalProps> = (props) => {
 };
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
+/** About component that triggers the About modal. */
 export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
