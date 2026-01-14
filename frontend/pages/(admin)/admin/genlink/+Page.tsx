@@ -1,7 +1,13 @@
-import { faBroom, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBroom,
+  faCheckDouble,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Activity, ChangeEvent, FC, useState } from "react";
-import { Button, Card, Form, ListGroup } from "react-bootstrap";
+import classNames from "classnames";
+import { Activity, ChangeEvent, FC, useEffect, useState } from "react";
+import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
@@ -73,6 +79,24 @@ export const Page: FC = () => {
   const [document, setDocument] = useState<File | null>(null);
   const [validDocument, setValidDocument] = useState(true); // Uploaded file validity.
   const [errorDocument, setErrorDocument] = useState(""); // Error messages for uploaded file.
+  const [enabledTools, setEnabledTools] = useState<string[]>([]);
+  useEffect(() => {
+    if (selected) {
+      const tools =
+        selected.info.review_tools
+          ?.filter(
+            ({ tool }) =>
+              settings &&
+              tool in settings &&
+              settings[tool as keyof typeof settings]
+          )
+          .map(({ tool, enabled }) => (enabled ? tool : null))
+          .filter((tool): tool is string => tool !== null) ?? [];
+      setEnabledTools(tools);
+    } else {
+      setEnabledTools([]);
+    }
+  }, [selected, settings]);
 
   const onDocumentChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -189,6 +213,40 @@ export const Page: FC = () => {
               <Activity mode={!selected ? "hidden" : "visible"}>
                 <Form.Group className="container mt-3">
                   <Form.Label>{t("admin.genlink.document.tools")}</Form.Label>
+                  <ButtonGroup
+                    aria-label={t("admin.genlink.document.select_label")}
+                    className="ms-2"
+                  >
+                    <Button
+                      size="sm"
+                      variant="primary"
+                      title={t("admin.genlink.document.select_all")}
+                      onClick={() => {
+                        const allTools = selected?.info.review_tools
+                          ?.filter(
+                            ({ tool }) =>
+                              settings &&
+                              tool in settings &&
+                              settings[tool as keyof typeof settings]
+                          )
+                          .filter(({ enabled }) => enabled)
+                          .map(({ tool }) => tool) as string[];
+                        setEnabledTools(allTools);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faCheckDouble} />
+                    </Button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      title={t("admin.genlink.document.deselect_all")}
+                      onClick={() => {
+                        setEnabledTools([]);
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faXmark} />
+                    </Button>
+                  </ButtonGroup>
                   <div className="row">
                     {selected?.info.review_tools
                       ?.filter(
@@ -202,14 +260,32 @@ export const Page: FC = () => {
                           className="col-lg-2 col-md-4 col-sm-6 form-check"
                           key={tool}
                         >
-                          <label className="form-check-label">
+                          <label
+                            className={classNames(
+                              "form-check-label",
+                              enabled ? "" : "text-secondary"
+                            )}
+                            aria-disabled={
+                              !selected || !isEnabled(selected, tool)
+                            }
+                          >
                             <input
                               type="checkbox"
                               className="form-check-input"
                               disabled={!selected || !isEnabled(selected, tool)}
                               name={`tool_config[]`}
                               value={tool}
-                              defaultChecked={enabled}
+                              // defaultChecked={enabled}
+                              checked={enabledTools.includes(tool)}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEnabledTools((prev) => [...prev, tool]);
+                                } else {
+                                  setEnabledTools((prev) =>
+                                    prev.filter((t) => t !== tool)
+                                  );
+                                }
+                              }}
                             />
                             {tr(`review:${tool}.title`)}
                           </label>
@@ -235,54 +311,56 @@ export const Page: FC = () => {
                   {task.info.name}: {filename} (
                   {new Date(timestamp).toLocaleString()})
                 </a>
-                <ClipboardIconButton
-                  onClick={() =>
-                    navigator.clipboard.writeText(
-                      new URL(`/preview/${id}`, hostname).toString()
-                    )
-                  }
-                />
-                <Button
-                  variant="icon"
-                  className="text-danger"
-                  title={t("admin.genlink.refresh_preview")}
-                  onClick={() => {
-                    fetch(`/api/v2/preview/${id}?cache_only=true`, {
-                      method: "DELETE",
-                    })
-                      .then((response) => {
-                        if (!response.ok) {
-                          console.error("Failed to refresh preview");
-                        }
+                <ButtonGroup>
+                  <ClipboardIconButton
+                    onClick={() =>
+                      navigator.clipboard.writeText(
+                        new URL(`/preview/${id}`, hostname).toString()
+                      )
+                    }
+                  />
+                  <Button
+                    variant="icon"
+                    className="text-danger"
+                    title={t("admin.genlink.refresh_preview")}
+                    onClick={() => {
+                      fetch(`/api/v2/preview/${id}?cache_only=true`, {
+                        method: "DELETE",
                       })
-                      .catch((error) => {
-                        console.error("Error refreshing preview:", error);
-                      });
-                  }}
-                >
-                  <FontAwesomeIcon icon={faBroom} />
-                </Button>
-                <Button
-                  variant="icon"
-                  className="text-danger"
-                  onClick={() => {
-                    fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
-                      .then((response) => {
-                        if (response.ok) {
-                          // Optionally, you can add logic to remove the deleted preview from the UI
-                          window.location.reload();
-                        } else {
-                          console.error("Failed to delete preview");
-                        }
-                      })
-                      .catch((error) => {
-                        console.error("Error deleting preview:", error);
-                      });
-                  }}
-                  title={t("admin.genlink.delete_preview")}
-                >
-                  <FontAwesomeIcon icon={faTrash} />
-                </Button>
+                        .then((response) => {
+                          if (!response.ok) {
+                            console.error("Failed to refresh preview");
+                          }
+                        })
+                        .catch((error) => {
+                          console.error("Error refreshing preview:", error);
+                        });
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faBroom} />
+                  </Button>
+                  <Button
+                    variant="icon"
+                    className="text-danger"
+                    onClick={() => {
+                      fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
+                        .then((response) => {
+                          if (response.ok) {
+                            // Optionally, you can add logic to remove the deleted preview from the UI
+                            window.location.reload();
+                          } else {
+                            console.error("Failed to delete preview");
+                          }
+                        })
+                        .catch((error) => {
+                          console.error("Error deleting preview:", error);
+                        });
+                    }}
+                    title={t("admin.genlink.delete_preview")}
+                  >
+                    <FontAwesomeIcon icon={faTrash} />
+                  </Button>
+                </ButtonGroup>
               </ListGroup.Item>
             ))}
           </ListGroup>
