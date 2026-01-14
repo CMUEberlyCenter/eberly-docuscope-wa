@@ -1,5 +1,5 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { UneditableIcon } from "./UneditableIcon";
-import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   component: UneditableIcon,

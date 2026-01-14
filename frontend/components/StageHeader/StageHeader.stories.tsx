@@ -1,5 +1,5 @@
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { StageHeader } from "./StageHeader";
-import type { Meta, StoryObj } from "@storybook/react";
 
 const meta = {
   component: StageHeader,

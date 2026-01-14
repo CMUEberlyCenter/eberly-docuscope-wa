@@ -1,20 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import CoverLetter from "../../test/CoverLetter.json";
-import { WritingTaskTitle } from "./WritingTaskTitle";
+import { WritingTaskInfo } from "./WritingTaskInfo";
 
 const meta = {
-  component: WritingTaskTitle,
-  title: "component/WritingTaskTitle",
+  component: WritingTaskInfo,
+  title: "component/WritingTaskInfo",
   tags: ["autodocs"],
   excludeStories: /.*Data$/,
-} satisfies Meta<typeof WritingTaskTitle>;
+} satisfies Meta<typeof WritingTaskInfo>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-export const WithCoverLetterTask: Story = {
+export const Default: Story = {
   args: {
     task: CoverLetter,
   },

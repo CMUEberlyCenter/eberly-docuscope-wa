@@ -25,7 +25,7 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   task?: Optional<WritingTask>;
 };
 /**
- * Component for displaying the currently outline with a sidebar for displaying
+ * Component for displaying the current outline with a sidebar for displaying
  * details about a selected rule or general information if nothing is selected.
  */
 export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
