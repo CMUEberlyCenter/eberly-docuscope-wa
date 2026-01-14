@@ -275,7 +275,6 @@ export const Page: FC = () => {
                               disabled={!selected || !isEnabled(selected, tool)}
                               name={`tool_config[]`}
                               value={tool}
-                              // defaultChecked={enabled}
                               checked={enabledTools.includes(tool)}
                               onChange={(e) => {
                                 if (e.target.checked) {
@@ -294,7 +293,10 @@ export const Page: FC = () => {
                   </div>
                 </Form.Group>
               </Activity>
-              <Button type="submit" disabled={!selected || !document}>
+              <Button
+                type="submit"
+                disabled={!selected || !document || !enabledTools.length}
+              >
                 {t("admin.genlink.submit")}
               </Button>
             </Form>
