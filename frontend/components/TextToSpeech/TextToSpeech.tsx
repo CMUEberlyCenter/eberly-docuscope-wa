@@ -18,15 +18,15 @@ import { usePageContext } from "vike-react/usePageContext";
 
 /**
  * Component for adding text to speech controls.
- * @component
  * @example
- *   (<TextToSpeech text={"Some text to read aloud."}/>)
+ *   (&lt;TextToSpeech text={"Some text to read aloud."}/&gt;)
  */
-export const TextToSpeech: FC<{ text: string }> = ({
-  text,
-}: {
+export const TextToSpeech: FC<{
+  /** The text to be read aloud. */
   text: string;
-}) => {
+  /** Whether the text to speech feature is enabled. If not provided, it defaults to the application's settings. */
+  enabled?: boolean;
+}> = ({ text, enabled }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<"paused" | "stopped" | "playing">(
@@ -35,7 +35,7 @@ export const TextToSpeech: FC<{ text: string }> = ({
   const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
     null
   );
-  const enabled = usePageContext().settings?.text2speech;
+  enabled = enabled ?? usePageContext()?.settings?.text2speech;
 
   useEffect(() => {
     return () => {

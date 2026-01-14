@@ -4,7 +4,7 @@ import { Translation } from "react-i18next";
 import { About } from "../About/About";
 
 /**
- * Footer component with legal links.
+ * Footer component with about and legal links.
  */
 export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
   className,

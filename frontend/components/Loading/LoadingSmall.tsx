@@ -5,7 +5,7 @@ import style from "./Loading.module.scss";
 
 /**
  * Component for displaying a small loading spinner.
- * To be used in accordion headers and other small areas.
+ * Used in accordion headers and other small areas.
  */
 export const LoadingSmall: FC<HTMLProps<HTMLDivElement>> = (props) => {
   return (

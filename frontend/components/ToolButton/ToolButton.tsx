@@ -11,8 +11,11 @@ import {
 import style from "./ToolButton.module.scss";
 
 type ToolButtonProps = ButtonProps & {
+  /** Text to display in the tooltip */
   tooltip: string;
+  /** Icon to display in the button */
   icon: ReactNode | null;
+  /** Title text to display in the button */
   title: string;
 };
 /** Button component with a tooltip and an icon. */
