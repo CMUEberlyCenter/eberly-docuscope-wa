@@ -68,6 +68,9 @@ admin:
       description: Use this link to preview the document for the selected Writing Task.
       upload: Upload Document
       tools: 'Select Enabled Tools:'
+      select_label: Select All / Deselect All
+      select_all: Select All
+      deselect_all: Deselect All
     submit: Launch
     existing_previews: Existing Previews
     delete_preview: Delete Preview
