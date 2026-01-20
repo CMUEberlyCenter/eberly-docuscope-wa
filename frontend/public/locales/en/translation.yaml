@@ -71,6 +71,8 @@ admin:
       select_label: Select All / Deselect All
       select_all: Select All
       deselect_all: Deselect All
+      invalid_file_type: 'Invalid file type! Please upload a .docx file.'
+      invalid_file_content: 'The uploaded file could not be processed. Please ensure it is a valid .docx document. {{message}}'
     submit: Launch
     existing_previews: Existing Previews
     delete_preview: Delete Preview

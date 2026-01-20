@@ -23,6 +23,7 @@ import {
   WritingTask,
 } from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
+import { convertToHtml } from "mammoth";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -99,19 +100,49 @@ export const Page: FC = () => {
   }, [selected, settings]);
 
   const onDocumentChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) {
-      setDocument(null);
-      return;
-    }
-    if (files.length > 1) {
+    try {
+      const files = event.target.files;
+      if (!files || files.length === 0) {
+        setValidDocument(true);
+        setErrorDocument("");
+        setDocument(null);
+        return;
+      }
+      if (files.length > 1) {
+        throw new Error(t("select_task.multiple_file_error"));
+      }
+      const file = files[0];
+      if (
+        file.type !==
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ) {
+        throw new Error(t("admin.genlink.document.invalid_file_type"));
+      }
+      // Test valid format
+      const { messages } = await convertToHtml(
+        { arrayBuffer: await file.arrayBuffer() },
+        {
+          styleMap: "u => u", // Preserve underline styles (str | str[] | regexp)
+        }
+      );
+      if (messages.length) {
+        throw new Error(
+          t("admin.genlink.document.invalid_file_content", {
+            message: messages.map((m) => m.message).join("; "),
+          })
+        );
+      }
+      setErrorDocument("");
+      setValidDocument(true);
+      setDocument(file);
+    } catch (err) {
       setValidDocument(false);
-      setErrorDocument(t("select_task.multiple_file_error"));
       setDocument(null);
-      return;
+      console.error(err);
+      if (err instanceof Error) {
+        setErrorDocument(err.message);
+      }
     }
-    setDocument(files[0]);
-    // TODO handle document upload
   };
 
   return (
