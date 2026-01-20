@@ -11,9 +11,9 @@ about:
   acknowledgements:
     title: 'Agradecimientos:'
     content: >
-      Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
+      Este proyecto ha sido parcialmente apoyado por la Fundación A.W. Mellon,
       la Beca Semilla de la Iniciativa Simon de Carnegie Mellon,
-      el Fondo de Desarrollo de Profesorado Berkman,
+      el Fondo de Desarrollo de la Facultad Berkman,
       y el Programa de Becas Semilla para Investigación y Desarrollo de Herramientas
       Educativas Habilitadas por IA Generativa, Dietrich College of Humanities & Social Sciences,
       Eberly Center for Teaching Excellence and Educational Innovation,
@@ -31,20 +31,20 @@ admin:
     scribe: 'Herramientas de I.A.: '
     model: 'Modelo Anthropic: '
     word_count_limit: 'Límite de Recuento de Palabras: '
-    notes_to_prose: 'Herramienta de $t(tool.tab.generate) $t(tool.button.prose.tooltip): '
-    notes_to_bullets: 'Herramienta de $t(tool.tab.generate) $t(tool.button.bullets.tooltip): '
-    civil_tone: 'Herramienta de $t(review:title) $t(review:civil_tone.title): '
-    credibility: 'Herramienta de $t(review:title) $t(review:credibility.title): '
-    expectations: 'Herramienta de $t(review:title) $t(review:expectations.title): '
-    sentence_clarity: 'Herramienta de $t(review:title) $t(review:sentences.title): '
-    lines_of_arguments: 'Herramienta de $t(review:title) $t(review:lines_of_arguments.title): '
-    logical_flow: 'Herramienta de $t(review:title) $t(review:logical_flow.title): '
-    paragraph_clarity: 'Herramienta de $t(review:title) $t(review:paragraph_clarity.title): '
-    professional_tone: 'Herramienta de $t(review:title) $t(review:professional_tone.title): '
-    prominent_topics: 'Herramienta de $t(review:title) $t(review:prominent_topics.title): '
-    sentences: 'Herramienta de $t(review:title) $t(review:sentences.title): '
-    sources: 'Herramienta de $t(review:title) $t(review:sources.title): '
-    organization: 'Herramienta de $t(review:title) $t(review:organization.title): '
+    notes_to_prose: 'Herramienta $t(tool.tab.generate) de $t(tool.button.prose.tooltip): '
+    notes_to_bullets: 'Herramienta $t(tool.tab.generate) de $t(tool.button.bullets.tooltip): '
+    civil_tone: 'Herramienta $t(review:title) de $t(review:civil_tone.title): '
+    credibility: 'Herramienta $t(review:title) de $t(review:credibility.title): '
+    expectations: 'Herramienta $t(review:title) de $t(review:expectations.title): '
+    sentence_clarity: 'Herramienta $t(review:title) de $t(review:sentences.title): '
+    lines_of_arguments: 'Herramienta $t(review:title) de $t(review:lines_of_arguments.title): '
+    logical_flow: 'Herramienta $t(review:title) de $t(review:logical_flow.title): '
+    paragraph_clarity: 'Herramienta $t(review:title) de $t(review:paragraph_clarity.title): '
+    professional_tone: 'Herramienta $t(review:title) de $t(review:professional_tone.title): '
+    prominent_topics: 'Herramienta $t(review:title) de $t(review:prominent_topics.title): '
+    sentences: 'Herramienta $t(review:title) de $t(review:sentences.title): '
+    sources: 'Herramienta $t(review:title) de $t(review:sources.title): '
+    organization: 'Herramienta $t(review:title) de $t(review:organization.title): '
     language: 'Idioma Predeterminado: '
     access_level: 'Nivel de acceso WTD: '
     available: 'Disponible'
@@ -61,16 +61,20 @@ admin:
     no_data: No hay datos de rendimiento disponibles.
   genlink:
     tab: Generar Enlaces
-    title: Generador de Enlaces de Tarea de Escritura y Vista Previa
+    title: Generador de Enlaces de Vista Previa y Tareas de Escritura
     description: Utilice esta herramienta para generar enlaces para Tareas de Escritura específicas dentro de myProse.
     document:
       title: Vista Previa del Documento
       description: Utilice este enlace para obtener una vista previa del documento para la Tarea de Escritura seleccionada.
       upload: Cargar Documento
       tools: 'Seleccionar Herramientas Habilitadas:'
-      select_label: Seleccionar Todas / Deseleccionar Todas
-      select_all: Seleccionar Todas
-      deselect_all: Deseleccionar Todas
+      select_label: Seleccionar Todo / Deseleccionar Todo
+      select_all: Seleccionar Todo
+      deselect_all: Deseleccionar Todo
+      invalid_file_type: ¡Tipo de archivo no válido! Por favor, cargue un archivo .docx.
+      invalid_file_content: El archivo cargado no pudo ser procesado. Por favor, asegúrese de que sea un documento .docx válido. {{message}}
+      empty_content: El documento cargado está vacío. Por favor, proporcione un documento con contenido.
+      too_large: El documento cargado con {{wordCount}} palabras excede el tamaño máximo permitido de {{maxWords}} palabras. Por favor, cargue un documento más pequeño.
     submit: Iniciar
     existing_previews: Vistas Previas Existentes
     delete_preview: Eliminar Vista Previa
@@ -86,7 +90,7 @@ legal:
 deeplink: Seleccione un tipo de texto para esta asignación
 deeplinking:
   title: LTI Deeplinking de $t(document.title)
-  disabled: Seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
+  disabled: Por favor, seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
   enabled: Haga clic para seleccionar contenido.
   select_tool: Seleccione una herramienta
   option:
@@ -94,7 +98,7 @@ deeplinking:
     review: Revisión
   upload: Seleccione una Tarea de Escritura o cargue un archivo de Tarea de Escritura personalizado
 genlink:
-  title: Generador de Enlaces de Tarea de Escritura de $t(document.title)
+  title: Generador de Enlaces de Tareas de Escritura de $t(document.title)
   link: 'Enlaces:'
   draft: Borrador de $t(document.title)
   review: Revisión de $t(document.title)
@@ -110,9 +114,9 @@ audio:
 editor:
   gdoc:
     error:
-      google_client_id: 'Error de configuración del servidor: el ID de Cliente de Google no está definido.'
-      google_api_key: 'Error de configuración del servidor: la Clave de API de Google no está definida.'
-      google_app_id: 'Error de configuración del servidor: el ID de Aplicación de Google no está definido.'
+      google_client_id: 'Error de configuración del servidor: El ID de Cliente de Google no está definido.'
+      google_api_key: 'Error de configuración del servidor: La Clave API de Google no está definida.'
+      google_app_id: 'Error de configuración del servidor: El ID de Aplicación de Google no está definido.'
       google_drive_api: La API de Google Drive no está cargada.
       docx: Error al obtener o convertir el archivo docx.
       gdoc: Error al obtener o convertir el archivo de Google Doc.
@@ -166,11 +170,11 @@ tool:
       tooltip: Generar Lista con Viñetas desde Notas
     view:
       title: 'Abrir expectativas de contenido: {{title}}'
-  initial: Escriba y resalte texto para realizar más acciones.
+  initial: Escriba y resalte texto para acciones adicionales.
   bookmark: Marcador
   bookmarked: Marcado
   input: Su Entrada
-  no_selection: Seleccione algún texto antes de usar esta herramienta.
+  no_selection: Por favor, seleccione algún texto antes de usar esta herramienta.
   output: Respuesta de I.A.
   regenerate: Regenerar
   paste: Pegar Texto
@@ -178,13 +182,13 @@ clipboard: Copiar al Portapapeles
 error:
   unknown: Ocurrió un error desconocido al procesar los resultados.
   no_selection:
-    prose: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
-    bullets: Parece que faltan las notas que pretendía proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
+    prose: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
+    bullets: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
     default: No hay texto seleccionado. Resalte el texto primero.
   no_results: No hay resultados válidos.
   unknown_error: Ocurrió un error.
-  too_large: El texto de entrada es demasiado grande para procesar. Reduzca la longitud del texto seleccionado e intente nuevamente.
-  service_unavailable: El servicio no está disponible actualmente. Intente nuevamente más tarde.
+  too_large: El texto de entrada es demasiado grande para procesar. Por favor, reduzca la longitud del texto seleccionado e intente nuevamente.
+  service_unavailable: El servicio no está disponible actualmente. Por favor, intente nuevamente más tarde.
 select_task:
   title: Seleccionar Tipo de Escritura
   filters: Filtros
@@ -201,8 +205,8 @@ select_task:
   multiple_file_error: Cargue solo un archivo a la vez.
   malformed_json: El contenido no pudo ser analizado como JSON.
   select: Seleccionar categoría
-  select_all: Seleccionar Todas
-  all_category: Todas
+  select_all: Seleccionar Todo
+  all_category: Todo
 cancel: Cancelar
 select: Seleccionar
 next: Siguiente

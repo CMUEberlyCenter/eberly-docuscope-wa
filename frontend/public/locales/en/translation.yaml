@@ -71,8 +71,10 @@ admin:
       select_label: Select All / Deselect All
       select_all: Select All
       deselect_all: Deselect All
-      invalid_file_type: 'Invalid file type! Please upload a .docx file.'
-      invalid_file_content: 'The uploaded file could not be processed. Please ensure it is a valid .docx document. {{message}}'
+      invalid_file_type: Invalid file type! Please upload a .docx file.
+      invalid_file_content: The uploaded file could not be processed. Please ensure it is a valid .docx document. {{message}}
+      empty_content: The uploaded document is empty. Please provide a document with content.
+      too_large: The uploaded document with {{wordCount}} words exceeds the maximum allowed size of {{maxWords}} words. Please upload a smaller document.
     submit: Launch
     existing_previews: Existing Previews
     delete_preview: Delete Preview

@@ -73,3 +73,36 @@ export const DEFAULT: Settings = {
   // docuscope: false,
   // impressions: false,
 };
+
+function countWordsRegex(htmlString: string): number {
+  // This is a simple regex-based word count that handles HTML content.
+  // It may not be perfect for all edge cases but works well enough for this use case.
+  return (
+    htmlString
+      // Strip HTML tags and replace them with a space to ensure words do not merge
+      .replace(/<[^>]*>/g, ' ')
+      .trim()
+      // Split by whitespace and filter out empty strings
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length
+  );
+}
+
+/**
+ * Check if the word count of the given HTML string is within the allowed limit.
+ * @param htmlString a string containing html
+ * @param settings optional settings object to specify word count limit
+ * @returns An object containing validity, word count, and maximum allowed words.
+ */
+export function checkWordCount(
+  htmlString: string,
+  settings?: Settings
+): { valid: boolean; wordCount: number; maxWords: number } {
+  const wordCount = countWordsRegex(htmlString);
+  const maxWords = settings?.word_count_limit || WORD_COUNT_LIMIT;
+  return {
+    valid: wordCount <= maxWords,
+    wordCount,
+    maxWords,
+  };
+}

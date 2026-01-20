@@ -24,6 +24,7 @@ import {
 } from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
 import { convertToHtml } from "mammoth";
+import { checkWordCount } from "../../../../src/lib/ToolSettings";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -119,7 +120,7 @@ export const Page: FC = () => {
         throw new Error(t("admin.genlink.document.invalid_file_type"));
       }
       // Test valid format
-      const { messages } = await convertToHtml(
+      const { value, messages } = await convertToHtml(
         { arrayBuffer: await file.arrayBuffer() },
         {
           styleMap: "u => u", // Preserve underline styles (str | str[] | regexp)
@@ -132,6 +133,23 @@ export const Page: FC = () => {
           })
         );
       }
+      if (!value || value.trim().length === 0) {
+        throw new Error(
+          t("admin.genlink.document.invalid_file_content", {
+            message: t("admin.genlink.document.empty_content"),
+          })
+        );
+      }
+      const { valid, wordCount, maxWords } = checkWordCount(value, settings);
+      if (!valid) {
+        throw new Error(
+          t("admin.genlink.document.too_large", {
+            wordCount,
+            maxWords,
+          })
+        );
+      }
+
       setErrorDocument("");
       setValidDocument(true);
       setDocument(file);
