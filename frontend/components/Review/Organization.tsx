@@ -52,7 +52,6 @@ import {
   type OnTopicReviewData,
   type OptionalReviewData,
 } from "../../src/lib/ReviewResponse";
-import { clearAllHighlights } from "../../src/app/service/topic.service";
 import {
   checkReviewResponse,
   ReviewErrorData,
@@ -68,6 +67,28 @@ import {
 } from "./ReviewContext";
 
 DataTable.use(DT);
+
+/**
+ * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
+ * This should use dispatch to set the context instead of direct DOM manipulation but
+ * this uses onTopic's data attributes.
+ */
+function clearAllHighlights() {
+  // Select all paragraphs
+  document
+    .querySelectorAll(".user-text .paragraph.paragraph-highlight")
+    .forEach((para) => para.classList.remove("paragraph-highlight"));
+
+  // Select all sentences
+  document
+    .querySelectorAll(".user-text .sentence.sentence-highlight")
+    .forEach((sentence) => sentence.classList.remove("sentence-highlight"));
+
+  // Select all topics
+  document
+    .querySelectorAll(".user-text .word.word-highlight")
+    .forEach((word) => word.classList.remove("word-highlight"));
+}
 
 type IndicatorIconProps = {
   unit: {

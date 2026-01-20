@@ -383,7 +383,12 @@ export const Review: FC = () => {
                     <Alert.Heading>{t("error.header")}</Alert.Heading>
                     {t("error.content")}
                     {t("error.details", {
-                      details: { message: error.message },
+                      details: {
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : String(error),
+                      },
                     })}
                   </Alert>
                 )}

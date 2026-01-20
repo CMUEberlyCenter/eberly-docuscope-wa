@@ -14,7 +14,6 @@ import {
   type OptionalReviewData,
 } from "../../src/lib/ReviewResponse";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import { highlightSentence } from "../../src/app/service/topic.service";
 import {
   checkReviewResponse,
   ReviewErrorData,
@@ -29,6 +28,25 @@ import {
   useReviewDispatch,
 } from "./ReviewContext";
 import "./Sentences.scss";
+
+/**
+ * Add highlight to the specified sentence in a given paragraph.
+ * Should use dispatch to set the context instead of direct DOM manipulation but
+ * this uses a different sentence location scheme based on the data attributes used by onTopic.
+ * @param aParagraphIndex 0 based index.
+ * @param aSentenceIndex 0 based index.
+ */
+function highlightSentence(aParagraphIndex: number, aSentenceIndex: number) {
+  document.querySelectorAll(`.user-text .highlight`).forEach((ele) => {
+    ele.classList.remove("highlight", "highlight-0");
+  });
+
+  const element = document.querySelector(
+    `.user-text .sentence[data-ds-paragraph="${aParagraphIndex + 1}"][data-ds-sentence="${aSentenceIndex + 1}"]`
+  );
+  element?.classList.add("highlight", "highlight-0");
+  element?.scrollIntoView({ behavior: "smooth", block: "center" });
+}
 
 /** Button component for selecting the Sentences tool. */
 export const SentencesButton: FC<ButtonProps> = (props) => {
