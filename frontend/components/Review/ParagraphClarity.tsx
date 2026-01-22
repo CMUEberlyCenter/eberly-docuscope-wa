@@ -182,7 +182,7 @@ export const ParagraphClarityPreview: FC<
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/preview/${id}/paragraph_clarity`, {
+      const response = await fetch(`/api/v2/snapshot/${id}/paragraph_clarity`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

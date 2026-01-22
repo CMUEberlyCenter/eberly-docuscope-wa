@@ -30,7 +30,7 @@ import { checkWordCount } from "../../../../src/lib/ToolSettings";
 export const Page: FC = () => {
   const { t } = useTranslation();
   const { t: tr } = useTranslation("review");
-  const { previews, tasks } = useData<Data>();
+  const { snapshots, tasks } = useData<Data>();
   const { settings } = usePageContext();
 
   const [data, setData] = useState<DbWritingTask[]>([]);
@@ -235,7 +235,7 @@ export const Page: FC = () => {
             <p>{t("admin:genlink.document.description")}</p>
             <Form
               method="POST"
-              action={"/api/v2/preview"}
+              action={"/api/v2/snapshot"}
               encType="multipart/form-data"
               target="_blank"
             >
@@ -353,13 +353,13 @@ export const Page: FC = () => {
           </div>
         </Card.Body>
       </Card>
-      {previews.length > 0 && (
+      {snapshots.length > 0 && (
         <Card>
-          <Card.Header>{t("admin:genlink.existing_previews")}</Card.Header>
+          <Card.Header>{t("admin:genlink.existing_snapshots")}</Card.Header>
           <ListGroup variant="flush">
-            {previews.map(({ id, task, filename, timestamp }) => (
+            {snapshots.map(({ id, task, filename, timestamp }) => (
               <ListGroup.Item key={`${id}`}>
-                <a href={`/preview/${id}`} target="_blank">
+                <a href={`/snapshot/${id}`} target="_blank">
                   {task.info.name}: {filename} (
                   {new Date(timestamp).toLocaleString()})
                 </a>
@@ -367,25 +367,28 @@ export const Page: FC = () => {
                   <ClipboardIconButton
                     onClick={() =>
                       navigator.clipboard.writeText(
-                        new URL(`/preview/${id}`, hostname).toString()
+                        new URL(`/snapshot/${id}`, hostname).toString()
                       )
                     }
                   />
                   <Button
                     variant="icon"
                     className="text-danger"
-                    title={t("admin:genlink.refresh_preview")}
+                    title={t("admin:genlink.refresh_snapshot")}
                     onClick={() => {
-                      fetch(`/api/v2/preview/${id}?cache_only=true`, {
+                      fetch(`/api/v2/snapshot/${id}?cache_only=true`, {
                         method: "DELETE",
                       })
                         .then((response) => {
                           if (!response.ok) {
-                            console.error("Failed to refresh preview");
+                            console.error(
+                              "Failed to refresh snapshots",
+                              response.statusText
+                            );
                           }
                         })
                         .catch((error) => {
-                          console.error("Error refreshing preview:", error);
+                          console.error("Error refreshing snapshots:", error);
                         });
                     }}
                   >
@@ -395,20 +398,23 @@ export const Page: FC = () => {
                     variant="icon"
                     className="text-danger"
                     onClick={() => {
-                      fetch(`/api/v2/preview/${id}`, { method: "DELETE" })
+                      fetch(`/api/v2/snapshot/${id}`, { method: "DELETE" })
                         .then((response) => {
                           if (response.ok) {
-                            // Optionally, you can add logic to remove the deleted preview from the UI
+                            // Optionally, add logic to remove the deleted snapshot from the UI
                             window.location.reload();
                           } else {
-                            console.error("Failed to delete preview");
+                            console.error(
+                              "Failed to delete snapshot",
+                              response.statusText
+                            );
                           }
                         })
                         .catch((error) => {
-                          console.error("Error deleting preview:", error);
+                          console.error("Error deleting snapshot:", error);
                         });
                     }}
-                    title={t("admin:genlink.delete_preview")}
+                    title={t("admin:genlink.delete_snapshot")}
                   >
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>

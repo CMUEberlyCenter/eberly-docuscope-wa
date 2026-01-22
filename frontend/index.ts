@@ -32,7 +32,7 @@ import {
 import { validateWritingTask } from './src/lib/schemaValidate';
 import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
-import { preview } from './src/server/api/preview';
+import { snapshot } from './src/server/api/snapshot';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
 import { writingTasks } from './src/server/api/tasks';
@@ -312,10 +312,11 @@ async function __main__() {
   Provider.whitelist(
     Provider.appRoute(),
     /\w+\.html$/,
-    '/genlink', // Eventually to be moved to admin endpoints
-    /draft/, // Eventually to be removed so only available in LTI
-    /review/, // Eventually to be removed so only available in LTI
-    '/',
+    '/genlink', // Eventually to be moved to admin endpoint.  TODO: Public access via LTI only.
+    /draft/, // TODO: Eventually to be removed so only available in LTI
+    /review/, // TODO: Eventually to be removed so only available in LTI
+    /\/snapshot/, // Snapshot viewing.  TODO: This will eventually be the only public tool.
+    '/', // TODO: Eventually to be replaced by welcome page with no tools.
     /locales/, // Localization files need to be public
     /myprose/, // These should be the "public" tools.
     /lti/, // additional public lti "well-known" endpoints
@@ -422,16 +423,16 @@ async function __main__() {
     }
     // prometheus metrics
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
-    // Writing Task/Outline Endpoints
+    // Writing Task/Outline API Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
-    // Scribe Endpoints
+    // Scribe API Endpoints
     app.use('/api/v2/scribe', scribe);
-    // OnTopic Enpoints
+    // OnTopic API Endpoints
     app.use('/api/v2/ontopic', ontopic);
-    // Reviews Endpoints
+    // Reviews API Endpoints
     app.use('/api/v2/review', reviews);
-    // Preview Endpoints for static content.
-    app.use('/api/v2/preview', preview);
+    // Snapshot API Endpoints for static content.
+    app.use('/api/v2/snapshot', snapshot);
 
     // app.use('/api/v2/performance', promptPerformance);
     // Metrics

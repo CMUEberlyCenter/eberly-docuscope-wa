@@ -179,7 +179,7 @@ export const LogicalFlowPreview: FC<PreviewCardProps<LogicalFlowData>> = ({
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/preview/${id}/logical_flow`, {
+      const response = await fetch(`/api/v2/snapshot/${id}/logical_flow`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

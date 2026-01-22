@@ -222,7 +222,7 @@ export const ProfessionalTonePreview: FC<
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/preview/${id}/professional_tone`, {
+      const response = await fetch(`/api/v2/snapshot/${id}/professional_tone`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

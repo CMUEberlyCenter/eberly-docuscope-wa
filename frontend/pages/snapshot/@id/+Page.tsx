@@ -15,7 +15,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import { SplitLayout } from "../../../layouts/SplitLayout";
 import AdditionalToolsIcon from "../../../assets/icons/additional_tools_icon.svg?react";
 import { Legal } from "../../../components/Legal/Legal";
 import { CivilTonePreview } from "../../../components/Review/CivilTone";
@@ -53,6 +52,7 @@ import { StageHeader } from "../../../components/StageHeader/StageHeader";
 import { TaskViewerButton } from "../../../components/TaskViewer/TaskViewer";
 import { UneditableIcon } from "../../../components/UneditableIcon/UneditableIcon";
 import { UserText } from "../../../components/UserTextView/UserText";
+import { SplitLayout } from "../../../layouts/SplitLayout";
 import {
   Analysis,
   CivilToneData,
@@ -69,8 +69,8 @@ import {
   SourcesData,
 } from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
-import { Data } from "./+data";
 import { ExpectationsPreview } from "../components/ExpectationsPreview";
+import { Data } from "./+data";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -83,8 +83,14 @@ type Tool =
   | "null";
 
 export const Page: FC = () => {
-  const preview = useData<Data>();
-  const { id: reviewID, filename, file, tool_config, task, analyses } = preview;
+  const {
+    id: reviewID,
+    filename,
+    file,
+    tool_config,
+    task,
+    analyses,
+  } = useData<Data>();
   const { settings } = usePageContext();
   const { t } = useTranslation("review");
   const [tab, setTab] = useState<TabKey>("big_picture");

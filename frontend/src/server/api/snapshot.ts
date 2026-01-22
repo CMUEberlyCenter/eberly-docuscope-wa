@@ -25,22 +25,22 @@ import {
 import { basicAuthMiddleware } from '../../utils/basicAuth';
 import { doChat, reviewData } from '../data/chat';
 import {
-  clearPreviewAnalysesById,
-  deletePreviewById,
-  findPreviewById,
-  insertPreview,
-  updatePreviewReviewsById,
+  clearSnapshotAnalysesById,
+  deleteSnapshotById,
+  findSnapshotById,
+  insertSnapshot,
+  updateSnapshotReviewsById,
 } from '../data/mongo';
 import { doOnTopic } from '../data/ontopic';
 import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 
-export const preview = Router();
+export const snapshot = Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-preview.post(
+snapshot.post(
   '/',
   basicAuthMiddleware,
   upload.single('document'),
@@ -79,26 +79,26 @@ preview.post(
       );
     }
     const segmented = await segmentText(value);
-    const dbId = await insertPreview(
+    const dbId = await insertSnapshot(
       writingTask,
       value,
       segmented,
       request.file.originalname,
       tools
     );
-    response.redirect(`/preview/${dbId.toString()}`);
+    response.redirect(`/snapshot/${dbId.toString()}`);
   }
 );
 
-preview.get(
+snapshot.get(
   '/:id',
   validate(param('id').isMongoId()),
   async (request, response) => {
     const id = request.params.id;
-    response.send(await findPreviewById(id));
+    response.send(await findSnapshotById(id));
   }
 );
-preview.delete(
+snapshot.delete(
   '/:id',
   basicAuthMiddleware,
   validate(param('id').isMongoId()),
@@ -107,15 +107,15 @@ preview.delete(
     const id = request.params.id;
     const cache = request.query.cache_only === 'true';
     if (cache) {
-      await clearPreviewAnalysesById(id);
+      await clearSnapshotAnalysesById(id);
     } else {
-      await deletePreviewById(id);
+      await deleteSnapshotById(id);
     }
     response.status(200).send();
   }
 );
 
-preview.get(
+snapshot.get(
   '/:id/ontopic',
   validate(param('id').isMongoId()),
   async (request, response) => {
@@ -124,8 +124,8 @@ preview.get(
     if (!settings.term_matrix && !settings.sentence_density) {
       throw new ForbiddenError('Ontopic tool is not available!');
     }
-    const preview = await findPreviewById(id);
-    const analysisData = preview.analyses.find(
+    const snapshot = await findSnapshotById(id);
+    const analysisData = snapshot.analyses.find(
       ({ tool }) => tool === 'ontopic'
     );
     if (analysisData) {
@@ -136,19 +136,19 @@ preview.get(
     request.on('close', () => {
       controller.abort();
     });
-    const data = await doOnTopic(preview.segmented, controller.signal);
+    const data = await doOnTopic(snapshot.segmented, controller.signal);
     if (controller.signal.aborted) {
       return;
     }
     if (!data) {
       throw new GatewayError('No response from onTopic');
     }
-    await updatePreviewReviewsById(id, data);
+    await updateSnapshotReviewsById(id, data);
     response.send(data);
   }
 );
 
-preview.get(
+snapshot.get(
   '/:id/expectation/:index',
   validate(param('id').isMongoId()),
   validate(param('index').isInt({ min: 0 })),
@@ -159,22 +159,22 @@ preview.get(
     if (!settings.expectations) {
       throw new ForbiddenError('Expectation Analysis tool is not available!');
     }
-    const preview = await findPreviewById(id);
-    if (!isEnabled(preview.task, 'expectations')) {
+    const snapshot = await findSnapshotById(id);
+    if (!isEnabled(snapshot.task, 'expectations')) {
       throw new ForbiddenError(
         `Expectation analysis is not enabled for this writing task.`
       );
     }
-    if (!preview.tool_config.includes('expectations')) {
+    if (!snapshot.tool_config.includes('expectations')) {
       throw new ForbiddenError(
-        `Expectation analysis is not configured for this preview.`
+        `Expectation analysis is not configured for this snapshot.`
       );
     }
-    const target = getExpectationByIndex(preview.task, indexNum);
+    const target = getExpectationByIndex(snapshot.task, indexNum);
     if (!target) {
       throw new ReferenceError(`No expectation found at index ${index}.`);
     }
-    const analysisData = preview.analyses
+    const analysisData = snapshot.analyses
       .filter((data) => isExpectationsData(data))
       .find(({ expectation }) => expectation === target.name);
     if (analysisData) {
@@ -189,8 +189,8 @@ preview.get(
       'expectations',
       {
         ...reviewData({
-          segmented: preview.segmented,
-          writing_task: preview.task ?? null,
+          segmented: snapshot.segmented,
+          writing_task: snapshot.task ?? null,
         }),
         expectation: target.name,
         description: target.description ?? '',
@@ -220,12 +220,12 @@ preview.get(
       expectation: target.name,
       response: chat_response,
     };
-    await updatePreviewReviewsById(id, data);
+    await updateSnapshotReviewsById(id, data);
     response.json(data);
   }
 );
 
-preview.get(
+snapshot.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
@@ -236,18 +236,18 @@ preview.get(
     if (analysis in settings && !settings[analysis as keyof typeof settings]) {
       throw new ForbiddenError(`${analysis} tool is not available!`);
     }
-    const preview = await findPreviewById(id);
-    if (!isEnabled(preview.task, analysis)) {
+    const snapshot = await findSnapshotById(id);
+    if (!isEnabled(snapshot.task, analysis)) {
       throw new ForbiddenError(
         `Analysis ${analysis} is not enabled for this writing task.`
       );
     }
-    if (!preview.tool_config.includes(analysis)) {
+    if (!snapshot.tool_config.includes(analysis)) {
       throw new ForbiddenError(
-        `Analysis ${analysis} is not configured for this preview.`
+        `Analysis ${analysis} is not configured for this snapshot.`
       );
     }
-    const analysisData = preview.analyses.find((a) => a.tool === analysis);
+    const analysisData = snapshot.analyses.find((a) => a.tool === analysis);
     if (analysisData) {
       return response.send(analysisData);
     }
@@ -259,8 +259,8 @@ preview.get(
     const chat = await doChat<ReviewResponse>(
       analysis as ReviewPrompt,
       reviewData({
-        segmented: preview.segmented,
-        writing_task: preview.task ?? null,
+        segmented: snapshot.segmented,
+        writing_task: snapshot.task ?? null,
       }),
       controller.signal,
       true,
@@ -279,7 +279,7 @@ preview.get(
       datetime,
       response: chat_response,
     } as Analysis; // FIXME typescript shenanigans
-    await updatePreviewReviewsById(id, data);
+    await updateSnapshotReviewsById(id, data);
     response.json(data);
   }
 );

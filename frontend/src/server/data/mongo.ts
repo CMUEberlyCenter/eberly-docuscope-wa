@@ -12,8 +12,8 @@ const client = new MongoClient(MONGO_CLIENT);
 const WRITING_TASKS = 'writing_tasks';
 /** Database collection for logging. */
 const LOGGING = 'logging';
-/** Database collection for static previews. */
-const PREVIEWS = 'previews';
+/** Database collection for static snapshots. */
+const SNAPSHOTS = 'snapshots';
 
 /** Extra information stored in database about the writing task */
 type WritingTaskDb = WritingTask & {
@@ -22,7 +22,7 @@ type WritingTaskDb = WritingTask & {
   modified?: Date;
 };
 
-type Preview = {
+type Snapshot = {
   _id?: ObjectId;
   timestamp: Date;
   task: WritingTask;
@@ -34,21 +34,21 @@ type Preview = {
 };
 
 // Unused
-// export async function findAllPreviews(): Promise<Preview[]> {
-//   const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
-//   const previews = await collection.find<Preview>({}).toArray();
-//   return previews;
+// export async function findAllSnapshots(): Promise<Snapshot[]> {
+//   const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+//   const snapshots = await collection.find<Snapshot>({}).toArray();
+//   return snapshots;
 // }
 
 /**
- * Find all previews with minimal information.
- * Used for listing previews without loading full data.
- * @returns Array of previews with only _id, filename, timestamp, task.info.name, and tool_config.
+ * Find all snapshots with minimal information.
+ * Used for listing snapshots without loading full data.
+ * @returns Array of snapshots with only _id, filename, timestamp, task.info.name, and tool_config.
  */
-export async function findAllPreviewsBasic(): Promise<Preview[]> {
-  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
-  const previews = await collection
-    .find<Preview>(
+export async function findAllSnapshotsBasic(): Promise<Snapshot[]> {
+  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+  const snapshots = await collection
+    .find<Snapshot>(
       {},
       {
         projection: {
@@ -60,30 +60,30 @@ export async function findAllPreviewsBasic(): Promise<Preview[]> {
       }
     )
     .toArray();
-  return previews;
+  return snapshots;
 }
 
-export async function findPreviewById(id: string): Promise<Preview> {
+export async function findSnapshotById(id: string): Promise<Snapshot> {
   try {
-    const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+    const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
     if (!ObjectId.isValid(id) || id.length !== 24) {
-      throw new ReferenceError(`Preview ${id} not found.`);
+      throw new ReferenceError(`Snapshot ${id} not found.`);
     }
     const _id = new ObjectId(id);
-    const preview = await collection.findOne<Preview>(
+    const snapshot = await collection.findOne<Snapshot>(
       { _id },
       { projection: { _id: 0 } }
     );
-    if (!preview) {
-      throw new ReferenceError(`Preview ${id} not found.`);
+    if (!snapshot) {
+      throw new ReferenceError(`Snapshot ${id} not found.`);
     }
-    return preview;
+    return snapshot;
   } catch (err) {
     console.error(err);
     throw err;
   }
 }
-export async function insertPreview(
+export async function insertSnapshot(
   task: WritingTask,
   file: string,
   segmented: string,
@@ -93,7 +93,7 @@ export async function insertPreview(
 ): Promise<ObjectId> {
   tool_config = tool_config ?? [];
   analyses = analyses ?? [];
-  const collection = client.db(MONGO_DB).collection<Preview>(PREVIEWS);
+  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
   const ins = await collection.insertOne({
     task,
     file,
@@ -106,40 +106,43 @@ export async function insertPreview(
   return ins.insertedId;
 }
 /**
- * Delete a preview by its ID.
- * @param id the identifier for the preview to delete.
+ * Delete a snapshot by its ID.
+ * @param id the identifier for the snapshot to delete.
  * @returns true if deletion is acknowledged.
  */
-export async function deletePreviewById(id: string) {
+export async function deleteSnapshotById(id: string) {
   if (!ObjectId.isValid(id) || id.length !== 24) {
-    throw new ReferenceError(`Preview ${id} not found.`);
+    throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const del = await client.db(MONGO_DB).collection(PREVIEWS).deleteOne({ _id });
+  const del = await client
+    .db(MONGO_DB)
+    .collection(SNAPSHOTS)
+    .deleteOne({ _id });
   if (!del.acknowledged || del.deletedCount !== 1) {
-    throw new ReferenceError(`Delete operation for Preview ${id} failed`);
+    throw new ReferenceError(`Delete operation for Snapshot ${id} failed`);
   }
-  console.log(`Deleted preview with id '${id}'`);
+  console.log(`Deleted snapshot with id '${id}'`);
   return del.acknowledged;
 }
 
 /**
- * Add new analyses to a preview.
- * @param id the identifier for the preview to update.
- * @param analyses the analyses to add to the preview.
- * @returns the id of the updated preview.
+ * Add new analyses to a snapshot.
+ * @param id the identifier for the snapshot to update.
+ * @param analyses the analyses to add to the snapshot.
+ * @returns the id of the updated snapshot.
  */
-export async function updatePreviewReviewsById(
+export async function updateSnapshotReviewsById(
   id: string | ObjectId,
   ...analyses: Analysis[]
 ) {
   if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
-    throw new ReferenceError(`Preview ${id} not found.`);
+    throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
   const upd = await client
     .db(MONGO_DB)
-    .collection<Preview>(PREVIEWS)
+    .collection<Snapshot>(SNAPSHOTS)
     .findOneAndUpdate(
       { _id },
       {
@@ -148,20 +151,20 @@ export async function updatePreviewReviewsById(
       }
     );
   if (!upd) {
-    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+    throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  console.log(`Updated reviews for preview with id '${id}'`);
+  console.log(`Updated reviews for snapshot with id '${id}'`);
   return upd._id;
 }
 
-export async function clearPreviewAnalysesById(id: string | ObjectId) {
+export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
-    throw new ReferenceError(`Preview ${id} not found.`);
+    throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
   const upd = await client
     .db(MONGO_DB)
-    .collection<Preview>(PREVIEWS)
+    .collection<Snapshot>(SNAPSHOTS)
     .findOneAndUpdate(
       { _id },
       {
@@ -169,9 +172,9 @@ export async function clearPreviewAnalysesById(id: string | ObjectId) {
       }
     );
   if (!upd) {
-    throw new ReferenceError(`Update operation for Preview ${id} failed`);
+    throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  console.log(`Cleared analyses for preview with id '${id}'`);
+  console.log(`Cleared analyses for snapshot with id '${id}'`);
   return upd._id;
 }
 
