@@ -25,7 +25,9 @@ import type {
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { useTranslation } from "react-i18next";
+import Icon from "../../assets/icons/expectations_icon.svg?react";
 import {
+  ErrorDataError,
   isErrorData,
   isExpectationsData,
   isExpectationsDataSuggestionNone,
@@ -33,7 +35,6 @@ import {
   type ExpectationsData,
 } from "../../src/lib/ReviewResponse";
 import { type Rule, type WritingTask } from "../../src/lib/WritingTask";
-import Icon from "../../assets/icons/expectations_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   checkReviewResponse,
@@ -64,13 +65,6 @@ type ExpectationProps = AccordionItemProps & {
   rule: Rule;
   setCurrent?: (key: AccordionEventKey) => void;
 };
-class ExpectationError extends Error {
-  data: ErrorData;
-  constructor(data: ErrorData) {
-    super(data.error.message);
-    this.data = data;
-  }
-}
 /** Component for rendering individual expectation rules. */
 const ExpectationRule: FC<ExpectationProps> = ({
   eventKey,
@@ -108,7 +102,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
     },
     onSuccess: ({ input, data }: { input: string; data: ExpectationsData }) => {
       if (isErrorData(data)) {
-        throw new ExpectationError(data);
+        throw new ErrorDataError(data);
       }
       dispatch({ type: "update", sentences: input });
       dispatch({
@@ -120,7 +114,7 @@ const ExpectationRule: FC<ExpectationProps> = ({
     onError: (error) => {
       console.error("Error fetching expectation:", error);
       dispatch({ type: "unset" });
-      if (error instanceof ExpectationError) {
+      if (error instanceof ErrorDataError) {
         setError(error.data);
         return;
       }

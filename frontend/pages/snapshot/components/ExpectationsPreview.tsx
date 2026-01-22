@@ -27,6 +27,7 @@ import {
 import { ToolHeader } from "../../../components/ToolHeader/ToolHeader";
 import {
   ErrorData,
+  ErrorDataError,
   ExpectationsData,
   isErrorData,
   isExpectationsDataSuggestionNone,
@@ -37,14 +38,6 @@ import {
   Rule,
   WritingTask,
 } from "../../../src/lib/WritingTask";
-
-class ExpectationError extends Error {
-  data: ErrorData;
-  constructor(data: ErrorData) {
-    super(data.error.message);
-    this.data = data;
-  }
-}
 
 type ExpectationRulePreviewProps = AccordionItemProps & {
   previewId: string;
@@ -89,7 +82,7 @@ const ExpectationRulePreview: FC<ExpectationRulePreviewProps> = ({
     },
     onSuccess: (data: ExpectationsData) => {
       if (isErrorData(data)) {
-        throw new ExpectationError(data);
+        throw new ErrorDataError(data);
       }
       dispatch({ type: "set", sentences: [data.response.sent_ids] });
       setCurrent?.(eventKey); // open this accordion item
@@ -97,7 +90,7 @@ const ExpectationRulePreview: FC<ExpectationRulePreviewProps> = ({
     onError: (error) => {
       console.error("Error fetching expectation preview:", error);
       dispatch({ type: "unset" });
-      if (error instanceof ExpectationError) {
+      if (error instanceof ErrorDataError) {
         setError(error.data);
         return;
       }

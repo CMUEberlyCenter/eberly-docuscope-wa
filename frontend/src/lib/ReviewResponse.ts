@@ -1,3 +1,4 @@
+import { Optional } from '..';
 import { type OnTopicData } from './OnTopicData';
 
 export type ReviewPrompt =
@@ -487,16 +488,26 @@ export interface OnTopicReviewData extends ReviewData<OnTopicData> {
 //   );
 // }
 
+/** Error data structure used to represent errors in review tools. */
 export type ErrorData = {
   tool: ReviewTool;
   datetime?: Date;
   error: Error;
 };
+/** Test if the data is an ErrorData object. */
 export function isErrorData(data: unknown): data is ErrorData {
   return !!data && typeof data === 'object' && 'error' in data && !!data.error;
 }
+/** Custom error class to encapsulate ErrorData. */
+export class ErrorDataError extends Error {
+  data: ErrorData;
+  constructor(data: ErrorData) {
+    super(data.error.message);
+    this.data = data;
+  }
+}
 
-export type OptionalReviewData<T> = T | ErrorData | null | undefined;
+export type OptionalReviewData<T> = Optional<T | ErrorData>;
 
 export type Analysis =
   | CivilToneData
