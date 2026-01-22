@@ -2,7 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
 import { Alert, type ButtonProps } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import {
   type ClarityData,
@@ -63,12 +63,12 @@ export const SentencesButton: FC<ButtonProps> = (props) => {
 };
 
 /** Error feedback component for clarity tool. */
-const ClarityErrorFallback: FC<{ error?: Error }> = ({ error }) => {
+const ClarityErrorFallback: FC<FallbackProps> = ({ error }) => {
   const { t } = useTranslation("review");
   return (
     <Alert variant="danger">
       <p>{t("sentences.error")}</p>
-      <pre>{error?.message}</pre>
+      {error instanceof Error ? <pre>{error.message}</pre> : null}
     </Alert>
   );
 };
@@ -350,7 +350,7 @@ export const SentencesPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/preview/${id}/ontopic`, {
+      const response = await fetch(`/api/v2/snapshot/${id}/ontopic`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

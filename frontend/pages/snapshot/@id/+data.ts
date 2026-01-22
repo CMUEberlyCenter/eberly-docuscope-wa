@@ -1,13 +1,13 @@
 import type { PageContextServer } from 'vike/types';
-import { findPreviewById } from '../../../src/server/data/mongo';
+import { findSnapshotById } from '../../../src/server/data/mongo';
 
 export const data = async (pageContext: PageContextServer) => {
   const id = pageContext.routeParams.id;
   // TODO handle not found
-  const preview = await findPreviewById(id);
+  const snapshot = await findSnapshotById(id);
 
   return {
-    ...preview,
+    ...snapshot,
     id,
   };
 };

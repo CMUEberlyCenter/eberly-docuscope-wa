@@ -1,5 +1,5 @@
 import {
-  findAllPreviewsBasic,
+  findAllSnapshotsBasic,
   findAllPublicWritingTasks,
 } from '../../../../src/server/data/mongo';
 
@@ -7,12 +7,12 @@ import {
 export const data = async () => {
   // Fetch all public writing tasks and basic preview information from the database
   const tasks = await findAllPublicWritingTasks();
-  const previews = (await findAllPreviewsBasic()).map((preview, i) => ({
-    ...preview,
+  const snapshots = (await findAllSnapshotsBasic()).map((snapshot, i) => ({
+    ...snapshot,
     _id: undefined,
-    id: preview._id?.toString() ?? `preview_${i}`,
+    id: snapshot._id?.toString() ?? `snapshot_${i}`,
   }));
-  return { tasks, previews };
+  return { tasks, snapshots };
 };
 
 export type Data = Awaited<ReturnType<typeof data>>;

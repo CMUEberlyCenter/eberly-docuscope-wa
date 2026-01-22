@@ -59,6 +59,6 @@ genlink:
     empty_content: The uploaded document is empty. Please provide a document with content.
     too_large: The uploaded document with {{wordCount}} words exceeds the maximum allowed size of {{maxWords}} words. Please upload a smaller document.
   submit: Launch
-  existing_previews: Existing Snapshots
-  delete_preview: Delete Snapshot
-  refresh_preview: Clear analysis cache
+  existing_snapshots: Existing Snapshots
+  delete_snapshot: Delete Snapshot
+  refresh_snapshot: Clear analysis cache

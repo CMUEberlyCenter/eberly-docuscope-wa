@@ -45,7 +45,7 @@ import {
   type ContainerProps,
   Row,
 } from "react-bootstrap";
-import { ErrorBoundary } from "react-error-boundary";
+import { ErrorBoundary, FallbackProps } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import {
   isErrorData,
@@ -238,32 +238,24 @@ const Legend: FC<ContainerProps> = (props) => (
 );
 
 /** Alert component for displaying organization errors. */
-const OrganizationErrorFallback: FC<AlertProps & { error?: Error }> = ({
-  error,
-  variant,
-  ...props
-}) => (
+const OrganizationErrorFallback: FC<FallbackProps> = ({ error }) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Alert {...props} variant={variant ?? "danger"}>
+      <Alert variant={"danger"}>
         <p>{t("organization.error")}</p>
-        <pre>{error?.message}</pre>
+        {error instanceof Error ? <pre>{error.message}</pre> : null}
       </Alert>
     )}
   </Translation>
 );
 
 /** Alert component for displaying coherence errors. */
-const CoherenceErrorFallback: FC<AlertProps & { error?: Error }> = ({
-  error,
-  variant,
-  ...props
-}) => (
+const CoherenceErrorFallback: FC<FallbackProps> = ({ error }) => (
   <Translation ns={"review"}>
     {(t) => (
-      <Alert {...props} color={variant ?? "warning"}>
-        {t("organizaion.error")}
-        {error?.message}
+      <Alert variant={"warning"}>
+        {t("organization.error")}
+        {error instanceof Error ? <pre>{error.message}</pre> : null}
       </Alert>
     )}
   </Translation>
@@ -657,7 +649,7 @@ export const OrganizationPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/preview/${id}/ontopic`, {
+      const response = await fetch(`/api/v2/snapshot/${id}/ontopic`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
