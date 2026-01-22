@@ -18,20 +18,23 @@ const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
 
   return (
     <span>
-      {new Intl.DateTimeFormat("en").formatRange(start, end)} (
-      {new Intl.DurationFormat("en", { style: "short" }).format(duration)})
+      {new Intl.DateTimeFormat(navigator.languages).formatRange(start, end)} (
+      {new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
+        duration
+      )}
+      )
     </span>
   );
 };
 export const Page: FC = () => {
   const { performance } = useData<Data>();
-  const { t } = useTranslation();
+  const { t } = useTranslation("admin");
   return (
     <Card>
-      <Card.Header>{t("admin.performance.title")}</Card.Header>
+      <Card.Header>{t("performance.title")}</Card.Header>
       <Card.Body>
         <Card.Text as="div">
-          {performance.length === 0 && <p>{t("admin.performance.no_data")}</p>}
+          {performance.length === 0 && <p>{t("performance.no_data")}</p>}
           {performance.map((entry) => (
             <div key={entry._id} style={{ marginBottom: "1em" }}>
               <h5>Prompt: {entry._id}</h5>
@@ -48,21 +51,21 @@ export const Page: FC = () => {
                   <ul>
                     <li>
                       Average:{" "}
-                      {new Intl.DurationFormat("en", { style: "long" }).format(
-                        msToDuration(Math.floor(entry.avgTime))
-                      )}
+                      {new Intl.DurationFormat(navigator.languages, {
+                        style: "long",
+                      }).format(msToDuration(Math.floor(entry.avgTime)))}
                     </li>
                     <li>
                       Min:{" "}
-                      {new Intl.DurationFormat("en", { style: "long" }).format(
-                        msToDuration(Math.floor(entry.minTime))
-                      )}
+                      {new Intl.DurationFormat(navigator.languages, {
+                        style: "long",
+                      }).format(msToDuration(Math.floor(entry.minTime)))}
                     </li>
                     <li>
                       Max:{" "}
-                      {new Intl.DurationFormat("en", { style: "long" }).format(
-                        msToDuration(Math.floor(entry.maxTime))
-                      )}
+                      {new Intl.DurationFormat(navigator.languages, {
+                        style: "long",
+                      }).format(msToDuration(Math.floor(entry.maxTime)))}
                     </li>
                   </ul>
                 </li>

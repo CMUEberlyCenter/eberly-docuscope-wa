@@ -117,7 +117,7 @@ export const Page: FC = () => {
         file.type !==
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
-        throw new Error(t("admin.genlink.document.invalid_file_type"));
+        throw new Error(t("admin:genlink.document.invalid_file_type"));
       }
       // Test valid format
       const { value, messages } = await convertToHtml(
@@ -128,22 +128,22 @@ export const Page: FC = () => {
       );
       if (messages.length) {
         throw new Error(
-          t("admin.genlink.document.invalid_file_content", {
+          t("admin:genlink.document.invalid_file_content", {
             message: messages.map((m) => m.message).join("; "),
           })
         );
       }
       if (!value || value.trim().length === 0) {
         throw new Error(
-          t("admin.genlink.document.invalid_file_content", {
-            message: t("admin.genlink.document.empty_content"),
+          t("admin:genlink.document.invalid_file_content", {
+            message: t("admin:genlink.document.empty_content"),
           })
         );
       }
       const { valid, wordCount, maxWords } = checkWordCount(value, settings);
       if (!valid) {
         throw new Error(
-          t("admin.genlink.document.too_large", {
+          t("admin:genlink.document.too_large", {
             wordCount,
             maxWords,
           })
@@ -166,9 +166,9 @@ export const Page: FC = () => {
   return (
     <>
       <Card>
-        <Card.Header>{t("admin.genlink.title")}</Card.Header>
+        <Card.Header>{t("admin:genlink.title")}</Card.Header>
         <Card.Body>
-          <Card.Text>{t("admin.genlink.description")}</Card.Text>
+          <Card.Text>{t("admin:genlink.description")}</Card.Text>
           <div
             className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
             style={{ maxHeight: "30rem" }}
@@ -231,8 +231,8 @@ export const Page: FC = () => {
 
           <hr />
           <div>
-            <h5>{t("admin.genlink.document.title")}</h5>
-            <p>{t("admin.genlink.document.description")}</p>
+            <h5>{t("admin:genlink.document.title")}</h5>
+            <p>{t("admin:genlink.document.description")}</p>
             <Form
               method="POST"
               action={"/api/v2/preview"}
@@ -247,7 +247,7 @@ export const Page: FC = () => {
                 readOnly={true}
               />
               <Form.Group>
-                <Form.Label>{t("admin.genlink.document.upload")}</Form.Label>
+                <Form.Label>{t("admin:genlink.document.upload")}</Form.Label>
                 <Form.Control
                   type="file"
                   name="document"
@@ -262,15 +262,15 @@ export const Page: FC = () => {
               </Form.Group>
               <Activity mode={!selected ? "hidden" : "visible"}>
                 <Form.Group className="container mt-3">
-                  <Form.Label>{t("admin.genlink.document.tools")}</Form.Label>
+                  <Form.Label>{t("admin:genlink.document.tools")}</Form.Label>
                   <ButtonGroup
-                    aria-label={t("admin.genlink.document.select_label")}
+                    aria-label={t("admin:genlink.document.select_label")}
                     className="ms-2"
                   >
                     <Button
                       size="sm"
                       variant="primary"
-                      title={t("admin.genlink.document.select_all")}
+                      title={t("admin:genlink.document.select_all")}
                       onClick={() => {
                         const allTools = selected?.info.review_tools
                           ?.filter(
@@ -289,7 +289,7 @@ export const Page: FC = () => {
                     <Button
                       variant="primary"
                       size="sm"
-                      title={t("admin.genlink.document.deselect_all")}
+                      title={t("admin:genlink.document.deselect_all")}
                       onClick={() => {
                         setEnabledTools([]);
                       }}
@@ -347,7 +347,7 @@ export const Page: FC = () => {
                 type="submit"
                 disabled={!selected || !document || !enabledTools.length}
               >
-                {t("admin.genlink.submit")}
+                {t("admin:genlink.submit")}
               </Button>
             </Form>
           </div>
@@ -355,7 +355,7 @@ export const Page: FC = () => {
       </Card>
       {previews.length > 0 && (
         <Card>
-          <Card.Header>{t("admin.genlink.existing_previews")}</Card.Header>
+          <Card.Header>{t("admin:genlink.existing_previews")}</Card.Header>
           <ListGroup variant="flush">
             {previews.map(({ id, task, filename, timestamp }) => (
               <ListGroup.Item key={`${id}`}>
@@ -374,7 +374,7 @@ export const Page: FC = () => {
                   <Button
                     variant="icon"
                     className="text-danger"
-                    title={t("admin.genlink.refresh_preview")}
+                    title={t("admin:genlink.refresh_preview")}
                     onClick={() => {
                       fetch(`/api/v2/preview/${id}?cache_only=true`, {
                         method: "DELETE",
@@ -408,7 +408,7 @@ export const Page: FC = () => {
                           console.error("Error deleting preview:", error);
                         });
                     }}
-                    title={t("admin.genlink.delete_preview")}
+                    title={t("admin:genlink.delete_preview")}
                   >
                     <FontAwesomeIcon icon={faTrash} />
                   </Button>
