@@ -85,7 +85,6 @@ type Tool =
 export const Page: FC = () => {
   const preview = useData<Data>();
   const { id: reviewID, filename, file, tool_config, task, analyses } = preview;
-  console.log("Preview Page data:", preview);
   const { settings } = usePageContext();
   const { t } = useTranslation("review");
   const [tab, setTab] = useState<TabKey>("big_picture");
@@ -339,7 +338,12 @@ export const Page: FC = () => {
                     <Alert.Heading>{t("error.header")}</Alert.Heading>
                     {t("error.content")}
                     {t("error.details", {
-                      details: { message: error.message },
+                      details: {
+                        message:
+                          error instanceof Error
+                            ? error.message
+                            : String(error),
+                      },
                     })}
                   </Alert>
                 )}

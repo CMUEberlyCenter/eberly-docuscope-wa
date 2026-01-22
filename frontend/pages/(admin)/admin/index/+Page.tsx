@@ -4,12 +4,12 @@ import { useTranslation } from "react-i18next";
 
 /** Index page for the admin dashboard. */
 export const Page: FC = () => {
-  const { t } = useTranslation();
+  const { t } = useTranslation("admin");
   return (
     <Card>
-      <Card.Header>{t("admin.home")}</Card.Header>
+      <Card.Header>{t("home")}</Card.Header>
       <Card.Body>
-        <Card.Text>{t("admin.welcome")}</Card.Text>
+        <Card.Text>{t("welcome")}</Card.Text>
       </Card.Body>
     </Card>
   );

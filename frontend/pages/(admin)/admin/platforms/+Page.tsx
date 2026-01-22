@@ -6,11 +6,11 @@ import type { Data } from "./+data";
 
 export const Page: FC = () => {
   const { platforms } = useData<Data>();
-  const { t } = useTranslation();
+  const { t } = useTranslation("admin");
 
   return (
     <Card>
-      <Card.Header>{t("admin.platforms.title")}</Card.Header>
+      <Card.Header>{t("platforms.title")}</Card.Header>
       <ListGroup variant="flush">
         {platforms.map(
           ({ platformId, platformName, platformActive, platformUrl }, i) => (
@@ -20,20 +20,24 @@ export const Page: FC = () => {
               }
             >
               <Row>
-                <Col md="auto">ID:</Col>
+                <Col md="auto">{t("platforms.id")}</Col>
                 <Col>{platformId}</Col>
               </Row>
               <Row>
-                <Col md="auto">Name:</Col>
+                <Col md="auto">{t("platforms.name")}</Col>
                 <Col>{platformName}</Col>
               </Row>
               <Row>
-                <Col md="auto">URL:</Col>
+                <Col md="auto">{t("platforms.url")}</Col>
                 <Col>{platformUrl}</Col>
               </Row>
               <Row>
-                <Col md="auto">Status:</Col>
-                <Col>{platformActive ? "Active" : "Inactive"}</Col>
+                <Col md="auto">{t("platforms.status")}</Col>
+                <Col>
+                  {platformActive
+                    ? t("platforms.active")
+                    : t("platforms.inactive")}
+                </Col>
               </Row>
             </ListGroup.Item>
           )
