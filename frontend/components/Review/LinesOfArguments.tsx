@@ -1,12 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
 import {
   type FC,
   type HTMLProps,
   useEffect,
   useId,
-  useRef,
-  useState,
+  useState
 } from "react";
 import {
   Accordion,
@@ -20,30 +18,26 @@ import type {
 } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
+import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import {
   type Claim as ClaimProps,
   isErrorData,
-  type LinesOfArgumentsData,
-  type OptionalReviewData,
+  type LinesOfArgumentsData
 } from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
-import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
-  checkReviewResponse,
-  ReviewErrorData,
+  ReviewErrorData
 } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewReset,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Lines Of Arguments tool. */
@@ -100,7 +94,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("lines_of_arguments.no_sentences")}
                       show={
                         (claim_sent_ids ?? []).length +
-                          (support_sent_ids ?? []).length ===
+                        (support_sent_ids ?? []).length ===
                         0
                       }
                     />
@@ -137,7 +131,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (support_sent_ids ?? []).length &&
-                            "highlight highlight-1"
+                          "highlight highlight-1"
                         )}
                       >
                         <h6>{t("lines_of_arguments.support")}</h6>
@@ -184,65 +178,11 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<LinesOfArgumentsData>>(null);
+  const { review, pending } = useReview<LinesOfArgumentsData>("lines_of_arguments");
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
   const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      const { document, writing_task } = data;
-      abortControllerRef.current = new AbortController();
-      setReview(null);
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/lines_of_arguments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document, writing_task }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({
-      input,
-      data,
-    }: {
-      input: string;
-      data: LinesOfArgumentsData;
-    }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "lines_of_arguments", error });
-      console.error("Error fetching Lines of Arguments review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    setCurrent(null);
-    // Fetch the review data for Lines of Arguments
-    mutation.mutate({ document, writing_task });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
   useEffect(() => {
     if (
       !current &&
@@ -267,7 +207,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("lines_of_arguments.title")}
           instructionsKey="lines_of_arguments"
         />
-        {mutation.isPending || !review ? (
+        {pending || !review ? (
           <Loading />
         ) : (
           <ErrorBoundary
@@ -307,7 +247,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
                     </div>
                   ) : null}
                   {"strategies" in review.response &&
-                  Array.isArray(review.response.strategies) ? (
+                    Array.isArray(review.response.strategies) ? (
                     <section className="mt-3">
                       <h6>{t("lines_of_arguments.strategies")}</h6>
                       <ul>
@@ -323,8 +263,8 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
                     claims={review.response.claims}
                   />
                   {!review.response.thesis &&
-                  !review.response.strategies?.length &&
-                  !review.response.claims?.length ? (
+                    !review.response.strategies?.length &&
+                    !review.response.claims?.length ? (
                     <Alert variant="warning">
                       {t("lines_of_arguments.null")}
                     </Alert>
@@ -346,59 +286,22 @@ export const LinesOfArgumentsPreview: FC<
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
-  const [review, setReview] = useState<
-    OptionalReviewData<LinesOfArgumentsData>
-  >((analysis as OptionalReviewData<LinesOfArgumentsData>) ?? null);
+  const { review, pending } = useSnapshotReview<LinesOfArgumentsData>(
+    "lines_of_arguments",
+    reviewID,
+    analysis
+  );
   const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(
-        `/api/v2/snapshot/${id}/lines_of_arguments`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          signal: abortControllerRef.current.signal,
-        }
-      );
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: LinesOfArgumentsData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "lines_of_arguments", error });
-      console.error("Error fetching Lines of Arguments review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
   useEffect(() => {
-    console.log("LogicalFlowPreview useEffect triggered.", reviewID, analysis);
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "lines_of_arguments") {
-      console.log("Using pre-fetched Lines of Arguments analysis data.");
-      setReview(analysis as OptionalReviewData<LinesOfArgumentsData>);
-      return;
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
-    console.log("Fetching Lines of Arguments analysis data.");
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
+  }, [current, review, dispatch]);
 
   return (
     <ReviewReset>
@@ -413,7 +316,7 @@ export const LinesOfArgumentsPreview: FC<
           title={t("lines_of_arguments.title")}
           instructionsKey="lines_of_arguments"
         />
-        {mutation.isPending || !review ? (
+        {pending || !review ? (
           <Loading />
         ) : (
           <ErrorBoundary
@@ -453,7 +356,7 @@ export const LinesOfArgumentsPreview: FC<
                     </div>
                   ) : null}
                   {"strategies" in review.response &&
-                  Array.isArray(review.response.strategies) ? (
+                    Array.isArray(review.response.strategies) ? (
                     <section className="mt-3">
                       <h6>{t("lines_of_arguments.strategies")}</h6>
                       <ul>
@@ -469,8 +372,8 @@ export const LinesOfArgumentsPreview: FC<
                     claims={review.response.claims}
                   />
                   {!review.response.thesis &&
-                  !review.response.strategies?.length &&
-                  !review.response.claims?.length ? (
+                    !review.response.strategies?.length &&
+                    !review.response.claims?.length ? (
                     <Alert variant="warning">
                       {t("lines_of_arguments.null")}
                     </Alert>

@@ -1,11 +1,7 @@
-import { useMutation } from "@tanstack/react-query";
 import {
   type FC,
   type HTMLProps,
-  useEffect,
-  useId,
-  useRef,
-  useState,
+  useId
 } from "react";
 import {
   Accordion,
@@ -14,23 +10,19 @@ import {
   type ButtonProps,
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
-import {
-  type OptionalReviewData,
-  type ProfessionalToneData,
-  type ProfessionalToneOutput,
-} from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
+import {
+  type ProfessionalToneData,
+  type ProfessionalToneOutput
+} from "../../src/lib/ReviewResponse";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewToolCard,
   ReviewToolContentProps,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Professional Tone tool. */
@@ -148,123 +140,17 @@ const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
 export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<ProfessionalToneData>>(null);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      const { document, writing_task } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/professional_tone", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document, writing_task }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({
-      input,
-      data,
-    }: {
-      input: string;
-      data: ProfessionalToneData;
-    }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "professional_tone", error });
-      console.error("Error fetching Professional Tone review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
-
-  return <Content review={review} isPending={mutation.isPending} {...props} />;
+  const { review, pending } = useReview<ProfessionalToneData>("professional_tone");
+  return <Content review={review} isPending={pending} {...props} />;
 };
 
 export const ProfessionalTonePreview: FC<
   PreviewCardProps<ProfessionalToneData>
 > = ({ reviewID, analysis, ...props }) => {
-  const [review, setReview] =
-    useState<OptionalReviewData<ProfessionalToneData>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/professional_tone`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: ProfessionalToneData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "professional_tone", error });
-      console.error("Error fetching Professional Tone review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  useEffect(() => {
-    console.log(
-      "ProfessionalTonePreview useEffect triggered.",
-      reviewID,
-      analysis
-    );
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "professional_tone") {
-      console.log("Using pre-fetched Professional Tone analysis data.");
-      setReview(analysis as OptionalReviewData<ProfessionalToneData>);
-      return;
-    }
-    console.log("Fetching Professional Tone analysis data.");
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
-  return <Content review={review} isPending={mutation.isPending} {...props} />;
+  const { review, pending } = useSnapshotReview<ProfessionalToneData>(
+    "professional_tone",
+    reviewID,
+    analysis
+  );
+  return <Content review={review} isPending={pending} {...props} />;
 };

@@ -1,30 +1,24 @@
-import { useMutation } from "@tanstack/react-query";
 import {
   type FC,
   type HTMLProps,
   useEffect,
   useId,
-  useRef,
-  useState,
+  useState
 } from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
 import {
-  type OptionalReviewData,
   type Source,
   type SourcesData,
-  type SourceType,
+  type SourceType
 } from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewToolCard,
   ReviewToolContentProps,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Accordion component for displaying citations. */
@@ -177,55 +171,9 @@ const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
 
 /** Sources review tool component. */
 export const Sources: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] = useState<OptionalReviewData<SourcesData>>(null);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      const { document, writing_task } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/sources", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document, writing_task }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({ input, data }: { input: string; data: SourcesData }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "sources", error });
-      console.error("Error fetching Sources review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    mutation.mutate({ document, writing_task });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
-
+  const { review, pending } = useReview<SourcesData>("sources");
   return (
-    <SourcesContent review={review} isPending={mutation.isPending} {...props} />
+    <SourcesContent review={review} isPending={pending} {...props} />
   );
 };
 
@@ -234,54 +182,12 @@ export const SourcesPreview: FC<PreviewCardProps<SourcesData>> = ({
   analysis,
   ...props
 }) => {
-  const [review, setReview] =
-    useState<OptionalReviewData<SourcesData>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/sources`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: SourcesData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "sources", error });
-      console.error("Error fetching Sources review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "sources") {
-      setReview(analysis as OptionalReviewData<SourcesData>);
-      return;
-    }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
+  const { review, pending } = useSnapshotReview<SourcesData>(
+    "sources",
+    reviewID,
+    analysis
+  );
   return (
-    <SourcesContent review={review} isPending={mutation.isPending} {...props} />
+    <SourcesContent review={review} isPending={pending} {...props} />
   );
 };
