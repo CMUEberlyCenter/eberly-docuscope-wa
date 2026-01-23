@@ -45,7 +45,7 @@ type ExpectationRulePreviewProps = AccordionItemProps & {
   ruleIdx: number;
   setCurrent?: (key: AccordionEventKey) => void;
 };
-/** Component for rendering individual expectation rules in preview mode. */
+/** Component for rendering individual expectation rules in snapshot mode. */
 const ExpectationRulePreview: FC<ExpectationRulePreviewProps> = ({
   eventKey,
   previewId,

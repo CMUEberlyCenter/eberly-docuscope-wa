@@ -9,13 +9,13 @@ import {
 } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
+import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import type { Optional } from "../../src";
 import {
   type LogicalFlowData,
   type OptionalReviewData,
 } from "../../src/lib/ReviewResponse";
 import type { WritingTask } from "../../src/lib/WritingTask";
-import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
@@ -26,6 +26,7 @@ import {
   ReviewToolCard,
   ReviewToolContentProps,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Logical Flow tool. */
@@ -169,57 +170,15 @@ export const LogicalFlowPreview: FC<PreviewCardProps<LogicalFlowData>> = ({
   reviewID,
   ...props
 }) => {
-  const [review, setReview] =
-    useState<OptionalReviewData<LogicalFlowData>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/logical_flow`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: LogicalFlowData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "logical_flow", error });
-      console.error("Error fetching Logical Flow review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "logical_flow") {
-      setReview(analysis as OptionalReviewData<LogicalFlowData>);
-      return;
-    }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
+  const { review, pending } = useSnapshotReview<LogicalFlowData>(
+    "logical_flow",
+    reviewID,
+    analysis
+  );
   return (
     <LogicalFlowContent
       review={review}
-      isPending={mutation.isPending}
+      isPending={pending}
       {...props}
     />
   );

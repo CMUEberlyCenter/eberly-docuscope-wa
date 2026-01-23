@@ -1,29 +1,21 @@
-import { useMutation } from "@tanstack/react-query";
 import {
   type FC,
   type HTMLProps,
-  useEffect,
-  useId,
-  useRef,
-  useState,
+  useId
 } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
 import {
-  type CredibilityData,
-  type OptionalReviewData,
+  type CredibilityData
 } from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewToolCard,
   ReviewToolContentProps,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
@@ -97,61 +89,11 @@ const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
 };
 /** Ethos review tool component. */
 export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
-  const dispatch = useReviewDispatch();
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<CredibilityData>>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/credibility", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({ input, data }: { input: string; data: CredibilityData }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "credibility", error });
-      console.error("Error fetching Credibility review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
+  const { review, pending } = useReview<CredibilityData>("credibility");
 
   return (
     <CredibilityContent
-      isPending={mutation.isPending}
+      isPending={pending}
       review={review}
       {...props}
     />
@@ -164,56 +106,11 @@ export const CredibilityPreview: FC<PreviewCardProps<CredibilityData>> = ({
   analysis,
   ...props
 }) => {
-  const [review, setReview] =
-    useState<OptionalReviewData<CredibilityData>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/credibility`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: CredibilityData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "credibility", error });
-      console.error("Error fetching Credibility review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "credibility") {
-      setReview(analysis as OptionalReviewData<CredibilityData>);
-      return;
-    }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
+  const { review, pending } = useSnapshotReview<CredibilityData>("credibility", reviewID, analysis);
 
   return (
     <CredibilityContent
-      isPending={mutation.isPending}
+      isPending={pending}
       review={review}
       {...props}
     />

@@ -1,33 +1,28 @@
-import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
+import { type FC, type HTMLProps, useEffect, useState } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
+import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import {
   isErrorData,
-  type OptionalReviewData,
-  type ProminentTopicsData,
+  type ProminentTopicsData
 } from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
-import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
-  checkReviewResponse,
-  ReviewErrorData,
+  ReviewErrorData
 } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewReset,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Prominent Topics tool. */
@@ -49,10 +44,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<ProminentTopicsData>>(null);
+  const { review, pending } = useReview<ProminentTopicsData>("prominent_topics");
   const dispatch = useReviewDispatch();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   useEffect(() => {
@@ -65,57 +57,6 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
       dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
   }, [current, review, dispatch]);
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/prominent_topics", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({
-      input,
-      data,
-    }: {
-      input: string;
-      data: ProminentTopicsData;
-    }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      if (error.name === "AbortError") return;
-      setReview({ tool: "prominent_topics", error });
-      console.error("Error fetching Prominent Topics review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-
-  useEffect(() => {
-    if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
 
   return (
     <ReviewReset>
@@ -130,7 +71,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
           title={t("prominent_topics.title")}
           instructionsKey="prominent_topics"
         />
-        {!review || mutation.isPending ? (
+        {!review || pending ? (
           <Loading />
         ) : (
           <ErrorBoundary
@@ -201,7 +142,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
                             <AlertIcon
                               show={
                                 topic_sents_ids.length +
-                                  elaboration_sents_ids.length ===
+                                elaboration_sents_ids.length ===
                                 0
                               }
                               message={t("prominent_topics.no_sentences")}
@@ -278,53 +219,22 @@ export const ProminentTopicsPreview: FC<
 > = ({ className, reviewID, analysis, ...props }) => {
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const { t } = useTranslation("review");
-  const [review, setReview] =
-    useState<OptionalReviewData<ProminentTopicsData>>(analysis);
+  const { review, pending } = useSnapshotReview<ProminentTopicsData>(
+    "prominent_topics",
+    reviewID,
+    analysis
+  );
   const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/prominent_topics`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: ProminentTopicsData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "prominent_topics", error });
-      console.error("Error fetching Prominent Topics review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
   useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "prominent_topics") {
-      setReview(analysis as OptionalReviewData<ProminentTopicsData>);
-      return;
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
     }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
+  }, [current, review, dispatch]);
   return (
     <ReviewReset>
       <article
@@ -338,7 +248,7 @@ export const ProminentTopicsPreview: FC<
           title={t("prominent_topics.title")}
           instructionsKey="prominent_topics"
         />
-        {!review || mutation.isPending ? (
+        {!review || pending ? (
           <Loading />
         ) : (
           <ErrorBoundary
@@ -409,7 +319,7 @@ export const ProminentTopicsPreview: FC<
                             <AlertIcon
                               show={
                                 topic_sents_ids.length +
-                                  elaboration_sents_ids.length ===
+                                elaboration_sents_ids.length ===
                                 0
                               }
                               message={t("prominent_topics.no_sentences")}

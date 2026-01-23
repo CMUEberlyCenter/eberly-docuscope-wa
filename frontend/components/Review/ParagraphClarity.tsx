@@ -1,31 +1,23 @@
-import { useMutation } from "@tanstack/react-query";
 import {
   type FC,
   type HTMLProps,
-  useEffect,
-  useId,
-  useRef,
-  useState,
+  useId
 } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
-import {
-  type OptionalReviewData,
-  type ParagraphClarityData,
-} from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
+import {
+  type ParagraphClarityData
+} from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewToolCard,
   ReviewToolContentProps,
+  useReview,
   useReviewDispatch,
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Paragraph Clarity tool. */
@@ -103,67 +95,11 @@ const ParagraphClarityContent: FC<
 export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<ParagraphClarityData>>(null);
-
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      const { document, writing_task } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/paragraph_clarity", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document, writing_task }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({
-      input,
-      data,
-    }: {
-      input: string;
-      data: ParagraphClarityData;
-    }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "paragraph_clarity", error });
-      console.error("Error fetching Paragraph Clarity review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    // Fetch the review data for Paragraph Clarity
-    mutation.mutate({ document, writing_task });
-    // TODO error handling
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
-
+  const { review, pending } = useReview<ParagraphClarityData>("paragraph_clarity");
   return (
     <ParagraphClarityContent
       review={review}
-      isPending={mutation.isPending}
+      isPending={pending}
       {...props}
     />
   );
@@ -172,57 +108,15 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
 export const ParagraphClarityPreview: FC<
   PreviewCardProps<ParagraphClarityData>
 > = ({ reviewID, analysis, ...props }) => {
-  const [review, setReview] =
-    useState<OptionalReviewData<ParagraphClarityData>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/paragraph_clarity`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: ParagraphClarityData) => {
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "paragraph_clarity", error });
-      console.error("Error fetching Paragraph Clarity review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "paragraph_clarity") {
-      setReview(analysis as OptionalReviewData<ParagraphClarityData>);
-      return;
-    }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
+  const { review, pending } = useSnapshotReview<ParagraphClarityData>(
+    "paragraph_clarity",
+    reviewID,
+    analysis
+  );
   return (
     <ParagraphClarityContent
       review={review}
-      isPending={mutation.isPending}
+      isPending={pending}
       {...props}
     />
   );
