@@ -10,6 +10,7 @@ export const Logo: FC = () => (
         href="https://www.cmu.edu/dietrich/english/research-and-publications/myprose.html"
         target="_blank"
         rel="noreferrer noopener"
+        data-testid="logo-link"
       >
         <img style={{ height: "1.1em" }} src={logo} alt={t("document.title")} />
       </a>
