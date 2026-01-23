@@ -1,5 +1,3 @@
-// import { cleanup } from "@testing-library/react";
-// import { afterAll, afterEach, beforeAll, describe, test, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, test } from "bun:test";
 import { About } from "./About"; // react 19 use pattern causes error in tests as location.href is not set.
