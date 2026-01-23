@@ -11,11 +11,12 @@
     "module": "ESNext",
     "noEmit": true,
     "moduleResolution": "Bundler",
-    "target": "ES2024",
+    "target": "esnext",
     "lib": [
       "DOM",
       "DOM.Iterable",
-      "ESNext"
+      "ESNext",
+      "ESNext.Intl"
     ],
     "types": [
       "vite/client",
