@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.",
   "type": "module",
   "private": true,
@@ -99,7 +99,7 @@
     "sass": "^1.97.3",
     "storybook": "^10.2.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.1",
+    "typescript-eslint": "^8.54.0",
     "vite": "^7.3.1",
     "vite-plugin-svgr": "^4.5.0",
     "vitest": "^4.0.18",
