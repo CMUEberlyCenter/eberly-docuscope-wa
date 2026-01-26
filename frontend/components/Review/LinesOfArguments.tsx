@@ -1,11 +1,5 @@
 import classNames from "classnames";
-import {
-  type FC,
-  type HTMLProps,
-  useEffect,
-  useId,
-  useState
-} from "react";
+import { type FC, type HTMLProps, useEffect, useId, useState } from "react";
 import {
   Accordion,
   type AccordionProps,
@@ -20,7 +14,7 @@ import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import {
   type Claim as ClaimProps,
-  type LinesOfArgumentsData
+  type LinesOfArgumentsData,
 } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -30,7 +24,7 @@ import {
   ReviewToolContentProps,
   useReview,
   useReviewDispatch,
-  useSnapshotReview
+  useSnapshotReview,
 } from "./ReviewContext";
 
 /** Button component for selecting the Lines Of Arguments tool. */
@@ -87,7 +81,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("lines_of_arguments.no_sentences")}
                       show={
                         (claim_sent_ids ?? []).length +
-                        (support_sent_ids ?? []).length ===
+                          (support_sent_ids ?? []).length ===
                         0
                       }
                     />
@@ -124,7 +118,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (support_sent_ids ?? []).length &&
-                          "highlight highlight-1"
+                            "highlight highlight-1"
                         )}
                       >
                         <h6>{t("lines_of_arguments.support")}</h6>
@@ -163,10 +157,9 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   );
 };
 
-const LinesOfArgumentsContent: FC<ReviewToolContentProps<LinesOfArgumentsData>> = ({
-  review,
-  ...props
-}) => {
+const LinesOfArgumentsContent: FC<
+  ReviewToolContentProps<LinesOfArgumentsData>
+> = ({ review, ...props }) => {
   const { t } = useTranslation("review");
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
@@ -202,9 +195,7 @@ const LinesOfArgumentsContent: FC<ReviewToolContentProps<LinesOfArgumentsData>> 
           <section className="mt-3">
             {review.response.thesis ? (
               <div>
-                <h6 className="d-inline">
-                  {t("lines_of_arguments.main")}
-                </h6>{" "}
+                <h6 className="d-inline">{t("lines_of_arguments.main")}</h6>{" "}
                 <p
                   className={classNames(
                     "d-inline",
@@ -216,7 +207,7 @@ const LinesOfArgumentsContent: FC<ReviewToolContentProps<LinesOfArgumentsData>> 
               </div>
             ) : null}
             {"strategies" in review.response &&
-              Array.isArray(review.response.strategies) ? (
+            Array.isArray(review.response.strategies) ? (
               <section className="mt-3">
                 <h6>{t("lines_of_arguments.strategies")}</h6>
                 <ul>
@@ -232,11 +223,9 @@ const LinesOfArgumentsContent: FC<ReviewToolContentProps<LinesOfArgumentsData>> 
               claims={review.response.claims}
             />
             {!review.response.thesis &&
-              !review.response.strategies?.length &&
-              !review.response.claims?.length ? (
-              <Alert variant="warning">
-                {t("lines_of_arguments.null")}
-              </Alert>
+            !review.response.strategies?.length &&
+            !review.response.claims?.length ? (
+              <Alert variant="warning">{t("lines_of_arguments.null")}</Alert>
             ) : null}
           </section>
         </section>
@@ -251,14 +240,11 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props
 }) => {
-  const { review, pending } = useReview<LinesOfArgumentsData>("lines_of_arguments");
+  const { review, pending } =
+    useReview<LinesOfArgumentsData>("lines_of_arguments");
 
   return (
-    <LinesOfArgumentsContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
+    <LinesOfArgumentsContent isPending={pending} review={review} {...props} />
   );
 };
 
@@ -272,10 +258,6 @@ export const LinesOfArgumentsPreview: FC<
   );
 
   return (
-    <LinesOfArgumentsContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
+    <LinesOfArgumentsContent isPending={pending} review={review} {...props} />
   );
 };

@@ -20,7 +20,10 @@ import {
   OptionalReviewData,
   ReviewTool,
 } from "../../src/lib/ReviewResponse";
-import { checkReviewResponse, ReviewErrorData } from "../ErrorHandler/ErrorHandler";
+import {
+  checkReviewResponse,
+  ReviewErrorData,
+} from "../ErrorHandler/ErrorHandler";
 import { Loading } from "../Loading/Loading";
 import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -193,7 +196,9 @@ export const ReviewToolCard: FC<
             }: FallbackProps) => (
               <Alert variant="danger">
                 <p>{errorMessage}</p>
-                {error instanceof Error && <pre className="mt-2">{error.message}</pre>}
+                {error instanceof Error && (
+                  <pre className="mt-2">{error.message}</pre>
+                )}
                 {/* needs onReset <Button variant="primary" onClick={resetErrorBoundary}>Try again</Button> */}
               </Alert>
             )}
@@ -209,13 +214,10 @@ export const ReviewToolCard: FC<
   );
 };
 
-export function useReview<T extends Analysis>(
-  tool: ReviewTool,
-) {
+export function useReview<T extends Analysis>(tool: ReviewTool) {
   const [document] = useFileText();
   const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<T>>(null);
+  const [review, setReview] = useState<OptionalReviewData<T>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
 
@@ -279,15 +281,18 @@ export function useReview<T extends Analysis>(
 export function useSnapshotReview<T extends Analysis>(
   tool: ReviewTool,
   snapshotID: string | undefined,
-  analysis: OptionalReviewData<T>) {
-  const [review, setReview] =
-    useState<OptionalReviewData<T>>(analysis);
+  analysis: OptionalReviewData<T>
+) {
+  const [review, setReview] = useState<OptionalReviewData<T>>(analysis);
   const dispatch = useReviewDispatch();
   const abortControllerRef = useRef<AbortController | null>(null);
   const mutation = useMutation({
     mutationFn: async (data: { id: string }) => {
       const { id } = data;
-      if (abortControllerRef.current && abortControllerRef.current.signal.aborted === false) {
+      if (
+        abortControllerRef.current &&
+        abortControllerRef.current.signal.aborted === false
+      ) {
         abortControllerRef.current.abort("canceling previous request");
       }
       abortControllerRef.current = new AbortController();
@@ -336,4 +341,4 @@ export function useSnapshotReview<T extends Analysis>(
     };
   }, []);
   return { review, mutation, setReview, pending: mutation.isPending };
-};
+}

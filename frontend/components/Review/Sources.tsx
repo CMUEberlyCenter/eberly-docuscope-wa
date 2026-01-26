@@ -1,16 +1,10 @@
-import {
-  type FC,
-  type HTMLProps,
-  useEffect,
-  useId,
-  useState
-} from "react";
+import { type FC, type HTMLProps, useEffect, useId, useState } from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import {
   type Source,
   type SourcesData,
-  type SourceType
+  type SourceType,
 } from "../../src/lib/ReviewResponse";
 import {
   PreviewCardProps,
@@ -172,9 +166,7 @@ const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
 /** Sources review tool component. */
 export const Sources: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
   const { review, pending } = useReview<SourcesData>("sources");
-  return (
-    <SourcesContent review={review} isPending={pending} {...props} />
-  );
+  return <SourcesContent review={review} isPending={pending} {...props} />;
 };
 
 export const SourcesPreview: FC<PreviewCardProps<SourcesData>> = ({
@@ -187,7 +179,5 @@ export const SourcesPreview: FC<PreviewCardProps<SourcesData>> = ({
     reviewID,
     analysis
   );
-  return (
-    <SourcesContent review={review} isPending={pending} {...props} />
-  );
+  return <SourcesContent review={review} isPending={pending} {...props} />;
 };

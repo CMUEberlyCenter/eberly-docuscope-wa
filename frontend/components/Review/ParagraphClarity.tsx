@@ -1,14 +1,8 @@
-import {
-  type FC,
-  type HTMLProps,
-  useId
-} from "react";
+import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
-import {
-  type ParagraphClarityData
-} from "../../src/lib/ReviewResponse";
+import { type ParagraphClarityData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import { ToolButton } from "../ToolButton/ToolButton";
 import {
@@ -95,13 +89,10 @@ const ParagraphClarityContent: FC<
 export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
-  const { review, pending } = useReview<ParagraphClarityData>("paragraph_clarity");
+  const { review, pending } =
+    useReview<ParagraphClarityData>("paragraph_clarity");
   return (
-    <ParagraphClarityContent
-      review={review}
-      isPending={pending}
-      {...props}
-    />
+    <ParagraphClarityContent review={review} isPending={pending} {...props} />
   );
 };
 
@@ -114,10 +105,6 @@ export const ParagraphClarityPreview: FC<
     analysis
   );
   return (
-    <ParagraphClarityContent
-      review={review}
-      isPending={pending}
-      {...props}
-    />
+    <ParagraphClarityContent review={review} isPending={pending} {...props} />
   );
 };

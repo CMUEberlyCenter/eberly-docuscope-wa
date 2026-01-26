@@ -1,8 +1,4 @@
-import {
-  type FC,
-  type HTMLProps,
-  useId
-} from "react";
+import { type FC, type HTMLProps, useId } from "react";
 import {
   Accordion,
   type AccordionProps,
@@ -13,7 +9,7 @@ import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import {
   type ProfessionalToneData,
-  type ProfessionalToneOutput
+  type ProfessionalToneOutput,
 } from "../../src/lib/ReviewResponse";
 import { ToolButton } from "../ToolButton/ToolButton";
 import {
@@ -140,7 +136,8 @@ const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
 export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
   ...props
 }) => {
-  const { review, pending } = useReview<ProfessionalToneData>("professional_tone");
+  const { review, pending } =
+    useReview<ProfessionalToneData>("professional_tone");
   return <Content review={review} isPending={pending} {...props} />;
 };
 
