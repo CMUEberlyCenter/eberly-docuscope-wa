@@ -16,28 +16,21 @@ import type {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
-import { ErrorBoundary } from "react-error-boundary";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import {
   type Claim as ClaimProps,
-  isErrorData,
   type LinesOfArgumentsData
 } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import {
-  ReviewErrorData
-} from "../ErrorHandler/ErrorHandler";
-import { Loading } from "../Loading/Loading";
-import { Summary } from "../Summary/Summary";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { ToolHeader } from "../ToolHeader/ToolHeader";
 import {
   PreviewCardProps,
-  ReviewReset,
+  ReviewToolCard,
+  ReviewToolContentProps,
   useReview,
   useReviewDispatch,
-  useSnapshotReview,
+  useSnapshotReview
 } from "./ReviewContext";
 
 /** Button component for selecting the Lines Of Arguments tool. */
@@ -170,6 +163,87 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   );
 };
 
+const LinesOfArgumentsContent: FC<ReviewToolContentProps<LinesOfArgumentsData>> = ({
+  review,
+  ...props
+}) => {
+  const { t } = useTranslation("review");
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
+    setCurrent(eventKey);
+  const dispatch = useReviewDispatch();
+  useEffect(() => {
+    if (
+      !current &&
+      review &&
+      "response" in review &&
+      review?.response?.sent_ids
+    ) {
+      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
+    }
+  }, [current, review, dispatch]);
+
+  return (
+    <ReviewToolCard
+      title={t("lines_of_arguments.title")}
+      instructionsKey={"lines_of_arguments"}
+      errorMessage={t("lines_of_arguments.error")}
+      review={review}
+      {...props}
+    >
+      {review && "response" in review ? (
+        <section>
+          <header>
+            <h5 className="text-primary">{t("insights")}</h5>
+            <Translation ns="instructions">
+              {(t) => <p>{t("lines_of_arguments_insights")}</p>}
+            </Translation>
+          </header>
+          <section className="mt-3">
+            {review.response.thesis ? (
+              <div>
+                <h6 className="d-inline">
+                  {t("lines_of_arguments.main")}
+                </h6>{" "}
+                <p
+                  className={classNames(
+                    "d-inline",
+                    !current ? "highlight highlight-0" : ""
+                  )}
+                >
+                  {review.response.thesis}
+                </p>
+              </div>
+            ) : null}
+            {"strategies" in review.response &&
+              Array.isArray(review.response.strategies) ? (
+              <section className="mt-3">
+                <h6>{t("lines_of_arguments.strategies")}</h6>
+                <ul>
+                  {review.response.strategies.map((strat, i) => (
+                    <li key={`loa-strat-${i}`}>{strat}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+            <Claims
+              onSelect={onSelect}
+              activeKey={current}
+              claims={review.response.claims}
+            />
+            {!review.response.thesis &&
+              !review.response.strategies?.length &&
+              !review.response.claims?.length ? (
+              <Alert variant="warning">
+                {t("lines_of_arguments.null")}
+              </Alert>
+            ) : null}
+          </section>
+        </section>
+      ) : null}
+    </ReviewToolCard>
+  );
+};
 /**
  * Component for displaying the results of Lines of Arguments review.
  */
@@ -177,213 +251,31 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props
 }) => {
-  const { t } = useTranslation("review");
   const { review, pending } = useReview<LinesOfArgumentsData>("lines_of_arguments");
-  const [current, setCurrent] = useState<AccordionEventKey>(null);
-  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
-    setCurrent(eventKey);
-  const dispatch = useReviewDispatch();
-  useEffect(() => {
-    if (
-      !current &&
-      review &&
-      "response" in review &&
-      review?.response?.sent_ids
-    ) {
-      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
-    }
-  }, [current, review, dispatch]);
 
   return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1 h-100"
-        )}
-      >
-        <ToolHeader
-          title={t("lines_of_arguments.title")}
-          instructionsKey="lines_of_arguments"
-        />
-        {pending || !review ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("lines_of_arguments.error")}</Alert>
-            }
-          >
-            {/* {review.datetime && (
-            <Card.Subtitle className="text-center">
-              {new Date(review.datetime).toLocaleString()}
-            </Card.Subtitle>
-          )} */}
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            {"response" in review ? (
-              <section>
-                <header>
-                  <h5 className="text-primary">{t("insights")}</h5>
-                  <Translation ns="instructions">
-                    {(t) => <p>{t("lines_of_arguments_insights")}</p>}
-                  </Translation>
-                </header>
-                <section className="mt-3">
-                  {review.response.thesis ? (
-                    <div>
-                      <h6 className="d-inline">
-                        {t("lines_of_arguments.main")}
-                      </h6>{" "}
-                      <p
-                        className={classNames(
-                          "d-inline",
-                          !current ? "highlight highlight-0" : ""
-                        )}
-                      >
-                        {review.response.thesis}
-                      </p>
-                    </div>
-                  ) : null}
-                  {"strategies" in review.response &&
-                    Array.isArray(review.response.strategies) ? (
-                    <section className="mt-3">
-                      <h6>{t("lines_of_arguments.strategies")}</h6>
-                      <ul>
-                        {review.response.strategies.map((strat, i) => (
-                          <li key={`loa-strat-${i}`}>{strat}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-                  <Claims
-                    onSelect={onSelect}
-                    activeKey={current}
-                    claims={review.response.claims}
-                  />
-                  {!review.response.thesis &&
-                    !review.response.strategies?.length &&
-                    !review.response.claims?.length ? (
-                    <Alert variant="warning">
-                      {t("lines_of_arguments.null")}
-                    </Alert>
-                  ) : null}
-                </section>
-              </section>
-            ) : null}
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
+    <LinesOfArgumentsContent
+      isPending={pending}
+      review={review}
+      {...props}
+    />
   );
 };
 
 export const LinesOfArgumentsPreview: FC<
   PreviewCardProps<LinesOfArgumentsData>
 > = ({ className, reviewID, analysis, ...props }) => {
-  const { t } = useTranslation("review");
-  const [current, setCurrent] = useState<AccordionEventKey>(null);
-  const onSelect: AccordionSelectCallback = (eventKey, _event) =>
-    setCurrent(eventKey);
   const { review, pending } = useSnapshotReview<LinesOfArgumentsData>(
     "lines_of_arguments",
     reviewID,
     analysis
   );
-  const dispatch = useReviewDispatch();
-  useEffect(() => {
-    if (
-      !current &&
-      review &&
-      "response" in review &&
-      review?.response?.sent_ids
-    ) {
-      dispatch({ type: "set", sentences: [review.response.sent_ids ?? []] });
-    }
-  }, [current, review, dispatch]);
 
   return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1 h-100"
-        )}
-      >
-        <ToolHeader
-          title={t("lines_of_arguments.title")}
-          instructionsKey="lines_of_arguments"
-        />
-        {pending || !review ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary
-            fallback={
-              <Alert variant="danger">{t("lines_of_arguments.error")}</Alert>
-            }
-          >
-            {/* {review.datetime && (
-            <Card.Subtitle className="text-center">
-              {new Date(review.datetime).toLocaleString()}
-            </Card.Subtitle>
-          )} */}
-            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
-            {"response" in review ? (
-              <section>
-                <header>
-                  <h5 className="text-primary">{t("insights")}</h5>
-                  <Translation ns="instructions">
-                    {(t) => <p>{t("lines_of_arguments_insights")}</p>}
-                  </Translation>
-                </header>
-                <section className="mt-3">
-                  {review.response.thesis ? (
-                    <div>
-                      <h6 className="d-inline">
-                        {t("lines_of_arguments.main")}
-                      </h6>{" "}
-                      <p
-                        className={classNames(
-                          "d-inline",
-                          !current ? "highlight highlight-0" : ""
-                        )}
-                      >
-                        {review.response.thesis}
-                      </p>
-                    </div>
-                  ) : null}
-                  {"strategies" in review.response &&
-                    Array.isArray(review.response.strategies) ? (
-                    <section className="mt-3">
-                      <h6>{t("lines_of_arguments.strategies")}</h6>
-                      <ul>
-                        {review.response.strategies.map((strat, i) => (
-                          <li key={`loa-strat-${i}`}>{strat}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  ) : null}
-                  <Claims
-                    onSelect={onSelect}
-                    activeKey={current}
-                    claims={review.response.claims}
-                  />
-                  {!review.response.thesis &&
-                    !review.response.strategies?.length &&
-                    !review.response.claims?.length ? (
-                    <Alert variant="warning">
-                      {t("lines_of_arguments.null")}
-                    </Alert>
-                  ) : null}
-                </section>
-              </section>
-            ) : null}
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
+    <LinesOfArgumentsContent
+      isPending={pending}
+      review={review}
+      {...props}
+    />
   );
 };

@@ -50,7 +50,7 @@
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.0",
     "@eslint/js": "^9.39.2",
-    "@happy-dom/global-registrator": "^20.3.7",
+    "@happy-dom/global-registrator": "^20.3.9",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
@@ -161,7 +161,7 @@
     "string-format": "^2.0.0",
     "swr": "^2.3.8",
     "vike": "^0.4.252",
-    "vike-react": "^0.6.18",
+    "vike-react": "^0.6.19",
     "vike-react-query": "^0.1.12",
     "yaml": "^2.8.2"
   },
