@@ -1,30 +1,15 @@
-import { useMutation } from "@tanstack/react-query";
-import {
-  type FC,
-  type HTMLProps,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
-import type { Optional } from "../../src";
-import {
-  type LogicalFlowData,
-  type OptionalReviewData,
-} from "../../src/lib/ReviewResponse";
-import type { WritingTask } from "../../src/lib/WritingTask";
+import { type LogicalFlowData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import {
   PreviewCardProps,
   ReviewToolCard,
   ReviewToolContentProps,
+  useReview,
   useReviewDispatch,
   useSnapshotReview,
 } from "./ReviewContext";
@@ -103,65 +88,9 @@ const LogicalFlowContent: FC<ReviewToolContentProps<LogicalFlowData>> = ({
 };
 
 /** Logical Flow review tool component. */
-export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
-  const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
-  const [review, setReview] =
-    useState<OptionalReviewData<LogicalFlowData>>(null); // useLogicalFlowData();
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: {
-      document: string;
-      writing_task: Optional<WritingTask>;
-    }) => {
-      const { document, writing_task } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/logical_flow", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document, writing_task }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: ({ input, data }: { input: string; data: LogicalFlowData }) => {
-      dispatch({ type: "unset" });
-      dispatch({ type: "update", sentences: input });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool: "logical_flow", error });
-      console.error("Error fetching Logical Flow review:", error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  // When the document or writing task changes, fetch a new review
-  useEffect(() => {
-    if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document, writing_task]);
-
-  return (
-    <LogicalFlowContent
-      review={review}
-      isPending={mutation.isPending}
-      {...props}
-    />
-  );
+export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useReview<LogicalFlowData>("logical_flow");
+  return <LogicalFlowContent review={review} isPending={pending} {...props} />;
 };
 
 /** Logical Flow review tool component. */

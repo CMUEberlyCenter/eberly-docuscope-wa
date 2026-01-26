@@ -82,7 +82,7 @@ const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
   );
 };
 /** Ethos review tool component. */
-export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
+export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useReview<CredibilityData>("credibility");
 
   return <CredibilityContent isPending={pending} review={review} {...props} />;

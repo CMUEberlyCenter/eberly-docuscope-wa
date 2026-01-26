@@ -176,10 +176,7 @@ const ProminentTopicsContent: FC<
 };
 
 /** Component for displaying results of Key Ideas review results. */
-export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
-  ...props
-}) => {
+export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } =
     useReview<ProminentTopicsData>("prominent_topics");
 
@@ -190,7 +187,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = ({
 
 export const ProminentTopicsPreview: FC<
   PreviewCardProps<ProminentTopicsData>
-> = ({ className, reviewID, analysis, ...props }) => {
+> = ({ reviewID, analysis, ...props }) => {
   const { review, pending } = useSnapshotReview<ProminentTopicsData>(
     "prominent_topics",
     reviewID,

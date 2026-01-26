@@ -164,7 +164,7 @@ const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
 };
 
 /** Sources review tool component. */
-export const Sources: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
+export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useReview<SourcesData>("sources");
   return <SourcesContent review={review} isPending={pending} {...props} />;
 };

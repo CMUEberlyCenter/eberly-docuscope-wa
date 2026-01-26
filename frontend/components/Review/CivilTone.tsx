@@ -78,7 +78,7 @@ const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
 };
 
 /** Civil Tone review tool component. */
-export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
+export const CivilTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { pending, review } = useReview<CivilToneData>("civil_tone");
 
   return <CivilToneContent isPending={pending} review={review} {...props} />;

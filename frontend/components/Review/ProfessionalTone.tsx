@@ -133,9 +133,7 @@ const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
 };
 
 /** Professional Tone review tool component. */
-export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = ({
-  ...props
-}) => {
+export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } =
     useReview<ProfessionalToneData>("professional_tone");
   return <Content review={review} isPending={pending} {...props} />;

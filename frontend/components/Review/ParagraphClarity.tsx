@@ -86,9 +86,7 @@ const ParagraphClarityContent: FC<
 };
 
 /** Paragraph Clarity review tool component. */
-export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = ({
-  ...props
-}) => {
+export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } =
     useReview<ParagraphClarityData>("paragraph_clarity");
   return (

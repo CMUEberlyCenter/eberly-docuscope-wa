@@ -1,9 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useRef, useState } from "react";
-import { Alert, type ButtonProps } from "react-bootstrap";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import { type FC, type HTMLProps, useEffect, useState } from "react";
+import { type ButtonProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import Icon from "../../assets/icons/sentence_density_icon.svg?react";
 import {
   type ClarityData,
   cleanAndRepairSentenceData,
@@ -11,21 +10,14 @@ import {
 import {
   isErrorData,
   type OnTopicReviewData,
-  type OptionalReviewData,
 } from "../../src/lib/ReviewResponse";
-import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import {
-  checkReviewResponse,
-  ReviewErrorData,
-} from "../ErrorHandler/ErrorHandler";
-import { useFileText } from "../FileUpload/FileTextContext";
-import { Loading } from "../Loading/Loading";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { ToolHeader } from "../ToolHeader/ToolHeader";
 import {
   PreviewCardProps,
-  ReviewReset,
-  useReviewDispatch,
+  ReviewToolCard,
+  ReviewToolContentProps,
+  useOnTopic,
+  useSnapshotOnTopic,
 } from "./ReviewContext";
 import "./Sentences.scss";
 
@@ -59,17 +51,6 @@ export const SentencesButton: FC<ButtonProps> = (props) => {
       tooltip={it("sentence_density_scope_note")}
       icon={<Icon />}
     />
-  );
-};
-
-/** Error feedback component for clarity tool. */
-const ClarityErrorFallback: FC<FallbackProps> = ({ error }) => {
-  const { t } = useTranslation("review");
-  return (
-    <Alert variant="danger">
-      <p>{t("sentences.error")}</p>
-      {error instanceof Error ? <pre>{error.message}</pre> : null}
-    </Alert>
   );
 };
 
@@ -118,81 +99,32 @@ const Legend: FC = () => {
 };
 
 /** Sentences review tool component. */
-export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
+const SentencesContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
+  review,
   ...props
 }) => {
   const { t } = useTranslation("review");
-  const [document] = useFileText();
-  const [data, setData] = useState<OptionalReviewData<OnTopicReviewData>>(null);
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
   const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
   const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
   const [textData, setTextData] = useState<ClarityData | undefined>();
 
-  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
-  // const ontopicProse = useOnTopicProse();
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { document: string }) => {
-      const { document } = data;
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch("/api/v2/review/ontopic", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ document }),
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: OnTopicReviewData) => {
-      setData(data);
-      if (data.response.html)
-        dispatch({ type: "update", sentences: data.response.html });
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-    onError: (error) => {
-      console.error("Error fetching Sentences review:", error);
-      setData({ tool: "ontopic", error });
-    },
-  });
-  useEffect(() => {
-    if (!document) return;
-    // Fetch the review data for Sentences
-    dispatch({ type: "remove" });
-    mutation.mutate({
-      document,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [document]);
-  // useEffect(() => {
-  //   if (ontopicProse) dispatch({ type: "update", sentences: ontopicProse });
-  // }, [ontopicProse]);
-
   useEffect(
     () =>
       setHtmlSentences(
-        !isErrorData(data) ? cleanAndRepairSentenceData(data?.response) : null
+        !isErrorData(review)
+          ? cleanAndRepairSentenceData(review?.response)
+          : null
       ),
-    [data]
+    [review]
   );
 
   useEffect(() => {
     setParagraphIndex(-1);
     setSentenceIndex(-1);
-    setTextData(!isErrorData(data) ? data?.response.clarity : undefined);
-  }, [data]);
+    setTextData(!isErrorData(review) ? review?.response.clarity : undefined);
+  }, [review]);
 
   useEffect(() => {
     if (paragraphIndex < 0 || sentenceIndex < 0) {
@@ -221,318 +153,105 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = ({
   };
 
   return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid sentences overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
-        {!data || mutation.isPending ? (
-          <Loading />
+    <ReviewToolCard
+      title={t("sentences.title")}
+      instructionsKey={"clarity"}
+      errorMessage={t("sentences.error")}
+      review={review}
+      className="sentences"
+      {...props}
+    >
+      <Legend />
+      <div className="py-1 overflow-auto sentence-display mb-1">
+        {sentenceDetails ? (
+          <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
         ) : (
-          <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-            {/* {data.datetime && (
-              <Card.Subtitle className="text-center">
-                {new Date(data.datetime).toLocaleString()}
-              </Card.Subtitle>
-            )} */}
-            {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
-            <Legend />
-            <div className="py-1 overflow-auto sentence-display mb-1">
-              {sentenceDetails ? (
-                <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
-              ) : (
-                <p>{t("sentences.select")}</p>
-              )}
-            </div>
-            {
-              <div className="overflow-auto w-100 h-100">
-                <table className="sentence-data align-middle table-hover w-100">
-                  <tbody>
-                    {textData?.map((sentence, i) =>
-                      typeof sentence === "string" ? (
-                        <tr key={`p${i}`}>
-                          <td className="paragraph-count" colSpan={3}>
-                            &nbsp;
-                          </td>
-                        </tr>
-                      ) : (
-                        <tr
-                          key={`p${sentence.at(0)}-s${sentence.at(1)}`}
-                          className={classNames(
-                            "selectable",
-                            paragraphIndex === sentence.at(0) &&
-                              sentenceIndex === sentence.at(1)
-                              ? "table-active"
-                              : ""
-                          )}
-                          onClick={() =>
-                            onHandleSentence(sentence[0], sentence[1])
-                          }
-                        >
-                          <td className="text-end">
-                            {sentence[2].sent_analysis.NPS.slice(
-                              0,
-                              sentence[2].sent_analysis.L_NPS
-                            ).map((np, j) => (
-                              <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
-                            ))}
-                          </td>
-                          <td className="text-center">
-                            {sentence[2].sent_analysis.BE_VERB ? (
-                              <BeVerbIcon
-                                title={sentence[2].sent_analysis.TOKENS.filter(
-                                  ({ is_root }) => is_root
-                                )
-                                  .map(({ text }) => text)
-                                  .join(" ")}
-                              />
-                            ) : /* there exists a root that is a verb in the sentence Tokens */
-                            sentence[2].sent_analysis.TOKENS.some(
-                                ({ is_root }, i) =>
-                                  is_root &&
-                                  sentence[2].text_w_info.at(i)?.at(0) ===
-                                    "VERB"
-                              ) ? (
-                              <ActiveVerbIcon
-                                title={sentence[2].sent_analysis.TOKENS.filter(
-                                  ({ is_root }) => is_root
-                                )
-                                  .map(({ text }) => text)
-                                  .join(" ")}
-                              />
-                            ) : null}
-                          </td>
-                          <td className="text-start">
-                            {sentence[2].sent_analysis.NPS.slice(
-                              -sentence[2].sent_analysis.R_NPS
-                            ).map((np, j) => (
-                              <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
-                            ))}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            }
-          </ErrorBoundary>
+          <p>{t("sentences.select")}</p>
         )}
-      </article>
-    </ReviewReset>
+      </div>
+      {
+        <div className="overflow-auto w-100 h-100">
+          <table className="sentence-data align-middle table-hover w-100">
+            <tbody>
+              {textData?.map((sentence, i) =>
+                typeof sentence === "string" ? (
+                  <tr key={`p${i}`}>
+                    <td className="paragraph-count" colSpan={3}>
+                      &nbsp;
+                    </td>
+                  </tr>
+                ) : (
+                  <tr
+                    key={`p${sentence.at(0)}-s${sentence.at(1)}`}
+                    className={classNames(
+                      "selectable",
+                      paragraphIndex === sentence.at(0) &&
+                        sentenceIndex === sentence.at(1)
+                        ? "table-active"
+                        : ""
+                    )}
+                    onClick={() => onHandleSentence(sentence[0], sentence[1])}
+                  >
+                    <td className="text-end">
+                      {sentence[2].sent_analysis.NPS.slice(
+                        0,
+                        sentence[2].sent_analysis.L_NPS
+                      ).map((np, j) => (
+                        <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
+                      ))}
+                    </td>
+                    <td className="text-center">
+                      {sentence[2].sent_analysis.BE_VERB ? (
+                        <BeVerbIcon
+                          title={sentence[2].sent_analysis.TOKENS.filter(
+                            ({ is_root }) => is_root
+                          )
+                            .map(({ text }) => text)
+                            .join(" ")}
+                        />
+                      ) : /* there exists a root that is a verb in the sentence Tokens */
+                      sentence[2].sent_analysis.TOKENS.some(
+                          ({ is_root }, i) =>
+                            is_root &&
+                            sentence[2].text_w_info.at(i)?.at(0) === "VERB"
+                        ) ? (
+                        <ActiveVerbIcon
+                          title={sentence[2].sent_analysis.TOKENS.filter(
+                            ({ is_root }) => is_root
+                          )
+                            .map(({ text }) => text)
+                            .join(" ")}
+                        />
+                      ) : null}
+                    </td>
+                    <td className="text-start">
+                      {sentence[2].sent_analysis.NPS.slice(
+                        -sentence[2].sent_analysis.R_NPS
+                      ).map((np, j) => (
+                        <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
+                      ))}
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      }
+    </ReviewToolCard>
   );
 };
 
+export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useOnTopic();
+  return <SentencesContent isPending={pending} review={review} {...props} />;
+};
+
 export const SentencesPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
-  className,
   reviewID,
   analysis,
   ...props
 }) => {
-  const { t } = useTranslation("review");
-  const [data, setData] =
-    useState<OptionalReviewData<OnTopicReviewData>>(analysis);
-  const [paragraphIndex, setParagraphIndex] = useState(-1);
-  const [sentenceIndex, setSentenceIndex] = useState(-1);
-  const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
-  const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
-  const [textData, setTextData] = useState<ClarityData | undefined>();
-
-  // Get the ontopic prose and send it to the context, ReviewContext handles "remove".
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async ({ id }: { id: string }) => {
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/ontopic`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal: abortControllerRef.current.signal,
-      });
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: OnTopicReviewData) => {
-      setData(data);
-      if (data.response.html)
-        dispatch({ type: "update", sentences: data.response.html });
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-    onError: (error) => {
-      console.error("Error fetching Sentences review:", error);
-      setData({ tool: "ontopic", error });
-    },
-  });
-  useEffect(() => {
-    if (!reviewID) return;
-    if (analysis && analysis.tool === "ontopic") {
-      setData(analysis as OptionalReviewData<OnTopicReviewData>);
-      if ("response" in analysis && analysis.response.html) {
-        dispatch({ type: "update", sentences: analysis.response.html });
-      }
-      return;
-    }
-    mutation.mutate({
-      id: reviewID,
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-    };
-  }, [reviewID, analysis]);
-
-  useEffect(
-    () =>
-      setHtmlSentences(
-        !isErrorData(data) ? cleanAndRepairSentenceData(data?.response) : null
-      ),
-    [data]
-  );
-
-  useEffect(() => {
-    setParagraphIndex(-1);
-    setSentenceIndex(-1);
-    setTextData(!isErrorData(data) ? data?.response.clarity : undefined);
-  }, [data]);
-
-  useEffect(() => {
-    if (paragraphIndex < 0 || sentenceIndex < 0) {
-      setSentenceDetails(null);
-    } else {
-      setSentenceDetails(
-        htmlSentences
-          ?.at(paragraphIndex - 1)
-          ?.at(sentenceIndex - 1)
-          ?.replaceAll('\\"', '"') ?? null
-      );
-    }
-  }, [htmlSentences, paragraphIndex, sentenceIndex]);
-
-  const onHandleSentence = (paragraph: number, sentence: number) => {
-    if (paragraph === paragraphIndex && sentence === sentenceIndex) {
-      setParagraphIndex(-1);
-      setSentenceIndex(-1);
-      highlightSentence(-1, -1);
-    } else {
-      highlightSentence(paragraph - 1, sentence - 1);
-      setParagraphIndex(paragraph);
-      setSentenceIndex(sentence);
-    }
-    // TODO text highlighting
-  };
-
-  return (
-    <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid sentences overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
-        <ToolHeader title={t("sentences.title")} instructionsKey="clarity" />
-        {!data || mutation.isPending ? (
-          <Loading />
-        ) : (
-          <ErrorBoundary FallbackComponent={ClarityErrorFallback}>
-            {/* {data.datetime && (
-              <Card.Subtitle className="text-center">
-                {new Date(data.datetime).toLocaleString()}
-              </Card.Subtitle>
-            )} */}
-            {isErrorData(data) ? <ReviewErrorData data={data} /> : null}
-            <Legend />
-            <div className="py-1 overflow-auto sentence-display mb-1">
-              {sentenceDetails ? (
-                <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
-              ) : (
-                <p>{t("sentences.select")}</p>
-              )}
-            </div>
-            {
-              <div className="overflow-auto w-100 h-100">
-                <table className="sentence-data align-middle table-hover w-100">
-                  <tbody>
-                    {textData?.map((sentence, i) =>
-                      typeof sentence === "string" ? (
-                        <tr key={`p${i}`}>
-                          <td className="paragraph-count" colSpan={3}>
-                            &nbsp;
-                          </td>
-                        </tr>
-                      ) : (
-                        <tr
-                          key={`p${sentence.at(0)}-s${sentence.at(1)}`}
-                          className={classNames(
-                            "selectable",
-                            paragraphIndex === sentence.at(0) &&
-                              sentenceIndex === sentence.at(1)
-                              ? "table-active"
-                              : ""
-                          )}
-                          onClick={() =>
-                            onHandleSentence(sentence[0], sentence[1])
-                          }
-                        >
-                          <td className="text-end">
-                            {sentence[2].sent_analysis.NPS.slice(
-                              0,
-                              sentence[2].sent_analysis.L_NPS
-                            ).map((np, j) => (
-                              <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
-                            ))}
-                          </td>
-                          <td className="text-center">
-                            {sentence[2].sent_analysis.BE_VERB ? (
-                              <BeVerbIcon
-                                title={sentence[2].sent_analysis.TOKENS.filter(
-                                  ({ is_root }) => is_root
-                                )
-                                  .map(({ text }) => text)
-                                  .join(" ")}
-                              />
-                            ) : /* there exists a root that is a verb in the sentence Tokens */
-                            sentence[2].sent_analysis.TOKENS.some(
-                                ({ is_root }, i) =>
-                                  is_root &&
-                                  sentence[2].text_w_info.at(i)?.at(0) ===
-                                    "VERB"
-                              ) ? (
-                              <ActiveVerbIcon
-                                title={sentence[2].sent_analysis.TOKENS.filter(
-                                  ({ is_root }) => is_root
-                                )
-                                  .map(({ text }) => text)
-                                  .join(" ")}
-                              />
-                            ) : null}
-                          </td>
-                          <td className="text-start">
-                            {sentence[2].sent_analysis.NPS.slice(
-                              -sentence[2].sent_analysis.R_NPS
-                            ).map((np, j) => (
-                              <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
-                            ))}
-                          </td>
-                        </tr>
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            }
-          </ErrorBoundary>
-        )}
-      </article>
-    </ReviewReset>
-  );
+  const { review, pending } = useSnapshotOnTopic(reviewID, analysis);
+  return <SentencesContent isPending={pending} review={review} {...props} />;
 };

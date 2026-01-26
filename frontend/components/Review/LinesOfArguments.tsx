@@ -236,10 +236,7 @@ const LinesOfArgumentsContent: FC<
 /**
  * Component for displaying the results of Lines of Arguments review.
  */
-export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
-  ...props
-}) => {
+export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } =
     useReview<LinesOfArgumentsData>("lines_of_arguments");
 
@@ -250,7 +247,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = ({
 
 export const LinesOfArgumentsPreview: FC<
   PreviewCardProps<LinesOfArgumentsData>
-> = ({ className, reviewID, analysis, ...props }) => {
+> = ({ reviewID, analysis, ...props }) => {
   const { review, pending } = useSnapshotReview<LinesOfArgumentsData>(
     "lines_of_arguments",
     reviewID,
