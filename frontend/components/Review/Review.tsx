@@ -127,6 +127,10 @@ export const Review: FC = () => {
       false
       /*settings.impressions && isEnabled(writingTask, "impressions")*/
     );
+    // Reset to default tab/tool if writing task or settings change.
+    setTab("big_picture");
+    setTool("null");
+    setOtherTool("null");
   }, [settings, writingTask]);
   useEffect(() => {
     setBigPictureFeature(
