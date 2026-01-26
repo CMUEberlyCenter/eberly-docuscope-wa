@@ -1,6 +1,8 @@
 ---
 document.title: myProse Review
 title: Review
+document.snapshot.title: myProse Snapshot
+snapshot: Snapshot
 select_tool: Select a tool
 tabs:
   big_picture: Big Picture
