@@ -13,12 +13,10 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
+import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import type { ReviewTool } from "../../src/lib/ReviewResponse";
 import { isEnabled } from "../../src/lib/WritingTask";
-import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
 import { useFileText } from "../FileUpload/FileTextContext";
-import { Legal } from "../Legal/Legal";
-import { StageHeader } from "../StageHeader/StageHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone } from "./CivilTone";
 import { Credibility } from "./Credibility";
@@ -170,8 +168,7 @@ export const Review: FC = () => {
   ]);
 
   return (
-    <aside className="my-1 border rounded bg-light d-flex flex-column">
-      <StageHeader title={t("title")} />
+    <>
       {!bigPictureFeature && !fineTuningFeature && (
         <NullTool text={t("null.no_writing_task")} />
       )}
@@ -420,7 +417,6 @@ export const Review: FC = () => {
           </Tab>
         ) : null}
       </Tabs>
-      <Legal />
-    </aside>
+    </>
   );
 };
