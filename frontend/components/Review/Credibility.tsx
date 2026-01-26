@@ -1,13 +1,7 @@
-import {
-  type FC,
-  type HTMLProps,
-  useId
-} from "react";
+import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import {
-  type CredibilityData
-} from "../../src/lib/ReviewResponse";
+import { type CredibilityData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   PreviewCardProps,
@@ -91,13 +85,7 @@ const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
 export const Credibility: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
   const { review, pending } = useReview<CredibilityData>("credibility");
 
-  return (
-    <CredibilityContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
-  );
+  return <CredibilityContent isPending={pending} review={review} {...props} />;
 };
 
 /** Ethos preview tool component. */
@@ -106,13 +94,11 @@ export const CredibilityPreview: FC<PreviewCardProps<CredibilityData>> = ({
   analysis,
   ...props
 }) => {
-  const { review, pending } = useSnapshotReview<CredibilityData>("credibility", reviewID, analysis);
-
-  return (
-    <CredibilityContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
+  const { review, pending } = useSnapshotReview<CredibilityData>(
+    "credibility",
+    reviewID,
+    analysis
   );
+
+  return <CredibilityContent isPending={pending} review={review} {...props} />;
 };

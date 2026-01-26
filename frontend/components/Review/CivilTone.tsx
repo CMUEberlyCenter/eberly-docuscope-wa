@@ -1,13 +1,7 @@
-import {
-  useId,
-  type FC,
-  type HTMLProps
-} from "react";
+import { useId, type FC, type HTMLProps } from "react";
 import { Accordion } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import {
-  type CivilToneData
-} from "../../src/lib/ReviewResponse";
+import { type CivilToneData } from "../../src/lib/ReviewResponse";
 import {
   PreviewCardProps,
   ReviewToolCard,
@@ -87,13 +81,7 @@ const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
 export const CivilTone: FC<HTMLProps<HTMLDivElement>> = ({ ...props }) => {
   const { pending, review } = useReview<CivilToneData>("civil_tone");
 
-  return (
-    <CivilToneContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
-  );
+  return <CivilToneContent isPending={pending} review={review} {...props} />;
 };
 
 /** Civil Tone preview component. */
@@ -108,11 +96,5 @@ export const CivilTonePreview: FC<PreviewCardProps<CivilToneData>> = ({
     analysis
   );
 
-  return (
-    <CivilToneContent
-      isPending={pending}
-      review={review}
-      {...props}
-    />
-  );
+  return <CivilToneContent isPending={pending} review={review} {...props} />;
 };

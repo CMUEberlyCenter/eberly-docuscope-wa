@@ -175,11 +175,5 @@ export const LogicalFlowPreview: FC<PreviewCardProps<LogicalFlowData>> = ({
     reviewID,
     analysis
   );
-  return (
-    <LogicalFlowContent
-      review={review}
-      isPending={pending}
-      {...props}
-    />
-  );
+  return <LogicalFlowContent review={review} isPending={pending} {...props} />;
 };
