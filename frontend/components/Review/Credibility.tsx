@@ -1,22 +1,24 @@
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { type CredibilityData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { CredibilityData } from "../../src/lib/ReviewResponse";
 
-const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
-  review,
-  ...props
-}) => {
+export const {
+  ReviewDataProvider: CredibilityReviewProvider,
+  SnapshotDataProvider: CredibilitySnapshotProvider,
+  useReviewDataContext: useCredibilityReview,
+} = createReviewDataContext<CredibilityData>("credibility");
+
+/** Ethos review tool component. */
+export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
+  const { review, pending } = useCredibilityReview();
   const dispatch = useReviewDispatch();
   const prefix = useId();
   return (
@@ -25,6 +27,7 @@ const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
       instructionsKey={"credibility"}
       errorMessage={t("credibility.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -80,25 +83,4 @@ const CredibilityContent: FC<ReviewToolContentProps<CredibilityData>> = ({
       )}
     </ReviewToolCard>
   );
-};
-/** Ethos review tool component. */
-export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } = useReview<CredibilityData>("credibility");
-
-  return <CredibilityContent isPending={pending} review={review} {...props} />;
-};
-
-/** Ethos preview tool component. */
-export const CredibilityPreview: FC<PreviewCardProps<CredibilityData>> = ({
-  reviewID,
-  analysis,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotReview<CredibilityData>(
-    "credibility",
-    reviewID,
-    analysis
-  );
-
-  return <CredibilityContent isPending={pending} review={review} {...props} />;
 };

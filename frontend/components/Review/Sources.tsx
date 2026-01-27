@@ -3,17 +3,20 @@ import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import {
   type Source,
-  type SourcesData,
+  SourcesData,
   type SourceType,
 } from "../../src/lib/ReviewResponse";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+
+export const {
+  ReviewDataProvider: SourcesReviewProvider,
+  SnapshotDataProvider: SourcesSnapshotProvider,
+  useReviewDataContext: useSourcesReview,
+} = createReviewDataContext<SourcesData>("sources");
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
@@ -49,10 +52,9 @@ const Citations: FC<
   );
 };
 
-const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
-  review,
-  ...props
-}) => {
+/** Sources review tool component. */
+export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useSourcesReview();
   const dispatch = useReviewDispatch();
   const { t } = useTranslation("review");
   const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
@@ -78,6 +80,7 @@ const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
       instructionsKey={"sources"}
       errorMessage="Error loading Sources review."
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -161,23 +164,4 @@ const SourcesContent: FC<ReviewToolContentProps<SourcesData>> = ({
       ) : null}
     </ReviewToolCard>
   );
-};
-
-/** Sources review tool component. */
-export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } = useReview<SourcesData>("sources");
-  return <SourcesContent review={review} isPending={pending} {...props} />;
-};
-
-export const SourcesPreview: FC<PreviewCardProps<SourcesData>> = ({
-  reviewID,
-  analysis,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotReview<SourcesData>(
-    "sources",
-    reviewID,
-    analysis
-  );
-  return <SourcesContent review={review} isPending={pending} {...props} />;
 };

@@ -4,17 +4,20 @@ import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
-import { type ProminentTopicsData } from "../../src/lib/ReviewResponse";
+import { ProminentTopicsData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { ToolButton } from "../ToolButton/ToolButton";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+
+export const {
+  ReviewDataProvider: ProminentTopicsReviewProvider,
+  SnapshotDataProvider: ProminentTopicsSnapshotProvider,
+  useReviewDataContext: useProminentTopicsReview,
+} = createReviewDataContext<ProminentTopicsData>("prominent_topics");
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
@@ -29,9 +32,9 @@ export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
   );
 };
 
-const ProminentTopicsContent: FC<
-  ReviewToolContentProps<ProminentTopicsData>
-> = ({ review, ...props }) => {
+/** Component for displaying results of Key Ideas review results. */
+export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useProminentTopicsReview();
   const { t } = useTranslation("review");
   const dispatch = useReviewDispatch();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
@@ -52,6 +55,7 @@ const ProminentTopicsContent: FC<
       instructionsKey={"prominent_topics"}
       errorMessage={t("prominent_topics.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -172,29 +176,5 @@ const ProminentTopicsContent: FC<
         </section>
       ) : null}
     </ReviewToolCard>
-  );
-};
-
-/** Component for displaying results of Key Ideas review results. */
-export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } =
-    useReview<ProminentTopicsData>("prominent_topics");
-
-  return (
-    <ProminentTopicsContent review={review} isPending={pending} {...props} />
-  );
-};
-
-export const ProminentTopicsPreview: FC<
-  PreviewCardProps<ProminentTopicsData>
-> = ({ reviewID, analysis, ...props }) => {
-  const { review, pending } = useSnapshotReview<ProminentTopicsData>(
-    "prominent_topics",
-    reviewID,
-    analysis
-  );
-
-  return (
-    <ProminentTopicsContent review={review} isPending={pending} {...props} />
   );
 };

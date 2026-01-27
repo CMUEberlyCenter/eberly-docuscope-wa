@@ -1,6 +1,6 @@
 import { FC, HTMLProps, useEffect, useId, useState } from "react";
 import { useFileText } from "../FileUpload/FileTextContext";
-import { useReviewContext } from "../Review/ReviewContext";
+import { useReviewContext } from "../ReviewContext/ReviewContext";
 import "./UserText.scss";
 
 type UserTextProps = HTMLProps<HTMLDivElement>;

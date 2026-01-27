@@ -2,17 +2,20 @@ import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/global_coherence_icon.svg?react";
-import { type LogicalFlowData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { ToolButton } from "../ToolButton/ToolButton";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+import { LogicalFlowData } from "../../src/lib/ReviewResponse";
+
+export const {
+  ReviewDataProvider: LogicalFlowReviewProvider,
+  SnapshotDataProvider: LogicalFlowSnapshotProvider,
+  useReviewDataContext: useLogicalFlowReview,
+} = createReviewDataContext<LogicalFlowData>("logical_flow");
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
@@ -27,10 +30,9 @@ export const LogicalFlowButton: FC<ButtonProps> = (props) => {
   );
 };
 
-const LogicalFlowContent: FC<ReviewToolContentProps<LogicalFlowData>> = ({
-  review,
-  ...props
-}) => {
+/** Logical Flow review tool component. */
+export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useLogicalFlowReview();
   const { t } = useTranslation("review");
   const id = useId();
   const dispatch = useReviewDispatch();
@@ -40,6 +42,7 @@ const LogicalFlowContent: FC<ReviewToolContentProps<LogicalFlowData>> = ({
       instructionsKey={"logical_flow"}
       errorMessage={t("logical_flow.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -85,24 +88,4 @@ const LogicalFlowContent: FC<ReviewToolContentProps<LogicalFlowData>> = ({
       ) : null}
     </ReviewToolCard>
   );
-};
-
-/** Logical Flow review tool component. */
-export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } = useReview<LogicalFlowData>("logical_flow");
-  return <LogicalFlowContent review={review} isPending={pending} {...props} />;
-};
-
-/** Logical Flow review tool component. */
-export const LogicalFlowPreview: FC<PreviewCardProps<LogicalFlowData>> = ({
-  analysis,
-  reviewID,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotReview<LogicalFlowData>(
-    "logical_flow",
-    reviewID,
-    analysis
-  );
-  return <LogicalFlowContent review={review} isPending={pending} {...props} />;
 };

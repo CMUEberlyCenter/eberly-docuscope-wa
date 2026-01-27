@@ -18,19 +18,39 @@ import type { ReviewTool } from "../../src/lib/ReviewResponse";
 import { isEnabled } from "../../src/lib/WritingTask";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { CivilTone } from "./CivilTone";
-import { Credibility } from "./Credibility";
+import { CivilTone, CivilToneReviewProvider } from "./CivilTone";
+import { Credibility, CredibilityReviewProvider } from "./Credibility";
 import { Expectations, ExpectationsButton } from "./Expectations";
-import { LinesOfArguments, LinesOfArgumentsButton } from "./LinesOfArguments";
-import { LogicalFlow, LogicalFlowButton } from "./LogicalFlow";
+import {
+  LinesOfArguments,
+  LinesOfArgumentsButton,
+  LinesOfArgumentsReviewProvider,
+} from "./LinesOfArguments";
+import {
+  LogicalFlow,
+  LogicalFlowButton,
+  LogicalFlowReviewProvider,
+} from "./LogicalFlow";
 import { NullTool } from "./NullTool";
-import { Organization } from "./Organization";
-import { ParagraphClarity, ParagraphClarityButton } from "./ParagraphClarity";
-import { ProfessionalTone, ProfessionalToneButton } from "./ProfessionalTone";
-import { ProminentTopics, ProminentTopicsButton } from "./ProminentTopics";
+import { Organization, OrganizationDataProvider } from "./Organization";
+import {
+  ParagraphClarity,
+  ParagraphClarityButton,
+  ParagraphClarityReviewProvider,
+} from "./ParagraphClarity";
+import {
+  ProfessionalTone,
+  ProfessionalToneButton,
+  ProfessionalToneReviewProvider,
+} from "./ProfessionalTone";
+import {
+  ProminentTopics,
+  ProminentTopicsButton,
+  ProminentTopicsReviewProvider,
+} from "./ProminentTopics";
 import "./Review.scss";
-import { Sentences, SentencesButton } from "./Sentences";
-import { Sources } from "./Sources";
+import { Sentences, SentencesButton, SentencesDataProvider } from "./Sentences";
+import { Sources, SourcesReviewProvider } from "./Sources";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -241,9 +261,21 @@ export const Review: FC = () => {
               <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
                 <Expectations />
               </Activity>
-              {tool === "prominent_topics" && <ProminentTopics />}
-              {tool === "lines_of_arguments" && <LinesOfArguments />}
-              {tool === "logical_flow" && <LogicalFlow />}
+              {tool === "prominent_topics" && (
+                <ProminentTopicsReviewProvider>
+                  <ProminentTopics />
+                </ProminentTopicsReviewProvider>
+              )}
+              {tool === "lines_of_arguments" && (
+                <LinesOfArgumentsReviewProvider>
+                  <LinesOfArguments />
+                </LinesOfArgumentsReviewProvider>
+              )}
+              {tool === "logical_flow" && (
+                <LogicalFlowReviewProvider>
+                  <LogicalFlow />
+                </LogicalFlowReviewProvider>
+              )}
               {/* Add Big Picture tools here. */}
             </div>
           </Tab>
@@ -401,16 +433,44 @@ export const Review: FC = () => {
                 >
                   <NullTool text={t("null.fine_tuning")} />
                 </Activity>
-                {otherTool === "civil_tone" && <CivilTone />}
-                {otherTool === "credibility" && <Credibility />}
+                {otherTool === "civil_tone" && (
+                  <CivilToneReviewProvider>
+                    <CivilTone />
+                  </CivilToneReviewProvider>
+                )}
+                {otherTool === "credibility" && (
+                  <CredibilityReviewProvider>
+                    <Credibility />
+                  </CredibilityReviewProvider>
+                )}
                 {/* {otherTool === "impressions" && ( */}
                 {/* <NullTool text={t("null.not_available")} /> */}
                 {/* )} */}
-                {otherTool === "organization" && <Organization />}
-                {otherTool === "sentences" && <Sentences />}
-                {otherTool === "paragraph_clarity" && <ParagraphClarity />}
-                {otherTool === "professional_tone" && <ProfessionalTone />}
-                {otherTool === "sources" && <Sources />}
+                {otherTool === "organization" && (
+                  <OrganizationDataProvider>
+                    <Organization />
+                  </OrganizationDataProvider>
+                )}
+                {otherTool === "sentences" && (
+                  <SentencesDataProvider>
+                    <Sentences />
+                  </SentencesDataProvider>
+                )}
+                {otherTool === "paragraph_clarity" && (
+                  <ParagraphClarityReviewProvider>
+                    <ParagraphClarity />
+                  </ParagraphClarityReviewProvider>
+                )}
+                {otherTool === "professional_tone" && (
+                  <ProfessionalToneReviewProvider>
+                    <ProfessionalTone />
+                  </ProfessionalToneReviewProvider>
+                )}
+                {otherTool === "sources" && (
+                  <SourcesReviewProvider>
+                    <Sources />
+                  </SourcesReviewProvider>
+                )}
                 {/* Add more tool displays here. */}
               </ErrorBoundary>
             </div>

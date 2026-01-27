@@ -1,29 +1,33 @@
 import { useId, type FC, type HTMLProps } from "react";
 import { Accordion } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { type CivilToneData } from "../../src/lib/ReviewResponse";
+import { CivilToneData } from "../../src/lib/ReviewResponse";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
 
-const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
-  review,
-  ...props
-}) => {
+export const {
+  ReviewDataProvider: CivilToneReviewProvider,
+  SnapshotDataProvider: CivilToneSnapshotProvider,
+  useReviewDataContext: useCivilToneReview,
+} = createReviewDataContext<CivilToneData>("civil_tone");
+
+/** Component for the Civil Tone review tool. */
+export const CivilTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
   const id = useId();
   const dispatch = useReviewDispatch();
+  const { pending, review } = useCivilToneReview();
+
   return (
     <ReviewToolCard
       title={t("civil_tone.title")}
       instructionsKey={"civil_tone"}
       errorMessage={t("civil_tone.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -75,26 +79,4 @@ const CivilToneContent: FC<ReviewToolContentProps<CivilToneData>> = ({
       ) : null}
     </ReviewToolCard>
   );
-};
-
-/** Civil Tone review tool component. */
-export const CivilTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { pending, review } = useReview<CivilToneData>("civil_tone");
-
-  return <CivilToneContent isPending={pending} review={review} {...props} />;
-};
-
-/** Civil Tone preview component. */
-export const CivilTonePreview: FC<PreviewCardProps<CivilToneData>> = ({
-  analysis,
-  reviewID,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotReview<CivilToneData>(
-    "civil_tone",
-    reviewID,
-    analysis
-  );
-
-  return <CivilToneContent isPending={pending} review={review} {...props} />;
 };

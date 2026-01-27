@@ -7,19 +7,16 @@ import {
   type ClarityData,
   cleanAndRepairSentenceData,
 } from "../../src/lib/OnTopicData";
-import {
-  isErrorData,
-  type OnTopicReviewData,
-} from "../../src/lib/ReviewResponse";
+import { isErrorData } from "../../src/lib/ReviewResponse";
+import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
+import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import { ToolButton } from "../ToolButton/ToolButton";
-import {
-  PreviewCardProps,
-  ReviewToolCard,
-  ReviewToolContentProps,
-  useOnTopic,
-  useSnapshotOnTopic,
-} from "./ReviewContext";
 import "./Sentences.scss";
+
+export {
+  OnTopicDataProvider as SentencesDataProvider,
+  OnTopicSnapshotProvider as SentencesSnapshotProvider,
+} from "../ReviewContext/OnTopicDataContext";
 
 /**
  * Add highlight to the specified sentence in a given paragraph.
@@ -99,10 +96,8 @@ const Legend: FC = () => {
 };
 
 /** Sentences review tool component. */
-const SentencesContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
-  review,
-  ...props
-}) => {
+export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
   const [paragraphIndex, setParagraphIndex] = useState(-1);
   const [sentenceIndex, setSentenceIndex] = useState(-1);
@@ -158,6 +153,7 @@ const SentencesContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
       instructionsKey={"clarity"}
       errorMessage={t("sentences.error")}
       review={review}
+      isPending={pending}
       className="sentences"
       {...props}
     >
@@ -240,18 +236,4 @@ const SentencesContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
       }
     </ReviewToolCard>
   );
-};
-
-export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } = useOnTopic();
-  return <SentencesContent isPending={pending} review={review} {...props} />;
-};
-
-export const SentencesPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
-  reviewID,
-  analysis,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotOnTopic(reviewID, analysis);
-  return <SentencesContent isPending={pending} review={review} {...props} />;
 };

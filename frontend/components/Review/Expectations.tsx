@@ -46,7 +46,7 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
-import { ReviewReset, useReviewDispatch } from "./ReviewContext";
+import { ReviewReset, useReviewDispatch } from "../ReviewContext/ReviewContext";
 
 /** Button component to use for selecting the Content Expectations tool. */
 export const ExpectationsButton: FC<ButtonProps> = (props) => {

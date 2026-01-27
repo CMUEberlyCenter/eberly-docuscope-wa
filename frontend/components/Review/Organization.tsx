@@ -42,15 +42,14 @@ import {
   Row,
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { type OnTopicReviewData } from "../../src/lib/ReviewResponse";
+import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
+import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import "./Organization.scss";
-import {
-  PreviewCardProps,
-  ReviewToolCard,
-  ReviewToolContentProps,
-  useOnTopic,
-  useSnapshotOnTopic,
-} from "./ReviewContext";
+
+export {
+  OnTopicDataProvider as OrganizationDataProvider,
+  OnTopicSnapshotProvider as OrganizationSnapshotProvider,
+} from "../ReviewContext/OnTopicDataContext";
 
 DataTable.use(DT);
 
@@ -230,10 +229,9 @@ type SelectedRowCol = {
   sentence?: number;
 } | null;
 
-const OrganizationContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
-  review,
-  ...props
-}) => {
+/** Organization review tool component. */
+export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
   const showToggle = false;
   const [paragraphRange, setParagraphRange] = useState<number[]>([]);
@@ -299,6 +297,7 @@ const OrganizationContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
       instructionsKey={"term_matrix"}
       errorMessage={t("organization.error")}
       review={review}
+      isPending={pending}
       className="organization"
       {...props}
     >
@@ -514,18 +513,4 @@ const OrganizationContent: FC<ReviewToolContentProps<OnTopicReviewData>> = ({
               )} */}
     </ReviewToolCard>
   );
-};
-/** Organization review tool component. */
-export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } = useOnTopic();
-  return <OrganizationContent review={review} isPending={pending} {...props} />;
-};
-
-export const OrganizationPreview: FC<PreviewCardProps<OnTopicReviewData>> = ({
-  reviewID,
-  analysis,
-  ...props
-}) => {
-  const { review, pending } = useSnapshotOnTopic(reviewID, analysis);
-  return <OrganizationContent review={review} isPending={pending} {...props} />;
 };

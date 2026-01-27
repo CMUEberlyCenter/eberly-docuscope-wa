@@ -2,17 +2,20 @@ import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
-import { type ParagraphClarityData } from "../../src/lib/ReviewResponse";
+import { ParagraphClarityData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { ToolButton } from "../ToolButton/ToolButton";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+
+export const {
+  ReviewDataProvider: ParagraphClarityReviewProvider,
+  SnapshotDataProvider: ParagraphClaritySnapshotProvider,
+  useReviewDataContext: useParagraphClarityReview,
+} = createReviewDataContext<ParagraphClarityData>("paragraph_clarity");
 
 /** Button component for selecting the Paragraph Clarity tool. */
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
@@ -27,9 +30,9 @@ export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
   );
 };
 
-const ParagraphClarityContent: FC<
-  ReviewToolContentProps<ParagraphClarityData>
-> = ({ review, ...props }) => {
+/** Paragraph Clarity review tool component. */
+export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useParagraphClarityReview();
   const { t } = useTranslation("review");
   const id = useId();
   const dispatch = useReviewDispatch();
@@ -39,6 +42,7 @@ const ParagraphClarityContent: FC<
       instructionsKey={"paragraph_clarity"}
       errorMessage={t("paragraph_clarity.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       <section>
@@ -82,27 +86,5 @@ const ParagraphClarityContent: FC<
         ) : null}
       </section>
     </ReviewToolCard>
-  );
-};
-
-/** Paragraph Clarity review tool component. */
-export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } =
-    useReview<ParagraphClarityData>("paragraph_clarity");
-  return (
-    <ParagraphClarityContent review={review} isPending={pending} {...props} />
-  );
-};
-
-export const ParagraphClarityPreview: FC<
-  PreviewCardProps<ParagraphClarityData>
-> = ({ reviewID, analysis, ...props }) => {
-  const { review, pending } = useSnapshotReview<ParagraphClarityData>(
-    "paragraph_clarity",
-    reviewID,
-    analysis
-  );
-  return (
-    <ParagraphClarityContent review={review} isPending={pending} {...props} />
   );
 };
