@@ -15,54 +15,61 @@ import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import AdditionalToolsIcon from "../../../assets/icons/additional_tools_icon.svg?react";
-import { CivilTonePreview } from "../../../components/Review/CivilTone";
-import { CredibilityPreview } from "../../../components/Review/Credibility";
+import {
+  CivilTone,
+  CivilToneSnapshotProvider,
+} from "../../../components/Review/CivilTone";
+import {
+  Credibility,
+  CredibilitySnapshotProvider,
+} from "../../../components/Review/Credibility";
 import { ExpectationsButton } from "../../../components/Review/Expectations";
 import {
+  LinesOfArguments,
   LinesOfArgumentsButton,
-  LinesOfArgumentsPreview,
+  LinesOfArgumentsSnapshotProvider,
 } from "../../../components/Review/LinesOfArguments";
 import {
+  LogicalFlow,
   LogicalFlowButton,
-  LogicalFlowPreview,
+  LogicalFlowSnapshotProvider,
 } from "../../../components/Review/LogicalFlow";
 import { NullTool } from "../../../components/Review/NullTool";
-import { OrganizationPreview } from "../../../components/Review/Organization";
 import {
+  Organization,
+  OrganizationSnapshotProvider,
+} from "../../../components/Review/Organization";
+import {
+  ParagraphClarity,
   ParagraphClarityButton,
-  ParagraphClarityPreview,
+  ParagraphClaritySnapshotProvider,
 } from "../../../components/Review/ParagraphClarity";
 import {
+  ProfessionalTone,
   ProfessionalToneButton,
-  ProfessionalTonePreview,
+  ProfessionalToneSnapshotProvider,
 } from "../../../components/Review/ProfessionalTone";
 import {
+  ProminentTopics,
   ProminentTopicsButton,
-  ProminentTopicsPreview,
+  ProminentTopicsSnapshotProvider,
 } from "../../../components/Review/ProminentTopics";
 import "../../../components/Review/Review.scss";
 import {
+  Sentences,
   SentencesButton,
-  SentencesPreview,
+  SentencesSnapshotProvider,
 } from "../../../components/Review/Sentences";
-import { SourcesPreview } from "../../../components/Review/Sources";
 import {
-  Analysis,
-  CivilToneData,
-  CredibilityData,
+  Sources,
+  SourcesSnapshotProvider,
+} from "../../../components/Review/Sources";
+import {
   isExpectationsData,
-  LinesOfArgumentsData,
-  LogicalFlowData,
-  OnTopicReviewData,
-  OptionalReviewData,
-  ParagraphClarityData,
-  ProfessionalToneData,
-  ProminentTopicsData,
   ReviewTool,
-  SourcesData,
 } from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
-import { ExpectationsPreview } from "../components/ExpectationsPreview";
+import { ExpectationsSnapshot } from "../components/ExpectationsSnapshot";
 import { Data } from "./+data";
 
 // tab event keys
@@ -92,11 +99,6 @@ export const Page: FC = () => {
   const disabled = (tool: Tool): boolean => {
     return !tool_config.includes(tool);
   };
-  function getAnalysis<T extends Analysis>(
-    tool: ReviewTool
-  ): OptionalReviewData<T> {
-    return analyses.find((a) => a.tool === tool) as OptionalReviewData<T>;
-  }
   const getExpectations = () => analyses.filter(isExpectationsData);
 
   return (
@@ -150,29 +152,35 @@ export const Page: FC = () => {
             <NullTool text={t("null.big_picture")} />
           </Activity>
           <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
-            <ExpectationsPreview
-              reviewID={reviewID}
+            <ExpectationsSnapshot
+              snapshotId={reviewID}
               analysis={getExpectations()}
               task={task}
             />
           </Activity>
           {tool === "prominent_topics" && (
-            <ProminentTopicsPreview
-              reviewID={reviewID}
-              analysis={getAnalysis<ProminentTopicsData>("prominent_topics")}
-            />
+            <ProminentTopicsSnapshotProvider
+              snapshotId={reviewID}
+              analyses={analyses}
+            >
+              <ProminentTopics />
+            </ProminentTopicsSnapshotProvider>
           )}
           {tool === "lines_of_arguments" && (
-            <LinesOfArgumentsPreview
-              reviewID={reviewID}
-              analysis={getAnalysis<LinesOfArgumentsData>("lines_of_arguments")}
-            />
+            <LinesOfArgumentsSnapshotProvider
+              snapshotId={reviewID}
+              analyses={analyses}
+            >
+              <LinesOfArguments />
+            </LinesOfArgumentsSnapshotProvider>
           )}
           {tool === "logical_flow" && (
-            <LogicalFlowPreview
-              reviewID={reviewID}
-              analysis={getAnalysis<LogicalFlowData>("logical_flow")}
-            />
+            <LogicalFlowSnapshotProvider
+              snapshotId={reviewID}
+              analyses={analyses}
+            >
+              <LogicalFlow />
+            </LogicalFlowSnapshotProvider>
           )}
           {/* Add Big Picture tools here. */}
         </div>
@@ -306,53 +314,63 @@ export const Page: FC = () => {
               <NullTool text={t("null.fine_tuning")} />
             </Activity>
             {secondaryTool === "civil_tone" && (
-              <CivilTonePreview
-                reviewID={reviewID}
-                analysis={getAnalysis<CivilToneData>("civil_tone")}
-              />
+              <CivilToneSnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <CivilTone />
+              </CivilToneSnapshotProvider>
             )}
             {secondaryTool === "credibility" && (
-              <CredibilityPreview
-                reviewID={reviewID}
-                analysis={getAnalysis<CredibilityData>("credibility")}
-              />
+              <CredibilitySnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <Credibility />
+              </CredibilitySnapshotProvider>
             )}
             {/* {secondaryTool === "impressions" && ( */}
             {/* <NullTool text={t("null.not_available")} /> */}
             {/* )} */}
             {secondaryTool === "organization" && (
-              <OrganizationPreview
-                reviewID={reviewID}
-                analysis={getAnalysis<OnTopicReviewData>("ontopic")}
-              />
+              <OrganizationSnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <Organization />
+              </OrganizationSnapshotProvider>
             )}
             {secondaryTool === "sentence_density" && (
-              <SentencesPreview
-                reviewID={reviewID}
-                analysis={getAnalysis<OnTopicReviewData>("ontopic")}
-              />
+              <SentencesSnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <Sentences />
+              </SentencesSnapshotProvider>
             )}
             {secondaryTool === "paragraph_clarity" && (
-              <ParagraphClarityPreview
-                reviewID={reviewID}
-                analysis={getAnalysis<ParagraphClarityData>(
-                  "paragraph_clarity"
-                )}
-              />
+              <ParagraphClaritySnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <ParagraphClarity />
+              </ParagraphClaritySnapshotProvider>
             )}
             {secondaryTool === "professional_tone" && (
-              <ProfessionalTonePreview
-                reviewID={reviewID}
-                analysis={getAnalysis<ProfessionalToneData>(
-                  "professional_tone"
-                )}
-              />
+              <ProfessionalToneSnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <ProfessionalTone />
+              </ProfessionalToneSnapshotProvider>
             )}
             {secondaryTool === "sources" && (
-              <SourcesPreview
-                reviewID={reviewID}
-                analysis={getAnalysis<SourcesData>("sources")}
-              />
+              <SourcesSnapshotProvider
+                snapshotId={reviewID}
+                analyses={analyses}
+              >
+                <Sources />
+              </SourcesSnapshotProvider>
             )}
             {/* Add more tool displays here. */}
           </ErrorBoundary>

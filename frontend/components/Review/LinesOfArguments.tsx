@@ -13,19 +13,22 @@ import type {
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/list_arguments_icon.svg?react";
 import {
+  LinesOfArgumentsData,
   type Claim as ClaimProps,
-  type LinesOfArgumentsData,
 } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import { ToolButton } from "../ToolButton/ToolButton";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+
+export const {
+  ReviewDataProvider: LinesOfArgumentsReviewProvider,
+  SnapshotDataProvider: LinesOfArgumentsSnapshotProvider,
+  useReviewDataContext: useLinesOfArgumentsReview,
+} = createReviewDataContext<LinesOfArgumentsData>("lines_of_arguments");
 
 /** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
@@ -157,10 +160,12 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   );
 };
 
-const LinesOfArgumentsContent: FC<
-  ReviewToolContentProps<LinesOfArgumentsData>
-> = ({ review, ...props }) => {
+/**
+ * Component for displaying the results of Lines of Arguments review.
+ */
+export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
+  const { review, pending } = useLinesOfArgumentsReview();
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = (eventKey, _event) =>
     setCurrent(eventKey);
@@ -182,6 +187,7 @@ const LinesOfArgumentsContent: FC<
       instructionsKey={"lines_of_arguments"}
       errorMessage={t("lines_of_arguments.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -231,30 +237,5 @@ const LinesOfArgumentsContent: FC<
         </section>
       ) : null}
     </ReviewToolCard>
-  );
-};
-/**
- * Component for displaying the results of Lines of Arguments review.
- */
-export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } =
-    useReview<LinesOfArgumentsData>("lines_of_arguments");
-
-  return (
-    <LinesOfArgumentsContent isPending={pending} review={review} {...props} />
-  );
-};
-
-export const LinesOfArgumentsPreview: FC<
-  PreviewCardProps<LinesOfArgumentsData>
-> = ({ reviewID, analysis, ...props }) => {
-  const { review, pending } = useSnapshotReview<LinesOfArgumentsData>(
-    "lines_of_arguments",
-    reviewID,
-    analysis
-  );
-
-  return (
-    <LinesOfArgumentsContent isPending={pending} review={review} {...props} />
   );
 };

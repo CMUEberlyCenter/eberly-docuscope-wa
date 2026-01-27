@@ -8,18 +8,21 @@ import {
 import { Translation, useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/professional_tone_icon.svg?react";
 import {
-  type ProfessionalToneData,
+  ProfessionalToneData,
   type ProfessionalToneOutput,
 } from "../../src/lib/ReviewResponse";
-import { ToolButton } from "../ToolButton/ToolButton";
 import {
-  PreviewCardProps,
   ReviewToolCard,
-  ReviewToolContentProps,
-  useReview,
   useReviewDispatch,
-  useSnapshotReview,
-} from "./ReviewContext";
+} from "../ReviewContext/ReviewContext";
+import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
+import { ToolButton } from "../ToolButton/ToolButton";
+
+export const {
+  ReviewDataProvider: ProfessionalToneReviewProvider,
+  SnapshotDataProvider: ProfessionalToneSnapshotProvider,
+  useReviewDataContext: useProfessionalToneReview,
+} = createReviewDataContext<ProfessionalToneData>("professional_tone");
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
@@ -80,10 +83,9 @@ const SentenceToneIssues: FC<
   );
 };
 
-const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
-  review,
-  ...props
-}) => {
+/** Professional Tone review tool component. */
+export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
+  const { review, pending } = useProfessionalToneReview();
   const { t } = useTranslation("review");
 
   return (
@@ -92,6 +94,7 @@ const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
       instructionsKey={"professional_tone"}
       errorMessage={t("professional_tone.error")}
       review={review}
+      isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
@@ -130,22 +133,4 @@ const Content: FC<ReviewToolContentProps<ProfessionalToneData>> = ({
       ) : null}
     </ReviewToolCard>
   );
-};
-
-/** Professional Tone review tool component. */
-export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
-  const { review, pending } =
-    useReview<ProfessionalToneData>("professional_tone");
-  return <Content review={review} isPending={pending} {...props} />;
-};
-
-export const ProfessionalTonePreview: FC<
-  PreviewCardProps<ProfessionalToneData>
-> = ({ reviewID, analysis, ...props }) => {
-  const { review, pending } = useSnapshotReview<ProfessionalToneData>(
-    "professional_tone",
-    reviewID,
-    analysis
-  );
-  return <Content review={review} isPending={pending} {...props} />;
 };
