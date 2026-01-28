@@ -23,7 +23,11 @@ import {
   Credibility,
   CredibilitySnapshotProvider,
 } from "../../../components/Review/Credibility";
-import { ExpectationsButton } from "../../../components/Review/Expectations";
+import {
+  Expectations,
+  ExpectationsButton,
+  ExpectationSnapshotProvider,
+} from "../../../components/Review/Expectations";
 import {
   LinesOfArguments,
   LinesOfArgumentsButton,
@@ -69,7 +73,6 @@ import {
   ReviewTool,
 } from "../../../src/lib/ReviewResponse";
 import { isEnabled } from "../../../src/lib/WritingTask";
-import { ExpectationsSnapshot } from "../components/ExpectationsSnapshot";
 import { Data } from "./+data";
 
 // tab event keys
@@ -152,11 +155,13 @@ export const Page: FC = () => {
             <NullTool text={t("null.big_picture")} />
           </Activity>
           <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
-            <ExpectationsSnapshot
-              snapshotId={reviewID}
+            <ExpectationSnapshotProvider
+              snapshotID={reviewID}
               analysis={getExpectations()}
               task={task}
-            />
+            >
+              <Expectations />
+            </ExpectationSnapshotProvider>
           </Activity>
           {tool === "prominent_topics" && (
             <ProminentTopicsSnapshotProvider

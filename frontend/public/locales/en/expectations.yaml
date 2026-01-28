@@ -1,7 +1,7 @@
 document.title: myProse Expectations Analysis
 title: Check Content Expectations
 error:
-  no_task: No text type specified!
+  no_task: No content expectations available!
 sentences: 'Sentences:'
 assessment: "What's working:"
 suggestion: 'Suggestion:'

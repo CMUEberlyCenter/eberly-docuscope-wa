@@ -20,7 +20,11 @@ import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone, CivilToneReviewProvider } from "./CivilTone";
 import { Credibility, CredibilityReviewProvider } from "./Credibility";
-import { Expectations, ExpectationsButton } from "./Expectations";
+import {
+  Expectations,
+  ExpectationsButton,
+  ExpectationsDataProvider,
+} from "./Expectations";
 import {
   LinesOfArguments,
   LinesOfArgumentsButton,
@@ -259,7 +263,9 @@ export const Review: FC = () => {
                 <NullTool text={t("null.big_picture")} />
               </Activity>
               <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
-                <Expectations />
+                <ExpectationsDataProvider>
+                  <Expectations />
+                </ExpectationsDataProvider>
               </Activity>
               {tool === "prominent_topics" && (
                 <ProminentTopicsReviewProvider>
