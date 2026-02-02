@@ -21,11 +21,6 @@ metrics.get('/metrics', async (_req: Request, res: Response) => {
   }
 });
 
-export const myproseSessionErrorsTotal = new Counter({
-  name: 'myprose_session_errors_total',
-  help: 'Number of errors in the session store',
-});
-
 const myprosePromptDuration = new Histogram({
   name: 'myprose_prompt_duration_seconds',
   help: 'Duration of the prompt generation',

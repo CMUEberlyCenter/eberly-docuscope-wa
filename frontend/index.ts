@@ -2,7 +2,7 @@
 
 Sets up and starts the expressjs server for handling requests for the myProse application.
 */
-import MongoDBStore from 'connect-mongodb-session';
+import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import express, {
   type NextFunction,
@@ -32,9 +32,9 @@ import {
 import { validateWritingTask } from './src/lib/schemaValidate';
 import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
-import { snapshot } from './src/server/api/snapshot';
 import { reviews } from './src/server/api/reviews';
 import { scribe } from './src/server/api/scribe';
+import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
@@ -44,7 +44,7 @@ import type {
   IdToken,
   LTIPlatform,
 } from './src/server/model/lti';
-import { metrics, myproseSessionErrorsTotal } from './src/server/prometheus';
+import { metrics } from './src/server/prometheus';
 import {
   ADMIN_PASSWORD,
   LTI_DB,
@@ -364,22 +364,13 @@ async function __main__() {
     app.use(cors());
 
     // Setup sessions
-    const MongoDBSessionStore = MongoDBStore(session);
-    const store = new MongoDBSessionStore({
-      uri: MONGO_CLIENT,
-      collection: 'sessions',
-    });
-    store.on('error', (err) => {
-      console.error(err);
-      myproseSessionErrorsTotal.inc({ error: err.message });
-    });
     app.use(
       session({
-        secret: SESSION_KEY,
-        store,
+        cookie: { secure: 'auto' },
         resave: false,
         saveUninitialized: false,
-        cookie: { secure: 'auto' },
+        secret: SESSION_KEY,
+        store: MongoStore.create({ mongoUrl: MONGO_CLIENT }),
       })
     );
     // Configure i18n middleware
