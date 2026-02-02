@@ -11,8 +11,8 @@ import {
 import escapeHtml from 'escape-html';
 import { type Descendant, Node as SlateNode, Text } from 'slate';
 import { jsx } from 'slate-hyperscript';
-import type { WritingTask } from '../../lib/WritingTask';
-import type { CustomElement, CustomText, ListElement } from '../../slate';
+import type { WritingTask } from './WritingTask';
+import type { CustomElement, CustomText, ListElement } from '../slate';
 
 /**
  * Convert editor's Descendants to a string with double newline between

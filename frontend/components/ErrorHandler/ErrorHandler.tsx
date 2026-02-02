@@ -3,7 +3,7 @@ import { Alert, type AlertProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Optional } from "../../src";
 import type { ErrorData } from "../../src/lib/ReviewResponse";
-import { ToolResult } from "../../src/app/lib/ToolResults";
+import { ToolResult } from "../../src/lib/ToolResults";
 
 class InputTooLargeError extends Error {}
 class ServiceUnavailableError extends Error {}

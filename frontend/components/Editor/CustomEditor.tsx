@@ -23,7 +23,7 @@ import {
   deserializeHtmlText,
   serialize,
   serializeDocx,
-} from "../../src/app/lib/slate";
+} from "../../src/lib/slate";
 import { FileDownload } from "../FileDownload/FileDownload";
 import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";

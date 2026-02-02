@@ -23,12 +23,8 @@ import { usePageContext } from "vike-react/usePageContext";
 import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "../../assets/icons/Highlight.svg?react";
-import { serialize, serializeHtml } from "../../src/app/lib/slate";
-import type {
-  SelectedText,
-  Tool,
-  ToolResult,
-} from "../../src/app/lib/ToolResults";
+import { serialize, serializeHtml } from "../../src/lib/slate";
+import type { SelectedText, Tool, ToolResult } from "../../src/lib/ToolResults";
 import { NotesRequest } from "../../src/lib/Requests";
 import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";

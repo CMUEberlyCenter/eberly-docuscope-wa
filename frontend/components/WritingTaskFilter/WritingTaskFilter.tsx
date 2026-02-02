@@ -13,13 +13,13 @@ import {
 } from "react";
 import { Button, FloatingLabel, Form, InputGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 import {
   extractKeywords,
   groupByCategory,
   hasKeywords,
   type WritingTask,
 } from "../../src/lib/WritingTask";
-import FilterIcon from "../../assets/icons/filter_icon.svg?react";
 
 const sep = ":";
 const hasPrefix = (prefix: string, key: string) =>
@@ -123,7 +123,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
   const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
 
   useEffect(() => {
-    const ftasks =
+    update?.(
       tasks
         ?.filter(
           (task) =>
@@ -140,8 +140,8 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
           if (task.rules.name.toLowerCase().includes(term)) return true;
           if (task.rules.overview.toLowerCase().includes(term)) return true;
           return false;
-        }) ?? [];
-    update?.(ftasks);
+        }) ?? []
+    );
   }, [tasks, activeKeywords, search, update]);
 
   const selectAll = useCallback(

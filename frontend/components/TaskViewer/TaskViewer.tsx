@@ -21,7 +21,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { isWritingTask, type WritingTask } from "../../src/lib/WritingTask";
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
-import { useWritingTasks } from "../../src/app/service/writing-task.service";
+import { useWritingTasks } from "../../src/service/writing-task.service";
 import {
   useSetWritingTask,
   useWritingTask,

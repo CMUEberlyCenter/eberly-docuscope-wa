@@ -1,4 +1,4 @@
-import { type Descendant, Range } from 'slate';
+import type { Descendant, Range } from 'slate';
 
 export interface SelectedText {
   text: string;

@@ -18,14 +18,10 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Transforms } from "slate";
-import { useSlate } from "slate-react";
+import { useWritingTasks } from "../../src/service/writing-task.service";
 import { type WritingTask, isWritingTask } from "../../src/lib/WritingTask";
-import {
-  taskToClipboard,
-  taskToEditor,
-  useWritingTasks,
-} from "../../src/app/service/writing-task.service";
+import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
+import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
 import {
   useSetWritingTask,
   useWritingTask,
@@ -90,13 +86,6 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
     setWritingTask({ task: selected });
     hide();
   }, [hide, selected]);
-  const editor = useSlate();
-  const insert = useCallback(() => {
-    if (selected) {
-      Transforms.insertNodes(editor, taskToEditor(selected, includeDetails));
-      commit();
-    }
-  }, [editor, selected, includeDetails, commit]);
 
   return (
     <Modal show={show} onHide={hide} size="xl" {...props}>
@@ -178,20 +167,19 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
             checked={includeDetails}
             onChange={() => setIncludeDetails(!includeDetails)}
           />
-          <Button
+          <CopyTaskToClipboardButton
             variant="secondary"
-            disabled={!selected}
-            onClick={async () =>
-              await navigator.clipboard.writeText(
-                taskToClipboard(selected, includeDetails)
-              )
-            }
+            task={selected}
+            includeDetails={includeDetails}
+          />
+          <CopyTaskToEditorButton
+            variant="secondary"
+            onClick={commit}
+            task={selected}
+            includeDetails={includeDetails}
           >
-            {t("clipboard")}
-          </Button>
-          <Button variant="secondary" disabled={!selected} onClick={insert}>
             {t("select_insert")}
-          </Button>
+          </CopyTaskToEditorButton>
           <Button variant="primary" disabled={!selected} onClick={commit}>
             {t("select")}
           </Button>

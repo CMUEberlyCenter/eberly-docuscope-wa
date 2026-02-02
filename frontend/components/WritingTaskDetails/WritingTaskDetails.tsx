@@ -1,14 +1,10 @@
-import { type FC, useCallback, useState } from "react";
-import { Button, Form, Modal, type ModalProps } from "react-bootstrap";
+import { type FC, useState } from "react";
+import { Form, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Transforms } from "slate";
-import { useSlate } from "slate-react";
 import type { Optional } from "../../src";
 import type { WritingTask } from "../../src/lib/WritingTask";
-import {
-  taskToClipboard,
-  taskToEditor,
-} from "../../src/app/service/writing-task.service";
+import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
+import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 
@@ -20,15 +16,6 @@ const WritingTaskDetails: FC<
 > = ({ show, onHide, writingTask, ...props }) => {
   const { t } = useTranslation();
   const [includeDetails, setIncludeDetails] = useState(false);
-  const editor = useSlate();
-  const insert = useCallback(() => {
-    if (writingTask) {
-      Transforms.insertNodes(editor, taskToEditor(writingTask, includeDetails));
-      if (onHide) {
-        onHide();
-      }
-    }
-  }, [editor, writingTask, includeDetails, onHide]);
 
   return (
     <Modal show={show} onHide={onHide} size="lg" {...props}>
@@ -51,20 +38,20 @@ const WritingTaskDetails: FC<
           checked={includeDetails}
           onChange={() => setIncludeDetails(!includeDetails)}
         />
-        <Button
+        <CopyTaskToClipboardButton
           variant="secondary"
-          disabled={!writingTask}
-          onClick={async () =>
-            await navigator.clipboard.writeText(
-              taskToClipboard(writingTask ?? null, includeDetails)
-            )
-          }
+          task={writingTask}
+          includeDetails={includeDetails}
+        />
+        <CopyTaskToEditorButton
+          variant="primary"
+          task={writingTask}
+          includeDetails={includeDetails}
+          onClick={onHide}
         >
-          {t("clipboard")}
-        </Button>
-        <Button variant="primary" disabled={!writingTask} onClick={insert}>
+          {/* <Button variant="primary" disabled={!writingTask} onClick={insert}> */}
           {t("details.insert")}
-        </Button>
+        </CopyTaskToEditorButton>
       </Modal.Footer>
     </Modal>
   );
