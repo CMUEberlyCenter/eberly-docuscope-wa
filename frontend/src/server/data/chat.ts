@@ -5,7 +5,7 @@ import type {
 } from '@anthropic-ai/sdk/resources/index.mjs';
 import { parse } from 'node-html-parser';
 import format from 'string-format';
-import { ChatStopError } from '../../lib/ProblemDetails';
+import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
 import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
 import type { PromptType } from '../model/prompt';
 import {
@@ -44,7 +44,7 @@ export async function doChat<T>(
   cache?: boolean
 ) {
   if (!ANTHROPIC_API_KEY) {
-    throw new Error('No LLM configured.'); // should this be 502?
+    throw new GatewayError('No LLM configured.'); // should this be 502?
   }
   const started = new Date();
   const template = await findPromptById(key);

@@ -196,7 +196,8 @@ export const handleError = (
   }
   if (err instanceof APIError) {
     if (err.error?.response?.status === 400) {
-      return response.status(500).json(InternalServerError(err));
+      // 400 can be used as a generic API error from Claude
+      return response.status(503).json(ServiceUnavailable(err));
     }
     if (err.error?.response?.status === 413) {
       return response.status(413).json(ContentTooLarge(err));
