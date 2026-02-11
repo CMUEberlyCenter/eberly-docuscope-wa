@@ -6,6 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
+import { convertToHtml } from "mammoth";
 import { Activity, ChangeEvent, FC, useEffect, useState } from "react";
 import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -16,6 +17,7 @@ import { MyProseLinks } from "../../../../components/MyProseLinks/MyProseLinks";
 import { WritingTaskFilter } from "../../../../components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../../../../components/WritingTaskInfo/WritingTaskInfo";
 import { validateWritingTask } from "../../../../src/lib/schemaValidate";
+import { checkWordCount } from "../../../../src/lib/ToolSettings";
 import {
   type DbWritingTask,
   isEnabled,
@@ -23,8 +25,6 @@ import {
   WritingTask,
 } from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
-import { convertToHtml } from "mammoth";
-import { checkWordCount } from "../../../../src/lib/ToolSettings";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -57,11 +57,30 @@ export const Page: FC = () => {
         setValid(false);
         setError(JSON.stringify(validateWritingTask.errors));
       } else if (isWritingTask(json)) {
+        const response = await fetch(
+          new URL("/api/v2/writing_tasks", location.href),
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(json),
+          }
+        );
+        if (!response.ok) {
+          setValid(false);
+          setError(await response.text());
+          return;
+        }
         setValid(true);
-        json.info.id = undefined; // ensure no id for uploaded task
-        json.public = false; // ensure private for uploaded task
-        setCustom(json);
-        setSelected(json);
+        const id = await response.text();
+        const custom = {
+          ...json,
+          _id: id,
+          info: { ...json.info, id },
+          public: false,
+        };
+        setCustom(custom);
+        setSelected(custom);
       } else {
         setValid(false);
         setError(t("select_task.invalid_upload"));
