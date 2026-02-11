@@ -52,8 +52,6 @@ export const Rating: FC<RatingProps> = ({
               percent = 100;
             } else if (i - fullSymbols === 0) {
               percent = (rating - i) * 100;
-            } else {
-              percent = 0;
             }
             return (
               <span key={`rating-${i}`} className="position-relative">
