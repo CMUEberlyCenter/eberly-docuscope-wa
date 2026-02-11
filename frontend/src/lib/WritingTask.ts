@@ -317,7 +317,7 @@ export type WritingTask = {
   public?: boolean;
 };
 
-export type DbWritingTask = WritingTask & { _id?: string };
+export type DbWritingTask = WritingTask & { _id?: string; modified?: string };
 
 /** Type guard for WritingTask. */
 export function isWritingTask(

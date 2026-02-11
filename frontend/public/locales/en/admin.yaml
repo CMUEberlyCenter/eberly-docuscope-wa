@@ -62,3 +62,16 @@ genlink:
   existing_snapshots: Existing Snapshots
   delete_snapshot: Delete Snapshot
   refresh_snapshot: Clear analysis cache
+writing_tasks:
+  tab: Writing Tasks
+  title: Writing Tasks Management
+  public:
+    title: Public Tasks
+    description: These tasks are visible to all users.
+  private:
+    title: Private Tasks
+    description: These tasks are not listed in the public task list.
+    version: "Version: {{version}}"
+    saved: "Saved: {{saved}}"
+    uploaded: "Uploaded: {{uploaded}}"
+    main: View

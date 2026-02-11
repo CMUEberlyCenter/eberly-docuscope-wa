@@ -233,7 +233,37 @@ export async function insertWritingTask(
 }
 
 /**
- * Generate the public writing task specifications.
+ * Generator for retrieving the private writing task specifications.
+ * @returns writing tasks where the public attribute is false. These are typically custom or in development tasks.
+ */
+async function* generateAllPrivateWritingTasks(): AsyncGenerator<DbWritingTask> {
+  try {
+    const collection = client
+      .db(MONGO_DB)
+      .collection<DbWritingTask>(WRITING_TASKS);
+    const cursor = collection.find<DbWritingTask>(
+      { public: false },
+      { projection: { path: 0 } }
+    );
+    for await (const doc of cursor) {
+      yield doc;
+    }
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+}
+
+/**
+ * Retrieve the list of private writing task specifications. These are typically outdated, custom, or in development tasks.
+ * @returns Array of writing tasks where the public attribute is false.
+ */
+export async function findAllPrivateWritingTasks(): Promise<DbWritingTask[]> {
+  return Array.fromAsync(generateAllPrivateWritingTasks());
+}
+
+/**
+ * Generator for retrieving the public writing task specifications.
  * This is used for populating writing task selections for publicly
  * facing versions.
  * @returns writing tasks where the public attribute is true.

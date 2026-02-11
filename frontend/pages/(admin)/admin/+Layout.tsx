@@ -23,6 +23,9 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
                 {t("performance.tab")}
               </Nav.Link>
               <Nav.Link href="/admin/genlink">{t("genlink.tab")}</Nav.Link>
+              <Nav.Link href="/admin/writing_tasks">
+                {t("writing_tasks.tab")}
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>
