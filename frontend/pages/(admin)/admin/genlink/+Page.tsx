@@ -257,6 +257,7 @@ export const Page: FC = () => {
               action={"/api/v2/snapshot"}
               encType="multipart/form-data"
               target="_blank"
+              onSubmit={() => setTimeout(() => window.location.reload(), 100)}
             >
               <input
                 type="hidden"
