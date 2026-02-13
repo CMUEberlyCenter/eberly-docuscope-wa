@@ -127,8 +127,9 @@ error:
     bullets: It seems that the notes you intended to provide are missing. Please share the notes so I can assist you in transforming them into a readable list.
     default: No text is selected. Highlight text first.
   no_results: No valid results.
-  unknown_error: An error occurred.
+  unknown_error: "An error occurred."
   too_large: The input text is too large to process. Please reduce the length of your selected text and try again.
+  too_large_selection: The selected text is too large to process, {{count}} words. Please reduce the length of your selection to less than {{maxCount}} words and try again.
   service_unavailable: The service is currently unavailable. Please try again later.
 select_task:
   title: Select Writing Type

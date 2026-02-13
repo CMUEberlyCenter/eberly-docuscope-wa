@@ -132,6 +132,45 @@ const ToolCard = forwardRef<HTMLDivElement, ToolCardProps>(
       (tool: Tool) => {
         if (editor.selection) {
           const fragment = Editor.fragment(editor, editor.selection);
+          const text = serialize(fragment);
+          const wordCount = [
+            ...new Intl.Segmenter(undefined, { granularity: "word" }).segment(
+              text
+            ),
+          ].filter((segment) => segment.isWordLike).length;
+          if (wordCount === 0) {
+            // error task, do not add to history
+            setCurrentTool({
+              tool,
+              datetime: new Date(),
+              input: {
+                text: "",
+              },
+              result: null,
+              error: new NoSelectedTextError(t("error.no_selection.default")),
+            });
+            return;
+          }
+          if (wordCount > 10) {
+            setCurrentTool({
+              tool,
+              datetime: new Date(),
+              input: {
+                text: serialize(fragment),
+                html: serializeHtml(fragment),
+                fragment: fragment,
+                range: editor.selection,
+              },
+              result: null,
+              error: new NoSelectedTextError(
+                t("error.too_large_selection", {
+                  count: wordCount,
+                  maxCount: 10,
+                })
+              ),
+            });
+            return;
+          }
           doTool({
             tool,
             datetime: new Date(),

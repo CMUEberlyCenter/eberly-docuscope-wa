@@ -48,11 +48,10 @@ export const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
   if (tool.error instanceof ServiceUnavailableError) {
     return <Alert variant="warning">{t("error.service_unavailable")}</Alert>;
   }
-  return (
-    <Alert variant="warning">
-      {t("error.unknown_error")}: {tool.error.message}
-    </Alert>
-  );
+  if (tool.error instanceof Error && tool.error.message) {
+    return <Alert variant="warning">{tool.error.message}</Alert>;
+  }
+  return <Alert variant="warning">{t("error.unknown_error")}</Alert>;
 };
 
 /**
