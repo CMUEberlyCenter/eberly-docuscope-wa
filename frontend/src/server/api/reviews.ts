@@ -240,8 +240,9 @@ reviews.post(
     const { response: chat_response, finished: datetime } = chat;
     if (!chat_response) throw new Error(`NULL results for ${expectation}`);
     if (!isExpectationsOutput(chat_response)) {
-      console.error(`Malformed results for ${expectation}`, chat_response);
-      throw new Error(`Malformed results for ${expectation}`);
+      throw new Error(`Malformed results for ${expectation}`, {
+        cause: chat_response,
+      });
     }
     const data: ExpectationsData = {
       tool: 'expectations',
@@ -292,7 +293,6 @@ reviews.post(
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find((a) => a.tool === analysis);
     if (cached) {
-      // console.log(`Returning cached analysis for ${analysis}`);
       response.json({ input: request.session.segmented, data: cached });
       return;
     }

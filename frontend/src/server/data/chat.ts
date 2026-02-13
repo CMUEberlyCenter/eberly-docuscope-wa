@@ -7,6 +7,7 @@ import { parse } from 'node-html-parser';
 import format from 'string-format';
 import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
 import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
+import { logger } from '../logger';
 import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
@@ -49,13 +50,11 @@ export async function doChat<T>(
   const started = new Date();
   const template = await findPromptById(key);
   if (!template) {
-    console.error(`${key} is not a valid template.`);
     throw new ReferenceError(`${key} template not found.`);
   }
   const { prompt, role, temperature } = template;
   if (!prompt) {
-    console.error(`Missing prompt for ${key} template.`);
-    throw new Error(`Malformed prompt for ${key}.`);
+    throw new Error(`Malformed prompt for ${key}.`, { cause: template });
   }
   const content = format(prompt, data);
   let response: string | T = '';
@@ -69,7 +68,6 @@ export async function doChat<T>(
   if (cache) {
     const inputTemplate = await findPromptById('input_text');
     if (!inputTemplate) {
-      console.error('Unable to locate input_text template.');
       throw new ReferenceError('Unable to locate input_text template.');
     }
     const text_cache: TextBlockParam = {
@@ -116,10 +114,6 @@ export async function doChat<T>(
   if (chat.type !== 'message') {
     // This likely should be in catch
     const err = chat as unknown as ErrorMessage; // typescript hack
-    console.error(
-      `Error response from ${chat.model} for request ${chat._request_id}`
-    );
-    console.error(chat);
     throw new Error(err.error.message, { cause: chat });
   }
   if (chat.stop_reason) {
@@ -139,14 +133,16 @@ export async function doChat<T>(
       case 'pause_turn':
         break;
       default:
-        console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+        logger.warn(`Unhandled stop reason: ${chat.stop_reason}`, {
+          cause: chat,
+        });
     }
   }
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
   } else {
-    console.warn(resp);
+    logger.warn(resp);
   }
   try {
     if (json) {

@@ -16,5 +16,6 @@ i18n
       loadPath: '/locales/{{lng}}/{{ns}}.yaml',
       parse: (data: string) => parse(data),
     },
+    showSupportNotice: false,
   });
 export default i18n;

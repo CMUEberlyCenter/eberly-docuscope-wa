@@ -208,11 +208,9 @@ snapshot.get(
         `NULL chat response for expectation ${index}: ${target.name}`
       );
     if (!isExpectationsOutput(chat_response)) {
-      console.error(
-        `Malformed results for ${index}: ${target.name}`,
-        chat_response
-      );
-      throw new Error(`Malformed results for ${index}: ${target.name}`);
+      throw new Error(`Malformed results for ${index}: ${target.name}`, {
+        cause: chat_response,
+      });
     }
     const data: ExpectationsData = {
       tool: 'expectations',

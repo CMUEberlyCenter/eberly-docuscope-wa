@@ -1,3 +1,4 @@
+import { GatewayError } from '../../lib/ProblemDetails';
 import { SEGMENT_URL } from '../settings';
 
 /**
@@ -18,10 +19,10 @@ export const segmentText = async (text: string): Promise<string> => {
     },
   });
   if (!res.ok) {
-    console.error(
-      `Bad response from segment: ${res.status} - ${res.statusText} - ${await res.text()}`
+    throw new GatewayError(
+      `Bad service response from 'segment': ${res.status} - ${res.statusText} - ${await res.text()}`,
+      { cause: res.statusText }
     );
-    throw new Error(`Bad service response from 'segment': ${res.status}`);
   }
   const data = (await res.json()) as string;
   return data.trim();

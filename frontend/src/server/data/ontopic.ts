@@ -27,13 +27,13 @@ export const doOnTopic = async (
     signal,
   });
   if (!res.ok) {
-    console.error(
-      `Bad response from ontopic: ${res.status} - ${res.statusText} - ${await res.text()}`
-    );
     // TODO check for response codes and throw specific errors.
-    throw new GatewayError(`onTopic Response status: ${res.status}`, {
-      cause: res.statusText,
-    });
+    throw new GatewayError(
+      `onTopic Response status: ${res.status} - ${res.statusText} - ${await res.text()}`,
+      {
+        cause: res.statusText,
+      }
+    );
   }
   const data = (await res.json()) as OnTopicData;
   return {

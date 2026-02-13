@@ -3,7 +3,8 @@ import {
   APIError,
   APIUserAbortError,
 } from '@anthropic-ai/sdk';
-import type { Request, Response, NextFunction } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import { logger } from '../server/logger';
 
 /* Type declaration for RFC-9457 problem details */
 type ProblemDetails<Details = string> = {
@@ -165,6 +166,8 @@ export const handleError = (
   response: Response,
   _next: NextFunction
 ) => {
+  // Log the error for debugging purposes.
+  logger.error(`Error occurred: ${err.message}`, err);
   if (err instanceof BadRequestError) {
     return response.status(400).json(BadRequest(err));
   }
@@ -215,6 +218,6 @@ export const handleError = (
   if (err instanceof ChatStopError) {
     return response.status(503).json(ServiceUnavailable(err));
   }
-  console.error('Unhandled error:', err);
+  logger.error(`Unhandled error: ${err.message}`, err);
   return response.status(500).json(InternalServerError(err));
 };

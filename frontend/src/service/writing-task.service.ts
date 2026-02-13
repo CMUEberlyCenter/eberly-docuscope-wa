@@ -1,6 +1,8 @@
 import useSWR from 'swr';
 import type { WritingTask } from '../lib/WritingTask';
 
+// Client-side service for fetching writing tasks from the backend API.
+
 // TODO: add lti token/session
 async function fetcher<T>(
   input: RequestInfo | URL,

@@ -1,5 +1,6 @@
 import { type Request, type Response, Router } from 'express';
 import { InternalServerError } from '../../lib/ProblemDetails';
+import { logger } from '../logger';
 import { ONTOPIC_URL } from '../settings';
 
 export const ontopic = Router();
@@ -16,7 +17,7 @@ ontopic.post('/', async (request: Request, response: Response) => {
       },
     });
     if (!res.ok) {
-      console.error(
+      logger.error(
         `Bad response from ontopic: ${res.status} - ${res.statusText}`
       );
       // forward bad response.
@@ -27,7 +28,7 @@ ontopic.post('/', async (request: Request, response: Response) => {
 
     response.json(ret);
   } catch (err) {
-    console.error(err);
+    logger.error(err);
     response.status(500).send(InternalServerError(err));
   }
 });

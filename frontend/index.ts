@@ -39,6 +39,7 @@ import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
 import { watchSettings } from './src/server/getSettings';
+import { logger } from './src/server/logger';
 import type {
   ContentItemType,
   IdToken,
@@ -46,7 +47,6 @@ import type {
 } from './src/server/model/lti';
 import { metrics } from './src/server/prometheus';
 import {
-  ADMIN_PASSWORD,
   LTI_DB,
   LTI_HOSTNAME,
   LTI_KEY,
@@ -70,9 +70,11 @@ const root = __dirname;
 const PUBLIC = __dirname;
 
 async function __main__() {
-  console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
+  logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDatabase = await initDatabase();
-  console.log('Database service initialized, ok to start listening ...');
+  logger.info('Database service initialized, ok to start listening ...', {
+    status: 'db_ready',
+  });
   // Initialize and watch prompts
   const shutdownPrompts = await initPrompts();
   // watch interface settings file
@@ -335,13 +337,14 @@ async function __main__() {
           const content = await readFile(path, { encoding: 'utf8' });
           const json = JSON.parse(content) as LTIPlatform;
           await Provider.registerPlatform(json);
-          console.log(
-            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`
+          logger.info(
+            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
+            { platformId: json.clientId, url: json.url, path }
           );
         }
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     } finally {
       const platforms = await Provider.getAllPlatforms();
       platforms.forEach(async (platform) => {
@@ -349,9 +352,9 @@ async function __main__() {
         const name = await platform.platformName();
         const url = await platform.platformUrl();
         const active = await platform.platformActive();
-        console.log('Registered platforms:');
-        console.log(
-          `${active ? '+' : 'o'} Platform: ${name} (${platformId}), URL: ${url}, Active: ${active}`
+        logger.info(
+          `LTI Registered platform: ${active ? '+' : 'o'} ${name} (${platformId}), URL: ${url}, Active: ${active}`,
+          { platformId, name, url, active }
         );
       });
     }
@@ -405,7 +408,7 @@ async function __main__() {
     app.use(handle(i18n));
 
     if (process.env.NODE_ENV === 'production') {
-      console.log('Production mode');
+      logger.info('Production mode', { mode: 'production' });
       app.use(express.static(join(root, 'dist', 'client')));
     } else {
       const vike = await import('vike/server');
@@ -489,7 +492,7 @@ async function __main__() {
             'Error rendering page:',
             pageContext.errorWhileRendering
           );
-          return next(new Error(`$${pageContext.errorWhileRendering}`));
+          // return next(new Error(`$${pageContext.errorWhileRendering}`));
         }
         const { httpResponse } = pageContext;
         if (!httpResponse) {
@@ -510,14 +513,16 @@ async function __main__() {
     // Global error handler/formatter
     app.use(handleError);
 
-    const server = app.listen(PORT, () =>
-      console.log(
-        ` > Ready on ${LTI_HOSTNAME.toString()}\n Admin password: ${ADMIN_PASSWORD}`
-      )
-    );
+    const server = app.listen(PORT, () => {
+      logger.info(`Ready on ${LTI_HOSTNAME.toString()}`, {
+        port: PORT,
+        hostname: LTI_HOSTNAME.hostname,
+        status: 'ready',
+      });
+    });
     const shutdown = () => {
       server.close(async () => {
-        console.log('HTTP server closed.');
+        logger.info('HTTP server closed.', { status: 'closed' });
         // If you have database connections, close them here
         await shutdownDatabase();
         await shutdownPrompts();
@@ -529,7 +534,7 @@ async function __main__() {
     ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, shutdown));
     return server;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 }
 export default await __main__();

@@ -1,6 +1,7 @@
 import { watch } from 'fs';
 import { readFile } from 'fs/promises';
 import { type Settings, DEFAULT } from '../lib/ToolSettings';
+import { logger } from './logger';
 import { TOOL_SETTINGS_PATH } from './settings';
 
 let ToolSettings: Settings = DEFAULT;
@@ -13,23 +14,22 @@ async function loadSettingsFromFile(filePath: string): Promise<Settings> {
   try {
     const fileContents = await readFile(filePath, 'utf-8');
     const jsonData = JSON.parse(fileContents);
-    // console.log('Settings loaded:', jsonData);
     return { ...DEFAULT, ...jsonData };
   } catch (error) {
-    console.error('Error reading settings file:', error);
+    logger.error('Error reading settings file:', error);
     return DEFAULT;
   }
 }
 
 export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
   ToolSettings = await loadSettingsFromFile(settingsPath);
-  console.log('Watching settings file:', settingsPath);
+  logger.info(`Watching settings file: ${settingsPath}`);
   const settings = watch(
     settingsPath,
     { persistent: true },
     async (eventType, filename) => {
       // FIXME: double invocation of this callback
-      console.log('watchSettings event:', eventType, filename);
+      logger.debug(`watchSettings event: ${eventType} ${filename}`);
       // if (!filename) {
       //   ToolSettings = DEFAULT; // Reset to default if no filename is provided
       //   console.log('Settings file has been reset to default.');

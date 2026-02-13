@@ -133,7 +133,7 @@
     "express-prom-bundle": "^8.0.0",
     "express-session": "^1.19.0",
     "express-validator": "^7.3.1",
-    "i18next": "^25.8.5",
+    "i18next": "^25.8.6",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "i18next-http-middleware": "^3.9.2",
@@ -162,6 +162,7 @@
     "vike": "^0.4.253",
     "vike-react": "^0.6.20",
     "vike-react-query": "^0.1.12",
+    "winston": "^3.19.0",
     "yaml": "^2.8.2"
   },
   "overrides": {

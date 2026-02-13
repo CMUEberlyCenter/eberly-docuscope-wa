@@ -17,17 +17,6 @@ import { LTI_HOSTNAME } from '../settings';
 
 export const writingTasks = Router();
 
-// Replacing with fs.watch
-// writingTasks.patch('/update', async (_request: Request, response: Response) => {
-//   try {
-//     await updatePublicWritingTasks();
-//     response.sendStatus(204);
-//   } catch (err) {
-//     console.error(err);
-//     response.status(500).send(InternalServerError(err));
-//   }
-// });
-
 writingTasks.get(
   '/:fileId',
   validate(param('fileId').isMongoId()),
