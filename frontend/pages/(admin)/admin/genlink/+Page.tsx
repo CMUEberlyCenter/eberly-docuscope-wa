@@ -6,7 +6,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { convertToHtml } from "mammoth";
+import { convertToHtml } from "mammoth/mammoth.browser";
 import { Activity, ChangeEvent, FC, useEffect, useState } from "react";
 import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
