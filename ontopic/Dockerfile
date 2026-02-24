@@ -19,7 +19,8 @@ ENV PYTHONOPTIMIZE=2
 ENV PATH="/.venv/bin:$PATH"
 RUN useradd --create-home appuser
 COPY --from=deps /.venv /.venv
-RUN python -m spacy download en_core_web_sm
+# RUN python -m spacy download en_core_web_sm # moved to pipenv `pipenv install $(spacy info en_core_web_sm --url)`
+# RUN python -m spacy download es_core_news_sm # moved to pipenv `pipenv install $(spacy info es_core_news_sm --url)`
 # RUN python -m nltk.downloader -d /usr/share/nltk_data stopwords
 USER appuser
 WORKDIR /home/appuser
