@@ -1,23 +1,28 @@
 """onTopic Web API"""
 
 import logging
-from typing import Optional
+from typing import Annotated, Optional
 
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import Depends, FastAPI, Header, Request, Response
+from langcodes import tag_is_valid, closest_supported_match
+from pydantic import AfterValidator, BaseModel, Field
 
-from dslib.models.document import DSDocument
+from localization.NLP import NLP_MODELS, Locale
+from ds_document import DSDocument, TopicSort
 
 app = FastAPI(
     title="onTopic Tools",
     description="onTopic text analysis tools for generating sentence density "
     "and term matrix data for a given text.",
-    version="2.0.0",
+    version="2.1.0",
     license={
         "name": "CC BY-NC-SA 4.0",
         "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     },
 )
+
+
+app.state.nlp_models = NLP_MODELS
 
 # Unused, to be removed, replace with prometheus library
 # @app.get("/metrics")
@@ -28,9 +33,17 @@ app = FastAPI(
 class OnTopicRequest(BaseModel):  # pylint: disable=too-few-public-methods
     """onTopic input JSON."""
 
-    base: str
-    custom: Optional[str] = ""
-    customStructured: Optional[list[str]] = []
+    base: Annotated[str, Field(description="The HTML fragment string to be analysed.")]
+    custom: Annotated[
+        Optional[str],
+        Field(description="Custom settings for the analysis", deprecated=True),
+    ] = None
+    customStructured: Annotated[
+        Optional[list[str]],
+        Field(
+            description="Custom structured settings for the analysis", deprecated=True
+        ),
+    ] = None
 
 
 type Lemma = list[str | bool | None | int]
@@ -47,32 +60,67 @@ class NounChunk(BaseModel):  # pylint: disable=too-few-public-methods
 class Token(BaseModel):  # pylint: disable=too-few-public-methods
     """onTopic sentence Tokens."""
 
-    text: str
-    is_root: bool
+    text: Annotated[str, Field(description="The text of the token")]
+    is_root: Annotated[
+        bool, Field(description="Whether the token is the root of the sentence")
+    ]
 
 
 class SentenceData(BaseModel):  # pylint: disable=too-few-public-methods
     """onTopic Clarity sentence statistics."""
 
-    NOUNS: int  # total # of nouns
-    HNOUNS: int  # total # of head nouns
-    L_HNOUNS: int  # head nouns on the left
-    R_HNOUNS: int  # head nouns on the right
-    L_NOUNS: list[Lemma]  # nouns on the left
-    R_NOUNS: list[Lemma]  # nouns on the right
-    MV_LINKS: int  # total # of links fron the root verb
-    MV_L_LINKS: int  # total # of left links from the root veb
-    MV_R_LINKS: int  # total # of right links from the root verb
-    V_LINKS: int  # total # of links from all the non-root verbs
-    V_L_LINKS: int  # total # of left links from all the non-root verbs
-    V_R_LINKS: int  # total # of right links fromn all the non-root verbs
-    NR_VERBS: int  # total # of non-root verbs
+    NOUNS: Annotated[int, Field(description="Total number of nouns in the sentence")]
+    HNOUNS: Annotated[
+        int, Field(description="Total number of head nouns in the sentence")
+    ]
+    L_HNOUNS: Annotated[
+        int, Field(description="Head nouns on the left side of the main verb")
+    ]
+    R_HNOUNS: Annotated[
+        int, Field(description="Head nouns on the right side of the main verb")
+    ]
+    L_NOUNS: Annotated[
+        list[Lemma],
+        Field(description="List of noun lemmas on the left side of the main verb"),
+    ]
+    R_NOUNS: Annotated[
+        list[Lemma],
+        Field(description="List of noun lemmas on the right side of the main verb"),
+    ]
+    MV_LINKS: Annotated[
+        int, Field(description="Total number of links from the root verb")
+    ]
+    MV_L_LINKS: Annotated[
+        int, Field(description="Total number of left links from the root verb")
+    ]
+    MV_R_LINKS: Annotated[
+        int, Field(description="Total number of right links from the root verb")
+    ]
+    V_LINKS: Annotated[
+        int, Field(description="Total number of links from all the non-root verbs")
+    ]
+    V_L_LINKS: Annotated[
+        int, Field(description="Total number of left links from all the non-root verbs")
+    ]
+    V_R_LINKS: Annotated[
+        int,
+        Field(description="Total number of right links from all the non-root verbs"),
+    ]
+    NR_VERBS: Annotated[int, Field(description="Total number of non-root verbs")]
     NPS: list[str]
-    NUM_NPS: int  # total # of NPs
-    L_NPS: int
-    R_NPS: int
-    BE_VERB: bool
-    HEADING: bool
+    NUM_NPS: Annotated[int, Field(description="Total number of noun phrases")]
+    L_NPS: Annotated[
+        int,
+        Field(description="Number of noun phrases on the left side of the main verb"),
+    ]
+    R_NPS: Annotated[
+        int,
+        Field(description="Number of noun phrases on the right side of the main verb"),
+    ]
+    BE_VERB: Annotated[
+        bool, Field(description="Whether the sentence contains a be verb")
+    ]
+    HEADING: Annotated[bool, Field(description="Whether the sentence is a heading")]
     NOUN_CHUNKS: list[NounChunk]
     TOKENS: list[Token]
     MOD_CL: None | tuple[int, int, str, int]  # [start, end, mod_cl, last_np]
@@ -153,20 +201,59 @@ class LocalData(BaseModel):  # pylint: disable=too-few-public-methods
 class OnTopicData(BaseModel):  # pylint: disable=too-few-public-methods
     """onTopic JSON data."""
 
-    clarity: Optional[list[ClarityData]] = []
-    coherence: Optional[CoherenceData] = None
-    html: Optional[str] = ""
+    clarity: Annotated[
+        Optional[list[ClarityData]],
+        Field(description="Clarity analysis data for each sentence"),
+    ] = []
+    coherence: Annotated[
+        Optional[CoherenceData], Field(description="Coherence analysis data")
+    ] = None
+    html: Annotated[
+        Optional[str],
+        Field(description="The annotated HTML output of the original text."),
+    ] = ""
     html_sentences: Optional[list[list[str]]] = []
     local: Optional[list[LocalData]] = []
 
 
+def validate_language(lang: Optional[str]) -> str:
+    """Validate the language tag and return a standardized version."""
+    if lang is None or lang == "*":
+        return "en"
+    if not tag_is_valid(lang):
+        raise ValueError(f"Invalid language tag: {lang}")
+    match = closest_supported_match(lang, app.state.nlp_models.keys())
+    if match is None:
+        raise ValueError(f"Unsupported language: {lang}")
+    return match
+
+
+def get_locale(request: Request) -> Locale:
+    """Get the appropriate NLP model based on the Accept-Language header."""
+    accept_language = request.headers.get("Accept-Language", "en")
+    try:
+        lang = validate_language(accept_language)
+    except ValueError as e:
+        logging.warning(f"Language validation error: {e}, defaulting to 'en'")
+        lang = "en"
+    return request.app.state.nlp_models.get(lang, request.app.state.nlp_models["en"])
+
+
 @app.post("/api/v2/ontopic")
-async def ontopic(data: OnTopicRequest):
+async def ontopic(
+    response: Response,
+    data: OnTopicRequest,
+    accept_language: Annotated[
+        Optional[str], Header(), AfterValidator(validate_language)
+    ] = "en",
+    locale=Depends(get_locale),
+) -> OnTopicData:
     """Analyse the posted prose for coherence and clarity."""
-    document = DSDocument()
+    logging.info(f"Received onTopic request for language: {accept_language}")
+    document = DSDocument(locale=locale)
     document.loadFromHtmlString(f"<body>{data.base}</body>")
 
-    coherence = document.generateGlobalVisData(2, 1, 0)  # views.TOPIC_SORT_APPEARANCE)
+    coherence = document.generateGlobalVisData(2, 1, TopicSort.APPEARANCE)
     clarity = document.getSentStructureData()
     # Remove redundant data as it is unexpected in the frontend.
     clarity_data: list[ClarityData] = [
@@ -192,6 +279,7 @@ async def ontopic(data: OnTopicRequest):
     #  for i in range(1, nrParagraphs+1)]
     local = []
 
+    response.headers["Content-Language"] = accept_language or "en"
     return OnTopicData(
         coherence=CoherenceData.model_validate(coherence),
         local=local,
@@ -208,14 +296,24 @@ class SegmentRequest(BaseModel):  # pylint: disable=too-few-public-methods
 
 
 @app.post("/api/v2/segment")
-async def segment(data: SegmentRequest):
+async def segment(
+    response: Response,
+    data: SegmentRequest,
+    accept_language: Annotated[
+        Optional[str], Header(), AfterValidator(validate_language)
+    ] = "en",
+    locale: Locale = Depends(get_locale),
+) -> str:
     """Segment the given text into sentences.
 
     Returns the original text with added id attributes for paragraphs
     and spans with id attributes for deliminating the sentences.
     """
-    document = DSDocument()
-    document.loadFromHtmlString(f"<body>{data.text}</body>")
+    logging.info(f"Received segment request for language: {accept_language}")
+    with locale.nlp.memory_zone():
+        document = DSDocument(locale=locale)
+        document.loadFromHtmlString(f"<body>{data.text}</body>")
+    response.headers["Content-Language"] = accept_language or "en"
     return document.toXml()
 
 
