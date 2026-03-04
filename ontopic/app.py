@@ -216,16 +216,15 @@ class OnTopicData(BaseModel):  # pylint: disable=too-few-public-methods
     local: Optional[list[LocalData]] = []
 
 
-def validate_language(lang: Optional[str]) -> str:
+def validate_language(accept_language: Optional[str]) -> str:
     """Validate the language tag and return a standardized version."""
-    if lang is None or lang == "*":
+    if accept_language is None or accept_language == "*":
         return "en"
-    if not tag_is_valid(lang):
-        raise ValueError(f"Invalid language tag: {lang}")
-    match = closest_supported_match(lang, app.state.nlp_models.keys())
-    if match is None:
-        raise ValueError(f"Unsupported language: {lang}")
-    return match
+    for l in [l.strip() for l in accept_language.split(",")]:
+        [la, _] = l.split(";") if ";" in l else (l, "")
+        if tag_is_valid(la):
+            return closest_supported_match(la, app.state.nlp_models.keys()) or "en"
+    raise ValueError(f"Unsupported language: {accept_language}")
 
 
 def get_locale(request: Request) -> Locale:
