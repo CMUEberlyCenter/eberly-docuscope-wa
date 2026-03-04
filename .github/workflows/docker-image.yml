@@ -32,14 +32,14 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/myprose
     - name: Build and push frontend Docker image
       id: push
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
       with:
         context: frontend
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
     - name: Generate frontend artifact attestation
-      uses: actions/attest-build-provenance@v3
+      uses: actions/attest-build-provenance@v4
       with:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/myprose
         subject-digest: ${{ steps.push.outputs.digest }}
@@ -52,14 +52,14 @@ jobs:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/ontopic
     - name: Build and push frontend Docker image
       id: push_ontopic
-      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83
+      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
       with:
         context: ontopic
         push: true
         tags: ${{ steps.meta_ontopic.outputs.tags }}
         labels: ${{ steps.meta_ontopic.outputs.labels }}
     - name: Generate ontopic artifact attestation
-      uses: actions/attest-build-provenance@v3
+      uses: actions/attest-build-provenance@v4
       with:
         subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}/ontopic
         subject-digest: ${{ steps.push_ontopic.outputs.digest }}
