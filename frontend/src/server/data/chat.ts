@@ -1,8 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type {
-  MessageParam,
-  TextBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs';
+import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
 import { parse } from 'node-html-parser';
 import format from 'string-format';
 import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
@@ -58,12 +55,6 @@ export async function doChat<T>(
   }
   const content = format(prompt, data);
   let response: string | T = '';
-  // const json_assistant: MessageParam = {
-  //   role: 'assistant',
-  //   content:
-  //     content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
-  //     '',
-  // };
   const caching: TextBlockParam[] = [];
   if (cache) {
     const inputTemplate = await findPromptById('input_text');
@@ -96,8 +87,6 @@ export async function doChat<T>(
           role: 'user',
           content,
         },
-        // JSON response assistant needs to come last!
-        // ...(json ? [json_assistant] : []),
       ],
       model: ANTHROPIC_MODEL,
       // metadata: {
