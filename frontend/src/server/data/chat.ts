@@ -58,12 +58,12 @@ export async function doChat<T>(
   }
   const content = format(prompt, data);
   let response: string | T = '';
-  const json_assistant: MessageParam = {
-    role: 'assistant',
-    content:
-      content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
-      '',
-  };
+  // const json_assistant: MessageParam = {
+  //   role: 'assistant',
+  //   content:
+  //     content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
+  //     '',
+  // };
   const caching: TextBlockParam[] = [];
   if (cache) {
     const inputTemplate = await findPromptById('input_text');
@@ -97,7 +97,7 @@ export async function doChat<T>(
           content,
         },
         // JSON response assistant needs to come last!
-        ...(json ? [json_assistant] : []),
+        // ...(json ? [json_assistant] : []),
       ],
       model: ANTHROPIC_MODEL,
       // metadata: {
@@ -149,10 +149,11 @@ export async function doChat<T>(
       // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
       // Using json_assistant and looking for "begin with" seems to help with this
       // but leaving this in case the model still fences it or fails to find the magic string.
+      // However, claud-4.6 no longer allows assistant prefill messages.
       const unfenced = response
         .replace(/^```json\s*/, '')
         .replace(/\s*```$/, '');
-      response = JSON.parse(`${json_assistant.content}${unfenced}`) as T;
+      response = JSON.parse(unfenced) as T;
     }
   } catch (err) {
     // Output the json that failed to parse.
