@@ -12,8 +12,10 @@ import {
   OnTopicReviewData,
   OptionalReviewData,
 } from "../../src/lib/ReviewResponse";
+import { userLanguage } from "../../src/lib/languageCode";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { useReviewDispatch } from "./ReviewContext";
 import {
   getAnalysis,
@@ -27,6 +29,7 @@ function useOnTopic() {
     useState<OptionalReviewData<OnTopicReviewData>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
+  const { task } = useWritingTask();
 
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
@@ -40,6 +43,7 @@ function useOnTopic() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": userLanguage(task),
         },
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
@@ -106,6 +110,8 @@ function useSnapshotOnTopic(
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          // language unnecessary for snapshot reviews since they should already be
+          // localized based on the snapshot's writing task's user_lang.
         },
         signal: abortControllerRef.current.signal,
       });

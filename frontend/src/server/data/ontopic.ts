@@ -5,14 +5,17 @@ import { ONTOPIC_URL } from '../settings';
 
 /**
  * Submit data to onTopic for processing.
- * @param review Review data to be sent to onTopic
+ * @param document Text to process.
+ * @param acceptLanguage The forwarded accept-language header value.
+ * @param signal Optional AbortSignal to cancel the request.
  * @returns Processed data.
  * @throws fetch errors
- * @throws Bad onTopic response status
+ * @throws GatewayError on bad onTopic response status
  * @throws JSON.parse errors
  */
 export const doOnTopic = async (
   document: string,
+  acceptLanguage?: string,
   signal?: AbortSignal
 ): Promise<OnTopicReviewData | undefined> => {
   const res = await fetch(ONTOPIC_URL, {
@@ -23,6 +26,8 @@ export const doOnTopic = async (
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
+      // forward accept-language header, default to '*' if not present.
+      'Accept-Language': acceptLanguage || '*',
     },
     signal,
   });

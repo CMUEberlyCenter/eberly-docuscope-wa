@@ -317,6 +317,11 @@ async def segment(
     return document.toXml()
 
 
+@app.get("/api/v2/languages")
+async def languages() -> list[str]:
+    """Return the list of supported languages."""
+    return list(app.state.nlp_models.keys())
+
 # For production, start this with the following:
 # > hypercorn app:app --bind 0.0.0.0:5000 --root-path /
 # Following is for developement and can be used as follows:
@@ -331,4 +336,4 @@ if __name__ == "__main__":
     config = Config()
     config.bind = ["0.0.0.0:5000"]
     config.loglevel = "info"
-    asyncio.run(serve(app, config))
+    asyncio.run(serve(app, config)) # type: ignore

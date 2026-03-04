@@ -14,6 +14,8 @@ ontopic.post('/', async (request: Request, response: Response) => {
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
+        // forward accept-language header, default to '*' if not present.
+        'Accept-Language': request.headers['accept-language'] || '*',
       },
     });
     if (!res.ok) {

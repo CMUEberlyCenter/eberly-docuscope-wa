@@ -24,11 +24,11 @@ import {
 } from '../../lib/WritingTask';
 import { doChat, reviewData } from '../data/chat';
 import { insertLog } from '../data/mongo';
+import { doOnTopic } from '../data/ontopic';
 import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
-import { doOnTopic } from '../data/ontopic';
 
 export const reviews = Router();
 
@@ -63,7 +63,10 @@ reviews.post(
   '/segment',
   validate(body().isString().notEmpty()),
   async (request: Request, response: Response) => {
-    const segmented = await segmentText(request.body as string);
+    const segmented = await segmentText(
+      request.body as string,
+      request.headers['accept-language']
+    );
     if (segmented.trim() === '') {
       throw new UnprocessableContentError(['Unable to segment document']);
     }
@@ -106,7 +109,10 @@ async function updateSession(
     request.session.analysis = []; // reset analysis
   }
   if (!request.session.segmented && request.session.document) {
-    const segmented = await segmentText(request.session.document);
+    const segmented = await segmentText(
+      request.session.document,
+      request.headers['accept-language']
+    );
     if (segmented.trim() === '') {
       throw new UnprocessableContentError(['Unable to segment document']);
     }
@@ -148,6 +154,7 @@ reviews.post(
     }
     const data = await doOnTopic(
       request.session.document ?? '',
+      request.headers['accept-language'],
       controller.signal
     );
     if (controller.signal.aborted) {

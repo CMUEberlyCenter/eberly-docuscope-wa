@@ -33,7 +33,7 @@ def html_sentence_splitter(doc):
 def initialize_nlp_model(model_name: str) -> Language:
     """Initialize NLP model."""
     nlp = spacy.load(model_name)
-    nlp.tokenizer.token_match = re.compile(r"<[^>]+>").match
+    nlp.tokenizer.token_match = re.compile(r"<[^>]+>").match  # type: ignore
     nlp.add_pipe("html_sentence_splitter", before="parser")
     return nlp
 

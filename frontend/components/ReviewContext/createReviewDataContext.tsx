@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { Optional } from "../../src";
+import { userLanguage } from "../../src/lib/languageCode";
 import {
   Analysis,
   OptionalReviewData,
@@ -42,6 +43,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": userLanguage(data.writing_task),
         },
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
@@ -109,6 +111,7 @@ function useSnapshotReview<T extends Analysis>(
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          // language should be determined server side by snapshot's writing task's user_lang.
         },
         signal: abortControllerRef.current.signal,
       });

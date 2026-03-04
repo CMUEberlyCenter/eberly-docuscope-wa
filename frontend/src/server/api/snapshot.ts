@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
+import { userLanguage } from '../../lib/languageCode';
 import {
   BadRequestError,
   ForbiddenError,
@@ -21,6 +22,7 @@ import {
   getExpectationByIndex,
   isEnabled,
   isWritingTask,
+  WritingTask,
 } from '../../lib/WritingTask';
 import { basicAuthMiddleware } from '../../utils/basicAuth';
 import { doChat, reviewData } from '../data/chat';
@@ -54,7 +56,7 @@ snapshot.post(
   ),
   async (request, response) => {
     const { task, tool_config } = request.body;
-    const writingTask = JSON.parse(task);
+    const writingTask = JSON.parse(task) as WritingTask; // already validated in middleware
     const tools = tool_config as string[];
     if (!request.file) {
       throw new BadRequestError('No document uploaded.');
@@ -78,7 +80,7 @@ snapshot.post(
         `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
       );
     }
-    const segmented = await segmentText(value);
+    const segmented = await segmentText(value, userLanguage(writingTask));
     const dbId = await insertSnapshot(
       writingTask,
       value,
@@ -136,7 +138,11 @@ snapshot.get(
     request.on('close', () => {
       controller.abort();
     });
-    const data = await doOnTopic(snapshot.segmented, controller.signal);
+    const data = await doOnTopic(
+      snapshot.segmented,
+      userLanguage(snapshot.task),
+      controller.signal
+    );
     if (controller.signal.aborted) {
       return;
     }
@@ -272,11 +278,11 @@ snapshot.get(
     if (typeof chat_response === 'string') {
       throw new Error(chat_response); // if string, throw as error
     }
-    const data: Analysis = {
+    const data = {
       tool: analysis as ReviewPrompt,
       datetime,
       response: chat_response,
-    } as Analysis; // FIXME typescript shenanigans
+    } as Analysis;
     await updateSnapshotReviewsById(id, data);
     response.json(data);
   }
