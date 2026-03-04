@@ -19,7 +19,6 @@ import {
 } from "../../src/lib/ReviewResponse";
 import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { Loading } from "../Loading/Loading";
-import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 
 type ReviewContextState = {
@@ -188,7 +187,6 @@ export const ReviewToolCard: FC<
             // onReset={(details) => mutation.reset()}
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
             {children}
           </ErrorBoundary>
         )}
