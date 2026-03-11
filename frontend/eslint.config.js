@@ -10,7 +10,7 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/app/**/*.{js,jsx,mjs,cjs,ts,tsx'],
+    files: ['index.ts', 'src/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'components/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'layouts/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'pages/**/*.{js,jsx,mjs,cjs,ts,tsx}'],
     plugins: {
       react,
     },
