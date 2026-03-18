@@ -17,6 +17,8 @@ const scribeNotes =
       controller.abort();
     });
     const data = request.body as NotesRequest;
+    // TODO: check for empty notes
+    // TODO: check for max tokens in notes to avoid expensive calls
     const chat = await doChat(
       key,
       {
@@ -59,6 +61,5 @@ const scribeText =
     response.json(chat.response);
   };
 const validate_text = validate(body('text').isString().not().isEmpty());
-// scribe.post('/proofread', validate_text, scribeText('grammar')); // no prompt for this anymore
 scribe.post('/copyedit', validate_text, scribeText('copyedit'));
 scribe.post('/local_coherence', validate_text, scribeText('local_coherence'));

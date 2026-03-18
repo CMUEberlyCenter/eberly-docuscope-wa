@@ -1,0 +1,58 @@
+diff --git a/dist/Provider/Services/DeepLinking.js b/dist/Provider/Services/DeepLinking.js
+index a665b036f4a0a3d139356edd0684c7ad8d2cc5dd..08b7aead58454f1a86389b740422aa71be5039d4 100644
+--- a/dist/Provider/Services/DeepLinking.js
++++ b/dist/Provider/Services/DeepLinking.js
+@@ -9,11 +9,11 @@ function _assertClassBrand(e, t, n) { if ("function" == typeof e ? e === t : e.h
+ 
+ const jwt = require('jsonwebtoken');
+ const provDeepLinkingDebug = require('debug')('provider:deepLinkingService');
+-const path = require('path');
+-const {
+-  sprightly
+-} = require('sprightly');
+-const deepLinkSubmissionForm = path.join(__dirname, '../../Templates', 'DeepLinkSubmissionForm.html');
++// const path = require('path');
++// const {
++//   sprightly
++// } = require('sprightly');
++// const deepLinkSubmissionForm = path.join(__dirname, '../../Templates', 'DeepLinkSubmissionForm.html');
+ var _getPlatform = /*#__PURE__*/new WeakMap();
+ var _ENCRYPTIONKEY = /*#__PURE__*/new WeakMap();
+ var _Database = /*#__PURE__*/new WeakMap();
+@@ -41,10 +41,16 @@ class DeepLinking {
+     const message = await this.createDeepLinkingMessage(idtoken, contentItems, options);
+ 
+     // Creating auto submitting form
+-    const form = sprightly(deepLinkSubmissionForm, {
+-      action: idtoken.platformContext.deepLinkingSettings.deep_link_return_url,
+-      message
+-    });
++    // const form = sprightly(deepLinkSubmissionForm, {
++    //   action: idtoken.platformContext.deepLinkingSettings.deep_link_return_url,
++    //   message
++    // });
++    const form = `<form id="ltijs_submit" style="display: none;" action="${idtoken.platformContext.deepLinkingSettings.deep_link_return_url}" method="POST">
++  <input type="hidden" name="JWT" value="${message}" />
++</form>
++<script>
++  document.getElementById("ltijs_submit").submit()
++</script>`
+     return form;
+   }
+ 
+diff --git a/dist/Utils/Database.js b/dist/Utils/Database.js
+index d48737e905fdcc8d6dac7650478520c4a4bd3e54..c9eb5174d083c068efc8265d1283415528c4fed2 100644
+--- a/dist/Utils/Database.js
++++ b/dist/Utils/Database.js
+@@ -24,9 +24,9 @@ class Database {
+   constructor(database) {
+     _classPrivateFieldInitSpec(this, _dbUrl, void 0);
+     _classPrivateFieldInitSpec(this, _dbConnection, {
+-      useNewUrlParser: true,
++      // useNewUrlParser: true,
+       connectTimeoutMS: 300000,
+-      useUnifiedTopology: true
++      // useUnifiedTopology: true
+     });
+     _classPrivateFieldInitSpec(this, _deploy, false);
+     if (!database || !database.url) throw new Error('MISSING_DATABASE_CONFIG');

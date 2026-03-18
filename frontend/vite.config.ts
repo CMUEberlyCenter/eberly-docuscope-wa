@@ -20,14 +20,14 @@ export default defineConfig(({ mode }) => ({
     //   // },
     //   output: {
     //     // dir: 'build/app',
-    //     manualChunks(id: string) {
+    //     codeSplitting(id: string) {
     //       if (id.includes('d3')) { return 'vendor-d3'; }
     //       if (id.includes('@fortawesome')) { return 'vendor-@fortawesome'; }
     //       if (id.includes('slate')) { return 'vendor-slate'; }
     //     }
     //   }
     // },
-    target: 'ES2022',
+    // target: 'ES2022',
   },
   css: {
     preprocessorOptions: {
