@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
@@ -95,7 +95,7 @@ snapshot.post(
 snapshot.get(
   '/:id',
   validate(param('id').isMongoId()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     response.send(await findSnapshotById(id));
   }
@@ -105,7 +105,7 @@ snapshot.delete(
   basicAuthMiddleware,
   validate(param('id').isMongoId()),
   validate(query('cache_only').optional().isBoolean()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     const cache = request.query.cache_only === 'true';
     if (cache) {
@@ -120,7 +120,7 @@ snapshot.delete(
 snapshot.get(
   '/:id/ontopic',
   validate(param('id').isMongoId()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     const settings = getSettings();
     if (!settings.term_matrix && !settings.sentence_density) {
@@ -158,7 +158,7 @@ snapshot.get(
   '/:id/expectation/:index',
   validate(param('id').isMongoId()),
   validate(param('index').isInt({ min: 0 })),
-  async (request, response) => {
+  async (request: Request<{ id: string, index: string }>, response) => {
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
     const settings = getSettings();
@@ -233,7 +233,7 @@ snapshot.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
-  async (request, response) => {
+  async (request: Request<{ id: string, analysis: string }>, response) => {
     // should this be behind authentication?
     const { id, analysis } = request.params;
     const settings = getSettings();
