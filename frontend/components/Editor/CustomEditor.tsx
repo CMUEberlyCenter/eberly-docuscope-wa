@@ -15,10 +15,10 @@ import {
   Form,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import Split from "react-split";
 import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
+import { SplitLayout } from "../../layouts/SplitLayout";
 import {
   deserializeHtmlText,
   serialize,
@@ -154,12 +154,7 @@ const CustomEditor: FC = () => {
         }
       }}
     >
-      <Split
-        className="container-fluid vh-100 w-100 d-flex flex-row align-items-stretch"
-        sizes={[60, 40]}
-        minSize={[400, 320]}
-        expandToMin={true}
-      >
+      <SplitLayout>
         <main className="d-flex overflow-none flex-column my-1">
           <ButtonToolbar
             aria-label="Editor Tools"
@@ -249,7 +244,7 @@ const CustomEditor: FC = () => {
           />
         </main>
         <ToolCard hasSelection={selection} />
-      </Split>
+      </SplitLayout>
     </Slate>
   );
 };
