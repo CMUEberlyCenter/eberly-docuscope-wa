@@ -6,7 +6,6 @@ import {
   HTMLProps,
   type ReactNode,
   use,
-  useContext,
   useEffect,
   useReducer,
 } from "react";
@@ -37,7 +36,7 @@ const initialReviewContext: ReviewContextState = {
 /** Context for review tools. */
 const ReviewContext = createContext<ReviewContextState | null>(null);
 /** Hook for accessing the review context state. */
-export const useReviewContext = () => useContext(ReviewContext);
+export const useReviewContext = () => use(ReviewContext);
 /** Context for dispatching actions to modify the review tools state. */
 const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
@@ -54,7 +53,7 @@ const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
  *   - `remove`: Nullify text which should then use the default text.
  * @returns Dispatch function for modifying the review state.
  */
-export const useReviewDispatch = () => useContext(ReviewDispatchContext);
+export const useReviewDispatch = () => use(ReviewDispatchContext);
 
 type ReviewAction =
   | {
@@ -108,11 +107,9 @@ export const ReviewProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [review, dispatch] = useReducer(reviewReducer, initialReviewContext);
 
   return (
-    <ReviewContext.Provider value={review}>
-      <ReviewDispatchContext.Provider value={dispatch}>
-        {children}
-      </ReviewDispatchContext.Provider>
-    </ReviewContext.Provider>
+    <ReviewContext value={review}>
+      <ReviewDispatchContext value={dispatch}>{children}</ReviewDispatchContext>
+    </ReviewContext>
   );
 };
 
@@ -133,7 +130,7 @@ export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
       dispatch({ type: "unset" });
       dispatch({ type: "remove" });
     };
-  }, []);
+  }, [dispatch]);
   return children;
 };
 

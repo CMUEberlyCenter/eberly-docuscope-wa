@@ -8,7 +8,7 @@ import classNames from "classnames";
 import {
   Activity,
   createContext,
-  useContext,
+  use,
   useEffect,
   useRef,
   useState,
@@ -206,7 +206,7 @@ function useExpectationsDataMutation({
 }
 
 function useExpectationsSnapshotMutation(snapshotID: string) {
-  return function ({
+  return function useSnapshot({
     expectationIndex,
     setCurrent,
     eventKey,
@@ -387,7 +387,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
 }) => {
   const dispatch = useReviewDispatch();
 
-  const mutation = useContext(ExpectationsDataContext)?.({
+  const mutation = use(ExpectationsDataContext)?.({
     eventKey,
     expectation: rule,
     expectationIndex: ruleIdx,
@@ -547,9 +547,9 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   const onSelect: AccordionSelectCallback = (eventKey, _event) => {
     setCurrent(eventKey);
   };
-  const analyses = useContext(ExpectationsSnapshotContext);
-  const task = useContext(WritingTaskContext);
-  const id = useContext(FileHashContext);
+  const analyses = use(ExpectationsSnapshotContext);
+  const task = use(WritingTaskContext);
+  const id = use(FileHashContext);
 
   const dispatch = useReviewDispatch();
   useEffect(() => {

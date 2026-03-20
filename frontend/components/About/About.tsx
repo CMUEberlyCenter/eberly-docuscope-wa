@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useState } from "react";
+import { type FC, type HTMLProps, useMemo, useState } from "react";
 import { ListGroup, Modal, type ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import { Logo } from "../Logo/Logo";
@@ -25,7 +25,7 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;
-  const build_date = new Date(__BUILD_DATE__);
+  const build_date = useMemo(() => new Date(__BUILD_DATE__), []);
   // const template_info = use(templatesInfo);
   const { task } = useWritingTask();
 

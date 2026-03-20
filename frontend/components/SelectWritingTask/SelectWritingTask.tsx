@@ -1,12 +1,6 @@
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  type ChangeEvent,
-  type FC,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { type ChangeEvent, type FC, useCallback, useState } from "react";
 import {
   Button,
   CloseButton,
@@ -18,8 +12,8 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useWritingTasks } from "../../src/service/writing-task.service";
 import { type WritingTask, isWritingTask } from "../../src/lib/WritingTask";
+import { useWritingTasks } from "../../src/service/writing-task.service";
 import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
 import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
 import {
@@ -46,7 +40,6 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const [selected, setSelected] = useState<WritingTask | undefined | null>(
     writingTask
   );
-  useEffect(() => setSelected(writingTask), [writingTask]);
   const [valid, setValid] = useState(true); // Uploaded file validity
   const [custom, setCustom] = useState<WritingTask | null>(null);
   const [showFile, setShowFile] = useState(false);
@@ -79,13 +72,13 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
 
   const hide = useCallback(() => {
     setShowDetails(false);
-    setSelected(undefined);
+    setSelected(writingTask ?? null);
     onHide?.();
-  }, [onHide]);
+  }, [writingTask, onHide]);
   const commit = useCallback(() => {
     setWritingTask({ task: selected });
     hide();
-  }, [hide, selected]);
+  }, [hide, selected, setWritingTask]);
 
   return (
     <Modal show={show} onHide={hide} size="xl" {...props}>

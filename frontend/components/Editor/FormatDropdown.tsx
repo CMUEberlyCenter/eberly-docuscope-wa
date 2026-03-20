@@ -87,7 +87,7 @@ const BlockItem: FC<{
       ];
       setActive(!!match);
     }
-  }, [selection, eventKey]);
+  }, [editor, selection, eventKey]);
 
   return (
     <Dropdown.Item active={active} eventKey={eventKey}>

@@ -1,13 +1,6 @@
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  useCallback,
-  useEffect,
-  useId,
-  useState,
-  type ChangeEvent,
-  type FC,
-} from "react";
+import { useCallback, useId, useState, type ChangeEvent, type FC } from "react";
 import {
   Button,
   CloseButton,
@@ -19,8 +12,8 @@ import {
   type ModalProps,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { isWritingTask, type WritingTask } from "../../src/lib/WritingTask";
 import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
+import { isWritingTask, type WritingTask } from "../../src/lib/WritingTask";
 import { useWritingTasks } from "../../src/service/writing-task.service";
 import {
   useSetWritingTask,
@@ -117,13 +110,12 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const setWritingTask = useSetWritingTask();
   const [showDetails, setShowDetails] = useState(false);
   const [selected, setSelected] = useState<WritingTask | null | undefined>(
-    task
+    () => task
   );
   const [valid, setValid] = useState(true);
   const [custom, setCustom] = useState<WritingTask | null>(null);
   const [data, setData] = useState<WritingTask[]>([]); // filtered list of tasks.
   const [showFile, setShowFile] = useState(false);
-  useEffect(() => setSelected(task), [task]);
 
   const uploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -149,9 +141,9 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
 
   const hide = useCallback(() => {
     setShowDetails(false);
-    setSelected(undefined);
+    setSelected(task ?? null);
     onHide?.();
-  }, [onHide]);
+  }, [task, onHide]);
   const commit = useCallback(() => {
     setWritingTask({ task: selected });
     hide();

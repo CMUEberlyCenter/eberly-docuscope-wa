@@ -3,7 +3,7 @@ import {
   createContext,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
   useRef,
   useState,
@@ -148,7 +148,7 @@ function useSnapshotOnTopic(
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
-  }, [snapshotID, analysis]);
+  }, [snapshotID, analysis, dispatch, mutation]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
@@ -162,7 +162,7 @@ const OnTopicDataContext =
   createContext<ReviewDataContext<OnTopicReviewData> | null>(null);
 
 export const useOnTopicData = () => {
-  const context = useContext(OnTopicDataContext);
+  const context = use(OnTopicDataContext);
   if (!context) {
     throw new Error("useOnTopicData must be used within a OnTopicDataProvider");
   }
@@ -173,11 +173,7 @@ export const OnTopicDataProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const ontopic = useOnTopic();
-  return (
-    <OnTopicDataContext.Provider value={ontopic}>
-      {children}
-    </OnTopicDataContext.Provider>
-  );
+  return <OnTopicDataContext value={ontopic}>{children}</OnTopicDataContext>;
 };
 export const OnTopicSnapshotProvider: FC<SnapshotProviderProps> = ({
   children,
@@ -188,9 +184,5 @@ export const OnTopicSnapshotProvider: FC<SnapshotProviderProps> = ({
     snapshotId,
     getAnalysis<OnTopicReviewData>(analyses, "ontopic")
   );
-  return (
-    <OnTopicDataContext.Provider value={ontopic}>
-      {children}
-    </OnTopicDataContext.Provider>
-  );
+  return <OnTopicDataContext value={ontopic}>{children}</OnTopicDataContext>;
 };

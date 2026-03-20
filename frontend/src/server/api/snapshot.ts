@@ -158,7 +158,7 @@ snapshot.get(
   '/:id/expectation/:index',
   validate(param('id').isMongoId()),
   validate(param('index').isInt({ min: 0 })),
-  async (request: Request<{ id: string, index: string }>, response) => {
+  async (request: Request<{ id: string; index: string }>, response) => {
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
     const settings = getSettings();
@@ -233,7 +233,7 @@ snapshot.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
-  async (request: Request<{ id: string, analysis: string }>, response) => {
+  async (request: Request<{ id: string; analysis: string }>, response) => {
     // should this be behind authentication?
     const { id, analysis } = request.params;
     const settings = getSettings();

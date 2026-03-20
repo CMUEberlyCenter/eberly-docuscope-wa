@@ -18,23 +18,46 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
           </Navbar.Brand>
           <Navbar.Toggle aria-controls={id} />
           <Navbar.Collapse id={id}>
-            <Nav className="me-auto" variant="underline" defaultActiveKey={"home"}>
-              <Nav.Link active={urlPathname === "/admin/"} href="/admin/" eventKey={"home"}>
+            <Nav
+              className="me-auto"
+              variant="underline"
+              defaultActiveKey={"home"}
+            >
+              <Nav.Link
+                active={urlPathname === "/admin/"}
+                href="/admin/"
+                eventKey={"home"}
+              >
                 {t("home")}
               </Nav.Link>
-              <Nav.Link active={urlPathname === "/admin/settings"} href="/admin/settings">
+              <Nav.Link
+                active={urlPathname === "/admin/settings"}
+                href="/admin/settings"
+              >
                 {t("settings.tab")}
               </Nav.Link>
-              <Nav.Link active={urlPathname === "/admin/platforms"} href="/admin/platforms">
+              <Nav.Link
+                active={urlPathname === "/admin/platforms"}
+                href="/admin/platforms"
+              >
                 {t("platforms.tab")}
               </Nav.Link>
-              <Nav.Link active={urlPathname === "/admin/performance"} href="/admin/performance">
+              <Nav.Link
+                active={urlPathname === "/admin/performance"}
+                href="/admin/performance"
+              >
                 {t("performance.tab")}
               </Nav.Link>
-              <Nav.Link active={urlPathname === "/admin/genlink"} href="/admin/genlink">
+              <Nav.Link
+                active={urlPathname === "/admin/genlink"}
+                href="/admin/genlink"
+              >
                 {t("genlink.tab")}
               </Nav.Link>
-              <Nav.Link active={urlPathname === "/admin/writing_tasks"} href="/admin/writing_tasks">
+              <Nav.Link
+                active={urlPathname === "/admin/writing_tasks"}
+                href="/admin/writing_tasks"
+              >
                 {t("writing_tasks.tab")}
               </Nav.Link>
             </Nav>

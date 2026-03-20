@@ -45,30 +45,14 @@ const CategoryKeywords: FC<CategoryKeywordsProps> = ({
   selectAll,
   selectNone,
 }) => {
-  const hasCategoryPrefix = useCallback(
-    (key: string) => hasPrefix(prefix, key),
-    [prefix]
-  );
-  const [keys, setKeys] = useState(new Set(keywords.filter(hasCategoryPrefix)));
-  useEffect(() => {
-    setKeys(new Set(keywords.filter(hasCategoryPrefix)));
-  }, [keywords, hasCategoryPrefix]);
-  const [active, setActive] = useState(
-    new Set(activeKeywords.filter(hasCategoryPrefix))
-  );
-  useEffect(() => {
-    setActive(new Set(activeKeywords.filter(hasCategoryPrefix)));
-  }, [activeKeywords, hasCategoryPrefix]);
-  const [allSelected, setAllSelected] = useState(false);
-  useEffect(() => {
-    setAllSelected(keys.symmetricDifference(active).size === 0);
-  }, [keys, active]);
+  const hasCategoryPrefix = (key: string) => hasPrefix(prefix, key);
+  const keys = new Set(keywords.filter(hasCategoryPrefix));
+  const active = new Set(activeKeywords.filter(hasCategoryPrefix));
+  const allSelected = () => keys.symmetricDifference(active).size === 0;
   const ref = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (ref.current) {
-      ref.current.indeterminate = active.size > 0 && !allSelected;
-    }
-  }, [ref, active, allSelected]);
+  if (ref.current) {
+    ref.current.indeterminate = active.size > 0 && !allSelected();
+  }
   const id = useId();
 
   return (
@@ -79,21 +63,21 @@ const CategoryKeywords: FC<CategoryKeywordsProps> = ({
           type="checkbox"
           label={title}
           className="fs-6 fw-semibold"
-          key={`context-all`}
-          checked={allSelected}
+          key={`${id}-checkbox-all`}
+          checked={allSelected()}
           ref={ref}
-          onChange={() => (allSelected ? selectNone() : selectAll())}
+          onChange={() => (allSelected() ? selectNone() : selectAll())}
         />
       </header>
       <Form>
-        {[...keys].map((key, i) => (
+        {keywords.filter(hasCategoryPrefix).map((key, i) => (
           <Form.Check
-            id={`${id}=${prefix}-checkbox-${i}`}
+            id={`${id}-${prefix}-checkbox-${i}`}
             type="checkbox"
             label={key.substring(`${prefix}${sep}`.length)}
             className="ms-4"
             data-keyword={key}
-            key={`${key}-${i}`}
+            key={`${id}-${key}`}
             checked={activeKeywords.includes(key)}
             onChange={() => toggle(key)}
           />
@@ -114,10 +98,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const [keywords, setKeywords] = useState(extractKeywords(tasks));
-  useEffect(() => {
-    setKeywords(extractKeywords(tasks));
-  }, [tasks]);
+  const keywords = extractKeywords(tasks);
 
   const [search, setSearch] = useState<string>("");
   const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
@@ -148,29 +129,25 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
     (prefix: string) => {
       prefix = `${prefix}:`;
       const keys = keywords.filter((key) => key.startsWith(prefix));
-      const other = activeKeywords.filter((key) => !key.startsWith(prefix));
-      setActiveKeywords([...other, ...keys]);
+      setActiveKeywords((activeKeywords) => [
+        ...activeKeywords.filter((key) => !key.startsWith(prefix)),
+        ...keys,
+      ]);
     },
-    [activeKeywords, keywords]
+    [keywords]
   );
-  const selectNone = useCallback(
-    (prefix: string) => {
-      prefix = `${prefix}:`;
-      setActiveKeywords(
-        activeKeywords.filter((key) => !key.startsWith(prefix))
-      );
-    },
-    [activeKeywords, keywords]
-  );
-  const toggle = useCallback(
-    (key: string) =>
-      setActiveKeywords(
-        activeKeywords.includes(key)
-          ? activeKeywords.filter((active) => active !== key)
-          : [...activeKeywords, key]
-      ),
-    [activeKeywords]
-  );
+  const selectNone = (prefix: string) => {
+    prefix = `${prefix}:`;
+    setActiveKeywords((activeKeywords) =>
+      activeKeywords.filter((key) => !key.startsWith(prefix))
+    );
+  };
+  const toggle = (key: string) =>
+    setActiveKeywords((activeKeywords) =>
+      activeKeywords.includes(key)
+        ? activeKeywords.filter((active) => active !== key)
+        : [...activeKeywords, key]
+    );
 
   const controlId = useId();
 

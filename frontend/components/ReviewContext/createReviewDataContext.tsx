@@ -77,7 +77,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
-  }, [document, writing_task]);
+  }, [document, writing_task, mutation]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
@@ -184,11 +184,7 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
 
   const ReviewDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { review, pending } = useReview<T>(tool);
-    return (
-      <Context.Provider value={{ review, pending }}>
-        {children}
-      </Context.Provider>
-    );
+    return <Context value={{ review, pending }}>{children}</Context>;
   };
 
   const SnapshotDataProvider: FC<SnapshotProviderProps> = ({
@@ -201,11 +197,7 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
       snapshotId,
       getAnalysis<T>(analyses, tool)
     );
-    return (
-      <Context.Provider value={{ review, pending }}>
-        {children}
-      </Context.Provider>
-    );
+    return <Context value={{ review, pending }}>{children}</Context>;
   };
   return { ReviewDataProvider, SnapshotDataProvider, useReviewDataContext };
 }

@@ -1,4 +1,4 @@
-import { FC, HTMLProps, useEffect, useId, useState } from "react";
+import { FC, HTMLProps, useEffect, useId } from "react";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useReviewContext } from "../ReviewContext/ReviewContext";
 import "./UserText.scss";
@@ -13,15 +13,11 @@ export const UserText: FC<UserTextProps> = ({ ...props }) => {
   const id = useId();
   const ctx = useReviewContext();
   const [fileText] = useFileText();
-  const [content, setContent] = useState<string>(fileText?.trim() ?? "");
+  const content = ctx?.text?.trim() ?? fileText?.trim() ?? ""; // if custom tool text use that, otherwise use prose
   // TODO make this so that it is aware of the previous number of levels and
   // removes them instead of hard coding.  As there is only 2 levels
   // of highlighting, this is not a big deal for now.
   const maxHighlightLevels = 2;
-
-  useEffect(() => {
-    setContent(ctx?.text?.trim() ?? fileText?.trim() ?? ""); // if custom tool text use that, otherwise use prose
-  }, [fileText, ctx?.text]);
 
   useEffect(() => {
     if (!content) return;

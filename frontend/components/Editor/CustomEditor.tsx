@@ -37,14 +37,27 @@ import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
 
+const loadSaveFileOps = {
+  id: "myprose",
+  types: [
+    {
+      accept: {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+      },
+    },
+  ],
+};
+
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
     // get from session storage
-    JSON.parse(sessionStorage.getItem("content") ?? "null") || [
-      { type: "paragraph", children: [{ text: "" }] },
-    ]
+    () =>
+      JSON.parse(sessionStorage.getItem("content") ?? "null") || [
+        { type: "paragraph", children: [{ text: "" }] },
+      ]
   );
   const [zoom, setZoom] = useState<number>(100);
   const [selection, setSelection] = useState<boolean>(false);
@@ -69,17 +82,6 @@ const CustomEditor: FC = () => {
       }
     }
   }, [upload, editor]);
-  const loadSaveFileOps = {
-    id: "myprose",
-    types: [
-      {
-        accept: {
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            [".docx"],
-        },
-      },
-    ],
-  };
   const uploadFile = useInitiateUploadFile();
 
   // Stuff for exporting docx file.
@@ -131,7 +133,7 @@ const CustomEditor: FC = () => {
     } else {
       setDocx(null);
     }
-  }, [content, ltiActivityTitle, writingTask]);
+  }, [content, file, ltiActivityTitle, showError, t, username, writingTask]);
 
   return (
     <Slate
