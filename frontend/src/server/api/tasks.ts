@@ -19,9 +19,15 @@ export const writingTasks = Router();
 
 writingTasks.get(
   '/:fileId',
-  validate(param('fileId').isMongoId()),
-  async (request: Request, response: Response) => {
+  validate(param('fileId').isMongoId().not().isArray()),
+  async (request: Request<{ fileId: string }>, response: Response) => {
     const fileId = request.params.fileId;
+    if (Array.isArray(fileId)) { // This should not be necessary as params should be a single string.
+      throw new UnprocessableContentError(
+        ['fileId must be a single value.'],
+        'Invalid fileId parameter'
+      );
+    }
     response.send(await findWritingTaskById(fileId));
   }
 );

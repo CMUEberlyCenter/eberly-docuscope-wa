@@ -6,6 +6,7 @@ import { TOOL_SETTINGS_PATH } from './settings';
 
 let ToolSettings: Settings = DEFAULT;
 
+/** Gets the site wide settings. */
 export function getSettings(): Settings {
   return ToolSettings;
 }
@@ -21,6 +22,7 @@ async function loadSettingsFromFile(filePath: string): Promise<Settings> {
   }
 }
 
+/** Sets up file watching for settings file changes. */
 export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
   ToolSettings = await loadSettingsFromFile(settingsPath);
   logger.info(`Watching settings file: ${settingsPath}`);

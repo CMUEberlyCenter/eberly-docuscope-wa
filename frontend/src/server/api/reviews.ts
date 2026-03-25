@@ -276,8 +276,12 @@ reviews.post(
   '/:analysis',
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
   validate(body('document').isString().notEmpty()),
-  async (request: Request, response: Response) => {
+  async (request: Request<{ analysis: string }>, response: Response) => {
     const { analysis } = request.params;
+    if (Array.isArray(analysis)) {
+      // This should never happen as params should be singular, but we check just in case.
+      throw new UnprocessableContentError('Invalid analysis type');
+    }
     // Check if the tool is enabled in settings
     const settings = getSettings();
     if (analysis in settings && !settings[analysis as keyof typeof settings]) {
