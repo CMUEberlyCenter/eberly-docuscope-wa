@@ -10,6 +10,8 @@ COPY ./package*.json /tmp/dev
 COPY ./package*.json /tmp/prod
 COPY ./bun.lock* /tmp/dev
 COPY ./bun.lock* /tmp/prod
+COPY ./patches /tmp/dev/patches
+COPY ./patches /tmp/prod/patches
 RUN cd /tmp/dev && bun install --frozen-lockfile
 RUN cd /tmp/prod && bun install --production --frozen-lockfile
 
