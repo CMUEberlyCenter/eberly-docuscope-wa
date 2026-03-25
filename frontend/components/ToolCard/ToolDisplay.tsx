@@ -2,6 +2,7 @@ import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-i
 import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
+import DOMPurify from "dompurify";
 import {
   type FC,
   type HTMLProps,
@@ -120,8 +121,9 @@ const ToolInput: FC<ToolProp> = ({ tool }) => {
         {tool?.input.text.trim() ? (
           <FadeContent>
             <Card.Text
+              // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
               dangerouslySetInnerHTML={{
-                __html: tool.input.html ?? tool.input.text,
+                __html: DOMPurify.sanitize(tool.input.html ?? tool.input.text),
               }}
             ></Card.Text>
           </FadeContent>

@@ -1,4 +1,5 @@
-import { type FC, type HTMLProps, useEffect, useId, useState } from "react";
+import DOMPurify from "dompurify";
+import { type FC, type HTMLProps, useId, useState } from "react";
 import AnimateHeight, { type Height } from "react-animate-height";
 import { Button } from "react-bootstrap";
 import css from "./FadeContent.module.scss";
@@ -19,25 +20,22 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
   minHeight = minHeight ?? 80;
   maxHeight = maxHeight ?? "auto";
   const [expanded, setExpanded] = useState(false);
-  const [height, setHeight] = useState<Height>(minHeight);
   const id = useId();
-  useEffect(() => {
-    setHeight(expanded ? maxHeight : minHeight);
-  }, [expanded]);
 
   return (
     <article {...props}>
       <AnimateHeight
         id={id}
-        height={height}
+        height={expanded ? maxHeight : minHeight}
         className={css["fade-content"]}
         data-fade={!expanded}
       >
         {/* Workaround for html string content. */}
         {htmlContent && (
           <div
+            // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
             dangerouslySetInnerHTML={{
-              __html: htmlContent,
+              __html: DOMPurify.sanitize(htmlContent),
             }}
           />
         )}

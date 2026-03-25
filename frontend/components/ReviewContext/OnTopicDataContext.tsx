@@ -5,8 +5,10 @@ import {
   ReactNode,
   use,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import {
   OnTopicReviewData,
@@ -65,12 +67,16 @@ function useOnTopic() {
       setReview({ tool: "ontopic", error });
     },
   });
+  const [pending, startTransition] = useTransition();
+  const update = useEffectEvent((document: string) => {
+    dispatch({ type: "remove" });
+    mutation.mutate({ document });
+  });
   useEffect(() => {
     if (!document) return;
     // Fetch the review data for Sentences
-    dispatch({ type: "remove" });
-    mutation.mutate({
-      document,
+    startTransition(() => {
+      update(document);
     });
     return () => {
       abortControllerRef.current?.abort();
@@ -83,7 +89,12 @@ function useOnTopic() {
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 function useSnapshotOnTopic(
@@ -132,30 +143,45 @@ function useSnapshotOnTopic(
       abortControllerRef.current = null;
     },
   });
+  const [pending, startTransition] = useTransition();
+  const triggerMutation = useEffectEvent((id: string) => {
+    mutation.mutate({ id });
+  });
+  const triggerDispatch = useEffectEvent(
+    (analysis: OptionalReviewData<OnTopicReviewData>) => {
+      if (analysis && "response" in analysis && analysis.response.html) {
+        dispatch({ type: "update", sentences: analysis.response.html });
+      }
+    }
+  );
   useEffect(() => {
     if (!snapshotID) return;
     if (analysis && analysis.tool === "ontopic") {
-      setReview(analysis as OptionalReviewData<OnTopicReviewData>);
-      if ("response" in analysis && analysis.response.html) {
-        dispatch({ type: "update", sentences: analysis.response.html });
-      }
+      startTransition(() => {
+        triggerDispatch(analysis);
+      });
       return;
     }
-    mutation.mutate({
-      id: snapshotID,
+    startTransition(() => {
+      triggerMutation(snapshotID);
     });
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
-  }, [snapshotID, analysis, dispatch, mutation]);
+  }, [snapshotID, analysis]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 const OnTopicDataContext =

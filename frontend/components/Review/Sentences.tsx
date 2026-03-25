@@ -1,12 +1,10 @@
 import classNames from "classnames";
-import { type FC, type HTMLProps, useEffect, useState } from "react";
+import DOMPurify from "dompurify";
+import { type FC, type HTMLProps, useEffect, useReducer } from "react";
 import { type ButtonProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import {
-  type ClarityData,
-  cleanAndRepairSentenceData,
-} from "../../src/lib/OnTopicData";
+import { cleanAndRepairSentenceData } from "../../src/lib/OnTopicData";
 import { isErrorData } from "../../src/lib/ReviewResponse";
 import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
 import { ReviewToolCard } from "../ReviewContext/ReviewContext";
@@ -31,7 +29,7 @@ function highlightSentence(aParagraphIndex: number, aSentenceIndex: number) {
   });
 
   const element = document.querySelector(
-    `.user-text .sentence[data-ds-paragraph="${aParagraphIndex + 1}"][data-ds-sentence="${aSentenceIndex + 1}"]`
+    `.user-text .sentence[data-ds-paragraph="${aParagraphIndex}"][data-ds-sentence="${aSentenceIndex}"]`
   );
   element?.classList.add("highlight", "highlight-0");
   element?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -99,53 +97,39 @@ const Legend: FC = () => {
 export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
-  const [paragraphIndex, setParagraphIndex] = useState(-1);
-  const [sentenceIndex, setSentenceIndex] = useState(-1);
-  const [sentenceDetails, setSentenceDetails] = useState<string | null>(null);
-  const [htmlSentences, setHtmlSentences] = useState<null | string[][]>(null);
-  const [textData, setTextData] = useState<ClarityData | undefined>();
-
-  useEffect(
-    () =>
-      setHtmlSentences(
-        !isErrorData(review)
-          ? cleanAndRepairSentenceData(review?.response)
-          : null
-      ),
-    [review]
+  const htmlSentences = !isErrorData(review)
+    ? cleanAndRepairSentenceData(review?.response)
+    : null;
+  const [selected, dispatch] = useReducer(
+    (
+      state: { paragraph: number; sentence: number; details: string | null },
+      action: { paragraph: number; sentence: number }
+    ) => {
+      const details =
+        action.paragraph < 0 || action.sentence < 0
+          ? null
+          : (htmlSentences
+              ?.at(action.paragraph - 1)
+              ?.at(action.sentence - 1)
+              ?.replaceAll('\\"', '"') ?? null);
+      return {
+        ...state,
+        paragraph: action.paragraph,
+        sentence: action.sentence,
+        details,
+      };
+    },
+    { paragraph: -1, sentence: -1, details: null }
   );
-
-  useEffect(() => {
-    setParagraphIndex(-1);
-    setSentenceIndex(-1);
-    setTextData(!isErrorData(review) ? review?.response.clarity : undefined);
-  }, [review]);
-
-  useEffect(() => {
-    if (paragraphIndex < 0 || sentenceIndex < 0) {
-      setSentenceDetails(null);
-    } else {
-      setSentenceDetails(
-        htmlSentences
-          ?.at(paragraphIndex - 1)
-          ?.at(sentenceIndex - 1)
-          ?.replaceAll('\\"', '"') ?? null
-      );
-    }
-  }, [htmlSentences, paragraphIndex, sentenceIndex]);
+  const textData = !isErrorData(review) ? review?.response.clarity : undefined;
 
   const onHandleSentence = (paragraph: number, sentence: number) => {
-    if (paragraph === paragraphIndex && sentence === sentenceIndex) {
-      setParagraphIndex(-1);
-      setSentenceIndex(-1);
-      highlightSentence(-1, -1);
-    } else {
-      highlightSentence(paragraph - 1, sentence - 1);
-      setParagraphIndex(paragraph);
-      setSentenceIndex(sentence);
-    }
-    // TODO text highlighting
+    dispatch({ paragraph, sentence });
+    highlightSentence(paragraph, sentence);
   };
+  useEffect(() => {
+    onHandleSentence(-1, -1);
+  }, [review]);
 
   return (
     <ReviewToolCard
@@ -159,8 +143,13 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
     >
       <Legend />
       <div className="py-1 overflow-auto sentence-display mb-1">
-        {sentenceDetails ? (
-          <div dangerouslySetInnerHTML={{ __html: sentenceDetails }} />
+        {selected.details ? (
+          <div
+            // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(selected.details),
+            }}
+          />
         ) : (
           <p>{t("sentences.select")}</p>
         )}
@@ -171,6 +160,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
             <tbody>
               {textData?.map((sentence, i) =>
                 typeof sentence === "string" ? (
+                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
                   <tr key={`p${i}`}>
                     <td className="paragraph-count" colSpan={3}>
                       &nbsp;
@@ -181,8 +171,8 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
                     key={`p${sentence.at(0)}-s${sentence.at(1)}`}
                     className={classNames(
                       "selectable",
-                      paragraphIndex === sentence.at(0) &&
-                        sentenceIndex === sentence.at(1)
+                      selected.paragraph === sentence.at(0) &&
+                        selected.sentence === sentence.at(1)
                         ? "table-active"
                         : ""
                     )}
@@ -193,6 +183,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
                         0,
                         sentence[2].sent_analysis.L_NPS
                       ).map((np, j) => (
+                        /* eslint-disable-next-line @eslint-react/no-array-index-key */
                         <TopicTextIcon key={`s${i}-lnp${j}`} title={np} />
                       ))}
                     </td>
@@ -224,6 +215,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
                       {sentence[2].sent_analysis.NPS.slice(
                         -sentence[2].sent_analysis.R_NPS
                       ).map((np, j) => (
+                        /* eslint-disable-next-line @eslint-react/no-array-index-key */
                         <TopicTextIcon key={`s${i}-rnp${j}`} title={np} />
                       ))}
                     </td>

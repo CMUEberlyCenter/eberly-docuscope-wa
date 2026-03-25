@@ -46,25 +46,28 @@ export const Rating: FC<RatingProps> = ({
             style[`rating-${fullSymbols}`]
           )}
         >
-          {new Array(scale).fill(0).map((_v, i) => {
-            let percent = 0;
-            if (i - fullSymbols < 0) {
-              percent = 100;
-            } else if (i - fullSymbols === 0) {
-              percent = (rating - i) * 100;
-            }
-            return (
-              <span key={`rating-${i}`} className="position-relative">
-                <i
-                  className={`fa-regular fa-star ${percent < 100 ? "visible" : "invisible"}`}
-                ></i>
-                <i
-                  className="fa-solid fa-star d-inline-block position-absolute overflow-hidden"
-                  style={{ top: 5, left: 0, width: `${percent}%` }}
-                ></i>
-              </span>
-            );
-          })}
+          {new Array(scale)
+            .fill(0)
+            .map((_, i) => i)
+            .map((i) => {
+              let percent = 0;
+              if (i - fullSymbols < 0) {
+                percent = 100;
+              } else if (i - fullSymbols === 0) {
+                percent = (rating - i) * 100;
+              }
+              return (
+                <span key={`rating-${i}`} className="position-relative">
+                  <i
+                    className={`fa-regular fa-star ${percent < 100 ? "visible" : "invisible"}`}
+                  ></i>
+                  <i
+                    className="fa-solid fa-star d-inline-block position-absolute overflow-hidden"
+                    style={{ top: 5, left: 0, width: `${percent}%` }}
+                  ></i>
+                </span>
+              );
+            })}
         </div>
         <span className="visually-hidden ms-2">{rating}</span>
       </div>

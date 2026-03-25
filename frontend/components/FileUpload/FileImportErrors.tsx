@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  type FC,
-  type ReactNode,
-} from "react";
+import { createContext, use, useState, type FC, type ReactNode } from "react";
 import { ListGroup, Toast } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -27,7 +21,7 @@ const FileImportErrorContext = createContext<{
   setShowErrors: () => {},
   showError: () => {},
 });
-export const useFileImportErrors = () => useContext(FileImportErrorContext);
+export const useFileImportErrors = () => use(FileImportErrorContext);
 
 export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
   children,
@@ -42,7 +36,7 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <FileImportErrorContext.Provider
+    <FileImportErrorContext
       value={{
         errors,
         setErrors,
@@ -65,9 +59,9 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
         <Toast.Body>
           <p>{t("editor.upload.error.overview")}</p>
           <ListGroup>
-            {errors.map((msg, i) => (
+            {errors.map((msg) => (
               <ListGroup.Item
-                key={i}
+                key={crypto.randomUUID()}
                 variant={msg.type === "error" ? "danger" : "warning"}
               >
                 {msg.type === "error"
@@ -78,6 +72,6 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
           </ListGroup>
         </Toast.Body>
       </Toast>
-    </FileImportErrorContext.Provider>
+    </FileImportErrorContext>
   );
 };

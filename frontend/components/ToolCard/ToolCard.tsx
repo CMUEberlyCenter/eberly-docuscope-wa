@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import DOMPurify from "dompurify";
 import { FC, type HTMLProps, useCallback, useId, useState } from "react";
 import {
   Alert,
@@ -326,8 +327,9 @@ const ToolCard: FC<ToolCardProps> = ({
               {/* For #135, use results directly. */}
               {currentTool.result ? (
                 <div
+                  // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
                   dangerouslySetInnerHTML={{
-                    __html: currentTool.result,
+                    __html: DOMPurify.sanitize(currentTool.result),
                   }}
                 />
               ) : (

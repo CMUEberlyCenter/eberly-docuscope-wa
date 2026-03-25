@@ -3,10 +3,12 @@ import {
   createContext,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
+  useTransition,
 } from "react";
 import { Optional } from "../../src";
 import { userLanguage } from "../../src/lib/languageCode";
@@ -66,25 +68,36 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
     },
   });
 
+  const [pending, startTransition] = useTransition();
+  const triggerMutation = useEffectEvent(
+    (document: string, writing_task: Optional<WritingTask>) => {
+      mutation.mutate({ document, writing_task });
+    }
+  );
+
   // When the document or writing task changes, fetch a new review
   useEffect(() => {
     if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
+    startTransition(() => {
+      triggerMutation(document, writing_task);
     });
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
-  }, [document, writing_task, mutation]);
+  }, [document, writing_task]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 function useSnapshotReview<T extends Analysis>(
@@ -131,26 +144,31 @@ function useSnapshotReview<T extends Analysis>(
       abortControllerRef.current = null;
     },
   });
+  const triggerMutation = useEffectEvent((id: string) => {
+    mutation.mutate({ id });
+  });
+  const [pending, startTransition] = useTransition();
   useEffect(() => {
     if (!snapshotID) return;
-    if (analysis && analysis.tool === tool) {
-      setReview(analysis as OptionalReviewData<T>);
-      return;
-    }
-    mutation.mutate({
-      id: snapshotID,
+    startTransition(() => {
+      triggerMutation(snapshotID);
     });
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [snapshotID, analysis]);
+  }, [snapshotID]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 export type ReviewDataContext<T extends Analysis> = {
@@ -172,8 +190,9 @@ export function getAnalysis<T extends Analysis>(
 
 export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
   const Context = createContext<ReviewDataContext<T> | null>(null);
+  // eslint-disable-next-line @eslint-react/component-hook-factories
   const useReviewDataContext = () => {
-    const ctx = useContext(Context);
+    const ctx = use(Context);
     if (!ctx) {
       throw new Error(
         "useReviewContext must be used within a ReviewProvider or SnapshotProvider"
@@ -182,11 +201,13 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
     return ctx;
   };
 
+  // eslint-disable-next-line @eslint-react/component-hook-factories
   const ReviewDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { review, pending } = useReview<T>(tool);
     return <Context value={{ review, pending }}>{children}</Context>;
   };
 
+  // eslint-disable-next-line @eslint-react/component-hook-factories
   const SnapshotDataProvider: FC<SnapshotProviderProps> = ({
     children,
     snapshotId,

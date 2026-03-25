@@ -190,7 +190,7 @@ function useExpectationsDataMutation({
       dispatch({ type: "unset" });
       dispatch({ type: "remove" });
     };
-  }, [task, document, dispatch]);
+  }, [task, document, dispatch, setCurrent]);
 
   return {
     taggedDocument,
@@ -205,8 +205,8 @@ function useExpectationsDataMutation({
   };
 }
 
-function useExpectationsSnapshotMutation(snapshotID: string) {
-  return function useSnapshot({
+function generateExpectationsSnapshotMutation(snapshotID: string) {
+  return function ({
     expectationIndex,
     setCurrent,
     eventKey,
@@ -291,7 +291,7 @@ function useExpectationsSnapshotMutation(snapshotID: string) {
 
 const ExpectationsDataContext = createContext<
   | typeof useExpectationsDataMutation
-  | ReturnType<typeof useExpectationsSnapshotMutation>
+  | ReturnType<typeof generateExpectationsSnapshotMutation>
   | null
 >(null);
 const ExpectationsSnapshotContext = createContext<
@@ -316,22 +316,20 @@ export const ExpectationsDataProvider: FC<{ children: React.ReactNode }> = ({
   const { task } = useWritingTask();
   const [document] = useFileText();
   /** Document hash to force rerender of expectation on change of document. */
-  const [hash, setHash] = useState<string>("null");
-  useEffect(() => {
-    // compute hash of document for use in keys
-    setHash(simpleHashString(document || ""));
-  }, [document]);
+  // const hash = useMemo(() => {
+  //   return simpleHashString(document || "");
+  // }, [document]);
 
   return (
-    <ExpectationsDataContext.Provider value={useExpectationsDataMutation}>
-      <ExpectationsSnapshotContext.Provider value={new Map()}>
-        <WritingTaskContext.Provider value={task}>
-          <FileHashContext.Provider value={hash}>
+    <ExpectationsDataContext value={useExpectationsDataMutation}>
+      <ExpectationsSnapshotContext value={new Map()}>
+        <WritingTaskContext value={task}>
+          <FileHashContext value={simpleHashString(document || "")}>
             {children}
-          </FileHashContext.Provider>
-        </WritingTaskContext.Provider>
-      </ExpectationsSnapshotContext.Provider>
-    </ExpectationsDataContext.Provider>
+          </FileHashContext>
+        </WritingTaskContext>
+      </ExpectationsSnapshotContext>
+    </ExpectationsDataContext>
   );
 };
 
@@ -341,34 +339,22 @@ export const ExpectationSnapshotProvider: FC<{
   task?: WritingTask;
   analysis?: OptionalReviewData<ExpectationsData[]>;
 }> = ({ analysis, children, snapshotID, task }) => {
-  const mutationFactory = useExpectationsSnapshotMutation(snapshotID);
-  const [analyses, setAnalyses] = useState(
-    new Map(
-      analysis && !isErrorData(analysis)
-        ? analysis.map((a) => [a.expectation, a])
-        : []
-    )
+  const mutationFactory = generateExpectationsSnapshotMutation(snapshotID);
+
+  const analyses = new Map(
+    analysis && !isErrorData(analysis)
+      ? analysis.map((a) => [a.expectation, a])
+      : []
   );
 
-  useEffect(() => {
-    setAnalyses(
-      new Map(
-        analysis && !isErrorData(analysis)
-          ? analysis.map((a) => [a.expectation, a])
-          : []
-      )
-    ); // reset to clear any old data
-  }, [analysis]);
   return (
-    <ExpectationsDataContext.Provider value={mutationFactory}>
-      <ExpectationsSnapshotContext.Provider value={analyses}>
-        <WritingTaskContext.Provider value={task ?? null}>
-          <FileHashContext.Provider value={snapshotID}>
-            {children}
-          </FileHashContext.Provider>
-        </WritingTaskContext.Provider>
-      </ExpectationsSnapshotContext.Provider>
-    </ExpectationsDataContext.Provider>
+    <ExpectationsDataContext value={mutationFactory}>
+      <ExpectationsSnapshotContext value={analyses}>
+        <WritingTaskContext value={task ?? null}>
+          <FileHashContext value={snapshotID}>{children}</FileHashContext>
+        </WritingTaskContext>
+      </ExpectationsSnapshotContext>
+    </ExpectationsDataContext>
   );
 };
 
@@ -395,7 +381,7 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
   });
   if (!mutation) {
     throw new Error(
-      "ExpectationRule must be used within an ExpectationsDataContext.Provider"
+      "ExpectationRule must be used within an ExpectationsDataContext"
     );
   }
 
@@ -551,12 +537,6 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   const task = use(WritingTaskContext);
   const id = use(FileHashContext);
 
-  const dispatch = useReviewDispatch();
-  useEffect(() => {
-    // this gets the current to reset on tool change.
-    setCurrent(null);
-  }, [task, dispatch]);
-
   return (
     <ReviewReset>
       <article
@@ -578,7 +558,9 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
             </div>
           </Activity>
           {task?.rules.rules.map((rule, i) => (
-            <section key={`${id}-rule-${rule.name}-${i}`}>
+            <section
+              key={`${id}-${task?.info.id || "no-task"}-rule-${rule.name}`}
+            >
               <h5 className="mb-0">{rule.name}</h5>
               <Accordion
                 className="mb-3"
@@ -586,20 +568,20 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
                 activeKey={current}
               >
                 <>
-                  {rule.children.map((rule, j) =>
-                    analyses.has(rule.name) ? (
+                  {rule.children.map((subrule, j) =>
+                    analyses.has(subrule.name) ? (
                       <LoadedExpectationRule
-                        analysis={analyses.get(rule.name)}
-                        eventKey={`${id}-expectation-${i}-${j}`}
-                        rule={rule}
-                        key={`${id}-expectation-${i}-${j}`}
+                        analysis={analyses.get(subrule.name)}
+                        eventKey={`${id}-${task?.info.id || "no-task"}-expectation-${i}-${j}`}
+                        rule={subrule}
+                        key={`${id}-${task?.info.id || "no-task"}-expectation-${rule.name}-${subrule.name}`}
                       />
                     ) : (
                       <ExpectationRule
-                        rule={rule}
-                        ruleIdx={getIndexOfExpectation(task, rule)}
-                        key={`${id}-expectation-${i}-${j}`}
-                        eventKey={`${id}-expectation-${i}-${j}`}
+                        rule={subrule}
+                        ruleIdx={getIndexOfExpectation(task, subrule)}
+                        key={`${id}-${task?.info.id || "no-task"}-expectation-${rule.name}-${subrule.name}`}
+                        eventKey={`${id}-${task?.info.id || "no-task"}-expectation-${i}-${j}`}
                         setCurrent={setCurrent}
                       />
                     )

@@ -84,6 +84,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
               <h6>{t("prominent_topics.strategies")}</h6>
               <ul>
                 {review.response.strategies.map((strategy, i) => (
+                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
                   <li key={`strategy-${i}`}>{strategy}</li>
                 ))}
               </ul>
@@ -106,7 +107,8 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                   },
                   i
                 ) => (
-                  <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                  <Accordion.Item key={`topic-${i}`} eventKey={`topic-${i}`}>
                     <Accordion.Header className="accordion-header-highlight">
                       <div className="flex-grow-1">
                         <h6 className="d-inline">
@@ -145,6 +147,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                           <h6>{t("prominent_topics.elaborations")}</h6>
                           <ul>
                             {techniques.map((technique, k) => (
+                              /* eslint-disable-next-line @eslint-react/no-array-index-key */
                               <li key={`elaboration-${i}-${k}`}>{technique}</li>
                             ))}
                           </ul>
@@ -154,10 +157,17 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                         <h6>{t("prominent_topics.suggestions")}</h6>
                         {suggestion || impact ? (
                           <ul>
+                            {/* eslint-disable-next-line @eslint-react/no-array-index-key */}
                             <li key={`suggestion-${i}-${suggestion}`}>
                               {suggestion}
                             </li>
-                            <li key={`impact-${i}-${impact}`}>{impact}</li>
+                            <li
+                              key={
+                                `impact-${i}-${impact}` /* eslint-disable-line @eslint-react/no-array-index-key */
+                              }
+                            >
+                              {impact}
+                            </li>
                           </ul>
                         ) : (
                           <p className="m-3 mt-2">

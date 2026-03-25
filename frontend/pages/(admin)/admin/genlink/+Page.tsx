@@ -7,7 +7,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { convertToHtml } from "mammoth/mammoth.browser";
-import { Activity, ChangeEvent, FC, useEffect, useState } from "react";
+import { Activity, ChangeEvent, FC, useCallback, useState } from "react";
 import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -39,6 +39,27 @@ export const Page: FC = () => {
   const [custom, setCustom] = useState<WritingTask | null>(null); // Uploaded file content.
   const [valid, setValid] = useState(true); // Uploaded file validity.
   const [error, setError] = useState(""); // Error messages for uploaded file.
+  const updateSelected = useCallback(
+    (selected: DbWritingTask | null) => {
+      setSelected(selected);
+      if (selected) {
+        const tools =
+          selected.info.review_tools
+            ?.filter(
+              ({ tool }) =>
+                settings &&
+                tool in settings &&
+                settings[tool as keyof typeof settings]
+            )
+            .map(({ tool, enabled }) => (enabled ? tool : null))
+            .filter((tool): tool is string => tool !== null) ?? [];
+        setEnabledTools(tools);
+      } else {
+        setEnabledTools([]);
+      }
+    },
+    [settings]
+  );
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
@@ -80,7 +101,7 @@ export const Page: FC = () => {
           public: false,
         };
         setCustom(custom);
-        setSelected(custom);
+        updateSelected(custom);
       } else {
         setValid(false);
         setError(t("select_task.invalid_upload"));
@@ -101,23 +122,6 @@ export const Page: FC = () => {
   const [validDocument, setValidDocument] = useState(true); // Uploaded file validity.
   const [errorDocument, setErrorDocument] = useState(""); // Error messages for uploaded file.
   const [enabledTools, setEnabledTools] = useState<string[]>([]);
-  useEffect(() => {
-    if (selected) {
-      const tools =
-        selected.info.review_tools
-          ?.filter(
-            ({ tool }) =>
-              settings &&
-              tool in settings &&
-              settings[tool as keyof typeof settings]
-          )
-          .map(({ tool, enabled }) => (enabled ? tool : null))
-          .filter((tool): tool is string => tool !== null) ?? [];
-      setEnabledTools(tools);
-    } else {
-      setEnabledTools([]);
-    }
-  }, [selected, settings]);
 
   const onDocumentChange = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
@@ -145,7 +149,7 @@ export const Page: FC = () => {
           styleMap: "u => u", // Preserve underline styles (str | str[] | regexp)
         }
       );
-      if (messages.length) {
+      if (Array.isArray(messages) && messages.length) {
         throw new Error(
           t("admin:genlink.document.invalid_file_content", {
             message: messages.map((m) => m.message).join("; "),
@@ -203,7 +207,7 @@ export const Page: FC = () => {
                         key={task.info.id ?? task.info.name}
                         action
                         active={selected === task}
-                        onClick={() => setSelected(task)}
+                        onClick={() => updateSelected(task)}
                       >
                         {task.info.name}
                       </ListGroup.Item>
@@ -213,7 +217,7 @@ export const Page: FC = () => {
                       key={"custom"}
                       action
                       active={selected === custom}
-                      onClick={() => setSelected(custom)}
+                      onClick={() => updateSelected(custom)}
                     >
                       {custom.info.name}
                     </ListGroup.Item>
@@ -223,7 +227,7 @@ export const Page: FC = () => {
                     action
                     variant="warning"
                     active={!selected}
-                    onClick={() => setSelected(null)}
+                    onClick={() => updateSelected(null)}
                   >
                     {t("select_task.null")}
                   </ListGroup.Item>

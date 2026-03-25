@@ -50,7 +50,7 @@ type ClaimsProps = AccordionProps & {
 /** Component for displaying a list of Claims. */
 const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
   const dispatch = useReviewDispatch();
-  const prefix = useId();
+  const prefixId = useId();
 
   return (
     <Translation ns={"review"}>
@@ -70,8 +70,9 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 i
               ) => (
                 <Accordion.Item
-                  key={`${prefix}-${i}`}
-                  eventKey={`${prefix}-${i}`}
+                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                  key={`${prefixId}-${i}`}
+                  eventKey={`${prefixId}-${i}`}
                 >
                   <Accordion.Header className="accordion-header-highlight">
                     <div className="flex-grow-1">
@@ -127,7 +128,8 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         <h6>{t("lines_of_arguments.support")}</h6>
                         <ul>
                           {support.map((s, k) => (
-                            <li key={`${i}-${k}`}>{s}</li>
+                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                            <li key={`${prefixId}-${i}-${k}`}>{s}</li>
                           ))}
                         </ul>
                       </div>
@@ -137,10 +139,14 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       {suggestion || impact ? (
                         <ul>
                           {suggestion ? (
-                            <li key={`${i}-suggestion`}>{suggestion}</li>
+                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                            <li key={`${prefixId}-${i}-suggestion`}>
+                              {suggestion}
+                            </li>
                           ) : null}
                           {impact ? (
-                            <li key={`${i}-impact`}>{impact}</li>
+                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                            <li key={`${prefixId}-${i}-impact`}>{impact}</li>
                           ) : null}
                         </ul>
                       ) : (
@@ -218,6 +224,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
                 <h6>{t("lines_of_arguments.strategies")}</h6>
                 <ul>
                   {review.response.strategies.map((strat, i) => (
+                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
                     <li key={`loa-strat-${i}`}>{strat}</li>
                   ))}
                 </ul>

@@ -1,8 +1,8 @@
 import { convertToHtml } from "mammoth";
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type FC,
@@ -15,13 +15,13 @@ import { FileUpload } from "./FileUpload";
 import { convertOptions } from "./convertOptions";
 
 /** Context for initiating the file upload dialog. */
-const InitiateOpenFileDispatch = createContext<() => void>(() => {});
+const InitiateOpenFileDispatchContext = createContext<() => void>(() => {});
 
 /**
  * Hook for accessing the function to initiate the file upload dialog.
  * This is used to open the file picker dialog.
  */
-export const useInitiateUploadFile = () => useContext(InitiateOpenFileDispatch);
+export const useInitiateUploadFile = () => use(InitiateOpenFileDispatchContext);
 
 const loadSaveFileOps = {
   id: "myprose",
@@ -76,7 +76,7 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
     } else {
       setShowUpload(true);
     }
-  }, []);
+  }, [showError]);
   useEffect(() => {
     if (!upload) {
       setFilename(null);
@@ -115,16 +115,16 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
           console.error("Caught non-error", err);
         }
       });
-  }, [upload]);
+  }, [upload, showError, t, setFilename, setText]);
 
   return (
-    <InitiateOpenFileDispatch.Provider value={uploadFile}>
+    <InitiateOpenFileDispatchContext value={uploadFile}>
       {children}
       <FileUpload
         show={showUpload}
         onHide={() => setShowUpload(false)}
         onFile={setUpload}
       />
-    </InitiateOpenFileDispatch.Provider>
+    </InitiateOpenFileDispatchContext>
   );
 };

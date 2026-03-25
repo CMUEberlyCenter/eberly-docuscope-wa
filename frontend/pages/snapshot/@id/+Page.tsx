@@ -1,4 +1,4 @@
-import { Activity, FC, useState } from "react";
+import { Activity, FC, useEffect, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -96,6 +96,22 @@ export const Page: FC = () => {
   const toggleTool = (tool: Tool) => {
     setTool((prev) => (prev === tool ? "null" : tool));
   };
+  useEffect(() => {
+    if (tool !== "null") {
+      gtag("event", "screen_view", {
+        app_name: "myProse-snapshot",
+        screen_name: `${reviewID}_${tool}`,
+      });
+    }
+  }, [reviewID, tool]);
+  useEffect(() => {
+    if (secondaryTool !== "null") {
+      gtag("event", "screen_view", {
+        app_name: "myProse-snapshot",
+        screen_name: `${reviewID}_${secondaryTool}`,
+      });
+    }
+  }, [reviewID, secondaryTool]);
   const toggleSecondaryTool = (selectedTool: Tool) => {
     setSecondaryTool((prev) => (prev === selectedTool ? "null" : selectedTool));
   };

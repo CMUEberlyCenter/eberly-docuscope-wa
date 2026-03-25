@@ -11,7 +11,7 @@ import {
   faVolumeHigh,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Button, ButtonGroup, Collapse } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
@@ -32,10 +32,9 @@ export const TextToSpeech: FC<{
   const [state, setState] = useState<"paused" | "stopped" | "playing">(
     "stopped"
   );
-  const [utterance, setUtterance] = useState<null | SpeechSynthesisUtterance>(
-    null
-  );
-  enabled = enabled ?? usePageContext()?.settings?.text2speech;
+  const utterance = useMemo(() => new SpeechSynthesisUtterance(text), [text]);
+  const ctx = usePageContext();
+  enabled = enabled ?? ctx?.settings?.text2speech;
 
   useEffect(() => {
     return () => {
@@ -45,17 +44,15 @@ export const TextToSpeech: FC<{
 
   /** Update utterance on change of text. */
   useEffect(() => {
-    setState("stopped");
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    setUtterance(utter);
-  }, [text]);
-
-  /** Cancel on close tools */
-  useEffect(() => {
-    setState("stopped");
-    window.speechSynthesis.cancel();
-  }, [open]);
+    const handleEnd = () => {
+      setState("stopped");
+    };
+    utterance.addEventListener("end", handleEnd);
+    return () => {
+      window.speechSynthesis.cancel();
+      utterance.removeEventListener("end", handleEnd);
+    };
+  }, [utterance]);
 
   /** Start utterance when play is pressed or resume if paused. */
   const handlePlay = useCallback(() => {
@@ -106,7 +103,10 @@ export const TextToSpeech: FC<{
         </ButtonGroup>
       </Collapse>
       <Button
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          handleStop();
+          setOpen(!open);
+        }}
         variant={!open ? "icon" : "primary"}
       >
         {!open ? (

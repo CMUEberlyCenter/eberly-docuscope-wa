@@ -35,6 +35,7 @@ const HeadDefault: FC = () => {
         src={`https://www.googletagmanager.com/gtag/js?id=${analytics}`}
       ></script>
       <script
+        // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
         dangerouslySetInnerHTML={{
           __html: `window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

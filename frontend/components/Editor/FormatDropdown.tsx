@@ -1,4 +1,4 @@
-import { type FC, type ReactNode, useEffect, useState } from "react";
+import { type FC, type ReactNode } from "react";
 import { ButtonGroup, Dropdown } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Editor, Element, Transforms } from "slate";
@@ -72,11 +72,10 @@ const BlockItem: FC<{
   children: ReactNode;
 }> = ({ eventKey, children }) => {
   const editor = useSlate();
-  const [active, setActive] = useState(false);
   const selection = useSlateSelection();
-  useEffect(() => {
+  const isActive = () => {
     if (!selection) {
-      setActive(eventKey === "paragraph");
+      return eventKey === "paragraph";
     } else {
       const [match] = [
         ...Editor.nodes(editor, {
@@ -85,54 +84,50 @@ const BlockItem: FC<{
             !Editor.isEditor(n) && Element.isElement(n) && n.type === eventKey,
         }),
       ];
-      setActive(!!match);
+      return !!match;
     }
-  }, [editor, selection, eventKey]);
+  };
 
   return (
-    <Dropdown.Item active={active} eventKey={eventKey}>
+    <Dropdown.Item active={isActive()} eventKey={eventKey}>
       {children}
     </Dropdown.Item>
   );
 };
 
+/**
+ * Format Dropdown Component.
+ * Changes the block type of the current selection in the editor. The label of the dropdown reflects the block type of the current selection, defaulting to "Paragraph" if multiple block types are present or if the selection is empty.
+ * @example
+ *   (&lt;FormatDropdown /&gt;)
+ * @see https://docs.slatejs.org/concepts/11-typescript#typescript-and-slate-react for more information on using Slate with TypeScript.
+ */
 export const FormatDropdown: FC = () => {
-  const [label, setLabel] = useState("paragraph");
   const editor = useSlate();
-  const selection = useSlateSelection();
   const { t } = useTranslation();
-  useEffect(() => {
-    const type = activeBlockType(editor);
-    switch (type) {
+  const label = (() => {
+    switch (activeBlockType(editor)) {
       case "heading-one":
-        setLabel(t("editor.menu.h1"));
-        break;
+        return "editor.menu.h1";
       case "heading-two":
-        setLabel(t("editor.menu.h2"));
-        break;
+        return "editor.menu.h2";
       case "heading-three":
-        setLabel(t("editor.menu.h3"));
-        break;
+        return "editor.menu.h3";
       case "heading-four":
-        setLabel(t("editor.menu.h4"));
-        break;
+        return "editor.menu.h4";
       case "heading-five":
-        setLabel(t("editor.menu.h5"));
-        break;
+        return "editor.menu.h5";
       case "heading-six":
-        setLabel(t("editor.menu.h6"));
-        break;
+        return "editor.menu.h6";
       case "bulleted-list":
-        setLabel(t("editor.menu.list"));
-        break;
+        return "editor.menu.list";
       case "numbered-list":
-        setLabel(t("editor.menu.numbered"));
-        break;
+        return "editor.menu.numbered";
       case "paragraph":
       default:
-        setLabel(t("editor.menu.paragraph"));
+        return "editor.menu.paragraph";
     }
-  }, [selection, editor, t]);
+  })();
   return (
     <Dropdown
       as={ButtonGroup}
@@ -145,7 +140,7 @@ export const FormatDropdown: FC = () => {
         className="text-end"
         // style={{ width: "10em" }}
       >
-        {label}
+        {t(label)}
       </Dropdown.Toggle>
       <Dropdown.Menu>
         <BlockItem eventKey={"paragraph"}>

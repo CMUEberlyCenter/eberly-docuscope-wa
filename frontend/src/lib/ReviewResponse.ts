@@ -55,9 +55,13 @@ export function isAssessment(data: unknown): data is GeneralAssessment {
 
 /** List of identified civility issues in the text. */
 type CivilToneOutput = {
-  text: string; // An inappropriate text segment.
+  /** Identified text segment. */
+  text: string;
+  /** A brief comment on the issue with the tone in the text. */
   assessment: string;
+  /** A brief suggestion on how to improve the tone in the text. */
   suggestion: string;
+  /** The id of the sentence span that was identified as having tone issues. */
   sent_id: string;
 }[];
 // function isCivilToneOutput(data: unknown): data is CivilToneOutput {

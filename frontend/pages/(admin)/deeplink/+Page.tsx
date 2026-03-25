@@ -56,7 +56,7 @@ export const Page: FC = () => {
   };
   const selectId = useId();
   const [tool, setTool] = useState<string>("");
-  const target = useRef<HTMLButtonElement>(null);
+  const targetRef = useRef<HTMLButtonElement>(null);
 
   // TODO: error page when not in LTI context.
   return (
@@ -156,7 +156,7 @@ export const Page: FC = () => {
             >
               <div>
                 <button
-                  ref={target}
+                  ref={targetRef}
                   type="submit"
                   className="btn btn-primary"
                   disabled={!selected || !tool}

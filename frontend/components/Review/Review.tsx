@@ -1,4 +1,4 @@
-import { Activity, type FC, useEffect, useState } from "react";
+import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -67,10 +67,10 @@ export const Review: FC = () => {
   const [tab, setTab] = useState<TabKey>("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
-  const [ready, setReady] = useState<boolean>(false);
   const [userText] = useFileText();
   const { task: writingTask } = useWritingTask();
   const { settings } = usePageContext();
+  const ready = !!userText && userText.trim().length > 0;
 
   const toggleTool = (selectedTool: Tool) => {
     setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
@@ -79,117 +79,67 @@ export const Review: FC = () => {
     setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
   };
 
-  useEffect(() => {
-    setReady(!!userText && userText.trim().length > 0);
-  }, [userText]);
+  // As per #230 most features are available even without a writing task if
+  // enabled in settings.  The server settings have priority over writing tasks.
+  const civilToneFeature =
+    !!settings?.civil_tone &&
+    (!writingTask || isEnabled(writingTask, "civil_tone"));
+  const credibilityFeature =
+    !!settings?.credibility &&
+    (!writingTask || isEnabled(writingTask, "credibility"));
+  const expectationsFeature =
+    !!settings?.expectations &&
+    (!writingTask || isEnabled(writingTask, "expectations"));
+  const ideasFeature =
+    !!settings?.prominent_topics &&
+    (!writingTask || isEnabled(writingTask, "prominent_topics"));
+  const argumentsFeature =
+    !!settings?.lines_of_arguments &&
+    isEnabled(writingTask, "lines_of_arguments");
+  const logicalFlowFeature =
+    !!settings?.logical_flow &&
+    (!writingTask || isEnabled(writingTask, "logical_flow"));
+  const paragraphClarityFeature =
+    !!settings?.paragraph_clarity &&
+    (!writingTask || isEnabled(writingTask, "paragraph_clarity"));
+  const professionalToneFeature =
+    !!settings?.professional_tone &&
+    (!writingTask || isEnabled(writingTask, "professional_tone"));
+  const sentencesFeature =
+    !!settings?.sentence_density &&
+    (!writingTask || isEnabled(writingTask, "sentence_density"));
+  const sourcesFeature =
+    !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"));
+  const impressionsFeature = false; /*settings.impressions && isEnabled(writingTask, "impressions")*/
+  const organizationFeature =
+    !!settings?.term_matrix &&
+    (!writingTask || isEnabled(writingTask, "term_matrix"));
+  const additionalToolsFeature =
+    civilToneFeature ||
+    credibilityFeature ||
+    sourcesFeature ||
+    organizationFeature ||
+    impressionsFeature;
+  const bigPictureFeature =
+    expectationsFeature ||
+    argumentsFeature ||
+    ideasFeature ||
+    logicalFlowFeature;
+  const fineTuningFeature =
+    additionalToolsFeature ||
+    paragraphClarityFeature ||
+    professionalToneFeature ||
+    sentencesFeature;
 
-  const [civilToneFeature, setCivilToneFeature] = useState(false);
-  const [credibilityFeature, setCredibilityFeature] = useState(false);
-  const [expectationsFeature, setExpectationsFeature] = useState(false);
-  const [ideasFeature, setIdeasFeature] = useState(false);
-  const [argumentsFeature, setArgumentsFeature] = useState(false);
-  const [logicalFlowFeature, setLogicalFlowFeature] = useState(false);
-  const [paragraphClarityFeature, setParagraphClarityFeature] = useState(false);
-  const [professionalToneFeature, setProfessionalToneFeature] = useState(false);
-  const [sentencesFeature, setSentencesFeature] = useState(false);
-  const [sourcesFeature, setSourcesFeature] = useState(false);
-  const [impressionsFeature, setImpressionsFeature] = useState(false);
-  const [organizationFeature, setOrganizationFeature] = useState(false);
-  const [additionalToolsFeature, setAdditionalToolsFeature] = useState(false);
-  const [bigPictureFeature, setBigPictureFeature] = useState(false);
-  const [fineTuningFeature, setFineTuningFeature] = useState(false);
+  const [isPending, startTransition] = useTransition();
   useEffect(() => {
-    // As per #230 most features are available even without a writing task if
-    // enabled in settings.  The server settings have priority over writing tasks.
-    setCivilToneFeature(
-      !!settings?.civil_tone &&
-        (!writingTask || isEnabled(writingTask, "civil_tone"))
-    );
-    setCredibilityFeature(
-      !!settings?.credibility &&
-        (!writingTask || isEnabled(writingTask, "credibility"))
-    );
-    setExpectationsFeature(
-      !!settings?.expectations &&
-        (!writingTask || isEnabled(writingTask, "expectations"))
-    );
-    // Lines of arguments only available if enabled in writing task.
-    setArgumentsFeature(
-      !!settings?.lines_of_arguments &&
-        isEnabled(writingTask, "lines_of_arguments")
-    );
-    setLogicalFlowFeature(
-      !!settings?.logical_flow &&
-        (!writingTask || isEnabled(writingTask, "logical_flow"))
-    );
-    setParagraphClarityFeature(
-      !!settings?.paragraph_clarity &&
-        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
-    );
-    setProfessionalToneFeature(
-      !!settings?.professional_tone &&
-        (!writingTask || isEnabled(writingTask, "professional_tone"))
-    );
-    setIdeasFeature(
-      !!settings?.prominent_topics &&
-        (!writingTask || isEnabled(writingTask, "prominent_topics"))
-    );
-    setSentencesFeature(
-      !!settings?.sentence_density &&
-        (!writingTask || isEnabled(writingTask, "sentence_density"))
-    );
-    setSourcesFeature(
-      !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"))
-    );
-    setOrganizationFeature(
-      !!settings?.term_matrix &&
-        (!writingTask || isEnabled(writingTask, "term_matrix"))
-    );
-    setImpressionsFeature(
-      false
-      /*settings.impressions && isEnabled(writingTask, "impressions")*/
-    );
     // Reset to default tab/tool if writing task or settings change.
-    setTab("big_picture");
-    setTool("null");
-    setOtherTool("null");
+    startTransition(() => {
+      setTab(() => "big_picture");
+      setTool(() => "null");
+      setOtherTool(() => "null");
+    });
   }, [settings, writingTask]);
-  useEffect(() => {
-    setBigPictureFeature(
-      expectationsFeature ||
-        argumentsFeature ||
-        ideasFeature ||
-        logicalFlowFeature
-    );
-  }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
-  useEffect(() => {
-    setAdditionalToolsFeature(
-      civilToneFeature ||
-        credibilityFeature ||
-        sourcesFeature ||
-        organizationFeature ||
-        impressionsFeature
-    );
-  }, [
-    civilToneFeature,
-    credibilityFeature,
-    sourcesFeature,
-    organizationFeature,
-    impressionsFeature,
-  ]);
-  useEffect(() => {
-    setFineTuningFeature(
-      additionalToolsFeature ||
-        paragraphClarityFeature ||
-        professionalToneFeature ||
-        sentencesFeature
-    );
-  }, [
-    additionalToolsFeature,
-    paragraphClarityFeature,
-    professionalToneFeature,
-    sentencesFeature,
-  ]);
 
   return (
     <>
@@ -198,6 +148,7 @@ export const Review: FC = () => {
       )}
       <Tabs
         activeKey={tab}
+        aria-disabled={isPending}
         onSelect={(k) => {
           setTab(k as TabKey);
         }}
@@ -231,7 +182,7 @@ export const Review: FC = () => {
                     </OverlayTrigger>
                   ) : (
                     <ExpectationsButton
-                      disabled={!ready}
+                      disabled={!ready || isPending}
                       active={tool === "expectations"}
                       onClick={() => toggleTool("expectations")}
                     />
@@ -239,21 +190,21 @@ export const Review: FC = () => {
                 ) : null}
                 {ideasFeature ? (
                   <ProminentTopicsButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "prominent_topics"}
                     onClick={() => toggleTool("prominent_topics")}
                   />
                 ) : null}
                 {argumentsFeature ? (
                   <LinesOfArgumentsButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "lines_of_arguments"}
                     onClick={() => toggleTool("lines_of_arguments")}
                   />
                 ) : null}
                 {logicalFlowFeature ? (
                   <LogicalFlowButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "logical_flow"}
                     onClick={() => toggleTool("logical_flow")}
                   />
@@ -296,21 +247,21 @@ export const Review: FC = () => {
               <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                 {paragraphClarityFeature ? (
                   <ParagraphClarityButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "paragraph_clarity"}
                     onClick={() => toggleOtherTool("paragraph_clarity")}
                   />
                 ) : null}
                 {sentencesFeature ? (
                   <SentencesButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "sentences"}
                     onClick={() => toggleOtherTool("sentences")}
                   />
                 ) : null}
                 {professionalToneFeature ? (
                   <ProfessionalToneButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "professional_tone"}
                     onClick={() => toggleOtherTool("professional_tone")}
                   />
@@ -388,7 +339,7 @@ export const Review: FC = () => {
                         <Dropdown.Item
                           onClick={() => toggleOtherTool("civil_tone")}
                           active={otherTool === "civil_tone"}
-                          disabled={!ready}
+                          disabled={!ready || isPending}
                         >
                           <h6 className="text-primary">
                             {t("civil_tone.title")}
@@ -402,7 +353,7 @@ export const Review: FC = () => {
                         <Dropdown.Item
                           onClick={() => toggleOtherTool("impressions")}
                           active={otherTool === "impressions"}
-                          disabled={!ready}
+                          disabled={!ready || isPending}
                         >
                           <h6 className="text-primary">
                             {t("impressions.title")}

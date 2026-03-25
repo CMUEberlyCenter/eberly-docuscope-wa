@@ -51,8 +51,6 @@ export {
   OnTopicSnapshotProvider as OrganizationSnapshotProvider,
 } from "../ReviewContext/OnTopicDataContext";
 
-DataTable.use(DT);
-
 /**
  * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
  * This should use dispatch to set the context instead of direct DOM manipulation but
@@ -234,18 +232,12 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
   const showToggle = false;
-  const [paragraphRange, setParagraphRange] = useState<number[]>([]);
+  const paragraphRange =
+    review && "response" in review
+      ? [...Array(review.response.coherence?.num_paras ?? 0).keys()]
+      : [];
   const [selected, setSelected] = useState<SelectedRowCol>(null);
-  useEffect(() => {
-    if (review && "response" in review) {
-      setParagraphRange([
-        ...Array(review.response.coherence?.num_paras ?? 0).keys(),
-      ]);
-    } else {
-      setParagraphRange([]);
-    }
-    setSelected(null);
-  }, [review]);
+  DataTable.use(DT);
 
   const onSelectTopic = useCallback(
     (topic: Topic) => {
@@ -361,6 +353,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                           : "topic-icon-large";
                         return (
                           <tr
+                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
                             key={`topic-paragraph-key-${i}`}
                             className={
                               topic === selected?.topic ? "bg-highlight" : ""
@@ -386,6 +379,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                               }${paraType?.is_topic_sent ? "" : "*"}`;
                               return (
                                 <td
+                                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
                                   key={`topic-key-${i}-${j}`}
                                   className={classNames(
                                     "p-0 text-center",

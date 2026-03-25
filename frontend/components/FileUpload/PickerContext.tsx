@@ -1,12 +1,6 @@
 import "@googleworkspace/drive-picker-element";
 import { convertToHtml } from "mammoth";
-import {
-  createContext,
-  useContext,
-  useRef,
-  type FC,
-  type ReactNode,
-} from "react";
+import { createContext, use, useRef, type FC, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useFileImportErrors } from "./FileImportErrors";
 import { useFilename, useFileText } from "./FileTextContext";
@@ -15,7 +9,7 @@ import { convertOptions } from "./convertOptions";
 // type PickerCallback = (doc?: google.picker.DocumentObject) => void;
 // TODO file data
 const PickerContext = createContext<(show: boolean) => void>(() => undefined);
-export const usePicker = () => useContext(PickerContext);
+export const usePicker = () => use(PickerContext);
 
 export const PickerProvider: FC<{
   children: ReactNode;
@@ -24,7 +18,7 @@ export const PickerProvider: FC<{
   appId?: string;
 }> = ({ children, clientId, apiKey, appId }) => {
   const { t } = useTranslation();
-  const filesApi = useRef(false);
+  const filesApiRef = useRef(false);
   const { showError } = useFileImportErrors();
   const [, setText] = useFileText();
   const [, setFilename] = useFilename();
@@ -89,10 +83,10 @@ export const PickerProvider: FC<{
         console.warn("No document selected");
         return;
       }
-      if (!filesApi.current) {
+      if (!filesApiRef.current) {
         try {
           await gapi.client.load("drive", "v3");
-          filesApi.current = true;
+          filesApiRef.current = true;
         } catch (error) {
           showError({
             type: "error",
@@ -106,7 +100,7 @@ export const PickerProvider: FC<{
       if (
         !("drive" in gapi.client) ||
         gapi.client.drive === undefined ||
-        !filesApi.current
+        !filesApiRef.current
       ) {
         console.error("gapi.client.drive is undefined");
         showError({
@@ -178,20 +172,12 @@ export const PickerProvider: FC<{
           error: new TypeError(doc.mimeType),
         });
       }
-      // } catch (err) {
-      // console.error("Error exporting file:", err);
-      // }
     });
-    // picker.addEventListener("picker:canceled", console.log);
     picker.addEventListener("picker:error", console.error);
     // ensure the element is registered before trying to use it, otherwise you'll get an error when trying to set properties on the custom element.
     document.body.appendChild(picker);
 
     picker.visible = true;
   };
-  return (
-    <PickerContext.Provider value={showPicker}>
-      {children}
-    </PickerContext.Provider>
-  );
+  return <PickerContext value={showPicker}>{children}</PickerContext>;
 };

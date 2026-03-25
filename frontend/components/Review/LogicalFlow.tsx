@@ -56,6 +56,7 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <Accordion>
             {review.response.map(
               ({ issue, suggestion, sent_ids, para_ids }, i) => (
+                /* eslint-disable-next-line @eslint-react/no-array-index-key */
                 <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
                   <Accordion.Header className="accordion-header-highlight">
                     <div className="flex-grow-1">

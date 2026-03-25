@@ -1,5 +1,7 @@
 /// <reference types="vite-plugin-svgr/client" />
 /// <reference types="@types/gtag.js" />
+/// <reference types="@types/gapi" />
+/// <reference types="@types/gapi.drive" />
 
 declare module '*.png' {
   const value: string;

@@ -1,11 +1,7 @@
-import { type FC, type HTMLProps, useEffect, useId, useState } from "react";
+import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import {
-  type Source,
-  SourcesData,
-  type SourceType,
-} from "../../src/lib/ReviewResponse";
+import { type Source, SourcesData } from "../../src/lib/ReviewResponse";
 import {
   ReviewToolCard,
   useReviewDispatch,
@@ -33,6 +29,7 @@ const Citations: FC<
   return (
     <Accordion {...props}>
       {citations?.map(({ names, assessment, sent_ids }, i) => (
+        /* eslint-disable-next-line @eslint-react/no-array-index-key */
         <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
           <Accordion.Header className="accordion-header-highlight">
             <div className="flex-grow-1">
@@ -57,23 +54,30 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useSourcesReview();
   const dispatch = useReviewDispatch();
   const { t } = useTranslation("review");
-  const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
-    {}
-  );
-  useEffect(() => {
-    if (
-      review &&
-      "response" in review &&
-      "sources" in review.response &&
-      review.response.sources
-    ) {
-      const data = Object.groupBy(
-        review.response.sources,
-        ({ src_type }) => src_type
-      );
-      setSources(data);
-    }
-  }, [review]);
+  const sources =
+    review &&
+    "response" in review &&
+    "sources" in review.response &&
+    review.response.sources
+      ? Object.groupBy(review.response.sources, ({ src_type }) => src_type)
+      : {};
+  // const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
+  // {}
+  // );
+  // useEffect(() => {
+  //   if (
+  //     review &&
+  //     "response" in review &&
+  //     "sources" in review.response &&
+  //     review.response.sources
+  //   ) {
+  //     const data = Object.groupBy(
+  //       review.response.sources,
+  //       ({ src_type }) => src_type
+  //     );
+  //     setSources(data);
+  //   }
+  // }, [review]);
   return (
     <ReviewToolCard
       title="Sources"
@@ -97,7 +101,11 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
             <Accordion>
               {review.response.issues.map(
                 ({ issue, suggestion, sent_ids }, i) => (
-                  <Accordion.Item key={`${i}`} eventKey={`${i}`}>
+                  <Accordion.Item
+                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                    key={`sources-issues-${i}`}
+                    eventKey={`sources-issues-${i}`}
+                  >
                     <Accordion.Header className="accordion-header-highlight">
                       <div>
                         <h6 className="d-inline">{t("sources.issue")}</h6>{" "}
