@@ -1,4 +1,4 @@
-import { Activity, FC, useEffect, useState } from "react";
+import { Activity, FC, useState } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -93,28 +93,28 @@ export const Page: FC = () => {
   const [tool, setTool] = useState<Tool>("null");
   const [secondaryTool, setSecondaryTool] = useState<Tool>("null");
 
-  const toggleTool = (tool: Tool) => {
-    setTool((prev) => (prev === tool ? "null" : tool));
-  };
-  useEffect(() => {
-    if (tool !== "null") {
-      gtag("event", "screen_view", {
-        app_name: "myProse-snapshot",
-        screen_name: `${reviewID}_${tool}`,
-      });
-    }
-  }, [reviewID, tool]);
-  useEffect(() => {
-    if (secondaryTool !== "null") {
-      gtag("event", "screen_view", {
-        app_name: "myProse-snapshot",
-        screen_name: `${reviewID}_${secondaryTool}`,
-      });
-    }
-  }, [reviewID, secondaryTool]);
-  const toggleSecondaryTool = (selectedTool: Tool) => {
-    setSecondaryTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
+  const toggleToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        gtag("event", "screen_view", {
+          app_name: "myProse-snapshot",
+          screen_name: `${reviewID}_${task.info.id}_${selectedTool}`,
+        });
+      }
+      setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
+  const secondaryToggleHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        gtag("event", "screen_view", {
+          app_name: "myProse-snapshot",
+          screen_name: `${reviewID}_${task.info.id}_${selectedTool}`,
+        });
+      }
+      setSecondaryTool((prev) =>
+        prev === selectedTool ? "null" : selectedTool
+      );
+    };
   const disabled = (tool: Tool): boolean => {
     return !tool_config.includes(tool);
   };
@@ -140,7 +140,7 @@ export const Page: FC = () => {
               <ExpectationsButton
                 disabled={disabled("expectations")}
                 active={tool === "expectations"}
-                onClick={() => toggleTool("expectations")}
+                onClick={toggleToolHandler("expectations")}
               />
             ) : null}
             {settings?.prominent_topics &&
@@ -148,7 +148,15 @@ export const Page: FC = () => {
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
-                onClick={() => toggleTool("prominent_topics")}
+                onClick={toggleToolHandler("prominent_topics")}
+              />
+            ) : null}
+            {settings?.prominent_topics &&
+            isEnabled(task, "prominent_topics") ? (
+              <ProminentTopicsButton
+                disabled={disabled("prominent_topics")}
+                active={tool === "prominent_topics"}
+                onClick={toggleToolHandler("prominent_topics")}
               />
             ) : null}
             {settings?.lines_of_arguments &&
@@ -156,14 +164,14 @@ export const Page: FC = () => {
               <LinesOfArgumentsButton
                 disabled={disabled("lines_of_arguments")}
                 active={tool === "lines_of_arguments"}
-                onClick={() => toggleTool("lines_of_arguments")}
+                onClick={toggleToolHandler("lines_of_arguments")}
               />
             ) : null}
             {settings?.logical_flow && isEnabled(task, "logical_flow") ? (
               <LogicalFlowButton
                 disabled={disabled("logical_flow")}
                 active={tool === "logical_flow"}
-                onClick={() => toggleTool("logical_flow")}
+                onClick={toggleToolHandler("logical_flow")}
               />
             ) : null}
           </ButtonToolbar>
@@ -218,7 +226,7 @@ export const Page: FC = () => {
               <ParagraphClarityButton
                 disabled={disabled("paragraph_clarity")}
                 active={secondaryTool === "paragraph_clarity"}
-                onClick={() => toggleSecondaryTool("paragraph_clarity")}
+                onClick={secondaryToggleHandler("paragraph_clarity")}
               />
             ) : null}
             {settings?.sentence_density &&
@@ -226,7 +234,7 @@ export const Page: FC = () => {
               <SentencesButton
                 disabled={disabled("sentence_density")}
                 active={secondaryTool === "sentence_density"}
-                onClick={() => toggleSecondaryTool("sentence_density")}
+                onClick={secondaryToggleHandler("sentence_density")}
               />
             ) : null}
             {settings?.professional_tone &&
@@ -234,7 +242,7 @@ export const Page: FC = () => {
               <ProfessionalToneButton
                 disabled={disabled("professional_tone")}
                 active={secondaryTool === "professional_tone"}
-                onClick={() => toggleSecondaryTool("professional_tone")}
+                onClick={secondaryToggleHandler("professional_tone")}
               />
             ) : null}
             <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
@@ -262,7 +270,7 @@ export const Page: FC = () => {
               <Dropdown.Menu className="additional-tools-menu">
                 {settings?.sources && isEnabled(task, "sources") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("sources")}
+                    onClick={secondaryToggleHandler("sources")}
                     active={secondaryTool === "sources"}
                     disabled={disabled("sources")}
                   >
@@ -274,7 +282,7 @@ export const Page: FC = () => {
                 ) : null}
                 {settings?.credibility && isEnabled(task, "credibility") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("credibility")}
+                    onClick={secondaryToggleHandler("credibility")}
                     active={secondaryTool === "credibility"}
                     disabled={disabled("credibility")}
                   >
@@ -286,7 +294,7 @@ export const Page: FC = () => {
                 ) : null}
                 {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("organization")}
+                    onClick={secondaryToggleHandler("organization")}
                     active={secondaryTool === "organization"}
                     disabled={disabled("term_matrix")}
                   >
@@ -298,7 +306,7 @@ export const Page: FC = () => {
                 ) : null}
                 {settings?.civil_tone && isEnabled(task, "civil_tone") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("civil_tone")}
+                    onClick={secondaryToggleHandler("civil_tone")}
                     active={secondaryTool === "civil_tone"}
                     disabled={disabled("civil_tone")}
                   >

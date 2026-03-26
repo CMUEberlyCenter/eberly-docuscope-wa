@@ -12,9 +12,10 @@ export const data = async (pageContext: PageContextServer) => {
       id,
     };
   } catch (err) {
-    if (err instanceof ReferenceError) throw render(404, `Error finding snapshot ${id}`);
+    if (err instanceof ReferenceError)
+      throw render(404, `Error finding snapshot ${id}`);
     throw err;
-  };
+  }
 };
 
 export type Data = Awaited<ReturnType<typeof data>>;

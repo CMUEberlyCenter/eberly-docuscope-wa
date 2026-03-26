@@ -40,9 +40,6 @@ export const WritingTaskProvider: FC<{
     (state: WritingTaskContext, newState: WritingTaskContext) => {
       const mergedState = { ...state, ...newState };
       if (mergedState.task?.info.id !== state.task?.info.id) {
-        console.log(
-          `Writing task changed from ${state.task?.info.id} to ${mergedState.task?.info.id}`
-        );
         if (window.gtag) {
           window.gtag("event", "screen_view", {
             app_name: "myProse",

@@ -18,9 +18,7 @@ export const Page: FC = () => {
   if (is404) {
     return (
       <div className="alert m-5">
-        <h4 className="alert-heading text-center">
-          404
-        </h4>
+        <h4 className="alert-heading text-center">404</h4>
         <p className="alert-body text-center">{t("not_found")}</p>
       </div>
     );

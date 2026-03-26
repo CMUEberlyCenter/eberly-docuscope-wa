@@ -72,12 +72,26 @@ export const Review: FC = () => {
   const { settings } = usePageContext();
   const ready = !!userText && userText.trim().length > 0;
 
-  const toggleTool = (selectedTool: Tool) => {
-    setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
-  const toggleOtherTool = (selectedTool: Tool) => {
-    setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
+  const toggleToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        gtag("event", "screen_view", {
+          app_name: "myProse-snapshot",
+          screen_name: `${writingTask?.info.id ?? "NO_TASK"}_${selectedTool}`,
+        });
+      }
+      setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
+  const toggleOtherToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        gtag("event", "screen_view", {
+          app_name: "myProse-snapshot",
+          screen_name: `${writingTask?.info.id ?? "NO_TASK"}_${selectedTool}`,
+        });
+      }
+      setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
 
   // As per #230 most features are available even without a writing task if
   // enabled in settings.  The server settings have priority over writing tasks.
@@ -184,7 +198,7 @@ export const Review: FC = () => {
                     <ExpectationsButton
                       disabled={!ready || isPending}
                       active={tool === "expectations"}
-                      onClick={() => toggleTool("expectations")}
+                      onClick={toggleToolHandler("expectations")}
                     />
                   )
                 ) : null}
@@ -192,21 +206,21 @@ export const Review: FC = () => {
                   <ProminentTopicsButton
                     disabled={!ready || isPending}
                     active={tool === "prominent_topics"}
-                    onClick={() => toggleTool("prominent_topics")}
+                    onClick={toggleToolHandler("prominent_topics")}
                   />
                 ) : null}
                 {argumentsFeature ? (
                   <LinesOfArgumentsButton
                     disabled={!ready || isPending}
                     active={tool === "lines_of_arguments"}
-                    onClick={() => toggleTool("lines_of_arguments")}
+                    onClick={toggleToolHandler("lines_of_arguments")}
                   />
                 ) : null}
                 {logicalFlowFeature ? (
                   <LogicalFlowButton
                     disabled={!ready || isPending}
                     active={tool === "logical_flow"}
-                    onClick={() => toggleTool("logical_flow")}
+                    onClick={toggleToolHandler("logical_flow")}
                   />
                 ) : null}
               </ButtonToolbar>
@@ -249,21 +263,21 @@ export const Review: FC = () => {
                   <ParagraphClarityButton
                     disabled={!ready || isPending}
                     active={otherTool === "paragraph_clarity"}
-                    onClick={() => toggleOtherTool("paragraph_clarity")}
+                    onClick={toggleOtherToolHandler("paragraph_clarity")}
                   />
                 ) : null}
                 {sentencesFeature ? (
                   <SentencesButton
                     disabled={!ready || isPending}
                     active={otherTool === "sentences"}
-                    onClick={() => toggleOtherTool("sentences")}
+                    onClick={toggleOtherToolHandler("sentences")}
                   />
                 ) : null}
                 {professionalToneFeature ? (
                   <ProfessionalToneButton
                     disabled={!ready || isPending}
                     active={otherTool === "professional_tone"}
-                    onClick={() => toggleOtherTool("professional_tone")}
+                    onClick={toggleOtherToolHandler("professional_tone")}
                   />
                 ) : null}
                 {additionalToolsFeature ? (
@@ -297,7 +311,7 @@ export const Review: FC = () => {
                     <Dropdown.Menu className="additional-tools-menu">
                       {sourcesFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("sources")}
+                          onClick={toggleOtherToolHandler("sources")}
                           active={otherTool === "sources"}
                           disabled={!ready}
                         >
@@ -309,7 +323,7 @@ export const Review: FC = () => {
                       ) : null}
                       {credibilityFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("credibility")}
+                          onClick={toggleOtherToolHandler("credibility")}
                           active={otherTool === "credibility"}
                           disabled={!ready}
                         >
@@ -323,7 +337,7 @@ export const Review: FC = () => {
                       ) : null}
                       {organizationFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("organization")}
+                          onClick={toggleOtherToolHandler("organization")}
                           active={otherTool === "organization"}
                           disabled={!ready}
                         >
@@ -337,7 +351,7 @@ export const Review: FC = () => {
                       ) : null}
                       {civilToneFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("civil_tone")}
+                          onClick={toggleOtherToolHandler("civil_tone")}
                           active={otherTool === "civil_tone"}
                           disabled={!ready || isPending}
                         >
@@ -351,7 +365,7 @@ export const Review: FC = () => {
                       ) : null}
                       {impressionsFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("impressions")}
+                          onClick={toggleOtherToolHandler("impressions")}
                           active={otherTool === "impressions"}
                           disabled={!ready || isPending}
                         >

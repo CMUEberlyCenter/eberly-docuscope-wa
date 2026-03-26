@@ -15,7 +15,8 @@ export const data = async (pageContext: PageContextServer) => {
       resource: pageContext.token?.platformContext.resource.title,
     };
   } catch (err) {
-    if (err instanceof ReferenceError) throw render(404, `No writing task found with id ${taskId}`);
+    if (err instanceof ReferenceError)
+      throw render(404, `No writing task found with id ${taskId}`);
     throw err;
   }
 };
