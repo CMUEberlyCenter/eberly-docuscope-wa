@@ -1,15 +1,11 @@
-import classNames from "classnames";
 import DOMPurify from "dompurify";
-import { FC, type HTMLProps, useCallback, useId, useState } from "react";
+import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
   Alert,
   ButtonGroup,
   ButtonToolbar,
   Card,
-  Nav,
-  Navbar,
   Stack,
-  Tab,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
@@ -23,8 +19,6 @@ import { serialize, serializeHtml } from "../../src/lib/slate";
 import type { SelectedText, Tool, ToolResult } from "../../src/lib/ToolResults";
 import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
-import { Legal } from "../Legal/Legal";
-import { Logo } from "../Logo/Logo";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
@@ -76,12 +70,7 @@ async function postConvertNotes(
 /**
  * Top level framework for writing tools display.
  */
-const ToolCard: FC<ToolCardProps> = ({
-  ref,
-  className,
-  hasSelection,
-  ...props
-}) => {
+const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const { task: writingTask } = useWritingTask();
   const { t } = useTranslation();
   const { settings } = usePageContext();
@@ -93,12 +82,11 @@ const ToolCard: FC<ToolCardProps> = ({
   const doTool = useCallback(
     async (data: ToolResult) => {
       setCurrentTool(data);
-      const emptyInput = data.input.text.trim() === "";
       try {
         switch (data.tool) {
           case "bullets":
           case "prose": {
-            if (emptyInput) {
+            if (data.input.text.trim() === "") {
               throw new NoSelectedTextError(
                 t(`error.no_selection.${data.tool}`)
               );
@@ -205,10 +193,6 @@ const ToolCard: FC<ToolCardProps> = ({
     [doTool]
   );
 
-  // Tab control stuff
-  const tabId = useId();
-  const [tab, setTab] = useState("generate");
-
   const onBookmark = () =>
     setCurrentTool((current) =>
       current ? { ...current, bookmarked: !current.bookmarked } : null
@@ -220,69 +204,33 @@ const ToolCard: FC<ToolCardProps> = ({
   // );
 
   return (
-    <aside
-      className={classNames(
-        className,
-        "my-1 border rounded bg-light d-flex flex-column tool-card"
-      )}
-      {...props}
-      ref={ref}
-    >
-      <header>
-        <Tab.Container id={tabId} defaultActiveKey="generate" activeKey={tab}>
-          <Navbar
-            className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between"
-            as="nav"
-          >
-            {/* <Nav variant="underline"> // underline or tabs conveys meaning better */}
-            <Nav>
-              {(settings?.notes2prose || settings?.notes2bullets) && (
-                <Nav.Item className="ms-3">
-                  <Nav.Link
-                    eventKey="generate"
-                    onClick={() => setTab("generate")}
-                  >
-                    {t("tool.tab.generate")}
-                  </Nav.Link>
-                </Nav.Item>
+    <div className="tool-card d-flex flex-column h-100">
+      <div className="d-flex justify-content-around">
+        <ButtonToolbar className="mb-2 mx-auto">
+          {(settings?.notes2prose || settings?.notes2bullets) && (
+            <ButtonGroup className="bg-white shadow-sm tools">
+              {settings.notes2prose && (
+                <ToolButton
+                  tooltip={t("tool.button.prose.tooltip")}
+                  title={t("tool.button.prose.title")}
+                  icon={<GenerateProseIcon />}
+                  onClick={() => onTool("prose")}
+                  disabled={!scribe || !hasSelection}
+                />
               )}
-            </Nav>
-            <Navbar.Brand className="ms-auto">
-              <Logo />
-            </Navbar.Brand>
-          </Navbar>
-          <Tab.Content>
-            <Tab.Pane eventKey="generate">
-              <div className="d-flex justify-content-around">
-                <ButtonToolbar className="mb-2 mx-auto">
-                  {(settings?.notes2prose || settings?.notes2bullets) && (
-                    <ButtonGroup className="bg-white shadow-sm tools">
-                      {settings.notes2prose && (
-                        <ToolButton
-                          tooltip={t("tool.button.prose.tooltip")}
-                          title={t("tool.button.prose.title")}
-                          icon={<GenerateProseIcon />}
-                          onClick={() => onTool("prose")}
-                          disabled={!scribe || !hasSelection}
-                        />
-                      )}
-                      {settings.notes2bullets && (
-                        <ToolButton
-                          tooltip={t("tool.button.bullets.tooltip")}
-                          title={t("tool.button.bullets.title")}
-                          icon={<GenerateBulletsIcon />}
-                          onClick={() => onTool("bullets")}
-                          disabled={!scribe || !hasSelection}
-                        />
-                      )}
-                    </ButtonGroup>
-                  )}
-                </ButtonToolbar>
-              </div>
-            </Tab.Pane>
-          </Tab.Content>
-        </Tab.Container>
-      </header>
+              {settings.notes2bullets && (
+                <ToolButton
+                  tooltip={t("tool.button.bullets.tooltip")}
+                  title={t("tool.button.bullets.title")}
+                  icon={<GenerateBulletsIcon />}
+                  onClick={() => onTool("bullets")}
+                  disabled={!scribe || !hasSelection}
+                />
+              )}
+            </ButtonGroup>
+          )}
+        </ButtonToolbar>
+      </div>
       <article className="flex-grow-1 position-relative overflow-auto container-fluid">
         {!currentTool && (
           <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
@@ -339,8 +287,7 @@ const ToolCard: FC<ToolCardProps> = ({
           </ToolDisplay.Root>
         )}
       </article>
-      <Legal />
-    </aside>
+    </div>
   );
 };
 

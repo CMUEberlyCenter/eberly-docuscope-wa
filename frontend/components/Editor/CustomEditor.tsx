@@ -29,6 +29,8 @@ import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";
 import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
+import { Legal } from "../Legal/Legal";
+import { StageHeader } from "../StageHeader/StageHeader";
 import ToolCard from "../ToolCard/ToolCard";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -245,7 +247,11 @@ const CustomEditor: FC = () => {
             autoFocus
           />
         </main>
-        <ToolCard hasSelection={selection} />
+        <aside className="my-1 border rounded bg-light d-flex flex-column">
+          <StageHeader title={t("tool.tab.generate")} />
+          <ToolCard hasSelection={selection} />
+          <Legal />
+        </aside>
       </SplitLayout>
     </Slate>
   );

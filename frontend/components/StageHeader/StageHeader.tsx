@@ -7,7 +7,12 @@ export const StageHeader: FC<{ title: string }> = ({ title }) => (
   <header>
     <Navbar className="border-bottom py-0 mb-1 mt-0 d-flex align-items-baseline justify-content-between">
       <Nav>
-        <Nav.Item className="active text-primary ms-3">{title}</Nav.Item>
+        <Nav.Item
+          className="active text-primary ms-3"
+          style={{ fontWeight: 600 }}
+        >
+          {title}
+        </Nav.Item>
       </Nav>
       <Navbar.Brand>
         <Logo />
