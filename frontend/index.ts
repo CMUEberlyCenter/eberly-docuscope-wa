@@ -168,7 +168,9 @@ async function __main__() {
         const form = await Provider.DeepLinking.createDeepLinkingForm(
           response.locals.token,
           items
-        ); // {message: 'Success'}
+        );
+        // { message: 'Success' });
+        console.log(form);
         response.send(form);
       } catch (err) {
         next(err);

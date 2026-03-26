@@ -272,7 +272,8 @@ async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
     { projection: { path: 0, modified: 0 } }
   );
   for await (const doc of cursor) {
-    yield doc;
+    // Convert _id from ObjectId to string for frontend compatibility.
+    yield { ...doc, _id: doc._id?.toString() ?? 'unknown_id' };
   }
 }
 
