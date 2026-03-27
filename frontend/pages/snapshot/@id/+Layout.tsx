@@ -1,13 +1,13 @@
+import { Legal } from "#components/Legal/Legal";
+import { StageHeader } from "#components/StageHeader/StageHeader";
+import { TaskViewerButton } from "#components/TaskViewer/TaskViewer";
+import { UneditableIcon } from "#components/UneditableIcon/UneditableIcon";
+import { UserText } from "#components/UserTextView/UserText";
+import { SplitLayout } from "#layouts/SplitLayout";
 import { Activity, FC, ReactNode } from "react";
 import Placeholder from "react-bootstrap/esm/Placeholder";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
-import { Legal } from "../../../components/Legal/Legal";
-import { StageHeader } from "../../../components/StageHeader/StageHeader";
-import { TaskViewerButton } from "../../../components/TaskViewer/TaskViewer";
-import { UneditableIcon } from "../../../components/UneditableIcon/UneditableIcon";
-import { UserText } from "../../../components/UserTextView/UserText";
-import { SplitLayout } from "../../../layouts/SplitLayout";
 import { Data } from "./+data";
 
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {

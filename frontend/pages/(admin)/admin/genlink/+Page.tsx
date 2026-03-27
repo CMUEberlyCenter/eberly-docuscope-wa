@@ -1,3 +1,15 @@
+import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIconButton";
+import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "#lib/schemaValidate";
+import { checkWordCount } from "#lib/ToolSettings";
+import {
+  type DbWritingTask,
+  isEnabled,
+  isWritingTask,
+  WritingTask,
+} from "#lib/WritingTask";
 import {
   faBroom,
   faCheckDouble,
@@ -12,18 +24,6 @@ import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import { ClipboardIconButton } from "../../../../components/ClipboardIconButton/ClipboardIconButton";
-import { MyProseLinks } from "../../../../components/MyProseLinks/MyProseLinks";
-import { WritingTaskFilter } from "../../../../components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../../components/WritingTaskInfo/WritingTaskInfo";
-import { validateWritingTask } from "../../../../src/lib/schemaValidate";
-import { checkWordCount } from "../../../../src/lib/ToolSettings";
-import {
-  type DbWritingTask,
-  isEnabled,
-  isWritingTask,
-  WritingTask,
-} from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */

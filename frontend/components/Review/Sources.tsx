@@ -1,7 +1,7 @@
+import { type Source, SourcesData } from "#/lib/ReviewResponse";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { type Source, SourcesData } from "../../src/lib/ReviewResponse";
 import {
   ReviewToolCard,
   useReviewDispatch,

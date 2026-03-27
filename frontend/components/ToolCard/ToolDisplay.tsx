@@ -1,3 +1,7 @@
+import { deserializeHtmlText } from "#/lib/slate";
+import type { ToolResult } from "#/lib/ToolResults";
+import AIResponseIcon from "#assets/icons/ai_icon.svg?react";
+import YourInputIcon from "#assets/icons/YourInput.svg?react";
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
 import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,10 +27,6 @@ import {
 import { useTranslation } from "react-i18next";
 import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
-import AIResponseIcon from "../../assets/icons/ai_icon.svg?react";
-import YourInputIcon from "../../assets/icons/YourInput.svg?react";
-import { deserializeHtmlText } from "../../src/lib/slate";
-import type { ToolResult } from "../../src/lib/ToolResults";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 import { ToolErrorHandler } from "../ErrorHandler/ErrorHandler";
 import { FadeContent } from "../FadeContent/FadeContent";

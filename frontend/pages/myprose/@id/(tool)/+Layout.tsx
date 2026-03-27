@@ -1,6 +1,6 @@
+import { ImportProvider } from "#components/FileUpload/ImportProvider";
 import type { FC, ReactNode } from "react";
 import { usePageContext } from "vike-react/usePageContext";
-import { ImportProvider } from "../../../../components/FileUpload/ImportProvider";
 
 const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const pageContext = usePageContext();

@@ -2,7 +2,7 @@ import {
   ACCESS_LEVEL,
   ANTHROPIC_MODEL,
   DEFAULT_LANGUAGE,
-} from '../../../../src/server/settings';
+} from '#server/settings';
 
 export async function data() {
   return {

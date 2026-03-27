@@ -1,3 +1,5 @@
+import { OnTopicReviewData, OptionalReviewData } from "#/lib/ReviewResponse";
+import { userLanguage } from "#/lib/languageCode";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
@@ -10,11 +12,6 @@ import {
   useState,
   useTransition,
 } from "react";
-import {
-  OnTopicReviewData,
-  OptionalReviewData,
-} from "../../src/lib/ReviewResponse";
-import { userLanguage } from "../../src/lib/languageCode";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";

@@ -1,3 +1,19 @@
+import { Optional } from "#/index";
+import {
+  ErrorDataError,
+  isErrorData,
+  isExpectationsData,
+  isExpectationsDataSuggestionNone,
+  OptionalReviewData,
+  type ErrorData,
+  type ExpectationsData,
+} from "#/lib/ReviewResponse";
+import {
+  getIndexOfExpectation,
+  WritingTask,
+  type Rule,
+} from "#/lib/WritingTask";
+import Icon from "#assets/icons/expectations_icon.svg?react";
 import {
   faCircleExclamation,
   faEllipsis,
@@ -25,22 +41,6 @@ import type {
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/expectations_icon.svg?react";
-import { Optional } from "../../src";
-import {
-  ErrorDataError,
-  isErrorData,
-  isExpectationsData,
-  isExpectationsDataSuggestionNone,
-  OptionalReviewData,
-  type ErrorData,
-  type ExpectationsData,
-} from "../../src/lib/ReviewResponse";
-import {
-  getIndexOfExpectation,
-  WritingTask,
-  type Rule,
-} from "../../src/lib/WritingTask";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   checkReviewResponse,

@@ -1,3 +1,7 @@
+import { Optional } from "#/index";
+import { userLanguage } from "#/lib/languageCode";
+import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
+import { WritingTask } from "#/lib/WritingTask";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
@@ -10,14 +14,6 @@ import {
   useState,
   useTransition,
 } from "react";
-import { Optional } from "../../src";
-import { userLanguage } from "../../src/lib/languageCode";
-import {
-  Analysis,
-  OptionalReviewData,
-  ReviewTool,
-} from "../../src/lib/ReviewResponse";
-import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";

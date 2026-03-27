@@ -1,8 +1,8 @@
+import { Logo } from "#components/Logo/Logo";
+import { useWritingTask } from "#components/WritingTaskContext/WritingTaskContext";
 import type { FC } from "react";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
-import { Logo } from "../../../../components/Logo/Logo";
-import { useWritingTask } from "../../../../components/WritingTaskContext/WritingTaskContext";
 
 export const Page: FC = () => {
   const { urlOriginal } = usePageContext();

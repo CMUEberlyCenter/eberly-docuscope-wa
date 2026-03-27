@@ -1,5 +1,5 @@
+import { findAllPublicWritingTasks } from '#server/data/mongo';
 import type { PageContextServer } from 'vike/types';
-import { findAllPublicWritingTasks } from '../../../src/server/data/mongo';
 
 export const data = async (_pageContext: PageContextServer) => {
   const tasks = await findAllPublicWritingTasks();

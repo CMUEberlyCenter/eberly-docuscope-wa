@@ -1,3 +1,5 @@
+import { type WritingTask, isWritingTask } from "#/lib/WritingTask";
+import { useWritingTasks } from "#/service/writing-task.service";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type ChangeEvent, type FC, useCallback, useState } from "react";
@@ -12,8 +14,6 @@ import {
   Popover,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { type WritingTask, isWritingTask } from "../../src/lib/WritingTask";
-import { useWritingTasks } from "../../src/service/writing-task.service";
 import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
 import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
 import {

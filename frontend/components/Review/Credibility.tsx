@@ -1,3 +1,4 @@
+import { CredibilityData } from "#/lib/ReviewResponse";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
@@ -7,7 +8,6 @@ import {
   useReviewDispatch,
 } from "../ReviewContext/ReviewContext";
 import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
-import { CredibilityData } from "../../src/lib/ReviewResponse";
 
 export const {
   ReviewDataProvider: CredibilityReviewProvider,

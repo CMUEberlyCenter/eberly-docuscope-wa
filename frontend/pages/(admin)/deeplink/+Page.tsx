@@ -1,12 +1,12 @@
 /* @overview: This is the configuration page for LTI deeplinking. The user can select a writing task from a list, or upload a custom writing task in JSON format. */
+import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "#lib/schemaValidate";
+import { isWritingTask, type WritingTask } from "#lib/WritingTask";
 import { type ChangeEvent, type FC, useId, useRef, useState } from "react";
 import { Form, ListGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
-import { WritingTaskFilter } from "../../../components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../components/WritingTaskInfo/WritingTaskInfo";
-import { validateWritingTask } from "../../../src/lib/schemaValidate";
-import { isWritingTask, type WritingTask } from "../../../src/lib/WritingTask";
 import type { Data } from "./+data";
 
 export const Page: FC = () => {

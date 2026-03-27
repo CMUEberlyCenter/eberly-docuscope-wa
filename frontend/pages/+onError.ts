@@ -1,4 +1,4 @@
-import { logger } from '../src/server/logger';
+import { logger } from '#server/logger';
 
 export const onError = (error: Error) => {
   logger.error(error);

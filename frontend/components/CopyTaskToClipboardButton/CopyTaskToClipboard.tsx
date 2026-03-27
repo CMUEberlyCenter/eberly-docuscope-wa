@@ -1,9 +1,9 @@
+import { Optional } from "#/index";
+import { WritingTask } from "#/lib/WritingTask";
 import { FC } from "react";
 import { Button, ButtonProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import sanitizeHtml from "sanitize-html";
-import { Optional } from "../../src";
-import { WritingTask } from "../../src/lib/WritingTask";
 
 /** Serialize to text for the clipboard. */
 const taskToClipboard = (

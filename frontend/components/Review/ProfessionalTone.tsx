@@ -1,3 +1,8 @@
+import {
+  ProfessionalToneData,
+  type ProfessionalToneOutput,
+} from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/professional_tone_icon.svg?react";
 import { type FC, type HTMLProps, useId } from "react";
 import {
   Accordion,
@@ -6,11 +11,6 @@ import {
   type ButtonProps,
 } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/professional_tone_icon.svg?react";
-import {
-  ProfessionalToneData,
-  type ProfessionalToneOutput,
-} from "../../src/lib/ReviewResponse";
 import {
   ReviewToolCard,
   useReviewDispatch,

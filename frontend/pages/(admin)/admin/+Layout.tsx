@@ -1,7 +1,7 @@
+import { Logo } from "#components/Logo/Logo";
 import { FC, ReactNode, useId } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Logo } from "../../../components/Logo/Logo";
 import { usePageContext } from "vike-react/usePageContext";
 
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {

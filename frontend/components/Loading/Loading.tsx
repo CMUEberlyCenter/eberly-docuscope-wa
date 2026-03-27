@@ -1,6 +1,6 @@
 import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
-import DotSpinner from "../../assets/icons/6-dots-rotate.svg?react";
+import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
 import style from "./Loading.module.scss";
 import classNames from "classnames";
 

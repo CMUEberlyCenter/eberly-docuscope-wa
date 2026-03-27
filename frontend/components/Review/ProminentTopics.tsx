@@ -1,10 +1,10 @@
+import { ProminentTopicsData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/list_key_ideas_icon.svg?react";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useEffect, useState } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
 import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/list_key_ideas_icon.svg?react";
-import { ProminentTopicsData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   ReviewToolCard,

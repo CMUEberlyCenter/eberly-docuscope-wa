@@ -1,6 +1,6 @@
+import { findSnapshotById } from '#server/data/mongo';
 import { render } from 'vike/abort';
 import type { PageContextServer } from 'vike/types';
-import { findSnapshotById } from '../../../src/server/data/mongo';
 
 export const data = async (pageContext: PageContextServer) => {
   const id = pageContext.routeParams.id;

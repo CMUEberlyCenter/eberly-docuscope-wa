@@ -1,7 +1,7 @@
+import { DbWritingTask } from "#/lib/WritingTask";
 import { FC } from "react";
 import { ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { DbWritingTask } from "../../src/lib/WritingTask";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
 
 const MyLink: FC<{ href: URL; title: string }> = ({ href, title }) => {

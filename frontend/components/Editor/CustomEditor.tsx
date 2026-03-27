@@ -18,12 +18,8 @@ import { useTranslation } from "react-i18next";
 import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
-import { SplitLayout } from "../../layouts/SplitLayout";
-import {
-  deserializeHtmlText,
-  serialize,
-  serializeDocx,
-} from "../../src/lib/slate";
+import { SplitLayout } from "#layouts/SplitLayout";
+import { deserializeHtmlText, serialize, serializeDocx } from "#/lib/slate";
 import { FileDownload } from "../FileDownload/FileDownload";
 import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";

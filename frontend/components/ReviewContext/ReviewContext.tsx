@@ -1,3 +1,8 @@
+import {
+  Analysis,
+  isErrorData,
+  OptionalReviewData,
+} from "#/lib/ReviewResponse";
 import classNames from "classnames";
 import {
   createContext,
@@ -11,11 +16,6 @@ import {
 } from "react";
 import Alert from "react-bootstrap/esm/Alert";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import {
-  Analysis,
-  isErrorData,
-  OptionalReviewData,
-} from "../../src/lib/ReviewResponse";
 import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";

@@ -1,11 +1,11 @@
+import { cleanAndRepairSentenceData } from "#/lib/OnTopicData";
+import { isErrorData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/sentence_density_icon.svg?react";
 import classNames from "classnames";
 import DOMPurify from "dompurify";
 import { type FC, type HTMLProps, useEffect, useReducer } from "react";
 import { type ButtonProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/sentence_density_icon.svg?react";
-import { cleanAndRepairSentenceData } from "../../src/lib/OnTopicData";
-import { isErrorData } from "../../src/lib/ReviewResponse";
 import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
 import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import { ToolButton } from "../ToolButton/ToolButton";

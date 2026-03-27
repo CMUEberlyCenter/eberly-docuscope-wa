@@ -1,4 +1,4 @@
-import { getLogData } from '../../../../src/server/data/mongo';
+import { getLogData } from '#server/data/mongo';
 
 export async function data() {
   const performance = await getLogData();

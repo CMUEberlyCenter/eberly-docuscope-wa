@@ -1,7 +1,7 @@
 import {
   findAllPrivateWritingTasks,
   findAllPublicWritingTasks,
-} from '../../../../src/server/data/mongo';
+} from '#server/data/mongo';
 
 export const data = async () => {
   const tasks = await findAllPublicWritingTasks();

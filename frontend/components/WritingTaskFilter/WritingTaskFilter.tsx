@@ -1,3 +1,10 @@
+import {
+  extractKeywords,
+  groupByCategory,
+  hasKeywords,
+  type WritingTask,
+} from "#/lib/WritingTask";
+import FilterIcon from "#assets/icons/filter_icon.svg?react";
 import { faX } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -13,13 +20,6 @@ import {
 } from "react";
 import { Button, FloatingLabel, Form, InputGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import FilterIcon from "../../assets/icons/filter_icon.svg?react";
-import {
-  extractKeywords,
-  groupByCategory,
-  hasKeywords,
-  type WritingTask,
-} from "../../src/lib/WritingTask";
 
 const sep = ":";
 const hasPrefix = (prefix: string, key: string) =>

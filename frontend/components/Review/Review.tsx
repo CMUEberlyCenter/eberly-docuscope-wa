@@ -1,3 +1,6 @@
+import type { ReviewTool } from "#/lib/ReviewResponse";
+import { isEnabled } from "#/lib/WritingTask";
+import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
 import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,
@@ -13,9 +16,6 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
-import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
-import type { ReviewTool } from "../../src/lib/ReviewResponse";
-import { isEnabled } from "../../src/lib/WritingTask";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone, CivilToneReviewProvider } from "./CivilTone";

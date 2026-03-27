@@ -1,7 +1,8 @@
+import { LogicalFlowData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/global_coherence_icon.svg?react";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   ReviewToolCard,
@@ -9,7 +10,6 @@ import {
 } from "../ReviewContext/ReviewContext";
 import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { LogicalFlowData } from "../../src/lib/ReviewResponse";
 
 export const {
   ReviewDataProvider: LogicalFlowReviewProvider,

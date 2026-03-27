@@ -1,6 +1,6 @@
 import { render } from 'vike/abort';
 import type { PageContext } from 'vike/types';
-// import { auth } from "../../../src/utils/auth";
+// import { auth } from "#/utils/auth";
 
 export async function guard(pageContext: PageContext) {
   // const data = await auth.api.userHasPermission({ body:{

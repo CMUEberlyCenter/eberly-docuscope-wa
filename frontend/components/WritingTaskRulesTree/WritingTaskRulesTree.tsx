@@ -1,3 +1,5 @@
+import type { Optional } from "#/index";
+import type { Rule, WritingTask } from "#/lib/WritingTask";
 import classnames from "classnames";
 import DOMPurify from "dompurify";
 import {
@@ -10,8 +12,6 @@ import {
 } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
-import type { Rule, WritingTask } from "../../src/lib/WritingTask";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
 

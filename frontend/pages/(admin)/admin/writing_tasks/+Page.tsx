@@ -1,13 +1,13 @@
+import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIconButton";
+import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { DbWritingTask } from "#lib/WritingTask";
 import { FC, useState } from "react";
 import { Badge, ListGroup } from "react-bootstrap";
 import Card from "react-bootstrap/esm/Card";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
-import { ClipboardIconButton } from "../../../../components/ClipboardIconButton/ClipboardIconButton";
-import { MyProseLinks } from "../../../../components/MyProseLinks/MyProseLinks";
-import { WritingTaskFilter } from "../../../../components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../../components/WritingTaskInfo/WritingTaskInfo";
-import { DbWritingTask } from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
 export const Page: FC = () => {

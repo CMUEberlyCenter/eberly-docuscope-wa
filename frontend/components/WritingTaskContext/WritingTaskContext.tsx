@@ -1,3 +1,4 @@
+import type { WritingTask } from "#/lib/WritingTask";
 import {
   createContext,
   type Dispatch,
@@ -6,7 +7,6 @@ import {
   use,
   useReducer,
 } from "react";
-import type { WritingTask } from "../../src/lib/WritingTask";
 
 type WritingTaskContext = {
   /** Current Writing Task Description. */

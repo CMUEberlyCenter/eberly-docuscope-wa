@@ -1,8 +1,8 @@
+import type { Optional } from "#/index";
+import type { WritingTask } from "#/lib/WritingTask";
 import { type FC, useState } from "react";
 import { Form, Modal, type ModalProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import type { Optional } from "../../src";
-import type { WritingTask } from "../../src/lib/WritingTask";
 import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
 import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";

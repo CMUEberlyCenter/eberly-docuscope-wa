@@ -1,8 +1,8 @@
+import { Legal } from "#components/Legal/Legal";
+import { StageHeader } from "#components/StageHeader/StageHeader";
+import { UserTextView } from "#components/UserTextView/UserTextView";
 import { FC, ReactNode } from "react";
 import { Translation } from "react-i18next";
-import { Legal } from "../components/Legal/Legal";
-import { StageHeader } from "../components/StageHeader/StageHeader";
-import { UserTextView } from "../components/UserTextView/UserTextView";
 import { SplitLayout } from "./SplitLayout";
 
 export const ReviewLayout: FC<{ children: ReactNode }> = ({ children }) => (

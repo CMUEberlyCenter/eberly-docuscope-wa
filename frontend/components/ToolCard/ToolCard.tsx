@@ -1,3 +1,10 @@
+import { NotesRequest } from "#/lib/Requests";
+import { serialize, serializeHtml } from "#/lib/slate";
+import type { SelectedText, Tool, ToolResult } from "#/lib/ToolResults";
+import { WritingTask } from "#/lib/WritingTask";
+import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
+import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
+import HighlightIcon from "#assets/icons/Highlight.svg?react";
 import DOMPurify from "dompurify";
 import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
@@ -11,13 +18,6 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { usePageContext } from "vike-react/usePageContext";
-import GenerateBulletsIcon from "../../assets/icons/generate_bullets_icon.svg?react";
-import GenerateProseIcon from "../../assets/icons/generate_prose_icon.svg?react";
-import HighlightIcon from "../../assets/icons/Highlight.svg?react";
-import { NotesRequest } from "../../src/lib/Requests";
-import { serialize, serializeHtml } from "../../src/lib/slate";
-import type { SelectedText, Tool, ToolResult } from "../../src/lib/ToolResults";
-import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";

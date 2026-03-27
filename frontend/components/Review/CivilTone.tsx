@@ -1,7 +1,7 @@
+import { CivilToneData } from "#/lib/ReviewResponse";
 import { useId, type FC, type HTMLProps } from "react";
 import { Accordion } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import { CivilToneData } from "../../src/lib/ReviewResponse";
 import {
   ReviewToolCard,
   useReviewDispatch,

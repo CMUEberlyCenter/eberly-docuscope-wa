@@ -1,3 +1,6 @@
+import { isWritingTask, type WritingTask } from "#/lib/WritingTask";
+import { useWritingTasks } from "#/service/writing-task.service";
+import OutlineDrawerIcon from "#assets/icons/wtd_library.svg?react";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useId, useState, type ChangeEvent, type FC } from "react";
@@ -12,9 +15,6 @@ import {
   type ModalProps,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
-import { isWritingTask, type WritingTask } from "../../src/lib/WritingTask";
-import { useWritingTasks } from "../../src/service/writing-task.service";
 import {
   useSetWritingTask,
   useWritingTask,

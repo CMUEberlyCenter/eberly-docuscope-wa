@@ -1,3 +1,56 @@
+import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
+import {
+  CivilTone,
+  CivilToneSnapshotProvider,
+} from "#components/Review/CivilTone";
+import {
+  Credibility,
+  CredibilitySnapshotProvider,
+} from "#components/Review/Credibility";
+import {
+  Expectations,
+  ExpectationsButton,
+  ExpectationSnapshotProvider,
+} from "#components/Review/Expectations";
+import {
+  LinesOfArguments,
+  LinesOfArgumentsButton,
+  LinesOfArgumentsSnapshotProvider,
+} from "#components/Review/LinesOfArguments";
+import {
+  LogicalFlow,
+  LogicalFlowButton,
+  LogicalFlowSnapshotProvider,
+} from "#components/Review/LogicalFlow";
+import { NullTool } from "#components/Review/NullTool";
+import {
+  Organization,
+  OrganizationSnapshotProvider,
+} from "#components/Review/Organization";
+import {
+  ParagraphClarity,
+  ParagraphClarityButton,
+  ParagraphClaritySnapshotProvider,
+} from "#components/Review/ParagraphClarity";
+import {
+  ProfessionalTone,
+  ProfessionalToneButton,
+  ProfessionalToneSnapshotProvider,
+} from "#components/Review/ProfessionalTone";
+import {
+  ProminentTopics,
+  ProminentTopicsButton,
+  ProminentTopicsSnapshotProvider,
+} from "#components/Review/ProminentTopics";
+import "#components/Review/Review.scss";
+import {
+  Sentences,
+  SentencesButton,
+  SentencesSnapshotProvider,
+} from "#components/Review/Sentences";
+import { Sources, SourcesSnapshotProvider } from "#components/Review/Sources";
+import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
+import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
 import {
   Alert,
@@ -14,65 +67,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import AdditionalToolsIcon from "../../../assets/icons/additional_tools_icon.svg?react";
-import {
-  CivilTone,
-  CivilToneSnapshotProvider,
-} from "../../../components/Review/CivilTone";
-import {
-  Credibility,
-  CredibilitySnapshotProvider,
-} from "../../../components/Review/Credibility";
-import {
-  Expectations,
-  ExpectationsButton,
-  ExpectationSnapshotProvider,
-} from "../../../components/Review/Expectations";
-import {
-  LinesOfArguments,
-  LinesOfArgumentsButton,
-  LinesOfArgumentsSnapshotProvider,
-} from "../../../components/Review/LinesOfArguments";
-import {
-  LogicalFlow,
-  LogicalFlowButton,
-  LogicalFlowSnapshotProvider,
-} from "../../../components/Review/LogicalFlow";
-import { NullTool } from "../../../components/Review/NullTool";
-import {
-  Organization,
-  OrganizationSnapshotProvider,
-} from "../../../components/Review/Organization";
-import {
-  ParagraphClarity,
-  ParagraphClarityButton,
-  ParagraphClaritySnapshotProvider,
-} from "../../../components/Review/ParagraphClarity";
-import {
-  ProfessionalTone,
-  ProfessionalToneButton,
-  ProfessionalToneSnapshotProvider,
-} from "../../../components/Review/ProfessionalTone";
-import {
-  ProminentTopics,
-  ProminentTopicsButton,
-  ProminentTopicsSnapshotProvider,
-} from "../../../components/Review/ProminentTopics";
-import "../../../components/Review/Review.scss";
-import {
-  Sentences,
-  SentencesButton,
-  SentencesSnapshotProvider,
-} from "../../../components/Review/Sentences";
-import {
-  Sources,
-  SourcesSnapshotProvider,
-} from "../../../components/Review/Sources";
-import {
-  isExpectationsData,
-  ReviewTool,
-} from "../../../src/lib/ReviewResponse";
-import { isEnabled } from "../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
 // tab event keys
