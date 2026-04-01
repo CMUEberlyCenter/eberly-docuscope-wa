@@ -145,7 +145,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
             </h6>
             <h5>{selected.name}</h5>
             <div
-              /* eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml */
+              /* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml */
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(selected.description),
               }}

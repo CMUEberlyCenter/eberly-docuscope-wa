@@ -33,7 +33,7 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
         {/* Workaround for html string content. */}
         {htmlContent && (
           <div
-            // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+            // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(htmlContent),
             }}

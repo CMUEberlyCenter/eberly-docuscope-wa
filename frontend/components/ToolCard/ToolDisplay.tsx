@@ -121,7 +121,7 @@ const ToolInput: FC<ToolProp> = ({ tool }) => {
         {tool?.input.text.trim() ? (
           <FadeContent>
             <Card.Text
-              // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+              // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(tool.input.html ?? tool.input.text),
               }}

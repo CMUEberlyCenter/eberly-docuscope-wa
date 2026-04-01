@@ -145,7 +145,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
       <div className="py-1 overflow-auto sentence-display mb-1">
         {selected.details ? (
           <div
-            // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+            // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(selected.details),
             }}

@@ -275,7 +275,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
               {/* For #135, use results directly. */}
               {currentTool.result ? (
                 <div
-                  // eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml
+                  // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
                   dangerouslySetInnerHTML={{
                     __html: DOMPurify.sanitize(currentTool.result),
                   }}

@@ -72,7 +72,7 @@ export const UserText: FC<UserTextProps> = ({ ...props }) => {
       <div
         id={id}
         className="user-text p-2"
-        /* eslint-disable-next-line @eslint-react/dom/no-dangerously-set-innerhtml */
+        /* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml */
         dangerouslySetInnerHTML={{
           __html: DOMPurify.sanitize(content),
         }}
