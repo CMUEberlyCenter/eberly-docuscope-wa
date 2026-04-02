@@ -147,13 +147,13 @@ export const Review: FC = () => {
 
   const [isPending, startTransition] = useTransition();
   useEffect(() => {
-    // Reset to default tab/tool if writing task or settings change.
+    // Reset to default tab/tool if writing task, file, or settings change.
     startTransition(() => {
       setTab(() => "big_picture");
       setTool(() => "null");
       setOtherTool(() => "null");
     });
-  }, [settings, writingTask]);
+  }, [settings, writingTask, userText]);
 
   return (
     <>

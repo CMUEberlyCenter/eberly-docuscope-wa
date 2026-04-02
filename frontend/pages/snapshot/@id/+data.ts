@@ -13,7 +13,7 @@ export const data = async (pageContext: PageContextServer) => {
     };
   } catch (err) {
     if (err instanceof ReferenceError)
-      throw render(404, `Error finding snapshot ${id}`);
+      throw render(404, `Snapshot not found: ${id}`);
     throw err;
   }
 };
