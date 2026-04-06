@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig } from "eslint/config";
 
 
-export default [
+export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
@@ -32,4 +32,4 @@ export default [
     }
   },
   ...storybook.configs["flat/recommended"]
-];
+);

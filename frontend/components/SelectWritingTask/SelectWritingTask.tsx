@@ -1,5 +1,4 @@
 import { type WritingTask, isWritingTask } from "#/lib/WritingTask";
-import { useWritingTasks } from "#/service/writing-task.service";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { type ChangeEvent, type FC, useCallback, useState } from "react";
@@ -34,8 +33,7 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
  */
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  const { data: writingTasks } = useWritingTasks(); // all public tasks
-  const { task: writingTask, isInstructor, isLTI } = useWritingTask(); // current task
+  const { task: writingTask, tasks: writingTasks } = useWritingTask(); // current task and list of available tasks.
   const setWritingTask = useSetWritingTask();
   const [selected, setSelected] = useState<WritingTask | undefined | null>(
     writingTask
@@ -98,7 +96,11 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
         ) : null}
       </Modal.Header>
       <Modal.Body>
-        {showDetails && selected ? (
+        {!writingTasks?.length ? (
+          <div className="alert alert-danger" role="alert">
+            {t("error.service_unavailable")}
+          </div>
+        ) : showDetails && selected ? (
           <WritingTaskRulesTree
             style={{ maxHeight: "72vh", height: "72vh" }}
             task={selected}
@@ -179,7 +181,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
         </Modal.Footer>
       ) : (
         <Modal.Footer>
-          {(!isLTI || isInstructor) && (
+          {writingTasks?.length ? (
             <OverlayTrigger
               onToggle={(nextShow) => setShowFile(nextShow)}
               show={showFile}
@@ -212,7 +214,7 @@ const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
                 <FontAwesomeIcon icon={faPlus} />
               </Button>
             </OverlayTrigger>
-          )}
+          ) : null}
           <Button variant="secondary" onClick={hide}>
             {t("cancel")}
           </Button>

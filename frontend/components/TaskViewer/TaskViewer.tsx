@@ -1,5 +1,4 @@
 import { isWritingTask, type WritingTask } from "#/lib/WritingTask";
-import { useWritingTasks } from "#/service/writing-task.service";
 import OutlineDrawerIcon from "#assets/icons/wtd_library.svg?react";
 import { faArrowLeft, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -105,8 +104,7 @@ const TaskViewer: FC<ModalProps> = (props) => {
 
 const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  const { task } = useWritingTask();
-  const { data: tasks } = useWritingTasks();
+  const { task, tasks: writingTasks } = useWritingTask();
   const setWritingTask = useSetWritingTask();
   const [showDetails, setShowDetails] = useState(false);
   const [selected, setSelected] = useState<WritingTask | null | undefined>(
@@ -167,7 +165,11 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
         ) : null}
       </Modal.Header>
       <Modal.Body>
-        {showDetails && selected ? (
+        {!writingTasks ? (
+          <div className="alert alert-danger" role="alert">
+            {t("error.service_unavailable")}
+          </div>
+        ) : showDetails && selected ? (
           <WritingTaskRulesTree
             style={{ maxHeight: "72vh", height: "72vh" }}
             task={selected}
@@ -180,7 +182,7 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
             <WritingTaskFilter
               className="w-100"
               update={setData}
-              tasks={tasks}
+              tasks={writingTasks}
             />
             <div className="w-100 h-0">
               <ListGroup className="overflow-auto w-100 mh-100">
@@ -202,7 +204,7 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
                     active={selected === custom}
                     onClick={() => setSelected(custom)}
                   >
-                    {custom.info.name}
+                    {custom?.info.name}
                   </ListGroup.Item>
                 )}
                 <ListGroup.Item
@@ -228,38 +230,40 @@ const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
         </Modal.Footer>
       ) : (
         <Modal.Footer>
-          <OverlayTrigger
-            onToggle={(nextShow) => setShowFile(nextShow)}
-            show={showFile}
-            trigger="click"
-            placement="top"
-            overlay={
-              <Popover>
-                <Popover.Header className="d-flex justify-content-between">
-                  <div>{t("select_task.upload")}</div>
-                  <CloseButton onClick={() => setShowFile(false)} />
-                </Popover.Header>
-                <Popover.Body>
-                  <Form noValidate>
-                    <Form.Group>
-                      <Form.Control
-                        type="file"
-                        onChange={uploadFile}
-                        isInvalid={!valid}
-                      />
-                      <Form.Control.Feedback type="invalid">
-                        {t("select_task.invalid_upload")}
-                      </Form.Control.Feedback>
-                    </Form.Group>
-                  </Form>
-                </Popover.Body>
-              </Popover>
-            }
-          >
-            <Button className="me-auto">
-              <FontAwesomeIcon icon={faPlus} />
-            </Button>
-          </OverlayTrigger>
+          {writingTasks?.length ? (
+            <OverlayTrigger
+              onToggle={(nextShow) => setShowFile(nextShow)}
+              show={showFile}
+              trigger="click"
+              placement="top"
+              overlay={
+                <Popover>
+                  <Popover.Header className="d-flex justify-content-between">
+                    <div>{t("select_task.upload")}</div>
+                    <CloseButton onClick={() => setShowFile(false)} />
+                  </Popover.Header>
+                  <Popover.Body>
+                    <Form noValidate>
+                      <Form.Group>
+                        <Form.Control
+                          type="file"
+                          onChange={uploadFile}
+                          isInvalid={!valid}
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {t("select_task.invalid_upload")}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Form>
+                  </Popover.Body>
+                </Popover>
+              }
+            >
+              <Button className="me-auto">
+                <FontAwesomeIcon icon={faPlus} />
+              </Button>
+            </OverlayTrigger>
+          ) : null}
           <Button variant="secondary" onClick={hide}>
             {t("cancel")}
           </Button>

@@ -13,6 +13,8 @@ type WritingTaskContext = {
   task?: WritingTask | null;
   /** Writing Task ID.  If set, that means the task is fixed. */
   taskId?: string | null;
+  /** Writing tasks available for selection, only used if taskId is not set. */
+  tasks?: WritingTask[];
   /** The username of the current user, only available in an LTI context. */
   username?: string;
   /** The title of the LTI activity inside the LMS's LTI context. */
