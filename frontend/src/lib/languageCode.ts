@@ -5,13 +5,15 @@ const LanguageCodeMap: Map<string, string> = new Map([
   ['english', 'en'],
   ['spanish', 'es'],
 ]);
+
+/** Resolve a language name to its ISO code. */
+export function resolveLanguageCode(lang: string): string | undefined {
+  return LanguageCodeMap.get(lang.toLowerCase());
+}
 /** Get the language code for the user based on their writing task. */
 export function userLanguage(task: WritingTask | unknown): string {
   if (!isWritingTask(task) || !task.info.user_lang) {
     return '*'; // default to onTopic default (english) if the writing task or user language is not valid.
   }
-  return LanguageCodeMap.get(task.info.user_lang.toLowerCase()) || '*';
+  return resolveLanguageCode(task.info.user_lang.toLowerCase()) || '*';
 }
-// function targetLanguage(task: WritingTask): string {
-//   return LanguageCodeMap.get(task.info.user_lang.toLowerCase()) || '*';
-// }

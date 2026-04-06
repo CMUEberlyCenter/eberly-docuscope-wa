@@ -7,6 +7,7 @@ export interface Settings {
   text2speech: boolean; // Text to speech widgets
   scribe: boolean; // global LLM tool availability, false disables all LLM tools
   word_count_limit: number; // Word Count limit for review tools.
+  select_word_limit: number; // Word Count limit for tools that operate on selected text, notes to prose/bullets, copyedit, and flow.
 
   // Draft Tools
   notes2prose: boolean; // Notes to Prose LLM tool
@@ -42,15 +43,16 @@ export interface Settings {
   // tagger: string; // URL. Needed for impressions
 }
 
-const WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
+const DOCUMENT_WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
+const SELECT_WORD_COUNT_LIMIT = 250; // Default word count limit for tools that operate on selected text.
 // Default json settings, in case of network failure.
 export const DEFAULT: Settings = {
   // common_dictionary: 'https://docuscope.eberly.cmu.edu/common_dictionary',
   // tagger: 'https://docuscope.eberly.cmu.edu/tagger/tag',
   text2speech: true,
   scribe: true,
-  word_count_limit: WORD_COUNT_LIMIT,
-
+  word_count_limit: DOCUMENT_WORD_COUNT_LIMIT,
+  select_word_limit: SELECT_WORD_COUNT_LIMIT,
   notes2prose: true,
   notes2bullets: true,
   // assess_expectation: false,
@@ -99,7 +101,7 @@ export function checkWordCount(
   settings?: Settings
 ): { valid: boolean; wordCount: number; maxWords: number } {
   const wordCount = countWordsRegex(htmlString);
-  const maxWords = settings?.word_count_limit || WORD_COUNT_LIMIT;
+  const maxWords = settings?.word_count_limit || DOCUMENT_WORD_COUNT_LIMIT;
   return {
     valid: wordCount <= maxWords,
     wordCount,

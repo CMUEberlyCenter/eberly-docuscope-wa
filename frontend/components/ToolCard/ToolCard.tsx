@@ -77,6 +77,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
   const scribe = true; // Originally for useScribe(); for opt-in check.
+  const selectionLimit = settings?.select_word_limit ?? 250;
 
   const editor = useSlate();
   const doTool = useCallback(
@@ -137,7 +138,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
           });
           return;
         }
-        if (wordCount > 10) {
+        if (wordCount > selectionLimit) {
           setCurrentTool({
             tool,
             datetime: new Date(),
@@ -151,7 +152,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
             error: new NoSelectedTextError(
               t("error.too_large_selection", {
                 count: wordCount,
-                maxCount: 10,
+                maxCount: selectionLimit,
               })
             ),
           });
@@ -181,7 +182,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         });
       }
     },
-    [editor, doTool, t]
+    [editor, doTool, t, selectionLimit]
   ); // Does this need to be wrapped in useCallback?
   const retry = useCallback(
     async (previous: ToolResult) =>
