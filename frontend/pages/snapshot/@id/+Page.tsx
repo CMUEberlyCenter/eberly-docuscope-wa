@@ -49,6 +49,7 @@ import {
   SentencesSnapshotProvider,
 } from "#components/Review/Sentences";
 import { Sources, SourcesSnapshotProvider } from "#components/Review/Sources";
+import { trackScreenView } from "#lib/tracking.js";
 import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
 import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
@@ -90,9 +91,10 @@ export const Page: FC = () => {
   const toggleToolHandler =
     (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
       if (!evt.currentTarget.classList.contains("active")) {
-        gtag("event", "screen_view", {
-          app_name: "myProse-snapshot",
-          screen_name: `${reviewID}_${task.info.id}_${selectedTool}`,
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "SnapshotPage",
+          task_id: task.info.id,
         });
       }
       setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
@@ -100,9 +102,10 @@ export const Page: FC = () => {
   const secondaryToggleHandler =
     (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
       if (!evt.currentTarget.classList.contains("active")) {
-        gtag("event", "screen_view", {
-          app_name: "myProse-snapshot",
-          screen_name: `${reviewID}_${task.info.id}_${selectedTool}`,
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "SnapshotPage",
+          task_id: task.info.id,
         });
       }
       setSecondaryTool((prev) =>

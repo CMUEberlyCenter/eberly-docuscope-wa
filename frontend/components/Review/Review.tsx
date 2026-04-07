@@ -1,6 +1,7 @@
 import type { ReviewTool } from "#/lib/ReviewResponse";
 import { isEnabled } from "#/lib/WritingTask";
 import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
+import { trackScreenView } from "#lib/tracking.js";
 import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,
@@ -75,9 +76,10 @@ export const Review: FC = () => {
   const toggleToolHandler =
     (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
       if (!evt.currentTarget.classList.contains("active")) {
-        gtag("event", "screen_view", {
-          app_name: "myProse-snapshot",
-          screen_name: `${writingTask?.info.id ?? "NO_TASK"}_${selectedTool}`,
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "Review",
+          task_id: writingTask?.info.id,
         });
       }
       setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
@@ -85,9 +87,10 @@ export const Review: FC = () => {
   const toggleOtherToolHandler =
     (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
       if (!evt.currentTarget.classList.contains("active")) {
-        gtag("event", "screen_view", {
-          app_name: "myProse-snapshot",
-          screen_name: `${writingTask?.info.id ?? "NO_TASK"}_${selectedTool}`,
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "Review",
+          task_id: writingTask?.info.id,
         });
       }
       setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));

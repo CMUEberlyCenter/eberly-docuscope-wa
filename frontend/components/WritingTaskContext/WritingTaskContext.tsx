@@ -1,4 +1,5 @@
 import type { WritingTask } from "#/lib/WritingTask";
+import { trackScreenView } from "#lib/tracking.js";
 import {
   createContext,
   type Dispatch,
@@ -42,14 +43,11 @@ export const WritingTaskProvider: FC<{
     (state: WritingTaskContext, newState: WritingTaskContext) => {
       const mergedState = { ...state, ...newState };
       if (mergedState.task?.info.id !== state.task?.info.id) {
-        if (window.gtag) {
-          window.gtag("event", "screen_view", {
-            app_name: "myProse",
-            screen_name: mergedState.task?.info.id, // Use the task ID as the screen name for analytics.  FIXME: private task ID name conflicts
-          });
-        } else {
-          console.warn(`gtag not available, cannot track writing task change`);
-        }
+        trackScreenView({
+          screen_name: "null",
+          screen_class: "WritingTask",
+          task_id: mergedState.task?.info.id,
+        });
       }
       return mergedState;
     },

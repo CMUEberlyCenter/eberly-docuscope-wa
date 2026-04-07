@@ -22,6 +22,7 @@ import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
+import { trackScreenView } from "#lib/tracking.js";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 class NoSelectedTextError extends Error {}
@@ -98,6 +99,11 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
               writingTask
             );
             const toolResult = { ...data, result };
+            trackScreenView({
+              screen_name: data.tool,
+              screen_class: "ToolCard",
+              task_id: writingTask?.info.id,
+            });
             setCurrentTool(toolResult);
             // setHistory(history => [...history, toolResult]);
             break;

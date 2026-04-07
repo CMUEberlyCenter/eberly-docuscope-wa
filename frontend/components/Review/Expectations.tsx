@@ -14,6 +14,7 @@ import {
   type Rule,
 } from "#/lib/WritingTask";
 import Icon from "#assets/icons/expectations_icon.svg?react";
+import { trackScreenView } from "#lib/tracking.js";
 import {
   faCircleExclamation,
   faEllipsis,
@@ -25,6 +26,7 @@ import {
   Activity,
   createContext,
   use,
+  useCallback,
   useEffect,
   useRef,
   useState,
@@ -408,7 +410,11 @@ const ExpectationRule: FC<ExpectationRuleProps> = ({
   }
 
   return (
-    <Accordion.Item eventKey={eventKey} {...props}>
+    <Accordion.Item
+      eventKey={eventKey}
+      {...props}
+      data-myprose-rule={rule.name}
+    >
       {mutation.isIdle ? (
         <div
           role="button"
@@ -461,7 +467,11 @@ const LoadedExpectationRule: FC<
 
   if (isErrorData(analysis)) {
     return (
-      <Accordion.Item {...props} eventKey={eventKey}>
+      <Accordion.Item
+        {...props}
+        eventKey={eventKey}
+        data-myprose-rule={rule.name}
+      >
         <Accordion.Header className="accordion-header-highlight">
           <div className="flex-grow-1">{rule.name}</div>
           <FontAwesomeIcon icon={faCircleExclamation} className="text-danger" />
@@ -478,7 +488,11 @@ const LoadedExpectationRule: FC<
 
   if (isExpectationsDataSuggestionNone(analysis)) {
     return (
-      <Accordion.Item {...props} eventKey={eventKey}>
+      <Accordion.Item
+        {...props}
+        eventKey={eventKey}
+        data-myprose-rule={rule.name}
+      >
         <div className={style["fake-accordion-button"]}>
           <div className="flex-grow-1">{analysis.expectation}</div>
           <AlertIcon message={t("warning")} show={true} />
@@ -488,7 +502,11 @@ const LoadedExpectationRule: FC<
   }
 
   return (
-    <Accordion.Item {...props} eventKey={eventKey}>
+    <Accordion.Item
+      {...props}
+      eventKey={eventKey}
+      data-myprose-rule={rule.name}
+    >
       <Accordion.Header className="accordion-header-highlight">
         <div className="flex-grow-1">{analysis.expectation}</div>
         <AlertIcon
@@ -528,14 +546,37 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
 }) => {
   const { t } = useTranslation("review");
   const { t: te } = useTranslation("expectations");
-
-  const [current, setCurrent] = useState<AccordionEventKey>(null);
-  const onSelect: AccordionSelectCallback = (eventKey, _event) => {
-    setCurrent(eventKey);
-  };
   const analyses = use(ExpectationsSnapshotContext);
   const task = use(WritingTaskContext);
   const id = use(FileHashContext);
+
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = useCallback(
+    (eventKey, event) => {
+      console.log("Selected expectation event key:", eventKey);
+      console.log(
+        "Event:",
+        (event.target as HTMLElement)
+          .closest("[data-myprose-rule]")
+          ?.getAttribute("data-myprose-rule")
+      );
+      setCurrent(eventKey);
+      if (eventKey) {
+        const rulename =
+          (event.target as HTMLElement)
+            .closest("[data-myprose-rule]")
+            ?.getAttribute("data-myprose-rule") || "unknown";
+        trackScreenView({
+          screen_name: `ExpectationDetail`,
+          screen_class: `Expectations`,
+          task_id: task?.info.id,
+          expectation: rulename,
+          file_hash: id,
+        });
+      }
+    },
+    [task?.info.id, id]
+  );
 
   return (
     <ReviewReset>
