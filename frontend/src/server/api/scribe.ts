@@ -22,7 +22,7 @@ const scribeNotes =
     // TODO check if user_lang is a language code and one that is supported.
     const language = data.user_lang
       ? resolveLanguageCode(data.user_lang)
-      : request.headers['accept-language'];
+      : request.headers['accept-language']?.split(',')[0] ?? 'en';
     // Uses regex in case segmentor does not properly flag certain words as word-like.
     const wordCount = [
       ...new Intl.Segmenter(language, { granularity: 'word' }).segment(
