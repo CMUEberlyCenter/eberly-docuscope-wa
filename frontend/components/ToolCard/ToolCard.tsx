@@ -194,10 +194,10 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
     [doTool]
   );
 
-  const onBookmark = () =>
-    setCurrentTool((current) =>
-      current ? { ...current, bookmarked: !current.bookmarked } : null
-    );
+  // const onBookmark = () =>
+  //   setCurrentTool((current) =>
+  //     current ? { ...current, bookmarked: !current.bookmarked } : null
+  //   );
   // setHistory(history =>
   //   history.map((h) =>
   //     h.datetime === currentTool.datetime ? updated : h
@@ -205,7 +205,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   // );
 
   return (
-    <div className="tool-card d-flex flex-column h-100">
+    <div className="tool-card d-flex flex-column flex-grow-1 overflow-hidden">
       <div className="d-flex justify-content-around">
         <ButtonToolbar className="mb-2 mx-auto">
           {(settings?.notes2prose || settings?.notes2bullets) && (
@@ -232,62 +232,46 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
           )}
         </ButtonToolbar>
       </div>
-      <article className="flex-grow-1 position-relative overflow-auto container-fluid">
-        {!currentTool && (
+      {!currentTool && (
+        <article className="d-flex flex-grow-1 flex-column position-relative overflow-auto container-fluid">
           <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
             <HighlightIcon className="icon-lg mx-auto" />
             <span className="mx-auto text-center">{t("tool.initial")}</span>
           </Stack>
-        )}
-        {/* Maybe use Carousel for history? */}
-        {currentTool?.tool === "prose" && (
-          <ToolDisplay.Root
-            // icon={<GenerateProseIcon />}
-            title={t("tool.button.prose.tooltip")}
-            tool={currentTool}
-            onBookmark={onBookmark}
-            actions={<ToolDisplay.Paste text={currentTool.result} />}
-          >
-            <ToolDisplay.Input tool={currentTool} />
-            <ToolDisplay.Response
-              tool={currentTool}
-              regenerate={retry}
-              text={currentTool.result ?? ""}
-            >
-              {/* TODO add error reporting */}
-              <Card.Text as="div">{currentTool.result}</Card.Text>
-            </ToolDisplay.Response>
-          </ToolDisplay.Root>
-        )}
-        {currentTool?.tool === "bullets" && (
-          <ToolDisplay.Root
-            // icon={<GenerateBulletsIcon />}
-            title={t("tool.button.bullets.tooltip")}
-            tool={currentTool}
-            onBookmark={onBookmark}
-            actions={<ToolDisplay.Paste text={currentTool.result} />}
-          >
-            <ToolDisplay.Input tool={currentTool} />
-            <ToolDisplay.Response
-              tool={currentTool}
-              regenerate={retry}
-              text={currentTool.result ?? ""}
-            >
-              {/* For #135, use results directly. */}
-              {currentTool.result ? (
-                <div
-                  // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-                  dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(currentTool.result),
-                  }}
-                />
-              ) : (
-                <Alert variant="danger">{t("error.no_results")}</Alert>
-              )}
-            </ToolDisplay.Response>
-          </ToolDisplay.Root>
-        )}
-      </article>
+        </article>
+      )}
+      {/* Maybe use Carousel for history? */}
+      {currentTool?.tool === "prose" && (
+        <ToolDisplay
+          title={t("tool.button.prose.tooltip")}
+          results={currentTool}
+          // onBookmark={onBookmark}
+          retry={retry}
+        >
+          {/* TODO add error reporting */}
+          <Card.Text as="div">{currentTool.result}</Card.Text>
+        </ToolDisplay>
+      )}
+      {currentTool?.tool === "bullets" && (
+        <ToolDisplay
+          title={t("tool.button.bullets.tooltip")}
+          results={currentTool}
+          // onBookmark={onBookmark}
+          retry={retry}
+        >
+          {/* For #135, use results directly. */}
+          {currentTool.result ? (
+            <div
+              // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(currentTool.result),
+              }}
+            />
+          ) : (
+            <Alert variant="danger">{t("error.no_results")}</Alert>
+          )}
+        </ToolDisplay>
+      )}
     </div>
   );
 };

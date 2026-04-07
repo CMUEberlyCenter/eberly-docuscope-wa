@@ -5,15 +5,8 @@ import YourInputIcon from "#assets/icons/YourInput.svg?react";
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
 import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import classNames from "classnames";
 import DOMPurify from "dompurify";
-import {
-  type FC,
-  type HTMLProps,
-  type ReactNode,
-  useCallback,
-  useState,
-} from "react";
+import { type FC, type HTMLProps, type ReactNode, useCallback } from "react";
 import {
   Alert,
   Button,
@@ -56,57 +49,6 @@ export const ToolButton: FC<ToolButtonProps> = ({
 );
 
 type ToolProp = { tool?: ToolResult | null };
-type ToolRootProps = HTMLProps<HTMLDivElement> &
-  ToolProp & {
-    title: string;
-    onBookmark: () => void;
-    actions?: ReactNode;
-  };
-/** Root component for displaying a tool card with header, content, and footer. */
-const ToolRoot: FC<ToolRootProps> = ({
-  tool,
-  children,
-  // icon,
-  title,
-  onBookmark,
-  actions,
-  className,
-  ...props
-}) => {
-  const { t } = useTranslation();
-  const [useBookmarks] = useState(false);
-  const cn = classNames(className, "bg-light");
-  return (
-    <div className={cn} {...props}>
-      <header className="text-center">
-        <h5 className="fs-6 mb-0">{title}</h5>
-        <h6 className="text-muted">
-          {tool?.datetime.toLocaleString()}
-          {useBookmarks && tool && !tool.error && (
-            <Button variant="icon" onClick={() => onBookmark()}>
-              <FontAwesomeIcon
-                icon={tool?.bookmarked ? faBookmark : faRegularBookmark}
-              />
-              <span className="visually-hidden sr-only">
-                {tool?.bookmarked ? t("tool.bookmarked") : t("tool.bookmark")}
-              </span>
-            </Button>
-          )}
-        </h6>
-      </header>
-      {tool && tool.error ? (
-        <ToolErrorHandler tool={tool} />
-      ) : (
-        <>
-          {children}
-          {!!children && !!actions && (
-            <footer className="mx-2">{actions}</footer>
-          )}
-        </>
-      )}
-    </div>
-  );
-};
 
 /** Component for displaying the users input selected for this tool. */
 const ToolInput: FC<ToolProp> = ({ tool }) => {
@@ -149,7 +91,7 @@ const ToolResponse: FC<ToolResponseProps> = ({
   ...props
 }) => {
   const { t } = useTranslation();
-  const cn = className ?? "px-1 m-2 pb-2";
+  const cn = className ?? "d-flex flex-column flex-grow-1 px-1 m-2 pb-2";
   return (
     <section {...props} className={cn}>
       <header className="d-flex align-items-baseline">
@@ -232,12 +174,54 @@ const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
   );
 };
 
-export const ToolDisplay = {
-  Root: ToolRoot,
-  Input: ToolInput,
-  Response: ToolResponse,
-  Spinner: Loading,
-  Paste: ToolPaste,
-  Button: ToolButton,
-  Fade: FadeContent,
+/** Component for displaying tool pending and results */
+export const ToolDisplay: FC<{
+  title: string;
+  results: ToolResult;
+  onBookmark?: () => void;
+  retry?: (prev: ToolResult) => Promise<void>;
+  children: ReactNode;
+}> = ({ results, title, onBookmark, retry, children }) => {
+  const { t } = useTranslation();
+  return (
+    <article className="d-flex flex-grow-1 flex-column position-relative overflow-auto container-fluid">
+      <header className="text-center">
+        <h5 className="fs-6 mb-0">{title}</h5>
+        <h6 className="text-muted">
+          {results?.datetime.toLocaleString()}
+          {onBookmark && results && !results.error && (
+            <Button variant="icon" onClick={() => onBookmark()}>
+              <FontAwesomeIcon
+                icon={results?.bookmarked ? faBookmark : faRegularBookmark}
+              />
+              <span className="visually-hidden sr-only">
+                {results?.bookmarked
+                  ? t("tool.bookmarked")
+                  : t("tool.bookmark")}
+              </span>
+            </Button>
+          )}
+        </h6>
+      </header>
+      {results && results.error ? (
+        <ToolErrorHandler tool={results} />
+      ) : (
+        <>
+          <ToolInput tool={results} />
+          <ToolResponse
+            tool={results}
+            regenerate={retry}
+            text={results.result ?? ""}
+          >
+            {children}
+          </ToolResponse>
+          {!!results.result && (
+            <footer className="mx-2">
+              <ToolPaste text={results.result} />
+            </footer>
+          )}
+        </>
+      )}
+    </article>
+  );
 };

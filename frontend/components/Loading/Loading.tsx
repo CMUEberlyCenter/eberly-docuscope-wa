@@ -8,7 +8,10 @@ import classNames from "classnames";
  * Basic loading spinner with text.
  * Used in Tool content areas.
  */
-export const Loading: FC<HTMLProps<HTMLDivElement>> = (className, ...props) => {
+export const Loading: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   return (
     <div
       role="status"
