@@ -25,6 +25,7 @@ import { ToolErrorHandler } from "../ErrorHandler/ErrorHandler";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer.js";
 
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
@@ -184,7 +185,7 @@ export const ToolDisplay: FC<{
 }> = ({ results, title, onBookmark, retry, children }) => {
   const { t } = useTranslation();
   return (
-    <article className="d-flex flex-grow-1 flex-column position-relative overflow-auto container-fluid">
+    <ToolContainer>
       <header className="text-center">
         <h5 className="fs-6 mb-0">{title}</h5>
         <h6 className="text-muted">
@@ -222,6 +223,6 @@ export const ToolDisplay: FC<{
           )}
         </>
       )}
-    </article>
+    </ToolContainer>
   );
 };

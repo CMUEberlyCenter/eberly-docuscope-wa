@@ -3,7 +3,7 @@ import {
   isErrorData,
   OptionalReviewData,
 } from "#/lib/ReviewResponse";
-import classNames from "classnames";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer.js";
 import {
   createContext,
   type Dispatch,
@@ -148,7 +148,6 @@ export const ReviewToolCard: FC<
   }
 > = ({
   children,
-  className,
   isPending,
   title,
   instructionsKey,
@@ -158,13 +157,7 @@ export const ReviewToolCard: FC<
 }) => {
   return (
     <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
+      <ToolContainer {...props}>
         <ToolHeader title={title} instructionsKey={instructionsKey} />
         {isPending || !review ? (
           <Loading />
@@ -187,7 +180,7 @@ export const ReviewToolCard: FC<
             {children}
           </ErrorBoundary>
         )}
-      </article>
+      </ToolContainer>
     </ReviewReset>
   );
 };
