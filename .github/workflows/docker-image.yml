@@ -20,19 +20,19 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Log in to the Container registry
-      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9
+      uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Extract metadata (tags, labels) for frontend Docker
       id: meta
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/myprose
     - name: Build and push frontend Docker image
       id: push
-      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
       with:
         context: frontend
         push: true
@@ -47,12 +47,12 @@ jobs:
         
     - name: Extract metadata (tags, labels) for ontopic Docker
       id: meta_ontopic
-      uses: docker/metadata-action@v5
+      uses: docker/metadata-action@v6
       with:
         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/ontopic
     - name: Build and push frontend Docker image
       id: push_ontopic
-      uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8
+      uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
       with:
         context: ontopic
         push: true
