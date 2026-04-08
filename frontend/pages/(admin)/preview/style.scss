@@ -1,0 +1,37 @@
+.deeplink {
+  .writing-task-card {
+    height: 100%;
+    max-height: 510px;
+  }
+
+  .carousel-indicators {
+    bottom: -30px;
+  }
+
+  .first-carousel,
+  .last-carousel {
+    height: 448px;
+    margin-bottom: 5px;
+  }
+
+  .first-carousel {
+    margin-inline-end: 16px;
+  }
+
+  .last-carousel {
+    margin-inline-start: 16px;
+  }
+
+  .carousel-control-prev,
+  .carousel-control-next {
+    width: 30px !important;
+  }
+
+  .carousel-control-prev {
+    left: -16px;
+  }
+
+  .carousel-control-next {
+    right: -16px;
+  }
+}
