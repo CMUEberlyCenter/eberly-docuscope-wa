@@ -28,10 +28,7 @@ export const Page: FC = () => {
   const targetRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <main
-      className="p-3 border d-flex flex-column overflow-hidden deeplink"
-      style={{ height: "600px", width: "800px" }}
-    >
+    <main className="d-flex flex-column overflow-hidden deeplink">
       <Card className="bg-light flex-grow-1 overflow-hidden writing-task-card">
         <Card.Body>
           <Carousel
