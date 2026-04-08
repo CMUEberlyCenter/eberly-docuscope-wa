@@ -51,6 +51,7 @@ export const FileUpload: FC<FileUploadProps> = ({
       <Modal.Footer>
         <Button
           variant="primary"
+          disabled={!file}
           onClick={() => {
             if (file) {
               onFile?.(file);
