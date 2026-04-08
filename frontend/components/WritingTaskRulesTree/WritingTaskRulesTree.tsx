@@ -24,6 +24,7 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   includeTitle?: boolean;
   /** Writing task */
   task?: Optional<WritingTask>;
+  detailsClassName?: string;
 };
 /**
  * Component for displaying the current outline with a sidebar for displaying
@@ -35,6 +36,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   task,
   leafOnly,
   className,
+  detailsClassName = "bg-light",
   ...props
 }) => {
   const { t } = useTranslation();
@@ -126,7 +128,9 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
           </div>
         ))}
       </div>
-      <div className="container-fluid rounded bg-light p-3 h-0 w-100 overflow-auto">
+      <div
+        className={`container-fluid rounded ${detailsClassName} p-3 h-0 w-100 overflow-auto`}
+      >
         {!selected && (
           <>
             <h5>
