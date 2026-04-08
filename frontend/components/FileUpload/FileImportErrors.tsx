@@ -13,6 +13,7 @@ const FileImportErrorContext = createContext<{
   showErrors: boolean;
   setShowErrors: (show: boolean) => void;
   showError: (...error: Message[]) => void;
+  clearErrors: () => void;
 }>({
   errors: [],
   setErrors: () => {},
@@ -20,6 +21,7 @@ const FileImportErrorContext = createContext<{
   showErrors: false,
   setShowErrors: () => {},
   showError: () => {},
+  clearErrors: () => {},
 });
 export const useFileImportErrors = () => use(FileImportErrorContext);
 
@@ -35,6 +37,11 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
     setShowErrors(true);
   };
 
+  const clearErrors = () => {
+    setErrors([]);
+    setShowErrors(false);
+  };
+
   return (
     <FileImportErrorContext
       value={{
@@ -44,6 +51,7 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
         showErrors,
         setShowErrors,
         showError,
+        clearErrors,
       }}
     >
       {children}
@@ -58,7 +66,7 @@ export const FileImportErrorProvider: FC<{ children: ReactNode }> = ({
         </Toast.Header>
         <Toast.Body>
           <p>{t("editor.upload.error.overview")}</p>
-          <ListGroup>
+          <ListGroup className="overflow-auto" style={{ maxHeight: "15rem" }}>
             {errors.map((msg) => (
               <ListGroup.Item
                 key={crypto.randomUUID()}
