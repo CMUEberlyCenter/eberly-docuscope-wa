@@ -6,7 +6,6 @@ import { useFileImportErrors } from "./FileImportErrors";
 import { useFilename, useFileText } from "./FileTextContext";
 import { convertOptions } from "./convertOptions";
 
-// type PickerCallback = (doc?: google.picker.DocumentObject) => void;
 // TODO file data
 const PickerContext = createContext<(show: boolean) => void>(() => undefined);
 export const usePicker = () => use(PickerContext);
@@ -19,7 +18,7 @@ export const PickerProvider: FC<{
 }> = ({ children, clientId, apiKey, appId }) => {
   const { t } = useTranslation();
   const filesApiRef = useRef(false);
-  const { showError } = useFileImportErrors();
+  const { clearErrors, showError } = useFileImportErrors();
   const [, setText] = useFileText();
   const [, setFilename] = useFilename();
 
@@ -110,6 +109,7 @@ export const PickerProvider: FC<{
         });
         return;
       }
+      clearErrors();
       setFilename(doc.name ?? null);
       if (
         doc.mimeType ===
