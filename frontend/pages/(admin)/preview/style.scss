@@ -1,37 +1,21 @@
-.deeplink {
-  .writing-task-card {
-    height: 100%;
-    max-height: 510px;
+.minh-0 {
+  min-height: 0;
+}
+
+.slide-container {
+  transition: transform 0.3s ease-in-out;
+
+  &.start {
+    transform: translateX(-100%); // out of view to the left
   }
 
-  .carousel-indicators {
-    bottom: -30px;
+  &.end {
+    top: 0;
+    transform: translateX(100%); // out of view to the right
   }
 
-  .first-carousel,
-  .last-carousel {
-    height: 440px;
-    margin-bottom: 5px;
-  }
-
-  .first-carousel {
-    margin-inline-end: 16px;
-  }
-
-  .last-carousel {
-    margin-inline-start: 16px;
-  }
-
-  .carousel-control-prev,
-  .carousel-control-next {
-    width: 30px !important;
-  }
-
-  .carousel-control-prev {
-    left: -16px;
-  }
-
-  .carousel-control-next {
-    right: -16px;
+  &.active {
+    /* Show the active container */
+    transform: translateX(0);
   }
 }
