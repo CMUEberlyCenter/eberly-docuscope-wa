@@ -1,7 +1,13 @@
-.minh-0 {
+.minh-0 { // used to handle flexbox height growth without causing overflow issues
   min-height: 0;
 }
 
+/**
+ * Styles for the sliding transition between the two main containers in the preview page.
+ * The .slide-container class is applied to both containers, and additional
+ * classes (.start, .end, .active) are used to control their position and visibility
+ * during transitions.
+ */
 .slide-container {
   transition: transform 0.3s ease-in-out;
 
