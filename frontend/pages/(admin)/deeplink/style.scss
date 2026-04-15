@@ -1,6 +1,10 @@
 .minh-0 { // used to handle flexbox height growth without causing overflow issues
   min-height: 0;
 }
+#root {
+  height: 100%;
+  width: 100%;
+}
 
 /**
  * Styles for the sliding transition between the two main containers in the preview page.
