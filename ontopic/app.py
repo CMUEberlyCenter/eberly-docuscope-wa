@@ -245,46 +245,50 @@ async def ontopic(
     accept_language: Annotated[
         Optional[str], Header(), AfterValidator(validate_language)
     ] = "en",
-    locale=Depends(get_locale),
+    locale: Locale = Depends(get_locale),
 ) -> OnTopicData:
     """Analyse the posted prose for coherence and clarity."""
     logging.info(f"Received onTopic request for language: {accept_language}")
-    document = DSDocument(locale=locale)
-    document.loadFromHtmlString(f"<body>{data.base}</body>")
+    with locale.nlp.memory_zone():
+        document = DSDocument(locale=locale)
+        document.loadFromHtmlString(f"<body>{data.base}</body>")
 
-    coherence = document.generateGlobalVisData(2, 1, TopicSort.APPEARANCE)
-    clarity = document.getSentStructureData()
-    # Remove redundant data as it is unexpected in the frontend.
-    clarity_data: list[ClarityData] = [
-        d[:2] + d[3:] if isinstance(d, tuple) else d for d in clarity
-    ]
-    topics = document.getCurrentTopics()
+        coherence = document.generateGlobalVisData(2, 1, TopicSort.APPEARANCE)
+        clarity = document.getSentStructureData()
+        # Remove redundant data as it is unexpected in the frontend.
+        clarity_data: list[ClarityData] = [
+            d[:2] + d[3:] if isinstance(d, tuple) else d for d in clarity
+        ]
+        topics = document.getCurrentTopics()
 
-    num_paragraphs = coherence.get("num_paras")
-    if num_paragraphs:
-        logging.info(
-            "Number of paragraphs processed: %d (might be 1 for very short text)",
-            num_paragraphs,
-        )
-    else:
-        logging.warning(
-            "Error obtaining number of paragraphs from %d, setting to 0", num_paragraphs
-        )
-        num_paragraphs = 0
+        num_paragraphs = coherence.get("num_paras")
+        if num_paragraphs:
+            logging.info(
+                "Number of paragraphs processed: %d (might be 1 for very short text)",
+                num_paragraphs,
+            )
+        else:
+            logging.warning(
+                "Error obtaining number of paragraphs from %d, setting to 0", num_paragraphs
+            )
+            num_paragraphs = 0
 
-    # Currently unused in visualization,
-    #  reduce processing by not performing this analysis.
-    # [LocalData.model_validate(document.generateGlobalVisData([i], 1, 2))
-    #  for i in range(1, nrParagraphs+1)]
-    local = []
+        # Currently unused in visualization,
+        #  reduce processing by not performing this analysis.
+        # [LocalData.model_validate(document.generateGlobalVisData([i], 1, 2))
+        #  for i in range(1, nrParagraphs+1)]
+        local = []
+
+        html = document.toHtml(topics, -1)
+        html_sentences = document.getHtmlSents(clarity)
 
     response.headers["Content-Language"] = accept_language or "en"
     return OnTopicData(
         coherence=CoherenceData.model_validate(coherence),
         local=local,
         clarity=clarity_data,
-        html=document.toHtml(topics, -1),
-        html_sentences=document.getHtmlSents(clarity),
+        html=html,
+        html_sentences=html_sentences,
     )
 
 
@@ -312,8 +316,9 @@ async def segment(
     with locale.nlp.memory_zone():
         document = DSDocument(locale=locale)
         document.loadFromHtmlString(f"<body>{data.text}</body>")
+        xml = document.toXml()
     response.headers["Content-Language"] = accept_language or "en"
-    return document.toXml()
+    return xml
 
 
 @app.get("/api/v2/languages")
