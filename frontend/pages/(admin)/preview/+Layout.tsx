@@ -1,3 +1,4 @@
+/* @overview Mockup of LTI deeplinking dialog for previewing page without deploying. */
 import { FC, ReactNode } from "react";
 import { Modal } from "react-bootstrap";
 
@@ -5,7 +6,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => (
   <div className="modal show d-block" style={{ position: "initial" }}>
     <Modal.Dialog size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Link Resource from Exteral Tool</Modal.Title>
+        <Modal.Title>Link Resource from External Tool</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <div

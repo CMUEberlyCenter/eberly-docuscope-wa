@@ -1,4 +1,4 @@
-/* @overview: This is the configuration page for LTI deeplinking. The user can select a writing task from a list. */
+/* @overview: This is the configuration page for LTI deeplinking. The user selects a writing task and a tool. */
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree.js";
@@ -31,6 +31,7 @@ export const Page: FC = () => {
     <main className="h-100 d-flex flex-column overflow-hidden gap-1 p-1 small">
       <div className="flex-grow-1 minh-0 h-100 overflow-hidden position-relative">
         {/* <Activity mode={index === 0 ? "visible" : "hidden"}> */}
+        {/* <ViewTransition enter="auto" exit="auto"> available in canary https://react.dev/reference/react/ViewTransition */}
         <div
           className={`minh-0 h-100 overflow-hidden position-absolute top-0 start-0 d-flex flex-row gap-3 align-items-stretch slide-container start ${index === 0 ? "active" : ""}`}
         >
@@ -148,7 +149,7 @@ export const Page: FC = () => {
                   ref={targetRef}
                   type="submit"
                   className="btn btn-primary"
-                  disabled={!selected || !tool || true}
+                  disabled={!selected || !tool || true/* FIXME: remove true to enable in production */}
                   title={
                     !selected || !tool ? t("deeplinking.disabled") : undefined
                   }
