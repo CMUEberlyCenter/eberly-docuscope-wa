@@ -168,6 +168,7 @@
     "slate-hyperscript": "^0.100.0",
     "slate-react": "^0.124.0",
     "string-format": "^2.0.0",
+    "telefunc": "^0.2.20",
     "vike": "^0.4.257",
     "vike-react": "^0.6.21",
     "vike-react-query": "^0.1.12",

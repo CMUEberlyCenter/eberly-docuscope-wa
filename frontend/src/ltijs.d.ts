@@ -199,7 +199,7 @@ declare module 'ltijs' {
     platformId: () => Promise<string | boolean>;
     platformName(name?: string): Promise<string | boolean>;
     platformUrl(url?: string): Promise<string | boolean>;
-    platformActive(): Promise<boolean>;
+    platformActive(active?: boolean): Promise<boolean>;
     // platformClientId(clientId?: string): Promise<string | boolean>;
     // platformKid(): string;
     // platformPublicKey(): Promise<string | false>;

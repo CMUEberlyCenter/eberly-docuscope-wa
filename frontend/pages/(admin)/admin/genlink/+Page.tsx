@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "./+data";
+import { onClearSnapshotCache } from "./Page.telefunc";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -399,21 +400,11 @@ export const Page: FC = () => {
                     variant="icon"
                     className="text-danger"
                     title={t("admin:genlink.refresh_snapshot")}
-                    onClick={() => {
-                      fetch(`/api/v2/snapshot/${id}?cache_only=true`, {
-                        method: "DELETE",
-                      })
-                        .then((response) => {
-                          if (!response.ok) {
-                            console.error(
-                              "Failed to refresh snapshots",
-                              response.statusText
-                            );
-                          }
-                        })
-                        .catch((error) => {
-                          console.error("Error refreshing snapshots:", error);
-                        });
+                    onClick={async () => {
+                      const out = await onClearSnapshotCache(id);
+                      if (!out.success) {
+                        console.error(out.message);
+                      }
                     }}
                   >
                     <FontAwesomeIcon icon={faBroom} />

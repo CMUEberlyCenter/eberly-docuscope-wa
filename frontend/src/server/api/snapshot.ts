@@ -2,12 +2,12 @@ import { Request, Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
-import { userLanguage } from '../../lib/languageCode';
+import { userLanguage } from '#lib/languageCode';
 import {
   BadRequestError,
   ForbiddenError,
   GatewayError,
-} from '../../lib/ProblemDetails';
+} from '#lib/ProblemDetails';
 import {
   Analysis,
   BasicReviewPrompts,
@@ -17,13 +17,13 @@ import {
   isExpectationsOutput,
   ReviewPrompt,
   ReviewResponse,
-} from '../../lib/ReviewResponse';
+} from '#lib/ReviewResponse';
 import {
   getExpectationByIndex,
   isEnabled,
   isWritingTask,
   WritingTask,
-} from '../../lib/WritingTask';
+} from '#lib/WritingTask';
 import { basicAuthMiddleware } from '../../utils/basicAuth';
 import { doChat, reviewData } from '../data/chat';
 import {

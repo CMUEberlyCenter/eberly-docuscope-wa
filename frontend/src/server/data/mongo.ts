@@ -379,7 +379,7 @@ export async function initDatabase() {
   );
   return async () => {
     await wtdShutdown();
-    return client.close();
+    await client.close();
   };
 }
 

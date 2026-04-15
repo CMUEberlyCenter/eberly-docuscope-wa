@@ -21,6 +21,7 @@ import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
+import { telefunc } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -170,7 +171,6 @@ async function __main__() {
           items
         );
         // { message: 'Success' });
-        console.log(form);
         response.send(form);
       } catch (err) {
         next(err);
@@ -324,7 +324,8 @@ async function __main__() {
     /locales/, // Localization files need to be public
     /myprose/, // These should be the "public" tools.
     /lti/, // additional public lti "well-known" endpoints
-    /admin/ // Admin routes, security should be handled outside LTI
+    /admin/, // Admin routes, security should be handled outside LTI
+    /_telefunc/ // Telefunc endpoint, should be protected in the future if used for non-public actions.
   );
   try {
     await Provider.deploy({ serverless: true });
@@ -450,6 +451,26 @@ async function __main__() {
       }
       Provider.redirect(res, '/draft');
     });
+    app.all(
+      '/_telefunc',
+      basicAuthMiddleware,
+      async (req: Request, res: Response, _next: NextFunction) => {
+        const { body, statusCode, contentType } = await telefunc({
+          url: req.originalUrl,
+          method: req.method,
+          body: req.body,
+          // readable: req,
+          // contentType: req.headers['content-type'] || '',
+          context: {
+            // You can add any arbitrary contextual information here
+            // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
+            user: (req as IBasicAuthedRequest).auth?.user,
+          },
+        });
+        res.status(statusCode).type(contentType).send(body);
+        // next();
+      }
+    );
     // Handle all other routes with Vike
     app.all(
       '{*vike}',
@@ -529,6 +550,9 @@ async function __main__() {
         await shutdownDatabase();
         await shutdownPrompts();
         shutdownSettings();
+        logger.info('Shutdown complete, exiting process.', {
+          status: 'shutdown_complete',
+        });
         process.exit(0);
       });
     };

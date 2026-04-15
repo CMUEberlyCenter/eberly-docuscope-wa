@@ -4,10 +4,11 @@ import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import { version } from './package.json';
+import { telefunc } from 'telefunc/vite';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [vike(), react(), /*visualizer(),*/ svgr()],
+  plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
   build: {
     // sourcemap: mode === 'development',
     // minify: mode !== 'development',
