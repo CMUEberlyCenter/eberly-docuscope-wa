@@ -524,7 +524,7 @@ const LoadedExpectationRule: FC<
         }}
         onExit={() => dispatch({ type: "unset" })}
       >
-        {analysis.response.assessment ? (
+        {analysis.response.assessment.trim() ? (
           <div>
             <h6 className="d-inline">{t("assessment")}</h6>{" "}
             <span>{analysis.response.assessment}</span>
@@ -532,7 +532,9 @@ const LoadedExpectationRule: FC<
         ) : null}
         <div>
           <h6 className="d-inline">{t("suggestion")}</h6>{" "}
-          <span>{analysis.response.suggestion || t("no_suggestions")}</span>
+          <span>
+            {analysis.response.suggestion.trim() || t("no_suggestions")}
+          </span>
         </div>
       </Accordion.Body>
     </Accordion.Item>

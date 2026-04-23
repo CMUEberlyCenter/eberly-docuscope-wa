@@ -10,7 +10,7 @@ type AlertIconProps = HTMLProps<HTMLDivElement> & {
 /** Simple alert icon component with a title tooltip. */
 export const AlertIcon: FC<AlertIconProps> = ({
   message,
-  show,
+  show = true,
   className,
   ...props
 }) => (
