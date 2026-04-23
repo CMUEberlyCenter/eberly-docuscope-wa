@@ -1,0 +1,11 @@
+introduction: Algo salió mal. Por favor, inténtelo de nuevo más tarde.
+label: "Error:"
+details: "Detalles del error: {{details}}"
+instructions: >
+  Si este error persiste, póngase en contacto con el soporte técnico con los detalles del error indicados anteriormente.
+unauthorized: No está autorizado para acceder a este recurso.
+forbidden: No tiene permiso para acceder a este recurso.
+not_found: El recurso solicitado no fue encontrado.
+service_unavailable: El servicio no está disponible en este momento. Por favor, inténtelo de nuevo más tarde.
+internal_server_error: Se produjo un error interno del servidor. Por favor, inténtelo de nuevo más tarde.
+unexpected_error: Se produjo un error inesperado. Por favor, inténtelo de nuevo más tarde.

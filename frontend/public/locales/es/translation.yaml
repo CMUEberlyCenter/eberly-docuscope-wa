@@ -1,104 +1,46 @@
 about:
   title: Acerca de
-  overview: 'Descripción General del Proyecto:'
-  project_link_title: Futuro de la Escritura
+  overview: 'Descripción del proyecto:'
+  project_link_title: Futuro de la escritura
   build: 'Compilación:'
   version: 'Versión: {{version}} compilada el {{date}}'
-  template: 'Información de Plantillas:'
+  template: 'Información de plantillas:'
   templates: Plantillas compiladas el {{date}}
-  task: 'Tarea de Escritura:'
+  task: 'Tarea de escritura:'
   task_name: 'Nombre: {{name}}'
   acknowledgements:
     title: 'Agradecimientos:'
     content: >
-      Este proyecto ha sido parcialmente apoyado por la Fundación A.W. Mellon,
+      Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
       la Beca Semilla de la Iniciativa Simon de Carnegie Mellon,
       el Fondo de Desarrollo de la Facultad Berkman,
-      y el Programa de Becas Semilla para Investigación y Desarrollo de Herramientas
-      Educativas Habilitadas por IA Generativa, Dietrich College of Humanities & Social Sciences,
+      y el Programa de Becas Semilla para la Investigación y el Desarrollo de Herramientas
+      Educativas con Inteligencia Artificial Generativa, Dietrich College of Humanities & Social Sciences,
       Eberly Center for Teaching Excellence and Educational Innovation,
-      Department of English, y Center for Technology Transfer and Enterprise Creation.
-  cmu: Carnegie Mellon University
+      Departamento de Inglés y Centro de Transferencia de Tecnología y Creación de Empresas.
+  cmu: Universidad Carnegie Mellon
   simon: Iniciativa Simon
-admin:
-  title: Panel de Administración
-  home: Inicio
-  welcome: Bienvenido al panel de administración. Utilice la navegación para gestionar diversos aspectos de la aplicación myProse.
-  settings:
-    tab: Configuración
-    title: Configuración Global
-    text_to_speech: 'Texto a Voz: '
-    scribe: 'Herramientas de I.A.: '
-    model: 'Modelo Anthropic: '
-    word_count_limit: 'Límite de Recuento de Palabras: '
-    notes_to_prose: 'Herramienta $t(tool.tab.generate) de $t(tool.button.prose.tooltip): '
-    notes_to_bullets: 'Herramienta $t(tool.tab.generate) de $t(tool.button.bullets.tooltip): '
-    civil_tone: 'Herramienta $t(review:title) de $t(review:civil_tone.title): '
-    credibility: 'Herramienta $t(review:title) de $t(review:credibility.title): '
-    expectations: 'Herramienta $t(review:title) de $t(review:expectations.title): '
-    sentence_clarity: 'Herramienta $t(review:title) de $t(review:sentences.title): '
-    lines_of_arguments: 'Herramienta $t(review:title) de $t(review:lines_of_arguments.title): '
-    logical_flow: 'Herramienta $t(review:title) de $t(review:logical_flow.title): '
-    paragraph_clarity: 'Herramienta $t(review:title) de $t(review:paragraph_clarity.title): '
-    professional_tone: 'Herramienta $t(review:title) de $t(review:professional_tone.title): '
-    prominent_topics: 'Herramienta $t(review:title) de $t(review:prominent_topics.title): '
-    sentences: 'Herramienta $t(review:title) de $t(review:sentences.title): '
-    sources: 'Herramienta $t(review:title) de $t(review:sources.title): '
-    organization: 'Herramienta $t(review:title) de $t(review:organization.title): '
-    language: 'Idioma Predeterminado: '
-    access_level: 'Nivel de acceso WTD: '
-    available: 'Disponible'
-    unavailable: 'Todas Deshabilitadas'
-    enabled: Habilitado
-    disabled: No
-    unlimited: Sin Límite
-  platforms:
-    tab: Plataformas
-    title: Plataformas LTI Registradas
-  performance:
-    tab: Rendimiento
-    title: Métricas de Rendimiento
-    no_data: No hay datos de rendimiento disponibles.
-  genlink:
-    tab: Generar Enlaces
-    title: Generador de Enlaces de Vista Previa y Tareas de Escritura
-    description: Utilice esta herramienta para generar enlaces para Tareas de Escritura específicas dentro de myProse.
-    document:
-      title: Vista Previa del Documento
-      description: Utilice este enlace para obtener una vista previa del documento para la Tarea de Escritura seleccionada.
-      upload: Cargar Documento
-      tools: 'Seleccionar Herramientas Habilitadas:'
-      select_label: Seleccionar Todo / Deseleccionar Todo
-      select_all: Seleccionar Todo
-      deselect_all: Deseleccionar Todo
-      invalid_file_type: ¡Tipo de archivo no válido! Por favor, cargue un archivo .docx.
-      invalid_file_content: El archivo cargado no pudo ser procesado. Por favor, asegúrese de que sea un documento .docx válido. {{message}}
-      empty_content: El documento cargado está vacío. Por favor, proporcione un documento con contenido.
-      too_large: El documento cargado con {{wordCount}} palabras excede el tamaño máximo permitido de {{maxWords}} palabras. Por favor, cargue un documento más pequeño.
-    submit: Iniciar
-    existing_previews: Vistas Previas Existentes
-    delete_preview: Eliminar Vista Previa
-    refresh_preview: Limpiar caché de análisis
 document.title: myProse
-document.description: $t(document.title) es un entorno para estructurar tareas de escritura con la ayuda de inteligencia artificial generativa y otras herramientas de análisis de lenguaje natural.
+document.description: $t(document.title) es un entorno para estructurar tareas de escritura con la ayuda de inteligencia artificial generativa y otras herramientas de análisis del lenguaje natural.
 loading: Analizando...
 wait: Esto puede tardar unos segundos...
 legal:
-  myprose: Aviso de Privacidad de $t(document.title)
+  myprose: Aviso de privacidad de $t(document.title)
   cmu: Legal
-  privacy: Aviso de Privacidad
-deeplink: Seleccione un tipo de texto para esta asignación
+  privacy: Aviso de privacidad
+deeplink: Seleccione un tipo de texto para esta tarea
 deeplinking:
-  title: LTI Deeplinking de $t(document.title)
-  disabled: Por favor, seleccione una herramienta y seleccione o cargue un archivo de Tarea de Escritura para habilitar este botón.
-  enabled: Haga clic para seleccionar contenido.
-  select_tool: Seleccione una herramienta
+  title: Vinculación profunda LTI de $t(document.title)
+  next: Detalles →
+  previous: ← Selección
+  disabled: Seleccione una herramienta y elija o cargue un archivo de tarea de escritura para habilitar este botón.
+  enabled: Haga clic para seleccionar el contenido.
+  select_tool: Seleccionar una herramienta
   option:
     draft: Borrador
     review: Revisión
-  upload: Seleccione una Tarea de Escritura o cargue un archivo de Tarea de Escritura personalizado
 genlink:
-  title: Generador de Enlaces de Tareas de Escritura de $t(document.title)
+  title: Generador de enlaces de tarea de escritura de $t(document.title)
   link: 'Enlaces:'
   draft: Borrador de $t(document.title)
   review: Revisión de $t(document.title)
@@ -114,34 +56,34 @@ audio:
 editor:
   gdoc:
     error:
-      google_client_id: 'Error de configuración del servidor: El ID de Cliente de Google no está definido.'
-      google_api_key: 'Error de configuración del servidor: La Clave API de Google no está definida.'
-      google_app_id: 'Error de configuración del servidor: El ID de Aplicación de Google no está definido.'
+      google_client_id: 'Error de configuración del servidor: el ID de cliente de Google no está definido.'
+      google_api_key: 'Error de configuración del servidor: la clave de API de Google no está definida.'
+      google_app_id: 'Error de configuración del servidor: el ID de aplicación de Google no está definido.'
       google_drive_api: La API de Google Drive no está cargada.
       docx: Error al obtener o convertir el archivo docx.
-      gdoc: Error al obtener o convertir el archivo de Google Doc.
-      gdoc_empty: La exportación de Google Doc devolvió contenido vacío.
+      gdoc: Error al obtener o convertir el archivo de Google Docs.
+      gdoc_empty: La exportación de Google Docs devolvió contenido vacío.
       unknown_type: 'Tipo de archivo no compatible: {{type}}'
   upload:
     title: Abrir
     file: Archivo
     open: Abrir
     error:
-      title: 'Problemas de Importación de Archivo:'
-      overview: 'Revise los detalles a continuación: Las advertencias probablemente indican diferencias de visualización mientras que los errores pueden indicar pérdida de información.'
+      title: 'Problemas al importar el archivo:'
+      overview: 'Revise los detalles a continuación: las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
       error: 'Error: {{message}}'
       warning: 'Advertencia: {{message}}'
-      fail: Solo se permite la selección de un archivo.
+      fail: Solo se permite seleccionar un archivo a la vez.
       not_docx: '¡{{file}} no es un archivo docx!'
-      failed_write: No se puede guardar el archivo.
-      security: Archivo rechazado debido a error de seguridad.
+      failed_write: No se pudo guardar el archivo.
+      security: Archivo rechazado debido a un error de seguridad.
   menu:
     file: Archivo
-    open: Importar desde Archivo
+    open: Importar desde archivo
     gdoc: Importar desde Google Docs
     save: Exportar
     view: Fuente
-    view.font_size: 'Tamaño de Fuente del Editor: {{zoom}}%'
+    view.font_size: 'Tamaño de fuente del editor: {{zoom}}%'
     paragraph: Párrafo
     h1: Encabezado 1
     h2: Encabezado 2
@@ -150,13 +92,13 @@ editor:
     h5: Encabezado 5
     h6: Encabezado 6
     list: Lista
-    numbered: Lista Numerada
+    numbered: Lista numerada
     bold: Negrita
     italic: Cursiva
     underline: Subrayado
     strike: Tachado
-    task: 'Expectativas de Contenido:'
-    no_task: Ninguna Seleccionada
+    task: 'Expectativas de contenido:'
+    no_task: Ninguna seleccionada
     no_edit: El texto no es editable.
 tool:
   tab:
@@ -164,57 +106,58 @@ tool:
   button:
     prose:
       title: Prosa
-      tooltip: Generar Prosa desde Notas
+      tooltip: Generar prosa a partir de notas
     bullets:
       title: Viñetas
-      tooltip: Generar Lista con Viñetas desde Notas
+      tooltip: Generar lista con viñetas a partir de notas
     view:
       title: 'Abrir expectativas de contenido: {{title}}'
-  initial: Escriba y resalte texto para acciones adicionales.
+  initial: Escriba y resalte texto para realizar más acciones.
   bookmark: Marcador
   bookmarked: Marcado
-  input: Su Entrada
-  no_selection: Por favor, seleccione algún texto antes de usar esta herramienta.
+  input: Su entrada
+  no_selection: Seleccione algún texto antes de usar esta herramienta.
   output: Respuesta de I.A.
   regenerate: Regenerar
-  paste: Pegar Texto
-clipboard: Copiar al Portapapeles
+  paste: Pegar texto
+clipboard: Copiar al portapapeles
 error:
-  unknown: Ocurrió un error desconocido al procesar los resultados.
+  unknown: Se produjo un error desconocido al procesar los resultados.
   no_selection:
-    prose: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
-    bullets: Parece que faltan las notas que pretendía proporcionar. Por favor, comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
+    prose: Parece que faltan las notas que tenía intención de proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
+    bullets: Parece que faltan las notas que tenía intención de proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
     default: No hay texto seleccionado. Resalte el texto primero.
   no_results: No hay resultados válidos.
-  unknown_error: Ocurrió un error.
-  too_large: El texto de entrada es demasiado grande para procesar. Por favor, reduzca la longitud del texto seleccionado e intente nuevamente.
-  service_unavailable: El servicio no está disponible actualmente. Por favor, intente nuevamente más tarde.
+  unknown_error: "Se produjo un error."
+  too_large: El texto de entrada es demasiado extenso para procesarlo. Reduzca la longitud del texto seleccionado e inténtelo de nuevo.
+  too_large_selection: El texto seleccionado es demasiado extenso para procesarlo, {{count}} palabras. Reduzca la longitud de su selección a menos de {{maxCount}} palabras e inténtelo de nuevo.
+  service_unavailable: El servicio no está disponible en este momento. Inténtelo de nuevo más tarde.
 select_task:
-  title: Seleccionar Tipo de Escritura
+  title: Seleccionar tipo de escritura
   filters: Filtros
-  label: Búsqueda de Texto
+  label: Búsqueda de texto
   placeholder: Ingrese título o palabras clave...
   search: Buscar
   context: Contexto
-  mode: Modo Principal
-  upload: Cargar Tipo de Texto Personalizado
+  mode: Modo principal
+  upload: Cargar tipo de texto personalizado
   invalid_upload: ¡El archivo cargado no es una especificación de tipo de texto válida!
-  "null": Sin Tipo de Texto
+  "null": Sin tipo de texto
   version: 'Versión: {{version}}'
-  copyright: 'Derechos de Autor: {{copyright}}'
+  copyright: 'Derechos de autor: {{copyright}}'
   multiple_file_error: Cargue solo un archivo a la vez.
-  malformed_json: El contenido no pudo ser analizado como JSON.
+  malformed_json: El contenido no pudo analizarse como JSON.
   select: Seleccionar categoría
-  select_all: Seleccionar Todo
-  all_category: Todo
+  select_all: Seleccionar todo
+  all_category: Todas
 cancel: Cancelar
 select: Seleccionar
 next: Siguiente
-select_insert: Seleccionar e Insertar
+select_insert: Seleccionar e insertar
 details:
-  include: Incluir Detalles
+  include: Incluir detalles
   insert: Insertar
-  overview: Descripción General
+  overview: Descripción general
   about:
-    expectation: 'Acerca de esta Expectativa:'
-    section: 'Acerca de esta Sección:'
+    expectation: 'Acerca de esta expectativa:'
+    section: 'Acerca de esta sección:'
