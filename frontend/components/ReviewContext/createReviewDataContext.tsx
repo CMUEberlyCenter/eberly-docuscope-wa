@@ -186,7 +186,6 @@ export function getAnalysis<T extends Analysis>(
 
 export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
   const Context = createContext<ReviewDataContext<T> | null>(null);
-  // eslint-disable-next-line @eslint-react/component-hook-factories
   const useReviewDataContext = () => {
     const ctx = use(Context);
     if (!ctx) {
@@ -197,13 +196,11 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
     return ctx;
   };
 
-  // eslint-disable-next-line @eslint-react/component-hook-factories
   const ReviewDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { review, pending } = useReview<T>(tool);
     return <Context value={{ review, pending }}>{children}</Context>;
   };
 
-  // eslint-disable-next-line @eslint-react/component-hook-factories
   const SnapshotDataProvider: FC<SnapshotProviderProps> = ({
     children,
     snapshotId,
