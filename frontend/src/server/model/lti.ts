@@ -1,3 +1,5 @@
+// TODO: check for duplicate types with ltijs.d.ts
+
 type ContextToken = {
   contextId: string;
   user: string;
@@ -165,4 +167,6 @@ export type LTIPlatform = {
   authenticationEndpoint: string;
   accesstokenEndpoint: string;
   authConfig: JWK_SET | JWK_KEY | RSA_KEY;
+  authorizationServer?: string;
+  kid?: string;
 };
