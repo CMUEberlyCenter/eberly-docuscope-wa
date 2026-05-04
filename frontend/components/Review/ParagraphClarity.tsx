@@ -52,7 +52,7 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
             {(t) => <p>{t("paragraph_clarity_insights")}</p>}
           </Translation>
         </header>
-        {review && "response" in review ? (
+        {review && "response" in review && review.response.length ? (
           <Accordion>
             {review.response.map(
               ({ issue, suggestion, sent_ids, para_id }, i) => (
@@ -84,7 +84,9 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
               )
             )}
           </Accordion>
-        ) : null}
+        ) : (
+          <div className="alert alert-info">{t("paragraph_clarity.null")}</div>
+        )}
       </section>
     </ReviewToolCard>
   );

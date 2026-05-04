@@ -223,9 +223,8 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
               <section className="mt-3">
                 <h6>{t("lines_of_arguments.strategies")}</h6>
                 <ul>
-                  {review.response.strategies.map((strat, i) => (
-                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                    <li key={`loa-strat-${i}`}>{strat}</li>
+                  {[...new Set(review.response.strategies)].map((strat) => (
+                    <li key={`loa-strat-${strat}`}>{strat}</li>
                   ))}
                 </ul>
               </section>

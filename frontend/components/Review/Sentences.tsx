@@ -154,8 +154,8 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <p>{t("sentences.select")}</p>
         )}
       </div>
-      {
-        <div className="overflow-auto w-100 h-100">
+      <div className="overflow-auto w-100 h-100">
+        {textData ? (
           <table className="sentence-data align-middle table-hover w-100">
             <tbody>
               {textData?.map((sentence, i) =>
@@ -224,8 +224,10 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
               )}
             </tbody>
           </table>
-        </div>
-      }
+        ) : (
+          <div className="alert alert-warning">{t("sentences.null")}</div>
+        )}
+      </div>
     </ReviewToolCard>
   );
 };

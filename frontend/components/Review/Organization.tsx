@@ -295,7 +295,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
     >
       <Legend />
       <div className="mt-1 mw-100 flex-grow-1">
-        {review && "response" in review && paragraphRange.length > 0 && (
+        {review && "response" in review && paragraphRange.length > 0 ? (
           <DataTable
             options={{
               paging: false,
@@ -407,6 +407,10 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                     )}
             </tbody>
           </DataTable>
+        ) : (
+          <div className="alert alert-info">
+            {t("organization.coherence.null")}
+          </div>
         )}
       </div>
       {/* {visualizationGlobal} */}
