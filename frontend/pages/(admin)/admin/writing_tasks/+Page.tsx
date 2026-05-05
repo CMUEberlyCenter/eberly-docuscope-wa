@@ -71,9 +71,10 @@ export const Page: FC = () => {
             <Card.Subtitle className="mb-2 text-muted">
               {t("writing_tasks.private.description")}
             </Card.Subtitle>
-            <ListGroup>
+            <ListGroup as="ul">
               {privateTasks.map((task) => (
                 <ListGroup.Item
+                  as="li"
                   key={task._id}
                   action
                   onClick={() =>

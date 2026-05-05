@@ -239,6 +239,20 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const [selected, setSelected] = useState<SelectedRowCol>(null);
   DataTable.use(DT);
 
+  // This was the start of an attempt at dynamically importing DataTable to avoid ssr issues.
+  //   const [DataTable, setDataTable] = useState<DataTableComponent | null>(null);
+  // useEffect(() => {
+  //   /** Initialize DataTable dynamically in case of ssr. */
+  //   const initDT = async () => {
+  //     const { default: dt_react } = await import("datatables.net-react");
+  //     const { default: style } = await import("datatables.net-dt");
+  //     await import("datatables.net-fixedcolumns-dt");
+  //     dt_react.use(style);
+  //     setDataTable(() => dt_react);
+  //   };
+  //   initDT();
+  // }, []);
+
   const onSelectTopic = useCallback(
     (topic: Topic) => {
       setSelected({
