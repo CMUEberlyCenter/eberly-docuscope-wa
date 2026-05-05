@@ -18,6 +18,7 @@ import { readdir, readFile, stat } from 'fs/promises';
 import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
+import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
@@ -41,11 +42,6 @@ import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
 import { watchSettings } from './src/server/getSettings';
 import { logger } from './src/server/logger';
-import type {
-  ContentItemType,
-  IdToken,
-  LTIPlatform,
-} from './src/server/model/lti';
 import { metrics } from './src/server/prometheus';
 import {
   LTI_DB,
@@ -145,7 +141,7 @@ async function __main__() {
         // Requires changing LTI front-end to use writing_task in custom.
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
-        const items: ContentItemType[] = [
+        const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
             // title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
@@ -338,7 +334,7 @@ async function __main__() {
         const stats = await stat(path);
         if (stats.isFile() && file.endsWith('.json')) {
           const content = await readFile(path, { encoding: 'utf8' });
-          const json = JSON.parse(content) as LTIPlatform;
+          const json = JSON.parse(content) as PlatformConfig;
           await Provider.registerPlatform(json);
           logger.info(
             `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,

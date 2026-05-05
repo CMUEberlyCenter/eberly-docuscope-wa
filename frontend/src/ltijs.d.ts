@@ -359,6 +359,7 @@ declare module 'ltijs' {
     accesstokenEndpoint: string;
     authConfig: JWK_SET | JWK_KEY | RSA_KEY;
     authorizationServer?: string;
+    kid?: string;
   };
 
   export interface Platform {
