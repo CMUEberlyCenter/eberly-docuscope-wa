@@ -15,7 +15,8 @@ declare module 'ltijs' {
       lineitem?: string; // id
       lineitems?: string; // URL
     };
-    launchPresentation?: { // in deeplinking token
+    launchPresentation?: {
+      // in deeplinking token
       locale?: string;
     };
     path: string;
@@ -187,16 +188,9 @@ declare module 'ltijs' {
     /** Retrieves line items from a specific URL. Usually retrieved from the `next` link header of a previous request. */
     url?: string;
   }
-  type JsonValue =
-    | string
-    | number
-    | boolean
-    | null
-    | { [key: string]: JsonValue }
-    | JsonValue[];
 
   interface LineItem {
-    id: string;
+    id?: string; // optional in request but required in response.
     /** The label is a short string with a human readable text for the line item. It MUST be specified and not blank when posted by the tool. A platform must always include the label. */
     label: string;
     /** The maximum score for this line item. Maximum score MUST be a numeric non-null value, strictly greater than 0. */
@@ -275,11 +269,11 @@ declare module 'ltijs' {
       token: IdToken,
       options?: GetLineItemsOptions,
       accessToken?: AccessToken
-    ): Promise<LineItem[]>;
+    ): Promise<{ lineItems: LineItem[] }>; // TODO finish typing output...
     createLineItem(
       token: IdToken,
       lineItem: LineItem,
-      options?: { resourceLinkId?: string },
+      options?: { resourceLinkId?: boolean },
       accessToken?: AccessToken
     ): Promise<LineItem>;
     getLineItemById(
