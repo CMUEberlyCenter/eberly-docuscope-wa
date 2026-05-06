@@ -10,6 +10,14 @@ declare module 'ltijs' {
     context: Context;
     contextId: string;
     deploymentId?: string;
+    endpoint?: {
+      scope?: string[];
+      lineitem?: string; // id
+      lineitems?: string; // URL
+    };
+    launchPresentation?: { // in deeplinking token
+      locale?: string;
+    };
     path: string;
     resource: {
       title?: string;
@@ -24,11 +32,13 @@ declare module 'ltijs' {
     custom?: { [key: string]: string };
   }
   export interface PlatformInfo {
-    product_family_code: string;
-    version: string;
     guid: string;
-    name: string;
-    description: string;
+    contact_email?: string;
+    description?: string;
+    name?: string;
+    url?: string;
+    product_family_code?: string;
+    version?: string;
   }
   export interface UserInfo {
     given_name?: string;
@@ -235,7 +245,7 @@ declare module 'ltijs' {
     gradesReleased?: boolean;
     [key: string]: JsonValue; // Custom properties, key must be a fully qualified URL, value must be valid JSON.
   }
-  interface Score {
+  export interface Score {
     timeStamp?: string; // ISO8601 Required in spec but added by function
     scoreGiven: number; // Must be a numeric value, greater than or equal to 0, and can be greater than or equal to the scoreMaximum of the line item.
     scoreMaximum?: number; // Required in spec but can be derived in submitScore function
