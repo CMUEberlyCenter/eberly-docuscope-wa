@@ -18,7 +18,7 @@ import { readdir, readFile, stat } from 'fs/promises';
 import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
-import type { ContentItem, IdToken, PlatformConfig, Score } from 'ltijs';
+import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
@@ -56,7 +56,6 @@ import {
   SESSION_KEY,
 } from './src/server/settings';
 import { basicAuthMiddleware } from './src/utils/basicAuth';
-import { JsonValue } from './src';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
 
@@ -220,46 +219,6 @@ async function __main__() {
       }
     }
   );
-
-  const createLineItem = async (token: IdToken): Promise<string> => {
-    try {
-      const response = await Provider.Grade.getLineItems(token, {
-        resourceLinkId: true,
-      });
-      const lineItemId = response.lineItems.at(0)?.id;
-      if (lineItemId) {
-        return lineItemId;
-      }
-      const newLineItem = await Provider.Grade.createLineItem(token, {
-        scoreMaximum: 100,
-        label: 'myProse Score',
-        resourceId: token.platformContext.resource.id,
-      });
-      return newLineItem.id!;
-    } catch (err) {
-      logger.error('Error creating line item:', { error: err });
-      throw new Error('Failed to create line item for grade submission.', {
-        cause: err,
-      });
-    }
-  };
-  const grade = async (
-    token: IdToken,
-    grade: number,
-    customData?: JsonValue
-  ) => {
-    const gradeObj: Score = {
-      userId: token.user,
-      scoreGiven: grade,
-      scoreMaximum: 100,
-      activityProgress: 'Completed',
-      gradingProgress: 'FullyGraded',
-      'https://docuscope-sc.eberly.cmu.edu/myprose/score': customData,
-    };
-    const lineItemId =
-      token.platformContext.endpoint?.lineitem ?? (await createLineItem(token));
-    return Provider.Grade.submitScore(token, lineItemId, gradeObj);
-  };
 
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
@@ -468,7 +427,7 @@ async function __main__() {
       Provider.redirect(res, '/draft');
     });
     app.all(
-      '/_telefunc',
+      '/admin/_telefunc',
       basicAuthMiddleware,
       async (req: Request, res: Response, _next: NextFunction) => {
         const { body, statusCode, contentType } = await telefunc({
@@ -487,6 +446,17 @@ async function __main__() {
         // next();
       }
     );
+    app.all('/_telefunc', async (req: Request, res: Response, _next: NextFunction) => {
+      const { body, statusCode, contentType } = await telefunc({
+        url: req.originalUrl,
+        method: req.method,
+        body: req.body,
+        context: {
+          token: res.locals.token,
+        },
+      });
+      res.status(statusCode).type(contentType).send(body);
+    });
     // Handle all other routes with Vike
     app.all(
       '{*vike}',
@@ -518,10 +488,6 @@ async function __main__() {
           session: req.session,
           writing_task_id,
           user: (req as IBasicAuthedRequest).auth?.user,
-          grade: token
-            ? (score: number, customData: JsonValue) =>
-                grade(token, score, customData)
-            : undefined,
           // ltik,
           // headers: {
           //   'Content-Type': 'text/html',

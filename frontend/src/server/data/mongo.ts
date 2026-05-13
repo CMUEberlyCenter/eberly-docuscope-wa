@@ -159,6 +159,12 @@ export async function updateSnapshotReviewsById(
   return upd._id;
 }
 
+/**
+ *
+ * @param id Analysis database id.
+ * @returns database id
+ * @throws RefereceError if id is not found.
+ */
 export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
