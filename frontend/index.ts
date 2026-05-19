@@ -22,7 +22,7 @@ import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { telefunc } from 'telefunc';
+import { config, telefunc } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -430,12 +430,13 @@ async function __main__() {
       '/admin/_telefunc',
       basicAuthMiddleware,
       async (req: Request, res: Response, _next: NextFunction) => {
+        config.telefuncUrl = '/admin/_telefunc';
         const { body, statusCode, contentType } = await telefunc({
-          url: req.originalUrl,
+          url: req.originalUrl, // Telefunc client is configured to send requests to /admin/_telefunc, but telefunc handlers are written for /_telefunc, so we hardcode the url here.  TODO: Refactor telefunc handlers to be aware of admin prefix and use req.originalUrl here.
           method: req.method,
           body: req.body,
           // readable: req,
-          // contentType: req.headers['content-type'] || '',
+          // contentType: req.headers['content-type'] || undefined,
           context: {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
@@ -446,17 +447,28 @@ async function __main__() {
         // next();
       }
     );
-    app.all('/_telefunc', async (req: Request, res: Response, _next: NextFunction) => {
-      const { body, statusCode, contentType } = await telefunc({
-        url: req.originalUrl,
-        method: req.method,
-        body: req.body,
-        context: {
-          token: res.locals.token,
-        },
-      });
-      res.status(statusCode).type(contentType).send(body);
-    });
+    app.all(
+      '/_telefunc',
+      async (req: Request, res: Response, _next: NextFunction) => {
+        config.telefuncUrl = '/_telefunc';
+        const { body, statusCode, contentType } = await telefunc({
+          url: req.originalUrl,
+          method: req.method,
+          body: req.body,
+          // readable: req,
+          // contentType: req.headers['content-type'] || '',
+          context: {
+            // You can add any arbitrary contextual information here
+            // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
+            token: res.locals.token,
+            user: (req as IBasicAuthedRequest).auth?.user,
+
+            // session: req.session,
+          },
+        });
+        res.status(statusCode).type(contentType).send(body);
+      }
+    );
     // Handle all other routes with Vike
     app.all(
       '{*vike}',
