@@ -37,7 +37,7 @@ import {
   LogicalFlowReviewProvider,
 } from "./LogicalFlow";
 import { NullTool } from "./NullTool";
-import { Organization, OrganizationDataProvider } from "./Organization";
+import { Organization, OrganizationButton, OrganizationDataProvider } from "./Organization";
 import {
   ParagraphClarity,
   ParagraphClarityButton,
@@ -226,6 +226,13 @@ export const Review: FC = () => {
                     onClick={toggleToolHandler("logical_flow")}
                   />
                 ) : null}
+                {organizationFeature ? (
+                  <OrganizationButton
+                    disabled={!ready || isPending}
+                    active={tool === "organization"}
+                    onClick={toggleToolHandler("organization")}
+                  />
+                ) : null}
               </ButtonToolbar>
               <Activity mode={!tool || tool === "null" ? "visible" : "hidden"}>
                 <NullTool text={t("null.big_picture")} />
@@ -249,6 +256,11 @@ export const Review: FC = () => {
                 <LogicalFlowReviewProvider>
                   <LogicalFlow />
                 </LogicalFlowReviewProvider>
+              )}
+              {tool === "organization" && (
+                <OrganizationDataProvider>
+                  <Organization />
+                </OrganizationDataProvider>
               )}
               {/* Add Big Picture tools here. */}
             </div>
@@ -300,7 +312,7 @@ export const Review: FC = () => {
                         active={[
                           "sources",
                           "credibility",
-                          "organization",
+                          // "organization", // TODO remove for #307
                           "civil_tone",
                           "impressions",
                         ].includes(otherTool)}
@@ -338,7 +350,7 @@ export const Review: FC = () => {
                           </div>
                         </Dropdown.Item>
                       ) : null}
-                      {organizationFeature ? (
+                      {/* organizationFeature ? (
                         <Dropdown.Item
                           onClick={toggleOtherToolHandler("organization")}
                           active={otherTool === "organization"}
@@ -351,7 +363,7 @@ export const Review: FC = () => {
                             {t("instructions:term_matrix_scope_note")}
                           </div>
                         </Dropdown.Item>
-                      ) : null}
+                      ) : null // TODO remove for #307 */}
                       {civilToneFeature ? (
                         <Dropdown.Item
                           onClick={toggleOtherToolHandler("civil_tone")}
@@ -420,11 +432,11 @@ export const Review: FC = () => {
                 {/* {otherTool === "impressions" && ( */}
                 {/* <NullTool text={t("null.not_available")} /> */}
                 {/* )} */}
-                {otherTool === "organization" && (
+                {/* {otherTool === "organization" && (
                   <OrganizationDataProvider>
                     <Organization />
                   </OrganizationDataProvider>
-                )}
+                )} */}
                 {otherTool === "sentences" && (
                   <SentencesDataProvider>
                     <Sentences />

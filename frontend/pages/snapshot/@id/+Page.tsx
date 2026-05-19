@@ -25,6 +25,7 @@ import {
 import { NullTool } from "#components/Review/NullTool";
 import {
   Organization,
+  OrganizationButton,
   OrganizationSnapshotProvider,
 } from "#components/Review/Organization";
 import {
@@ -49,8 +50,8 @@ import {
   SentencesSnapshotProvider,
 } from "#components/Review/Sentences";
 import { Sources, SourcesSnapshotProvider } from "#components/Review/Sources";
-import { trackScreenView } from "#lib/tracking.js";
 import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
+import { trackScreenView } from "#lib/tracking.js";
 import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
 import {
@@ -171,6 +172,13 @@ export const Page: FC = () => {
                 onClick={toggleToolHandler("logical_flow")}
               />
             ) : null}
+            {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
+              <OrganizationButton
+                disabled={disabled("term_matrix")}
+                active={tool === "organization"}
+                onClick={toggleToolHandler("organization")}
+              />
+            ) : null}
           </ButtonToolbar>
           <Activity mode={!tool || tool === "null" ? "visible" : "hidden"}>
             <NullTool text={t("null.big_picture")} />
@@ -207,6 +215,14 @@ export const Page: FC = () => {
             >
               <LogicalFlow />
             </LogicalFlowSnapshotProvider>
+          )}
+          {tool === "organization" && (
+            <OrganizationSnapshotProvider
+              snapshotId={reviewID}
+              analyses={analyses}
+            >
+              <Organization />
+            </OrganizationSnapshotProvider>
           )}
           {/* Add Big Picture tools here. */}
         </div>
@@ -253,7 +269,7 @@ export const Page: FC = () => {
                   active={[
                     "sources",
                     "credibility",
-                    "organization",
+                    // "organization", // TODO remove for #307
                     "civil_tone",
                     "impressions",
                   ].includes(secondaryTool)}
@@ -289,7 +305,7 @@ export const Page: FC = () => {
                     </div>
                   </Dropdown.Item>
                 ) : null}
-                {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
+                {/* {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
                   <Dropdown.Item
                     onClick={secondaryToggleHandler("organization")}
                     active={secondaryTool === "organization"}
@@ -300,7 +316,7 @@ export const Page: FC = () => {
                       {t("instructions:term_matrix_scope_note")}
                     </div>
                   </Dropdown.Item>
-                ) : null}
+                ) : null} */}
                 {settings?.civil_tone && isEnabled(task, "civil_tone") ? (
                   <Dropdown.Item
                     onClick={secondaryToggleHandler("civil_tone")}
@@ -358,14 +374,14 @@ export const Page: FC = () => {
             {/* {secondaryTool === "impressions" && ( */}
             {/* <NullTool text={t("null.not_available")} /> */}
             {/* )} */}
-            {secondaryTool === "organization" && (
+            {/* {secondaryTool === "organization" && (
               <OrganizationSnapshotProvider
                 snapshotId={reviewID}
                 analyses={analyses}
               >
                 <Organization />
               </OrganizationSnapshotProvider>
-            )}
+            )} */}
             {secondaryTool === "sentence_density" && (
               <SentencesSnapshotProvider
                 snapshotId={reviewID}

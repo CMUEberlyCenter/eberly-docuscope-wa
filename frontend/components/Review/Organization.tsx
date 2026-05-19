@@ -23,6 +23,8 @@
       it appears at least once on the left side of the main verb in a sentence within the paragraph.
 
  */
+import Icon from "#assets/icons/topical_progression_icon.svg?react";
+import { ToolButton } from "#components/ToolButton/ToolButton.js";
 import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
@@ -36,6 +38,7 @@ import {
 } from "react";
 import {
   Button,
+  ButtonProps,
   Col,
   Container,
   type ContainerProps,
@@ -50,6 +53,18 @@ export {
   OnTopicDataProvider as OrganizationDataProvider,
   OnTopicSnapshotProvider as OrganizationSnapshotProvider,
 } from "../ReviewContext/OnTopicDataContext";
+
+export const OrganizationButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  return (
+    <ToolButton
+      {...props}
+      title={t("review:organization.title")}
+      tooltip={t("instructions:term_matrix_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 /**
  * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
