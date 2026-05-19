@@ -269,7 +269,7 @@ export const Page: FC = () => {
                   active={[
                     "sources",
                     "credibility",
-                    "organization",
+                    // "organization", // TODO remove for #307
                     "civil_tone",
                     "impressions",
                   ].includes(secondaryTool)}
