@@ -37,7 +37,11 @@ import {
   LogicalFlowReviewProvider,
 } from "./LogicalFlow";
 import { NullTool } from "./NullTool";
-import { Organization, OrganizationButton, OrganizationDataProvider } from "./Organization";
+import {
+  Organization,
+  OrganizationButton,
+  OrganizationDataProvider,
+} from "./Organization";
 import {
   ParagraphClarity,
   ParagraphClarityButton,
