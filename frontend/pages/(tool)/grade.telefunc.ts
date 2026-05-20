@@ -5,5 +5,5 @@ import { JsonValue } from '#/index';
 
 export async function onGrade(score: number, customData?: JsonValue) {
   const { token } = getContext<{ token: IdToken }>();
-  grade(Provider.Grade, token, score, customData);
+  return grade(Provider.Grade, token, score, customData);
 }
