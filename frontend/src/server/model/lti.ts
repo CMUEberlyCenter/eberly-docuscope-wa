@@ -50,6 +50,12 @@ export const grade = async (gradeService: GradeService, token: Optional<IdToken>
 ) => {
   if (!gradeService) return null;
   if (!token) return null;
+  // Check if a line item already exists for this resource link, and if so, get the existing grade.
+  const existingGrade = await getGrade(gradeService, token);
+  if (existingGrade && existingGrade.scoreGiven >= score) {
+    // Don't update the grade if the new score is not higher than the existing score.
+    return existingGrade;
+  }
   const lineItemId =
     token.platformContext.endpoint?.lineitem ?? (await createLineItem(gradeService, token));
   const gradeObj: Score = {
@@ -62,3 +68,14 @@ export const grade = async (gradeService: GradeService, token: Optional<IdToken>
   };
   return gradeService.submitScore(token, lineItemId, gradeObj);
 };
+
+async function getGrade(gradeService: GradeService, token: Optional<IdToken>) {
+  if (!gradeService) return null;
+  if (!token) return null;
+  if (!token.platformContext.endpoint?.lineitem) return null;
+  const lineItemId = token.platformContext.endpoint.lineitem;
+  const scores = await gradeService.getScores(token, lineItemId, {
+    userId: token.user,
+  });
+  return scores.at(0) ?? null;
+}
