@@ -57,7 +57,7 @@ export const DEFAULT: Settings = {
   notes2bullets: true,
   // assess_expectation: false,
 
-  civil_tone: true,
+  civil_tone: false,
   credibility: true,
   expectations: true,
   lines_of_arguments: true,
