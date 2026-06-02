@@ -19,7 +19,7 @@ import { useData } from "vike-react/useData";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { gradeReview } from "./createReviewContext.telefunc";
+import { onGrade } from "./createReviewContext.telefunc";
 import { useReviewDispatch } from "./ReviewContext";
 
 function useReview<T extends Analysis>(tool: ReviewTool) {
@@ -58,7 +58,11 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       dispatch({ type: "update", sentences: input });
       // check if isErrorData? - should be handled in component
       setReview(data);
-      gradeReview(token, 1.0, { tool, task_id: writing_task?.info.id ?? '', input_length: input.length })
+      onGrade(token, 1.0, {
+        tool,
+        task_id: writing_task?.info.id ?? "",
+        input_length: input.length,
+      });
     },
     onError: (error) => {
       setReview({ tool, error });

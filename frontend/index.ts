@@ -139,8 +139,9 @@ async function __main__() {
         }
         // FIXME task should not be inserted. Use writing_task directly.
         // Requires changing LTI front-end to use writing_task in custom.
-        const writing_task_id: string =
-          _id ? task.info.id ?? _id : (await insertWritingTask(task)).toString();
+        const writing_task_id: string = _id
+          ? (task.info.id ?? _id)
+          : (await insertWritingTask(task)).toString();
         const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
