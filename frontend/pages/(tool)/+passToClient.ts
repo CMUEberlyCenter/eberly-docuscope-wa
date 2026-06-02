@@ -1,3 +1,1 @@
-export default {
-  passToClient: ["isLTI"],
-}
+export default ["isLTI", "token"];

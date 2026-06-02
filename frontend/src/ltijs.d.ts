@@ -241,7 +241,7 @@ declare module 'ltijs' {
   }
   export interface Score {
     timeStamp?: string; // ISO8601 Required in spec but added by function
-    scoreGiven: number; // Must be a numeric value, greater than or equal to 0, and can be greater than or equal to the scoreMaximum of the line item.
+    scoreGiven?: number; // Must be a numeric value, greater than or equal to 0, and can be greater than or equal to the scoreMaximum of the line item.
     scoreMaximum?: number; // Required in spec but can be derived in submitScore function
     comment?: string;
     activityProgress?:
@@ -296,7 +296,7 @@ declare module 'ltijs' {
       token: IdToken,
       lineItemId: string,
       options?: { userId?: string; limit?: number; url?: string }
-    ): Promise<Score[]>;
+    ): Promise<{ scores: Score[] }>;
   }
 
   export interface NameAndRolesService {

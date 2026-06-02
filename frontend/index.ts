@@ -140,7 +140,7 @@ async function __main__() {
         // FIXME task should not be inserted. Use writing_task directly.
         // Requires changing LTI front-end to use writing_task in custom.
         const writing_task_id: string =
-          _id ?? (await insertWritingTask(task)).toString();
+          _id ? task.info.id ?? _id : (await insertWritingTask(task)).toString();
         const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
@@ -455,15 +455,10 @@ async function __main__() {
           url: req.originalUrl,
           method: req.method,
           body: req.body,
-          // readable: req,
-          // contentType: req.headers['content-type'] || '',
           context: {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
-            token: res.locals.token,
-            user: (req as IBasicAuthedRequest).auth?.user,
-
-            // session: req.session,
+            gradeService: Provider.Grade,
           },
         });
         res.status(statusCode).type(contentType).send(body);
