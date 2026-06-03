@@ -390,6 +390,7 @@ export async function initDatabase() {
   };
 }
 
+// TODO: add if LTI user (indicates student)
 type LogData = {
   _id?: string;
   timestamp: Date;
@@ -473,6 +474,48 @@ async function* generateLogData(): AsyncGenerator<AggregateLogData> {
 }
 export function getLogData(): Promise<AggregateLogData[]> {
   return Array.fromAsync(generateLogData());
+}
+
+export type SessionAggregateData = {
+  _id: string;
+  prompts: {
+    prompt: string;
+    count: number;
+  }[];
+};
+
+async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
+  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const cursor = collection.aggregate<SessionAggregateData>([
+    {
+      '$group': {
+        '_id': {
+          'sessionId': '$performance_data.session_id',
+          'prompt': '$meta.prompt'
+        },
+        'count': {
+          '$sum': 1
+        }
+      }
+    }, {
+      '$group': {
+        '_id': '$_id.sessionId',
+        'prompts': {
+          '$push': {
+            'prompt': '$_id.prompt',
+            'count': '$count'
+          }
+        }
+      }
+    }
+  ]);
+  for await (const doc of cursor) {
+    yield doc;
+  }
+}
+
+export function getSessionData(): Promise<SessionAggregateData[]> {
+  return Array.fromAsync(generateSessionData());
 }
 
 // async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {
