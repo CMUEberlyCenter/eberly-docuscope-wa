@@ -1,7 +1,8 @@
-import { getLogData } from '#server/data/mongo';
+import { getLogData, getSessionData } from '#server/data/mongo';
 
 export async function data() {
   const performance = await getLogData();
-  return { performance };
+  const session = await getSessionData();
+  return { performance, session };
 }
 export type Data = Awaited<ReturnType<typeof data>>;
