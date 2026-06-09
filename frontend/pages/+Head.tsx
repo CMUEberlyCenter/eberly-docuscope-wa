@@ -11,7 +11,7 @@ const HeadDefault: FC = () => {
     <>
       <meta name="robots" content="none" />
 
-      <link rel="icon" href={logoUrl} type="image/svg+xml" />
+      <link rel="icon" href="/favicon.ico" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"
