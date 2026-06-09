@@ -98,7 +98,7 @@ editor:
     italic: Italic
     underline: Underline
     strike: Strikethrough
-    task: 'Content Expectations:'
+    task: 'Writing Type:'
     no_task: None Selected
     no_edit: Text is not editable.
 tool:

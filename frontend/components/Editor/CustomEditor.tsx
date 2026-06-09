@@ -157,7 +157,8 @@ const CustomEditor: FC = () => {
         <main className="d-flex overflow-none flex-column my-1">
           <ButtonToolbar
             aria-label="Editor Tools"
-            className="align-items-center mb-2"
+            className="align-items-center mb-0 bg-light border rounded-top px-2"
+            style={{ height: 48 }}
           >
             <ButtonGroup>
               <DropdownButton
