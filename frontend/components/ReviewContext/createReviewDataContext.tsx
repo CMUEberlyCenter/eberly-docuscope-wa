@@ -62,6 +62,9 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
         tool,
         task_id: writing_task?.info.id ?? "",
         input_length: input.length,
+        // TODO: ability to reconstruct student final state.
+        // TODO: document: input,
+        // TODO: data: [...prev, data]
       });
     },
     onError: (error) => {
