@@ -488,26 +488,27 @@ async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<SessionAggregateData>([
     {
-      '$group': {
-        '_id': {
-          'sessionId': '$performance_data.session_id',
-          'prompt': '$meta.prompt'
+      $group: {
+        _id: {
+          sessionId: '$performance_data.session_id',
+          prompt: '$meta.prompt',
         },
-        'count': {
-          '$sum': 1
-        }
-      }
-    }, {
-      '$group': {
-        '_id': '$_id.sessionId',
-        'prompts': {
-          '$push': {
-            'prompt': '$_id.prompt',
-            'count': '$count'
-          }
-        }
-      }
-    }
+        count: {
+          $sum: 1,
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$_id.sessionId',
+        prompts: {
+          $push: {
+            prompt: '$_id.prompt',
+            count: '$count',
+          },
+        },
+      },
+    },
   ]);
   for await (const doc of cursor) {
     yield doc;

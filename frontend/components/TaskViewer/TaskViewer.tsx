@@ -32,10 +32,12 @@ export const TaskViewerButton: FC = () => {
   const selectId = useId();
   const { task: writingTask, taskId } = useWritingTask();
   return (
-    <div className="d-flex align-items-baseline gap-1 py-1">
+    <div className="d-flex align-items-stretch gap-1 py-1">
       {writingTask && (
         <>
-          <span className="text-muted">{t("editor.menu.task")}</span>
+          <span className="text-muted align-self-center">
+            {t("editor.menu.task")}
+          </span>
           <Button
             variant="secondary"
             onClick={() => setShow(!show)}
@@ -49,6 +51,7 @@ export const TaskViewerButton: FC = () => {
           {!taskId && (
             <Button
               variant="secondary"
+              className="p-1"
               onClick={() => setShowSelect(true)}
               aria-controls={selectId}
             >

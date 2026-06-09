@@ -25,7 +25,10 @@ export const UserTextView: FC<UserTextViewProps> = ({
   const cl = classNames(className, "d-flex flex-column");
   return (
     <main className={cl} {...props}>
-      <header className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3">
+      <header
+        className="d-flex justify-content-between align-items-center border rounded-top bg-light px-3"
+        style={{ height: 48 }}
+      >
         <ButtonGroup>
           <DropdownButton
             as={ButtonGroup}
