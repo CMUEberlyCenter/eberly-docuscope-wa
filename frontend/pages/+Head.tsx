@@ -1,6 +1,5 @@
 // https://vike.dev/Head
 
-import logoUrl from "#assets/favicon.svg";
 import type { FC } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 
