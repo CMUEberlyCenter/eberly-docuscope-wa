@@ -16,7 +16,7 @@ revision_plan: >
 
 expectations: >
   <p>Verifique si su escritura incluye toda la información que los lectores esperan encontrar en su texto, e incorpore los elementos faltantes antes de abordar otros problemas.</p>
-  <p>Abordar primero las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores y logre su propósito de manera efectiva.</p>
+  <p>Atender primero las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores y logre su propósito de manera efectiva.</p>
 
 lines_of_arguments: >
   <p>Evalúe qué tan efectivamente su escritura desarrolla su tesis a través de afirmaciones y evidencia para crear un argumento cohesivo y persuasivo.</p>
@@ -24,11 +24,11 @@ lines_of_arguments: >
 
 pathos: >
   <p>Revise su comunicación en busca de elementos que generen resonancia emocional (<i>es decir,</i> pathos) y conexiones significativas con su audiencia.</p>
-  <p>Refinar los recursos emocionales garantiza que su mensaje llegue al corazón de los lectores mientras mantiene la autenticidad y el compromiso ético.</p>
+  <p>Refinar los recursos emocionales garantiza que su mensaje llegue al corazón de los lectores, manteniendo la autenticidad y el compromiso ético.</p>
 
 credibility: >
   <p>Revise su comunicación en busca de elementos que establezcan y mantengan la credibilidad y el carácter ético (<i>es decir,</i> ethos).</p>
-  <p>Refinar la credibilidad garantiza que su mensaje lleve el peso de la autoridad mientras demuestra integridad y confiabilidad. El objetivo no es simplemente mostrar credenciales, sino construir una confianza genuina.<p>
+  <p>Refinar la credibilidad garantiza que su mensaje lleve el peso de la autoridad, demostrando integridad y confiabilidad. El objetivo no es simplemente mostrar credenciales, sino construir una confianza genuina.<p>
 
 prominent_topics: >
   <p>Examine los temas prominentes encontrados en su escritura y evalúe si los desarrolló con suficientes detalles.</p>
@@ -39,7 +39,7 @@ logical_flow: >
   <p>Un flujo lógico mejorado aumenta la legibilidad y ayuda a los lectores a comprender mejor su texto.</p>
 
 term_matrix: >
-  <p>Observe cómo se organizan términos específicos a lo largo de su borrador.</p>
+  <p>Observe cómo se organizan los términos específicos a lo largo de su borrador.</p>
   <p>Utilice la visualización interactiva para explorar las conexiones y la ubicación de los términos importantes.</p>
   <p>Refinar la estructura y el flujo de ideas garantiza una mayor cohesión en su escritura.</p>
 
@@ -48,12 +48,12 @@ sources: >
   <p>Integrar las fuentes de manera adecuada fortalece la credibilidad y el respaldo de su texto.</p>
 
 professional_tone: >
-  <p>Revise las oraciones con características lingüísticas que puedan restar adecuación al tono.</p>
+  <p>Revise las oraciones con características lingüísticas que puedan restar un tono apropiado.</p>
   <p>Refinar el tono garantiza que su escritura cumpla con los estándares de los contextos académicos y profesionales.</p>
 
 civil_tone: >
   <p>Revise su comunicación en busca de características lingüísticas que mantengan un discurso respetuoso, constructivo y equilibrado.</p>
-  <p>Refinar el tono garantiza que su mensaje promueva la comprensión y el diálogo colaborativo mientras respeta las diversas perspectivas.</p>
+  <p>Refinar el tono garantiza que su mensaje promueva la comprensión y el diálogo colaborativo, respetando las diversas perspectivas.</p>
 
 clarity: >
   <p>Revise las oraciones con muchas frases nominales, ya que estas oraciones más largas con estructuras potencialmente complejas pueden reducir la legibilidad.</p>
@@ -108,13 +108,13 @@ guide_scope_note: >
   Crear un plan de revisión garantiza una comunicación efectiva
 
 expectations_scope_note: >
-  Abordar las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores
+  Atender las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores
 
 lines_of_arguments_scope_note: >
-  Desarrollar afirmaciones bien respaldadas y abordar los contraargumentos fortalece su capacidad persuasiva
+  Desarrollar afirmaciones bien respaldadas y abordar los contraargumentos fortalece su persuasión
 
 credibility_scope_note: >
-  Establecer credibilidad y carácter ético genera confianza genuina y autoridad ante su audiencia
+  Establecer credibilidad y carácter ético genera confianza genuina y autoridad con su audiencia
 
 pathos_scope_note: >
   Crear resonancia emocional y conexiones significativas fortalece el compromiso de la audiencia
@@ -150,7 +150,7 @@ notes_to_bullets_scope_note: >
   Genere una lista con viñetas a partir de sus notas
 
 copyedit_scope_note: >
-  Corrija su borrador para mejorar la claridad y la gramática
+  Corrija su borrador para mayor claridad y gramática
 
 additional_tools_scope_note: >
   Refine su borrador con herramientas de revisión adicionales

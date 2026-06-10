@@ -1,8 +1,9 @@
 import { FC } from "react";
-import { Card } from "react-bootstrap";
+import { Button, ButtonGroup, Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
+import { handleDownload } from "./handleDownload";
 
 const msToDuration = (ms: number) => ({
   months: Math.floor(ms / 2592000000),
@@ -31,7 +32,41 @@ export const Page: FC = () => {
   const { t } = useTranslation("admin");
   return (
     <Card>
-      <Card.Header>{t("performance.title")}</Card.Header>
+      <Card.Header>
+        {t("performance.title")}
+        {performance.length > 0 || session.length > 0 ? (
+          <ButtonGroup className="float-end">
+            {performance.length > 0 && (
+              <Button
+                variant="link"
+                title="performance_data.json"
+                onClick={() =>
+                  handleDownload(
+                    JSON.stringify(performance, null, 2),
+                    "performance_data.json"
+                  )
+                }
+              >
+                {t("performance.download")}
+              </Button>
+            )}
+            {session.length > 0 && (
+              <Button
+                variant="link"
+                title="session_data.json"
+                onClick={() =>
+                  handleDownload(
+                    JSON.stringify(session, null, 2),
+                    "session_data.json"
+                  )
+                }
+              >
+                {t("performance.download_session")}
+              </Button>
+            )}
+          </ButtonGroup>
+        ) : null}
+      </Card.Header>
       <Card.Body>
         <Card.Text as="div">
           {performance.length === 0 && <p>{t("performance.no_data")}</p>}
