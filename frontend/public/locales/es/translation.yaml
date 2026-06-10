@@ -9,9 +9,9 @@ about:
   task: 'Tarea de escritura:'
   task_name: 'Nombre: {{name}}'
   acknowledgements:
-    title: 'Agradecimientos:'
+    title: 'Reconocimientos:'
     content: >
-      Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
+      Este proyecto ha contado con el apoyo parcial de la Fundación A.W. Mellon,
       la Beca Semilla de la Iniciativa Simon de Carnegie Mellon,
       el Fondo de Desarrollo de la Facultad Berkman,
       y el Programa de Becas Semilla para la Investigación y el Desarrollo de Herramientas
@@ -39,6 +39,7 @@ deeplinking:
   option:
     draft: Borrador
     review: Revisión
+  # upload: Seleccione una tarea de escritura o cargue un archivo de tarea de escritura personalizado
 genlink:
   title: Generador de enlaces de tarea de escritura de $t(document.title)
   link: 'Enlaces:'
@@ -70,12 +71,12 @@ editor:
     open: Abrir
     error:
       title: 'Problemas al importar el archivo:'
-      overview: 'Revise los detalles a continuación: las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
+      overview: 'Verifique los detalles a continuación: las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
       error: 'Error: {{message}}'
       warning: 'Advertencia: {{message}}'
-      fail: Solo se permite seleccionar un archivo a la vez.
+      fail: Solo se puede seleccionar un archivo a la vez.
       not_docx: '¡{{file}} no es un archivo docx!'
-      failed_write: No se pudo guardar el archivo.
+      failed_write: No se puede guardar el archivo.
       security: Archivo rechazado debido a un error de seguridad.
   menu:
     file: Archivo
@@ -97,8 +98,8 @@ editor:
     italic: Cursiva
     underline: Subrayado
     strike: Tachado
-    task: 'Expectativas de contenido:'
-    no_task: Ninguna seleccionada
+    task: 'Tipo de escritura:'
+    no_task: Ninguno seleccionado
     no_edit: El texto no es editable.
 tool:
   tab:
@@ -146,7 +147,7 @@ select_task:
   version: 'Versión: {{version}}'
   copyright: 'Derechos de autor: {{copyright}}'
   multiple_file_error: Cargue solo un archivo a la vez.
-  malformed_json: El contenido no pudo analizarse como JSON.
+  malformed_json: El contenido no se pudo analizar como JSON.
   select: Seleccionar categoría
   select_all: Seleccionar todo
   all_category: Todas

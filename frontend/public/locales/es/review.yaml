@@ -13,7 +13,7 @@ summary:
   weaknesses: "Oportunidades de revisión:"
 insights: Perspectivas de Revisión
 error:
-  header: ¡Error al Cargar la Revisión!
+  header: ¡Error al cargar la revisión!
   content: Se produjo un error al recuperar los datos de la revisión.
   details: 'Detalles: {{message}}'
   too_large: El documento es demasiado grande para procesarlo. Por favor, acorte su texto e inténtelo de nuevo.
@@ -26,7 +26,7 @@ civil_tone:
   tooltip: El uso de un lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
   error: Error al mostrar la herramienta Tono Civil.
   'null': No se encontraron problemas.
-  prefix: 'Su Texto:'
+  prefix: 'Su texto:'
   issue: "Problema:"
   suggestion: "Sugerencia:"
 credibility:
@@ -41,6 +41,7 @@ sentence_density:
 sentences:
   title: Claridad de las Oraciones
   error: 'Error al mostrar los datos de las oraciones:'
+  'null': No se pudieron extraer datos de oraciones de su borrador.
   select: Seleccione una oración para ver su composición.
   legend:
     noun: Sintagma nominal
@@ -64,7 +65,7 @@ sentences:
 global_coherence:
   title: Problemas de Progresión Lógica
   overview: "<p>Esta herramienta identifica interrupciones en la organización que
-    dificultan la fluidez de la lectura y la comprensión, como presentar ideas fuera
+    dificultan la fluidez de lectura y la comprensión, como presentar ideas fuera
     de orden, separar detalles relacionados o dispersar conceptos conectados.</p><p>Revise
     cada problema identificado y aborde los comentarios que considere útiles.</p>"
   error: Error al cargar los datos de Progresión Lógica.
@@ -74,7 +75,7 @@ global_coherence:
   redundant: Información Redundante
   inconsistent: Información Inconsistente
   suggestion:
-    text: 'Su Texto:'
+    text: 'Su texto:'
     explanation: 'Problema(s):'
     suggestions: 'Sugerencias:'
   'null': No se pudo generar ningún comentario sobre la progresión lógica a partir de su borrador.
@@ -111,6 +112,7 @@ logical_flow:
   title: Problemas de Flujo Lógico
   tooltip: Organizar las ideas de manera coherente mejora la legibilidad y la comprensión del lector.
   error: Error al mostrar la herramienta Problemas de Flujo Lógico.
+  'null': No se encontraron problemas.
   no_sentences: No se encontraron oraciones relevantes en su borrador.
   issue: "Problema:"
   suggestion: "Sugerencia:"
@@ -138,21 +140,23 @@ organization:
     a lo largo y dentro de los párrafos. Los círculos oscuros indican que un grupo
     temático particular se trata de manera prominente en un párrafo determinado. Los
     círculos blancos y los espacios vacíos indican que un grupo temático particular
-    se menciona pero no de manera prominente, o no se menciona en absoluto en el párrafo.
-    Estudie la visualización en busca de círculos oscuros/blancos y espacios vacíos,
-    y verifique si los cambios en los grupos temáticos y su prominencia se ajustan
-    a un plan de escritura que sus lectores puedan seguir fácilmente.
+    se menciona pero no de manera prominente, o no se menciona en absoluto en el
+    párrafo. Estudie la visualización en busca de círculos oscuros/blancos y espacios
+    vacíos, y verifique si los cambios en los grupos temáticos y su prominencia se
+    ajustan a un plan de escritura que sus lectores puedan seguir fácilmente.
   coherence:
     title: Términos a lo Largo de los Párrafos
     topic_only: 'Mostrar solo grupos temáticos:'
     paragraphs: Tema
     sentences_in_paragraph: 'Coherencia entre oraciones en el párrafo: {{paragraph}}'
     sentences: 'Oraciones:'
+    'null': No se encontraron párrafos en su borrador.
 paragraph_clarity:
   title: Claridad del Párrafo
   tooltip: Mejorar el flujo del párrafo aumenta la legibilidad y la comunicación efectiva.
   error: Error al mostrar la herramienta Claridad del Párrafo.
   suggestion: "Sugerencia:"
+  'null': No se encontraron problemas.
 professional_tone:
   title: Tono Profesional
   tooltip: Mantener características lingüísticas apropiadas ayuda a que su escritura cumpla con los estándares profesionales.
@@ -161,7 +165,7 @@ professional_tone:
   confidence: Confianza
   subjectivity: Subjetividad
   'null': Sin comentarios.
-  text: "Su Texto:"
+  text: "Su texto:"
   issue: "Problema:"
   suggestion: "Sugerencia:"
 sources:
