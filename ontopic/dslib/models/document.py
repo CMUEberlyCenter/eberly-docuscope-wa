@@ -2033,8 +2033,9 @@ class DSDocument:
                                     x[LEMMA] for x in temp_para["new_accum_lemmas"]
                                 ]:
                                     temp_para["new_accum_lemmas"].append(
-                                        gl
-                                    )  # add 'gl' to the list
+                                        cl
+                                    )  # add 'cl' to the list
+                                    break
 
                 # remove the duplicates. It may be a bit faster to do it here than checking duplicates in the loop above...
                 para["given_accum_lemmas"] = list(set(para["given_accum_lemmas"]))
