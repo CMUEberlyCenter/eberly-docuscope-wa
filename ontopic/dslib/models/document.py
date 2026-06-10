@@ -2016,7 +2016,6 @@ class DSDocument:
                             )  # add 'gl' to the list
                             break  # 2024.12.02
 
-                    is_done = False
                     for temp_elem in self.elements:
                         temp_para = temp_elem.data
                         if temp_para == para:
@@ -2036,10 +2035,7 @@ class DSDocument:
                                     temp_para["new_accum_lemmas"].append(
                                         cl
                                     )  # add 'cl' to the list
-                                    is_done = True
                                     break # no need to check other paragraphs
-                        if is_done:
-                            break
 
                 # remove the duplicates. It may be a bit faster to do it here than checking duplicates in the loop above...
                 para["given_accum_lemmas"] = list(set(para["given_accum_lemmas"]))
