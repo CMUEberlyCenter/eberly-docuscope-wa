@@ -19,7 +19,7 @@ import { useData } from "vike-react/useData";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { onGrade } from "./createReviewContext.telefunc";
+import { onGrade } from "./createReviewDataContext.telefunc";
 import { useReviewDispatch } from "./ReviewContext";
 
 function useReview<T extends Analysis>(tool: ReviewTool) {

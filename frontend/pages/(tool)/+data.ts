@@ -3,7 +3,7 @@ import {
   findWritingTaskById,
 } from '#server/data/mongo';
 import { logger } from '#server/logger.js';
-import { isInstructor, startGrading } from '#server/model/lti';
+import { isContentDeveloper, isInstructor, isStudent, isTestUser, startGrading } from '#server/model/lti';
 import { Provider } from 'ltijs';
 import type { PageContextServer } from 'vike/types';
 
@@ -19,14 +19,23 @@ export async function data(pageContext: PageContextServer) {
     ? []
     : (await findAllPublicWritingTasks()).map(({ _id, ...task }) => task); // need everything but _id for preview.
 
-  try {
-    // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
-    startGrading(Provider.Grade, pageContext.token).then((check) => {
-      logger.info('LTI grade:', check);
-    });
-  } catch (error) {
-    logger.error('Error during LTI grade check:', { error });
-    // NOOP if grading fails, as this is not critical for the main functionality of the app, and we do not want to block users from using the app if there is an issue with grading.
+  if (pageContext.token) { // isLTI
+    if (isTestUser(pageContext.token)) {
+      logger.warn('Test user accessing the app with token:', {
+        token: pageContext.token,
+      });
+    } else if (isStudent(pageContext.token?.platformContext)) {
+      // only attempt to grade if the user is a student.
+      try {
+        // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
+        startGrading(Provider.Grade, pageContext.token).then((check) => {
+          logger.info('LTI grade:', check);
+        });
+      } catch (error) {
+        logger.error('Error during LTI grade check:', { error });
+        // NOOP if grading fails, as this is not critical for the main functionality of the app, and we do not want to block users from using the app if there is an issue with grading.
+      }
+    }
   }
 
   return {
@@ -36,7 +45,9 @@ export async function data(pageContext: PageContextServer) {
     ltiActivityTitle: pageContext.token?.platformContext?.resource?.title,
     username: pageContext.token?.userInfo?.name,
     isLTI: !!pageContext.token,
-    isInstructor: isInstructor(pageContext.token?.platformContext),
+    isContentDeveloper: !!pageContext.token && isContentDeveloper(pageContext.token),
+    isInstructor: !!pageContext.token && isInstructor(pageContext.token),
+    isStudent: !!pageContext.token && isStudent(pageContext.token),
     token: pageContext.token, // necessary for telefuncs to have access to the token for LTI grading as page context is not usable in telefuncs.
   };
 }

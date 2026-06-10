@@ -2,19 +2,116 @@ import { JsonValue, Optional } from '#/index';
 import { logger } from '#server/logger.js';
 import type { PlatformContext, GradeService, IdToken, Score } from 'ltijs';
 
-export function isInstructor(token?: PlatformContext): boolean {
+/*
+// @deprecated
+const LIS_System_Roles_Core = [
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#Administrator',
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#None',
+];
+// @deprecated
+const LIS_System_Roles_NonCore = [
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#AccountAdmin',
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#Creator',
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#SysAdmin',
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#SysSupport',
+  'http://purl.imsglobal.org/vocab/lis/v2/system/person#User',
+];
+// @deprecated
+const LIS_Institution_Roles_Core = [
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Administrator',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Faculty',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Guest',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#None',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Other',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Staff',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Student',
+];
+const LIS_Institution_Roles_NonCore = [
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Alumni',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Instructor',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Learner',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Member',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Mentor',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#Observer',
+  'http://purl.imsglobal.org/vocab/lis/v2/institution/person#ProspectiveStudent',
+];
+const LIS_Context_Roles_Core = [
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Administrator',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Learner',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Mentor',
+];
+const LIS_Context_Roles_NonCore = [
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Manager',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Member',
+  'http://purl.imsglobal.org/vocab/lis/v2/membership#Officer',
+];
+
+const LIS_Sub_Roles = [
+  ...['Administrator', 'Developer', 'ExternalDeveloper', 'ExternalSupport', 'ExternalSystemAdministrator', 'Support'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Administrator#${sub}`),
+  ...['ContentDeveloper', 'ContentExpert', 'ExternalContentExpert', 'Librarian'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/ContentDeveloper#${sub}`),
+  ...['ExternalInstructor',
+    'Grader',
+    'GuestInstructor',
+    'Lecturer',
+    'PrimaryInstructor',
+    'SecondaryInstructor',
+    'TeachingAssistant',
+    'TeachingAssistantGroup',
+    'TeachingAssistantOffering',
+    'TeachingAssistantSection',
+    'TeachingAssistantSectionAssociation',
+    'TeachingAssistantTemplate'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Instructor#${sub}`),
+  ...['ExternalLearner', 'GuestLearner', 'Instructor', 'Learner', 'NonCreditLearner'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Learner#${sub}`),
+  ...['AreaManager',
+    'CourseCoordinator',
+    'ExternalObserver',
+    'Manager',
+    'Observer'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Manager#${sub}`),
+  ...['Member'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Member#${sub}`),
+  ...['Advisor',
+    'Auditor',
+    'ExternalAdvisor',
+    'ExternalAuditor',
+    'ExternalLearningFacilitator',
+    'ExternalMentor',
+    'ExternalReviewer',
+    'ExternalTutor',
+    'LearningFacilitator',
+    'Mentor',
+    'Reviewer',
+    'Tutor'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Mentor#${sub}`),
+  ...['Chair', 'Communications', 'Secretary', 'Treasurer', 'Vice-Chair'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Officer#${sub}`),
+];
+*/
+const LTI_Test_User = 'http://purl.imsglobal.org/vocab/lti/system/person#TestUser';
+
+export function isTestUser(token: IdToken): boolean {
+  return token.platformContext.roles.includes(LTI_Test_User);
+}
+export function isInstructor(token: IdToken): boolean {
   return (
-    !!token &&
     ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
-      (role) => token.roles.includes(role)
+      (role) => token.platformContext.roles.includes(role)
     )
   );
 }
 
-// export function isStudent(token: ContextToken): boolean {
-//   return [
-//     "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
-//   ].some(role => token.roles.includes(role));
+export function isStudent(token: IdToken): boolean {
+  return [
+    "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
+  ].some(role => token.platformContext.roles.includes(role));
+}
+
+export function isContentDeveloper(token: IdToken): boolean {
+  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper'].some(
+    (role) => token.platformContext.roles.includes(role)
+  );
+}
+
+// export function isTorus(token?: IdToken): boolean {
+//   return !!token && token.platformInfo?.guid === 'true';
 // }
 
 export const MAX_SCORE = 1.0; // Using undefined, 0 (openned), and 1 (used at least one tool)
@@ -96,6 +193,7 @@ export const grade = async (
     existingGrade?.scoreGiven !== undefined &&
     existingGrade.scoreGiven >= score
   ) {
+    console.log("non-clobbering grading");
     // Don't update the grade if the new score is not higher than the existing score.
     return existingGrade;
   }
