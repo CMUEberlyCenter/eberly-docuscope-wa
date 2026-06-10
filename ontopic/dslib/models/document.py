@@ -2036,10 +2036,7 @@ class DSDocument:
                                     temp_para["new_accum_lemmas"].append(
                                         cl
                                     )  # add 'cl' to the list
-                                    is_done = True
                                     break # no need to check other paragraphs
-                        if is_done:
-                            break
 
                 # remove the duplicates. It may be a bit faster to do it here than checking duplicates in the loop above...
                 para["given_accum_lemmas"] = list(set(para["given_accum_lemmas"]))
