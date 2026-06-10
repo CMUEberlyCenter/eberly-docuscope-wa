@@ -481,7 +481,16 @@ export type SessionAggregateData = {
   prompts: {
     prompt: string;
     count: number;
+    timestamp: Date;
+    cache_creation_input_tokens: number;
+    cache_read_input_tokens: number;
+    input_tokens: number;
+    output_tokens: number;
   }[];
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number;
+  cache_read_input_tokens: number;
 };
 
 async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
@@ -496,6 +505,19 @@ async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
         count: {
           $sum: 1,
         },
+        timestamp: { $first: '$timestamp' },
+        cache_creation_input_tokens: {
+          $sum: '$performance_data.usage.cache_creation_input_tokens',
+        },
+        cache_read_input_tokens: {
+          $sum: '$performance_data.usage.cache_read_input_tokens',
+        },
+        input_tokens: {
+          $sum: '$performance_data.usage.input_tokens',
+        },
+        output_tokens: {
+          $sum: '$performance_data.usage.output_tokens',
+        },
       },
     },
     {
@@ -505,7 +527,24 @@ async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
           $push: {
             prompt: '$_id.prompt',
             count: '$count',
+            timestamp: '$timestamp',
+            cache_creation_input_tokens: '$cache_creation_input_tokens',
+            cache_read_input_tokens: '$cache_read_input_tokens',
+            input_tokens: '$input_tokens',
+            output_tokens: '$output_tokens',
           },
+        },
+        input_tokens: {
+          $sum: '$input_tokens',
+        },
+        output_tokens: {
+          $sum: '$output_tokens',
+        },
+        cache_creation_input_tokens: {
+          $sum: '$cache_creation_input_tokens',
+        },
+        cache_read_input_tokens: {
+          $sum: '$cache_read_input_tokens',
         },
       },
     },

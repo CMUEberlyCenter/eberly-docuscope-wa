@@ -1,6 +1,6 @@
 // https://vike.dev/Head
 
-import logoUrl from "#assets/logo.svg";
+import logoUrl from "#assets/favicon.svg";
 import type { FC } from "react";
 import { usePageContext } from "vike-react/usePageContext";
 
@@ -11,7 +11,7 @@ const HeadDefault: FC = () => {
     <>
       <meta name="robots" content="none" />
 
-      <link rel="icon" href={logoUrl} />
+      <link rel="icon" href="/favicon.ico" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"

@@ -42,6 +42,26 @@ performance:
   tab: Performance
   title: Performance Metrics
   no_data: No performance data available.
+  prompt: 'Prompt: {{prompt}}'
+  range: 'Count: {{count}} between '
+  time_per_request: 'Time/Request:'
+  average: 'Average: {{time}}'
+  minimum: 'Minimum: {{time}}'
+  maximum: 'Maximum: {{time}}'
+  average_input_tokens: 'Average Input Tokens: {{tokens}}'
+  average_output_tokens: 'Average Output Tokens: {{tokens}}'
+  average_cache_creation_input_tokens: 'Average Cache Creation Input Tokens: {{tokens}}'
+  average_cache_read_input_tokens: 'Average Cache Read Input Tokens: {{tokens}}'
+  max_cache_creation_input_tokens: 'Max Cache Creation Input Tokens: {{tokens}}'
+  max_cache_read_input_tokens: 'Max Cache Read Input Tokens: {{tokens}}'
+  session:
+    title: Per Session Performance Metrics
+    id: Session ID
+    token_count: Token Count
+    input_tokens: Input
+    output_tokens: Output
+    cache_creation_input_tokens: Cache Creation
+    cache_read_input_tokens: Cache Read
 genlink:
   tab: Generate Links
   title: Writing Task and Snapshot Link Generator

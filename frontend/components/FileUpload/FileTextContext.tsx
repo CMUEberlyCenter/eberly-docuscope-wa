@@ -1,6 +1,7 @@
 import {
   createContext,
   use,
+  useEffect,
   useState,
   type Dispatch,
   type FC,
@@ -32,6 +33,10 @@ export const FileTextProvider: FC<{
 }> = ({ children, initial }) => {
   const [text, setText] = useState<string | null>(initial?.text ?? null);
   const [file, setFile] = useState<string | null>(initial?.file ?? null);
+  const originalTitle = typeof document !== "undefined" ? document.title : "MyProse";
+  useEffect(() => {
+    document.title = file ?? originalTitle;
+  }, [file]);
 
   return (
     <FileTextContext value={[text, setText]}>
