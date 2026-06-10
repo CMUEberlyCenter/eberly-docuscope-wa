@@ -1,3 +1,15 @@
+import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIconButton";
+import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "#lib/schemaValidate";
+import { checkWordCount } from "#lib/ToolSettings";
+import {
+  type DbWritingTask,
+  isEnabled,
+  isWritingTask,
+  WritingTask,
+} from "#lib/WritingTask";
 import {
   faBroom,
   faCheckDouble,
@@ -6,25 +18,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
-import { Activity, ChangeEvent, FC, useEffect, useState } from "react";
+import { convertToHtml } from "mammoth/mammoth.browser";
+import { Activity, ChangeEvent, FC, useCallback, useState } from "react";
 import { Button, ButtonGroup, Card, Form, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import { ClipboardIconButton } from "../../../../components/ClipboardIconButton/ClipboardIconButton";
-import { MyProseLinks } from "../../../../components/MyProseLinks/MyProseLinks";
-import { WritingTaskFilter } from "../../../../components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../../components/WritingTaskInfo/WritingTaskInfo";
-import { validateWritingTask } from "../../../../src/lib/schemaValidate";
-import {
-  type DbWritingTask,
-  isEnabled,
-  isWritingTask,
-  WritingTask,
-} from "../../../../src/lib/WritingTask";
 import { Data } from "./+data";
-import { convertToHtml } from "mammoth";
-import { checkWordCount } from "../../../../src/lib/ToolSettings";
+import { onClearSnapshotCache } from "./Page.telefunc";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -39,6 +40,27 @@ export const Page: FC = () => {
   const [custom, setCustom] = useState<WritingTask | null>(null); // Uploaded file content.
   const [valid, setValid] = useState(true); // Uploaded file validity.
   const [error, setError] = useState(""); // Error messages for uploaded file.
+  const updateSelected = useCallback(
+    (selected: DbWritingTask | null) => {
+      setSelected(selected);
+      if (selected) {
+        const tools =
+          selected.info.review_tools
+            ?.filter(
+              ({ tool }) =>
+                settings &&
+                tool in settings &&
+                settings[tool as keyof typeof settings]
+            )
+            .map(({ tool, enabled }) => (enabled ? tool : null))
+            .filter((tool): tool is string => tool !== null) ?? [];
+        setEnabledTools(tools);
+      } else {
+        setEnabledTools([]);
+      }
+    },
+    [settings]
+  );
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) {
@@ -57,11 +79,30 @@ export const Page: FC = () => {
         setValid(false);
         setError(JSON.stringify(validateWritingTask.errors));
       } else if (isWritingTask(json)) {
+        const response = await fetch(
+          new URL("/api/v2/writing_tasks", location.href),
+          {
+            method: "POST",
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(json),
+          }
+        );
+        if (!response.ok) {
+          setValid(false);
+          setError(await response.text());
+          return;
+        }
         setValid(true);
-        json.info.id = undefined; // ensure no id for uploaded task
-        json.public = false; // ensure private for uploaded task
-        setCustom(json);
-        setSelected(json);
+        const id = await response.text();
+        const custom = {
+          ...json,
+          _id: id,
+          info: { ...json.info, id },
+          public: false,
+        };
+        setCustom(custom);
+        updateSelected(custom);
       } else {
         setValid(false);
         setError(t("select_task.invalid_upload"));
@@ -82,23 +123,6 @@ export const Page: FC = () => {
   const [validDocument, setValidDocument] = useState(true); // Uploaded file validity.
   const [errorDocument, setErrorDocument] = useState(""); // Error messages for uploaded file.
   const [enabledTools, setEnabledTools] = useState<string[]>([]);
-  useEffect(() => {
-    if (selected) {
-      const tools =
-        selected.info.review_tools
-          ?.filter(
-            ({ tool }) =>
-              settings &&
-              tool in settings &&
-              settings[tool as keyof typeof settings]
-          )
-          .map(({ tool, enabled }) => (enabled ? tool : null))
-          .filter((tool): tool is string => tool !== null) ?? [];
-      setEnabledTools(tools);
-    } else {
-      setEnabledTools([]);
-    }
-  }, [selected, settings]);
 
   const onDocumentChange = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
@@ -126,7 +150,7 @@ export const Page: FC = () => {
           styleMap: "u => u", // Preserve underline styles (str | str[] | regexp)
         }
       );
-      if (messages.length) {
+      if (Array.isArray(messages) && messages.length) {
         throw new Error(
           t("admin:genlink.document.invalid_file_content", {
             message: messages.map((m) => m.message).join("; "),
@@ -184,7 +208,7 @@ export const Page: FC = () => {
                         key={task.info.id ?? task.info.name}
                         action
                         active={selected === task}
-                        onClick={() => setSelected(task)}
+                        onClick={() => updateSelected(task)}
                       >
                         {task.info.name}
                       </ListGroup.Item>
@@ -194,7 +218,7 @@ export const Page: FC = () => {
                       key={"custom"}
                       action
                       active={selected === custom}
-                      onClick={() => setSelected(custom)}
+                      onClick={() => updateSelected(custom)}
                     >
                       {custom.info.name}
                     </ListGroup.Item>
@@ -204,7 +228,7 @@ export const Page: FC = () => {
                     action
                     variant="warning"
                     active={!selected}
-                    onClick={() => setSelected(null)}
+                    onClick={() => updateSelected(null)}
                   >
                     {t("select_task.null")}
                   </ListGroup.Item>
@@ -238,6 +262,7 @@ export const Page: FC = () => {
               action={"/api/v2/snapshot"}
               encType="multipart/form-data"
               target="_blank"
+              onSubmit={() => setTimeout(() => window.location.reload(), 100)}
             >
               <input
                 type="hidden"
@@ -375,21 +400,11 @@ export const Page: FC = () => {
                     variant="icon"
                     className="text-danger"
                     title={t("admin:genlink.refresh_snapshot")}
-                    onClick={() => {
-                      fetch(`/api/v2/snapshot/${id}?cache_only=true`, {
-                        method: "DELETE",
-                      })
-                        .then((response) => {
-                          if (!response.ok) {
-                            console.error(
-                              "Failed to refresh snapshots",
-                              response.statusText
-                            );
-                          }
-                        })
-                        .catch((error) => {
-                          console.error("Error refreshing snapshots:", error);
-                        });
+                    onClick={async () => {
+                      const out = await onClearSnapshotCache(id);
+                      if (!out.success) {
+                        console.error(out.message);
+                      }
                     }}
                   >
                     <FontAwesomeIcon icon={faBroom} />

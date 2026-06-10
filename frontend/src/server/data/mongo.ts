@@ -2,6 +2,7 @@ import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
 import { Analysis } from '../../lib/ReviewResponse';
 import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
+import { logger } from '../logger';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
@@ -64,24 +65,19 @@ export async function findAllSnapshotsBasic(): Promise<Snapshot[]> {
 }
 
 export async function findSnapshotById(id: string): Promise<Snapshot> {
-  try {
-    const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
-    if (!ObjectId.isValid(id) || id.length !== 24) {
-      throw new ReferenceError(`Snapshot ${id} not found.`);
-    }
-    const _id = new ObjectId(id);
-    const snapshot = await collection.findOne<Snapshot>(
-      { _id },
-      { projection: { _id: 0 } }
-    );
-    if (!snapshot) {
-      throw new ReferenceError(`Snapshot ${id} not found.`);
-    }
-    return snapshot;
-  } catch (err) {
-    console.error(err);
-    throw err;
+  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+  if (!ObjectId.isValid(id) || id.length !== 24) {
+    throw new ReferenceError(`Snapshot ${id} not found.`);
   }
+  const _id = new ObjectId(id);
+  const snapshot = await collection.findOne<Snapshot>(
+    { _id },
+    { projection: { _id: 0 } }
+  );
+  if (!snapshot) {
+    throw new ReferenceError(`Snapshot ${id} not found.`);
+  }
+  return snapshot;
 }
 export async function insertSnapshot(
   task: WritingTask,
@@ -122,7 +118,10 @@ export async function deleteSnapshotById(id: string) {
   if (!del.acknowledged || del.deletedCount !== 1) {
     throw new ReferenceError(`Delete operation for Snapshot ${id} failed`);
   }
-  console.log(`Deleted snapshot with id '${id}'`);
+  logger.info(`Deleted snapshot with id '${id}'`, {
+    snapshotId: id,
+    action: 'delete_snapshot',
+  });
   return del.acknowledged;
 }
 
@@ -153,10 +152,19 @@ export async function updateSnapshotReviewsById(
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  console.log(`Updated reviews for snapshot with id '${id}'`);
+  logger.info(`Updated reviews for snapshot with id '${id}'`, {
+    snapshotId: id,
+    action: 'update_snapshot',
+  });
   return upd._id;
 }
 
+/**
+ *
+ * @param id Analysis database id.
+ * @returns database id
+ * @throws RefereceError if id is not found.
+ */
 export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
@@ -174,7 +182,10 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  console.log(`Cleared analyses for snapshot with id '${id}'`);
+  logger.info(`Cleared analyses for snapshot with id '${id}'`, {
+    snapshotId: id,
+    action: 'clear_snapshot_analyses',
+  });
   return upd._id;
 }
 
@@ -184,33 +195,28 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
  * @returns
  */
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
-  try {
-    const collection = client.db(MONGO_DB).collection(WRITING_TASKS);
-    if (ObjectId.isValid(id) && id.length === 24) {
-      const _id = new ObjectId(id);
-      const rules = await collection.findOne<WritingTask>(
-        { _id },
-        { projection: { _id: 0, path: 0, modified: 0 } }
-      );
-      if (!rules) {
-        throw new ReferenceError(`Writing Task ${id} not found.`);
-      }
-      return rules;
-    }
+  const collection = client.db(MONGO_DB).collection(WRITING_TASKS);
+  if (ObjectId.isValid(id) && id.length === 24) {
+    const _id = new ObjectId(id);
     const rules = await collection.findOne<WritingTask>(
-      { 'info.id': id, public: true, 'info.access': ACCESS_LEVEL }, // Find if the id exists in the public tasks.
-      // Only use public tasks so that instructor submittend tasks are not returned.
-      // Unsure if ACCESS_LEVEL is necessary here.  ACCESS_LEVEL's meaning is not well defined.
-      { projection: { _id: 0, path: 0, modified: 0 }, sort: { modified: -1 } }
+      { _id },
+      { projection: { _id: 0, path: 0, modified: 0 } }
     );
     if (!rules) {
       throw new ReferenceError(`Writing Task ${id} not found.`);
     }
     return rules;
-  } catch (err) {
-    console.error(err);
-    throw err;
   }
+  const rules = await collection.findOne<WritingTask>(
+    { 'info.id': id, public: true, 'info.access': ACCESS_LEVEL }, // Find if the id exists in the public tasks.
+    // Only use public tasks so that instructor submittend tasks are not returned.
+    // Unsure if ACCESS_LEVEL is necessary here.  ACCESS_LEVEL's meaning is not well defined.
+    { projection: { _id: 0, path: 0, modified: 0 }, sort: { modified: -1 } }
+  );
+  if (!rules) {
+    throw new ReferenceError(`Writing Task ${id} not found.`);
+  }
+  return rules;
 }
 
 /**
@@ -233,27 +239,48 @@ export async function insertWritingTask(
 }
 
 /**
- * Generate the public writing task specifications.
+ * Generator for retrieving the private writing task specifications.
+ * @returns writing tasks where the public attribute is false. These are typically custom or in development tasks.
+ */
+async function* generateAllPrivateWritingTasks(): AsyncGenerator<DbWritingTask> {
+  const collection = client
+    .db(MONGO_DB)
+    .collection<DbWritingTask>(WRITING_TASKS);
+  const cursor = collection.find<DbWritingTask>(
+    { public: false },
+    { projection: { path: 0 } }
+  );
+  for await (const doc of cursor) {
+    // Convert _id from ObjectId to string for frontend compatibility. #293
+    yield { ...doc, _id: doc._id?.toString() ?? 'unknown_id' };
+  }
+}
+
+/**
+ * Retrieve the list of private writing task specifications. These are typically outdated, custom, or in development tasks.
+ * @returns Array of writing tasks where the public attribute is false.
+ */
+export async function findAllPrivateWritingTasks(): Promise<DbWritingTask[]> {
+  return Array.fromAsync(generateAllPrivateWritingTasks());
+}
+
+/**
+ * Generator for retrieving the public writing task specifications.
  * This is used for populating writing task selections for publicly
  * facing versions.
  * @returns writing tasks where the public attribute is true.
  */
 async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
-  try {
-    const collection = client
-      .db(MONGO_DB)
-      .collection<DbWritingTask>(WRITING_TASKS);
-    const cursor = collection.find<DbWritingTask>(
-      { public: true, 'info.access': ACCESS_LEVEL },
-      { projection: { path: 0, modified: 0 } }
-    );
-    for await (const doc of cursor) {
-      // Need to convert _id from ObjectId to string for frontend compatibility and to match type.
-      yield { ...doc, _id: doc._id?.toString() ?? 'unknown_id' };
-    }
-  } catch (err) {
-    console.error(err);
-    throw err;
+  const collection = client
+    .db(MONGO_DB)
+    .collection<DbWritingTask>(WRITING_TASKS);
+  const cursor = collection.find<DbWritingTask>(
+    { public: true, 'info.access': ACCESS_LEVEL },
+    { projection: { path: 0, modified: 0 } }
+  );
+  for await (const doc of cursor) {
+    // Convert _id from ObjectId to string for frontend compatibility. #293
+    yield { ...doc, _id: doc._id?.toString() ?? 'unknown_id' };
   }
 }
 
@@ -284,7 +311,10 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
     { ...data, public: true, path, modified: new Date() },
     { upsert: true }
   );
-  console.log(`Inserted writing task ${data.info.name} v${data.info.version}`);
+  logger.info(`Inserted writing task ${data.info.name} v${data.info.version}`, {
+    writingTaskId: data.info.id,
+    action: 'upsert_public_writing_task',
+  });
   return ins.upsertedId;
 }
 
@@ -303,7 +333,10 @@ async function deleteWritingTaskByPath(path: string) {
       `Delete operation for Writing Task at '${path}' failed`
     );
   }
-  console.log(`Deleted writing task at path '${path}'`);
+  logger.info(`Deleted writing task at path '${path}'`, {
+    path,
+    action: 'delete_writing_task',
+  });
   return del.acknowledged;
 }
 
@@ -325,7 +358,7 @@ export async function initDatabase() {
       retry = 0;
     } catch (err) {
       const { message } = err as Error;
-      console.warn(
+      logger.warn(
         `Failed to connect to database: ${message}  Retrying in ${sleep}ms (${retry} attempts left)...`
       );
       retry -= 1;
@@ -353,10 +386,11 @@ export async function initDatabase() {
   );
   return async () => {
     await wtdShutdown();
-    return client.close();
+    await client.close();
   };
 }
 
+// TODO: add if LTI user (indicates student)
 type LogData = {
   _id?: string;
   timestamp: Date;
@@ -440,6 +474,88 @@ async function* generateLogData(): AsyncGenerator<AggregateLogData> {
 }
 export function getLogData(): Promise<AggregateLogData[]> {
   return Array.fromAsync(generateLogData());
+}
+
+export type SessionAggregateData = {
+  _id: string;
+  prompts: {
+    prompt: string;
+    count: number;
+    timestamp: Date;
+    cache_creation_input_tokens: number;
+    cache_read_input_tokens: number;
+    input_tokens: number;
+    output_tokens: number;
+  }[];
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number;
+  cache_read_input_tokens: number;
+};
+
+async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
+  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const cursor = collection.aggregate<SessionAggregateData>([
+    {
+      $group: {
+        _id: {
+          sessionId: '$performance_data.session_id',
+          prompt: '$meta.prompt',
+        },
+        count: {
+          $sum: 1,
+        },
+        timestamp: { $first: '$timestamp' },
+        cache_creation_input_tokens: {
+          $sum: '$performance_data.usage.cache_creation_input_tokens',
+        },
+        cache_read_input_tokens: {
+          $sum: '$performance_data.usage.cache_read_input_tokens',
+        },
+        input_tokens: {
+          $sum: '$performance_data.usage.input_tokens',
+        },
+        output_tokens: {
+          $sum: '$performance_data.usage.output_tokens',
+        },
+      },
+    },
+    {
+      $group: {
+        _id: '$_id.sessionId',
+        prompts: {
+          $push: {
+            prompt: '$_id.prompt',
+            count: '$count',
+            timestamp: '$timestamp',
+            cache_creation_input_tokens: '$cache_creation_input_tokens',
+            cache_read_input_tokens: '$cache_read_input_tokens',
+            input_tokens: '$input_tokens',
+            output_tokens: '$output_tokens',
+          },
+        },
+        input_tokens: {
+          $sum: '$input_tokens',
+        },
+        output_tokens: {
+          $sum: '$output_tokens',
+        },
+        cache_creation_input_tokens: {
+          $sum: '$cache_creation_input_tokens',
+        },
+        cache_read_input_tokens: {
+          $sum: '$cache_read_input_tokens',
+        },
+      },
+    },
+  ]);
+  for await (const doc of cursor) {
+    yield doc;
+  }
+}
+
+export function getSessionData(): Promise<SessionAggregateData[]> {
+  return Array.fromAsync(generateSessionData());
 }
 
 // async function* generateLatestLogData(prompt: string): AsyncGenerator<LogData> {

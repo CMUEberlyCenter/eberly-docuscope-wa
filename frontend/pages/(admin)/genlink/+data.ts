@@ -1,5 +1,5 @@
 // import { DataAsync } from 'vike/types';
-import { findAllPublicWritingTasks } from '../../../src/server/data/mongo';
+import { findAllPublicWritingTasks } from '#/server/data/mongo';
 
 export const data = async () => {
   const tasks = await findAllPublicWritingTasks();

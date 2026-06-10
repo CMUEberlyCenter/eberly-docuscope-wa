@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Translation } from "react-i18next";
-import logo from "../../assets/logo.svg";
+import logo from "#assets/logo.svg";
 
 /** Logo component for the application. */
 export const Logo: FC = () => (

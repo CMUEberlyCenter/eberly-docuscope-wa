@@ -1,3 +1,6 @@
+import { deserializeHtmlText, serialize, serializeDocx } from "#/lib/slate";
+import { SplitLayout } from "#layouts/SplitLayout";
+import { ToolLayout } from "#layouts/ToolLayout.js";
 import {
   faBold,
   faItalic,
@@ -15,15 +18,9 @@ import {
   Form,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import Split from "react-split";
 import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
-import {
-  deserializeHtmlText,
-  serialize,
-  serializeDocx,
-} from "../../src/lib/slate";
 import { FileDownload } from "../FileDownload/FileDownload";
 import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";
@@ -37,14 +34,27 @@ import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
 
+const loadSaveFileOps = {
+  id: "myprose",
+  types: [
+    {
+      accept: {
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+          [".docx"],
+      },
+    },
+  ],
+};
+
 const CustomEditor: FC = () => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
     // get from session storage
-    JSON.parse(sessionStorage.getItem("content") ?? "null") || [
-      { type: "paragraph", children: [{ text: "" }] },
-    ]
+    () =>
+      JSON.parse(sessionStorage.getItem("content") ?? "null") || [
+        { type: "paragraph", children: [{ text: "" }] },
+      ]
   );
   const [zoom, setZoom] = useState<number>(100);
   const [selection, setSelection] = useState<boolean>(false);
@@ -69,17 +79,6 @@ const CustomEditor: FC = () => {
       }
     }
   }, [upload, editor]);
-  const loadSaveFileOps = {
-    id: "myprose",
-    types: [
-      {
-        accept: {
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-            [".docx"],
-        },
-      },
-    ],
-  };
   const uploadFile = useInitiateUploadFile();
 
   // Stuff for exporting docx file.
@@ -131,7 +130,7 @@ const CustomEditor: FC = () => {
     } else {
       setDocx(null);
     }
-  }, [content, ltiActivityTitle, writingTask]);
+  }, [content, file, ltiActivityTitle, showError, t, username, writingTask]);
 
   return (
     <Slate
@@ -154,16 +153,12 @@ const CustomEditor: FC = () => {
         }
       }}
     >
-      <Split
-        className="container-fluid vh-100 w-100 d-flex flex-row align-items-stretch"
-        sizes={[60, 40]}
-        minSize={[400, 320]}
-        expandToMin={true}
-      >
+      <SplitLayout>
         <main className="d-flex overflow-none flex-column my-1">
           <ButtonToolbar
             aria-label="Editor Tools"
-            className="align-items-center mb-2"
+            className="align-items-center mb-0 bg-light border rounded-top px-2"
+            style={{ height: 48 }}
           >
             <ButtonGroup>
               <DropdownButton
@@ -248,8 +243,10 @@ const CustomEditor: FC = () => {
             autoFocus
           />
         </main>
-        <ToolCard hasSelection={selection} />
-      </Split>
+        <ToolLayout stage={t("tool.tab.generate")}>
+          <ToolCard hasSelection={selection} />
+        </ToolLayout>
+      </SplitLayout>
     </Slate>
   );
 };

@@ -1,7 +1,6 @@
 // https://vike.dev/Head
 
 import type { FC } from "react";
-import logoUrl from "../assets/logo.svg";
 import { usePageContext } from "vike-react/usePageContext";
 
 const HeadDefault: FC = () => {
@@ -11,7 +10,7 @@ const HeadDefault: FC = () => {
     <>
       <meta name="robots" content="none" />
 
-      <link rel="icon" href={logoUrl} />
+      <link rel="icon" href="/favicon.ico" />
       <link rel="preconnect" href="https://fonts.googleapis.com" />
       <link
         rel="preconnect"
@@ -35,6 +34,7 @@ const HeadDefault: FC = () => {
         src={`https://www.googletagmanager.com/gtag/js?id=${analytics}`}
       ></script>
       <script
+        // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
         dangerouslySetInnerHTML={{
           __html: `window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}

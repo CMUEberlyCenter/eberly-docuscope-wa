@@ -1,0 +1,11 @@
+introduction: Something went wrong. Please try again later.
+label: "Error:"
+details: "Error Details: {{details}}"
+instructions: >
+  If this error persists, please contact support with the above error details.
+unauthorized: You are not authorized to access this resource.
+forbidden: You do not have permission to access this resource.
+not_found: The requested resource was not found.
+service_unavailable: The service is currently unavailable. Please try again later.
+internal_server_error: An internal server error occurred. Please try again later.
+unexpected_error: An unexpected error occurred. Please try again later.

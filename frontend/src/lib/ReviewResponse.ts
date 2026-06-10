@@ -55,9 +55,13 @@ export function isAssessment(data: unknown): data is GeneralAssessment {
 
 /** List of identified civility issues in the text. */
 type CivilToneOutput = {
-  text: string; // An inappropriate text segment.
+  /** Identified text segment. */
+  text: string;
+  /** A brief comment on the issue with the tone in the text. */
   assessment: string;
+  /** A brief suggestion on how to improve the tone in the text. */
   suggestion: string;
+  /** The id of the sentence span that was identified as having tone issues. */
   sent_id: string;
 }[];
 // function isCivilToneOutput(data: unknown): data is CivilToneOutput {
@@ -112,6 +116,8 @@ export type ExpectationsOutput = {
   assessment: string;
   /** A brief summary of suggestions for better meeting the expectations. */
   suggestion: string;
+  /** True if the text sufficiently addresses the expectation. */
+  expectation_met?: boolean;
 };
 export function isExpectationsOutput(
   data: unknown
@@ -451,6 +457,12 @@ export const isExpectationsData = (
 const isNone = (suggestion: string): boolean =>
   suggestion.match(/^none/i) !== null;
 
+/**
+ * Tests if the suggestion in expectation data is marked as "none".
+ * @param data Expectation data returned from the review process.
+ * @returns true if the suggestions start with "none", indicating that the LLM did not identify references to the expectation.
+ * @deprecated The expectations prompt no longer uses the "none" fail state.
+ */
 export function isExpectationsDataSuggestionNone(
   data: ExpectationsData
 ): boolean {

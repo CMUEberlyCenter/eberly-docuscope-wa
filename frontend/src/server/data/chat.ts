@@ -1,12 +1,10 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type {
-  MessageParam,
-  TextBlockParam,
-} from '@anthropic-ai/sdk/resources/index.mjs';
+import type { TextBlockParam } from '@anthropic-ai/sdk/resources/index.mjs';
 import { parse } from 'node-html-parser';
 import format from 'string-format';
 import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
 import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
+import { logger } from '../logger';
 import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
@@ -49,27 +47,18 @@ export async function doChat<T>(
   const started = new Date();
   const template = await findPromptById(key);
   if (!template) {
-    console.error(`${key} is not a valid template.`);
     throw new ReferenceError(`${key} template not found.`);
   }
   const { prompt, role, temperature } = template;
   if (!prompt) {
-    console.error(`Missing prompt for ${key} template.`);
-    throw new Error(`Malformed prompt for ${key}.`);
+    throw new Error(`Malformed prompt for ${key}.`, { cause: template });
   }
   const content = format(prompt, data);
   let response: string | T = '';
-  const json_assistant: MessageParam = {
-    role: 'assistant',
-    content:
-      content.match(/Your JSON response must begin with `([^`]*)`/)?.at(1) ??
-      '',
-  };
   const caching: TextBlockParam[] = [];
   if (cache) {
     const inputTemplate = await findPromptById('input_text');
     if (!inputTemplate) {
-      console.error('Unable to locate input_text template.');
       throw new ReferenceError('Unable to locate input_text template.');
     }
     const text_cache: TextBlockParam = {
@@ -98,8 +87,6 @@ export async function doChat<T>(
           role: 'user',
           content,
         },
-        // JSON response assistant needs to come last!
-        ...(json ? [json_assistant] : []),
       ],
       model: ANTHROPIC_MODEL,
       // metadata: {
@@ -116,10 +103,6 @@ export async function doChat<T>(
   if (chat.type !== 'message') {
     // This likely should be in catch
     const err = chat as unknown as ErrorMessage; // typescript hack
-    console.error(
-      `Error response from ${chat.model} for request ${chat._request_id}`
-    );
-    console.error(chat);
     throw new Error(err.error.message, { cause: chat });
   }
   if (chat.stop_reason) {
@@ -139,24 +122,27 @@ export async function doChat<T>(
       case 'pause_turn':
         break;
       default:
-        console.warn(`Unhandled stop reason: ${chat.stop_reason}`);
+        logger.warn(`Unhandled stop reason: ${chat.stop_reason}`, {
+          cause: chat,
+        });
     }
   }
   const resp = chat.content.at(0);
   if (resp?.type === 'text') {
     response = resp.text;
   } else {
-    console.warn(resp);
+    logger.warn(resp);
   }
   try {
     if (json) {
       // Expecting JSON response, sometimes the model will fence the JSON in ```json ... ```
       // Using json_assistant and looking for "begin with" seems to help with this
       // but leaving this in case the model still fences it or fails to find the magic string.
+      // However, claud-4.6 no longer allows assistant prefill messages.
       const unfenced = response
         .replace(/^```json\s*/, '')
         .replace(/\s*```$/, '');
-      response = JSON.parse(`${json_assistant.content}${unfenced}`) as T;
+      response = JSON.parse(unfenced) as T;
     }
   } catch (err) {
     // Output the json that failed to parse.

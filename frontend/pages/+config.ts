@@ -13,5 +13,5 @@ export default {
   ssr: false,
   passToClient: ['settings', 'google'],
 
-  extends: vikeReact,
+  extends: [vikeReact],
 } satisfies Config;

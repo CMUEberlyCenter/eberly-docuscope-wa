@@ -1,4 +1,7 @@
+import type { Optional } from "#/index";
+import type { Rule, WritingTask } from "#/lib/WritingTask";
 import classnames from "classnames";
+import DOMPurify from "dompurify";
 import {
   type FC,
   type HTMLProps,
@@ -9,10 +12,8 @@ import {
 } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import type { Rule, WritingTask } from "../../src/lib/WritingTask";
 import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
 import "./WritingTaskRulesTree.scss";
-import type { Optional } from "../../src";
 
 type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   /** Callback for when rule selection changes. */
@@ -23,6 +24,7 @@ type RuleTreeProps = HTMLProps<HTMLDivElement> & {
   includeTitle?: boolean;
   /** Writing task */
   task?: Optional<WritingTask>;
+  detailsClassName?: string;
 };
 /**
  * Component for displaying the current outline with a sidebar for displaying
@@ -34,6 +36,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
   task,
   leafOnly,
   className,
+  detailsClassName = "bg-light",
   ...props
 }) => {
   const { t } = useTranslation();
@@ -65,8 +68,8 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
     <div {...props} className={cn}>
       <div className="d-flex flex-column align-items-start writing-task-tree h-0 w-100 overflow-auto">
         {includeTitle && <WritingTaskTitle task={writingTask} />}
-        {writingTask?.rules.rules.map((rule, i) => (
-          <div key={`${id}-${i}`} aria-expanded="true">
+        {writingTask?.rules.rules.map((rule) => (
+          <div key={`${id}-${rule.name}`} aria-expanded="true">
             <ButtonGroup aria-selected={selected === rule}>
               <Button
                 size="sm"
@@ -125,7 +128,9 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
           </div>
         ))}
       </div>
-      <div className="container-fluid rounded bg-light p-3 h-0 w-100 overflow-auto">
+      <div
+        className={`container-fluid rounded ${detailsClassName} p-3 h-0 w-100 overflow-auto`}
+      >
         {!selected && (
           <>
             <h5>
@@ -143,7 +148,12 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                 : t("details.about.expectation")}
             </h6>
             <h5>{selected.name}</h5>
-            <div dangerouslySetInnerHTML={{ __html: selected.description }} />
+            <div
+              /* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml */
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(selected.description),
+              }}
+            />
           </>
         )}
       </div>

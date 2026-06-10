@@ -5,19 +5,19 @@ The page also displays the generated link and allows the user to copy it to the 
 
 To be replaced by the admin genlink page.
 */
-import { type ChangeEvent, type FC, useState } from "react";
-import { Form, ListGroup } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
-import { useData } from "vike-react/useData";
-import { MyProseLinks } from "../../../components/MyProseLinks/MyProseLinks";
-import { WritingTaskFilter } from "../../../components/WritingTaskFilter/WritingTaskFilter";
-import { WritingTaskInfo } from "../../../components/WritingTaskInfo/WritingTaskInfo";
-import { validateWritingTask } from "../../../src/lib/schemaValidate";
+import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
+import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { validateWritingTask } from "#lib/schemaValidate";
 import {
   type DbWritingTask,
   isWritingTask,
   type WritingTask,
-} from "../../../src/lib/WritingTask";
+} from "#lib/WritingTask";
+import { type ChangeEvent, type FC, useState } from "react";
+import { Form, ListGroup } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+import { useData } from "vike-react/useData";
 import type { Data } from "./+data";
 
 const Page: FC = () => {

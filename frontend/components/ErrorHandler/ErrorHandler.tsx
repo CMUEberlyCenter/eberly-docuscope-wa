@@ -1,9 +1,9 @@
+import { Optional } from "#/index";
+import type { ErrorData } from "#/lib/ReviewResponse";
+import { ToolResult } from "#/lib/ToolResults";
 import type { FC } from "react";
 import { Alert, type AlertProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { Optional } from "../../src";
-import type { ErrorData } from "../../src/lib/ReviewResponse";
-import { ToolResult } from "../../src/lib/ToolResults";
 
 class InputTooLargeError extends Error {}
 class ServiceUnavailableError extends Error {}
@@ -48,11 +48,10 @@ export const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
   if (tool.error instanceof ServiceUnavailableError) {
     return <Alert variant="warning">{t("error.service_unavailable")}</Alert>;
   }
-  return (
-    <Alert variant="warning">
-      {t("error.unknown_error")}: {tool.error.message}
-    </Alert>
-  );
+  if (tool.error instanceof Error && tool.error.message) {
+    return <Alert variant="warning">{tool.error.message}</Alert>;
+  }
+  return <Alert variant="warning">{t("error.unknown_error")}</Alert>;
 };
 
 /**

@@ -1,7 +1,7 @@
 import {
   findAllSnapshotsBasic,
   findAllPublicWritingTasks,
-} from '../../../../src/server/data/mongo';
+} from '#/server/data/mongo';
 
 /** Populates the data required for the admin genlink page. */
 export const data = async () => {

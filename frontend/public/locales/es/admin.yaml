@@ -1,0 +1,77 @@
+title: Panel de Administración
+home: Inicio
+welcome: Bienvenido al panel de administración. Utilice la navegación para gestionar los distintos aspectos de la aplicación myProse.
+settings:
+  tab: Configuración
+  title: Configuración Global
+  text_to_speech: 'Texto a Voz: '
+  scribe: 'Herramientas de I.A.: '
+  model: 'Modelo Anthropic: '
+  word_count_limit: 'Límite de Recuento de Palabras: '
+  notes_to_prose: '$t(translation:tool.button.prose.tooltip) $t(translation:tool.tab.generate) Herramienta: '
+  notes_to_bullets: '$t(translation:tool.button.bullets.tooltip) $t(translation:tool.tab.generate) Herramienta: '
+  civil_tone: '$t(review:civil_tone.title) $t(review:title) Herramienta: '
+  credibility: '$t(review:credibility.title) $t(review:title) Herramienta: '
+  expectations: '$t(review:expectations.title) $t(review:title) Herramienta: '
+  sentence_clarity: '$t(review:sentences.title) $t(review:title) Herramienta: '
+  lines_of_arguments: '$t(review:lines_of_arguments.title) $t(review:title) Herramienta: '
+  logical_flow: '$t(review:logical_flow.title) $t(review:title) Herramienta: '
+  paragraph_clarity: '$t(review:paragraph_clarity.title) $t(review:title) Herramienta: '
+  professional_tone: '$t(review:professional_tone.title) $t(review:title) Herramienta: '
+  prominent_topics: '$t(review:prominent_topics.title) $t(review:title) Herramienta: '
+  sentences: '$t(review:sentences.title) $t(review:title) Herramienta: '
+  sources: '$t(review:sources.title) $t(review:title) Herramienta: '
+  organization: '$t(review:organization.title) $t(review:title) Herramienta: '
+  language: 'Idioma Predeterminado: '
+  access_level: 'Nivel de acceso WTD: '
+  available: 'Disponible'
+  unavailable: 'Todo Deshabilitado'
+  enabled: Habilitado
+  disabled: No
+  unlimited: Sin Límite
+platforms:
+  tab: Plataformas
+  title: Plataformas LTI Registradas
+  id: 'ID de Plataforma:'
+  name: 'Nombre de Plataforma:'
+  url: 'URL de Plataforma:'
+  status: 'Estado:'
+  active: Activo
+  inactive: Inactivo
+performance:
+  tab: Rendimiento
+  title: Métricas de Rendimiento
+  no_data: No hay datos de rendimiento disponibles.
+genlink:
+  tab: Generar Enlaces
+  title: Generador de Enlaces para Tareas de Escritura e Instantáneas
+  description: Utilice esta herramienta para generar enlaces para Tareas de Escritura específicas dentro de myProse.
+  document:
+    title: Documento de Instantánea
+    description: Utilice este enlace para ver el documento de la Tarea de Escritura seleccionada.
+    upload: Subir Documento
+    tools: 'Seleccionar Herramientas Habilitadas:'
+    select_label: Seleccionar Todo / Deseleccionar Todo
+    select_all: Seleccionar Todo
+    deselect_all: Deseleccionar Todo
+    invalid_file_type: ¡Tipo de archivo no válido! Por favor, suba un archivo .docx.
+    invalid_file_content: El archivo subido no pudo procesarse. Asegúrese de que sea un documento .docx válido. {{message}}
+    empty_content: El documento subido está vacío. Por favor, proporcione un documento con contenido.
+    too_large: El documento subido con {{wordCount}} palabras supera el tamaño máximo permitido de {{maxWords}} palabras. Por favor, suba un documento más pequeño.
+  submit: Iniciar
+  existing_snapshots: Instantáneas Existentes
+  delete_snapshot: Eliminar Instantánea
+  refresh_snapshot: Limpiar caché de análisis
+writing_tasks:
+  tab: Tareas de Escritura
+  title: Gestión de Tareas de Escritura
+  public:
+    title: Tareas Públicas
+    description: Estas tareas son visibles para todos los usuarios.
+  private:
+    title: Tareas Privadas
+    description: Estas tareas no aparecen en la lista de tareas públicas.
+    version: "Versión: {{version}}"
+    saved: "Guardado: {{saved}}"
+    uploaded: "Subido: {{uploaded}}"
+    main: Ver

@@ -37,3 +37,4 @@ dswadb
 .env.fish
 /secrets/
 /private/
+/frontend/error.log

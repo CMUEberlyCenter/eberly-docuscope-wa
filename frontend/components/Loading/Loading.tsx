@@ -1,6 +1,6 @@
 import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
-import DotSpinner from "../../assets/icons/6-dots-rotate.svg?react";
+import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
 import style from "./Loading.module.scss";
 import classNames from "classnames";
 
@@ -8,7 +8,10 @@ import classNames from "classnames";
  * Basic loading spinner with text.
  * Used in Tool content areas.
  */
-export const Loading: FC<HTMLProps<HTMLDivElement>> = (className, ...props) => {
+export const Loading: FC<HTMLProps<HTMLDivElement>> = ({
+  className,
+  ...props
+}) => {
   return (
     <div
       role="status"

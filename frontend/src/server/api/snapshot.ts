@@ -1,12 +1,13 @@
-import { Router } from 'express';
+import { Request, Router } from 'express';
 import { body, param, query } from 'express-validator';
 import { convertToHtml } from 'mammoth';
 import multer from 'multer';
+import { userLanguage } from '#lib/languageCode';
 import {
   BadRequestError,
   ForbiddenError,
   GatewayError,
-} from '../../lib/ProblemDetails';
+} from '#lib/ProblemDetails';
 import {
   Analysis,
   BasicReviewPrompts,
@@ -16,12 +17,13 @@ import {
   isExpectationsOutput,
   ReviewPrompt,
   ReviewResponse,
-} from '../../lib/ReviewResponse';
+} from '#lib/ReviewResponse';
 import {
   getExpectationByIndex,
   isEnabled,
   isWritingTask,
-} from '../../lib/WritingTask';
+  WritingTask,
+} from '#lib/WritingTask';
 import { basicAuthMiddleware } from '../../utils/basicAuth';
 import { doChat, reviewData } from '../data/chat';
 import {
@@ -54,7 +56,7 @@ snapshot.post(
   ),
   async (request, response) => {
     const { task, tool_config } = request.body;
-    const writingTask = JSON.parse(task);
+    const writingTask = JSON.parse(task) as WritingTask; // already validated in middleware
     const tools = tool_config as string[];
     if (!request.file) {
       throw new BadRequestError('No document uploaded.');
@@ -78,7 +80,7 @@ snapshot.post(
         `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
       );
     }
-    const segmented = await segmentText(value);
+    const segmented = await segmentText(value, userLanguage(writingTask));
     const dbId = await insertSnapshot(
       writingTask,
       value,
@@ -93,7 +95,7 @@ snapshot.post(
 snapshot.get(
   '/:id',
   validate(param('id').isMongoId()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     response.send(await findSnapshotById(id));
   }
@@ -103,7 +105,7 @@ snapshot.delete(
   basicAuthMiddleware,
   validate(param('id').isMongoId()),
   validate(query('cache_only').optional().isBoolean()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     const cache = request.query.cache_only === 'true';
     if (cache) {
@@ -118,7 +120,7 @@ snapshot.delete(
 snapshot.get(
   '/:id/ontopic',
   validate(param('id').isMongoId()),
-  async (request, response) => {
+  async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     const settings = getSettings();
     if (!settings.term_matrix && !settings.sentence_density) {
@@ -136,7 +138,11 @@ snapshot.get(
     request.on('close', () => {
       controller.abort();
     });
-    const data = await doOnTopic(snapshot.segmented, controller.signal);
+    const data = await doOnTopic(
+      snapshot.segmented,
+      userLanguage(snapshot.task),
+      controller.signal
+    );
     if (controller.signal.aborted) {
       return;
     }
@@ -152,7 +158,7 @@ snapshot.get(
   '/:id/expectation/:index',
   validate(param('id').isMongoId()),
   validate(param('index').isInt({ min: 0 })),
-  async (request, response) => {
+  async (request: Request<{ id: string; index: string }>, response) => {
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
     const settings = getSettings();
@@ -208,11 +214,9 @@ snapshot.get(
         `NULL chat response for expectation ${index}: ${target.name}`
       );
     if (!isExpectationsOutput(chat_response)) {
-      console.error(
-        `Malformed results for ${index}: ${target.name}`,
-        chat_response
-      );
-      throw new Error(`Malformed results for ${index}: ${target.name}`);
+      throw new Error(`Malformed results for ${index}: ${target.name}`, {
+        cause: chat_response,
+      });
     }
     const data: ExpectationsData = {
       tool: 'expectations',
@@ -229,7 +233,7 @@ snapshot.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
-  async (request, response) => {
+  async (request: Request<{ id: string; analysis: string }>, response) => {
     // should this be behind authentication?
     const { id, analysis } = request.params;
     const settings = getSettings();
@@ -274,11 +278,11 @@ snapshot.get(
     if (typeof chat_response === 'string') {
       throw new Error(chat_response); // if string, throw as error
     }
-    const data: Analysis = {
+    const data = {
       tool: analysis as ReviewPrompt,
       datetime,
       response: chat_response,
-    } as Analysis; // FIXME typescript shenanigans
+    } as Analysis;
     await updateSnapshotReviewsById(id, data);
     response.json(data);
   }

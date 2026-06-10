@@ -1,8 +1,8 @@
+import type { CustomText } from "#/slate";
 import type { FC, ReactNode } from "react";
-import { OverlayTrigger, Tooltip, Button } from "react-bootstrap";
+import { Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
-import type { CustomText } from "../../src/slate";
 
 type Markings = "bold" | "underline" | "italic" | "strikethrough";
 type LeafProps = Omit<CustomText, "text"> & {

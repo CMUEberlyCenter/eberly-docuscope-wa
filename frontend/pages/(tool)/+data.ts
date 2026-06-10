@@ -1,16 +1,23 @@
+import {
+  findAllPublicWritingTasks,
+  findWritingTaskById,
+} from '#server/data/mongo';
+import { isInstructor } from '#server/model/lti';
 import type { PageContextServer } from 'vike/types';
-import { findWritingTaskById } from '../../src/server/data/mongo';
-import { isInstructor } from '../../src/server/model/lti';
 
 export async function data(pageContext: PageContextServer) {
   const taskId = pageContext.writing_task_id; // set if system specified
   const task = taskId ? await findWritingTaskById(taskId) : undefined;
   const ltiActivityTitle = pageContext.token?.platformContext?.resource?.title;
   const username = pageContext.token?.userInfo?.name;
+  const tasks = task
+    ? []
+    : (await findAllPublicWritingTasks()).map(({ _id, ...task }) => task); // need everything but _id for preview.
 
   return {
     task,
     taskId,
+    tasks,
     ltiActivityTitle,
     username,
     isLTI: !!pageContext.token,

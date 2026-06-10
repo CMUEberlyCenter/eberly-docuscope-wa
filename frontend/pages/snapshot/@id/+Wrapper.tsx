@@ -1,7 +1,7 @@
+import { FileTextProvider } from "#components/FileUpload/FileTextContext";
+import { ReviewProvider } from "#components/ReviewContext/ReviewContext";
+import { WritingTaskProvider } from "#components/WritingTaskContext/WritingTaskContext";
 import { FC, ReactNode } from "react";
-import { ReviewProvider } from "../../../components/ReviewContext/ReviewContext";
-import { FileTextProvider } from "../../../components/FileUpload/FileTextContext";
-import { WritingTaskProvider } from "../../../components/WritingTaskContext/WritingTaskContext";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
 
