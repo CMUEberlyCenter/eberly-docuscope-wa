@@ -2,6 +2,7 @@ import {
   createContext,
   use,
   useEffect,
+  useRef,
   useState,
   type Dispatch,
   type FC,
@@ -33,9 +34,12 @@ export const FileTextProvider: FC<{
 }> = ({ children, initial }) => {
   const [text, setText] = useState<string | null>(initial?.text ?? null);
   const [file, setFile] = useState<string | null>(initial?.file ?? null);
-  const originalTitle = typeof document !== "undefined" ? document.title : "MyProse";
+  const originalTitleRef = useRef("");
+  if (originalTitleRef.current === "" && typeof document !== "undefined") {
+    originalTitleRef.current = document.title;
+  }
   useEffect(() => {
-    document.title = file ?? originalTitle;
+    document.title = file || originalTitleRef.current;
   }, [file]);
 
   return (
