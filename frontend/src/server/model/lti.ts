@@ -225,5 +225,6 @@ async function getGrade(gradeService: GradeService, token: Optional<IdToken>) {
   const { scores } = await gradeService.getScores(token, lineItemId, {
     userId: token.user,
   });
+  console.log(scores); // Check if need to better handle multiple scores.
   return scores.at(0) ?? null;
 }
