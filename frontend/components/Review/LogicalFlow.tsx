@@ -1,7 +1,8 @@
+import { LogicalFlowData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/global_coherence_icon.svg?react";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/global_coherence_icon.svg?react";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   ReviewToolCard,
@@ -9,7 +10,6 @@ import {
 } from "../ReviewContext/ReviewContext";
 import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
 import { ToolButton } from "../ToolButton/ToolButton";
-import { LogicalFlowData } from "../../src/lib/ReviewResponse";
 
 export const {
   ReviewDataProvider: LogicalFlowReviewProvider,
@@ -53,37 +53,44 @@ export const LogicalFlow: FC<HTMLProps<HTMLDivElement>> = (props) => {
               {(t) => <p>{t("logical_flow_insights")}</p>}
             </Translation>
           </header>
-          <Accordion>
-            {review.response.map(
-              ({ issue, suggestion, sent_ids, para_ids }, i) => (
-                <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
-                  <Accordion.Header className="accordion-header-highlight">
-                    <div className="flex-grow-1">
-                      <h6 className="d-inline">{t("logical_flow.issue")}</h6>{" "}
-                      <span>{issue}</span>
-                    </div>
-                    <AlertIcon
-                      show={sent_ids.length + para_ids.length === 0}
-                      message={t("logical_flow.no_sentences")}
-                    />
-                  </Accordion.Header>
-                  <Accordion.Body
-                    onEntered={() =>
-                      dispatch({
-                        type: "set",
-                        sentences: [sent_ids],
-                        paragraphs: para_ids,
-                      })
-                    }
-                    onExit={() => dispatch({ type: "unset" })}
-                  >
-                    <h6 className="d-inline">{t("logical_flow.suggestion")}</h6>{" "}
-                    <p className="d-inline">{suggestion}</p>
-                  </Accordion.Body>
-                </Accordion.Item>
-              )
-            )}
-          </Accordion>
+          {review.response.length === 0 ? (
+            <div className="alert alert-info">{t("logical_flow.null")}</div>
+          ) : (
+            <Accordion>
+              {review.response.map(
+                ({ issue, suggestion, sent_ids, para_ids }, i) => (
+                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                  <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+                    <Accordion.Header className="accordion-header-highlight">
+                      <div className="flex-grow-1">
+                        <h6 className="d-inline">{t("logical_flow.issue")}</h6>{" "}
+                        <span>{issue}</span>
+                      </div>
+                      <AlertIcon
+                        show={sent_ids.length + para_ids.length === 0}
+                        message={t("logical_flow.no_sentences")}
+                      />
+                    </Accordion.Header>
+                    <Accordion.Body
+                      onEntered={() =>
+                        dispatch({
+                          type: "set",
+                          sentences: [sent_ids],
+                          paragraphs: para_ids,
+                        })
+                      }
+                      onExit={() => dispatch({ type: "unset" })}
+                    >
+                      <h6 className="d-inline">
+                        {t("logical_flow.suggestion")}
+                      </h6>{" "}
+                      <p className="d-inline">{suggestion}</p>
+                    </Accordion.Body>
+                  </Accordion.Item>
+                )
+              )}
+            </Accordion>
+          )}
         </section>
       ) : null}
     </ReviewToolCard>

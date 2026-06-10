@@ -41,6 +41,7 @@ sentence_density:
 sentences:
   title: Sentence Clarity
   error: 'Error displaying Sentence data:'
+  'null': No sentence data could be extracted from your draft.
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
@@ -109,6 +110,7 @@ logical_flow:
   title: Logical Flow Issues
   tooltip: Organizing ideas coherently enhances readability and reader comprehension.
   error: Error displaying Logical Flow Issues tool.
+  'null': No issues found.
   no_sentences: No relevant sentences were found in your draft.
   issue: "Issue:"
   suggestion: "Suggestion:"
@@ -145,11 +147,13 @@ organization:
     paragraphs: Topic
     sentences_in_paragraph: 'Coherence across sentences in paragraph: {{paragraph}}'
     sentences: 'Sentences:'
+    'null': No paragraphs were found in your draft.
 paragraph_clarity:
   title: Paragraph Clarity
   tooltip: Improving paragraph flow enhances readability and effective communication.
   error: Error displaying Paragraph Clarity tool.
   suggestion: "Suggestion:"
+  'null': No issues found.
 professional_tone:
   title: Professional Tone
   tooltip: Maintaining appropriate language features helps your writing meet professional standards.

@@ -1,10 +1,10 @@
+import { Optional } from "#/index";
+import { WritingTask } from "#/lib/WritingTask";
 import { FC } from "react";
 import { Button, ButtonProps } from "react-bootstrap";
 import sanitizeHtml from "sanitize-html";
 import { Node, Transforms } from "slate";
 import { useSlate } from "slate-react";
-import { Optional } from "../../src";
-import { WritingTask } from "../../src/lib/WritingTask";
 
 /** Serialization of an html string. */
 const descriptionToSlate = (description: string): string => {

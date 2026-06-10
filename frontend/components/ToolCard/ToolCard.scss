@@ -6,19 +6,6 @@
     height: 48px;
   }
 
-  nav {
-    .nav-link {
-      font-weight: 600;
-    }
-    // .active {
-    //   font-weight: bolder;
-    // }
-    // .nav-link:hover {
-    //   color: var(--bs-primary);
-    //   font-weight: bold;
-    // }
-  }
-
   .tools {
     --prose-tool-radius: 0.75rem;
     border-radius: var(--prose-tool-radius);

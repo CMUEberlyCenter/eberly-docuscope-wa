@@ -1,3 +1,58 @@
+import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
+import {
+  CivilTone,
+  CivilToneSnapshotProvider,
+} from "#components/Review/CivilTone";
+import {
+  Credibility,
+  CredibilitySnapshotProvider,
+} from "#components/Review/Credibility";
+import {
+  Expectations,
+  ExpectationsButton,
+  ExpectationSnapshotProvider,
+} from "#components/Review/Expectations";
+import {
+  LinesOfArguments,
+  LinesOfArgumentsButton,
+  LinesOfArgumentsSnapshotProvider,
+} from "#components/Review/LinesOfArguments";
+import {
+  LogicalFlow,
+  LogicalFlowButton,
+  LogicalFlowSnapshotProvider,
+} from "#components/Review/LogicalFlow";
+import { NullTool } from "#components/Review/NullTool";
+import {
+  Organization,
+  OrganizationButton,
+  OrganizationSnapshotProvider,
+} from "#components/Review/Organization";
+import {
+  ParagraphClarity,
+  ParagraphClarityButton,
+  ParagraphClaritySnapshotProvider,
+} from "#components/Review/ParagraphClarity";
+import {
+  ProfessionalTone,
+  ProfessionalToneButton,
+  ProfessionalToneSnapshotProvider,
+} from "#components/Review/ProfessionalTone";
+import {
+  ProminentTopics,
+  ProminentTopicsButton,
+  ProminentTopicsSnapshotProvider,
+} from "#components/Review/ProminentTopics";
+import "#components/Review/Review.scss";
+import {
+  Sentences,
+  SentencesButton,
+  SentencesSnapshotProvider,
+} from "#components/Review/Sentences";
+import { Sources, SourcesSnapshotProvider } from "#components/Review/Sources";
+import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
+import { trackScreenView } from "#lib/tracking.js";
+import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
 import {
   Alert,
@@ -14,65 +69,6 @@ import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
-import AdditionalToolsIcon from "../../../assets/icons/additional_tools_icon.svg?react";
-import {
-  CivilTone,
-  CivilToneSnapshotProvider,
-} from "../../../components/Review/CivilTone";
-import {
-  Credibility,
-  CredibilitySnapshotProvider,
-} from "../../../components/Review/Credibility";
-import {
-  Expectations,
-  ExpectationsButton,
-  ExpectationSnapshotProvider,
-} from "../../../components/Review/Expectations";
-import {
-  LinesOfArguments,
-  LinesOfArgumentsButton,
-  LinesOfArgumentsSnapshotProvider,
-} from "../../../components/Review/LinesOfArguments";
-import {
-  LogicalFlow,
-  LogicalFlowButton,
-  LogicalFlowSnapshotProvider,
-} from "../../../components/Review/LogicalFlow";
-import { NullTool } from "../../../components/Review/NullTool";
-import {
-  Organization,
-  OrganizationSnapshotProvider,
-} from "../../../components/Review/Organization";
-import {
-  ParagraphClarity,
-  ParagraphClarityButton,
-  ParagraphClaritySnapshotProvider,
-} from "../../../components/Review/ParagraphClarity";
-import {
-  ProfessionalTone,
-  ProfessionalToneButton,
-  ProfessionalToneSnapshotProvider,
-} from "../../../components/Review/ProfessionalTone";
-import {
-  ProminentTopics,
-  ProminentTopicsButton,
-  ProminentTopicsSnapshotProvider,
-} from "../../../components/Review/ProminentTopics";
-import "../../../components/Review/Review.scss";
-import {
-  Sentences,
-  SentencesButton,
-  SentencesSnapshotProvider,
-} from "../../../components/Review/Sentences";
-import {
-  Sources,
-  SourcesSnapshotProvider,
-} from "../../../components/Review/Sources";
-import {
-  isExpectationsData,
-  ReviewTool,
-} from "../../../src/lib/ReviewResponse";
-import { isEnabled } from "../../../src/lib/WritingTask";
 import { Data } from "./+data";
 
 // tab event keys
@@ -93,12 +89,30 @@ export const Page: FC = () => {
   const [tool, setTool] = useState<Tool>("null");
   const [secondaryTool, setSecondaryTool] = useState<Tool>("null");
 
-  const toggleTool = (tool: Tool) => {
-    setTool((prev) => (prev === tool ? "null" : tool));
-  };
-  const toggleSecondaryTool = (selectedTool: Tool) => {
-    setSecondaryTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
+  const toggleToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "SnapshotPage",
+          task_id: task.info.id,
+        });
+      }
+      setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
+  const secondaryToggleHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "SnapshotPage",
+          task_id: task.info.id,
+        });
+      }
+      setSecondaryTool((prev) =>
+        prev === selectedTool ? "null" : selectedTool
+      );
+    };
   const disabled = (tool: Tool): boolean => {
     return !tool_config.includes(tool);
   };
@@ -124,7 +138,7 @@ export const Page: FC = () => {
               <ExpectationsButton
                 disabled={disabled("expectations")}
                 active={tool === "expectations"}
-                onClick={() => toggleTool("expectations")}
+                onClick={toggleToolHandler("expectations")}
               />
             ) : null}
             {settings?.prominent_topics &&
@@ -132,7 +146,15 @@ export const Page: FC = () => {
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
-                onClick={() => toggleTool("prominent_topics")}
+                onClick={toggleToolHandler("prominent_topics")}
+              />
+            ) : null}
+            {settings?.prominent_topics &&
+            isEnabled(task, "prominent_topics") ? (
+              <ProminentTopicsButton
+                disabled={disabled("prominent_topics")}
+                active={tool === "prominent_topics"}
+                onClick={toggleToolHandler("prominent_topics")}
               />
             ) : null}
             {settings?.lines_of_arguments &&
@@ -140,14 +162,21 @@ export const Page: FC = () => {
               <LinesOfArgumentsButton
                 disabled={disabled("lines_of_arguments")}
                 active={tool === "lines_of_arguments"}
-                onClick={() => toggleTool("lines_of_arguments")}
+                onClick={toggleToolHandler("lines_of_arguments")}
               />
             ) : null}
             {settings?.logical_flow && isEnabled(task, "logical_flow") ? (
               <LogicalFlowButton
                 disabled={disabled("logical_flow")}
                 active={tool === "logical_flow"}
-                onClick={() => toggleTool("logical_flow")}
+                onClick={toggleToolHandler("logical_flow")}
+              />
+            ) : null}
+            {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
+              <OrganizationButton
+                disabled={disabled("term_matrix")}
+                active={tool === "organization"}
+                onClick={toggleToolHandler("organization")}
               />
             ) : null}
           </ButtonToolbar>
@@ -187,6 +216,14 @@ export const Page: FC = () => {
               <LogicalFlow />
             </LogicalFlowSnapshotProvider>
           )}
+          {tool === "organization" && (
+            <OrganizationSnapshotProvider
+              snapshotId={reviewID}
+              analyses={analyses}
+            >
+              <Organization />
+            </OrganizationSnapshotProvider>
+          )}
           {/* Add Big Picture tools here. */}
         </div>
       </Tab>
@@ -202,7 +239,7 @@ export const Page: FC = () => {
               <ParagraphClarityButton
                 disabled={disabled("paragraph_clarity")}
                 active={secondaryTool === "paragraph_clarity"}
-                onClick={() => toggleSecondaryTool("paragraph_clarity")}
+                onClick={secondaryToggleHandler("paragraph_clarity")}
               />
             ) : null}
             {settings?.sentence_density &&
@@ -210,7 +247,7 @@ export const Page: FC = () => {
               <SentencesButton
                 disabled={disabled("sentence_density")}
                 active={secondaryTool === "sentence_density"}
-                onClick={() => toggleSecondaryTool("sentence_density")}
+                onClick={secondaryToggleHandler("sentence_density")}
               />
             ) : null}
             {settings?.professional_tone &&
@@ -218,7 +255,7 @@ export const Page: FC = () => {
               <ProfessionalToneButton
                 disabled={disabled("professional_tone")}
                 active={secondaryTool === "professional_tone"}
-                onClick={() => toggleSecondaryTool("professional_tone")}
+                onClick={secondaryToggleHandler("professional_tone")}
               />
             ) : null}
             <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
@@ -232,7 +269,7 @@ export const Page: FC = () => {
                   active={[
                     "sources",
                     "credibility",
-                    "organization",
+                    // "organization", // TODO remove for #307
                     "civil_tone",
                     "impressions",
                   ].includes(secondaryTool)}
@@ -246,7 +283,7 @@ export const Page: FC = () => {
               <Dropdown.Menu className="additional-tools-menu">
                 {settings?.sources && isEnabled(task, "sources") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("sources")}
+                    onClick={secondaryToggleHandler("sources")}
                     active={secondaryTool === "sources"}
                     disabled={disabled("sources")}
                   >
@@ -258,7 +295,7 @@ export const Page: FC = () => {
                 ) : null}
                 {settings?.credibility && isEnabled(task, "credibility") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("credibility")}
+                    onClick={secondaryToggleHandler("credibility")}
                     active={secondaryTool === "credibility"}
                     disabled={disabled("credibility")}
                   >
@@ -268,9 +305,9 @@ export const Page: FC = () => {
                     </div>
                   </Dropdown.Item>
                 ) : null}
-                {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
+                {/* {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("organization")}
+                    onClick={secondaryToggleHandler("organization")}
                     active={secondaryTool === "organization"}
                     disabled={disabled("term_matrix")}
                   >
@@ -279,10 +316,10 @@ export const Page: FC = () => {
                       {t("instructions:term_matrix_scope_note")}
                     </div>
                   </Dropdown.Item>
-                ) : null}
+                ) : null} */}
                 {settings?.civil_tone && isEnabled(task, "civil_tone") ? (
                   <Dropdown.Item
-                    onClick={() => toggleSecondaryTool("civil_tone")}
+                    onClick={secondaryToggleHandler("civil_tone")}
                     active={secondaryTool === "civil_tone"}
                     disabled={disabled("civil_tone")}
                   >
@@ -337,14 +374,14 @@ export const Page: FC = () => {
             {/* {secondaryTool === "impressions" && ( */}
             {/* <NullTool text={t("null.not_available")} /> */}
             {/* )} */}
-            {secondaryTool === "organization" && (
+            {/* {secondaryTool === "organization" && (
               <OrganizationSnapshotProvider
                 snapshotId={reviewID}
                 analyses={analyses}
               >
                 <Organization />
               </OrganizationSnapshotProvider>
-            )}
+            )} */}
             {secondaryTool === "sentence_density" && (
               <SentencesSnapshotProvider
                 snapshotId={reviewID}

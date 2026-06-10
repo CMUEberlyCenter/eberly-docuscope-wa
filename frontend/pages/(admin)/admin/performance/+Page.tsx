@@ -27,7 +27,7 @@ const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
   );
 };
 export const Page: FC = () => {
-  const { performance } = useData<Data>();
+  const { performance, session } = useData<Data>();
   const { t } = useTranslation("admin");
   return (
     <Card>
@@ -37,63 +37,110 @@ export const Page: FC = () => {
           {performance.length === 0 && <p>{t("performance.no_data")}</p>}
           {performance.map((entry) => (
             <div key={entry._id} style={{ marginBottom: "1em" }}>
-              <h5>Prompt: {entry._id}</h5>
+              <h5>{t("performance.prompt", { prompt: entry._id })}</h5>
               <ul>
                 <li>
-                  Count: {entry.count.toLocaleString()} between{" "}
+                  {t("performance.range", {
+                    count: entry.count.toLocaleString(),
+                  })}
                   <DateRange
                     start={new Date(entry.startTime)}
                     end={new Date(entry.endTime)}
                   />
                 </li>
                 <li>
-                  Time/Request:
+                  {t("performance.time_per_request")}
                   <ul>
                     <li>
-                      Average:{" "}
-                      {new Intl.DurationFormat(navigator.languages, {
-                        style: "long",
-                      }).format(msToDuration(Math.floor(entry.avgTime)))}
+                      {t("performance.average", {
+                        time: new Intl.DurationFormat(navigator.languages, {
+                          style: "long",
+                        }).format(msToDuration(Math.floor(entry.avgTime))),
+                      })}
                     </li>
                     <li>
-                      Min:{" "}
-                      {new Intl.DurationFormat(navigator.languages, {
-                        style: "long",
-                      }).format(msToDuration(Math.floor(entry.minTime)))}
+                      {t("performance.minimum", {
+                        time: new Intl.DurationFormat(navigator.languages, {
+                          style: "long",
+                        }).format(msToDuration(Math.floor(entry.minTime))),
+                      })}
                     </li>
                     <li>
-                      Max:{" "}
-                      {new Intl.DurationFormat(navigator.languages, {
-                        style: "long",
-                      }).format(msToDuration(Math.floor(entry.maxTime)))}
+                      {t("performance.maximum", {
+                        time: new Intl.DurationFormat(navigator.languages, {
+                          style: "long",
+                        }).format(msToDuration(Math.floor(entry.maxTime))),
+                      })}
                     </li>
                   </ul>
                 </li>
                 <li>
-                  Average Input Tokens: {entry.avgInputTokens.toLocaleString()}
+                  {t("performance.average_input_tokens", {
+                    tokens: entry.avgInputTokens.toLocaleString(),
+                  })}
                 </li>
                 <li>
-                  Average Output Tokens:{" "}
-                  {entry.avgOutputTokens.toLocaleString()}
+                  {t("performance.average_output_tokens", {
+                    tokens: entry.avgOutputTokens.toLocaleString(),
+                  })}
                 </li>
                 <li>
-                  Average Cache Creation Tokens:{" "}
-                  {entry.avgCacheCreate.toLocaleString()}
+                  {t("performance.average_cache_creation_input_tokens", {
+                    tokens: entry.avgCacheCreate.toLocaleString(),
+                  })}
                 </li>
                 <li>
-                  Max Cache Creation Tokens:{" "}
-                  {entry.maxCacheCreate.toLocaleString()}
+                  {t("performance.max_cache_creation_input_tokens", {
+                    tokens: entry.maxCacheCreate.toLocaleString(),
+                  })}
                 </li>
                 <li>
-                  Average Cache Read Tokens:{" "}
-                  {entry.avgCacheRead.toLocaleString()}
+                  {t("performance.average_cache_read_input_tokens", {
+                    tokens: entry.avgCacheRead.toLocaleString(),
+                  })}
                 </li>
                 <li>
-                  Max Cache Read Tokens: {entry.maxCacheRead.toLocaleString()}
+                  {t("performance.max_cache_read_input_tokens", {
+                    tokens: entry.maxCacheRead.toLocaleString(),
+                  })}
                 </li>
               </ul>
             </div>
           ))}
+          <table className="table table-sm caption-top">
+            <caption>{t("performance.session.title")}</caption>
+            <thead>
+              <tr>
+                <th rowSpan={2} scope="col">
+                  {t("performance.session.id")}
+                </th>
+                <th colSpan={4} scope="colgroup">
+                  {t("performance.session.token_count")}
+                </th>
+              </tr>
+              <tr>
+                <th scope="col">{t("performance.session.input_tokens")}</th>
+                <th scope="col">{t("performance.session.output_tokens")}</th>
+                <th scope="col">
+                  {t("performance.session.cache_creation_input_tokens")}
+                </th>
+                <th scope="col">
+                  {t("performance.session.cache_read_input_tokens")}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {session.map((entry) => (
+                <tr key={entry._id}>
+                  <td>{entry._id}</td>
+                  <td>{entry.input_tokens}</td>
+                  <td>{entry.output_tokens}</td>
+                  <td>{entry.cache_creation_input_tokens}</td>
+                  <td>{entry.cache_read_input_tokens}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </Card.Text>
       </Card.Body>
     </Card>

@@ -1,19 +1,28 @@
+import type { WritingTask } from "#/lib/WritingTask";
+import { trackScreenView } from "#lib/tracking.js";
 import {
   createContext,
   type Dispatch,
   type FC,
   type ReactNode,
-  useContext,
+  use,
   useReducer,
 } from "react";
-import type { WritingTask } from "../../src/lib/WritingTask";
 
 type WritingTaskContext = {
+  /** Current Writing Task Description. */
   task?: WritingTask | null;
+  /** Writing Task ID.  If set, that means the task is fixed. */
   taskId?: string | null;
+  /** Writing tasks available for selection, only used if taskId is not set. */
+  tasks?: WritingTask[];
+  /** The username of the current user, only available in an LTI context. */
   username?: string;
+  /** The title of the LTI activity inside the LMS's LTI context. */
   ltiActivityTitle?: string;
+  /** If true, the task is being used in an LTI context. */
   isLTI?: boolean;
+  /** If true, the user is an instructor in the LTI context. */
   isInstructor?: boolean;
 };
 const WritingTaskContext = createContext<WritingTaskContext>({});
@@ -31,10 +40,17 @@ export const WritingTaskProvider: FC<{
   initial?: WritingTaskContext;
 }> = ({ children, initial }) => {
   const [task, setTask] = useReducer(
-    (state: WritingTaskContext, newState: WritingTaskContext) => ({
-      ...state,
-      ...newState,
-    }),
+    (state: WritingTaskContext, newState: WritingTaskContext) => {
+      const mergedState = { ...state, ...newState };
+      if (mergedState.task?.info.id !== state.task?.info.id) {
+        trackScreenView({
+          screen_name: "null",
+          screen_class: "WritingTask",
+          task_id: mergedState.task?.info.id,
+        });
+      }
+      return mergedState;
+    },
     {
       task: undefined,
       taskId: undefined,
@@ -46,15 +62,15 @@ export const WritingTaskProvider: FC<{
     }
   );
   return (
-    <WritingTaskContext.Provider value={task}>
-      <WritingTaskDispatchContext.Provider value={setTask}>
+    <WritingTaskContext value={task}>
+      <WritingTaskDispatchContext value={setTask}>
         {children}
-      </WritingTaskDispatchContext.Provider>
-    </WritingTaskContext.Provider>
+      </WritingTaskDispatchContext>
+    </WritingTaskContext>
   );
 };
 
 /** Hook to access the current writing task. */
-export const useWritingTask = () => useContext(WritingTaskContext);
+export const useWritingTask = () => use(WritingTaskContext);
 /** Hook to get the function to set the current writing task. */
-export const useSetWritingTask = () => useContext(WritingTaskDispatchContext);
+export const useSetWritingTask = () => use(WritingTaskDispatchContext);

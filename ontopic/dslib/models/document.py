@@ -2016,6 +2016,7 @@ class DSDocument:
                             )  # add 'gl' to the list
                             break  # 2024.12.02
 
+                    is_done = False
                     for temp_elem in self.elements:
                         temp_para = temp_elem.data
                         if temp_para == para:

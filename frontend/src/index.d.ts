@@ -12,3 +12,11 @@ declare module 'express-session' {
     analysis?: Analysis[];
   }
 }
+
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonValue }
+  | JsonValue[];

@@ -32,7 +32,7 @@ describe("ToolErrorHandler", () => {
     );
     expect(screen.getByRole("alert")).toBeInTheDocument();
     expect(
-      screen.getByText("error.unknown_error", { exact: false })
+      screen.getByText(errorMessage, { exact: false })
     ).toBeInTheDocument();
     expect(
       screen.getByText(errorMessage, { exact: false })

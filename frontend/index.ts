@@ -18,9 +18,11 @@ import { readdir, readFile, stat } from 'fs/promises';
 import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
+import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
+import { config, telefunc } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -39,14 +41,9 @@ import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts } from './src/server/data/prompts';
 import { watchSettings } from './src/server/getSettings';
-import type {
-  ContentItemType,
-  IdToken,
-  LTIPlatform,
-} from './src/server/model/lti';
+import { logger } from './src/server/logger';
 import { metrics } from './src/server/prometheus';
 import {
-  ADMIN_PASSWORD,
   LTI_DB,
   LTI_HOSTNAME,
   LTI_KEY,
@@ -70,9 +67,11 @@ const root = __dirname;
 const PUBLIC = __dirname;
 
 async function __main__() {
-  console.log(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
+  logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDatabase = await initDatabase();
-  console.log('Database service initialized, ok to start listening ...');
+  logger.info('Database service initialized, ok to start listening ...', {
+    status: 'db_ready',
+  });
   // Initialize and watch prompts
   const shutdownPrompts = await initPrompts();
   // watch interface settings file
@@ -142,7 +141,7 @@ async function __main__() {
         // Requires changing LTI front-end to use writing_task in custom.
         const writing_task_id: string =
           _id ?? (await insertWritingTask(task)).toString();
-        const items: ContentItemType[] = [
+        const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
             // title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
@@ -166,7 +165,8 @@ async function __main__() {
         const form = await Provider.DeepLinking.createDeepLinkingForm(
           response.locals.token,
           items
-        ); // {message: 'Success'}
+        );
+        // { message: 'Success' });
         response.send(form);
       } catch (err) {
         next(err);
@@ -219,27 +219,6 @@ async function __main__() {
       }
     }
   );
-
-  // For platform management, should not be exposed publicly
-  // Provider.app.delete(
-  //   '/lti/platforms/:platformId',
-  //   async (req: Request, res: Response, next: NextFunction) => {
-  //     const platformId = req.params.platformId;
-  //     try {
-  //       if (!platformId) {
-  //         throw new BadRequestError('Missing platformId parameter.');
-  //       }
-  //       if ((await Provider.getPlatformById(platformId)) === false) {
-  //         throw new FileNotFoundError('Platform not found.');
-  //       }
-  //       await Provider.deletePlatformById(platformId);
-  //       res.status(204).send(); // No Content
-  //     } catch (err) {
-  //       console.error('Error deleting platform:', err);
-  //       next(err);
-  //     }
-  //   }
-  // );
 
   /**
    * Endpoint to retrieve the Canvas LTI configuration for the tool.
@@ -320,7 +299,8 @@ async function __main__() {
     /locales/, // Localization files need to be public
     /myprose/, // These should be the "public" tools.
     /lti/, // additional public lti "well-known" endpoints
-    /admin/ // Admin routes, security should be handled outside LTI
+    /admin/, // Admin routes, security should be handled outside LTI
+    /_telefunc/ // Telefunc endpoint, should be protected in the future if used for non-public actions.
   );
   try {
     await Provider.deploy({ serverless: true });
@@ -333,15 +313,16 @@ async function __main__() {
         const stats = await stat(path);
         if (stats.isFile() && file.endsWith('.json')) {
           const content = await readFile(path, { encoding: 'utf8' });
-          const json = JSON.parse(content) as LTIPlatform;
+          const json = JSON.parse(content) as PlatformConfig;
           await Provider.registerPlatform(json);
-          console.log(
-            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`
+          logger.info(
+            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
+            { platformId: json.clientId, url: json.url, path }
           );
         }
       }
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     } finally {
       const platforms = await Provider.getAllPlatforms();
       platforms.forEach(async (platform) => {
@@ -349,9 +330,9 @@ async function __main__() {
         const name = await platform.platformName();
         const url = await platform.platformUrl();
         const active = await platform.platformActive();
-        console.log('Registered platforms:');
-        console.log(
-          `${active ? '+' : 'o'} Platform: ${name} (${platformId}), URL: ${url}, Active: ${active}`
+        logger.info(
+          `LTI Registered platform: ${active ? '+' : 'o'} ${name} (${platformId}), URL: ${url}, Active: ${active}`,
+          { platformId, name, url, active }
         );
       });
     }
@@ -405,7 +386,7 @@ async function __main__() {
     app.use(handle(i18n));
 
     if (process.env.NODE_ENV === 'production') {
-      console.log('Production mode');
+      logger.info('Production mode', { mode: 'production' });
       app.use(express.static(join(root, 'dist', 'client')));
     } else {
       const vike = await import('vike/server');
@@ -445,6 +426,49 @@ async function __main__() {
       }
       Provider.redirect(res, '/draft');
     });
+    app.all(
+      '/admin/_telefunc',
+      basicAuthMiddleware,
+      async (req: Request, res: Response, _next: NextFunction) => {
+        config.telefuncUrl = '/admin/_telefunc';
+        const { body, statusCode, contentType } = await telefunc({
+          url: req.originalUrl, // Telefunc client is configured to send requests to /admin/_telefunc, but telefunc handlers are written for /_telefunc, so we hardcode the url here.  TODO: Refactor telefunc handlers to be aware of admin prefix and use req.originalUrl here.
+          method: req.method,
+          body: req.body,
+          // readable: req,
+          // contentType: req.headers['content-type'] || undefined,
+          context: {
+            // You can add any arbitrary contextual information here
+            // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
+            user: (req as IBasicAuthedRequest).auth?.user,
+          },
+        });
+        res.status(statusCode).type(contentType).send(body);
+        // next();
+      }
+    );
+    app.all(
+      '/_telefunc',
+      async (req: Request, res: Response, _next: NextFunction) => {
+        config.telefuncUrl = '/_telefunc';
+        const { body, statusCode, contentType } = await telefunc({
+          url: req.originalUrl,
+          method: req.method,
+          body: req.body,
+          // readable: req,
+          // contentType: req.headers['content-type'] || '',
+          context: {
+            // You can add any arbitrary contextual information here
+            // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
+            token: res.locals.token,
+            user: (req as IBasicAuthedRequest).auth?.user,
+
+            // session: req.session,
+          },
+        });
+        res.status(statusCode).type(contentType).send(body);
+      }
+    );
     // Handle all other routes with Vike
     app.all(
       '{*vike}',
@@ -485,11 +509,10 @@ async function __main__() {
         const pageContext = await renderPage(pageContextInit);
         // pageContext.urlParsed?.search;
         if (pageContext.errorWhileRendering) {
-          console.error(
-            'Error rendering page:',
-            pageContext.errorWhileRendering
-          );
-          return next(new Error(`$${pageContext.errorWhileRendering}`));
+          logger.error('Error rendering page:', {
+            error: pageContext.errorWhileRendering,
+          });
+          // return next(new Error(`$${pageContext.errorWhileRendering}`));
         }
         const { httpResponse } = pageContext;
         if (!httpResponse) {
@@ -510,18 +533,23 @@ async function __main__() {
     // Global error handler/formatter
     app.use(handleError);
 
-    const server = app.listen(PORT, () =>
-      console.log(
-        ` > Ready on ${LTI_HOSTNAME.toString()}\n Admin password: ${ADMIN_PASSWORD}`
-      )
-    );
+    const server = app.listen(PORT, () => {
+      logger.info(`Ready on ${LTI_HOSTNAME.toString()}`, {
+        port: PORT,
+        hostname: LTI_HOSTNAME.hostname,
+        status: 'ready',
+      });
+    });
     const shutdown = () => {
       server.close(async () => {
-        console.log('HTTP server closed.');
+        logger.info('HTTP server closed.', { status: 'closed' });
         // If you have database connections, close them here
         await shutdownDatabase();
         await shutdownPrompts();
         shutdownSettings();
+        logger.info('Shutdown complete, exiting process.', {
+          status: 'shutdown_complete',
+        });
         process.exit(0);
       });
     };
@@ -529,7 +557,7 @@ async function __main__() {
     ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, shutdown));
     return server;
   } catch (err) {
-    console.error(err);
+    logger.error(err);
   }
 }
 export default await __main__();

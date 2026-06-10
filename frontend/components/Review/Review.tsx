@@ -1,4 +1,8 @@
-import { Activity, type FC, useEffect, useState } from "react";
+import type { ReviewTool } from "#/lib/ReviewResponse";
+import { isEnabled } from "#/lib/WritingTask";
+import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
+import { trackScreenView } from "#lib/tracking.js";
+import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,
   ButtonGroup,
@@ -13,9 +17,6 @@ import {
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
-import AdditionalToolsIcon from "../../assets/icons/additional_tools_icon.svg?react";
-import type { ReviewTool } from "../../src/lib/ReviewResponse";
-import { isEnabled } from "../../src/lib/WritingTask";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { CivilTone, CivilToneReviewProvider } from "./CivilTone";
@@ -36,7 +37,11 @@ import {
   LogicalFlowReviewProvider,
 } from "./LogicalFlow";
 import { NullTool } from "./NullTool";
-import { Organization, OrganizationDataProvider } from "./Organization";
+import {
+  Organization,
+  OrganizationButton,
+  OrganizationDataProvider,
+} from "./Organization";
 import {
   ParagraphClarity,
   ParagraphClarityButton,
@@ -67,129 +72,95 @@ export const Review: FC = () => {
   const [tab, setTab] = useState<TabKey>("big_picture");
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
-  const [ready, setReady] = useState<boolean>(false);
   const [userText] = useFileText();
   const { task: writingTask } = useWritingTask();
   const { settings } = usePageContext();
+  const ready = !!userText && userText.trim().length > 0;
 
-  const toggleTool = (selectedTool: Tool) => {
-    setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
-  const toggleOtherTool = (selectedTool: Tool) => {
-    setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-  };
+  const toggleToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "Review",
+          task_id: writingTask?.info.id,
+        });
+      }
+      setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
+  const toggleOtherToolHandler =
+    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
+      if (!evt.currentTarget.classList.contains("active")) {
+        trackScreenView({
+          screen_name: selectedTool,
+          screen_class: "Review",
+          task_id: writingTask?.info.id,
+        });
+      }
+      setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
+    };
 
-  useEffect(() => {
-    setReady(!!userText && userText.trim().length > 0);
-  }, [userText]);
+  // As per #230 most features are available even without a writing task if
+  // enabled in settings.  The server settings have priority over writing tasks.
+  const civilToneFeature =
+    !!settings?.civil_tone &&
+    (!writingTask || isEnabled(writingTask, "civil_tone"));
+  const credibilityFeature =
+    !!settings?.credibility &&
+    (!writingTask || isEnabled(writingTask, "credibility"));
+  const expectationsFeature =
+    !!settings?.expectations &&
+    (!writingTask || isEnabled(writingTask, "expectations"));
+  const ideasFeature =
+    !!settings?.prominent_topics &&
+    (!writingTask || isEnabled(writingTask, "prominent_topics"));
+  const argumentsFeature =
+    !!settings?.lines_of_arguments &&
+    isEnabled(writingTask, "lines_of_arguments");
+  const logicalFlowFeature =
+    !!settings?.logical_flow &&
+    (!writingTask || isEnabled(writingTask, "logical_flow"));
+  const paragraphClarityFeature =
+    !!settings?.paragraph_clarity &&
+    (!writingTask || isEnabled(writingTask, "paragraph_clarity"));
+  const professionalToneFeature =
+    !!settings?.professional_tone &&
+    (!writingTask || isEnabled(writingTask, "professional_tone"));
+  const sentencesFeature =
+    !!settings?.sentence_density &&
+    (!writingTask || isEnabled(writingTask, "sentence_density"));
+  const sourcesFeature =
+    !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"));
+  const impressionsFeature = false; /*settings.impressions && isEnabled(writingTask, "impressions")*/
+  const organizationFeature =
+    !!settings?.term_matrix &&
+    (!writingTask || isEnabled(writingTask, "term_matrix"));
+  const additionalToolsFeature =
+    civilToneFeature ||
+    credibilityFeature ||
+    sourcesFeature ||
+    organizationFeature ||
+    impressionsFeature;
+  const bigPictureFeature =
+    expectationsFeature ||
+    argumentsFeature ||
+    ideasFeature ||
+    logicalFlowFeature;
+  const fineTuningFeature =
+    additionalToolsFeature ||
+    paragraphClarityFeature ||
+    professionalToneFeature ||
+    sentencesFeature;
 
-  const [civilToneFeature, setCivilToneFeature] = useState(false);
-  const [credibilityFeature, setCredibilityFeature] = useState(false);
-  const [expectationsFeature, setExpectationsFeature] = useState(false);
-  const [ideasFeature, setIdeasFeature] = useState(false);
-  const [argumentsFeature, setArgumentsFeature] = useState(false);
-  const [logicalFlowFeature, setLogicalFlowFeature] = useState(false);
-  const [paragraphClarityFeature, setParagraphClarityFeature] = useState(false);
-  const [professionalToneFeature, setProfessionalToneFeature] = useState(false);
-  const [sentencesFeature, setSentencesFeature] = useState(false);
-  const [sourcesFeature, setSourcesFeature] = useState(false);
-  const [impressionsFeature, setImpressionsFeature] = useState(false);
-  const [organizationFeature, setOrganizationFeature] = useState(false);
-  const [additionalToolsFeature, setAdditionalToolsFeature] = useState(false);
-  const [bigPictureFeature, setBigPictureFeature] = useState(false);
-  const [fineTuningFeature, setFineTuningFeature] = useState(false);
+  const [isPending, startTransition] = useTransition();
   useEffect(() => {
-    // As per #230 most features are available even without a writing task if
-    // enabled in settings.  The server settings have priority over writing tasks.
-    setCivilToneFeature(
-      !!settings?.civil_tone &&
-        (!writingTask || isEnabled(writingTask, "civil_tone"))
-    );
-    setCredibilityFeature(
-      !!settings?.credibility &&
-        (!writingTask || isEnabled(writingTask, "credibility"))
-    );
-    setExpectationsFeature(
-      !!settings?.expectations &&
-        (!writingTask || isEnabled(writingTask, "expectations"))
-    );
-    // Lines of arguments only available if enabled in writing task.
-    setArgumentsFeature(
-      !!settings?.lines_of_arguments &&
-        isEnabled(writingTask, "lines_of_arguments")
-    );
-    setLogicalFlowFeature(
-      !!settings?.logical_flow &&
-        (!writingTask || isEnabled(writingTask, "logical_flow"))
-    );
-    setParagraphClarityFeature(
-      !!settings?.paragraph_clarity &&
-        (!writingTask || isEnabled(writingTask, "paragraph_clarity"))
-    );
-    setProfessionalToneFeature(
-      !!settings?.professional_tone &&
-        (!writingTask || isEnabled(writingTask, "professional_tone"))
-    );
-    setIdeasFeature(
-      !!settings?.prominent_topics &&
-        (!writingTask || isEnabled(writingTask, "prominent_topics"))
-    );
-    setSentencesFeature(
-      !!settings?.sentence_density &&
-        (!writingTask || isEnabled(writingTask, "sentence_density"))
-    );
-    setSourcesFeature(
-      !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"))
-    );
-    setOrganizationFeature(
-      !!settings?.term_matrix &&
-        (!writingTask || isEnabled(writingTask, "term_matrix"))
-    );
-    setImpressionsFeature(
-      false
-      /*settings.impressions && isEnabled(writingTask, "impressions")*/
-    );
-    // Reset to default tab/tool if writing task or settings change.
-    setTab("big_picture");
-    setTool("null");
-    setOtherTool("null");
-  }, [settings, writingTask]);
-  useEffect(() => {
-    setBigPictureFeature(
-      expectationsFeature ||
-        argumentsFeature ||
-        ideasFeature ||
-        logicalFlowFeature
-    );
-  }, [expectationsFeature, argumentsFeature, ideasFeature, logicalFlowFeature]);
-  useEffect(() => {
-    setAdditionalToolsFeature(
-      civilToneFeature ||
-        credibilityFeature ||
-        sourcesFeature ||
-        organizationFeature ||
-        impressionsFeature
-    );
-  }, [
-    civilToneFeature,
-    credibilityFeature,
-    sourcesFeature,
-    organizationFeature,
-    impressionsFeature,
-  ]);
-  useEffect(() => {
-    setFineTuningFeature(
-      additionalToolsFeature ||
-        paragraphClarityFeature ||
-        professionalToneFeature ||
-        sentencesFeature
-    );
-  }, [
-    additionalToolsFeature,
-    paragraphClarityFeature,
-    professionalToneFeature,
-    sentencesFeature,
-  ]);
+    // Reset to default tab/tool if writing task, file, or settings change.
+    startTransition(() => {
+      setTab(() => "big_picture");
+      setTool(() => "null");
+      setOtherTool(() => "null");
+    });
+  }, [settings, writingTask, userText]);
 
   return (
     <>
@@ -198,6 +169,7 @@ export const Review: FC = () => {
       )}
       <Tabs
         activeKey={tab}
+        aria-disabled={isPending}
         onSelect={(k) => {
           setTab(k as TabKey);
         }}
@@ -231,31 +203,38 @@ export const Review: FC = () => {
                     </OverlayTrigger>
                   ) : (
                     <ExpectationsButton
-                      disabled={!ready}
+                      disabled={!ready || isPending}
                       active={tool === "expectations"}
-                      onClick={() => toggleTool("expectations")}
+                      onClick={toggleToolHandler("expectations")}
                     />
                   )
                 ) : null}
                 {ideasFeature ? (
                   <ProminentTopicsButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "prominent_topics"}
-                    onClick={() => toggleTool("prominent_topics")}
+                    onClick={toggleToolHandler("prominent_topics")}
                   />
                 ) : null}
                 {argumentsFeature ? (
                   <LinesOfArgumentsButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "lines_of_arguments"}
-                    onClick={() => toggleTool("lines_of_arguments")}
+                    onClick={toggleToolHandler("lines_of_arguments")}
                   />
                 ) : null}
                 {logicalFlowFeature ? (
                   <LogicalFlowButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={tool === "logical_flow"}
-                    onClick={() => toggleTool("logical_flow")}
+                    onClick={toggleToolHandler("logical_flow")}
+                  />
+                ) : null}
+                {organizationFeature ? (
+                  <OrganizationButton
+                    disabled={!ready || isPending}
+                    active={tool === "organization"}
+                    onClick={toggleToolHandler("organization")}
                   />
                 ) : null}
               </ButtonToolbar>
@@ -282,6 +261,11 @@ export const Review: FC = () => {
                   <LogicalFlow />
                 </LogicalFlowReviewProvider>
               )}
+              {tool === "organization" && (
+                <OrganizationDataProvider>
+                  <Organization />
+                </OrganizationDataProvider>
+              )}
               {/* Add Big Picture tools here. */}
             </div>
           </Tab>
@@ -296,23 +280,23 @@ export const Review: FC = () => {
               <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
                 {paragraphClarityFeature ? (
                   <ParagraphClarityButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "paragraph_clarity"}
-                    onClick={() => toggleOtherTool("paragraph_clarity")}
+                    onClick={toggleOtherToolHandler("paragraph_clarity")}
                   />
                 ) : null}
                 {sentencesFeature ? (
                   <SentencesButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "sentences"}
-                    onClick={() => toggleOtherTool("sentences")}
+                    onClick={toggleOtherToolHandler("sentences")}
                   />
                 ) : null}
                 {professionalToneFeature ? (
                   <ProfessionalToneButton
-                    disabled={!ready}
+                    disabled={!ready || isPending}
                     active={otherTool === "professional_tone"}
-                    onClick={() => toggleOtherTool("professional_tone")}
+                    onClick={toggleOtherToolHandler("professional_tone")}
                   />
                 ) : null}
                 {additionalToolsFeature ? (
@@ -332,7 +316,7 @@ export const Review: FC = () => {
                         active={[
                           "sources",
                           "credibility",
-                          "organization",
+                          // "organization", // TODO remove for #307
                           "civil_tone",
                           "impressions",
                         ].includes(otherTool)}
@@ -346,7 +330,7 @@ export const Review: FC = () => {
                     <Dropdown.Menu className="additional-tools-menu">
                       {sourcesFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("sources")}
+                          onClick={toggleOtherToolHandler("sources")}
                           active={otherTool === "sources"}
                           disabled={!ready}
                         >
@@ -358,7 +342,7 @@ export const Review: FC = () => {
                       ) : null}
                       {credibilityFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("credibility")}
+                          onClick={toggleOtherToolHandler("credibility")}
                           active={otherTool === "credibility"}
                           disabled={!ready}
                         >
@@ -370,9 +354,9 @@ export const Review: FC = () => {
                           </div>
                         </Dropdown.Item>
                       ) : null}
-                      {organizationFeature ? (
+                      {/* organizationFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("organization")}
+                          onClick={toggleOtherToolHandler("organization")}
                           active={otherTool === "organization"}
                           disabled={!ready}
                         >
@@ -383,12 +367,12 @@ export const Review: FC = () => {
                             {t("instructions:term_matrix_scope_note")}
                           </div>
                         </Dropdown.Item>
-                      ) : null}
+                      ) : null // TODO remove for #307 */}
                       {civilToneFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("civil_tone")}
+                          onClick={toggleOtherToolHandler("civil_tone")}
                           active={otherTool === "civil_tone"}
-                          disabled={!ready}
+                          disabled={!ready || isPending}
                         >
                           <h6 className="text-primary">
                             {t("civil_tone.title")}
@@ -400,9 +384,9 @@ export const Review: FC = () => {
                       ) : null}
                       {impressionsFeature ? (
                         <Dropdown.Item
-                          onClick={() => toggleOtherTool("impressions")}
+                          onClick={toggleOtherToolHandler("impressions")}
                           active={otherTool === "impressions"}
-                          disabled={!ready}
+                          disabled={!ready || isPending}
                         >
                           <h6 className="text-primary">
                             {t("impressions.title")}
@@ -452,11 +436,11 @@ export const Review: FC = () => {
                 {/* {otherTool === "impressions" && ( */}
                 {/* <NullTool text={t("null.not_available")} /> */}
                 {/* )} */}
-                {otherTool === "organization" && (
+                {/* {otherTool === "organization" && (
                   <OrganizationDataProvider>
                     <Organization />
                   </OrganizationDataProvider>
-                )}
+                )} */}
                 {otherTool === "sentences" && (
                   <SentencesDataProvider>
                     <Sentences />

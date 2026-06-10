@@ -1,19 +1,20 @@
+import { OnTopicReviewData, OptionalReviewData } from "#/lib/ReviewResponse";
+import { userLanguage } from "#/lib/languageCode";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
+  useTransition,
 } from "react";
-import {
-  OnTopicReviewData,
-  OptionalReviewData,
-} from "../../src/lib/ReviewResponse";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { useReviewDispatch } from "./ReviewContext";
 import {
   getAnalysis,
@@ -27,6 +28,7 @@ function useOnTopic() {
     useState<OptionalReviewData<OnTopicReviewData>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
+  const { task } = useWritingTask();
 
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
@@ -40,6 +42,7 @@ function useOnTopic() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": userLanguage(task),
         },
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
@@ -61,12 +64,16 @@ function useOnTopic() {
       setReview({ tool: "ontopic", error });
     },
   });
+  const [pending, startTransition] = useTransition();
+  const update = useEffectEvent((document: string) => {
+    dispatch({ type: "remove" });
+    mutation.mutate({ document });
+  });
   useEffect(() => {
     if (!document) return;
     // Fetch the review data for Sentences
-    dispatch({ type: "remove" });
-    mutation.mutate({
-      document,
+    startTransition(() => {
+      update(document);
     });
     return () => {
       abortControllerRef.current?.abort();
@@ -79,7 +86,12 @@ function useOnTopic() {
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 function useSnapshotOnTopic(
@@ -106,6 +118,8 @@ function useSnapshotOnTopic(
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          // language unnecessary for snapshot reviews since they should already be
+          // localized based on the snapshot's writing task's user_lang.
         },
         signal: abortControllerRef.current.signal,
       });
@@ -126,17 +140,27 @@ function useSnapshotOnTopic(
       abortControllerRef.current = null;
     },
   });
+  const [pending, startTransition] = useTransition();
+  const triggerMutation = useEffectEvent((id: string) => {
+    mutation.mutate({ id });
+  });
+  const triggerDispatch = useEffectEvent(
+    (analysis: OptionalReviewData<OnTopicReviewData>) => {
+      if (analysis && "response" in analysis && analysis.response.html) {
+        dispatch({ type: "update", sentences: analysis.response.html });
+      }
+    }
+  );
   useEffect(() => {
     if (!snapshotID) return;
     if (analysis && analysis.tool === "ontopic") {
-      setReview(analysis as OptionalReviewData<OnTopicReviewData>);
-      if ("response" in analysis && analysis.response.html) {
-        dispatch({ type: "update", sentences: analysis.response.html });
-      }
+      startTransition(() => {
+        triggerDispatch(analysis);
+      });
       return;
     }
-    mutation.mutate({
-      id: snapshotID,
+    startTransition(() => {
+      triggerMutation(snapshotID);
     });
     return () => {
       abortControllerRef.current?.abort();
@@ -149,14 +173,19 @@ function useSnapshotOnTopic(
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 const OnTopicDataContext =
   createContext<ReviewDataContext<OnTopicReviewData> | null>(null);
 
 export const useOnTopicData = () => {
-  const context = useContext(OnTopicDataContext);
+  const context = use(OnTopicDataContext);
   if (!context) {
     throw new Error("useOnTopicData must be used within a OnTopicDataProvider");
   }
@@ -167,11 +196,7 @@ export const OnTopicDataProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const ontopic = useOnTopic();
-  return (
-    <OnTopicDataContext.Provider value={ontopic}>
-      {children}
-    </OnTopicDataContext.Provider>
-  );
+  return <OnTopicDataContext value={ontopic}>{children}</OnTopicDataContext>;
 };
 export const OnTopicSnapshotProvider: FC<SnapshotProviderProps> = ({
   children,
@@ -182,9 +207,5 @@ export const OnTopicSnapshotProvider: FC<SnapshotProviderProps> = ({
     snapshotId,
     getAnalysis<OnTopicReviewData>(analyses, "ontopic")
   );
-  return (
-    <OnTopicDataContext.Provider value={ontopic}>
-      {children}
-    </OnTopicDataContext.Provider>
-  );
+  return <OnTopicDataContext value={ontopic}>{children}</OnTopicDataContext>;
 };

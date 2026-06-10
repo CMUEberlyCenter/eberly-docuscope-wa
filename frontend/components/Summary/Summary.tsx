@@ -1,6 +1,6 @@
 import type { FC } from "react";
 import { Translation } from "react-i18next";
-import { type Analysis, isAssessment } from "../../src/lib/ReviewResponse";
+import { type Analysis, isAssessment } from "#/lib/ReviewResponse";
 
 /**
  * Component for displaying a summary of strengths and weaknesses from a

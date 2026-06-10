@@ -1,7 +1,7 @@
+import ReviewIcon from "#assets/icons/review_icon.svg?react";
 import classNames from "classnames";
 import { FC, HTMLProps } from "react";
 import Stack from "react-bootstrap/esm/Stack";
-import ReviewIcon from "../../assets/icons/review_icon.svg?react";
 
 /** No selected tool component. */
 export const NullTool: FC<HTMLProps<HTMLDivElement> & { text: string }> = ({

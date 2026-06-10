@@ -11,19 +11,18 @@ import { FileUploadProvider } from "./FileUploadContext";
 import { PickerProvider } from "./PickerContext";
 
 type Props = {
+  /** The children to render inside the provider. */
   children: ReactNode;
+  /** The Google API client ID. */
   clientId?: string;
+  /** The Google API key. */
   apiKey?: string;
+  /** The Google App ID. */
   appId?: string;
 };
 /**
  * @component
  * Provider that wraps around file upload related contexts.
- * @param param0.children - The children to render inside the provider.
- * @param param0.clientId - The Google API client ID.
- * @param param0.apiKey - The Google API key.
- * @param param0.appId - The Google App ID.
- * @returns
  */
 export const ImportProvider: FC<Props> = ({
   children,

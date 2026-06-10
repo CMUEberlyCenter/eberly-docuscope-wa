@@ -1,20 +1,19 @@
+import { Optional } from "#/index";
+import { userLanguage } from "#/lib/languageCode";
+import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
+import { WritingTask } from "#/lib/WritingTask";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
   FC,
   ReactNode,
-  useContext,
+  use,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
+  useTransition,
 } from "react";
-import { Optional } from "../../src";
-import {
-  Analysis,
-  OptionalReviewData,
-  ReviewTool,
-} from "../../src/lib/ReviewResponse";
-import { WritingTask } from "../../src/lib/WritingTask";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -42,6 +41,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Accept-Language": userLanguage(data.writing_task),
         },
         body: JSON.stringify(data),
         signal: abortControllerRef.current.signal,
@@ -64,12 +64,18 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
     },
   });
 
+  const [pending, startTransition] = useTransition();
+  const triggerMutation = useEffectEvent(
+    (document: string, writing_task: Optional<WritingTask>) => {
+      mutation.mutate({ document, writing_task });
+    }
+  );
+
   // When the document or writing task changes, fetch a new review
   useEffect(() => {
     if (!document) return;
-    mutation.mutate({
-      document,
-      writing_task,
+    startTransition(() => {
+      triggerMutation(document, writing_task);
     });
     return () => {
       abortControllerRef.current?.abort();
@@ -82,7 +88,12 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 function useSnapshotReview<T extends Analysis>(
@@ -109,6 +120,7 @@ function useSnapshotReview<T extends Analysis>(
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          // language should be determined server side by snapshot's writing task's user_lang.
         },
         signal: abortControllerRef.current.signal,
       });
@@ -128,26 +140,31 @@ function useSnapshotReview<T extends Analysis>(
       abortControllerRef.current = null;
     },
   });
+  const triggerMutation = useEffectEvent((id: string) => {
+    mutation.mutate({ id });
+  });
+  const [pending, startTransition] = useTransition();
   useEffect(() => {
     if (!snapshotID) return;
-    if (analysis && analysis.tool === tool) {
-      setReview(analysis as OptionalReviewData<T>);
-      return;
-    }
-    mutation.mutate({
-      id: snapshotID,
+    startTransition(() => {
+      triggerMutation(snapshotID);
     });
     return () => {
       abortControllerRef.current?.abort();
     };
-  }, [snapshotID, analysis]);
+  }, [snapshotID]);
   useEffect(() => {
     return () => {
       abortControllerRef.current?.abort();
       abortControllerRef.current = null;
     };
   }, []);
-  return { review, mutation, setReview, pending: mutation.isPending };
+  return {
+    review,
+    mutation,
+    setReview,
+    pending: mutation.isPending || pending,
+  };
 }
 
 export type ReviewDataContext<T extends Analysis> = {
@@ -170,7 +187,7 @@ export function getAnalysis<T extends Analysis>(
 export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
   const Context = createContext<ReviewDataContext<T> | null>(null);
   const useReviewDataContext = () => {
-    const ctx = useContext(Context);
+    const ctx = use(Context);
     if (!ctx) {
       throw new Error(
         "useReviewContext must be used within a ReviewProvider or SnapshotProvider"
@@ -181,11 +198,7 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
 
   const ReviewDataProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { review, pending } = useReview<T>(tool);
-    return (
-      <Context.Provider value={{ review, pending }}>
-        {children}
-      </Context.Provider>
-    );
+    return <Context value={{ review, pending }}>{children}</Context>;
   };
 
   const SnapshotDataProvider: FC<SnapshotProviderProps> = ({
@@ -198,11 +211,7 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
       snapshotId,
       getAnalysis<T>(analyses, tool)
     );
-    return (
-      <Context.Provider value={{ review, pending }}>
-        {children}
-      </Context.Provider>
-    );
+    return <Context value={{ review, pending }}>{children}</Context>;
   };
   return { ReviewDataProvider, SnapshotDataProvider, useReviewDataContext };
 }

@@ -1,6 +1,6 @@
+import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
+import style from "#components/Loading/Loading.module.scss";
 import type { FC } from "react";
-import DotSpinner from "../assets/icons/6-dots-rotate.svg?react";
-import style from "../components/Loading/Loading.module.scss";
 
 const LoadingLayout: FC = () => (
   <div role="status" className="vw-100 vh-100 position-relative">

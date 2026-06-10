@@ -1,4 +1,4 @@
-import { type FC, useEffect, useRef, useState } from "react";
+import { type FC, useEffect, useMemo, useRef } from "react";
 
 /**
  * A simple hidden component that prompts a file download event.
@@ -9,22 +9,18 @@ export const FileDownload: FC<{ content: Blob; title?: string }> = ({
   content,
   title,
 }) => {
-  const [url, setUrl] = useState<string>(""); // content as ObjectURL.
-  const ref = useRef<HTMLAnchorElement>(null); // ahref reference.
+  const url = useMemo(() => URL.createObjectURL(content), [content]);
+  const ref = useRef<HTMLAnchorElement>(null); // a href reference.
   // Create and destroy Object URL to use in link.
   useEffect(() => {
-    setUrl(URL.createObjectURL(content));
     return () => {
       URL.revokeObjectURL(url);
-      setUrl("");
     };
-  }, [content]);
-  // Invoke click to start download when there is an ahref and url encoded data.
+  }, [url]);
+  // Invoke click to start download when there is a link.
   useEffect(() => {
-    if (url && ref.current) {
-      ref.current?.click();
-    }
-  }, [url, ref]);
+    ref.current?.click();
+  }, [ref]);
 
   return <a className="d-none" ref={ref} href={url} download={title ?? true} />;
 };

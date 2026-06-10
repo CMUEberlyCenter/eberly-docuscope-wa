@@ -11,6 +11,15 @@
     "module": "ESNext",
     "noEmit": true,
     "moduleResolution": "Bundler",
+    "paths": {
+      "#/*": ["./src/*"],
+      "#assets/*": ["./assets/*"],
+      "#components/*": ["./components/*"],
+      "#layouts/*": ["./layouts/*"],
+      "#lib/*": ["./src/lib/*"],
+      "#pages/*": ["./pages/*"],
+      "#server/*": ["./src/server/*"]
+    },
     "target": "esnext",
     "lib": [
       "DOM",

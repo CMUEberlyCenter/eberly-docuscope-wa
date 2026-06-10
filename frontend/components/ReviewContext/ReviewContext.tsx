@@ -1,4 +1,9 @@
-import classNames from "classnames";
+import {
+  Analysis,
+  isErrorData,
+  OptionalReviewData,
+} from "#/lib/ReviewResponse";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer.js";
 import {
   createContext,
   type Dispatch,
@@ -6,20 +11,13 @@ import {
   HTMLProps,
   type ReactNode,
   use,
-  useContext,
   useEffect,
   useReducer,
 } from "react";
 import Alert from "react-bootstrap/esm/Alert";
 import { ErrorBoundary, FallbackProps } from "react-error-boundary";
-import {
-  Analysis,
-  isErrorData,
-  OptionalReviewData,
-} from "../../src/lib/ReviewResponse";
 import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { Loading } from "../Loading/Loading";
-import { Summary } from "../Summary/Summary";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 
 type ReviewContextState = {
@@ -38,7 +36,7 @@ const initialReviewContext: ReviewContextState = {
 /** Context for review tools. */
 const ReviewContext = createContext<ReviewContextState | null>(null);
 /** Hook for accessing the review context state. */
-export const useReviewContext = () => useContext(ReviewContext);
+export const useReviewContext = () => use(ReviewContext);
 /** Context for dispatching actions to modify the review tools state. */
 const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
   () => undefined
@@ -55,7 +53,7 @@ const ReviewDispatchContext = createContext<Dispatch<ReviewAction>>(
  *   - `remove`: Nullify text which should then use the default text.
  * @returns Dispatch function for modifying the review state.
  */
-export const useReviewDispatch = () => useContext(ReviewDispatchContext);
+export const useReviewDispatch = () => use(ReviewDispatchContext);
 
 type ReviewAction =
   | {
@@ -109,11 +107,9 @@ export const ReviewProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [review, dispatch] = useReducer(reviewReducer, initialReviewContext);
 
   return (
-    <ReviewContext.Provider value={review}>
-      <ReviewDispatchContext.Provider value={dispatch}>
-        {children}
-      </ReviewDispatchContext.Provider>
-    </ReviewContext.Provider>
+    <ReviewContext value={review}>
+      <ReviewDispatchContext value={dispatch}>{children}</ReviewDispatchContext>
+    </ReviewContext>
   );
 };
 
@@ -134,7 +130,7 @@ export const ReviewReset: FC<{ children: ReactNode }> = ({ children }) => {
       dispatch({ type: "unset" });
       dispatch({ type: "remove" });
     };
-  }, []);
+  }, [dispatch]);
   return children;
 };
 
@@ -152,7 +148,6 @@ export const ReviewToolCard: FC<
   }
 > = ({
   children,
-  className,
   isPending,
   title,
   instructionsKey,
@@ -162,13 +157,7 @@ export const ReviewToolCard: FC<
 }) => {
   return (
     <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
+      <ToolContainer {...props}>
         <ToolHeader title={title} instructionsKey={instructionsKey} />
         {isPending || !review ? (
           <Loading />
@@ -188,11 +177,10 @@ export const ReviewToolCard: FC<
             // onReset={(details) => mutation.reset()}
           >
             {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-            <Summary review={review} />
             {children}
           </ErrorBoundary>
         )}
-      </article>
+      </ToolContainer>
     </ReviewReset>
   );
 };

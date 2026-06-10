@@ -1,8 +1,8 @@
+import { ParagraphClarityData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/paragraph_clarity_icon.svg?react";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, type ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
-import Icon from "../../assets/icons/paragraph_clarity_icon.svg?react";
-import { ParagraphClarityData } from "../../src/lib/ReviewResponse";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   ReviewToolCard,
@@ -52,10 +52,11 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
             {(t) => <p>{t("paragraph_clarity_insights")}</p>}
           </Translation>
         </header>
-        {review && "response" in review ? (
+        {review && "response" in review && review.response.length ? (
           <Accordion>
             {review.response.map(
               ({ issue, suggestion, sent_ids, para_id }, i) => (
+                /* eslint-disable-next-line @eslint-react/no-array-index-key */
                 <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
                   <Accordion.Header className="accordion-header-highlight">
                     <div className="flex-grow-1">{issue}</div>
@@ -83,7 +84,9 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
               )
             )}
           </Accordion>
-        ) : null}
+        ) : (
+          <div className="alert alert-info">{t("paragraph_clarity.null")}</div>
+        )}
       </section>
     </ReviewToolCard>
   );

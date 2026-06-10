@@ -1,8 +1,8 @@
+import OutlineDrawerIcon from "#assets/icons/wtd_library.svg?react";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useId, useState } from "react";
 import { Button } from "react-bootstrap";
 import { Translation } from "react-i18next";
-import OutlineDrawerIcon from "../../assets/icons/wtd_library.svg?react";
 import SelectWritingTask from "../SelectWritingTask/SelectWritingTask";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import WritingTaskDetails from "../WritingTaskDetails/WritingTaskDetails";
@@ -21,7 +21,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
 
   const cn = classNames(
     className,
-    "d-flex align-items-center flex-row justify-content-center gap-1"
+    "d-flex align-items-stretch flex-row justify-content-center gap-1"
   );
 
   return (
@@ -30,9 +30,11 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
         <div className={cn} {...props}>
           {writingTask && (
             <>
-              <span className="text-muted">{t("editor.menu.task")}</span>
+              <span className="text-muted align-self-center">
+                {t("editor.menu.task")}
+              </span>
               <Button
-                variant="light"
+                variant="secondary"
                 onClick={() => setShowTask(!showTask)}
                 title={t("tool.button.view.title", {
                   title: writingTask.rules.name,
@@ -43,7 +45,8 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
               {!writingTaskId && (
                 <Button
                   aria-controls={taskId}
-                  variant={"light"}
+                  className="p-1"
+                  variant={"secondary"}
                   onClick={() => setShowSelect(true)}
                 >
                   <OutlineDrawerIcon height={24} />

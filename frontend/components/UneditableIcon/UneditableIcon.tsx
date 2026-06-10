@@ -1,7 +1,7 @@
+import NoEditIcon from "#assets/icons/no_edit_icon.svg?react";
 import { FC } from "react";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import NoEditIcon from "../../assets/icons/no_edit_icon.svg?react";
 
 /** Icon indicating that the content is not editable. */
 export const UneditableIcon: FC = () => {

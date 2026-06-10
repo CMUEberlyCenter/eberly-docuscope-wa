@@ -8,10 +8,10 @@ export type Prompt = {
 };
 
 export type NotesPrompt = 'notes_to_prose' | 'notes_to_bullets';
-type ExpectationPrompt = 'expectation';
-export type TextPrompt = 'copyedit' | 'grammar' | 'local_coherence';
+// type ExpectationPrompt = 'expectation';
+// export type TextPrompt = 'copyedit' | 'grammar' | 'local_coherence';
 export type PromptType =
   | NotesPrompt
-  | ExpectationPrompt
-  | TextPrompt
+  // | ExpectationPrompt
+  // | TextPrompt
   | ReviewPrompt;

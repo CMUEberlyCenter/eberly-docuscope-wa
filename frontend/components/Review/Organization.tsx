@@ -23,6 +23,8 @@
       it appears at least once on the left side of the main verb in a sentence within the paragraph.
 
  */
+import Icon from "#assets/icons/topical_progression_icon.svg?react";
+import { ToolButton } from "#components/ToolButton/ToolButton.js";
 import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";
@@ -36,6 +38,7 @@ import {
 } from "react";
 import {
   Button,
+  ButtonProps,
   Col,
   Container,
   type ContainerProps,
@@ -51,7 +54,17 @@ export {
   OnTopicSnapshotProvider as OrganizationSnapshotProvider,
 } from "../ReviewContext/OnTopicDataContext";
 
-DataTable.use(DT);
+export const OrganizationButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  return (
+    <ToolButton
+      {...props}
+      title={t("review:organization.title")}
+      tooltip={t("instructions:term_matrix_scope_note")}
+      icon={<Icon />}
+    />
+  );
+};
 
 /**
  * Remove paragraph-highlight, sentence-highlight, and word-highlight css classes.
@@ -234,18 +247,26 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
   const showToggle = false;
-  const [paragraphRange, setParagraphRange] = useState<number[]>([]);
+  const paragraphRange =
+    review && "response" in review
+      ? [...Array(review.response.coherence?.num_paras ?? 0).keys()]
+      : [];
   const [selected, setSelected] = useState<SelectedRowCol>(null);
-  useEffect(() => {
-    if (review && "response" in review) {
-      setParagraphRange([
-        ...Array(review.response.coherence?.num_paras ?? 0).keys(),
-      ]);
-    } else {
-      setParagraphRange([]);
-    }
-    setSelected(null);
-  }, [review]);
+  DataTable.use(DT);
+
+  // This was the start of an attempt at dynamically importing DataTable to avoid ssr issues.
+  //   const [DataTable, setDataTable] = useState<DataTableComponent | null>(null);
+  // useEffect(() => {
+  //   /** Initialize DataTable dynamically in case of ssr. */
+  //   const initDT = async () => {
+  //     const { default: dt_react } = await import("datatables.net-react");
+  //     const { default: style } = await import("datatables.net-dt");
+  //     await import("datatables.net-fixedcolumns-dt");
+  //     dt_react.use(style);
+  //     setDataTable(() => dt_react);
+  //   };
+  //   initDT();
+  // }, []);
 
   const onSelectTopic = useCallback(
     (topic: Topic) => {
@@ -303,7 +324,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
     >
       <Legend />
       <div className="mt-1 mw-100 flex-grow-1">
-        {review && "response" in review && paragraphRange.length > 0 && (
+        {review && "response" in review && paragraphRange.length > 0 ? (
           <DataTable
             options={{
               paging: false,
@@ -361,6 +382,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                           : "topic-icon-large";
                         return (
                           <tr
+                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
                             key={`topic-paragraph-key-${i}`}
                             className={
                               topic === selected?.topic ? "bg-highlight" : ""
@@ -386,6 +408,7 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                               }${paraType?.is_topic_sent ? "" : "*"}`;
                               return (
                                 <td
+                                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
                                   key={`topic-key-${i}-${j}`}
                                   className={classNames(
                                     "p-0 text-center",
@@ -413,6 +436,10 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                     )}
             </tbody>
           </DataTable>
+        ) : (
+          <div className="alert alert-info">
+            {t("organization.coherence.null")}
+          </div>
         )}
       </div>
       {/* {visualizationGlobal} */}

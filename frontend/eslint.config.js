@@ -1,20 +1,20 @@
 import pluginJs from "@eslint/js";
-import react from "eslint-plugin-react";
+import react from "@eslint-react/eslint-plugin";
 import storybook from "eslint-plugin-storybook"; // For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
 
-export default [
+export default defineConfig(
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ['src/app/**/*.{js,jsx,mjs,cjs,ts,tsx'],
-    plugins: {
-      react,
-    },
+    ...react.configs["recommended-typescript"],
+    files: ['index.ts', 'src/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'components/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'layouts/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'pages/**/*.{js,jsx,mjs,cjs,ts,tsx}'],
     languageOptions: {
+      parser: tseslint.parser,
       parserOptions: {
         ecmaFeatures: {
           jsx: true,
@@ -32,4 +32,4 @@ export default [
     }
   },
   ...storybook.configs["flat/recommended"]
-];
+);

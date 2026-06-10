@@ -24,11 +24,11 @@ import {
 } from '../../lib/WritingTask';
 import { doChat, reviewData } from '../data/chat';
 import { insertLog } from '../data/mongo';
+import { doOnTopic } from '../data/ontopic';
 import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
-import { doOnTopic } from '../data/ontopic';
 
 export const reviews = Router();
 
@@ -63,7 +63,10 @@ reviews.post(
   '/segment',
   validate(body().isString().notEmpty()),
   async (request: Request, response: Response) => {
-    const segmented = await segmentText(request.body as string);
+    const segmented = await segmentText(
+      request.body as string,
+      request.headers['accept-language']
+    );
     if (segmented.trim() === '') {
       throw new UnprocessableContentError(['Unable to segment document']);
     }
@@ -106,7 +109,10 @@ async function updateSession(
     request.session.analysis = []; // reset analysis
   }
   if (!request.session.segmented && request.session.document) {
-    const segmented = await segmentText(request.session.document);
+    const segmented = await segmentText(
+      request.session.document,
+      request.headers['accept-language']
+    );
     if (segmented.trim() === '') {
       throw new UnprocessableContentError(['Unable to segment document']);
     }
@@ -148,6 +154,7 @@ reviews.post(
     }
     const data = await doOnTopic(
       request.session.document ?? '',
+      request.headers['accept-language'],
       controller.signal
     );
     if (controller.signal.aborted) {
@@ -240,8 +247,9 @@ reviews.post(
     const { response: chat_response, finished: datetime } = chat;
     if (!chat_response) throw new Error(`NULL results for ${expectation}`);
     if (!isExpectationsOutput(chat_response)) {
-      console.error(`Malformed results for ${expectation}`, chat_response);
-      throw new Error(`Malformed results for ${expectation}`);
+      throw new Error(`Malformed results for ${expectation}`, {
+        cause: chat_response,
+      });
     }
     const data: ExpectationsData = {
       tool: 'expectations',
@@ -268,8 +276,12 @@ reviews.post(
   '/:analysis',
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
   validate(body('document').isString().notEmpty()),
-  async (request: Request, response: Response) => {
+  async (request: Request<{ analysis: string }>, response: Response) => {
     const { analysis } = request.params;
+    if (Array.isArray(analysis)) {
+      // This should never happen as params should be singular, but we check just in case.
+      throw new UnprocessableContentError('Invalid analysis type');
+    }
     // Check if the tool is enabled in settings
     const settings = getSettings();
     if (analysis in settings && !settings[analysis as keyof typeof settings]) {
@@ -292,7 +304,6 @@ reviews.post(
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find((a) => a.tool === analysis);
     if (cached) {
-      // console.log(`Returning cached analysis for ${analysis}`);
       response.json({ input: request.session.segmented, data: cached });
       return;
     }

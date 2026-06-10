@@ -5,6 +5,7 @@ import {
   isWritingTaskIdValid,
   type WritingTask,
 } from '../../lib/WritingTask';
+import { logger } from '../logger';
 import { WRITING_TASKS_PATH } from '../settings';
 
 /**
@@ -26,7 +27,7 @@ export async function initWritingTasks(
     try {
       await remove(path);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   });
   wtds.on('add', async (path) => {
@@ -41,7 +42,7 @@ export async function initWritingTasks(
       }
       await add(path, json);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   });
   wtds.on('change', async (path) => {
@@ -49,14 +50,14 @@ export async function initWritingTasks(
       const content = await readFile(path, { encoding: 'utf8' });
       const json = JSON.parse(content);
       if (!isWritingTask(json)) {
-        throw new Error(`${path} is not a WTD`);
+        throw new Error(`${path} is not a Writing Task Description.`);
       }
       if (!isWritingTaskIdValid(json.info.id)) {
         throw new Error(`${path} has an invalid info.id value.`);
       }
       await add(path, json);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   });
 

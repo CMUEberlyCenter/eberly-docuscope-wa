@@ -1,8 +1,8 @@
+import ClipboardIcon from "#assets/icons/clipboard_icon.svg?react";
+import classNames from "classnames";
 import type { FC } from "react";
 import { Button, type ButtonProps } from "react-bootstrap";
 import { Translation } from "react-i18next";
-import ClipboardIcon from "../../assets/icons/clipboard_icon.svg?react";
-import classNames from "classnames";
 
 /**
  * Icon button component for displaying a button with a clipboard icon.

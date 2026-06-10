@@ -1,3 +1,4 @@
+import { CredibilityData } from "#/lib/ReviewResponse";
 import { type FC, type HTMLProps, useId } from "react";
 import { Accordion, Alert } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
@@ -7,7 +8,6 @@ import {
   useReviewDispatch,
 } from "../ReviewContext/ReviewContext";
 import { createReviewDataContext } from "../ReviewContext/createReviewDataContext";
-import { CredibilityData } from "../../src/lib/ReviewResponse";
 
 export const {
   ReviewDataProvider: CredibilityReviewProvider,
@@ -20,7 +20,7 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
   const { review, pending } = useCredibilityReview();
   const dispatch = useReviewDispatch();
-  const prefix = useId();
+  const prefixId = useId();
   return (
     <ReviewToolCard
       title={t("credibility.title")}
@@ -43,8 +43,9 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
               <Accordion>
                 {review.response.map(({ issue, suggestion, sent_ids }, i) => (
                   <Accordion.Item
-                    key={`${prefix}-${i}`}
-                    eventKey={`${prefix}-${i}`}
+                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
+                    key={`${prefixId}-${i}`}
+                    eventKey={`${prefixId}-${i}`}
                   >
                     <Accordion.Header className="accordion-header-highlight">
                       <div className="fex-grow-1">
