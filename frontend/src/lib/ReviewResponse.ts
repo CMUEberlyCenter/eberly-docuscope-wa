@@ -55,13 +55,13 @@ export function isAssessment(data: unknown): data is GeneralAssessment {
 
 /** List of identified civility issues in the text. */
 type CivilToneOutput = {
-  /** Identified text segment. */
+  /** Identified inappropriate text segment from the input text. */
   text: string;
-  /** A brief comment on the issue with the tone in the text. */
+  /** One sentence assessment about the use of uncivil tone. */
   assessment: string;
-  /** A brief suggestion on how to improve the tone in the text. */
+  /** One sentence suggestion describing how the text can be improved. */
   suggestion: string;
-  /** The id of the sentence span that was identified as having tone issues. */
+  /** The id of the span element for the sentence from the input text that was identified as having tone issues. */
   sent_id: string;
 }[];
 // function isCivilToneOutput(data: unknown): data is CivilToneOutput {
@@ -86,8 +86,11 @@ type CivilToneOutput = {
 
 /** List of identified credibility issues in the text */
 type CredibilityOutput = {
+  /** One sentence assessment about the credibility issue. */
   issue: string;
+  /** One sentence suggestion describing how the text can be improved. */
   suggestion: string;
+  /** A list of IDs for the sentences containing the credibility issue. */
   sent_ids: string[];
 }[];
 // function isCredibilityOutput(data: unknown): data is CredibilityOutput {
@@ -109,12 +112,13 @@ type CredibilityOutput = {
 //   );
 // }
 
+/** Assessment of whether the input text meets the expectations. */
 export type ExpectationsOutput = {
-  /** List of span ids */
+  /** A list of IDs for the sentences adressing the expectation. */
   sent_ids: string[];
-  /** An acknowledgment of what's working and possible issues, if any. */
+  /** An explanation of of what is working and/or possible issues, if any. */
   assessment: string;
-  /** A brief summary of suggestions for better meeting the expectations. */
+  /** A brief suggestion for meeting the expectation better. */
   suggestion: string;
   /** True if the text sufficiently addresses the expectation. */
   expectation_met?: boolean;
@@ -135,13 +139,13 @@ export function isExpectationsOutput(
 }
 
 export type Claim = {
-  /** Summary of the claim written in a single sentence. */
+  /** A brief description of the claim. */
   claim: string;
-  /** A list of phrases describing a supporting evidence. */
+  /** A list of evidence supporting the claim. */
   support: string[];
-  /** List of span ids for sentences that support the claim. */
+  /** A list of span element IDs from the input text containing the sentences stating the claim. */
   claim_sent_ids: string[];
-  /** A list of span ids for sentences that provide evidence to support the claim. */
+  /** A list of span element IDs from the input text containing the sentences that support the claim. */
   support_sent_ids: string[];
   /** One sentence suggestion describing how the text may be improved. */
   suggestion?: string;
@@ -170,13 +174,13 @@ export type Claim = {
 
 /** JSON structure for the results of the arguments prompt. */
 type LinesOfArgumentsOutput = {
-  /** This is a sentence that summarizes the main argument. This is a sentence that describes the argumentation strategy and its assessment. */
+  /** A brief description of the thesis. */
   thesis: string;
-  /** List of phrases describing the strategies. */
+  /** A list of identified rhetorical and persuasive strategies used by the author of the text. */
   strategies: string[];
   /** List of span ids for sentences that present the central position of the text. */
   sent_ids?: string[];
-  /** List of claims that supports the thesis */
+  /** List of identified claims that supports the thesis. */
   claims: Claim[];
 } & Partial<GeneralAssessment>;
 // function isLinesOfArgumentsOutput(
@@ -203,9 +207,13 @@ type LinesOfArgumentsOutput = {
 
 /** List of identified logical flow issues (i.e., disruptions). */
 type LogicalFlowOutput = {
+  /** One sentence assessment about the disruption. */
   issue: string;
+  /** One sentence suggestion describing how the text may be improved. */
   suggestion: string;
+  /** A list of span element IDs from the input text containing the sentences related to the issue. */
   sent_ids: string[];
+  /** A list of p element IDs from the input text for the paragraphs related to the issue. */
   para_ids: string[];
 }[];
 // function isLogicalFlowOutput(data: unknown): data is LogicalFlowOutput {
@@ -230,10 +238,15 @@ type LogicalFlowOutput = {
 //   );
 // }
 
+/** List of identified paragraph clarity issues. */
 type ParagraphClarityOutput = {
+  /** One sentence assessment about the paragraph clarity issue. */
   issue: string;
+  /** One sentence suggestion describing how the text may be improved. */
   suggestion: string;
+  /** A list of span element IDs from the input text containing the sentences related to the issue. */
   sent_ids: string[];
+  /** p element ID from the input text for the paragraphs related to the issue. */
   para_id: string;
 }[];
 // function isParagraphClarityOutput(
@@ -259,11 +272,17 @@ type ParagraphClarityOutput = {
 //   );
 // }
 
+/** List of identified professional tone issues. */
 export type ProfessionalToneOutput = {
+  /** A text segment with inappropriate tone.*/
   text: string;
+  /** An ID of a sentence (<span> element) from the input text that contains the text segment with inappropriate tone, e.g., 'p1s1'. */
   sent_id: string;
+  /** One sentence assessment about the professional tone issue. */
   issue: string;
+  /** One sentence suggestion describing how the text may be improved. */
   suggestion: string;
+  /** Classification of the tone problem. */
   tone_type: 'confidence' | 'subjectivity' | 'emotional';
 }[];
 // function isProfessionalToneOutput(
@@ -292,16 +311,25 @@ export type ProfessionalToneOutput = {
 
 /** JSON structure for the results of the prominent_topics prompt. */
 type ProminentTopicsOutput = {
+  /** One sentence summary of the central idea presented in the text. */
   main_idea: string;
+  /** A list of identified elaboration strategies in the input text. */
   strategies: string[];
-  /** A list of span ids for the sentences from the text that are used to state the main idea. */
+  /** A list of span IDs from the input text for the sentences that describe the central idea. */
   sent_ids: string[];
+  /** List of prominent topics found in the text. */
   topics: {
+    /** A brief description of the topic. */
     topic: string;
+    /** A list of elaboration techniques used to develop the topic. Do not include minor techniques. An empty list if no major elaboration techniques are found. */
     techniques: string[];
+    /** A list of span element IDs from the input text for the sentences that describe the topic. */
     topic_sents_ids: string[];
+    /** A list of span element IDs from the input text for the sentences that elaborate on the topic. */
     elaboration_sents_ids: string[];
+    /** One sentence suggestion describing how the text may be improved. */
     suggestion?: string;
+    /** One sentence description of how suggested revisions will strengthen the thesis. */
     impact?: string;
   }[];
 };
@@ -366,14 +394,15 @@ export type Source = {
 //     )
 //   );
 // }
+/** A list of citation related issues found in the input text. */
 type SourcesOutput = {
-  sources: Source[];
-  issues: {
-    issue: string;
-    suggestion: string;
-    sent_ids: string[];
-  }[];
-};
+  /** One sentence assessment about the citation related issue. */
+  issue: string;
+  /** One sentence suggestion describing how the text may be improved. */
+  suggestion: string;
+  /** A list of span element IDs from the input text for the sentences displaying the citation related issue. */
+  sent_ids: string[];
+}[];
 // function isSourcesOutput(data: unknown): data is SourcesOutput {
 //   return (
 //     !!data &&
