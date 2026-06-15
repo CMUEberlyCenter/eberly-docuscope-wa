@@ -41,7 +41,29 @@ platforms:
 performance:
   tab: Rendimiento
   title: Métricas de Rendimiento
+  download: Datos de Herramienta
+  download_session: Datos de Sesión
   no_data: No hay datos de rendimiento disponibles.
+  prompt: 'Indicación: {{prompt}}'
+  range: 'Cantidad: {{count}} entre '
+  time_per_request: 'Tiempo/Solicitud:'
+  average: 'Promedio: {{time}}'
+  minimum: 'Mínimo: {{time}}'
+  maximum: 'Máximo: {{time}}'
+  average_input_tokens: 'Promedio de Tokens de Entrada: {{tokens}}'
+  average_output_tokens: 'Promedio de Tokens de Salida: {{tokens}}'
+  average_cache_creation_input_tokens: 'Promedio de Tokens de Entrada de Creación de Caché: {{tokens}}'
+  average_cache_read_input_tokens: 'Promedio de Tokens de Entrada de Lectura de Caché: {{tokens}}'
+  max_cache_creation_input_tokens: 'Máximo de Tokens de Entrada de Creación de Caché: {{tokens}}'
+  max_cache_read_input_tokens: 'Máximo de Tokens de Entrada de Lectura de Caché: {{tokens}}'
+  session:
+    title: Métricas de Rendimiento por Sesión
+    id: ID de Sesión
+    token_count: Recuento de Tokens
+    input_tokens: Entrada
+    output_tokens: Salida
+    cache_creation_input_tokens: Creación de Caché
+    cache_read_input_tokens: Lectura de Caché
 genlink:
   tab: Generar Enlaces
   title: Generador de Enlaces para Tareas de Escritura e Instantáneas
@@ -49,15 +71,15 @@ genlink:
   document:
     title: Documento de Instantánea
     description: Utilice este enlace para ver el documento de la Tarea de Escritura seleccionada.
-    upload: Subir Documento
+    upload: Cargar Documento
     tools: 'Seleccionar Herramientas Habilitadas:'
     select_label: Seleccionar Todo / Deseleccionar Todo
     select_all: Seleccionar Todo
     deselect_all: Deseleccionar Todo
-    invalid_file_type: ¡Tipo de archivo no válido! Por favor, suba un archivo .docx.
-    invalid_file_content: El archivo subido no pudo procesarse. Asegúrese de que sea un documento .docx válido. {{message}}
-    empty_content: El documento subido está vacío. Por favor, proporcione un documento con contenido.
-    too_large: El documento subido con {{wordCount}} palabras supera el tamaño máximo permitido de {{maxWords}} palabras. Por favor, suba un documento más pequeño.
+    invalid_file_type: '¡Tipo de archivo no válido! Por favor, cargue un archivo .docx.'
+    invalid_file_content: El archivo cargado no pudo procesarse. Asegúrese de que sea un documento .docx válido. {{message}}
+    empty_content: El documento cargado está vacío. Por favor, proporcione un documento con contenido.
+    too_large: El documento cargado con {{wordCount}} palabras supera el tamaño máximo permitido de {{maxWords}} palabras. Por favor, cargue un documento más pequeño.
   submit: Iniciar
   existing_snapshots: Instantáneas Existentes
   delete_snapshot: Eliminar Instantánea
@@ -73,5 +95,5 @@ writing_tasks:
     description: Estas tareas no aparecen en la lista de tareas públicas.
     version: "Versión: {{version}}"
     saved: "Guardado: {{saved}}"
-    uploaded: "Subido: {{uploaded}}"
+    uploaded: "Cargado: {{uploaded}}"
     main: Ver

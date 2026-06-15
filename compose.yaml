@@ -54,12 +54,12 @@ services:
       - mongo_user
       - mongo_pass
       - token
+    env_file:
+      - google.env
     environment:
       ADMIN_PASSWORD_FILE: /run/secrets/admin_password
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       ANTHROPIC_MAX_TOKENS: 2048
-      GOOGLE_ANALYTICS: G-88EPY3554N
-      GOOGLE_CLIENT_ID: 1234 # Replace with your actual Google Client ID
       LTI_HOSTNAME: https://docuscope-sc-test.eberly.cmu.edu/
       LTI_KEY_FILE: /run/secrets/token
       MONGO_DB: myprose

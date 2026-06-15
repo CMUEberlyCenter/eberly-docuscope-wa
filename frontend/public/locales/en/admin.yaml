@@ -41,6 +41,8 @@ platforms:
 performance:
   tab: Performance
   title: Performance Metrics
+  download: Tool Data
+  download_session: Session Data
   no_data: No performance data available.
   prompt: 'Prompt: {{prompt}}'
   range: 'Count: {{count}} between '

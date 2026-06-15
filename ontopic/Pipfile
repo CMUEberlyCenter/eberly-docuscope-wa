@@ -18,13 +18,15 @@ langcodes = "*"
 en-core-web-sm = {file = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"}
 es-core-news-sm = {file = "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl"}
 pillow = "*"
+click = "*"
+numpy = "*"
 
 [dev-packages]
 pylint = "*"
 pycodestyle = "*"
 
 [requires]
-python_version = "3.13"
+python_version = "3.14"
 
 [scripts]
 start = "hypercorn -b 0.0.0.0:5000 --reload  --root-path / app:app"
