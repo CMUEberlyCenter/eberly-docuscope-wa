@@ -371,69 +371,66 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                     .filter(
                       ({ is_topic_cluster }) => is_topic_cluster || !showToggle
                     )
-                    .map(
-                      ({ topic, is_non_local, paragraphs, sent_count }, i) => {
-                        const topi = topic.at(2)?.replaceAll("_", " ") ?? "";
-                        const [left, right] = ["l", "r"].map((lr) =>
-                          is_non_local ? lr : lr.toUpperCase()
-                        );
-                        const paraIconClass = is_non_local
-                          ? "topic-icon-small"
-                          : "topic-icon-large";
-                        return (
-                          <tr
-                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                            key={`topic-paragraph-key-${i}`}
-                            className={
-                              topic === selected?.topic ? "bg-highlight" : ""
-                            }
+                    .map(({ topic, is_non_local, paragraphs, sent_count }) => {
+                      const topi = topic.at(2)?.replaceAll("_", " ") ?? "";
+                      const [left, right] = ["l", "r"].map((lr) =>
+                        is_non_local ? lr : lr.toUpperCase()
+                      );
+                      const paraIconClass = is_non_local
+                        ? "topic-icon-small"
+                        : "topic-icon-large";
+                      return (
+                        <tr
+                          key={`topic-paragraph-key-${JSON.stringify({ topic, is_non_local, paragraphs, sent_count })}`}
+                          className={
+                            topic === selected?.topic ? "bg-highlight" : ""
+                          }
+                        >
+                          <td
+                            data-search={topi}
+                            data-order={sent_count}
+                            className="p-0"
                           >
-                            <td
-                              data-search={topi}
-                              data-order={sent_count}
-                              className="p-0"
+                            <Button
+                              className="w-100 text-primary text-start"
+                              variant="none"
+                              active={topic === selected?.topic}
+                              onClick={() => onSelectTopic(topic)}
                             >
-                              <Button
-                                className="w-100 text-primary text-start"
-                                variant="none"
-                                active={topic === selected?.topic}
-                                onClick={() => onSelectTopic(topic)}
+                              {topi}
+                            </Button>
+                          </td>
+                          {paragraphs.map((paraType, j) => {
+                            const paraContent = `${
+                              paraType?.is_left ? left : right
+                            }${paraType?.is_topic_sent ? "" : "*"}`;
+                            return (
+                              <td
+                                // need to use index as the source array is positional and has null values
+                                key={`topic-key-${j}`} // eslint-disable-line @eslint-react/no-array-index-key
+                                className={classNames(
+                                  "p-0 text-center",
+                                  selected?.paragraph === j
+                                    ? "bg-highlight"
+                                    : ""
+                                )}
                               >
-                                {topi}
-                              </Button>
-                            </td>
-                            {paragraphs.map((paraType, j) => {
-                              const paraContent = `${
-                                paraType?.is_left ? left : right
-                              }${paraType?.is_topic_sent ? "" : "*"}`;
-                              return (
-                                <td
-                                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                                  key={`topic-key-${i}-${j}`}
-                                  className={classNames(
-                                    "p-0 text-center",
-                                    selected?.paragraph === j
-                                      ? "bg-highlight"
-                                      : ""
-                                  )}
-                                >
-                                  {paraType ? (
-                                    <Button
-                                      variant="icon"
-                                      title={paraContent}
-                                      className={paraIconClass}
-                                      onClick={() => onSelectCell(topic, j)}
-                                    >
-                                      <IndicatorIcon unit={paraType} />
-                                    </Button>
-                                  ) : null}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      }
-                    )}
+                                {paraType ? (
+                                  <Button
+                                    variant="icon"
+                                    title={paraContent}
+                                    className={paraIconClass}
+                                    onClick={() => onSelectCell(topic, j)}
+                                  >
+                                    <IndicatorIcon unit={paraType} />
+                                  </Button>
+                                ) : null}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
             </tbody>
           </DataTable>
         ) : (

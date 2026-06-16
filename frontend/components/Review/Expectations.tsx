@@ -3,7 +3,6 @@ import {
   ErrorDataError,
   isErrorData,
   isExpectationsData,
-  isExpectationsDataSuggestionNone,
   OptionalReviewData,
   type ErrorData,
   type ExpectationsData,
@@ -482,21 +481,6 @@ const LoadedExpectationRule: FC<
         >
           <ReviewErrorData data={analysis} />
         </Accordion.Body>
-      </Accordion.Item>
-    );
-  }
-
-  if (isExpectationsDataSuggestionNone(analysis)) {
-    return (
-      <Accordion.Item
-        {...props}
-        eventKey={eventKey}
-        data-myprose-rule={rule.name}
-      >
-        <div className={style["fake-accordion-button"]}>
-          <div className="flex-grow-1">{analysis.expectation}</div>
-          <AlertIcon message={t("warning")} show={true} />
-        </div>
       </Accordion.Item>
     );
   }

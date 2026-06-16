@@ -83,9 +83,8 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
             <div className="mt-3">
               <h6>{t("prominent_topics.strategies")}</h6>
               <ul>
-                {review.response.strategies.map((strategy, i) => (
-                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                  <li key={`strategy-${i}`}>{strategy}</li>
+                {review.response.strategies.map((strategy) => (
+                  <li key={`strategy-${strategy}`}>{strategy}</li>
                 ))}
               </ul>
             </div>
@@ -107,8 +106,10 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                   },
                   i
                 ) => (
-                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                  <Accordion.Item key={`topic-${i}`} eventKey={`topic-${i}`}>
+                  <Accordion.Item
+                    key={`topic-${JSON.stringify({ topic, techniques, topic_sents_ids, elaboration_sents_ids, suggestion, impact })}`}
+                    eventKey={`topic-${i}`}
+                  >
                     <Accordion.Header className="accordion-header-highlight">
                       <div className="flex-grow-1">
                         <h6 className="d-inline">
@@ -146,9 +147,10 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                         >
                           <h6>{t("prominent_topics.elaborations")}</h6>
                           <ul>
-                            {techniques.map((technique, k) => (
-                              /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                              <li key={`elaboration-${i}-${k}`}>{technique}</li>
+                            {techniques.map((technique) => (
+                              <li key={`elaboration-${technique}`}>
+                                {technique}
+                              </li>
                             ))}
                           </ul>
                         </div>
@@ -157,17 +159,10 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                         <h6>{t("prominent_topics.suggestions")}</h6>
                         {suggestion || impact ? (
                           <ul>
-                            {/* eslint-disable-next-line @eslint-react/no-array-index-key */}
-                            <li key={`suggestion-${i}-${suggestion}`}>
+                            <li key={`suggestion-${suggestion}`}>
                               {suggestion}
                             </li>
-                            <li
-                              key={
-                                `impact-${i}-${impact}` /* eslint-disable-line @eslint-react/no-array-index-key */
-                              }
-                            >
-                              {impact}
-                            </li>
+                            <li key={`impact-${impact}`}>{impact}</li>
                           </ul>
                         ) : (
                           <p className="m-3 mt-2">

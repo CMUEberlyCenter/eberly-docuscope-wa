@@ -43,8 +43,7 @@ export const Credibility: FC<HTMLProps<HTMLDivElement>> = (props) => {
               <Accordion>
                 {review.response.map(({ issue, suggestion, sent_ids }, i) => (
                   <Accordion.Item
-                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                    key={`${prefixId}-${i}`}
+                    key={JSON.stringify({ issue, suggestion, sent_ids })}
                     eventKey={`${prefixId}-${i}`}
                   >
                     <Accordion.Header className="accordion-header-highlight">
