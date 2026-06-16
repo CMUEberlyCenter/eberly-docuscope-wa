@@ -72,7 +72,7 @@ async function postConvertNotes(
  * Top level framework for writing tools display.
  */
 const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
-  const { task: writingTask } = useWritingTask();
+  const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
   const { settings } = usePageContext();
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);

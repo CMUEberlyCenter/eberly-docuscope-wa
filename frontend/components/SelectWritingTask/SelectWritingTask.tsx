@@ -15,10 +15,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { CopyTaskToClipboardButton } from "../CopyTaskToClipboardButton/CopyTaskToClipboard";
 import { CopyTaskToEditorButton } from "../CopyTaskToEditorButton/CopyTaskToEditorButton";
-import {
-  useSetWritingTask,
-  useWritingTask,
-} from "../WritingTaskContext/WritingTaskContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
@@ -33,8 +30,8 @@ import { WritingTaskTitle } from "../WritingTaskTitle/WritingTaskTitle";
  */
 const SelectWritingTask: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  const { task: writingTask, tasks: writingTasks } = useWritingTask(); // current task and list of available tasks.
-  const setWritingTask = useSetWritingTask();
+  const [{ task: writingTask, tasks: writingTasks }, setWritingTask] =
+    useWritingTask(); // current task and list of available tasks.
   const [selected, setSelected] = useState<WritingTask | undefined | null>(
     writingTask
   );

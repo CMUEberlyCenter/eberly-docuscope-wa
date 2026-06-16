@@ -28,7 +28,7 @@ function useOnTopic() {
     useState<OptionalReviewData<OnTopicReviewData>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
 
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {

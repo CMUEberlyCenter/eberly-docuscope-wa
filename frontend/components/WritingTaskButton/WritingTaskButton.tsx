@@ -12,7 +12,7 @@ export const WritingTaskButton: FC<HTMLProps<HTMLDivElement>> = ({
   className,
   ...props
 }) => {
-  const { task: writingTask, taskId: writingTaskId } = useWritingTask();
+  const [{ task: writingTask, taskId: writingTaskId }] = useWritingTask();
   // const selectAvailable = useSelectTaskAvailable();
   const [showTask, setShowTask] = useState(false);
   const [showSelect, setShowSelect] = useState(false);

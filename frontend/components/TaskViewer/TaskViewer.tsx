@@ -14,10 +14,7 @@ import {
   type ModalProps,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import {
-  useSetWritingTask,
-  useWritingTask,
-} from "../WritingTaskContext/WritingTaskContext";
+import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import { WritingTaskFilter } from "../WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "../WritingTaskInfo/WritingTaskInfo";
 import { WritingTaskRulesTree } from "../WritingTaskRulesTree/WritingTaskRulesTree";
@@ -30,7 +27,7 @@ export const TaskViewerButton: FC = () => {
   const { t } = useTranslation();
   const id = useId();
   const selectId = useId();
-  const { task: writingTask, taskId } = useWritingTask();
+  const [{ task: writingTask, taskId }] = useWritingTask();
   return (
     <div className="d-flex align-items-stretch gap-1 py-1">
       {writingTask && (
@@ -90,7 +87,7 @@ export const TaskViewerButton: FC = () => {
 
 /** Modal component for displaying the outline. */
 const TaskViewer: FC<ModalProps> = (props) => {
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
   return (
     <Modal {...props} size="lg">
       <Modal.Header closeButton className="py-1">
@@ -107,8 +104,7 @@ const TaskViewer: FC<ModalProps> = (props) => {
 
 const TaskSelector: FC<ModalProps> = ({ show, onHide, ...props }) => {
   const { t } = useTranslation();
-  const { task, tasks: writingTasks } = useWritingTask();
-  const setWritingTask = useSetWritingTask();
+  const [{ task, tasks: writingTasks }, setWritingTask] = useWritingTask();
   const [showDetails, setShowDetails] = useState(false);
   const [selected, setSelected] = useState<WritingTask | null | undefined>(
     () => task
