@@ -25,10 +25,12 @@ type WritingTaskContext = {
   /** If true, the user is an instructor in the LTI context. */
   isInstructor?: boolean;
 };
-const WritingTaskContext = createContext<WritingTaskContext>({});
-const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
-  () => {}
-);
+const WritingTaskContext = createContext<
+  [WritingTaskContext, Dispatch<WritingTaskContext>]
+>([{}, () => {}]);
+// const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
+// () => {}
+// );
 
 /**
  * Context provider component for the writing task context.
@@ -62,15 +64,9 @@ export const WritingTaskProvider: FC<{
     }
   );
   return (
-    <WritingTaskContext value={task}>
-      <WritingTaskDispatchContext value={setTask}>
-        {children}
-      </WritingTaskDispatchContext>
-    </WritingTaskContext>
+    <WritingTaskContext value={[task, setTask]}>{children}</WritingTaskContext>
   );
 };
 
-/** Hook to access the current writing task. */
+/** Hook to access the current writing task and its setter function. */
 export const useWritingTask = () => use(WritingTaskContext);
-/** Hook to get the function to set the current writing task. */
-export const useSetWritingTask = () => use(WritingTaskDispatchContext);

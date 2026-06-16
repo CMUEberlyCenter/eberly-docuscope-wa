@@ -6,7 +6,7 @@ import { usePageContext } from "vike-react/usePageContext";
 
 export const Page: FC = () => {
   const { urlOriginal } = usePageContext();
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
   const { t } = useTranslation();
 
   return (

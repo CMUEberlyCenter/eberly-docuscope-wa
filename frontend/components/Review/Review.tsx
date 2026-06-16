@@ -73,7 +73,7 @@ export const Review: FC = () => {
   const [tool, setTool] = useState<Tool>("null");
   const [otherTool, setOtherTool] = useState<Tool>("null");
   const [userText] = useFileText();
-  const { task: writingTask } = useWritingTask();
+  const [{ task: writingTask }] = useWritingTask();
   const { settings } = usePageContext();
   const ready = !!userText && userText.trim().length > 0;
 

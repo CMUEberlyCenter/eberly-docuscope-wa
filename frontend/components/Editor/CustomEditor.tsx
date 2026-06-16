@@ -83,7 +83,7 @@ const CustomEditor: FC = () => {
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
-  const { task: writingTask, username, ltiActivityTitle } = useWritingTask();
+  const [{ task: writingTask, username, ltiActivityTitle }] = useWritingTask();
   const saveAs = useCallback(async () => {
     if (content) {
       const blob = await Packer.toBlob(

@@ -27,7 +27,7 @@ const AboutModal: FC<ModalProps> = (props) => {
   const version = __APP_VERSION__;
   const build_date = useMemo(() => new Date(__BUILD_DATE__), []);
   // const template_info = use(templatesInfo);
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
 
   return (
     <Modal {...props}>

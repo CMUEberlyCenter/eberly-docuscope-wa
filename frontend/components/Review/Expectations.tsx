@@ -100,7 +100,7 @@ function useExpectationsDataMutation({
   eventKey,
 }: ExpectationMutationProps) {
   const dispatch = useReviewDispatch();
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
   const [document] = useFileText();
   const [errorData, setErrorData] = useState<ErrorData | null>(null);
   const [result, setResult] =
@@ -315,7 +315,7 @@ function simpleHashString(str: string): string {
 export const ExpectationsDataProvider: FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const { task } = useWritingTask();
+  const [{ task }] = useWritingTask();
   const [document] = useFileText();
   /** Document hash to force rerender of expectation on change of document. */
   // const hash = useMemo(() => {

@@ -25,7 +25,7 @@ import { useReviewDispatch } from "./ReviewContext";
 function useReview<T extends Analysis>(tool: ReviewTool) {
   const { token } = useData<{ token: IdToken }>();
   const [document] = useFileText();
-  const { task: writing_task } = useWritingTask();
+  const [{ task: writing_task }] = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<T>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
