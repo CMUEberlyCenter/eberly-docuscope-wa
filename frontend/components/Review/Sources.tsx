@@ -1,8 +1,9 @@
-import { type Source, SourcesData } from "#/lib/ReviewResponse";
+import { SourcesData } from "#/lib/ReviewResponse";
+import { AlertIcon } from "#components/AlertIcon/AlertIcon.js";
 import Icon from "#assets/icons/sources_icon.svg?react";
 import { ToolButton } from "#components/ToolButton/ToolButton.js";
-import { type FC, type HTMLProps, useId } from "react";
-import { Accordion, type AccordionProps, Alert, ButtonProps } from "react-bootstrap";
+import { type FC, type HTMLProps } from "react";
+import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import {
   ReviewToolCard,
@@ -65,120 +66,58 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useSourcesReview();
   const dispatch = useReviewDispatch();
   const { t } = useTranslation("review");
-  const sources =
-    review &&
-      "response" in review &&
-      "sources" in review.response &&
-      review.response.sources
-      ? Object.groupBy(review.response.sources, ({ src_type }) => src_type)
-      : {};
-  // const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(
-  // {}
-  // );
-  // useEffect(() => {
-  //   if (
-  //     review &&
-  //     "response" in review &&
-  //     "sources" in review.response &&
-  //     review.response.sources
-  //   ) {
-  //     const data = Object.groupBy(
-  //       review.response.sources,
-  //       ({ src_type }) => src_type
-  //     );
-  //     setSources(data);
-  //   }
-  // }, [review]);
   return (
     <ReviewToolCard
-      title="Sources"
+      title={t("sources.title")}
       instructionsKey={"sources"}
-      errorMessage="Error loading Sources review."
+      errorMessage={t("sources.error")}
       review={review}
       isPending={pending}
       {...props}
     >
       {review && "response" in review ? (
-        <section className="mb-3">
+        <section>
           <header>
             <h5 className="text-primary">{t("insights")}</h5>
             <Translation ns="instructions">
               {(t) => <p>{t("sources_insights")}</p>}
             </Translation>
           </header>
-          {review.response.issues.length <= 0 ? (
+          {review.response.length <= 0 ? (
             <Alert variant="info">{t("sources.no_issues")}</Alert>
           ) : (
             <Accordion>
-              {review.response.issues.map(
-                ({ issue, suggestion, sent_ids }, i) => (
-                  <Accordion.Item
-                    /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                    key={`sources-issues-${i}`}
-                    eventKey={`sources-issues-${i}`}
+              {review.response.map(({ issue, suggestion, sent_ids }, i) => (
+                <Accordion.Item
+                  key={JSON.stringify({ issue, suggestion, sent_ids })}
+                  eventKey={`sources-issues-${i}`}
+                >
+                  <Accordion.Header className="accordion-header-highlight">
+                    <div>
+                      <h6 className="d-inline">{t("sources.issue")}</h6>{" "}
+                      <p className="d-inline">{issue}</p>
+                    </div>
+                    <AlertIcon
+                      message={t("sources.no_sentences")}
+                      show={sent_ids.length <= 0}
+                    />
+                  </Accordion.Header>
+                  <Accordion.Body
+                    onEntered={() =>
+                      dispatch({
+                        type: "set",
+                        sentences: [sent_ids],
+                      })
+                    }
+                    onExit={() => dispatch({ type: "unset" })}
                   >
-                    <Accordion.Header className="accordion-header-highlight">
-                      <div>
-                        <h6 className="d-inline">{t("sources.issue")}</h6>{" "}
-                        <p className="d-inline">{issue}</p>
-                      </div>
-                    </Accordion.Header>
-                    <Accordion.Body
-                      onEntered={() =>
-                        dispatch({
-                          type: "set",
-                          sentences: [sent_ids],
-                        })
-                      }
-                      onExit={() => dispatch({ type: "unset" })}
-                    >
-                      {suggestion}
-                    </Accordion.Body>
-                  </Accordion.Item>
-                )
-              )}
+                    <h6 className="d-inline">{t("sources.suggestion")}</h6>{" "}
+                    <p className="d-inline">{suggestion}</p>
+                  </Accordion.Body>
+                </Accordion.Item>
+              ))}
             </Accordion>
           )}
-        </section>
-      ) : null}
-      {review && "response" in review ? (
-        <section>
-          <header>
-            <h5 className="text-primary">{t("sources.types.title")}</h5>
-            <p>{t("sources.types.subtitle")}</p>
-          </header>
-          <section>
-            <h6>{t("sources.supportive.title")}</h6>
-            <Citations
-              className="mb-3"
-              citations={sources.supporting}
-              emptyText={t("sources.supportive.null")}
-            />
-          </section>
-          <section>
-            <h6>{t("sources.hedged.title")}</h6>
-            <Citations
-              className="mb-3"
-              citations={sources.hedged}
-              emptyText={t("sources.hedged.null")}
-            />
-          </section>
-          <section>
-            <h6>{t("sources.alternative.title")}</h6>
-            <Citations
-              className="mb-3"
-              citations={sources.alternative}
-              emptyText={t("sources.alternative.null")}
-            />
-          </section>
-          <section>
-            <h6>{t("sources.neutral.title")}</h6>
-            <Citations
-              className="mb-3"
-              citations={sources.neutral}
-              emptyText={t("sources.neutral.null")}
-            />
-          </section>
         </section>
       ) : null}
     </ReviewToolCard>

@@ -169,24 +169,9 @@ sources:
   title: Source Usage
   error: Error displaying Sources tool.
   issue: "Issue:"
-  source: "Source(s):"
-  supportive:
-    title: Supportive Citation
-    "null": No supportive style of citation is used in this draft.
-  hedged:
-    title: Hedged Citation
-    "null": No hedged style of citation is used in this draft.
-  alternative:
-    title: Alternative Citation
-    "null": No alternative style of citation is used in this draft.
-  neutral:
-    title: Neutral Citation
-    "null": No neutral style of citation is used in this draft.
+  suggestion: "Suggestion:"
+  no_sentences: No relevant sentences were found in your draft.
   no_issues: No significant citation issues were found in your draft.
-  'null': No feedback.
-  types:
-    title: Types of Sources
-    subtitle: The following types of sources are found in this draft.
 impressions:
   title: Impressions
 'null':
