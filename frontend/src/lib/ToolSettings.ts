@@ -43,7 +43,7 @@ export interface Settings {
   // tagger: string; // URL. Needed for impressions
 }
 
-const DOCUMENT_WORD_COUNT_LIMIT = 2000; // Default word count limit for review tools
+const DOCUMENT_WORD_COUNT_LIMIT = 8000; // Default word count limit for review tools
 const SELECT_WORD_COUNT_LIMIT = 250; // Default word count limit for tools that operate on selected text.
 // Default json settings, in case of network failure.
 export const DEFAULT: Settings = {

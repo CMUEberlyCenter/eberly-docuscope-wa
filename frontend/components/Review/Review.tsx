@@ -59,7 +59,7 @@ import {
 } from "./ProminentTopics";
 import "./Review.scss";
 import { Sentences, SentencesButton, SentencesDataProvider } from "./Sentences";
-import { Sources, SourcesReviewProvider } from "./Sources";
+import { Sources, SourcesButton, SourcesReviewProvider } from "./Sources";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
@@ -135,12 +135,12 @@ export const Review: FC = () => {
   const organizationFeature =
     !!settings?.term_matrix &&
     (!writingTask || isEnabled(writingTask, "term_matrix"));
-  const additionalToolsFeature =
-    civilToneFeature ||
-    credibilityFeature ||
-    sourcesFeature ||
-    organizationFeature ||
-    impressionsFeature;
+  const additionalToolsFeature = false;
+  // civilToneFeature ||
+  // credibilityFeature ||
+  // sourcesFeature ||
+  // organizationFeature ||
+  // impressionsFeature;
   const bigPictureFeature =
     expectationsFeature ||
     argumentsFeature ||
@@ -299,6 +299,14 @@ export const Review: FC = () => {
                     onClick={toggleOtherToolHandler("professional_tone")}
                   />
                 ) : null}
+                {sourcesFeature ? (
+                  <SourcesButton
+                    disabled={!ready || isPending}
+                    active={otherTool === "sources"}
+                    onClick={toggleOtherToolHandler("sources")}
+                  />
+                ) : null}
+                {/* TODO remove additional tools button */}
                 {additionalToolsFeature ? (
                   <Dropdown
                     as={ButtonGroup}
@@ -314,7 +322,7 @@ export const Review: FC = () => {
                         variant="outline-primary"
                         className="tool_button tool_dropdown"
                         active={[
-                          "sources",
+                          // "sources",  // TODO remove for #325
                           "credibility",
                           // "organization", // TODO remove for #307
                           "civil_tone",

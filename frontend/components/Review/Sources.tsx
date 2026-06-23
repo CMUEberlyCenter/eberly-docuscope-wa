@@ -1,6 +1,8 @@
 import { type Source, SourcesData } from "#/lib/ReviewResponse";
+import Icon from "#assets/icons/sources_icon.svg?react";
+import { ToolButton } from "#components/ToolButton/ToolButton.js";
 import { type FC, type HTMLProps, useId } from "react";
-import { Accordion, type AccordionProps, Alert } from "react-bootstrap";
+import { Accordion, type AccordionProps, Alert, ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import {
   ReviewToolCard,
@@ -13,6 +15,15 @@ export const {
   SnapshotDataProvider: SourcesSnapshotProvider,
   useReviewDataContext: useSourcesReview,
 } = createReviewDataContext<SourcesData>("sources");
+
+export const SourcesButton: FC<ButtonProps> = (props) => {
+  const { t } = useTranslation("review");
+  return <ToolButton {...props}
+    title={t("review:sources.title")}
+    tooltip={t("instructions:sources_scope_note")}
+    icon={<Icon />}
+  />;
+};
 
 /** Accordion component for displaying citations. */
 const Citations: FC<
@@ -56,9 +67,9 @@ export const Sources: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
   const sources =
     review &&
-    "response" in review &&
-    "sources" in review.response &&
-    review.response.sources
+      "response" in review &&
+      "sources" in review.response &&
+      review.response.sources
       ? Object.groupBy(review.response.sources, ({ src_type }) => src_type)
       : {};
   // const [sources, setSources] = useState<Partial<Record<SourceType, Source[]>>>(

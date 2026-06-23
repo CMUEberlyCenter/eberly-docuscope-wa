@@ -1,4 +1,3 @@
-import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
 import {
   CivilTone,
   CivilToneSnapshotProvider,
@@ -49,21 +48,16 @@ import {
   SentencesButton,
   SentencesSnapshotProvider,
 } from "#components/Review/Sentences";
-import { Sources, SourcesSnapshotProvider } from "#components/Review/Sources";
+import { Sources, SourcesButton, SourcesSnapshotProvider } from "#components/Review/Sources";
 import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
 import { trackScreenView } from "#lib/tracking.js";
 import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
 import {
   Alert,
-  ButtonGroup,
   ButtonToolbar,
-  Dropdown,
-  OverlayTrigger,
-  Stack,
   Tab,
-  Tabs,
-  Tooltip,
+  Tabs
 } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
@@ -142,7 +136,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.prominent_topics &&
-            isEnabled(task, "prominent_topics") ? (
+              isEnabled(task, "prominent_topics") ? (
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
@@ -150,7 +144,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.prominent_topics &&
-            isEnabled(task, "prominent_topics") ? (
+              isEnabled(task, "prominent_topics") ? (
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
@@ -158,7 +152,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.lines_of_arguments &&
-            isEnabled(task, "lines_of_arguments") ? (
+              isEnabled(task, "lines_of_arguments") ? (
               <LinesOfArgumentsButton
                 disabled={disabled("lines_of_arguments")}
                 active={tool === "lines_of_arguments"}
@@ -235,7 +229,7 @@ export const Page: FC = () => {
         <div className="h-100 d-flex flex-column overflow-auto">
           <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
             {settings?.paragraph_clarity &&
-            isEnabled(task, "paragraph_clarity") ? (
+              isEnabled(task, "paragraph_clarity") ? (
               <ParagraphClarityButton
                 disabled={disabled("paragraph_clarity")}
                 active={secondaryTool === "paragraph_clarity"}
@@ -243,7 +237,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.sentence_density &&
-            isEnabled(task, "sentence_density") ? (
+              isEnabled(task, "sentence_density") ? (
               <SentencesButton
                 disabled={disabled("sentence_density")}
                 active={secondaryTool === "sentence_density"}
@@ -251,14 +245,21 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.professional_tone &&
-            isEnabled(task, "professional_tone") ? (
+              isEnabled(task, "professional_tone") ? (
               <ProfessionalToneButton
                 disabled={disabled("professional_tone")}
                 active={secondaryTool === "professional_tone"}
                 onClick={secondaryToggleHandler("professional_tone")}
               />
             ) : null}
-            <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
+            {settings?.sources && isEnabled(task, "sources") ? (
+              <SourcesButton
+                disabled={disabled("sources")}
+                active={secondaryTool === "sources"}
+                onClick={secondaryToggleHandler("sources")}
+              />
+            ) : null}
+            {/* <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
               <OverlayTrigger
                 placement="bottom"
                 overlay={<Tooltip>{t("additional_tools.tooltip")}</Tooltip>}
@@ -267,7 +268,7 @@ export const Page: FC = () => {
                   variant="outline-primary"
                   className="tool_button tool_dropdown"
                   active={[
-                    "sources",
+                    // "sources", // TODO remove for #325
                     "credibility",
                     // "organization", // TODO remove for #307
                     "civil_tone",
@@ -305,7 +306,7 @@ export const Page: FC = () => {
                     </div>
                   </Dropdown.Item>
                 ) : null}
-                {/* {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
+                {/ {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
                   <Dropdown.Item
                     onClick={secondaryToggleHandler("organization")}
                     active={secondaryTool === "organization"}
@@ -316,7 +317,7 @@ export const Page: FC = () => {
                       {t("instructions:term_matrix_scope_note")}
                     </div>
                   </Dropdown.Item>
-                ) : null} */}
+                ) : null} /}
                 {settings?.civil_tone && isEnabled(task, "civil_tone") ? (
                   <Dropdown.Item
                     onClick={secondaryToggleHandler("civil_tone")}
@@ -330,7 +331,7 @@ export const Page: FC = () => {
                   </Dropdown.Item>
                 ) : null}
               </Dropdown.Menu>
-            </Dropdown>
+            </Dropdown> */}
           </ButtonToolbar>
           <ErrorBoundary
             fallbackRender={({ error }) => (

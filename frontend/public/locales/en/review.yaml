@@ -166,7 +166,7 @@ professional_tone:
   issue: "Issue:"
   suggestion: "Suggestion:"
 sources:
-  title: Sources
+  title: Source Usage
   error: Error displaying Sources tool.
   issue: "Issue:"
   source: "Source(s):"
