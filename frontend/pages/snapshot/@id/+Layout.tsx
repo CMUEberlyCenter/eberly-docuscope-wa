@@ -40,9 +40,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
           <UserText className="overflow-auto border-top flex-grow-1" />
         </Activity>
       </main>
-      <ToolLayout stage={t("snapshot")}>
-        {children}
-      </ToolLayout>
+      <ToolLayout stage={t("snapshot")}>{children}</ToolLayout>
     </SplitLayout>
   );
 };

@@ -48,17 +48,16 @@ import {
   SentencesButton,
   SentencesSnapshotProvider,
 } from "#components/Review/Sentences";
-import { Sources, SourcesButton, SourcesSnapshotProvider } from "#components/Review/Sources";
+import {
+  Sources,
+  SourcesButton,
+  SourcesSnapshotProvider,
+} from "#components/Review/Sources";
 import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
 import { trackScreenView } from "#lib/tracking.js";
 import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
-import {
-  Alert,
-  ButtonToolbar,
-  Tab,
-  Tabs
-} from "react-bootstrap";
+import { Alert, ButtonToolbar, Tab, Tabs } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -136,7 +135,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.prominent_topics &&
-              isEnabled(task, "prominent_topics") ? (
+            isEnabled(task, "prominent_topics") ? (
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
@@ -144,7 +143,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.prominent_topics &&
-              isEnabled(task, "prominent_topics") ? (
+            isEnabled(task, "prominent_topics") ? (
               <ProminentTopicsButton
                 disabled={disabled("prominent_topics")}
                 active={tool === "prominent_topics"}
@@ -152,7 +151,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.lines_of_arguments &&
-              isEnabled(task, "lines_of_arguments") ? (
+            isEnabled(task, "lines_of_arguments") ? (
               <LinesOfArgumentsButton
                 disabled={disabled("lines_of_arguments")}
                 active={tool === "lines_of_arguments"}
@@ -229,7 +228,7 @@ export const Page: FC = () => {
         <div className="h-100 d-flex flex-column overflow-auto">
           <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
             {settings?.paragraph_clarity &&
-              isEnabled(task, "paragraph_clarity") ? (
+            isEnabled(task, "paragraph_clarity") ? (
               <ParagraphClarityButton
                 disabled={disabled("paragraph_clarity")}
                 active={secondaryTool === "paragraph_clarity"}
@@ -237,7 +236,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.sentence_density &&
-              isEnabled(task, "sentence_density") ? (
+            isEnabled(task, "sentence_density") ? (
               <SentencesButton
                 disabled={disabled("sentence_density")}
                 active={secondaryTool === "sentence_density"}
@@ -245,7 +244,7 @@ export const Page: FC = () => {
               />
             ) : null}
             {settings?.professional_tone &&
-              isEnabled(task, "professional_tone") ? (
+            isEnabled(task, "professional_tone") ? (
               <ProfessionalToneButton
                 disabled={disabled("professional_tone")}
                 active={secondaryTool === "professional_tone"}
