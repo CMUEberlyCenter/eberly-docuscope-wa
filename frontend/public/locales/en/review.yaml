@@ -88,7 +88,7 @@ prominent_topics:
   elaborations: Elaboration Techniques
   sentences: Sentences
   suggestions: Comments
-  no_suggestions: No comments. It looks very good.
+  no_suggestions: No major issues.
   'null': No topics were found in your draft.
 lines_of_arguments:
   title: Lines of Argument
@@ -104,7 +104,7 @@ lines_of_arguments:
   support: 'Support:'
   sentences: Sentences
   suggestions: 'Comments:'
-  no_suggestions: No comments. It looks very good.
+  no_suggestions: No major issues.
   'null': No lines of arguments were detected in your draft.
 logical_flow:
   title: Logical Flow Issues

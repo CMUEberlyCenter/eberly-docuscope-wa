@@ -4,10 +4,10 @@ welcome: Bienvenido al panel de administración. Utilice la navegación para ges
 settings:
   tab: Configuración
   title: Configuración Global
-  text_to_speech: 'Texto a Voz: '
+  text_to_speech: 'Texto a voz: '
   scribe: 'Herramientas de I.A.: '
   model: 'Modelo Anthropic: '
-  word_count_limit: 'Límite de Recuento de Palabras: '
+  word_count_limit: 'Límite de recuento de palabras: '
   notes_to_prose: '$t(translation:tool.button.prose.tooltip) $t(translation:tool.tab.generate) Herramienta: '
   notes_to_bullets: '$t(translation:tool.button.bullets.tooltip) $t(translation:tool.tab.generate) Herramienta: '
   civil_tone: '$t(review:civil_tone.title) $t(review:title) Herramienta: '
@@ -22,27 +22,27 @@ settings:
   sentences: '$t(review:sentences.title) $t(review:title) Herramienta: '
   sources: '$t(review:sources.title) $t(review:title) Herramienta: '
   organization: '$t(review:organization.title) $t(review:title) Herramienta: '
-  language: 'Idioma Predeterminado: '
+  language: 'Idioma predeterminado: '
   access_level: 'Nivel de acceso WTD: '
   available: 'Disponible'
-  unavailable: 'Todo Deshabilitado'
+  unavailable: 'Todo deshabilitado'
   enabled: Habilitado
   disabled: No
-  unlimited: Sin Límite
+  unlimited: Sin límite
 platforms:
   tab: Plataformas
   title: Plataformas LTI Registradas
-  id: 'ID de Plataforma:'
-  name: 'Nombre de Plataforma:'
-  url: 'URL de Plataforma:'
+  id: 'ID de plataforma:'
+  name: 'Nombre de la plataforma:'
+  url: 'URL de la plataforma:'
   status: 'Estado:'
   active: Activo
   inactive: Inactivo
 performance:
   tab: Rendimiento
   title: Métricas de Rendimiento
-  download: Datos de Herramienta
-  download_session: Datos de Sesión
+  download: Datos de la herramienta
+  download_session: Datos de sesión
   no_data: No hay datos de rendimiento disponibles.
   prompt: 'Indicación: {{prompt}}'
   range: 'Cantidad: {{count}} entre '
@@ -50,48 +50,48 @@ performance:
   average: 'Promedio: {{time}}'
   minimum: 'Mínimo: {{time}}'
   maximum: 'Máximo: {{time}}'
-  average_input_tokens: 'Promedio de Tokens de Entrada: {{tokens}}'
-  average_output_tokens: 'Promedio de Tokens de Salida: {{tokens}}'
-  average_cache_creation_input_tokens: 'Promedio de Tokens de Entrada de Creación de Caché: {{tokens}}'
-  average_cache_read_input_tokens: 'Promedio de Tokens de Entrada de Lectura de Caché: {{tokens}}'
-  max_cache_creation_input_tokens: 'Máximo de Tokens de Entrada de Creación de Caché: {{tokens}}'
-  max_cache_read_input_tokens: 'Máximo de Tokens de Entrada de Lectura de Caché: {{tokens}}'
+  average_input_tokens: 'Promedio de tokens de entrada: {{tokens}}'
+  average_output_tokens: 'Promedio de tokens de salida: {{tokens}}'
+  average_cache_creation_input_tokens: 'Promedio de tokens de entrada de creación de caché: {{tokens}}'
+  average_cache_read_input_tokens: 'Promedio de tokens de entrada de lectura de caché: {{tokens}}'
+  max_cache_creation_input_tokens: 'Máximo de tokens de entrada de creación de caché: {{tokens}}'
+  max_cache_read_input_tokens: 'Máximo de tokens de entrada de lectura de caché: {{tokens}}'
   session:
     title: Métricas de Rendimiento por Sesión
-    id: ID de Sesión
-    token_count: Recuento de Tokens
+    id: ID de sesión
+    token_count: Recuento de tokens
     input_tokens: Entrada
     output_tokens: Salida
-    cache_creation_input_tokens: Creación de Caché
-    cache_read_input_tokens: Lectura de Caché
+    cache_creation_input_tokens: Creación de caché
+    cache_read_input_tokens: Lectura de caché
 genlink:
-  tab: Generar Enlaces
-  title: Generador de Enlaces para Tareas de Escritura e Instantáneas
-  description: Utilice esta herramienta para generar enlaces para Tareas de Escritura específicas dentro de myProse.
+  tab: Generar enlaces
+  title: Generador de enlaces para tareas de escritura e instantáneas
+  description: Utilice esta herramienta para generar enlaces para tareas de escritura específicas dentro de myProse.
   document:
-    title: Documento de Instantánea
-    description: Utilice este enlace para ver el documento de la Tarea de Escritura seleccionada.
-    upload: Cargar Documento
-    tools: 'Seleccionar Herramientas Habilitadas:'
-    select_label: Seleccionar Todo / Deseleccionar Todo
-    select_all: Seleccionar Todo
-    deselect_all: Deseleccionar Todo
+    title: Documento de instantánea
+    description: Utilice este enlace para ver el documento de la tarea de escritura seleccionada.
+    upload: Cargar documento
+    tools: 'Seleccionar herramientas habilitadas:'
+    select_label: Seleccionar todo / Deseleccionar todo
+    select_all: Seleccionar todo
+    deselect_all: Deseleccionar todo
     invalid_file_type: '¡Tipo de archivo no válido! Por favor, cargue un archivo .docx.'
     invalid_file_content: El archivo cargado no pudo procesarse. Asegúrese de que sea un documento .docx válido. {{message}}
     empty_content: El documento cargado está vacío. Por favor, proporcione un documento con contenido.
     too_large: El documento cargado con {{wordCount}} palabras supera el tamaño máximo permitido de {{maxWords}} palabras. Por favor, cargue un documento más pequeño.
   submit: Iniciar
-  existing_snapshots: Instantáneas Existentes
-  delete_snapshot: Eliminar Instantánea
-  refresh_snapshot: Limpiar caché de análisis
+  existing_snapshots: Instantáneas existentes
+  delete_snapshot: Eliminar instantánea
+  refresh_snapshot: Borrar caché de análisis
 writing_tasks:
-  tab: Tareas de Escritura
-  title: Gestión de Tareas de Escritura
+  tab: Tareas de escritura
+  title: Gestión de tareas de escritura
   public:
-    title: Tareas Públicas
+    title: Tareas públicas
     description: Estas tareas son visibles para todos los usuarios.
   private:
-    title: Tareas Privadas
+    title: Tareas privadas
     description: Estas tareas no aparecen en la lista de tareas públicas.
     version: "Versión: {{version}}"
     saved: "Guardado: {{saved}}"
