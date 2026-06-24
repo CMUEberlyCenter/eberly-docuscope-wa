@@ -258,79 +258,6 @@ export const Page: FC = () => {
                 onClick={secondaryToggleHandler("sources")}
               />
             ) : null}
-            {/* <Dropdown as={ButtonGroup} className="bg-white shadow-sm rounded-2">
-              <OverlayTrigger
-                placement="bottom"
-                overlay={<Tooltip>{t("additional_tools.tooltip")}</Tooltip>}
-              >
-                <Dropdown.Toggle
-                  variant="outline-primary"
-                  className="tool_button tool_dropdown"
-                  active={[
-                    // "sources", // TODO remove for #325
-                    "credibility",
-                    // "organization", // TODO remove for #307
-                    "civil_tone",
-                    "impressions",
-                  ].includes(secondaryTool)}
-                >
-                  <Stack>
-                    <AdditionalToolsIcon />
-                    <span>{t("additional_tools.title")}</span>
-                  </Stack>
-                </Dropdown.Toggle>
-              </OverlayTrigger>
-              <Dropdown.Menu className="additional-tools-menu">
-                {settings?.sources && isEnabled(task, "sources") ? (
-                  <Dropdown.Item
-                    onClick={secondaryToggleHandler("sources")}
-                    active={secondaryTool === "sources"}
-                    disabled={disabled("sources")}
-                  >
-                    <h6 className="text-primary">{t("sources.title")}</h6>
-                    <div className="text-wrap">
-                      {t("instructions:sources_scope_note")}
-                    </div>
-                  </Dropdown.Item>
-                ) : null}
-                {settings?.credibility && isEnabled(task, "credibility") ? (
-                  <Dropdown.Item
-                    onClick={secondaryToggleHandler("credibility")}
-                    active={secondaryTool === "credibility"}
-                    disabled={disabled("credibility")}
-                  >
-                    <h6 className="text-primary">{t("credibility.title")}</h6>
-                    <div className="text-wrap">
-                      {t("instructions:credibility_scope_note")}
-                    </div>
-                  </Dropdown.Item>
-                ) : null}
-                {/ {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
-                  <Dropdown.Item
-                    onClick={secondaryToggleHandler("organization")}
-                    active={secondaryTool === "organization"}
-                    disabled={disabled("term_matrix")}
-                  >
-                    <h6 className="text-primary">{t("organization.title")}</h6>
-                    <div className="text-wrap">
-                      {t("instructions:term_matrix_scope_note")}
-                    </div>
-                  </Dropdown.Item>
-                ) : null} /}
-                {settings?.civil_tone && isEnabled(task, "civil_tone") ? (
-                  <Dropdown.Item
-                    onClick={secondaryToggleHandler("civil_tone")}
-                    active={secondaryTool === "civil_tone"}
-                    disabled={disabled("civil_tone")}
-                  >
-                    <h6 className="text-primary">{t("civil_tone.title")}</h6>
-                    <div className="text-wrap">
-                      {t("instructions:civil_tone_scope_note")}
-                    </div>
-                  </Dropdown.Item>
-                ) : null}
-              </Dropdown.Menu>
-            </Dropdown> */}
           </ButtonToolbar>
           <ErrorBoundary
             fallbackRender={({ error }) => (
@@ -371,17 +298,6 @@ export const Page: FC = () => {
                 <Credibility />
               </CredibilitySnapshotProvider>
             )}
-            {/* {secondaryTool === "impressions" && ( */}
-            {/* <NullTool text={t("null.not_available")} /> */}
-            {/* )} */}
-            {/* {secondaryTool === "organization" && (
-              <OrganizationSnapshotProvider
-                snapshotId={reviewID}
-                analyses={analyses}
-              >
-                <Organization />
-              </OrganizationSnapshotProvider>
-            )} */}
             {secondaryTool === "sentence_density" && (
               <SentencesSnapshotProvider
                 snapshotId={reviewID}

@@ -1,15 +1,11 @@
 import type { ReviewTool } from "#/lib/ReviewResponse";
 import { isEnabled } from "#/lib/WritingTask";
-import AdditionalToolsIcon from "#assets/icons/additional_tools_icon.svg?react";
 import { trackScreenView } from "#lib/tracking.js";
 import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,
-  ButtonGroup,
   ButtonToolbar,
-  Dropdown,
   OverlayTrigger,
-  Stack,
   Tab,
   Tabs,
   Tooltip,
@@ -102,12 +98,6 @@ export const Review: FC = () => {
 
   // As per #230 most features are available even without a writing task if
   // enabled in settings.  The server settings have priority over writing tasks.
-  const civilToneFeature =
-    !!settings?.civil_tone &&
-    (!writingTask || isEnabled(writingTask, "civil_tone"));
-  const credibilityFeature =
-    !!settings?.credibility &&
-    (!writingTask || isEnabled(writingTask, "credibility"));
   const expectationsFeature =
     !!settings?.expectations &&
     (!writingTask || isEnabled(writingTask, "expectations"));
@@ -131,26 +121,19 @@ export const Review: FC = () => {
     (!writingTask || isEnabled(writingTask, "sentence_density"));
   const sourcesFeature =
     !!settings?.sources && (!writingTask || isEnabled(writingTask, "sources"));
-  const impressionsFeature = false; /*settings.impressions && isEnabled(writingTask, "impressions")*/
   const organizationFeature =
     !!settings?.term_matrix &&
     (!writingTask || isEnabled(writingTask, "term_matrix"));
-  const additionalToolsFeature = false;
-  // civilToneFeature ||
-  // credibilityFeature ||
-  // sourcesFeature ||
-  // organizationFeature ||
-  // impressionsFeature;
   const bigPictureFeature =
     expectationsFeature ||
     argumentsFeature ||
     ideasFeature ||
     logicalFlowFeature;
   const fineTuningFeature =
-    additionalToolsFeature ||
     paragraphClarityFeature ||
     professionalToneFeature ||
-    sentencesFeature;
+    sentencesFeature ||
+    sourcesFeature;
 
   const [isPending, startTransition] = useTransition();
   useEffect(() => {
@@ -306,107 +289,6 @@ export const Review: FC = () => {
                     onClick={toggleOtherToolHandler("sources")}
                   />
                 ) : null}
-                {/* TODO remove additional tools button */}
-                {additionalToolsFeature ? (
-                  <Dropdown
-                    as={ButtonGroup}
-                    className="bg-white shadow-sm rounded-2"
-                  >
-                    <OverlayTrigger
-                      placement="bottom"
-                      overlay={
-                        <Tooltip>{t("additional_tools.tooltip")}</Tooltip>
-                      }
-                    >
-                      <Dropdown.Toggle
-                        variant="outline-primary"
-                        className="tool_button tool_dropdown"
-                        active={[
-                          // "sources",  // TODO remove for #325
-                          "credibility",
-                          // "organization", // TODO remove for #307
-                          "civil_tone",
-                          "impressions",
-                        ].includes(otherTool)}
-                      >
-                        <Stack>
-                          <AdditionalToolsIcon />
-                          <span>{t("additional_tools.title")}</span>
-                        </Stack>
-                      </Dropdown.Toggle>
-                    </OverlayTrigger>
-                    <Dropdown.Menu className="additional-tools-menu">
-                      {sourcesFeature ? (
-                        <Dropdown.Item
-                          onClick={toggleOtherToolHandler("sources")}
-                          active={otherTool === "sources"}
-                          disabled={!ready}
-                        >
-                          <h6 className="text-primary">{t("sources.title")}</h6>
-                          <div className="text-wrap">
-                            {t("instructions:sources_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {credibilityFeature ? (
-                        <Dropdown.Item
-                          onClick={toggleOtherToolHandler("credibility")}
-                          active={otherTool === "credibility"}
-                          disabled={!ready}
-                        >
-                          <h6 className="text-primary">
-                            {t("credibility.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {t("instructions:credibility_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {/* organizationFeature ? (
-                        <Dropdown.Item
-                          onClick={toggleOtherToolHandler("organization")}
-                          active={otherTool === "organization"}
-                          disabled={!ready}
-                        >
-                          <h6 className="text-primary">
-                            {t("organization.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {t("instructions:term_matrix_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null // TODO remove for #307 */}
-                      {civilToneFeature ? (
-                        <Dropdown.Item
-                          onClick={toggleOtherToolHandler("civil_tone")}
-                          active={otherTool === "civil_tone"}
-                          disabled={!ready || isPending}
-                        >
-                          <h6 className="text-primary">
-                            {t("civil_tone.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {t("instructions:civil_tone_scope_note")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                      {impressionsFeature ? (
-                        <Dropdown.Item
-                          onClick={toggleOtherToolHandler("impressions")}
-                          active={otherTool === "impressions"}
-                          disabled={!ready || isPending}
-                        >
-                          <h6 className="text-primary">
-                            {t("impressions.title")}
-                          </h6>
-                          <div className="text-wrap">
-                            {t("impressions.tooltip")}
-                          </div>
-                        </Dropdown.Item>
-                      ) : null}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                ) : null}
               </ButtonToolbar>
               <ErrorBoundary
                 fallbackRender={({ error }) => (
@@ -441,14 +323,6 @@ export const Review: FC = () => {
                     <Credibility />
                   </CredibilityReviewProvider>
                 )}
-                {/* {otherTool === "impressions" && ( */}
-                {/* <NullTool text={t("null.not_available")} /> */}
-                {/* )} */}
-                {/* {otherTool === "organization" && (
-                  <OrganizationDataProvider>
-                    <Organization />
-                  </OrganizationDataProvider>
-                )} */}
                 {otherTool === "sentences" && (
                   <SentencesDataProvider>
                     <Sentences />

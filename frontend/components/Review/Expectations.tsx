@@ -316,10 +316,6 @@ export const ExpectationsDataProvider: FC<{ children: React.ReactNode }> = ({
 }) => {
   const [{ task }] = useWritingTask();
   const [document] = useFileText();
-  /** Document hash to force rerender of expectation on change of document. */
-  // const hash = useMemo(() => {
-  //   return simpleHashString(document || "");
-  // }, [document]);
 
   return (
     <ExpectationsDataContext value={useExpectationsDataMutation}>
