@@ -155,6 +155,7 @@ paragraph_clarity:
   title: Claridad del Párrafo
   tooltip: Mejorar el flujo del párrafo aumenta la legibilidad y la comunicación efectiva.
   error: Error al mostrar la herramienta Claridad del Párrafo.
+  issue: "Problema:"
   suggestion: "Sugerencia:"
   'null': No se encontraron problemas.
 professional_tone:

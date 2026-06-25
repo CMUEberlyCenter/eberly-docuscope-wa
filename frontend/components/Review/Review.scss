@@ -67,6 +67,9 @@
   .accordion-header-highlight {
     --bs-accordion-active-bg: var(--bs-highlight);
   }
+  div.accordion-item:has(.show) {
+    border: 4px solid var(--bs-info-border-subtle);
+  }
 
   .inverse-color {
     --bs-nav-underline-link-active-color: var(--bs-primary);
