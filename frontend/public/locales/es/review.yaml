@@ -13,7 +13,7 @@ summary:
   weaknesses: "Oportunidades de revisión:"
 insights: Perspectivas de Revisión
 error:
-  header: ¡Error al cargar la revisión!
+  header: ¡Error al Cargar la Revisión!
   content: Se produjo un error al recuperar los datos de la revisión.
   details: 'Detalles: {{message}}'
   too_large: El documento es demasiado grande para procesarlo. Por favor, acorte su texto e inténtelo de nuevo.
@@ -26,7 +26,7 @@ civil_tone:
   tooltip: El uso de un lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
   error: Error al mostrar la herramienta Tono Civil.
   'null': No se encontraron problemas.
-  prefix: 'Su texto:'
+  prefix: 'Su Texto:'
   issue: "Problema:"
   suggestion: "Sugerencia:"
 credibility:
@@ -65,7 +65,7 @@ sentences:
 global_coherence:
   title: Problemas de Progresión Lógica
   overview: "<p>Esta herramienta identifica interrupciones en la organización que
-    dificultan la fluidez de lectura y la comprensión, como presentar ideas fuera
+    dificultan la fluidez de la lectura y la comprensión, como presentar ideas fuera
     de orden, separar detalles relacionados o dispersar conceptos conectados.</p><p>Revise
     cada problema identificado y aborde los comentarios que considere útiles.</p>"
   error: Error al cargar los datos de Progresión Lógica.
@@ -75,7 +75,7 @@ global_coherence:
   redundant: Información Redundante
   inconsistent: Información Inconsistente
   suggestion:
-    text: 'Su texto:'
+    text: 'Su Texto:'
     explanation: 'Problema(s):'
     suggestions: 'Sugerencias:'
   'null': No se pudo generar ningún comentario sobre la progresión lógica a partir de su borrador.
@@ -90,7 +90,7 @@ prominent_topics:
   elaborations: Técnicas de Elaboración
   sentences: Oraciones
   suggestions: Comentarios
-  no_suggestions: Sin comentarios. Se ve muy bien.
+  no_suggestions: No se encontraron problemas importantes.
   'null': No se encontraron temas en su borrador.
 lines_of_arguments:
   title: Líneas de Argumentación
@@ -106,7 +106,7 @@ lines_of_arguments:
   support: 'Respaldo:'
   sentences: Oraciones
   suggestions: 'Comentarios:'
-  no_suggestions: Sin comentarios. Se ve muy bien.
+  no_suggestions: No se encontraron problemas importantes.
   'null': No se detectaron líneas de argumentación en su borrador.
 logical_flow:
   title: Problemas de Flujo Lógico
@@ -137,13 +137,13 @@ organization:
     location: Número de párrafo.
     boxed_number: Un número enmarcado.
   description: El Panel de Coherencia representa el flujo de sus grupos temáticos
-    a lo largo y dentro de los párrafos. Los círculos oscuros indican que un grupo
-    temático particular se trata de manera prominente en un párrafo determinado. Los
-    círculos blancos y los espacios vacíos indican que un grupo temático particular
-    se menciona pero no de manera prominente, o no se menciona en absoluto en el
-    párrafo. Estudie la visualización en busca de círculos oscuros/blancos y espacios
-    vacíos, y verifique si los cambios en los grupos temáticos y su prominencia se
-    ajustan a un plan de escritura que sus lectores puedan seguir fácilmente.
+    a lo largo de los párrafos y dentro de ellos. Los círculos oscuros indican que
+    un grupo temático particular se trata de manera prominente en un párrafo determinado.
+    Los círculos blancos y los espacios vacíos indican que un grupo temático particular
+    se menciona pero no de manera prominente, o no se menciona en absoluto en el párrafo.
+    Estudie la visualización en busca de círculos oscuros y blancos y espacios vacíos,
+    y verifique si los cambios en los grupos temáticos y su prominencia se ajustan
+    a un plan de escritura que sus lectores puedan seguir fácilmente.
   coherence:
     title: Términos a lo Largo de los Párrafos
     topic_only: 'Mostrar solo grupos temáticos:'
@@ -165,31 +165,16 @@ professional_tone:
   confidence: Confianza
   subjectivity: Subjetividad
   'null': Sin comentarios.
-  text: "Su texto:"
+  text: "Su Texto:"
   issue: "Problema:"
   suggestion: "Sugerencia:"
 sources:
-  title: Fuentes
+  title: Uso de Fuentes
   error: Error al mostrar la herramienta Fuentes.
   issue: "Problema:"
-  source: "Fuente(s):"
-  supportive:
-    title: Cita de Apoyo
-    "null": No se utiliza ningún estilo de cita de apoyo en este borrador.
-  hedged:
-    title: Cita Matizada
-    "null": No se utiliza ningún estilo de cita matizada en este borrador.
-  alternative:
-    title: Cita Alternativa
-    "null": No se utiliza ningún estilo de cita alternativa en este borrador.
-  neutral:
-    title: Cita Neutral
-    "null": No se utiliza ningún estilo de cita neutral en este borrador.
+  suggestion: "Sugerencia:"
+  no_sentences: No se encontraron oraciones relevantes en su borrador.
   no_issues: No se encontraron problemas significativos de citación en su borrador.
-  'null': Sin comentarios.
-  types:
-    title: Tipos de Fuentes
-    subtitle: Los siguientes tipos de fuentes se encuentran en este borrador.
 impressions:
   title: Impresiones
 'null':

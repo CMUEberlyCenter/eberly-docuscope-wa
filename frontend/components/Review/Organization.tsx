@@ -371,69 +371,66 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
                     .filter(
                       ({ is_topic_cluster }) => is_topic_cluster || !showToggle
                     )
-                    .map(
-                      ({ topic, is_non_local, paragraphs, sent_count }, i) => {
-                        const topi = topic.at(2)?.replaceAll("_", " ") ?? "";
-                        const [left, right] = ["l", "r"].map((lr) =>
-                          is_non_local ? lr : lr.toUpperCase()
-                        );
-                        const paraIconClass = is_non_local
-                          ? "topic-icon-small"
-                          : "topic-icon-large";
-                        return (
-                          <tr
-                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                            key={`topic-paragraph-key-${i}`}
-                            className={
-                              topic === selected?.topic ? "bg-highlight" : ""
-                            }
+                    .map(({ topic, is_non_local, paragraphs, sent_count }) => {
+                      const topi = topic.at(2)?.replaceAll("_", " ") ?? "";
+                      const [left, right] = ["l", "r"].map((lr) =>
+                        is_non_local ? lr : lr.toUpperCase()
+                      );
+                      const paraIconClass = is_non_local
+                        ? "topic-icon-small"
+                        : "topic-icon-large";
+                      return (
+                        <tr
+                          key={`topic-paragraph-key-${JSON.stringify({ topic, is_non_local, paragraphs, sent_count })}`}
+                          className={
+                            topic === selected?.topic ? "bg-highlight" : ""
+                          }
+                        >
+                          <td
+                            data-search={topi}
+                            data-order={sent_count}
+                            className="p-0"
                           >
-                            <td
-                              data-search={topi}
-                              data-order={sent_count}
-                              className="p-0"
+                            <Button
+                              className="w-100 text-primary text-start"
+                              variant="none"
+                              active={topic === selected?.topic}
+                              onClick={() => onSelectTopic(topic)}
                             >
-                              <Button
-                                className="w-100 text-primary text-start"
-                                variant="none"
-                                active={topic === selected?.topic}
-                                onClick={() => onSelectTopic(topic)}
+                              {topi}
+                            </Button>
+                          </td>
+                          {paragraphs.map((paraType, j) => {
+                            const paraContent = `${
+                              paraType?.is_left ? left : right
+                            }${paraType?.is_topic_sent ? "" : "*"}`;
+                            return (
+                              <td
+                                // need to use index as the source array is positional and has null values
+                                key={`topic-key-${j}`} // eslint-disable-line @eslint-react/no-array-index-key
+                                className={classNames(
+                                  "p-0 text-center",
+                                  selected?.paragraph === j
+                                    ? "bg-highlight"
+                                    : ""
+                                )}
                               >
-                                {topi}
-                              </Button>
-                            </td>
-                            {paragraphs.map((paraType, j) => {
-                              const paraContent = `${
-                                paraType?.is_left ? left : right
-                              }${paraType?.is_topic_sent ? "" : "*"}`;
-                              return (
-                                <td
-                                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                                  key={`topic-key-${i}-${j}`}
-                                  className={classNames(
-                                    "p-0 text-center",
-                                    selected?.paragraph === j
-                                      ? "bg-highlight"
-                                      : ""
-                                  )}
-                                >
-                                  {paraType ? (
-                                    <Button
-                                      variant="icon"
-                                      title={paraContent}
-                                      className={paraIconClass}
-                                      onClick={() => onSelectCell(topic, j)}
-                                    >
-                                      <IndicatorIcon unit={paraType} />
-                                    </Button>
-                                  ) : null}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        );
-                      }
-                    )}
+                                {paraType ? (
+                                  <Button
+                                    variant="icon"
+                                    title={paraContent}
+                                    className={paraIconClass}
+                                    onClick={() => onSelectCell(topic, j)}
+                                  >
+                                    <IndicatorIcon unit={paraType} />
+                                  </Button>
+                                ) : null}
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
             </tbody>
           </DataTable>
         ) : (
@@ -442,102 +439,6 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
           </div>
         )}
       </div>
-      {/* {visualizationGlobal} */}
-      {/* {true || selected?.paragraph ? null : (
-                <div className="mw-100 mt-1 overflow-auto">
-                  <table>
-                    <caption>
-                      {t("organization.coherence.sentences_in_paragraph", {
-                        paragraph: selected?.paragraph ?? 0 + 1,
-                      })}
-                    </caption>
-                    <thead>
-                      <tr>
-                        <td>{t("organization.coherence.sentences")}</td>
-                        {data?.response.local
-                          ?.at(selected?.paragraph ?? 0)
-                          ?.data?.at(0)
-                          ?.sentences.map((_sentence, i) => (
-                            <td key={`key-sentence-${i}`}>
-                              <Button
-                                size="sm"
-                                variant="outline-primary"
-                                active={selected?.sentence === i}
-                                data-sentence={i}
-                                // onClick={() =>
-                                //   setSelectedSentence(
-                                //     selectedSentence === i ? -1 : i
-                                //   )
-                                // }
-                              >
-                                {i + 1}
-                              </Button>
-                            </td>
-                          ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data?.response.local
-                        ?.at(selected?.paragraph ?? 0)
-                        ?.data?.filter((topic) => !!topic)
-                        .map(({ topic, is_non_local, sentences }, i) => {
-                          const topi = topic.at(2) ?? "";
-                          const [left, right] = ["l", "r"].map((lr) =>
-                            is_non_local ? lr : lr.toUpperCase()
-                          );
-                          const iconClass = is_non_local
-                            ? "topic-icon-small"
-                            : "topic-icon-large";
-                          return (
-                            <tr key={`topic-sentence-key-${i}`}>
-                              <th>
-                                <Button
-                                  className="text-primary text-start"
-                                  variant="none"
-                                  // onClick={() =>
-                                  //   setSelectedTopic(topic)
-                                  //   // onTopicClick(selectedParagraph, i)
-                                  // }
-                                >
-                                  {topi.replaceAll("_", " ")}
-                                </Button>
-                              </th>
-                              {sentences.map((sentence, j) => {
-                                const content = `${
-                                  sentence?.is_left ? left : right
-                                }${sentence?.is_topic_sent ? "" : "*"}`;
-                                return (
-                                  <td
-                                    className="text-center p-0"
-                                    key={`topic-sentence-key-${i}-${j}`}
-                                  >
-                                    <div
-                                      className="topic-type-default"
-                                      // onClick={() => {
-                                      //   setSelectedSentence(selectedSentence === j ? );
-                                      //   setSelectedTopic(topic);
-                                      // }
-                                      // }
-                                    >
-                                      {sentence ? (
-                                        <span
-                                          title={content}
-                                          className={iconClass}
-                                        >
-                                          <IndicatorIcon unit={sentence} />
-                                        </span>
-                                      ) : null}
-                                    </div>
-                                  </td>
-                                );
-                              })}
-                            </tr>
-                          );
-                        })}
-                    </tbody>
-                  </table>
-                </div>
-              )} */}
     </ReviewToolCard>
   );
 };

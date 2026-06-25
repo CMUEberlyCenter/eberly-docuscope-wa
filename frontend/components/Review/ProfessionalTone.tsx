@@ -51,8 +51,10 @@ const SentenceToneIssues: FC<
   return (
     <Accordion {...props}>
       {issues.map(({ text, sent_id, issue, suggestion }, i) => (
-        /* eslint-disable-next-line @eslint-react/no-array-index-key */
-        <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+        <Accordion.Item
+          key={`${id}-${JSON.stringify({ text, sent_id, issue, suggestion })}`}
+          eventKey={`${id}-${i}`}
+        >
           <Accordion.Header className="accordion-header-highlight">
             <span>
               <h6 className="d-inline">{t("professional_tone.text")}</h6>{" "}
@@ -69,7 +71,7 @@ const SentenceToneIssues: FC<
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <div className="highlight highlight-1 p-3 pb-2">
+            <div className="bg-info-subtle p-3 pb-2">
               <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
               <p className="d-inline">{issue}</p>
             </div>
