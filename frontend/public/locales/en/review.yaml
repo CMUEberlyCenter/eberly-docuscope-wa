@@ -152,6 +152,7 @@ paragraph_clarity:
   title: Paragraph Clarity
   tooltip: Improving paragraph flow enhances readability and effective communication.
   error: Error displaying Paragraph Clarity tool.
+  issue: "Issue:"
   suggestion: "Suggestion:"
   'null': No issues found.
 professional_tone:
