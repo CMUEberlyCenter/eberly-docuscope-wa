@@ -138,14 +138,6 @@ export const Page: FC = () => {
                 onClick={toggleToolHandler("prominent_topics")}
               />
             ) : null}
-            {settings?.prominent_topics &&
-            isEnabled(task, "prominent_topics") ? (
-              <ProminentTopicsButton
-                disabled={disabled("prominent_topics")}
-                active={tool === "prominent_topics"}
-                onClick={toggleToolHandler("prominent_topics")}
-              />
-            ) : null}
             {settings?.lines_of_arguments &&
             isEnabled(task, "lines_of_arguments") ? (
               <LinesOfArgumentsButton
