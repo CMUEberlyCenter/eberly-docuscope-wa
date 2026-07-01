@@ -76,9 +76,9 @@
   }
 
   div.accordion-item {
-    border: 4px solid transparent;
+    border: 3px solid transparent;
 
-    &:not(:has(.collapsed)) {
+    &:not(:has(.collapsed)):has(.accordion-collapse) { // check for accordion-collapse to avoid highlighting empty accordion items (eg) expectations
       border-color: var(--bs-info-border-subtle);
     }
   }
