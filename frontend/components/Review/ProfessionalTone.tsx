@@ -71,11 +71,11 @@ const SentenceToneIssues: FC<
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <div className="highlight highlight-0 p-3 pb-2">
+            <div className="highlight highlight-0 p-3">
               <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
               <p className="d-inline">{issue}</p>
             </div>
-            <div className="p-3">
+            <div className="p-3 pb-0">
               <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
               <p className="d-inline">{suggestion}</p>
             </div>
