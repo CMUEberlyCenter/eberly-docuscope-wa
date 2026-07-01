@@ -1,12 +1,17 @@
-import { clearSnapshotAnalysesById } from '#server/data/mongo';
+import { clearSnapshotAnalysesById, clearSnapshotAnalysisById } from '#server/data/mongo';
 import { logger } from '#server/logger.js';
 import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
+import { ReviewTool } from '#lib/ReviewResponse.js';
 
-export async function onClearSnapshotCache(id: string) {
+export async function onClearSnapshotCache(id: string, tool: ReviewTool | "*") {
   getAuthorizedUser();
   try {
-    await clearSnapshotAnalysesById(id);
+    if (tool == "*") {
+      await clearSnapshotAnalysesById(id);
+    } else {
+      await clearSnapshotAnalysisById(id, tool);
+    }
     return { success: true };
   } catch (error) {
     if (error instanceof ReferenceError) {
