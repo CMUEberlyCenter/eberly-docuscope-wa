@@ -1,6 +1,6 @@
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
-import { Analysis } from '../../lib/ReviewResponse';
+import { Analysis, ReviewTool } from '../../lib/ReviewResponse';
 import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
@@ -177,6 +177,31 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
       { _id },
       {
         $set: { analyses: [], timestamp: new Date() },
+      }
+    );
+  if (!upd) {
+    throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
+  }
+  logger.info(`Cleared analyses for snapshot with id '${id}'`, {
+    snapshotId: id,
+    action: 'clear_snapshot_analyses',
+  });
+  return upd._id;
+}
+
+export async function clearSnapshotAnalysisById(id: string | ObjectId, tool: ReviewTool) {
+  if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
+    throw new ReferenceError(`Snapshot ${id} not found.`);
+  }
+  const _id = new ObjectId(id);
+  const upd = await client
+    .db(MONGO_DB)
+    .collection<Snapshot>(SNAPSHOTS)
+    .findOneAndUpdate(
+      { _id },
+      {
+        $pull: { "analyses": { tool } }, // Pull the specific analysis by tool
+        $set: { timestamp: new Date() },
       }
     );
   if (!upd) {
