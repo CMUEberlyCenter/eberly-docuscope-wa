@@ -68,6 +68,13 @@
     --bs-accordion-active-bg: var(--bs-highlight);
   }
 
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+  .accordion-button:focus-visible {
+    box-shadow: var(--bs-accordion-btn-focus-box-shadow);
+  }
+
   div.accordion-item {
     border: 4px solid transparent;
 
