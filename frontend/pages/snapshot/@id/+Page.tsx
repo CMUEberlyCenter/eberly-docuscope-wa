@@ -68,11 +68,7 @@ import { Data } from "./+data";
 type TabKey = "big_picture" | "fine_tuning";
 // tool event keys
 type Tool =
-  | ReviewTool
-  | "sentence_density"
-  | "organization"
-  | "impressions"
-  | "null";
+  ReviewTool | "sentence_density" | "organization" | "impressions" | "null";
 
 export const Page: FC = () => {
   const { id: reviewID, tool_config, task, analyses } = useData<Data>();
