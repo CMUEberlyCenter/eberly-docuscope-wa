@@ -65,7 +65,8 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
                       <h6 className="d-inline">
                         {t("paragraph_clarity.issue")}
                       </h6>{" "}
-                      <span>{issue}</span></div>
+                      <span>{issue}</span>
+                    </div>
                     <AlertIcon
                       show={sent_ids.length === 0 && !para_id}
                       message={t("logical_flow.no_sentences")}

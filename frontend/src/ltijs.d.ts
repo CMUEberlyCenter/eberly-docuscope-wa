@@ -139,11 +139,7 @@ declare module 'ltijs' {
     height?: number; // int
   };
   export type ContentItem =
-    | LTI_Link
-    | LTI_ResourceLink
-    | LTI_File
-    | LTI_HTMLFragment
-    | LTI_Image;
+    LTI_Link | LTI_ResourceLink | LTI_File | LTI_HTMLFragment | LTI_Image;
 
   export interface DeepLinkingMessageOptions {
     message?: string;
@@ -245,17 +241,9 @@ declare module 'ltijs' {
     scoreMaximum?: number; // Required in spec but can be derived in submitScore function
     comment?: string;
     activityProgress?:
-      | 'Initialized'
-      | 'Started'
-      | 'InProgress'
-      | 'Submitted'
-      | 'Completed';
+      'Initialized' | 'Started' | 'InProgress' | 'Submitted' | 'Completed';
     gradingProgress?:
-      | 'FullyGraded'
-      | 'Pending'
-      | 'PendingManual'
-      | 'Failed'
-      | 'NotReady';
+      'FullyGraded' | 'Pending' | 'PendingManual' | 'Failed' | 'NotReady';
     userId?: string; // Required in request but added by function
     scoringUserId?: string;
     submission?: {
