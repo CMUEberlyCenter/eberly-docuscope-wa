@@ -3,13 +3,17 @@ import {
   type ProfessionalToneOutput,
 } from "#/lib/ReviewResponse";
 import Icon from "#assets/icons/professional_tone_icon.svg?react";
-import { type FC, type HTMLProps, useId } from "react";
+import { type FC, type HTMLProps, useCallback, useId, useState } from "react";
 import {
   Accordion,
   type AccordionProps,
   Alert,
   type ButtonProps,
 } from "react-bootstrap";
+import {
+  AccordionEventKey,
+  AccordionSelectCallback,
+} from "react-bootstrap/esm/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import {
   ReviewToolCard,
@@ -90,6 +94,13 @@ const SentenceToneIssues: FC<
 export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useProfessionalToneReview();
   const { t } = useTranslation("review");
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = useCallback(
+    (eventKey: AccordionEventKey) => {
+      setCurrent(eventKey);
+    },
+    []
+  );
 
   return (
     <ReviewToolCard
@@ -111,6 +122,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.confidence")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(
                 ({ tone_type }) => tone_type === "confidence"
               )}
@@ -119,6 +132,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.subjectivity")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(({ tone_type }) =>
                 ["subjective", "subjectivity"].includes(tone_type)
               )}
@@ -127,6 +142,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.sentiment")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(
                 ({ tone_type }) => tone_type === "emotional"
               )}
