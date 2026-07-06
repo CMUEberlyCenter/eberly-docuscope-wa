@@ -189,7 +189,10 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   return upd._id;
 }
 
-export async function clearSnapshotAnalysisById(id: string | ObjectId, tool: ReviewTool) {
+export async function clearSnapshotAnalysisById(
+  id: string | ObjectId,
+  tool: ReviewTool
+) {
   if (typeof id === 'string' && (!ObjectId.isValid(id) || id.length !== 24)) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
@@ -200,7 +203,7 @@ export async function clearSnapshotAnalysisById(id: string | ObjectId, tool: Rev
     .findOneAndUpdate(
       { _id },
       {
-        $pull: { "analyses": { tool } }, // Pull the specific analysis by tool
+        $pull: { analyses: { tool } }, // Pull the specific analysis by tool
         $set: { timestamp: new Date() },
       }
     );
