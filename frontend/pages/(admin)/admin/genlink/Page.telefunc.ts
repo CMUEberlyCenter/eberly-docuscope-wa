@@ -1,13 +1,16 @@
-import { clearSnapshotAnalysesById, clearSnapshotAnalysisById } from '#server/data/mongo';
+import {
+  clearSnapshotAnalysesById,
+  clearSnapshotAnalysisById,
+} from '#server/data/mongo';
 import { logger } from '#server/logger.js';
 import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
 import { ReviewTool } from '#lib/ReviewResponse.js';
 
-export async function onClearSnapshotCache(id: string, tool: ReviewTool | "*") {
+export async function onClearSnapshotCache(id: string, tool: ReviewTool | '*') {
   getAuthorizedUser();
   try {
-    if (tool == "*") {
+    if (tool == '*') {
       await clearSnapshotAnalysesById(id);
     } else {
       await clearSnapshotAnalysisById(id, tool);

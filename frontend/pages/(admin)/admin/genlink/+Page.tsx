@@ -19,8 +19,23 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { convertToHtml } from "mammoth/mammoth.browser";
-import { Activity, ChangeEvent, FC, FormEvent, useCallback, useState } from "react";
-import { Button, ButtonGroup, Card, Dropdown, Form, InputGroup, ListGroup } from "react-bootstrap";
+import {
+  Activity,
+  ChangeEvent,
+  FC,
+  FormEvent,
+  useCallback,
+  useState,
+} from "react";
+import {
+  Button,
+  ButtonGroup,
+  Card,
+  Dropdown,
+  Form,
+  InputGroup,
+  ListGroup,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
@@ -188,7 +203,15 @@ export const Page: FC = () => {
     }
   };
 
-  const reviewTools: ReviewTool[] = ["expectations", "prominent_topics", "logical_flow", "paragraph_clarity", "professional_tone", "sources"];
+  const reviewTools: ReviewTool[] = [
+    "expectations",
+    "lines_of_arguments",
+    "prominent_topics",
+    "logical_flow",
+    "paragraph_clarity",
+    "professional_tone",
+    "sources",
+  ];
 
   return (
     <>
@@ -399,35 +422,41 @@ export const Page: FC = () => {
                       )
                     }
                   />
-                  <Form onSubmit={async (event) => {
-                    event.preventDefault();
-                    const data = new FormData(event.currentTarget);
-                    const id = data.get("id") as string;
-                    const tool = data.get("tool") as ReviewTool | "*";
+                  <Form
+                    onSubmit={async (event) => {
+                      event.preventDefault();
+                      const data = new FormData(event.currentTarget);
+                      const id = data.get("id") as string;
+                      const tool = data.get("tool") as ReviewTool | "*";
 
-                    const response = await onClearSnapshotCache(id, tool);
-                    if (!response.success) {
-                      console.error(response.message);
-                    }
-                  }}>
+                      const response = await onClearSnapshotCache(id, tool);
+                      if (!response.success) {
+                        console.error(response.message);
+                      }
+                    }}
+                  >
                     <input type="hidden" name="id" value={id} />
                     <InputGroup>
-                    <Form.Select aria-label={t("admin:genlink.select_tool")} name="tool" size="sm">
-                      <option value="*">All</option>
-                      {reviewTools.map((tool) => (
-                        <option key={tool} value={tool}>
-                          {tr(`review:${tool}.title`)}
-                        </option>
-                      ))}
-                    </Form.Select>
-                    <Button
-                      variant="icon"
-                      className="text-danger bg-light"
-                      type="submit"
-                      title={t("admin:genlink.refresh_snapshot")}
-                    >
-                      <FontAwesomeIcon icon={faBroom} />
-                    </Button>
+                      <Form.Select
+                        aria-label={t("admin:genlink.select_tool")}
+                        name="tool"
+                        size="sm"
+                      >
+                        <option value="*">All</option>
+                        {reviewTools.map((tool) => (
+                          <option key={tool} value={tool}>
+                            {tr(`review:${tool}.title`)}
+                          </option>
+                        ))}
+                      </Form.Select>
+                      <Button
+                        variant="icon"
+                        className="text-danger bg-light"
+                        type="submit"
+                        title={t("admin:genlink.refresh_snapshot")}
+                      >
+                        <FontAwesomeIcon icon={faBroom} />
+                      </Button>
                     </InputGroup>
                   </Form>
                   <Button
