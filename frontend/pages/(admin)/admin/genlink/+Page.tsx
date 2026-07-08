@@ -2,6 +2,7 @@ import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIc
 import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
+import { ReviewTool } from "#lib/ReviewResponse.js";
 import { validateWritingTask } from "#lib/schemaValidate";
 import { checkWordCount } from "#lib/ToolSettings";
 import {
@@ -23,25 +24,22 @@ import {
   Activity,
   ChangeEvent,
   FC,
-  FormEvent,
   useCallback,
-  useState,
+  useState
 } from "react";
 import {
   Button,
   ButtonGroup,
   Card,
-  Dropdown,
   Form,
   InputGroup,
-  ListGroup,
+  ListGroup
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "./+data";
 import { onClearSnapshotCache } from "./Page.telefunc";
-import { ReviewTool } from "#lib/ReviewResponse.js";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {

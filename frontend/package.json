@@ -58,7 +58,7 @@
   ],
   "devDependencies": {
     "@chromatic-com/storybook": "^5.2.1",
-    "@eslint-react/eslint-plugin": "^5.11.2",
+    "@eslint-react/eslint-plugin": "^5.12.1",
     "@eslint/js": "^10.0.1",
     "@happy-dom/global-registrator": "^20.10.6",
     "@rollup/plugin-commonjs": "^29.0.3",
@@ -86,7 +86,7 @@
     "@types/google.picker": "^0.0.52",
     "@types/gtag.js": "^0.0.20",
     "@types/multer": "^2.2.0",
-    "@types/node": "^26.1.0",
+    "@types/node": "^26.1.1",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@types/sanitize-html": "^2.16.1",
@@ -107,7 +107,7 @@
     "rollup-plugin-visualizer": "^7.0.1",
     "sass": "^1.101.0",
     "storybook": "^10.4.6",
-    "typescript-eslint": "^8.62.1",
+    "typescript-eslint": "^8.63.0",
     "vite": "^8.1.3",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "^4.1.10",
@@ -119,7 +119,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.3.0",
     "@fortawesome/free-regular-svg-icons": "^7.3.0",
     "@fortawesome/free-solid-svg-icons": "^7.3.0",
-    "@fortawesome/react-fontawesome": "^3.3.1",
+    "@fortawesome/react-fontawesome": "^3.4.0",
     "@googleworkspace/drive-picker-element": "^0.7.3",
     "@tanstack/react-query": "^5.101.2",
     "ajv": "^8.20.0",
@@ -149,9 +149,9 @@
     "i18next-http-middleware": "^3.9.7",
     "ltijs": "^5.9.9",
     "mammoth": "^1.12.0",
-    "mongodb": "^7.4.0",
+    "mongodb": "^7.5.0",
     "multer": "^2.2.0",
-    "node-html-parser": "^8.0.4",
+    "node-html-parser": "^9.0.0",
     "prom-client": "^15.1.3",
     "react": "^19.2.7",
     "react-animate-height": "^3.2.4",
@@ -168,7 +168,7 @@
     "slate-hyperscript": "^0.125.0",
     "slate-react": "^0.125.1",
     "string-format": "^2.0.0",
-    "telefunc": "^0.2.21",
+    "telefunc": "^0.2.22",
     "vike": "^0.4.260",
     "vike-react": "^0.6.25",
     "vike-react-query": "^0.1.13",
@@ -194,5 +194,9 @@
   },
   "patchedDependencies": {
     "ltijs@5.9.9": "patches/ltijs@5.9.9.patch"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "@parcel/watcher@2.5.6": true
   }
 }
