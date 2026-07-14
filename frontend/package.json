@@ -15,7 +15,7 @@
   "private": true,
   "scripts": {
     "dev": "npx bun ./index.ts",
-    "build": "npx -y bun vike build",
+    "build": "npx -y bunx --bun vike build",
     "build:server": "npx bun build index.ts --outdir=./build/server --target=node",
     "test": "npx bun test",
     "test:watch": "npx bun test --watch",
