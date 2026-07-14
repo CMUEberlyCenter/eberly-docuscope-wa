@@ -118,29 +118,41 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
-        const task = JSON.parse(request.body.file) as DbWritingTask;
+        const task = request.body.file
+          ? (JSON.parse(request.body.file) as DbWritingTask)
+          : null;
         const tool = ['draft', 'review'].includes(request.body.tool)
           ? request.body.tool
           : 'draft';
         const url = new URL(tool, LTI_HOSTNAME);
-        const { _id, ...writing_task } = task;
-        const valid = validateWritingTask(writing_task);
-        if (!valid) {
-          throw new UnprocessableContentError(
-            validateWritingTask.errors,
-            'Invalid JSON'
-          );
+        const custom: {
+          tool: string;
+          writing_task_id?: string;
+          writing_task?: string;
+        } = { tool };
+        if (task) {
+          const { _id, ...writing_task } = task;
+          const valid = validateWritingTask(writing_task);
+          if (!valid) {
+            throw new UnprocessableContentError(
+              validateWritingTask.errors,
+              'Invalid JSON'
+            );
+          }
+          if (!isWritingTask(writing_task)) {
+            throw new UnprocessableContentError(
+              ['Failed type checking!'],
+              'Invalid JSON'
+            );
+          }
+          // FIXME task should not be inserted. Use writing_task directly.
+          // Requires changing LTI front-end to use writing_task in custom.
+          const writing_task_id: string =
+            _id ?? (await insertWritingTask(writing_task)).toString();
+          custom.writing_task_id = writing_task_id;
+          custom.writing_task = JSON.stringify(writing_task);
         }
-        if (!isWritingTask(writing_task)) {
-          throw new UnprocessableContentError(
-            ['Failed type checking!'],
-            'Invalid JSON'
-          );
-        }
-        // FIXME task should not be inserted. Use writing_task directly.
-        // Requires changing LTI front-end to use writing_task in custom.
-        const writing_task_id: string =
-          _id ?? (await insertWritingTask(task)).toString();
+        const { t } = request.i18n;
         const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
@@ -148,18 +160,19 @@ async function __main__() {
             // text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
             title:
               response.locals.token.platformContext.deepLinkingSettings.title, // #236
-            text: `${writing_task.info.name} (${request.i18n.t(`deeplinking.option.${tool}`)})`,
+            text: t('deeplinking.description', {
+              context: task ? 'task' : undefined,
+              interpolation: { skipOnVariables: false },
+              tool: `$t(deeplinking.option.${tool})`,
+              task,
+            }),
             url: url.toString(),
             icon: {
               url: new URL('logo.svg', LTI_HOSTNAME).toString(),
               width: 500,
               height: 160,
             },
-            custom: {
-              writing_task_id,
-              writing_task: JSON.stringify(writing_task),
-              tool,
-            },
+            custom,
           },
         ];
         const form = await Provider.DeepLinking.createDeepLinkingForm(

@@ -64,7 +64,7 @@ export const Page: FC = () => {
           </ListGroup>
           <div className="w-100 h-100 minh-0 d-flex flex-column gap-2 align-items-stretch">
             <div className="flex-grow-1 minh-0 overflow-hidden">
-              <WritingTaskInfo task={selected} className="" />
+              <WritingTaskInfo task={selected} />
             </div>
             <div className="d-flex justify-content-end">
               <Button
@@ -106,6 +106,14 @@ export const Page: FC = () => {
           noValidate
           method="post"
           className="d-flex gap-2 justify-content-between align-items-center"
+          onSubmit={(event) => {
+            if (!selected) {
+              const confirmation = window.confirm(t("deeplinking.confirm"));
+              if (!confirmation) {
+                event.preventDefault();
+              }
+            }
+          }}
         >
           <input
             type="hidden"
@@ -136,11 +144,7 @@ export const Page: FC = () => {
               placement="top"
               overlay={
                 <Tooltip>
-                  {t(
-                    !selected || !tool
-                      ? "deeplinking.disabled"
-                      : t("deeplinking.enabled")
-                  )}
+                  {t(!tool ? "deeplinking.disabled" : t("deeplinking.enabled"))}
                 </Tooltip>
               }
             >
@@ -149,10 +153,8 @@ export const Page: FC = () => {
                   ref={targetRef}
                   type="submit"
                   className="btn btn-primary"
-                  disabled={!selected || !tool}
-                  title={
-                    !selected || !tool ? t("deeplinking.disabled") : undefined
-                  }
+                  disabled={!tool}
+                  title={!tool ? t("deeplinking.disabled") : undefined}
                 >
                   {t("select")}
                 </button>
