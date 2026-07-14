@@ -39,6 +39,9 @@ deeplinking:
   option:
     draft: Draft
     review: Review
+  confirm: You have not selected a Writing Task. Are you sure you want to continue without selecting one?
+  description: $t(document.title) {{tool}}
+  description_task: '$t(document.title) {{tool}}: {{task.info.name}}'
   # upload: Select a Writing Task or upload a custom Writing Task File
 genlink:
   title: $t(document.title) Writing Task Link Generator

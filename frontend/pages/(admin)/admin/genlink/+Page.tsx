@@ -20,20 +20,14 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import classNames from "classnames";
 import { convertToHtml } from "mammoth/mammoth.browser";
-import {
-  Activity,
-  ChangeEvent,
-  FC,
-  useCallback,
-  useState
-} from "react";
+import { Activity, ChangeEvent, FC, useCallback, useState } from "react";
 import {
   Button,
   ButtonGroup,
   Card,
   Form,
   InputGroup,
-  ListGroup
+  ListGroup,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
