@@ -42,8 +42,15 @@ export const CivilTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
             <Accordion>
               {review.response.map(
                 ({ text, assessment, suggestion, sent_id }, i) => (
-                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                  <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+                  <Accordion.Item
+                    key={JSON.stringify({
+                      text,
+                      assessment,
+                      suggestion,
+                      sent_id,
+                    })}
+                    eventKey={`${id}-${i}`}
+                  >
                     <Accordion.Header className="accordion-header-highlight">
                       <h6 className="d-inline">{t("civil_tone.prefix")}</h6>{" "}
                       <q>{text}</q>

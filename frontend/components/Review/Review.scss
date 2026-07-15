@@ -1,8 +1,15 @@
 @use "sass:meta";
 
 .review {
-  --highlight-1-bg: #e4ff92;
-  --highlight-1-text: black;
+  // --highlight-1-bg: #e4ff92;
+  --highlight-1-border: #00682c;
+
+  @mixin underline_highlight($color: var(--highlight-1-border)) {
+    text-decoration: underline;
+    text-decoration-color: $color;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 2px;
+  }
 
   .select-button {
     div {
@@ -37,24 +44,44 @@
   }
 
   span.highlight-1 {
-    text-decoration: underline;
+    // needed for user text
+    @include underline_highlight();
   }
 
   .highlight {
-    background-color: var(--bs-highlight);
+    &.highlight-0 {
+      // used for user text and tools
+      background-color: var(--bs-highlight);
+    }
 
     &.highlight-1 {
-      background-color: var(--highlight-1-bg);
-      color: var(--highlight-1-text);
+      // used for tools
+
       li,
       span {
-        text-decoration: underline;
+        @include underline_highlight();
       }
     }
   }
 
   .accordion-header-highlight {
     --bs-accordion-active-bg: var(--bs-highlight);
+  }
+
+  .accordion-button:focus {
+    box-shadow: none;
+  }
+  .accordion-button:focus-visible {
+    box-shadow: var(--bs-accordion-btn-focus-box-shadow);
+  }
+
+  div.accordion-item {
+    border: 3px solid transparent;
+
+    &:not(:has(.collapsed)):has(.accordion-collapse) {
+      // check for accordion-collapse to avoid highlighting empty accordion items (eg) expectations
+      border-color: var(--bs-info-border-subtle);
+    }
   }
 
   .inverse-color {

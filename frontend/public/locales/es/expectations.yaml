@@ -3,7 +3,7 @@ title: Verificar Expectativas de Contenido
 error:
   no_task: ¡No hay expectativas de contenido disponibles!
 sentences: 'Oraciones:'
-assessment: "Lo que funciona:"
+assessment: "Lo que funciona bien:"
 suggestion: 'Sugerencia:'
 no_suggestions: Sin comentarios. Se ve muy bien.
 warning: Esta expectativa no se aborda en su borrador.

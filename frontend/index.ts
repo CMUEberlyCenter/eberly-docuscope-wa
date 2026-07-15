@@ -22,7 +22,7 @@ import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { config, telefunc } from 'telefunc';
+import { config, serve } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -118,30 +118,41 @@ async function __main__() {
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
-        const task = JSON.parse(request.body.file) as DbWritingTask;
+        const task = request.body.file
+          ? (JSON.parse(request.body.file) as DbWritingTask)
+          : null;
         const tool = ['draft', 'review'].includes(request.body.tool)
           ? request.body.tool
           : 'draft';
         const url = new URL(tool, LTI_HOSTNAME);
-        const { _id, ...writing_task } = task;
-        const valid = validateWritingTask(writing_task);
-        if (!valid) {
-          throw new UnprocessableContentError(
-            validateWritingTask.errors,
-            'Invalid JSON'
-          );
+        const custom: {
+          tool: string;
+          writing_task_id?: string;
+          writing_task?: string;
+        } = { tool };
+        if (task) {
+          const { _id, ...writing_task } = task;
+          const valid = validateWritingTask(writing_task);
+          if (!valid) {
+            throw new UnprocessableContentError(
+              validateWritingTask.errors,
+              'Invalid JSON'
+            );
+          }
+          if (!isWritingTask(writing_task)) {
+            throw new UnprocessableContentError(
+              ['Failed type checking!'],
+              'Invalid JSON'
+            );
+          }
+          // FIXME task should not be inserted. Use writing_task directly.
+          // Requires changing LTI front-end to use writing_task in custom.
+          const writing_task_id: string =
+            _id ?? (await insertWritingTask(writing_task)).toString();
+          custom.writing_task_id = writing_task_id;
+          custom.writing_task = JSON.stringify(writing_task);
         }
-        if (!isWritingTask(writing_task)) {
-          throw new UnprocessableContentError(
-            ['Failed type checking!'],
-            'Invalid JSON'
-          );
-        }
-        // FIXME task should not be inserted. Use writing_task directly.
-        // Requires changing LTI front-end to use writing_task in custom.
-        const writing_task_id: string = _id
-          ? (task.info.id ?? _id)
-          : (await insertWritingTask(task)).toString();
+        const { t } = request.i18n;
         const items: ContentItem[] = [
           {
             type: 'ltiResourceLink',
@@ -149,18 +160,19 @@ async function __main__() {
             // text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
             title:
               response.locals.token.platformContext.deepLinkingSettings.title, // #236
-            text: `${writing_task.info.name} (${request.i18n.t(`deeplinking.option.${tool}`)})`,
+            text: t('deeplinking.description', {
+              context: task ? 'task' : undefined,
+              interpolation: { skipOnVariables: false },
+              tool: `$t(deeplinking.option.${tool})`,
+              task,
+            }),
             url: url.toString(),
             icon: {
               url: new URL('logo.svg', LTI_HOSTNAME).toString(),
               width: 500,
               height: 160,
             },
-            custom: {
-              writing_task_id,
-              writing_task: JSON.stringify(writing_task),
-              tool,
-            },
+            custom,
           },
         ];
         const form = await Provider.DeepLinking.createDeepLinkingForm(
@@ -407,7 +419,6 @@ async function __main__() {
     // Snapshot API Endpoints for static content.
     app.use('/api/v2/snapshot', snapshot);
 
-    // app.use('/api/v2/performance', promptPerformance);
     // Metrics
     app.use(metrics);
 
@@ -432,27 +443,26 @@ async function __main__() {
       basicAuthMiddleware,
       async (req: Request, res: Response, _next: NextFunction) => {
         config.telefuncUrl = '/admin/_telefunc';
-        const { body, statusCode, contentType } = await telefunc({
+        // Need to use serve instead of new Telefunc() because the latter does not support express with bun.
+        const { body, statusCode, headers } = await serve({
           url: req.originalUrl, // Telefunc client is configured to send requests to /admin/_telefunc, but telefunc handlers are written for /_telefunc, so we hardcode the url here.  TODO: Refactor telefunc handlers to be aware of admin prefix and use req.originalUrl here.
           method: req.method,
           body: req.body,
-          // readable: req,
-          // contentType: req.headers['content-type'] || undefined,
           context: {
             // You can add any arbitrary contextual information here
-            // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             user: (req as IBasicAuthedRequest).auth?.user,
           },
         });
-        res.status(statusCode).type(contentType).send(body);
-        // next();
+        res.status(statusCode);
+        headers.forEach(([name, value]) => res.setHeader(name, value));
+        res.send(body);
       }
     );
     app.all(
       '/_telefunc',
       async (req: Request, res: Response, _next: NextFunction) => {
         config.telefuncUrl = '/_telefunc';
-        const { body, statusCode, contentType } = await telefunc({
+        const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,
           body: req.body,
@@ -460,9 +470,14 @@ async function __main__() {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             gradeService: Provider.Grade,
+            token: res.locals.token,
+            user: (req as IBasicAuthedRequest).auth?.user,
+            // session: req.session,
           },
         });
-        res.status(statusCode).type(contentType).send(body);
+        res.status(statusCode);
+        headers.forEach(([name, value]) => res.setHeader(name, value));
+        res.send(body);
       }
     );
     // Handle all other routes with Vike

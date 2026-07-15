@@ -3,13 +3,17 @@ import {
   type ProfessionalToneOutput,
 } from "#/lib/ReviewResponse";
 import Icon from "#assets/icons/professional_tone_icon.svg?react";
-import { type FC, type HTMLProps, useId } from "react";
+import { type FC, type HTMLProps, useCallback, useId, useState } from "react";
 import {
   Accordion,
   type AccordionProps,
   Alert,
   type ButtonProps,
 } from "react-bootstrap";
+import {
+  AccordionEventKey,
+  AccordionSelectCallback,
+} from "react-bootstrap/esm/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import {
   ReviewToolCard,
@@ -51,8 +55,10 @@ const SentenceToneIssues: FC<
   return (
     <Accordion {...props}>
       {issues.map(({ text, sent_id, issue, suggestion }, i) => (
-        /* eslint-disable-next-line @eslint-react/no-array-index-key */
-        <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+        <Accordion.Item
+          key={`${id}-${JSON.stringify({ text, sent_id, issue, suggestion })}`}
+          eventKey={`${id}-${i}`}
+        >
           <Accordion.Header className="accordion-header-highlight">
             <span>
               <h6 className="d-inline">{t("professional_tone.text")}</h6>{" "}
@@ -69,11 +75,11 @@ const SentenceToneIssues: FC<
             }
             onExit={() => dispatch({ type: "unset" })}
           >
-            <div className="highlight highlight-1 p-3 pb-2">
+            <div className="highlight highlight-0 p-3">
               <h6 className="d-inline">{t("professional_tone.issue")}</h6>{" "}
               <p className="d-inline">{issue}</p>
             </div>
-            <div className="p-3">
+            <div className="p-3 pb-0">
               <h6 className="d-inline">{t("professional_tone.suggestion")}</h6>{" "}
               <p className="d-inline">{suggestion}</p>
             </div>
@@ -88,6 +94,13 @@ const SentenceToneIssues: FC<
 export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useProfessionalToneReview();
   const { t } = useTranslation("review");
+  const [current, setCurrent] = useState<AccordionEventKey>(null);
+  const onSelect: AccordionSelectCallback = useCallback(
+    (eventKey: AccordionEventKey) => {
+      setCurrent(eventKey);
+    },
+    []
+  );
 
   return (
     <ReviewToolCard
@@ -109,6 +122,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.confidence")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(
                 ({ tone_type }) => tone_type === "confidence"
               )}
@@ -117,6 +132,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.subjectivity")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(({ tone_type }) =>
                 ["subjective", "subjectivity"].includes(tone_type)
               )}
@@ -125,6 +142,8 @@ export const ProfessionalTone: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <section>
             <h5>{t("professional_tone.sentiment")}</h5>
             <SentenceToneIssues
+              activeKey={current}
+              onSelect={onSelect}
               issues={review.response.filter(
                 ({ tone_type }) => tone_type === "emotional"
               )}

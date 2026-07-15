@@ -56,10 +56,17 @@ export const ParagraphClarity: FC<HTMLProps<HTMLDivElement>> = (props) => {
           <Accordion>
             {review.response.map(
               ({ issue, suggestion, sent_ids, para_id }, i) => (
-                /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                <Accordion.Item key={`${id}-${i}`} eventKey={`${id}-${i}`}>
+                <Accordion.Item
+                  key={`${id}-${JSON.stringify({ issue, suggestion, sent_ids, para_id })}`}
+                  eventKey={`${id}-${i}`}
+                >
                   <Accordion.Header className="accordion-header-highlight">
-                    <div className="flex-grow-1">{issue}</div>
+                    <div className="flex-grow-1">
+                      <h6 className="d-inline">
+                        {t("paragraph_clarity.issue")}
+                      </h6>{" "}
+                      <span>{issue}</span>
+                    </div>
                     <AlertIcon
                       show={sent_ids.length === 0 && !para_id}
                       message={t("logical_flow.no_sentences")}

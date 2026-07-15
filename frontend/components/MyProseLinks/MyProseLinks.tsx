@@ -19,6 +19,12 @@ const MyLink: FC<{ href: URL; title: string }> = ({ href, title }) => {
   );
 };
 
+/**
+ * @component
+ * Component for displaying generated links to myProse tools and tasks.
+ * @param param0.selected The selected writing task.
+ * @param param0.hostname The hostname of the application.
+ */
 export const MyProseLinks: FC<{
   selected: DbWritingTask | null;
   hostname: URL;

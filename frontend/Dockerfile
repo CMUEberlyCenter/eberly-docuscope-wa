@@ -21,7 +21,7 @@ COPY . .
 RUN bun run build
 RUN bun run build:server
 
-FROM docker.io/node:25-slim AS release
+FROM docker.io/node:26-slim AS release
 # Using node image as bun image has had issues with native modules in some cases
 # TODO: check if bun can be used directly here with ltijs security module and other native modules
 LABEL org.opencontainers.image.description="myProse web application"

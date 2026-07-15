@@ -14,7 +14,7 @@ import {
 const FilenameContext = createContext<
   [string | null, Dispatch<SetStateAction<string | null>>]
 >([null, () => {}]);
-/** Hook for accessing the uploaded filename. */ // used for exporting with the same name
+/** Hook for accessing the uploaded filename. */
 export const useFilename = () => use(FilenameContext);
 /**
  * Context for the file text.

@@ -70,8 +70,14 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                 i
               ) => (
                 <Accordion.Item
-                  /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                  key={`${prefixId}-${i}`}
+                  key={JSON.stringify({
+                    claim,
+                    support,
+                    claim_sent_ids,
+                    support_sent_ids,
+                    suggestion,
+                    impact,
+                  })}
                   eventKey={`${prefixId}-${i}`}
                 >
                   <Accordion.Header className="accordion-header-highlight">
@@ -103,20 +109,6 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                     }
                     onExit={() => dispatch({ type: "unset" })}
                   >
-                    {/* {support && typeof support === "string" ? (
-                      <div
-                        className={classNames(
-                          "p-3 pb-2",
-                          (support_sent_ids ?? []).length &&
-                          "highlight highlight-1"
-                        )}
-                      >
-                        <h6 className="d-inline">
-                          {t("lines_of_arguments.support")}
-                        </h6>{" "}
-                        <span>{support}</span>
-                      </div>
-                    ) : null} */}
                     {support && Array.isArray(support) ? (
                       <div
                         className={classNames(
@@ -127,9 +119,8 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       >
                         <h6>{t("lines_of_arguments.support")}</h6>
                         <ul>
-                          {support.map((s, k) => (
-                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                            <li key={`${prefixId}-${i}-${k}`}>{s}</li>
+                          {support.map((s) => (
+                            <li key={`support-${s}`}>{s}</li>
                           ))}
                         </ul>
                       </div>
@@ -139,14 +130,12 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       {suggestion || impact ? (
                         <ul>
                           {suggestion ? (
-                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                            <li key={`${prefixId}-${i}-suggestion`}>
+                            <li key={`suggestion-${suggestion}`}>
                               {suggestion}
                             </li>
                           ) : null}
                           {impact ? (
-                            /* eslint-disable-next-line @eslint-react/no-array-index-key */
-                            <li key={`${prefixId}-${i}-impact`}>{impact}</li>
+                            <li key={`impact-${impact}`}>{impact}</li>
                           ) : null}
                         </ul>
                       ) : (
