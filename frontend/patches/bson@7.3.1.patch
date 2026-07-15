@@ -1,0 +1,17 @@
+diff --git a/lib/bson.cjs b/lib/bson.cjs
+index 4acdf67c52588b94919b0cc5347b9570bc6b943d..67a6da3617b0c9cbc96efde6eb91f0561e74c16f 100644
+--- a/lib/bson.cjs
++++ b/lib/bson.cjs
+@@ -2607,9 +2607,9 @@ class ObjectId extends BSONValue {
+     static {
+         this.resetState();
+         const { startupSnapshot } = globalThis?.process?.getBuiltinModule?.('v8') ?? {};
+-        if (startupSnapshot?.isBuildingSnapshot?.()) {
+-            startupSnapshot?.addDeserializeCallback?.(this.resetState);
+-        }
++        // if (startupSnapshot?.isBuildingSnapshot?.()) {
++            // startupSnapshot?.addDeserializeCallback?.(this.resetState);
++        // }
+     }
+     static cacheHexString;
+     buffer;

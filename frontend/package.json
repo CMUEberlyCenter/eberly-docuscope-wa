@@ -176,24 +176,21 @@
     "yaml": "^2.9.0"
   },
   "overrides": {
-    "@babel/core": ">=7.29.0",
+    "@babel/core": ">=7.29.0 <8",
     "bluebird": ">=3.7.2",
     "mongoose": ">=8.9.5",
     "react-streaming": "$react-streaming",
     "whatwg-url": ">=15.0.0",
-    "devalue": ">5.8.0",
     "@types/node": "$@types/node",
     "jws": ">=4.0.0",
     "qs": ">6.14.1",
     "bn.js": ">=5.2.3",
-    "fast-xml-parser": ">5.3.3",
     "minimatch": ">=10.2.1",
-    "lodash": ">4.17.22",
-    "hono": ">=4.12.7",
-    "@hono/node-server": ">=1.19.11"
+    "lodash": ">4.17.22"
   },
   "patchedDependencies": {
-    "ltijs@5.9.9": "patches/ltijs@5.9.9.patch"
+    "ltijs@5.9.9": "patches/ltijs@5.9.9.patch",
+    "bson@7.3.1": "patches/bson@7.3.1.patch"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
