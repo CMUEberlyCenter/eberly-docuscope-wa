@@ -11,7 +11,7 @@ about:
   acknowledgements:
     title: 'Agradecimientos:'
     content: >
-      Este proyecto ha sido parcialmente financiado por la Fundación A.W. Mellon,
+      Este proyecto ha contado con el apoyo parcial de la Fundación A.W. Mellon,
       la Beca Semilla de la Iniciativa Simon de Carnegie Mellon,
       el Fondo de Desarrollo de la Facultad Berkman,
       y el Programa de Becas Semilla para la Investigación y el Desarrollo de Herramientas
@@ -39,8 +39,12 @@ deeplinking:
   option:
     draft: Borrador
     review: Revisión
+  confirm: No ha seleccionado una tarea de escritura. ¿Está seguro de que desea continuar sin seleccionar una?
+  description: $t(document.title) {{tool}}
+  description_task: '{{task.rules.overview}}'
+  # upload: Seleccione una tarea de escritura o cargue un archivo de tarea de escritura personalizado
 genlink:
-  title: Generador de enlaces de tarea de escritura de $t(document.title)
+  title: Generador de enlaces de tareas de escritura de $t(document.title)
   link: 'Enlaces:'
   draft: Borrador de $t(document.title)
   review: Revisión de $t(document.title)
@@ -73,9 +77,9 @@ editor:
       overview: 'Revise los detalles a continuación: las advertencias probablemente indican diferencias de visualización, mientras que los errores pueden indicar pérdida de información.'
       error: 'Error: {{message}}'
       warning: 'Advertencia: {{message}}'
-      fail: Solo se permite seleccionar un archivo a la vez.
+      fail: Solo se puede seleccionar un archivo a la vez.
       not_docx: '¡{{file}} no es un archivo docx!'
-      failed_write: No se pudo guardar el archivo.
+      failed_write: No se puede guardar el archivo.
       security: Archivo rechazado debido a un error de seguridad.
   menu:
     file: Archivo
@@ -124,8 +128,8 @@ clipboard: Copiar al portapapeles
 error:
   unknown: Se produjo un error desconocido al procesar los resultados.
   no_selection:
-    prose: Parece que las notas que tenía intención de proporcionar no están presentes. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
-    bullets: Parece que las notas que tenía intención de proporcionar no están presentes. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
+    prose: Parece que faltan las notas que tenía intención de proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en un párrafo legible.
+    bullets: Parece que faltan las notas que tenía intención de proporcionar. Comparta las notas para que pueda ayudarle a transformarlas en una lista legible.
     default: No hay texto seleccionado. Resalte el texto primero.
   no_results: No hay resultados válidos.
   unknown_error: "Se produjo un error."
@@ -136,7 +140,7 @@ select_task:
   title: Seleccionar tipo de escritura
   filters: Filtros
   label: Búsqueda de texto
-  placeholder: Ingrese un título o palabras clave...
+  placeholder: Ingrese título o palabras clave...
   search: Buscar
   context: Contexto
   mode: Modo principal
@@ -146,7 +150,7 @@ select_task:
   version: 'Versión: {{version}}'
   copyright: 'Derechos de autor: {{copyright}}'
   multiple_file_error: Cargue solo un archivo a la vez.
-  malformed_json: El contenido no pudo analizarse como JSON.
+  malformed_json: El contenido no se pudo analizar como JSON.
   select: Seleccionar categoría
   select_all: Seleccionar todo
   all_category: Todas

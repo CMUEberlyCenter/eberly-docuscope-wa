@@ -15,8 +15,8 @@ revision_plan: >
   <p>Recuerde enfocarse en las mejoras generales antes de perfeccionar las oraciones y los detalles del lenguaje.</p>
 
 expectations: >
-  <p>Verifique si su escritura incluye toda la información que los lectores esperan encontrar en su texto e incorpore los elementos faltantes antes de abordar otros problemas.</p>
-  <p>Atender primero las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores y logre su propósito de manera efectiva.</p>
+  <p>Verifique si su escritura incluye toda la información que los lectores esperan encontrar en su texto, e incorpore los elementos faltantes antes de abordar otros problemas.</p>
+  <p>Abordar primero las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores y logre su propósito de manera efectiva.</p>
 
 lines_of_arguments: >
   <p>Evalúe qué tan efectivamente su escritura desarrolla su tesis a través de afirmaciones y evidencia para crear un argumento cohesivo y persuasivo.</p>
@@ -39,16 +39,16 @@ logical_flow: >
   <p>Un flujo lógico mejorado aumenta la legibilidad y ayuda a los lectores a comprender mejor su texto.</p>
 
 term_matrix: >
-  <p>Observe cómo se organizan términos específicos a lo largo de su borrador.</p>
+  <p>Observe cómo se organizan los términos específicos a lo largo de su borrador.</p>
   <p>Utilice la visualización interactiva para explorar las conexiones y la ubicación de los términos importantes.</p>
   <p>Refinar la estructura y el flujo de ideas garantiza una mayor cohesión en su escritura.</p>
 
 sources: >
-  <p>Revise los problemas asociados con la forma en que se citan las fuentes. Además, verifique si la credibilidad de las fuentes se asigna de manera adecuada revisando cómo se utiliza cada fuente en su borrador.</p>
-  <p>Integrar las fuentes de manera apropiada fortalece la credibilidad y el respaldo de su texto.</p>
+  <p>Revise los problemas asociados con la forma en que se citan las fuentes. Además, verifique si la credibilidad de las fuentes se asigna de manera apropiada revisando cómo se utiliza cada fuente en su borrador.</p>
+  <p>Integrar las fuentes de manera adecuada fortalece la credibilidad y el respaldo de su texto.</p>
 
 professional_tone: >
-  <p>Revise las oraciones con características lingüísticas que puedan restar adecuación al tono.</p>
+  <p>Revise las oraciones con características lingüísticas que puedan restar un tono apropiado.</p>
   <p>Refinar el tono garantiza que su escritura cumpla con los estándares de los contextos académicos y profesionales.</p>
 
 civil_tone: >
@@ -108,13 +108,13 @@ guide_scope_note: >
   Crear un plan de revisión garantiza una comunicación efectiva
 
 expectations_scope_note: >
-  Atender las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores
+  Abordar las brechas de contenido garantiza que su escritura cumpla con las expectativas de los lectores
 
 lines_of_arguments_scope_note: >
-  Desarrollar afirmaciones bien respaldadas y abordar los contraargumentos fortalece su capacidad persuasiva
+  Desarrollar afirmaciones bien respaldadas y abordar los contraargumentos fortalece su persuasión
 
 credibility_scope_note: >
-  Establecer credibilidad y carácter ético genera confianza genuina y autoridad ante su audiencia
+  Establecer credibilidad y carácter ético genera confianza genuina y autoridad con su audiencia
 
 pathos_scope_note: >
   Crear resonancia emocional y conexiones significativas fortalece el compromiso de la audiencia
@@ -129,10 +129,10 @@ logical_flow_scope_note: >
   Organizar las ideas de manera coherente mejora la legibilidad y la comprensión del lector
 
 sources_scope_note: >
-  Integrar y citar las fuentes de manera apropiada fortalece la credibilidad y la evidencia de respaldo de su texto
+  Integrar y citar las fuentes de manera adecuada fortalece la credibilidad y la evidencia de respaldo de su texto
 
 professional_tone_scope_note: >
-  Mantener características lingüísticas adecuadas ayuda a que su escritura cumpla con los estándares profesionales
+  Mantener características lingüísticas apropiadas ayuda a que su escritura cumpla con los estándares profesionales
 
 civil_tone_scope_note: >
   Usar un lenguaje respetuoso y equilibrado promueve el diálogo colaborativo entre diversas perspectivas
@@ -150,7 +150,7 @@ notes_to_bullets_scope_note: >
   Genere una lista con viñetas a partir de sus notas
 
 copyedit_scope_note: >
-  Corrija su borrador para mejorar la claridad y la gramática
+  Corrija su borrador para mayor claridad y gramática
 
 additional_tools_scope_note: >
   Refine su borrador con herramientas de revisión adicionales

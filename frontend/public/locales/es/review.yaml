@@ -13,7 +13,7 @@ summary:
   weaknesses: "Oportunidades de revisión:"
 insights: Perspectivas de Revisión
 error:
-  header: ¡Error al Cargar la Revisión!
+  header: ¡Error al cargar la revisión!
   content: Se produjo un error al recuperar los datos de la revisión.
   details: 'Detalles: {{message}}'
   too_large: El documento es demasiado grande para procesarlo. Por favor, acorte su texto e inténtelo de nuevo.
@@ -26,7 +26,7 @@ civil_tone:
   tooltip: El uso de un lenguaje respetuoso y equilibrado promueve el diálogo colaborativo.
   error: Error al mostrar la herramienta Tono Civil.
   'null': No se encontraron problemas.
-  prefix: 'Su Texto:'
+  prefix: 'Su texto:'
   issue: "Problema:"
   suggestion: "Sugerencia:"
 credibility:
@@ -53,8 +53,8 @@ sentences:
     description: Este panel muestra cada una de sus oraciones como una secuencia de
       sintagmas nominales que aparecen antes y después del verbo principal. Preste
       atención a las oraciones con muchos sintagmas nominales antes del verbo principal
-      y también después. Haga clic en la línea de la oración a la izquierda para
-      ver su oración real.
+      y también después. Haga clic en la línea de la oración a la izquierda para ver
+      su oración real.
     read_aloud: Lea la oración en voz alta cuando lo sienta necesario. Si tropieza
       o se queda sin aliento, es muy probable que esté incluyendo demasiada información
       en una sola oración.
@@ -75,7 +75,7 @@ global_coherence:
   redundant: Información Redundante
   inconsistent: Información Inconsistente
   suggestion:
-    text: 'Su Texto:'
+    text: 'Su texto:'
     explanation: 'Problema(s):'
     suggestions: 'Sugerencias:'
   'null': No se pudo generar ningún comentario sobre la progresión lógica a partir de su borrador.
@@ -166,7 +166,7 @@ professional_tone:
   confidence: Confianza
   subjectivity: Subjetividad
   'null': Sin comentarios.
-  text: "Su Texto:"
+  text: "Su texto:"
   issue: "Problema:"
   suggestion: "Sugerencia:"
 sources:
