@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import { type FC, type HTMLProps, useId, useState } from "react";
 import AnimateHeight, { type Height } from "react-animate-height";
 import { Button } from "react-bootstrap";
@@ -31,14 +31,7 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
         data-fade={!expanded}
       >
         {/* Workaround for html string content. */}
-        {htmlContent && (
-          <div
-            // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(htmlContent),
-            }}
-          />
-        )}
+        {htmlContent && <SafeHTML html={htmlContent} />}
         {children}
       </AnimateHeight>
       <div className="d-flex justify-content-around">

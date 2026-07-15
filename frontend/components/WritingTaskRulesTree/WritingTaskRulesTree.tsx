@@ -1,7 +1,7 @@
 import type { Optional } from "#/index";
 import type { Rule, WritingTask } from "#/lib/WritingTask";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import classnames from "classnames";
-import DOMPurify from "dompurify";
 import {
   type FC,
   type HTMLProps,
@@ -148,12 +148,7 @@ export const WritingTaskRulesTree: FC<RuleTreeProps> = ({
                 : t("details.about.expectation")}
             </h6>
             <h5>{selected.name}</h5>
-            <div
-              /* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml */
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(selected.description),
-              }}
-            />
+            <SafeHTML html={selected.description} />
           </>
         )}
       </div>

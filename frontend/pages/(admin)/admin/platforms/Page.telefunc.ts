@@ -1,4 +1,4 @@
-import { logger } from '#server/logger.js';
+import { logger } from '#server/logger';
 import { Provider } from 'ltijs';
 import { getAuthorizedUser } from '../getAuthorizedUser';
 

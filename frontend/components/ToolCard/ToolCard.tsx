@@ -5,7 +5,8 @@ import { WritingTask } from "#/lib/WritingTask";
 import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "#assets/icons/Highlight.svg?react";
-import DOMPurify from "dompurify";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
+import { trackScreenView } from "#lib/tracking";
 import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
   Alert,
@@ -22,7 +23,6 @@ import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
-import { trackScreenView } from "#lib/tracking.js";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 class NoSelectedTextError extends Error {}
@@ -267,12 +267,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         >
           {/* For #135, use results directly. */}
           {currentTool.result ? (
-            <div
-              // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(currentTool.result),
-              }}
-            />
+            <SafeHTML html={currentTool.result} />
           ) : (
             <Alert variant="danger">{t("error.no_results")}</Alert>
           )}
