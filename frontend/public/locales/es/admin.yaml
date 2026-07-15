@@ -41,11 +41,11 @@ platforms:
 performance:
   tab: Rendimiento
   title: Métricas de Rendimiento
-  download: Datos de la herramienta
+  download: Datos de herramienta
   download_session: Datos de sesión
   no_data: No hay datos de rendimiento disponibles.
   prompt: 'Indicación: {{prompt}}'
-  range: 'Cantidad: {{count}} entre '
+  range: 'Recuento: {{count}} entre '
   time_per_request: 'Tiempo/Solicitud:'
   average: 'Promedio: {{time}}'
   minimum: 'Mínimo: {{time}}'
@@ -66,7 +66,7 @@ performance:
     cache_read_input_tokens: Lectura de caché
 genlink:
   tab: Generar enlaces
-  title: Generador de enlaces para tareas de escritura e instantáneas
+  title: Generador de enlaces de tareas de escritura e instantáneas
   description: Utilice esta herramienta para generar enlaces para tareas de escritura específicas dentro de myProse.
   document:
     title: Documento de instantánea
