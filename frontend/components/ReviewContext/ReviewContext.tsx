@@ -3,7 +3,7 @@ import {
   isErrorData,
   OptionalReviewData,
 } from "#/lib/ReviewResponse";
-import { ToolContainer } from "#components/ToolContainer/ToolContainer.js";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer";
 import {
   createContext,
   type Dispatch,

@@ -1,6 +1,6 @@
 import { deserializeHtmlText, serialize, serializeDocx } from "#/lib/slate";
 import { SplitLayout } from "#layouts/SplitLayout";
-import { ToolLayout } from "#layouts/ToolLayout.js";
+import { ToolLayout } from "#layouts/ToolLayout";
 import {
   faBold,
   faItalic,

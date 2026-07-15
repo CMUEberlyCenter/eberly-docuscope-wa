@@ -24,7 +24,7 @@
 
  */
 import Icon from "#assets/icons/topical_progression_icon.svg?react";
-import { ToolButton } from "#components/ToolButton/ToolButton.js";
+import { ToolButton } from "#components/ToolButton/ToolButton";
 import classNames from "classnames";
 import DT from "datatables.net-dt";
 import "datatables.net-fixedcolumns-dt";

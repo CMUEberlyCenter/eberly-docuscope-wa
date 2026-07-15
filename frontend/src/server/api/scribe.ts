@@ -1,6 +1,6 @@
-import { resolveLanguageCode } from '#lib/languageCode.js';
-import { BadRequestError } from '#lib/ProblemDetails.js';
-import { getSettings } from '#server/getSettings.js';
+import { resolveLanguageCode } from '#lib/languageCode';
+import { BadRequestError } from '#lib/ProblemDetails';
+import { getSettings } from '#server/getSettings';
 import { type Request, type Response, Router } from 'express';
 import { body } from 'express-validator';
 import type { NotesRequest } from '../../lib/Requests';
