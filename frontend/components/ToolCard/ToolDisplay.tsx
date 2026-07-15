@@ -2,10 +2,11 @@ import { deserializeHtmlText } from "#/lib/slate";
 import type { ToolResult } from "#/lib/ToolResults";
 import AIResponseIcon from "#assets/icons/ai_icon.svg?react";
 import YourInputIcon from "#assets/icons/YourInput.svg?react";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer";
 import { faBookmark as faRegularBookmark } from "@fortawesome/free-regular-svg-icons";
 import { faArrowsRotate, faBookmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import DOMPurify from "dompurify";
 import { type FC, type HTMLProps, type ReactNode, useCallback } from "react";
 import {
   Alert,
@@ -25,7 +26,6 @@ import { ToolErrorHandler } from "../ErrorHandler/ErrorHandler";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
-import { ToolContainer } from "#components/ToolContainer/ToolContainer.js";
 
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
@@ -63,12 +63,10 @@ const ToolInput: FC<ToolProp> = ({ tool }) => {
         </header>
         {tool?.input.text.trim() ? (
           <FadeContent>
-            <Card.Text
-              // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(tool.input.html ?? tool.input.text),
-              }}
-            ></Card.Text>
+            <SafeHTML
+              className="card-text"
+              html={tool.input.html ?? tool.input.text}
+            />
           </FadeContent>
         ) : (
           <Card.Text as="div">

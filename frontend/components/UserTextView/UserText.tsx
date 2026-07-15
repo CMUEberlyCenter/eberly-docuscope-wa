@@ -1,4 +1,4 @@
-import DOMPurify from "dompurify";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import { FC, HTMLProps, useEffect, useId } from "react";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useReviewContext } from "../ReviewContext/ReviewContext";
@@ -69,14 +69,7 @@ export const UserText: FC<UserTextProps> = ({ ...props }) => {
 
   return (
     <article {...props}>
-      <div
-        id={id}
-        className="user-text p-2"
-        /* eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml */
-        dangerouslySetInnerHTML={{
-          __html: DOMPurify.sanitize(content),
-        }}
-      ></div>
+      <SafeHTML id={id} className="user-text p-2" html={content} />
     </article>
   );
 };

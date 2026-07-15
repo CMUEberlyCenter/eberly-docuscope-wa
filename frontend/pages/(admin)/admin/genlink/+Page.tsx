@@ -2,7 +2,7 @@ import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIc
 import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
-import { ReviewTool } from "#lib/ReviewResponse.js";
+import { ReviewTool } from "#lib/ReviewResponse";
 import { validateWritingTask } from "#lib/schemaValidate";
 import { checkWordCount } from "#lib/ToolSettings";
 import {

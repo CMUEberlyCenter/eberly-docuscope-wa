@@ -1,8 +1,8 @@
 import { cleanAndRepairSentenceData } from "#/lib/OnTopicData";
 import { isErrorData } from "#/lib/ReviewResponse";
 import Icon from "#assets/icons/sentence_density_icon.svg?react";
+import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import classNames from "classnames";
-import DOMPurify from "dompurify";
 import { type FC, type HTMLProps, useEffect, useReducer } from "react";
 import { type ButtonProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -144,12 +144,7 @@ export const Sentences: FC<HTMLProps<HTMLDivElement>> = (props) => {
       <Legend />
       <div className="py-1 overflow-auto sentence-display mb-1">
         {selected.details ? (
-          <div
-            // eslint-disable-next-line @eslint-react/dom-no-dangerously-set-innerhtml
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(selected.details),
-            }}
-          />
+          <SafeHTML html={selected.details} />
         ) : (
           <p>{t("sentences.select")}</p>
         )}

@@ -2,7 +2,7 @@ import { TaskViewerButton } from "#components/TaskViewer/TaskViewer";
 import { UneditableIcon } from "#components/UneditableIcon/UneditableIcon";
 import { UserText } from "#components/UserTextView/UserText";
 import { SplitLayout } from "#layouts/SplitLayout";
-import { ToolLayout } from "#layouts/ToolLayout.js";
+import { ToolLayout } from "#layouts/ToolLayout";
 import { Activity, FC, ReactNode } from "react";
 import Placeholder from "react-bootstrap/esm/Placeholder";
 import { useTranslation } from "react-i18next";

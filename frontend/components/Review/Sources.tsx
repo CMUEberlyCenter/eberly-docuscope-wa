@@ -1,7 +1,7 @@
 import { SourcesData } from "#/lib/ReviewResponse";
 import Icon from "#assets/icons/sources_icon.svg?react";
-import { AlertIcon } from "#components/AlertIcon/AlertIcon.js";
-import { ToolButton } from "#components/ToolButton/ToolButton.js";
+import { AlertIcon } from "#components/AlertIcon/AlertIcon";
+import { ToolButton } from "#components/ToolButton/ToolButton";
 import { type FC, type HTMLProps } from "react";
 import { Accordion, Alert, ButtonProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";

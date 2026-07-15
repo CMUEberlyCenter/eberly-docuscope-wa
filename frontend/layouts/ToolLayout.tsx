@@ -1,5 +1,5 @@
-import { Legal } from "#components/Legal/Legal.js";
-import { StageHeader } from "#components/StageHeader/StageHeader.js";
+import { Legal } from "#components/Legal/Legal";
+import { StageHeader } from "#components/StageHeader/StageHeader";
 import classNames from "classnames";
 import { FC, HTMLProps, ReactNode } from "react";
 

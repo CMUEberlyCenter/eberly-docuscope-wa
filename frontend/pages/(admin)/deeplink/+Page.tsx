@@ -1,7 +1,7 @@
 /* @overview: This is the configuration page for LTI deeplinking. The user selects a writing task and a tool. */
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
-import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree.js";
+import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree";
 import { type WritingTask } from "#lib/WritingTask";
 import { type FC, useId, useRef, useState } from "react";
 import {
