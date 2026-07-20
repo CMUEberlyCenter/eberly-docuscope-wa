@@ -212,6 +212,7 @@ async function __main__() {
                     'ContentArea',
                     'assignment_selection',
                     'link_selection',
+                    'course_navigation',
                   ], // Add placements for Canvas
                   supported_types: ['LtiResourceLink'], // match what is produced in deep linking
                 },
@@ -239,6 +240,14 @@ async function __main__() {
   Provider.app.get(
     '/lti/configuration',
     async (_req: Request, res: Response) => {
+      const placement_defaults = {
+        icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+        message_type: 'LtiDeepLinkingRequest',
+        target_link_uri: new URL(
+          Provider.appRoute(),
+          LTI_HOSTNAME
+        ).toString(),
+      }
       res.json({
         title: PRODUCT,
         description: 'myProse Editing and Review tools',
@@ -263,31 +272,27 @@ async function __main__() {
             platform: 'canvas.instructure.com',
             privacy_level: 'public',
             settings: {
-              text: 'myProse Editing and Review tools',
+              text: 'myProse Drafting and Review tools',
               labels: {
-                en: 'myProse Editing and Review tools',
+                en: 'myProse Drafting and Review tools',
+                es: 'myProse Herramientas de Redacción y Revisión',
               },
               icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
               placements: [
                 {
-                  text: PRODUCT,
+                  ...placement_defaults,
+                  text: `${PRODUCT} Assignment Selection Placement`,
                   placement: 'assignment_selection',
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                  message_type: 'LtiDeepLinkingRequest',
-                  target_link_uri: new URL(
-                    Provider.appRoute(),
-                    LTI_HOSTNAME
-                  ).toString(),
                 },
                 {
-                  text: PRODUCT,
+                  ...placement_defaults,
+                  text: `${PRODUCT} Link Selection Placement`,
                   placement: 'link_selection',
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                  message_type: 'LtiDeepLinkingRequest',
-                  target_link_uri: new URL(
-                    Provider.appRoute(),
-                    LTI_HOSTNAME
-                  ).toString(),
+                },
+                {
+                  ...placement_defaults,
+                  text: `${PRODUCT} Course Navigation Placement`,
+                  placement: 'course_navigation',
                 },
               ],
             },
