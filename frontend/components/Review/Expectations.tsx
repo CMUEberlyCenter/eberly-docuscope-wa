@@ -13,7 +13,7 @@ import {
   type Rule,
 } from "#/lib/WritingTask";
 import Icon from "#assets/icons/expectations_icon.svg?react";
-import { trackScreenView } from "#lib/tracking";
+import { trackScreenView } from "#/client/tracking";
 import {
   faCircleExclamation,
   faEllipsis,

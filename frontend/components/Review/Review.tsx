@@ -1,6 +1,6 @@
 import type { ReviewTool } from "#/lib/ReviewResponse";
 import { isEnabled } from "#/lib/WritingTask";
-import { trackScreenView } from "#lib/tracking";
+import { trackScreenView } from "#/client/tracking";
 import { Activity, type FC, useEffect, useState, useTransition } from "react";
 import {
   Alert,

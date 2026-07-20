@@ -1,4 +1,4 @@
-import { deserializeHtmlText, serialize, serializeDocx } from "#/lib/slate";
+import { deserializeHtmlText, serialize, serializeDocx } from "#/client/slate";
 import { SplitLayout } from "#layouts/SplitLayout";
 import { ToolLayout } from "#layouts/ToolLayout";
 import {
