@@ -1,5 +1,5 @@
 import type { WritingTask } from "#/lib/WritingTask";
-import { trackScreenView } from "#lib/tracking";
+import { trackScreenView } from "#/client/tracking";
 import {
   createContext,
   type Dispatch,
