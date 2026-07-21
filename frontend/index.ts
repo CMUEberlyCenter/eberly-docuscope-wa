@@ -2,6 +2,7 @@
 
 Sets up and starts the expressjs server for handling requests for the myProse application.
 */
+import { TelefuncContext } from '#lib/TelefuncContext.js';
 import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import express, {
@@ -22,7 +23,7 @@ import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { config, serve } from 'telefunc';
+import { serve } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -444,29 +445,16 @@ async function __main__() {
       Provider.redirect(res, '/draft');
     });
     app.all(
-      '/admin/_telefunc',
-      basicAuthMiddleware,
-      async (req: Request, res: Response, _next: NextFunction) => {
-        config.telefuncUrl = '/admin/_telefunc';
-        // Need to use serve instead of new Telefunc() because the latter does not support express with bun.
-        const { body, statusCode, headers } = await serve({
-          url: req.originalUrl, // Telefunc client is configured to send requests to /admin/_telefunc, but telefunc handlers are written for /_telefunc, so we hardcode the url here.  TODO: Refactor telefunc handlers to be aware of admin prefix and use req.originalUrl here.
-          method: req.method,
-          body: req.body,
-          context: {
-            // You can add any arbitrary contextual information here
-            user: (req as IBasicAuthedRequest).auth?.user,
-          },
-        });
-        res.status(statusCode);
-        headers.forEach(([name, value]) => res.setHeader(name, value));
-        res.send(body);
-      }
-    );
-    app.all(
       '/_telefunc',
+      async (req: Request, res: Response, next: NextFunction) => {
+        const body = JSON.parse(req.body) as { file?: string;[key: string]: any };
+        if (body.file?.includes('/admin/')) {
+          return basicAuthMiddleware(req, res, next);
+        }
+        next();
+      },
       async (req: Request, res: Response, _next: NextFunction) => {
-        config.telefuncUrl = '/_telefunc';
+        const user = (req as IBasicAuthedRequest).auth?.user;
         const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,
@@ -475,9 +463,10 @@ async function __main__() {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             token: res.locals.token,
-            user: (req as IBasicAuthedRequest).auth?.user,
+            user,
+            isAdmin: user === 'admin',
             // session: req.session,
-          },
+          } as TelefuncContext,
         });
         res.status(statusCode);
         headers.forEach(([name, value]) => res.setHeader(name, value));
