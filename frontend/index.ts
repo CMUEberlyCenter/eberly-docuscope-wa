@@ -244,11 +244,8 @@ async function __main__() {
       const placement_defaults = {
         icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
         message_type: 'LtiDeepLinkingRequest',
-        target_link_uri: new URL(
-          Provider.appRoute(),
-          LTI_HOSTNAME
-        ).toString(),
-      }
+        target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+      };
       res.json({
         title: PRODUCT,
         description: 'myProse Editing and Review tools',
@@ -447,7 +444,10 @@ async function __main__() {
     app.all(
       '/_telefunc',
       async (req: Request, res: Response, next: NextFunction) => {
-        const body = JSON.parse(req.body) as { file?: string;[key: string]: any };
+        const body = JSON.parse(req.body) as {
+          file?: string;
+          [key: string]: unknown;
+        };
         if (body.file?.includes('/admin/')) {
           return basicAuthMiddleware(req, res, next);
         }

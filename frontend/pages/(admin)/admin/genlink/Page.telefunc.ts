@@ -12,7 +12,10 @@ type ClearSnapshotCacheResponse = {
   message?: string;
 };
 
-export async function onClearSnapshotCache(id: string, tool: ReviewTool | '*'): Promise<ClearSnapshotCacheResponse> {
+export async function onClearSnapshotCache(
+  id: string,
+  tool: ReviewTool | '*'
+): Promise<ClearSnapshotCacheResponse> {
   getAuthorizedUser();
   try {
     if (tool == '*') {
