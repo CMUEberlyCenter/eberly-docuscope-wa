@@ -1,4 +1,4 @@
-import { IdToken } from "ltijs";
+import { IdToken } from 'ltijs';
 
 export type TelefuncContext = {
   user?: string | null;

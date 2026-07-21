@@ -5,10 +5,13 @@ import { getAuthorizedUser } from '../getAuthorizedUser';
 type ActivatePlatformResponse = {
   success: boolean;
   message?: string;
-  value?: any;
+  value?: boolean;
 };
 
-export async function onActivatePlatform(platformId: string, active: boolean): Promise<ActivatePlatformResponse> {
+export async function onActivatePlatform(
+  platformId: string,
+  active: boolean
+): Promise<ActivatePlatformResponse> {
   getAuthorizedUser();
   try {
     // const { Provider } = await import('ltijs');
