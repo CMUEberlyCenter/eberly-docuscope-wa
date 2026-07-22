@@ -7,7 +7,15 @@ import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
 import { ReviewTool } from '#lib/ReviewResponse';
 
-export async function onClearSnapshotCache(id: string, tool: ReviewTool | '*') {
+type ClearSnapshotCacheResponse = {
+  success: boolean;
+  message?: string;
+};
+
+export async function onClearSnapshotCache(
+  id: string,
+  tool: ReviewTool | '*'
+): Promise<ClearSnapshotCacheResponse> {
   getAuthorizedUser();
   try {
     if (tool == '*') {

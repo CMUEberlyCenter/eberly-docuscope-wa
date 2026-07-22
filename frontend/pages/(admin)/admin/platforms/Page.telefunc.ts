@@ -2,7 +2,16 @@ import { logger } from '#server/logger';
 import { Provider } from 'ltijs';
 import { getAuthorizedUser } from '../getAuthorizedUser';
 
-export async function onActivatePlatform(platformId: string, active: boolean) {
+type ActivatePlatformResponse = {
+  success: boolean;
+  message?: string;
+  value?: boolean;
+};
+
+export async function onActivatePlatform(
+  platformId: string,
+  active: boolean
+): Promise<ActivatePlatformResponse> {
   getAuthorizedUser();
   try {
     // const { Provider } = await import('ltijs');

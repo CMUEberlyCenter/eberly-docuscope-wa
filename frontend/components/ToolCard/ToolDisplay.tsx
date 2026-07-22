@@ -1,4 +1,4 @@
-import { deserializeHtmlText } from "#/lib/slate";
+import { deserializeHtmlText } from "#/client/slate";
 import type { ToolResult } from "#/lib/ToolResults";
 import AIResponseIcon from "#assets/icons/ai_icon.svg?react";
 import YourInputIcon from "#assets/icons/YourInput.svg?react";

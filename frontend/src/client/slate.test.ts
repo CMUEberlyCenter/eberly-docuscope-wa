@@ -47,7 +47,7 @@ describe('lib/slate', () => {
           type: 'paragraph',
           children: [
             {
-              text: 'I am writing to apply for a summer internship in graphic design, which I learned about through Janie Kagen, a friend of Mr. James Bond. As a second-year Communication Design major at Carnegie Mellon University, I have developed a strong dedication to design through my coursework and my extracurricular activities. My experience ranges from creating a board game from start to finish, to designing all graphic elements of a theatrical production. I feel that through my steadfast work ethic and my enthusiasm, I can be a valuable asset to your company as a summer intern. ',
+              text: 'I am writing to apply for a summer internship in graphic design, which I learned about through Janie Kagen, a friend of Mr. James Bond. As a second-year Communication Design major at Carnegie Mellon University, I have developed a strong dedication to design through my coursework and my extracurricular activities. My experience ranges from creating a board game from start to finish, to designing all graphic elements of a theatrical production. I feel that through my steadfast work ethic and my enthusiasm, I can be a valuable asset to your company as a summer intern.',
             },
           ],
         },
@@ -71,7 +71,7 @@ sep
 
 oli0 oli1
 
-I am writing to apply for a summer internship in graphic design, which I learned about through Janie Kagen, a friend of Mr. James Bond. As a second-year Communication Design major at Carnegie Mellon University, I have developed a strong dedication to design through my coursework and my extracurricular activities. My experience ranges from creating a board game from start to finish, to designing all graphic elements of a theatrical production. I feel that through my steadfast work ethic and my enthusiasm, I can be a valuable asset to your company as a summer intern. 
+I am writing to apply for a summer internship in graphic design, which I learned about through Janie Kagen, a friend of Mr. James Bond. As a second-year Communication Design major at Carnegie Mellon University, I have developed a strong dedication to design through my coursework and my extracurricular activities. My experience ranges from creating a board game from start to finish, to designing all graphic elements of a theatrical production. I feel that through my steadfast work ethic and my enthusiasm, I can be a valuable asset to your company as a summer intern.
 
 `);
   });

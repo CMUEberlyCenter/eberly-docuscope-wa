@@ -2,6 +2,7 @@
 
 Sets up and starts the expressjs server for handling requests for the myProse application.
 */
+import { TelefuncContext } from '#lib/TelefuncContext.js';
 import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import express, {
@@ -22,7 +23,7 @@ import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
 import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
-import { config, serve } from 'telefunc';
+import { serve } from 'telefunc';
 import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
 import {
@@ -212,6 +213,7 @@ async function __main__() {
                     'ContentArea',
                     'assignment_selection',
                     'link_selection',
+                    'course_navigation',
                   ], // Add placements for Canvas
                   supported_types: ['LtiResourceLink'], // match what is produced in deep linking
                 },
@@ -239,6 +241,11 @@ async function __main__() {
   Provider.app.get(
     '/lti/configuration',
     async (_req: Request, res: Response) => {
+      const placement_defaults = {
+        icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+        message_type: 'LtiDeepLinkingRequest',
+        target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
+      };
       res.json({
         title: PRODUCT,
         description: 'myProse Editing and Review tools',
@@ -263,31 +270,27 @@ async function __main__() {
             platform: 'canvas.instructure.com',
             privacy_level: 'public',
             settings: {
-              text: 'myProse Editing and Review tools',
+              text: 'myProse Drafting and Review tools',
               labels: {
-                en: 'myProse Editing and Review tools',
+                en: 'myProse Drafting and Review tools',
+                es: 'myProse Herramientas de Redacción y Revisión',
               },
               icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
               placements: [
                 {
-                  text: PRODUCT,
+                  ...placement_defaults,
+                  text: `${PRODUCT} Assignment Selection Placement`,
                   placement: 'assignment_selection',
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                  message_type: 'LtiDeepLinkingRequest',
-                  target_link_uri: new URL(
-                    Provider.appRoute(),
-                    LTI_HOSTNAME
-                  ).toString(),
                 },
                 {
-                  text: PRODUCT,
+                  ...placement_defaults,
+                  text: `${PRODUCT} Link Selection Placement`,
                   placement: 'link_selection',
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-                  message_type: 'LtiDeepLinkingRequest',
-                  target_link_uri: new URL(
-                    Provider.appRoute(),
-                    LTI_HOSTNAME
-                  ).toString(),
+                },
+                {
+                  ...placement_defaults,
+                  text: `${PRODUCT} Course Navigation Placement`,
+                  placement: 'course_navigation',
                 },
               ],
             },
@@ -439,29 +442,19 @@ async function __main__() {
       Provider.redirect(res, '/draft');
     });
     app.all(
-      '/admin/_telefunc',
-      basicAuthMiddleware,
-      async (req: Request, res: Response, _next: NextFunction) => {
-        config.telefuncUrl = '/admin/_telefunc';
-        // Need to use serve instead of new Telefunc() because the latter does not support express with bun.
-        const { body, statusCode, headers } = await serve({
-          url: req.originalUrl, // Telefunc client is configured to send requests to /admin/_telefunc, but telefunc handlers are written for /_telefunc, so we hardcode the url here.  TODO: Refactor telefunc handlers to be aware of admin prefix and use req.originalUrl here.
-          method: req.method,
-          body: req.body,
-          context: {
-            // You can add any arbitrary contextual information here
-            user: (req as IBasicAuthedRequest).auth?.user,
-          },
-        });
-        res.status(statusCode);
-        headers.forEach(([name, value]) => res.setHeader(name, value));
-        res.send(body);
-      }
-    );
-    app.all(
       '/_telefunc',
+      async (req: Request, res: Response, next: NextFunction) => {
+        const body = JSON.parse(req.body) as {
+          file?: string;
+          [key: string]: unknown;
+        };
+        if (body.file?.includes('/admin/')) {
+          return basicAuthMiddleware(req, res, next);
+        }
+        next();
+      },
       async (req: Request, res: Response, _next: NextFunction) => {
-        config.telefuncUrl = '/_telefunc';
+        const user = (req as IBasicAuthedRequest).auth?.user;
         const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,
@@ -471,9 +464,10 @@ async function __main__() {
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             gradeService: Provider.Grade,
             token: res.locals.token,
-            user: (req as IBasicAuthedRequest).auth?.user,
+            user,
+            isAdmin: user === 'admin',
             // session: req.session,
-          },
+          } as TelefuncContext,
         });
         res.status(statusCode);
         headers.forEach(([name, value]) => res.setHeader(name, value));

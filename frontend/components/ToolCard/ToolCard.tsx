@@ -1,12 +1,12 @@
 import { NotesRequest } from "#/lib/Requests";
-import { serialize, serializeHtml } from "#/lib/slate";
+import { serialize, serializeHtml } from "#/client/slate";
 import type { SelectedText, Tool, ToolResult } from "#/lib/ToolResults";
 import { WritingTask } from "#/lib/WritingTask";
 import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "#assets/icons/Highlight.svg?react";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
-import { trackScreenView } from "#lib/tracking";
+import { trackScreenView } from "#/client/tracking";
 import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
   Alert,

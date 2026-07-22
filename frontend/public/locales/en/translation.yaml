@@ -144,6 +144,7 @@ select_task:
   search: Search
   context: Context
   mode: Primary Mode
+  domain: Domain
   upload: Upload Custom Text Type
   invalid_upload: Uploaded file is not a valid text type specificaton!
   "null": No Text Type

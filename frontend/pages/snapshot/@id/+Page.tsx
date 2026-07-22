@@ -54,7 +54,7 @@ import {
   SourcesSnapshotProvider,
 } from "#components/Review/Sources";
 import { isExpectationsData, ReviewTool } from "#lib/ReviewResponse";
-import { trackScreenView } from "#lib/tracking";
+import { trackScreenView } from "#/client/tracking";
 import { isEnabled } from "#lib/WritingTask";
 import { Activity, FC, useState } from "react";
 import { Alert, ButtonToolbar, Tab, Tabs } from "react-bootstrap";
