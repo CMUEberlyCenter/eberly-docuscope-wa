@@ -59,13 +59,13 @@ const TopicTextIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
 /** Icons component for active verbs, a triangle. */
 const ActiveVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
   <span {...props} className={classNames(className, "active-verb-icon")}>
-    ▲
+    ●
   </span>
 );
 /** Icons component for be verbs, a circle. */
 const BeVerbIcon: FC<SentenceIconProps> = ({ className, ...props }) => (
   <span {...props} className={classNames(className, "be-verb-icon")}>
-    ●
+    ▲
   </span>
 );
 
@@ -82,12 +82,12 @@ const Legend: FC = () => {
         <span className="topic-text">{t("sentences.legend.noun")}</span>
       </div>
       <div>
-        <ActiveVerbIcon />{" "}
-        <span className="active-verb">{t("sentences.legend.action")}</span>
-      </div>
-      <div>
         <BeVerbIcon />{" "}
         <span className="be-verb">{t("sentences.legend.passive")}</span>
+      </div>
+      <div>
+        <ActiveVerbIcon />{" "}
+        <span className="active-verb">{t("sentences.legend.action")}</span>
       </div>
     </div>
   );

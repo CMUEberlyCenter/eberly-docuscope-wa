@@ -155,6 +155,7 @@ select_task:
   select: Select category
   select_all: Select All
   all_category: All
+  domain_null: Any Domain
 cancel: Cancel
 select: Select
 next: Next

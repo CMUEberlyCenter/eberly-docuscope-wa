@@ -26,6 +26,8 @@ const hasPrefix = (prefix: string, key: string) =>
   key.startsWith(`${prefix}${sep}`) &&
   key.substring(prefix.length + sep.length).length > 0;
 
+const getKeyword = (prefix: string, key: string) => key.substring(`${prefix}${sep}`.length);
+
 type CategoryKeywordsProps = {
   prefix: string;
   title: string;
@@ -74,7 +76,7 @@ const CategoryKeywords: FC<CategoryKeywordsProps> = ({
           <Form.Check
             id={`${id}-${prefix}-checkbox-${i}`}
             type="checkbox"
-            label={key.substring(`${prefix}${sep}`.length)}
+            label={getKeyword(prefix, key)}
             className="ms-4"
             data-keyword={key}
             key={`${id}-${key}`}
@@ -99,6 +101,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
 }) => {
   const { t } = useTranslation();
   const keywords = extractKeywords(tasks);
+  const groups = groupByCategory(keywords);
 
   const [search, setSearch] = useState<string>("");
   const [activeKeywords, setActiveKeywords] = useState<string[]>([]);
@@ -148,6 +151,12 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
         ? activeKeywords.filter((active) => active !== key)
         : [...activeKeywords, key]
     );
+  const selectDomain = (domain: string) => {
+    setActiveKeywords((activeKeywords) => [
+      ...activeKeywords.filter((key) => !hasPrefix("domain", key)),
+      ...hasPrefix("domain", domain) ? [domain] : []
+    ]);
+  };
 
   const controlId = useId();
 
@@ -172,7 +181,8 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
           <FontAwesomeIcon icon={faX} />
         </Button>
       </InputGroup>
-      {Object.keys(groupByCategory(keywords))
+      {Object.keys(groups)
+        .filter((prefix) => prefix !== "domain")
         .toSorted((a, b) =>
           t(`select_task.${a}`).localeCompare(t(`select_task.${b}`))
         )
@@ -188,6 +198,18 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
             selectNone={() => selectNone(prefix)}
           />
         ))}
+      {groups.domain && (
+        <FloatingLabel label={t("select_task.domain")}>
+          <select className="form-select" onChange={(evt) => selectDomain(evt.target.value)} aria-label={t("select_task.domain")} value={activeKeywords.find((key) => hasPrefix("domain", key)) || ""}>
+            <option value="">{t("select_task.domain_null")}</option>
+            {groups.domain.map((domain) => (
+              <option key={domain} value={domain}>
+                {getKeyword("domain", domain)}
+              </option>
+            ))}
+          </select>
+        </FloatingLabel>
+      )}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 $noun-phrase: #5c36af;
-$action-verb: #b10008;
-$be-verb: #4296f5;
+$be-verb: #b10008;
+$active-verb: #4296f5;
 
 .topic-text-icon {
   color: $noun-phrase;
@@ -11,12 +11,8 @@ $be-verb: #4296f5;
   font-weight: bold;
 }
 
-.active-verb-icon {
-  color: $action-verb;
-}
-
-.active-verb {
-  color: $action-verb;
+.be-verb {
+  color: $be-verb;
   text-decoration: underline;
   font-weight: bold;
   text-underline-offset: 1.2pt;
@@ -27,12 +23,16 @@ $be-verb: #4296f5;
   color: $be-verb;
 }
 
-.be-verb {
-  color: $be-verb;
+.active-verb {
+  color: $active-verb;
   text-decoration: dotted underline;
   font-weight: bold;
   text-underline-offset: 1.2pt;
   text-decoration-thickness: 12%;
+}
+
+.active-verb-icon {
+  color: $active-verb;
 }
 
 .sentences {

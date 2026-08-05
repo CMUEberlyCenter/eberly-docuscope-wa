@@ -9,8 +9,8 @@ COPY ./package*.json /tmp/dev
 COPY ./package*.json /tmp/prod
 COPY ./patches /tmp/dev/patches
 COPY ./patches /tmp/prod/patches
-RUN cd /tmp/dev && npm ci
-RUN cd /tmp/prod && npm ci --omit=dev
+RUN --mount=type=cache,target=/root/.npm cd /tmp/dev && npm ci
+RUN --mount=type=cache,target=/root/.npm cd /tmp/prod && npm ci --omit=dev
 
 FROM base AS build
 COPY --from=install /tmp/dev/node_modules node_modules
