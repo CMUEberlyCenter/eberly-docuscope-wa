@@ -45,7 +45,7 @@ sentences:
   select: Select a sentence to see its composition.
   legend:
     noun: Noun phrase
-    action: Action verb
+    action: Strong verb
     passive: Be verb
   details:
     overview: You may lose <b>clarity</b> if you try to pack too many ideas into a
