@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
-import { version } from './package.json';
+import { version } from './package.json' with { type: 'json' };
 import { telefunc } from 'telefunc/vite';
 
 // https://vitejs.dev/config/
