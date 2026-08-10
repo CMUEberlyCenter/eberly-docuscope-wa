@@ -85,29 +85,28 @@ const LIS_Sub_Roles = [
   ...['Chair', 'Communications', 'Secretary', 'Treasurer', 'Vice-Chair'].map(sub => `http://purl.imsglobal.org/vocab/lis/v2/membership/Officer#${sub}`),
 ];
 */
-const LTI_Test_User = 'http://purl.imsglobal.org/vocab/lti/system/person#TestUser';
+const LTI_Test_User =
+  'http://purl.imsglobal.org/vocab/lti/system/person#TestUser';
 
 export function isTestUser(token: IdToken): boolean {
   return token.platformContext.roles.includes(LTI_Test_User);
 }
 export function isInstructor(token: IdToken): boolean {
-  return (
-    ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
-      (role) => token.platformContext.roles.includes(role)
-    )
+  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
+    (role) => token.platformContext.roles.includes(role)
   );
 }
 
 export function isStudent(token: IdToken): boolean {
-  return [
-    "http://purl.imsglobal.org/vocab/lis/v2/membership#Learner"
-  ].some(role => token.platformContext.roles.includes(role));
+  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'].some(
+    (role) => token.platformContext.roles.includes(role)
+  );
 }
 
 export function isContentDeveloper(token: IdToken): boolean {
-  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper'].some(
-    (role) => token.platformContext.roles.includes(role)
-  );
+  return [
+    'http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper',
+  ].some((role) => token.platformContext.roles.includes(role));
 }
 
 // export function isTorus(token?: IdToken): boolean {
@@ -193,7 +192,7 @@ export const grade = async (
     existingGrade?.scoreGiven !== undefined &&
     existingGrade.scoreGiven >= score
   ) {
-    console.log("non-clobbering grading");
+    console.log('non-clobbering grading');
     // Don't update the grade if the new score is not higher than the existing score.
     return existingGrade;
   }

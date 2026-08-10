@@ -19,7 +19,9 @@ import { usePageContext } from "vike-react/usePageContext";
 /**
  * Component for adding text to speech controls.
  * @example
- *   (&lt;TextToSpeech text={"Some text to read aloud."}/&gt;)
+ * ```tsx
+ * <TextToSpeech text={"Some text to read aloud."} />
+ * ```
  */
 export const TextToSpeech: FC<{
   /** The text to be read aloud. */

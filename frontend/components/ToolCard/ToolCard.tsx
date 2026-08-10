@@ -1,12 +1,15 @@
-import { NotesRequest } from "#/lib/Requests";
 import { serialize, serializeHtml } from "#/client/slate";
-import type { SelectedText, Tool, ToolResult } from "#/lib/ToolResults";
-import { WritingTask } from "#/lib/WritingTask";
+import { trackScreenView } from "#/client/tracking";
+import { NotesRequest } from "#/lib/Requests";
+import type { Tool, ToolResult } from "#/lib/ToolResults";
 import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "#assets/icons/Highlight.svg?react";
+import {
+  NoInputError,
+  SelectionTooLargeError,
+} from "#components/ErrorHandler/ErrorHandler.js";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
-import { trackScreenView } from "#/client/tracking";
 import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
   Alert,
@@ -19,57 +22,20 @@ import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { usePageContext } from "vike-react/usePageContext";
-import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
+import { onNotesToBullets, onNotesToProse } from "./ToolCard.telefunc";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
-class NoSelectedTextError extends Error {}
-
-/*** Notes to Prose ***/
-async function postConvertNotes(
-  { text }: SelectedText,
-  output: "prose" | "bullets" = "prose",
-  writing_task?: WritingTask | null
-): Promise<string> {
-  const endpoint =
-    output === "bullets" ? "convert_to_bullets" : "convert_to_prose";
-  const { user_lang, target_lang } = writing_task?.info ?? {};
-  const response = await fetch(`/api/v2/scribe/${endpoint}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      notes: text,
-      user_lang,
-      target_lang,
-    } as NotesRequest),
-  });
-  if (!response.ok) {
-    checkReviewResponse(response);
-    // throw new Error(`HTTP error status: ${response.status}`, {
-    //   cause: await response.json(),
-    // });
-  }
-  const data = await response.json();
-  if (typeof data === "string") {
-    return data;
-  }
-  // TODO fix this for server errors instead of openai errors.
-  if ("error" in data) {
-    console.error(data.message);
-    return data.message;
-  }
-  // if ('choices' in data) {
-  //   logCovertNotes(text, data);
-  //   return data.choices[0].message.content ?? '';
-  // }
-  console.error(data);
-  return "";
-}
 
 /**
- * Top level framework for writing tools display.
+ * Top level framework for drafting tools display.
+ * @component
+ * @example
+ * ```tsx
+ * <ToolCard hasSelection={true} />
+ * ```
  */
 const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
@@ -77,7 +43,6 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const { settings } = usePageContext();
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
-  const scribe = true; // Originally for useScribe(); for opt-in check.
   const selectionLimit = settings?.select_word_limit ?? 250;
 
   const editor = useSlate();
@@ -85,32 +50,39 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
     async (data: ToolResult) => {
       setCurrentTool(data);
       try {
-        switch (data.tool) {
-          case "bullets":
-          case "prose": {
-            if (data.input.text.trim() === "") {
-              throw new NoSelectedTextError(
-                t(`error.no_selection.${data.tool}`)
-              );
-            }
-            const result = await postConvertNotes(
-              data.input,
-              data.tool,
-              writingTask
-            );
-            const toolResult = { ...data, result };
-            trackScreenView({
-              screen_name: data.tool,
-              screen_class: "ToolCard",
-              task_id: writingTask?.info.id,
-            });
-            setCurrentTool(toolResult);
-            // setHistory(history => [...history, toolResult]);
-            break;
-          }
-          default:
-            console.error(`Unhandled tool: ${data}`);
+        if (data.input.text.trim() === "") {
+          throw new NoInputError("No text selected for processing.", data.tool);
         }
+        const requestData: NotesRequest = {
+          notes: data.input.text,
+          user_lang: writingTask?.info.user_lang,
+          target_lang: writingTask?.info.target_lang,
+        };
+        const onNotes =
+          data.tool === "bullets" ? onNotesToBullets : onNotesToProse;
+        const response = await onNotes(requestData);
+        if ("error" in response) {
+          if (response.error?.id === "word_count_exceeded") {
+            throw new SelectionTooLargeError(
+              response.error.message,
+              response.error?.details?.wordCount ?? -1,
+              response.error?.details?.limit ?? -1
+            );
+          }
+          if (response.error?.id === "empty_input") {
+            throw new NoInputError(response.error.message, data.tool);
+          }
+          // TODO: Handle other specific error cases as needed
+          throw new Error(response.error?.message);
+        }
+        const toolResult = { ...data, result: response.result };
+        trackScreenView({
+          screen_name: data.tool,
+          screen_class: "ToolCard",
+          task_id: writingTask?.info.id,
+        });
+        setCurrentTool(toolResult);
+        // setHistory(history => [...history, toolResult]);
       } catch (error) {
         if (error instanceof Error) {
           setCurrentTool({ ...data, error });
@@ -119,7 +91,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         }
       }
     },
-    [writingTask, t]
+    [writingTask]
   );
   const onTool = useCallback(
     (tool: Tool) => {
@@ -140,7 +112,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
               text: "",
             },
             result: null,
-            error: new NoSelectedTextError(t("error.no_selection.default")),
+            error: new NoInputError("No input provided.", tool),
           });
           return;
         }
@@ -155,11 +127,10 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
               range: editor.selection,
             },
             result: null,
-            error: new NoSelectedTextError(
-              t("error.too_large_selection", {
-                count: wordCount,
-                maxCount: selectionLimit,
-              })
+            error: new SelectionTooLargeError(
+              "Selection exceeds the maximum word count.",
+              wordCount,
+              selectionLimit
             ),
           });
           return;
@@ -184,11 +155,11 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
             text: "",
           },
           result: null,
-          error: new NoSelectedTextError(t("error.no_selection.default")),
+          error: new NoInputError("Error: No input provided.", "default"),
         });
       }
     },
-    [editor, doTool, t, selectionLimit]
+    [editor, doTool, selectionLimit]
   ); // Does this need to be wrapped in useCallback?
   const retry = useCallback(
     async (previous: ToolResult) =>
@@ -222,7 +193,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
                   title={t("tool.button.prose.title")}
                   icon={<GenerateProseIcon />}
                   onClick={() => onTool("prose")}
-                  disabled={!scribe || !hasSelection}
+                  disabled={!hasSelection}
                 />
               )}
               {settings.notes2bullets && (
@@ -231,7 +202,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
                   title={t("tool.button.bullets.title")}
                   icon={<GenerateBulletsIcon />}
                   onClick={() => onTool("bullets")}
-                  disabled={!scribe || !hasSelection}
+                  disabled={!hasSelection}
                 />
               )}
             </ButtonGroup>

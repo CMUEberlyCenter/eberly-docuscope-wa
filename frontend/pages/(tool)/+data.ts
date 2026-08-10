@@ -3,7 +3,13 @@ import {
   findWritingTaskById,
 } from '#server/data/mongo';
 import { logger } from '#server/logger.js';
-import { isContentDeveloper, isInstructor, isStudent, isTestUser, startGrading } from '#server/model/lti';
+import {
+  isContentDeveloper,
+  isInstructor,
+  isStudent,
+  isTestUser,
+  startGrading,
+} from '#server/model/lti';
 import { Provider } from 'ltijs';
 import type { PageContextServer } from 'vike/types';
 
@@ -19,7 +25,8 @@ export async function data(pageContext: PageContextServer) {
     ? []
     : (await findAllPublicWritingTasks()).map(({ _id, ...task }) => task); // need everything but _id for preview.
 
-  if (pageContext.token) { // isLTI
+  if (pageContext.token) {
+    // isLTI
     if (isTestUser(pageContext.token)) {
       logger.warn('Test user accessing the app with token:', {
         token: pageContext.token,
@@ -45,7 +52,8 @@ export async function data(pageContext: PageContextServer) {
     ltiActivityTitle: pageContext.token?.platformContext?.resource?.title,
     username: pageContext.token?.userInfo?.name,
     isLTI: !!pageContext.token,
-    isContentDeveloper: !!pageContext.token && isContentDeveloper(pageContext.token),
+    isContentDeveloper:
+      !!pageContext.token && isContentDeveloper(pageContext.token),
     isInstructor: !!pageContext.token && isInstructor(pageContext.token),
     isStudent: !!pageContext.token && isStudent(pageContext.token),
     token: pageContext.token, // necessary for telefuncs to have access to the token for LTI grading as page context is not usable in telefuncs.

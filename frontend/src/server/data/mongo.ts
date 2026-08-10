@@ -1,10 +1,10 @@
+import { PromptType } from '#server/model/prompt.js';
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { MongoClient, ObjectId } from 'mongodb';
 import { Analysis, ReviewTool } from '../../lib/ReviewResponse';
 import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
-import { type ChatResponse } from './chat';
 import { initWritingTasks } from './writing_task_description';
 
 const client = new MongoClient(MONGO_CLIENT);
@@ -434,7 +434,19 @@ type LogData = {
 };
 export function insertLog(
   session_id: string,
-  { finished, key, delta_ms, model, usage }: ChatResponse<unknown>
+  {
+    finished,
+    key,
+    delta_ms,
+    model,
+    usage,
+  }: {
+    finished: Date;
+    key: PromptType;
+    delta_ms: number;
+    model: Messages.Model;
+    usage: Messages.Usage;
+  }
 ) {
   const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
   collection.insertOne({

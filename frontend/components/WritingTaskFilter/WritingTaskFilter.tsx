@@ -26,7 +26,8 @@ const hasPrefix = (prefix: string, key: string) =>
   key.startsWith(`${prefix}${sep}`) &&
   key.substring(prefix.length + sep.length).length > 0;
 
-const getKeyword = (prefix: string, key: string) => key.substring(`${prefix}${sep}`.length);
+const getKeyword = (prefix: string, key: string) =>
+  key.substring(`${prefix}${sep}`.length);
 
 type CategoryKeywordsProps = {
   prefix: string;
@@ -154,7 +155,7 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
   const selectDomain = (domain: string) => {
     setActiveKeywords((activeKeywords) => [
       ...activeKeywords.filter((key) => !hasPrefix("domain", key)),
-      ...hasPrefix("domain", domain) ? [domain] : []
+      ...(hasPrefix("domain", domain) ? [domain] : []),
     ]);
   };
 
@@ -200,7 +201,12 @@ export const WritingTaskFilter: FC<WritingTaskFilterProps> = ({
         ))}
       {groups.domain && (
         <FloatingLabel label={t("select_task.domain")}>
-          <select className="form-select" onChange={(evt) => selectDomain(evt.target.value)} aria-label={t("select_task.domain")} value={activeKeywords.find((key) => hasPrefix("domain", key)) || ""}>
+          <select
+            className="form-select"
+            onChange={(evt) => selectDomain(evt.target.value)}
+            aria-label={t("select_task.domain")}
+            value={activeKeywords.find((key) => hasPrefix("domain", key)) || ""}
+          >
             <option value="">{t("select_task.domain_null")}</option>
             {groups.domain.map((domain) => (
               <option key={domain} value={domain}>

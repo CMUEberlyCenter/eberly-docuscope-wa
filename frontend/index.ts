@@ -40,8 +40,8 @@ import { scribe } from './src/server/api/scribe';
 import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
-import { initPrompts } from './src/server/data/prompts';
-import { watchSettings } from './src/server/getSettings';
+import { initPrompts, PROMPTS } from './src/server/data/prompts';
+import { getSettings, watchSettings } from './src/server/getSettings';
 import { logger } from './src/server/logger';
 import { metrics } from './src/server/prometheus';
 import {
@@ -464,9 +464,12 @@ async function __main__() {
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             gradeService: Provider.Grade,
             token: res.locals.token,
+            sessionId: req.sessionID,
             user,
             isAdmin: user === 'admin',
-            // session: req.session,
+            acceptLanguage: req.headers['accept-language'],
+            settings: getSettings(),
+            prompts: PROMPTS, // session: req.session,
           } as TelefuncContext,
         });
         res.status(statusCode);
