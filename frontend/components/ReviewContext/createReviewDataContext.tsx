@@ -2,8 +2,8 @@ import { Optional } from "#/index";
 import { userLanguage } from "#/lib/languageCode";
 import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
 import { WritingTask } from "#/lib/WritingTask";
+import { Data } from "#pages/(tool)/+data.js";
 import { useMutation } from "@tanstack/react-query";
-import { IdToken } from "ltijs";
 import {
   createContext,
   FC,
@@ -23,7 +23,7 @@ import { onGrade } from "./createReviewDataContext.telefunc";
 import { useReviewDispatch } from "./ReviewContext";
 
 function useReview<T extends Analysis>(tool: ReviewTool) {
-  const { token } = useData<{ token: IdToken }>();
+  const { token } = useData<Data>();
   const [document] = useFileText();
   const [{ task: writing_task }] = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<T>>(null);

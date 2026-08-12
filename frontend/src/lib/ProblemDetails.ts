@@ -22,30 +22,38 @@ export class FileNotFoundError extends Error {}
 /** Generate File Not Found message. */
 export const FileNotFound = (
   err: Error | string,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/404',
   title: 'Not Found',
   detail: err instanceof Error ? err.message : err,
   status: 404,
   instance,
+  ...extensions,
 });
 
 /** Forbidden Error */
 export class ForbiddenError extends Error {}
 /** Generate Forbidden message. */
-const Forbidden = (err: Error | string, instance?: string): ProblemDetails => ({
+const Forbidden = (
+  err: Error | string,
+  instance?: string,
+  extensions?: { [key: string]: unknown }
+): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/403',
   title: 'Forbidden',
   detail: err instanceof Error ? err.message : err,
   status: 403,
   instance,
+  ...extensions,
 });
 
 /** Generate Internal Server Error message. */
 export const InternalServerError = (
   err: Error | string | unknown,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/500',
   title: 'Internal Server Error',
@@ -58,6 +66,7 @@ export const InternalServerError = (
         : 'Unknown error type!',
   error: err,
   instance,
+  ...extensions,
 });
 
 export class BadRequestError extends Error {}
@@ -65,36 +74,42 @@ export class BadRequestError extends Error {}
 /** Generate Bad Request message. */
 export const BadRequest = (
   err: Error | string,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/400',
   title: 'Bad Request',
   detail: err instanceof Error ? err.message : err,
   status: 400,
   instance,
+  ...extensions,
 });
 
 /** Generate Unauthorized message. */
 export const Unauthorized = (
   err: Error | string,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/401',
   title: 'Unauthorized',
   detail: err instanceof Error ? err.message : err,
   status: 401,
   instance,
+  ...extensions,
 });
 
 const ContentTooLarge = (
   err: Error | string,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/413',
   title: 'Content Too Large',
   detail: err instanceof Error ? err.message : err,
   status: 413,
   instance,
+  ...extensions,
 });
 
 export class UnprocessableContentError extends Error {
@@ -111,7 +126,8 @@ export class UnprocessableContentError extends Error {
 /** Generate Unprocessable Content message. */
 export const UnprocessableContent = (
   err: Error | string,
-  instance?: string
+  instance?: string,
+  extensions?: { [key: string]: unknown }
 ): ProblemDetails => ({
   type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/422',
   title: 'Unprocessable Content',
@@ -119,6 +135,7 @@ export const UnprocessableContent = (
   status: 422,
   instance,
   errors: err instanceof UnprocessableContentError ? err.validation : undefined,
+  ...extensions,
 });
 
 export class GatewayError extends Error {}
@@ -159,6 +176,63 @@ const ServiceUnavailable = (
 
 export class ChatStopError extends Error {}
 
+export const errorToProblemDetails = (
+  err: Error | string | unknown,
+  instance?: string,
+  extensions?: { [key: string]: unknown }
+): ProblemDetails => {
+  if (err instanceof BadRequestError) {
+    return BadRequest(err, instance, extensions);
+  }
+  if (err instanceof ForbiddenError) {
+    return Forbidden(err, instance, extensions);
+  }
+  if (err instanceof FileNotFoundError) {
+    return FileNotFound(err, instance, extensions);
+  }
+  if (err instanceof ReferenceError) {
+    return FileNotFound(err, instance, extensions);
+  }
+  if (err instanceof SyntaxError) {
+    return UnprocessableContent(err, instance, extensions);
+  }
+  if (err instanceof UnprocessableContentError) {
+    return UnprocessableContent(err, instance, extensions);
+  }
+  if (err instanceof GatewayError) {
+    return BadGateway(err, instance);
+  }
+  if (err instanceof APIUserAbortError) {
+    return BadGateway(err, instance);
+  }
+  if (err instanceof APIConnectionTimeoutError) {
+    return GatewayTimeout(err, instance);
+  }
+  if (err instanceof APIError) {
+    if (err.error?.response?.status === 400) {
+      return ServiceUnavailable(err, instance);
+    }
+    if (err.error?.response?.status === 413) {
+      return ContentTooLarge(err, instance);
+    }
+    // https://docs.claude.com/en/api/errors
+    // 401 authentication_error
+    // 403 permission_error
+    // 404 not_found_error
+    // 429 rate_limit_error
+    // 500 api_error
+    // 529 overloaded_error
+    return ServiceUnavailable(err, instance);
+  }
+  if (err instanceof ChatStopError) {
+    return ServiceUnavailable(err, instance);
+  }
+  logger.error(
+    `Unhandled error: ${err instanceof Error ? err.message : err}`,
+    err
+  );
+  return InternalServerError(err, instance, extensions);
+};
 /** Express error handling middleware */
 export const handleError = (
   err: Error,
@@ -168,56 +242,6 @@ export const handleError = (
 ) => {
   // Log the error for debugging purposes.
   logger.error(`Error occurred: ${err.message}`, err);
-  if (err instanceof BadRequestError) {
-    return response.status(400).json(BadRequest(err));
-  }
-  if (err instanceof ForbiddenError) {
-    return response.status(403).json(Forbidden(err));
-  }
-  // TODO: Unauthorized
-  if (err instanceof FileNotFoundError) {
-    return response.status(404).json(FileNotFound(err));
-  }
-  if (err instanceof ReferenceError) {
-    return response.status(404).json(FileNotFound(err));
-  }
-  if (err instanceof SyntaxError) {
-    // likely JSON parse error
-    return response.status(422).json(UnprocessableContent(err));
-  }
-  if (err instanceof UnprocessableContentError) {
-    return response.status(422).json(UnprocessableContent(err));
-  }
-  if (err instanceof GatewayError) {
-    return response.status(502).json(BadGateway(err));
-  }
-  if (err instanceof APIUserAbortError) {
-    return response.status(502).json(BadGateway(err));
-  }
-  if (err instanceof APIConnectionTimeoutError) {
-    return response.status(504).json(GatewayTimeout(err));
-  }
-  if (err instanceof APIError) {
-    if (err.error?.response?.status === 400) {
-      // 400 can be used as a generic API error from Claude
-      return response.status(503).json(ServiceUnavailable(err));
-    }
-    if (err.error?.response?.status === 413) {
-      return response.status(413).json(ContentTooLarge(err));
-    }
-    // https://docs.claude.com/en/api/errors
-    // 401 authentication_error
-    // 403 permission_error
-    // 404 not_found_error
-    // 429 rate_limit_error
-    // 500 api_error
-    // 529 overloaded_error
-    return response.status(503).json(ServiceUnavailable(err));
-    // TODO check err.response.status for other specific handling
-  }
-  if (err instanceof ChatStopError) {
-    return response.status(503).json(ServiceUnavailable(err));
-  }
-  logger.error(`Unhandled error: ${err.message}`, err);
-  return response.status(500).json(InternalServerError(err));
+  const details = errorToProblemDetails(err);
+  response.status(details.status || 500).json(details);
 };

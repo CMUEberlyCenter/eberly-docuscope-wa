@@ -36,7 +36,6 @@ import { validateWritingTask } from './src/lib/schemaValidate';
 import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
-import { scribe } from './src/server/api/scribe';
 import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
@@ -413,8 +412,6 @@ async function __main__() {
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline API Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
-    // Scribe API Endpoints
-    app.use('/api/v2/scribe', scribe);
     // OnTopic API Endpoints
     app.use('/api/v2/ontopic', ontopic);
     // Reviews API Endpoints
@@ -455,6 +452,7 @@ async function __main__() {
       },
       async (req: Request, res: Response, _next: NextFunction) => {
         const user = (req as IBasicAuthedRequest).auth?.user;
+        console.log('Telefunc request', res.locals.token);
         const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,
@@ -463,7 +461,7 @@ async function __main__() {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
             gradeService: Provider.Grade,
-            token: res.locals.token,
+            // token: res.locals.token, // token not accessible in telefunc response
             sessionId: req.sessionID,
             user,
             isAdmin: user === 'admin',

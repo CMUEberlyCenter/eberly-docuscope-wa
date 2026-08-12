@@ -31,7 +31,7 @@ export async function data(pageContext: PageContextServer) {
       logger.warn('Test user accessing the app with token:', {
         token: pageContext.token,
       });
-    } else if (isStudent(pageContext.token?.platformContext)) {
+    } else if (isStudent(pageContext.token)) {
       // only attempt to grade if the user is a student.
       try {
         // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
@@ -56,7 +56,7 @@ export async function data(pageContext: PageContextServer) {
       !!pageContext.token && isContentDeveloper(pageContext.token),
     isInstructor: !!pageContext.token && isInstructor(pageContext.token),
     isStudent: !!pageContext.token && isStudent(pageContext.token),
-    token: pageContext.token, // necessary for telefuncs to have access to the token for LTI grading as page context is not usable in telefuncs.
+    token: pageContext.token, // pass the token to the frontend for use in telefuncs and other client-side logic that may require LTI context.
   };
 }
 export type Data = Awaited<ReturnType<typeof data>>;

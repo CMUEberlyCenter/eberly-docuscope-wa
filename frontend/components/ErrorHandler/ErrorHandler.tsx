@@ -15,17 +15,15 @@ export class NoInputError extends Error {
   }
 }
 export class SelectionTooLargeError extends Error {
-  public count: number;
-  public limit: number;
+  public count: number = 0;
+  public limit: number = 0;
   constructor(
-    message: string,
-    count: number,
-    limit: number,
+    error: { detail?: string; count?: number; limit?: number },
     options?: ErrorOptions
   ) {
-    super(message, options);
-    this.count = count;
-    this.limit = limit;
+    super(error.detail, options);
+    this.count = error.count ?? 0;
+    this.limit = error.limit ?? 0;
   }
 }
 

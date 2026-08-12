@@ -1,23 +1,40 @@
 import { resolveLanguageCode } from '#lib/languageCode';
-import { ChatStopError, GatewayError } from '#lib/ProblemDetails';
+import {
+  BadRequest,
+  ChatStopError,
+  errorToProblemDetails,
+} from '#lib/ProblemDetails';
 import { NotesRequest } from '#lib/Requests';
 import { TelefuncContext } from '#lib/TelefuncContext';
 import { anthropic, ErrorMessage } from '#server/data/chat';
 import { insertLog } from '#server/data/mongo.js';
 import { logger } from '#server/logger';
+import { grade, isStudent } from '#server/model/lti.js';
 import { NotesPrompt } from '#server/model/prompt';
 import { ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '#server/settings';
+import { IdToken } from 'ltijs';
 import format from 'string-format';
 import { getContext } from 'telefunc';
 
-async function convertNotes(key: NotesPrompt, data: NotesRequest) {
+async function convertNotes(
+  key: NotesPrompt,
+  data: NotesRequest,
+  token?: IdToken
+) {
   const started = new Date();
   const { notes, user_lang } = data;
-  if (!notes) {
-    return { error: { id: 'empty_input', message: 'Notes input is empty' } };
+  let score = 0;
+  if (!notes || notes.trim() === '') {
+    return { error: BadRequest('No text provided.', 'empty_input') };
   }
-  const { acceptLanguage, settings, onClose, token, sessionId, prompts } =
-    getContext<TelefuncContext>();
+  const {
+    acceptLanguage,
+    settings,
+    onClose,
+    sessionId,
+    prompts,
+    gradeService,
+  } = getContext<TelefuncContext>();
   const language = user_lang
     ? resolveLanguageCode(user_lang)
     : (acceptLanguage?.split(',')[0] ?? 'en');
@@ -29,11 +46,11 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const limit = settings.select_word_limit;
   if (wordCount > limit) {
     return {
-      error: {
-        id: 'word_count_exceeded',
-        message: `Notes exceed the maximum word count of ${limit}`,
-        details: { wordCount, limit },
-      },
+      error: BadRequest(
+        'Submitted input exceeds the maximum word count.',
+        'word_count_exceeded',
+        { count: wordCount, limit }
+      ),
     };
   }
   try {
@@ -107,6 +124,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
         model: chat.model,
         usage: chat.usage,
       });
+      score = 1.0; // Set the score to 1 if the conversion is successful.
       return { result: result.text };
     } else {
       throw new Error('Unexpected response format from the model.', {
@@ -115,38 +133,21 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     }
   } catch (error) {
     logger.error('Error in convertNotes:', error);
-    if (error instanceof GatewayError) {
-      return { error: { id: 'gateway_error', message: error.message } };
+    return { error: errorToProblemDetails(error) };
+  } finally {
+    if (gradeService && token && isStudent(token)) {
+      // only attempt to grade if the user is a student and both gradeService and token are available.
+      try {
+        const gradeResult = await grade(gradeService, token, score); // Attempt to grade regardless of success or failure.
+        logger.info('Grading result:', gradeResult);
+      } catch (error) {
+        logger.error('Error in grading:', error);
+      }
     }
-    if (error instanceof ReferenceError) {
-      return {
-        error: {
-          id: 'template_not_found',
-          message: error.message,
-          details: { prompt: key },
-        },
-      };
-    }
-    if (error instanceof Error) {
-      return {
-        error: {
-          id: 'chat_error',
-          message: error.message,
-          details: { stack: error.stack, prompt: key },
-        },
-      };
-    }
-    return {
-      error: {
-        id: 'chat_error',
-        message: 'An error occurred while processing the notes.',
-        details: { error, prompt: key },
-      },
-    };
   }
 }
 
-export const onNotesToProse = (data: NotesRequest) =>
-  convertNotes('notes_to_prose', data);
-export const onNotesToBullets = (data: NotesRequest) =>
-  convertNotes('notes_to_bullets', data);
+export const onNotesToProse = (data: NotesRequest, token?: IdToken) =>
+  convertNotes('notes_to_prose', data, token);
+export const onNotesToBullets = (data: NotesRequest, token?: IdToken) =>
+  convertNotes('notes_to_bullets', data, token);

@@ -1,6 +1,6 @@
 import { JsonValue, Optional } from '#/index';
 import { logger } from '#server/logger.js';
-import type { PlatformContext, GradeService, IdToken, Score } from 'ltijs';
+import type { GradeService, IdToken, Score } from 'ltijs';
 
 /*
 // @deprecated
@@ -88,18 +88,26 @@ const LIS_Sub_Roles = [
 const LTI_Test_User =
   'http://purl.imsglobal.org/vocab/lti/system/person#TestUser';
 
-export function isTestUser(token: IdToken): boolean {
-  return token.platformContext.roles.includes(LTI_Test_User);
+export function isTestUser(token: Optional<IdToken>): boolean {
+  return !!token && token.platformContext.roles.includes(LTI_Test_User);
 }
-export function isInstructor(token: IdToken): boolean {
-  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
-    (role) => token.platformContext.roles.includes(role)
+export function isInstructor(token: Optional<IdToken>): boolean {
+  return (
+    !!token &&
+    ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
+      (role) => token.platformContext.roles.includes(role)
+    )
   );
 }
 
-export function isStudent(token: IdToken): boolean {
-  return ['http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'].some(
-    (role) => token.platformContext.roles.includes(role)
+export function isStudent(token: Optional<IdToken>): boolean {
+  // Check if the token is defined and if the roles array includes the student role.
+  // Should not need to check the sub-roles as the main role should be present if the user is a student, but we can add that check if needed in the future.
+  return (
+    !!token &&
+    ['http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'].some((role) =>
+      token.platformContext.roles.includes(role)
+    )
   );
 }
 
@@ -158,7 +166,7 @@ const getLineItemId = async (
 };
 
 export const startGrading = async (
-  gradeService: GradeService,
+  gradeService: Optional<GradeService>,
   token: Optional<IdToken>
 ) => {
   if (!gradeService) return null;
@@ -178,7 +186,7 @@ export const startGrading = async (
 };
 
 export const grade = async (
-  gradeService: GradeService,
+  gradeService: Optional<GradeService>,
   token: Optional<IdToken>,
   score: number,
   customData?: JsonValue
@@ -187,24 +195,16 @@ export const grade = async (
   if (!token) return null;
   // Check if a line item already exists for this resource link, and if so, get the existing grade.
   const existingGrade = await getGrade(gradeService, token);
-  console.log('Existing grade:', existingGrade);
+  console.log('Existing grade:', existingGrade); // TODO: remove for production, but useful for debugging.
   if (
-    existingGrade?.scoreGiven !== undefined &&
-    existingGrade.scoreGiven >= score
+    existingGrade?.resultScore !== undefined &&
+    existingGrade.resultScore >= score
   ) {
-    console.log('non-clobbering grading');
+    console.log('non-clobbering grading'); // TODO remove
     // Don't update the grade if the new score is not higher than the existing score.
     return existingGrade;
   }
   const lineItemId = await getLineItemId(gradeService, token);
-  console.log(
-    'Submitting grade with lineItemId:',
-    lineItemId,
-    'score:',
-    score,
-    'customData:',
-    customData
-  );
   const gradeObj: Score = {
     userId: token.user,
     scoreGiven: score * 1.0, // ensure it is a float, as some LTI platforms may require a decimal value for the score, even if it is a whole number.
@@ -216,14 +216,18 @@ export const grade = async (
   return gradeService.submitScore(token, lineItemId, gradeObj);
 };
 
-async function getGrade(gradeService: GradeService, token: Optional<IdToken>) {
+async function getGrade(
+  gradeService: Optional<GradeService>,
+  token: Optional<IdToken>
+) {
   if (!gradeService) return null;
   if (!token) return null;
+  // If there is no line item associated with the token, we cannot retrieve a grade.
   if (!token.platformContext.endpoint?.lineitem) return null;
   const lineItemId = token.platformContext.endpoint.lineitem;
   const { scores } = await gradeService.getScores(token, lineItemId, {
     userId: token.user,
   });
-  console.log(scores); // Check if need to better handle multiple scores.
+  console.log(scores); // Check if need to better handle multiple scores. TODO: remove
   return scores.at(0) ?? null;
 }

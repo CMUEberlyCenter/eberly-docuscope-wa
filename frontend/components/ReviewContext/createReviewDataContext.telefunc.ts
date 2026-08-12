@@ -1,7 +1,8 @@
 import { JsonValue } from '#/index';
+import { TelefuncContext } from '#lib/TelefuncContext.js';
 import { logger } from '#server/logger.js';
 import { grade, isStudent, isTestUser } from '#server/model/lti.js';
-import { GradeService, IdToken } from 'ltijs';
+import { IdToken } from 'ltijs';
 import { getContext } from 'telefunc';
 
 export async function onGrade(
@@ -9,9 +10,14 @@ export async function onGrade(
   score: number,
   customData?: JsonValue
 ) {
+  const { gradeService } = getContext<TelefuncContext>();
   if (!token) {
     logger.warn('Attempted to grade without a token'); // TODO remove this line for production.
-    return null;
+    return null; // no-op if no token is present, as grading requires a valid LTI token.
+  }
+  if (!gradeService) {
+    logger.error('Grade service is not available in the context'); // TODO remove this line for production.
+    return null; // no-op if the grade service is not available, as grading cannot proceed without it.
   }
   if (isTestUser(token)) {
     // NOOP for test users, but log the grading attempt for debugging purposes.
@@ -23,7 +29,6 @@ export async function onGrade(
   if (isStudent(token)) {
     // Only attempt to grade if the user is a student.
     try {
-      const { gradeService } = getContext<{ gradeService: GradeService }>();
       logger.info(
         `Grading review with score: ${score} and customData: ${JSON.stringify(customData)}, token: ${!!token}, service: ${!!gradeService} `
       );

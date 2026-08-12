@@ -26,6 +26,8 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { onNotesToBullets, onNotesToProse } from "./ToolCard.telefunc";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
+import { useData } from "vike-react/useData";
+import { Data } from "#pages/(tool)/+data.js";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 
@@ -41,6 +43,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
   const { settings } = usePageContext();
+  const { token } = useData<Data>();
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
   const selectionLimit = settings?.select_word_limit ?? 250;
@@ -60,20 +63,19 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         };
         const onNotes =
           data.tool === "bullets" ? onNotesToBullets : onNotesToProse;
-        const response = await onNotes(requestData);
-        if ("error" in response) {
-          if (response.error?.id === "word_count_exceeded") {
-            throw new SelectionTooLargeError(
-              response.error.message,
-              response.error?.details?.wordCount ?? -1,
-              response.error?.details?.limit ?? -1
+        const response = await onNotes(requestData, token);
+        if ("error" in response && response.error) {
+          if (response.error?.instance === "word_count_exceeded") {
+            throw new SelectionTooLargeError(response.error);
+          }
+          if (response.error?.instance === "empty_input") {
+            throw new NoInputError(
+              response.error.detail ?? "No text selected for processing.",
+              data.tool
             );
           }
-          if (response.error?.id === "empty_input") {
-            throw new NoInputError(response.error.message, data.tool);
-          }
           // TODO: Handle other specific error cases as needed
-          throw new Error(response.error?.message);
+          throw new Error(response.error.detail);
         }
         const toolResult = { ...data, result: response.result };
         trackScreenView({
@@ -91,7 +93,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         }
       }
     },
-    [writingTask]
+    [writingTask, token]
   );
   const onTool = useCallback(
     (tool: Tool) => {
@@ -127,11 +129,11 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
               range: editor.selection,
             },
             result: null,
-            error: new SelectionTooLargeError(
-              "Selection exceeds the maximum word count.",
-              wordCount,
-              selectionLimit
-            ),
+            error: new SelectionTooLargeError({
+              detail: "Submitted input exceeds the maximum word count.",
+              count: wordCount,
+              limit: selectionLimit,
+            }),
           });
           return;
         }
