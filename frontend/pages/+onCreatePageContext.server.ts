@@ -3,7 +3,7 @@ import type { PageContext } from 'vike/types';
 
 export async function onCreatePageContext(pageContext: PageContext) {
   // The object pageContext was just created
-  pageContext.settings = getSettings();
+  // pageContext.settings = getSettings(); // should already be in pageContext via toolSettingsMiddleware
 
   // const req = pageContext.req;
   // const session = await auth.api.getSession({ req });

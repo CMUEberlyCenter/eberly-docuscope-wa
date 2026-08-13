@@ -29,6 +29,8 @@ import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 import { countPrompt } from '../prometheus';
+import { Settings } from '#lib/ToolSettings.js';
+import { getContext } from '@universal-middleware/express';
 
 export const reviews = Router();
 
@@ -194,7 +196,8 @@ reviews.post(
       .withMessage('Expectation is required')
   ),
   async (request: Request, response: Response) => {
-    if (!getSettings().expectations) {
+    const { settings } = getContext<{ settings: Settings }>(request as any);
+    if (!settings.expectations) {
       throw new ForbiddenError('Expectations tool is not available!');
     }
     const { document, writing_task, expectation } =
@@ -283,7 +286,7 @@ reviews.post(
       throw new UnprocessableContentError('Invalid analysis type');
     }
     // Check if the tool is enabled in settings
-    const settings = getSettings();
+    const settings = await getSettings();
     if (analysis in settings && !settings[analysis as keyof typeof settings]) {
       throw new ForbiddenError(`${analysis} tool is not available!`);
     }

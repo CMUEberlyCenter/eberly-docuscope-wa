@@ -42,7 +42,7 @@ import {
   ProminentTopicsButton,
   ProminentTopicsSnapshotProvider,
 } from "#components/Review/ProminentTopics";
-import "#components/Review/Review.scss";
+// import "#components/Review/Review.scss";
 import {
   Sentences,
   SentencesButton,
@@ -71,6 +71,7 @@ type Tool =
   ReviewTool | "sentence_density" | "organization" | "impressions" | "null";
 
 export const Page: FC = () => {
+  return null;
   const { id: reviewID, tool_config, task, analyses } = useData<Data>();
   const { settings } = usePageContext();
   const { t } = useTranslation("review");

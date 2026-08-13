@@ -4,6 +4,7 @@ import { WritingTaskProvider } from "#components/WritingTaskContext/WritingTaskC
 import { FC, ReactNode } from "react";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
+import { SnapshotContextProvider } from "./SnapshotContext";
 
 export const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
   const { task, segmented } = useData<Data>();
@@ -11,7 +12,9 @@ export const Wrapper: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <WritingTaskProvider initial={{ task, taskId: task.info.id }}>
       <FileTextProvider initial={{ text: segmented }}>
-        <ReviewProvider>{children}</ReviewProvider>
+        <ReviewProvider>
+          <SnapshotContextProvider>{children}</SnapshotContextProvider>
+        </ReviewProvider>
       </FileTextProvider>
     </WritingTaskProvider>
   );

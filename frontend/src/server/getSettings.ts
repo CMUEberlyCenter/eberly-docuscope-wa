@@ -1,13 +1,18 @@
+import { enhance, type UniversalMiddleware } from '@universal-middleware/core';
 import { watch } from 'fs';
 import { readFile } from 'fs/promises';
-import { type Settings, DEFAULT } from '../lib/ToolSettings';
+import { DEFAULT, type Settings } from '../lib/ToolSettings';
 import { logger } from './logger';
 import { TOOL_SETTINGS_PATH } from './settings';
 
-let ToolSettings: Settings = DEFAULT;
+let ToolSettings: Settings | null = null;
 
 /** Gets the site wide settings. */
-export function getSettings(): Settings {
+export async function getSettings(): Promise<Settings> {
+  if (!ToolSettings) {
+    logger.warn('ToolSettings not loaded yet, loading from file...');
+    ToolSettings = await loadSettingsFromFile(TOOL_SETTINGS_PATH);
+  }
   return ToolSettings;
 }
 
@@ -43,3 +48,11 @@ export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
   );
   return () => settings.close();
 }
+
+export const toolSettingsMiddleware: UniversalMiddleware = enhance(
+  async (_request, context, _runtime) => {
+    const settings = await getSettings();
+    return { ...context, settings };
+  }, {
+    name: 'myprose:toolSettingsMiddleware',
+  });

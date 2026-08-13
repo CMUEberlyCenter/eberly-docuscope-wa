@@ -122,7 +122,7 @@ snapshot.get(
   validate(param('id').isMongoId()),
   async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
-    const settings = getSettings();
+    const settings = await getSettings();
     if (!settings.term_matrix && !settings.sentence_density) {
       throw new ForbiddenError('Ontopic tool is not available!');
     }
@@ -161,7 +161,7 @@ snapshot.get(
   async (request: Request<{ id: string; index: string }>, response) => {
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
-    const settings = getSettings();
+    const settings = await getSettings();
     if (!settings.expectations) {
       throw new ForbiddenError('Expectation Analysis tool is not available!');
     }

@@ -31,7 +31,7 @@ const scribeNotes =
     ].filter(
       (segment) => segment.isWordLike || segment.segment.match(/\w+/)
     ).length;
-    const limit = getSettings().select_word_limit;
+    const limit = (await getSettings()).select_word_limit;
     if (wordCount > limit) {
       throw new BadRequestError(
         `Notes exceed the maximum word count of ${limit}`
