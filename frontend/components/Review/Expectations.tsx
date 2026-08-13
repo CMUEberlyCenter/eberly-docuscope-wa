@@ -535,13 +535,6 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
   const [current, setCurrent] = useState<AccordionEventKey>(null);
   const onSelect: AccordionSelectCallback = useCallback(
     (eventKey, event) => {
-      console.log("Selected expectation event key:", eventKey);
-      console.log(
-        "Event:",
-        (event.target as HTMLElement)
-          .closest("[data-myprose-rule]")
-          ?.getAttribute("data-myprose-rule")
-      );
       setCurrent(eventKey);
       if (eventKey) {
         const rulename =

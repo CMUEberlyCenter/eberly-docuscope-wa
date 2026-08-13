@@ -268,6 +268,8 @@ async function __main__() {
             tool_id: PRODUCT,
             platform: 'canvas.instructure.com',
             privacy_level: 'public',
+            selection_height: 800,
+            selection_width: 800,
             settings: {
               text: 'myProse Drafting and Review tools',
               labels: {
@@ -452,7 +454,6 @@ async function __main__() {
       },
       async (req: Request, res: Response, _next: NextFunction) => {
         const user = (req as IBasicAuthedRequest).auth?.user;
-        console.log('Telefunc request', res.locals.token);
         const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,

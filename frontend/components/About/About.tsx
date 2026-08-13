@@ -5,28 +5,19 @@ import { Translation, useTranslation } from "react-i18next";
 import { Logo } from "../Logo/Logo";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 
-// type PromptInfo = { saved_at: string };
-// async function fetchTemplateInfo() {
-//   const response = await fetch("/api/v2/scribe/templates/info");
-//   if (!response.ok) {
-//     console.error("Failed to fetch template info.", response);
-//     return null;
-//   }
-//   return response.json() as Promise<PromptInfo>;
-// }
-
-// const templatesInfo = fetchTemplateInfo();
-
 /**
  * AboutModal component for displaying information about the application.
+ * @component
+ * @example
+ * ```tsx
+ * <AboutModal show={true} onHide={() => {}} />
+ * ```
  * @param props Bootstrap Modal properties.
- * @returns
  */
 const AboutModal: FC<ModalProps> = (props) => {
   const { t } = useTranslation();
   const version = __APP_VERSION__;
   const build_date = useMemo(() => new Date(__BUILD_DATE__), []);
-  // const template_info = use(templatesInfo);
   const [{ task }] = useWritingTask();
 
   return (
@@ -98,11 +89,11 @@ const AboutModal: FC<ModalProps> = (props) => {
 };
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
-/** About component that triggers the About modal. */
+/** About link button component that triggers the About modal. */
 export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
-  const toggle = () => setShow(!show);
+  const toggle = () => setShow((prev) => !prev);
   return (
     <Translation>
       {(t) => (
