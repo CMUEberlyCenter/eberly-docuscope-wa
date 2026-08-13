@@ -2,6 +2,7 @@ import { Optional } from "#/index";
 import { userLanguage } from "#/lib/languageCode";
 import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
 import { WritingTask } from "#/lib/WritingTask";
+import { Data } from "#pages/(tool)/+data.js";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
@@ -14,12 +15,15 @@ import {
   useState,
   useTransition,
 } from "react";
+import { useData } from "vike-react/useData";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
+import { onGrade } from "./createReviewDataContext.telefunc";
 import { useReviewDispatch } from "./ReviewContext";
 
 function useReview<T extends Analysis>(tool: ReviewTool) {
+  const { token } = useData<Data>();
   const [document] = useFileText();
   const [{ task: writing_task }] = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<T>>(null);
@@ -54,6 +58,14 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       dispatch({ type: "update", sentences: input });
       // check if isErrorData? - should be handled in component
       setReview(data);
+      onGrade(token, 1.0, {
+        tool,
+        task_id: writing_task?.info.id ?? "",
+        input_length: input.length,
+        // TODO: ability to reconstruct student final state.
+        // TODO: document: input,
+        // TODO: data: [...prev, data]
+      });
     },
     onError: (error) => {
       setReview({ tool, error });

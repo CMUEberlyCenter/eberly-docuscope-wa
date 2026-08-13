@@ -2,7 +2,14 @@ import type { FC } from "react";
 import { Nav, Navbar } from "react-bootstrap";
 import { Logo } from "../Logo/Logo";
 
-/** Header component for displaying the stage title and logo. */
+/**
+ * Header component for displaying the stage title and logo.
+ * @component
+ * @example
+ * ```tsx
+ * <StageHeader title="My Stage" />
+ * ```
+ */
 export const StageHeader: FC<{ title: string }> = ({ title }) => (
   <header>
     <Navbar

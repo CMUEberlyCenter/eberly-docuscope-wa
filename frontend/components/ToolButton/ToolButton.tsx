@@ -18,7 +18,14 @@ type ToolButtonProps = ButtonProps & {
   /** Title text to display in the button */
   title: string;
 };
-/** Button component with a tooltip and an icon. */
+/**
+ * Button component with a tooltip, an icon, and a title.
+ * @component
+ * @example
+ * ```tsx
+ * <ToolButton tooltip="Click me" icon={<FontAwesomeIcon icon={faPlay} />} title="Play" />
+ * ```
+ */
 export const ToolButton: FC<ToolButtonProps> = ({
   tooltip,
   icon,

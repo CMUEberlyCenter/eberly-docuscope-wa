@@ -14,10 +14,10 @@ import {
 } from '../settings';
 import { findPromptById } from './prompts';
 
-const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
+export const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
 /** Anthropic error message schema. */
-type ErrorMessage = {
+export type ErrorMessage = {
   type: 'error';
   error: {
     type: string;

@@ -185,6 +185,9 @@ declare module 'ltijs' {
     url?: string;
   }
 
+  /**
+   * Ref: https://www.imsglobal.org/spec/lti-ags/v2p0#example-line-item-requests
+   */
   interface LineItem {
     id?: string; // optional in request but required in response.
     /** The label is a short string with a human readable text for the line item. It MUST be specified and not blank when posted by the tool. A platform must always include the label. */
@@ -235,9 +238,12 @@ declare module 'ltijs' {
     gradesReleased?: boolean;
     [key: string]: JsonValue; // Custom properties, key must be a fully qualified URL, value must be valid JSON.
   }
+  /**
+   * Ref: https://www.imsglobal.org/spec/lti-ags/v2p0#score-service-media-type-and-schema
+   */
   export interface Score {
     timeStamp?: string; // ISO8601 Required in spec but added by function
-    scoreGiven: number; // Must be a numeric value, greater than or equal to 0, and can be greater than or equal to the scoreMaximum of the line item.
+    scoreGiven?: number; // Must be a numeric value, greater than or equal to 0, and can be greater than or equal to the scoreMaximum of the line item.
     scoreMaximum?: number; // Required in spec but can be derived in submitScore function
     comment?: string;
     activityProgress?:
@@ -250,6 +256,21 @@ declare module 'ltijs' {
       startedAt: string; // ISO8601
       submittedAt: string; // ISO8601
     };
+    [key: string]: JsonValue; // Custom properties, key must be a fully qualified URL, value must be valid JSON.
+  }
+  /**
+   * Represents scores returned by /results endpoint.
+   * Ref: https://www.imsglobal.org/spec/lti-ags/v2p0#example-of-getting-the-results-for-a-line-item
+   */
+  interface ScoreResult {
+    id: string; // URL: unique identifier for the score result
+    scoreOf: string; // URL: line item
+    userId: string; // string: user identifier
+    resultScore: number;
+    resultMaximum: number;
+    scoringUserId?: string; // Optional, the userId of the user who submitted the score. Spec specifies that it is optional.
+    timestamp?: string; // ISO8601, provided by at least Moodle, but not required by spec
+    comment?: string;
     [key: string]: JsonValue; // Custom properties, key must be a fully qualified URL, value must be valid JSON.
   }
   export interface GradeService {
@@ -284,7 +305,7 @@ declare module 'ltijs' {
       token: IdToken,
       lineItemId: string,
       options?: { userId?: string; limit?: number; url?: string }
-    ): Promise<Score[]>;
+    ): Promise<{ scores: ScoreResult[] }>;
   }
 
   export interface NameAndRolesService {

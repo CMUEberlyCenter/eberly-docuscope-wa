@@ -6,7 +6,7 @@ import type { Prompt } from '../model/prompt';
 import { PROMPT_TEMPLATES_PATH } from '../settings';
 
 /** Map of prompt identifiers to their content.  Acts as an in-memory database. */
-const PROMPTS = new Map<string, Prompt>();
+export const PROMPTS = new Map<string, Prompt>();
 
 /** Extract the key from a filename. */
 const keyFromFilename = (path: string) => basename(path, '.md');

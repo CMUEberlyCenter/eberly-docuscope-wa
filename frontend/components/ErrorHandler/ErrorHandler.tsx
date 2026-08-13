@@ -7,6 +7,25 @@ import { useTranslation } from "react-i18next";
 
 class InputTooLargeError extends Error {}
 class ServiceUnavailableError extends Error {}
+export class NoInputError extends Error {
+  public tool: string;
+  constructor(message: string, tool: string, options?: ErrorOptions) {
+    super(message, options);
+    this.tool = tool;
+  }
+}
+export class SelectionTooLargeError extends Error {
+  public count: number = 0;
+  public limit: number = 0;
+  constructor(
+    error: { detail?: string; count?: number; limit?: number },
+    options?: ErrorOptions
+  ) {
+    super(error.detail, options);
+    this.count = error.count ?? 0;
+    this.limit = error.limit ?? 0;
+  }
+}
 
 /**
  * Checks the HTTP response for errors and returns the corresponding error data.
@@ -41,6 +60,23 @@ export const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
   const { t } = useTranslation();
   if (!tool.error) {
     return null;
+  }
+  if (tool.error instanceof NoInputError) {
+    return (
+      <Alert variant="warning">
+        {t(`error.no_selection.${tool.error.tool}`)}
+      </Alert>
+    );
+  }
+  if (tool.error instanceof SelectionTooLargeError) {
+    return (
+      <Alert variant="warning">
+        {t("error.selection_too_large", {
+          count: tool.error.count,
+          maxCount: tool.error.limit,
+        })}
+      </Alert>
+    );
   }
   if (tool.error instanceof InputTooLargeError) {
     return <Alert variant="warning">{t("error.input_too_large_error")}</Alert>;

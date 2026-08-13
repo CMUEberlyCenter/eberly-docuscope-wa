@@ -36,12 +36,11 @@ import { validateWritingTask } from './src/lib/schemaValidate';
 import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
-import { scribe } from './src/server/api/scribe';
 import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
-import { initPrompts } from './src/server/data/prompts';
-import { watchSettings } from './src/server/getSettings';
+import { initPrompts, PROMPTS } from './src/server/data/prompts';
+import { getSettings, watchSettings } from './src/server/getSettings';
 import { logger } from './src/server/logger';
 import { metrics } from './src/server/prometheus';
 import {
@@ -269,6 +268,8 @@ async function __main__() {
             tool_id: PRODUCT,
             platform: 'canvas.instructure.com',
             privacy_level: 'public',
+            selection_height: 800,
+            selection_width: 800,
             settings: {
               text: 'myProse Drafting and Review tools',
               labels: {
@@ -413,8 +414,6 @@ async function __main__() {
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline API Endpoints
     app.use('/api/v2/writing_tasks', writingTasks);
-    // Scribe API Endpoints
-    app.use('/api/v2/scribe', scribe);
     // OnTopic API Endpoints
     app.use('/api/v2/ontopic', ontopic);
     // Reviews API Endpoints
@@ -462,10 +461,14 @@ async function __main__() {
           context: {
             // You can add any arbitrary contextual information here
             // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
-            token: res.locals.token,
+            gradeService: Provider.Grade,
+            // token: res.locals.token, // token not accessible in telefunc response
+            sessionId: req.sessionID,
             user,
             isAdmin: user === 'admin',
-            // session: req.session,
+            acceptLanguage: req.headers['accept-language'],
+            settings: getSettings(),
+            prompts: PROMPTS, // session: req.session,
           } as TelefuncContext,
         });
         res.status(statusCode);
