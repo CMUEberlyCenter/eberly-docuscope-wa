@@ -12,7 +12,7 @@ export async function onGrade(
 ) {
   const { gradeService } = getContext<TelefuncContext>();
   if (!token) {
-    logger.warn('Attempted to grade without a token'); // TODO remove this line for production.
+    // logger.warn('Attempted to grade without a token'); // TODO remove this line for production.
     return null; // no-op if no token is present, as grading requires a valid LTI token.
   }
   if (!gradeService) {
@@ -24,14 +24,13 @@ export async function onGrade(
     logger.info(
       `Test user grading with score: ${score} and customData: ${JSON.stringify(customData)}`
     );
-    return null; // or consider returning a specific response for test users
   }
   if (isStudent(token)) {
     // Only attempt to grade if the user is a student.
     try {
-      logger.info(
-        `Grading review with score: ${score} and customData: ${JSON.stringify(customData)}, token: ${!!token}, service: ${!!gradeService} `
-      );
+      // logger.info(
+      //   `Grading review with score: ${score} and customData: ${JSON.stringify(customData)}`
+      // );
       return grade(gradeService, token, score, customData);
     } catch (error) {
       logger.error('Error in onGrade telefunc:', error);

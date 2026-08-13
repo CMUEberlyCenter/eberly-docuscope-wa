@@ -9,7 +9,7 @@ import { TelefuncContext } from '#lib/TelefuncContext';
 import { anthropic, ErrorMessage } from '#server/data/chat';
 import { insertLog } from '#server/data/mongo.js';
 import { logger } from '#server/logger';
-import { grade, isStudent } from '#server/model/lti.js';
+import { grade, isStudent, isTestUser } from '#server/model/lti.js';
 import { NotesPrompt } from '#server/model/prompt';
 import { ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '#server/settings';
 import { IdToken } from 'ltijs';
@@ -136,6 +136,9 @@ async function convertNotes(
     return { error: errorToProblemDetails(error) };
   } finally {
     if (gradeService && token && isStudent(token)) {
+      if (isTestUser(token)) {
+        logger.info(`Test user grading in draft mode with score: ${score}`);
+      }
       // only attempt to grade if the user is a student and both gradeService and token are available.
       try {
         const gradeResult = await grade(gradeService, token, score); // Attempt to grade regardless of success or failure.

@@ -254,9 +254,9 @@ async function __main__() {
         ).toString(),
         target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
         scopes: [
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
+          'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
+          'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
+          'https://purl.imsglobal.org/spec/lti-ags/scope/score',
           // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
           // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
           // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
@@ -268,8 +268,6 @@ async function __main__() {
             tool_id: PRODUCT,
             platform: 'canvas.instructure.com',
             privacy_level: 'public',
-            selection_height: 800,
-            selection_width: 800,
             settings: {
               text: 'myProse Drafting and Review tools',
               labels: {
@@ -277,6 +275,8 @@ async function __main__() {
                 es: 'myProse Herramientas de Redacción y Revisión',
               },
               icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+              selection_height: 800,
+              selection_width: 800,
               placements: [
                 {
                   ...placement_defaults,
@@ -292,6 +292,17 @@ async function __main__() {
                   ...placement_defaults,
                   text: `${PRODUCT} Course Navigation Placement`,
                   placement: 'course_navigation',
+                  message_type: 'LtiResourceLinkRequest',
+                  target_link_uri: new URL(
+                    Provider.appRoute(),
+                    LTI_HOSTNAME
+                  ).toString(),
+                  windowTarget: '_blank',
+                  custom_fields: {
+                    course_id: '$Canvas.course.id',
+                    course_name: '$Canvas.course.name',
+                    tool: 'review',
+                  },
                 },
               ],
             },

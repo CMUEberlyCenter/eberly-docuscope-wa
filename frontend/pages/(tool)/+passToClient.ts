@@ -1,1 +1,1 @@
-export default ['isLTI'];
+export default ['isLTI', 'token'];
