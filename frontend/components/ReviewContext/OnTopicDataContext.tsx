@@ -21,6 +21,7 @@ import {
   ReviewDataContext,
   SnapshotProviderProps,
 } from "./createReviewDataContext";
+import { onGrade } from "./createReviewDataContext.telefunc";
 
 function useOnTopic() {
   const [document] = useFileText();
@@ -32,9 +33,7 @@ function useOnTopic() {
 
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort("canceling previous request");
-      }
+      abortControllerRef.current?.abort("canceling previous request");
       abortControllerRef.current = new AbortController();
       dispatch({ type: "unset" }); // probably not needed, but just in case
       dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
@@ -45,7 +44,7 @@ function useOnTopic() {
           "Accept-Language": userLanguage(task),
         },
         body: JSON.stringify(data),
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current?.signal,
       });
       checkReviewResponse(response);
       return response.json();
@@ -55,6 +54,7 @@ function useOnTopic() {
       if (data.response.html) {
         dispatch({ type: "update", sentences: data.response.html });
       }
+      onGrade(1.0, { tool: "ontopic" });
     },
     onSettled: () => {
       abortControllerRef.current = null;
@@ -121,7 +121,7 @@ function useSnapshotOnTopic(
           // language unnecessary for snapshot reviews since they should already be
           // localized based on the snapshot's writing task's user_lang.
         },
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current?.signal,
       });
       checkReviewResponse(response);
       return response.json();

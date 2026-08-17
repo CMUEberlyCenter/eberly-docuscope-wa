@@ -1,6 +1,6 @@
 {
-  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./index.ts", "components/**/*"],
-  "exclude": ["dist"],
+  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./index.ts", "./components/**/*"],
+  "exclude": ["build", "dist", "node_modules", "**/*.test.*", "**/*.spec.*"],
   "compilerOptions": {
     "strict": true,
     "esModuleInterop": true,

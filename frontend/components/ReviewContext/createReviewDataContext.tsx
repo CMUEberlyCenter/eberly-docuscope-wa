@@ -2,7 +2,6 @@ import { Optional } from "#/index";
 import { userLanguage } from "#/lib/languageCode";
 import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
 import { WritingTask } from "#/lib/WritingTask";
-import { Data } from "#pages/(tool)/+data.js";
 import { useMutation } from "@tanstack/react-query";
 import {
   createContext,
@@ -15,7 +14,6 @@ import {
   useState,
   useTransition,
 } from "react";
-import { useData } from "vike-react/useData";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -23,7 +21,6 @@ import { onGrade } from "./createReviewDataContext.telefunc";
 import { useReviewDispatch } from "./ReviewContext";
 
 function useReview<T extends Analysis>(tool: ReviewTool) {
-  const { token } = useData<Data>();
   const [document] = useFileText();
   const [{ task: writing_task }] = useWritingTask();
   const [review, setReview] = useState<OptionalReviewData<T>>(null);
@@ -48,7 +45,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
           "Accept-Language": userLanguage(data.writing_task),
         },
         body: JSON.stringify(data),
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current?.signal,
       });
       checkReviewResponse(response);
       return response.json();
@@ -58,7 +55,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       dispatch({ type: "update", sentences: input });
       // check if isErrorData? - should be handled in component
       setReview(data);
-      onGrade(token, 1.0, {
+      onGrade(1.0, {
         tool,
         task_id: writing_task?.info.id ?? "",
         input_length: input.length,
@@ -134,7 +131,7 @@ function useSnapshotReview<T extends Analysis>(
           "Content-Type": "application/json",
           // language should be determined server side by snapshot's writing task's user_lang.
         },
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current?.signal,
       });
       checkReviewResponse(response);
       return response.json();

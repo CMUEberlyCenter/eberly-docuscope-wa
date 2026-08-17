@@ -9,7 +9,7 @@ import { telefunc } from 'telefunc/vite';
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
-  build: {
+  // build: {
     // sourcemap: mode === 'development',
     // minify: mode !== 'development',
     // rollupOptions: {
@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
     //   }
     // },
     // target: 'ES2022',
-  },
+  // },
   css: {
     preprocessorOptions: {
       scss: {

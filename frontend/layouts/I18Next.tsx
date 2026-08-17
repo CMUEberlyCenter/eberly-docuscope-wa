@@ -9,6 +9,7 @@ i18n
   .use(Backend) // get from public/locales/...
   .use(LanguageDetector) // get language from browser
   .use(initReactI18next)
+  // @ts-expect-error: typing error
   .init({
     fallbackLng: "en",
     interpolation: { escapeValue: false },

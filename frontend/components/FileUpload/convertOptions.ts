@@ -40,6 +40,7 @@ function createResizedImageConverter(maxWidth: number, maxHeight: number) {
         const dataUrl = canvas.toDataURL(image.contentType);
         resolve({
           src: dataUrl,
+          // @ts-expect-error
           width: `${width}px`,
           height: `${height}px`,
         });

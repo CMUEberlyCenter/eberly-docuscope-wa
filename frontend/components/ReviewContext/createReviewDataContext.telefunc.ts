@@ -1,19 +1,15 @@
-import { JsonValue } from '#/index';
-import { TelefuncContext } from '#lib/TelefuncContext.js';
+import { type JsonValue } from '#/index';
+import { type TelefuncContext } from '#lib/TelefuncContext.js';
 import { logger } from '#server/logger.js';
 import { grade, isStudent, isTestUser } from '#server/model/lti.js';
-import { IdToken } from 'ltijs';
 import { getContext } from 'telefunc';
 
-export async function onGrade(
-  token: IdToken,
-  score: number,
-  customData?: JsonValue
-) {
-  const { gradeService } = getContext<TelefuncContext>();
-  if (!token || !gradeService) {
+export async function onGrade(score: number, customData?: JsonValue) {
+  const { gradeService, session } = getContext<TelefuncContext>();
+  if (!session?.token || !gradeService) {
     return null; // no-op if no token is present, as grading requires a valid LTI token.
   }
+  const { token } = session;
   if (isStudent(token)) {
     // Only attempt to grade if the user is a student.
     if (isTestUser(token)) {
