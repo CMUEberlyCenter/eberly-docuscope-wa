@@ -196,24 +196,38 @@ async function __main__() {
             'Missing parameter: "openid_configuration".'
           );
         }
+
         const message = await Provider.DynamicRegistration.register(
           req.query.openid_configuration,
           req.query.registration_token,
           {
+            // https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
             'https://purl.imsglobal.org/spec/lti-tool-configuration': {
               messages: [
+                { type: 'LtiResourceLinkRequest' },
                 {
                   type: 'LtiResourceLinkRequest',
+                  label: `${PRODUCT} Review`,
+                  'label#es': `${PRODUCT} Revisión`,
+                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  placements: ['course_navigation'],
+                  custom_parameters: {
+                    tool: 'review',
+                    course_id: '$Canvas.course.id',
+                    course_name: '$Canvas.course.name',
+                  },
                 },
                 {
                   type: 'LtiDeepLinkingRequest',
                   label: PRODUCT,
+                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                   placements: [
                     'ContentArea',
                     'assignment_selection',
                     'link_selection',
-                    'course_navigation',
                   ], // Add placements for Canvas
+                  selection_height: 800, // Set the height for the deep linking modal in canvas, maybe...
+                  selection_width: 800,
                   supported_types: ['LtiResourceLink'], // match what is produced in deep linking
                 },
               ],
@@ -254,13 +268,13 @@ async function __main__() {
         ).toString(),
         target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
         scopes: [
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem",
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly",
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/score",
-          // "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly",
-          // "https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly",
+          'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
+          'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
+          'https://purl.imsglobal.org/spec/lti-ags/scope/score',
+          'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
+          'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly',
           // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
-          // "https://canvas.instructure.com/lti/public_jwk/scope/update"
+          'https://canvas.instructure.com/lti/public_jwk/scope/update',
         ],
         extensions: [
           {
@@ -275,6 +289,8 @@ async function __main__() {
                 es: 'myProse Herramientas de Redacción y Revisión',
               },
               icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+              selection_height: 800,
+              selection_width: 800,
               placements: [
                 {
                   ...placement_defaults,
@@ -290,6 +306,17 @@ async function __main__() {
                   ...placement_defaults,
                   text: `${PRODUCT} Course Navigation Placement`,
                   placement: 'course_navigation',
+                  message_type: 'LtiResourceLinkRequest',
+                  target_link_uri: new URL(
+                    Provider.appRoute(),
+                    LTI_HOSTNAME
+                  ).toString(),
+                  windowTarget: '_blank',
+                  custom_fields: {
+                    course_id: '$Canvas.course.id',
+                    course_name: '$Canvas.course.name',
+                    tool: 'review',
+                  },
                 },
               ],
             },
@@ -452,7 +479,6 @@ async function __main__() {
       },
       async (req: Request, res: Response, _next: NextFunction) => {
         const user = (req as IBasicAuthedRequest).auth?.user;
-        console.log('Telefunc request', res.locals.token);
         const { body, statusCode, headers } = await serve({
           url: req.originalUrl,
           method: req.method,
