@@ -32,11 +32,6 @@ export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
     async (eventType, filename) => {
       // FIXME: double invocation of this callback
       logger.debug(`watchSettings event: ${eventType} ${filename}`);
-      // if (!filename) {
-      //   ToolSettings = DEFAULT; // Reset to default if no filename is provided
-      //   console.log('Settings file has been reset to default.');
-      //   return;
-      // }
       // TODO use filename and eventType to determine if we need to reload settings
       ToolSettings = await loadSettingsFromFile(settingsPath);
     }

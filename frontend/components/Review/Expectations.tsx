@@ -54,6 +54,9 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
+import { useData } from "vike-react/useData";
+import { Data } from "#pages/(tool)/+data.js";
+import { onGrade } from "./Expectations.telefunc";
 
 /** Button component to use for selecting the Content Expectations tool. */
 export const ExpectationsButton: FC<ButtonProps> = (props) => {
@@ -98,6 +101,7 @@ function useExpectationsDataMutation({
   setCurrent,
   eventKey,
 }: ExpectationMutationProps) {
+  const { token } = useData<Data>();
   const dispatch = useReviewDispatch();
   const [{ task }] = useWritingTask();
   const [document] = useFileText();
@@ -157,6 +161,12 @@ function useExpectationsDataMutation({
         sentences: [data.response.sent_ids],
       });
       setCurrent?.(eventKey); // open this accordion item
+      onGrade(token, 1.0, {
+        tool: "expectations",
+        task_id: task?.info.id ?? "",
+        expectation: expectation.name,
+        input_length: input.length,
+      });
     },
     onError: (error) => {
       console.error("Error fetching expectation:", error);

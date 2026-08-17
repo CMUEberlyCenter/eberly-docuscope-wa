@@ -27,13 +27,12 @@ export async function data(pageContext: PageContextServer) {
 
   if (pageContext.token) {
     // isLTI
-    if (isTestUser(pageContext.token)) {
-      logger.warn('Test user accessing the app with token:', {
-        token: pageContext.token,
-      });
-    } else if (isStudent(pageContext.token)) {
+    if (isStudent(pageContext.token)) {
       // only attempt to grade if the user is a student.
       try {
+        if (isTestUser(pageContext.token)) {
+          logger.info('Test user grading initialization.');
+        }
         // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
         startGrading(Provider.Grade, pageContext.token).then((check) => {
           logger.info('LTI grade:', check);

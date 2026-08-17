@@ -128,10 +128,6 @@ const createLineItem = async (
   token: IdToken
 ): Promise<string> => {
   try {
-    console.log(
-      'Creating line item for resource link:',
-      token.platformContext.resource.id
-    );
     // Check if a line item already exists for this resource link
     const response = await gradeService.getLineItems(token, {
       resourceLinkId: true,
@@ -195,12 +191,10 @@ export const grade = async (
   if (!token) return null;
   // Check if a line item already exists for this resource link, and if so, get the existing grade.
   const existingGrade = await getGrade(gradeService, token);
-  console.log('Existing grade:', existingGrade); // TODO: remove for production, but useful for debugging.
   if (
     existingGrade?.resultScore !== undefined &&
     existingGrade.resultScore >= score
   ) {
-    console.log('non-clobbering grading'); // TODO remove
     // Don't update the grade if the new score is not higher than the existing score.
     return existingGrade;
   }
@@ -228,6 +222,5 @@ async function getGrade(
   const { scores } = await gradeService.getScores(token, lineItemId, {
     userId: token.user,
   });
-  console.log(scores); // Check if need to better handle multiple scores. TODO: remove
-  return scores.at(0) ?? null;
+  return scores.at(0) ?? null; // multiple scores only available when grading multiple students, not currently supported.
 }
