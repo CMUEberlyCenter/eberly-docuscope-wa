@@ -61,7 +61,7 @@ import { Server } from 'vike/types';
 // import { auth } from './src/utils/auth';
 import vike, { toFetchHandler } from "@vikejs/express";
 import { getContext } from '@universal-middleware/express';
-import { Settings } from '#lib/ToolSettings.ts';
+import { Settings } from '#lib/ToolSettings';
 
 // use process.cwd() to get the current working directory so that
 // both development and production environments work correctly.
@@ -72,14 +72,14 @@ const PUBLIC = __dirname;
 
 function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
-  const shutdownDatabase = await initDatabase();
+  const shutdownDatabase = initDatabase();
   logger.info('Database service initialized, ok to start listening ...', {
     status: 'db_ready',
   });
   // Initialize and watch prompts
-  const shutdownPrompts = await initPrompts();
+  const shutdownPrompts = initPrompts();
   // watch interface settings file
-  const shutdownSettings = await watchSettings();
+  const shutdownSettings = watchSettings();
 
   // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
@@ -323,39 +323,41 @@ function getHandler() {
     /admin/, // Admin routes, security should be handled outside LTI
     /_telefunc/ // Telefunc endpoint, should be protected in the future if used for non-public actions.
   );
-    await Provider.deploy({ serverless: true });
+  Provider.deploy({ serverless: true });
+//  await Provider.deploy({ serverless: true });
+
 
     // Register manually configured platforms.
-    try {
-      const files = await readdir(PLATFORMS_PATH);
-      for (const file of files) {
-        const path = join(PLATFORMS_PATH, file);
-        const stats = await stat(path);
-        if (stats.isFile() && file.endsWith('.json')) {
-          const content = await readFile(path, { encoding: 'utf8' });
-          const json = JSON.parse(content) as PlatformConfig;
-          await Provider.registerPlatform(json);
-          logger.info(
-            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
-            { platformId: json.clientId, url: json.url, path }
-          );
-        }
-      }
-    } catch (err) {
-      logger.error(err);
-    } finally {
-      const platforms = await Provider.getAllPlatforms();
-      platforms.forEach(async (platform) => {
-        const platformId = await platform.platformId();
-        const name = await platform.platformName();
-        const url = await platform.platformUrl();
-        const active = await platform.platformActive();
-        logger.info(
-          `LTI Registered platform: ${active ? '+' : 'o'} ${name} (${platformId}), URL: ${url}, Active: ${active}`,
-          { platformId, name, url, active }
-        );
-      });
-    }
+    // try {
+    //   const files = await readdir(PLATFORMS_PATH);
+    //   for (const file of files) {
+    //     const path = join(PLATFORMS_PATH, file);
+    //     const stats = await stat(path);
+    //     if (stats.isFile() && file.endsWith('.json')) {
+    //       const content = await readFile(path, { encoding: 'utf8' });
+    //       const json = JSON.parse(content) as PlatformConfig;
+    //       await Provider.registerPlatform(json);
+    //       logger.info(
+    //         `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
+    //         { platformId: json.clientId, url: json.url, path }
+    //       );
+    //     }
+    //   }
+    // } catch (err) {
+    //   logger.error(err);
+    // } finally {
+    //   const platforms = await Provider.getAllPlatforms();
+    //   platforms.forEach(async (platform) => {
+    //     const platformId = await platform.platformId();
+    //     const name = await platform.platformName();
+    //     const url = await platform.platformUrl();
+    //     const active = await platform.platformActive();
+    //     logger.info(
+    //       `LTI Registered platform: ${active ? '+' : 'o'} ${name} (${platformId}), URL: ${url}, Active: ${active}`,
+    //       { platformId, name, url, active }
+    //     );
+    //   });
+    // }
     const app = express();
     app.use('/admin', basicAuthMiddleware);
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
@@ -405,14 +407,14 @@ function getHandler() {
       });
     app.use(handle(i18n));
 
-    if (process.env.NODE_ENV === 'production') {
-      logger.info('Production mode', { mode: 'production' });
-      app.use(express.static(join(root, 'dist', 'client')));
-    } else {
-      const vike = await import('vike/server');
-      const { devMiddleware } = await vike.createDevMiddleware({ root });
-      app.use(devMiddleware);
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   logger.info('Production mode', { mode: 'production' });
+    //   app.use(express.static(join(root, 'dist', 'client')));
+    // } else {
+    //   const vike = await import('vike/server');
+    //   const { devMiddleware } = await vike.createDevMiddleware({ root });
+    //   app.use(devMiddleware);
+    // }
     // prometheus metrics
     app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
     // Writing Task/Outline API Endpoints
@@ -434,6 +436,7 @@ function getHandler() {
     app.use('/locales', express.static(join(root, 'public/locales')));
     app.use('/settings', express.static(join(PUBLIC, 'settings')));
 
+    // app.use(toolSettingsMiddleware())
     app.use(Provider.app);
     app.use(express.static(PUBLIC));
     // Handle index.html to support old (pre-tool split) genlink links
@@ -567,12 +570,20 @@ function getHandler() {
     // };
     // // Handle termination signals for graceful shutdown
     // ['SIGTERM', 'SIGINT'].forEach((signal) => process.on(signal, shutdown));
-    vike(app, [
-      toolSettingsMiddleware,
-    ]);
+    // vike(app, [
+      // toolSettingsMiddleware,
+    // ]);
+  console.log("+server")
+  return toFetchHandler(app);
+}
+function getHandler2() {
+  const app = express();
+  // vike(app, [toolSettingsMiddleware])
+  vike(app, [])
+
   return toFetchHandler(app);
 }
 export default {
   fetch: getHandler(),
   prod: { port: PORT },
-} as Server;;
+} as Server;

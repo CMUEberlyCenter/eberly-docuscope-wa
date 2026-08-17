@@ -7,9 +7,9 @@ import { version } from './package.json' with { type: 'json' };
 import { telefunc } from 'telefunc/vite';
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig({
   plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
-  build: {
+  // build: {
     // sourcemap: mode === 'development',
     // minify: mode !== 'development',
     // rollupOptions: {
@@ -29,7 +29,7 @@ export default defineConfig(({ mode }) => ({
     //   }
     // },
     // target: 'ES2022',
-  },
+  // },
   css: {
     preprocessorOptions: {
       scss: {
@@ -43,9 +43,9 @@ export default defineConfig(({ mode }) => ({
     __APP_VERSION__: JSON.stringify(version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
   },
-  server: {
-    // fixes accessing from docker container
-    allowedHosts:
-      mode !== 'development' ? [] : ['localhost', 'host.docker.internal'],
-  },
-}));
+  // server: {
+  //   // fixes accessing from docker container
+  //   allowedHosts:
+  //     mode !== 'development' ? [] : ['localhost', 'host.docker.internal'],
+  // },
+});

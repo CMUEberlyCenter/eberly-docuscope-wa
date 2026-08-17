@@ -9,5 +9,5 @@ export async function onCreatePageContext(pageContext: PageContext) {
   // const session = await auth.api.getSession({ req });
   // pageContext.session = session;
 
-  // return pageContext;
+  return pageContext;
 }

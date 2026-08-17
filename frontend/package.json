@@ -14,7 +14,8 @@
   },
   "private": true,
   "scripts": {
-    "dev": "npx tsx ./index.ts",
+    "odev": "npx tsx ./index.ts",
+    "dev": "vike dev",
     "build": "vike build",
     "build:server": "vite build --config vite.config.server.ts",
     "test": "npx bun test",
