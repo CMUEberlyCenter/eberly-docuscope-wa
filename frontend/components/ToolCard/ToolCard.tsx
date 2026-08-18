@@ -26,8 +26,6 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./ToolCard.scss";
 import { onNotesToBullets, onNotesToProse } from "./ToolCard.telefunc";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
-import { useData } from "vike-react/useData";
-import { Data } from "#pages/(tool)/+data.js";
 
 type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 
@@ -43,7 +41,6 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
   const { settings } = usePageContext();
-  const { token } = useData<Data>();
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
   const selectionLimit = settings?.select_word_limit ?? 250;
@@ -63,7 +60,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         };
         const onNotes =
           data.tool === "bullets" ? onNotesToBullets : onNotesToProse;
-        const response = await onNotes(requestData, token);
+        const response = await onNotes(requestData);
         if ("error" in response && response.error) {
           if (response.error?.instance === "word_count_exceeded") {
             throw new SelectionTooLargeError(response.error);
@@ -93,7 +90,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         }
       }
     },
-    [writingTask, token]
+    [writingTask]
   );
   const onTool = useCallback(
     (tool: Tool) => {

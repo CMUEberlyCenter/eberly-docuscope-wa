@@ -1,3 +1,4 @@
+import { isWritingTask, WritingTask } from '#lib/WritingTask.js';
 import {
   findAllPublicWritingTasks,
   findWritingTaskById,
@@ -15,9 +16,25 @@ import type { PageContextServer } from 'vike/types';
 
 export async function data(pageContext: PageContextServer) {
   const taskId = pageContext.writing_task_id; // set if system specified
-  const tokenTask = pageContext.token?.platformContext.custom?.writing_task; // set if LTI specified and writing_task included in custom
-  const task = tokenTask
-    ? JSON.parse(tokenTask)
+  const token = pageContext.session?.token; // set if LTI specified
+  const tokenTask = token?.platformContext.custom?.writing_task; // set if LTI specified and writing_task included in custom
+  let parsedTask: WritingTask | undefined = undefined;
+  if (tokenTask) {
+    try {
+      const taskData = JSON.parse(tokenTask);
+      if (isWritingTask(taskData)) {
+        parsedTask = taskData;
+      } else {
+        logger.error('Invalid writing_task structure in LTI token:', {
+          taskData,
+        });
+      }
+    } catch (error) {
+      logger.error('Error parsing writing_task from LTI token:', { error });
+    }
+  }
+  const task = parsedTask
+    ? parsedTask
     : taskId
       ? await findWritingTaskById(taskId)
       : undefined;
@@ -25,22 +42,17 @@ export async function data(pageContext: PageContextServer) {
     ? []
     : (await findAllPublicWritingTasks()).map(({ _id, ...task }) => task); // need everything but _id for preview.
 
-  if (pageContext.token) {
-    // isLTI
-    if (isStudent(pageContext.token)) {
-      // only attempt to grade if the user is a student.
-      try {
-        if (isTestUser(pageContext.token)) {
-          logger.info('Test user grading initialization.');
-        }
-        // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
-        startGrading(Provider.Grade, pageContext.token).then((check) => {
-          logger.info('LTI grade:', check);
-        });
-      } catch (error) {
-        logger.error('Error during LTI grade check:', { error });
-        // NOOP if grading fails, as this is not critical for the main functionality of the app, and we do not want to block users from using the app if there is an issue with grading.
+  if (isStudent(token)) {
+    // only attempt to grade if the user is a student.
+    try {
+      if (isTestUser(token)) {
+        logger.info('Test user grading initialization.');
       }
+      // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
+      startGrading(Provider.Grade, token);
+    } catch (error) {
+      logger.error('Error during LTI grade check:', { error });
+      // NOOP if grading fails, as this is not critical for the main functionality of the app, and we do not want to block users from using the app if there is an issue with grading.
     }
   }
 
@@ -48,14 +60,12 @@ export async function data(pageContext: PageContextServer) {
     task,
     taskId,
     tasks,
-    ltiActivityTitle: pageContext.token?.platformContext?.resource?.title,
-    username: pageContext.token?.userInfo?.name,
-    isLTI: !!pageContext.token,
-    isContentDeveloper:
-      !!pageContext.token && isContentDeveloper(pageContext.token),
-    isInstructor: !!pageContext.token && isInstructor(pageContext.token),
-    isStudent: !!pageContext.token && isStudent(pageContext.token),
-    token: pageContext.token, // pass the token to the frontend for use in telefuncs and other client-side logic that may require LTI context.
+    ltiActivityTitle: token?.platformContext?.resource?.title,
+    username: token?.userInfo?.name,
+    isLTI: !!token,
+    isContentDeveloper: isContentDeveloper(token),
+    isInstructor: isInstructor(token),
+    isStudent: isStudent(token),
   };
 }
 export type Data = Awaited<ReturnType<typeof data>>;

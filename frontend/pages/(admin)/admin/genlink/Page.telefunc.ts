@@ -8,10 +8,18 @@ import { getAuthorizedUser } from '../getAuthorizedUser';
 import { ReviewTool } from '#lib/ReviewResponse';
 
 type ClearSnapshotCacheResponse = {
+  /** If the operation succeeded. */
   success: boolean;
+  /** A message describing the result of the operation if success is false. */
   message?: string;
 };
 
+/**
+ * Clears the cache for a specific snapshot and review tool.
+ * @param id - snapshot id
+ * @param tool - review tool identifier (or '*' for all tools)
+ * @returns A promise resolving to the cache clearing response or an error.
+ */
 export async function onClearSnapshotCache(
   id: string,
   tool: ReviewTool | '*'

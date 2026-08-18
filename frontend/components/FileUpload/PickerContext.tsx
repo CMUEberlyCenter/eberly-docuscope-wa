@@ -116,9 +116,8 @@ export const PickerProvider: FC<{
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
       ) {
         try {
-          // @ts-expect-error
-          const res = await gapi.client.drive.files.get({ fileId: doc.id, alt: "media" }, { responseType: "arraybuffer" }
-          );
+          // @ts-expect-error: gapi.client.drive.files.get does not have a proper TypeScript definition for the responseType option.
+          const res = await gapi.client.drive.files.get({ fileId: doc.id, alt: "media" }, { responseType: "arraybuffer" });
           const { value, messages } = await convertToHtml(
             { arrayBuffer: res.body as unknown as ArrayBuffer },
             convertOptions

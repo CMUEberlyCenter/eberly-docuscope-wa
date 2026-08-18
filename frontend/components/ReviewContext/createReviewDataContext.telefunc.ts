@@ -1,10 +1,25 @@
-import { type JsonValue } from '#/index';
 import { type TelefuncContext } from '#lib/TelefuncContext.js';
 import { logger } from '#server/logger.js';
 import { grade, isStudent, isTestUser } from '#server/model/lti.js';
 import { getContext } from 'telefunc';
 
-export async function onGrade(score: number, customData?: JsonValue) {
+type ReviewGradeData = {
+  /** The tool use that initiated the grading request. */
+  tool: string;
+  /** The writing task ID. */
+  task_id?: string;
+  /** Approximate text length of student submission. */
+  input_length?: number;
+}
+
+/**
+ * Issue a grade for a student's work based on the review tool used.
+ * Current paradigm is that a grade of 1.0 indicates that at least one review tool was used.
+ * @param score - The score to assign.
+ * @param customData - Additional data for the line item.
+ * @returns A promise resolving to a Score or null.
+ */
+export async function onGrade(score: number, customData?: ReviewGradeData) {
   const { gradeService, session } = getContext<TelefuncContext>();
   if (!session?.token || !gradeService) {
     return null; // no-op if no token is present, as grading requires a valid LTI token.

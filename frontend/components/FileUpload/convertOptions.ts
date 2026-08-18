@@ -40,7 +40,7 @@ function createResizedImageConverter(maxWidth: number, maxHeight: number) {
         const dataUrl = canvas.toDataURL(image.contentType);
         resolve({
           src: dataUrl,
-          // @ts-expect-error
+          // @ts-expect-error: TypeScript's lib.dom.d.ts does not yet support the width and height properties on the returned object
           width: `${width}px`,
           height: `${height}px`,
         });

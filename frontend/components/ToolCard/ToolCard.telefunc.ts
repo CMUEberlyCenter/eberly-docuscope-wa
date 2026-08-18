@@ -4,24 +4,19 @@ import {
   ChatStopError,
   errorToProblemDetails,
 } from '#lib/ProblemDetails';
-import { NotesRequest } from '#lib/Requests';
-import { TelefuncContext } from '#lib/TelefuncContext';
+import { type NotesRequest } from '#lib/Requests';
+import { type TelefuncContext } from '#lib/TelefuncContext';
 import { anthropic, ErrorMessage } from '#server/data/chat';
 import { insertLog } from '#server/data/mongo.js';
 import { logger } from '#server/logger';
 import { grade, isStudent, isTestUser } from '#server/model/lti.js';
-import { NotesPrompt } from '#server/model/prompt';
+import { type NotesPrompt } from '#server/model/prompt';
 import { ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '#server/settings';
-import { IdToken } from 'ltijs';
 import format from 'string-format';
 import { getContext } from 'telefunc';
 
-async function convertNotes(
-  key: NotesPrompt,
-  data: NotesRequest,
-  token?: IdToken
-) {
-  const started = new Date();
+async function convertNotes(key: NotesPrompt, data: NotesRequest) {
+  const started = new Date(); // performance tracking: record the start time of the conversion process.
   const { notes, user_lang } = data;
   let score = 0;
   if (!notes || notes.trim() === '') {
@@ -34,6 +29,7 @@ async function convertNotes(
     sessionId,
     prompts,
     gradeService,
+    session,
   } = getContext<TelefuncContext>();
   const language = user_lang
     ? resolveLanguageCode(user_lang)
@@ -53,6 +49,7 @@ async function convertNotes(
       ),
     };
   }
+  const token = session?.token;
   try {
     const template = prompts.get(key);
     if (!template) {
@@ -135,11 +132,11 @@ async function convertNotes(
     logger.error('Error in convertNotes:', error);
     return { error: errorToProblemDetails(error) };
   } finally {
+    // only attempt to grade if the user is a student and both gradeService and token are available.
     if (gradeService && token && isStudent(token)) {
       if (isTestUser(token)) {
         logger.info(`Test user grading in draft mode with score: ${score}`);
       }
-      // only attempt to grade if the user is a student and both gradeService and token are available.
       try {
         const gradeResult = await grade(gradeService, token, score); // Attempt to grade regardless of success or failure.
         logger.info('Grading result:', gradeResult);
@@ -150,7 +147,17 @@ async function convertNotes(
   }
 }
 
-export const onNotesToProse = (data: NotesRequest, token?: IdToken) =>
-  convertNotes('notes_to_prose', data, token);
-export const onNotesToBullets = (data: NotesRequest, token?: IdToken) =>
-  convertNotes('notes_to_bullets', data, token);
+/**
+ * Converts notes to prose.
+ * @param data - User input.
+ * @returns A promise resolving to the converted prose or an error.
+ */
+export const onNotesToProse = (data: NotesRequest) =>
+  convertNotes('notes_to_prose', data);
+/**
+ * Converts notes to bullet points.
+ * @param data - User input.
+ * @returns A promise resolving to the converted bullet points or an error.
+ */
+export const onNotesToBullets = (data: NotesRequest) =>
+  convertNotes('notes_to_bullets', data);
