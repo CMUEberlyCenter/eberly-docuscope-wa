@@ -1,23 +1,11 @@
-import { Command } from 'commander';
 import { randomUUID } from 'crypto';
 import 'dotenv/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { version } from '../../package.json';
 import type { LanguageSettingsRequest } from '../lib/Requests';
 
-const program = new Command();
-program
-  .description('Backend server for DocuScope Write and Audit.')
-  .version(version);
-// .addOption(
-//   new Option('-p --port <number>', 'Port to use for server.').env('PORT')
-// )
-program.parse();
-// const options = program.opts();
 const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
-// const port = !isNaN(parseInt(options.port)) ? parseInt(options.port) : 8888;
 
 function envInt(env: string | undefined, fallback = 0) {
   if (!env) return fallback;

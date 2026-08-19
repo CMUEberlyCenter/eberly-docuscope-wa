@@ -1,5 +1,4 @@
 {
-  "include": ["./src/**/*", "./pages/**/*", "./layouts/**/*", "vike.d.ts", "./+server.ts", "./components/**/*"],
   "exclude": ["build", "dist", "node_modules", "**/*.test.*", "**/*.spec.*"],
   "compilerOptions": {
     "strict": true,

@@ -130,7 +130,6 @@
     "bootstrap": "^5.3.8",
     "chokidar": "^5.0.0",
     "classnames": "^2.5.1",
-    "commander": "^15.0.0",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "datatables.net-dt": "^3.0.2",
