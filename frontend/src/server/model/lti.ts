@@ -111,10 +111,13 @@ export function isStudent(token: Optional<IdToken>): boolean {
   );
 }
 
-export function isContentDeveloper(token: IdToken): boolean {
-  return [
-    'http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper',
-  ].some((role) => token.platformContext.roles.includes(role));
+export function isContentDeveloper(token: Optional<IdToken>): boolean {
+  return (
+    !!token &&
+    ['http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper'].some(
+      (role) => token.platformContext.roles.includes(role)
+    )
+  );
 }
 
 // export function isTorus(token?: IdToken): boolean {

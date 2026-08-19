@@ -20,9 +20,12 @@ const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
   return (
     <span>
       {new Intl.DateTimeFormat(navigator.languages).formatRange(start, end)} (
-      {new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
-        duration
-      )}
+      {
+        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
+        new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
+          duration
+        )
+      }
       )
     </span>
   );
@@ -88,6 +91,7 @@ export const Page: FC = () => {
                   <ul>
                     <li>
                       {t("performance.average", {
+                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                         time: new Intl.DurationFormat(navigator.languages, {
                           style: "long",
                         }).format(msToDuration(Math.floor(entry.avgTime))),
@@ -95,6 +99,7 @@ export const Page: FC = () => {
                     </li>
                     <li>
                       {t("performance.minimum", {
+                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                         time: new Intl.DurationFormat(navigator.languages, {
                           style: "long",
                         }).format(msToDuration(Math.floor(entry.minTime))),
@@ -102,6 +107,7 @@ export const Page: FC = () => {
                     </li>
                     <li>
                       {t("performance.maximum", {
+                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                         time: new Intl.DurationFormat(navigator.languages, {
                           style: "long",
                         }).format(msToDuration(Math.floor(entry.maxTime))),

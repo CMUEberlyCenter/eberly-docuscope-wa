@@ -493,7 +493,8 @@ async function __main__() {
             isAdmin: user === 'admin',
             acceptLanguage: req.headers['accept-language'],
             settings: getSettings(),
-            prompts: PROMPTS, // session: req.session,
+            prompts: PROMPTS,
+            session: req.session,
           } as TelefuncContext,
         });
         res.status(statusCode);
@@ -513,6 +514,7 @@ async function __main__() {
       async (req: Request, res: Response, next) => {
         // need to do this here as without vike-photon pageContext.runtime.res is not available in hooks.
         const token: IdToken | undefined = res.locals.token;
+        req.session.token = token; // store the LTI token in the session for later use in telefuncs and other server-side logic that may require LTI context.
         const query =
           typeof req.query.writing_task === 'string'
             ? req.query.writing_task

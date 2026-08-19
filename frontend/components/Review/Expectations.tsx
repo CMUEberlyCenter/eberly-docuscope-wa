@@ -1,3 +1,4 @@
+import { trackScreenView } from "#/client/tracking";
 import { Optional } from "#/index";
 import {
   ErrorDataError,
@@ -13,7 +14,6 @@ import {
   type Rule,
 } from "#/lib/WritingTask";
 import Icon from "#assets/icons/expectations_icon.svg?react";
-import { trackScreenView } from "#/client/tracking";
 import {
   faCircleExclamation,
   faEllipsis,
@@ -54,8 +54,6 @@ import { ToolButton } from "../ToolButton/ToolButton";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
-import { useData } from "vike-react/useData";
-import { Data } from "#pages/(tool)/+data.js";
 import { onGrade } from "./Expectations.telefunc";
 
 /** Button component to use for selecting the Content Expectations tool. */
@@ -101,7 +99,6 @@ function useExpectationsDataMutation({
   setCurrent,
   eventKey,
 }: ExpectationMutationProps) {
-  const { token } = useData<Data>();
   const dispatch = useReviewDispatch();
   const [{ task }] = useWritingTask();
   const [document] = useFileText();
@@ -132,7 +129,7 @@ function useExpectationsDataMutation({
           writing_task: task,
           expectation: expectation.name,
         }),
-        signal: abortControllerRef.current.signal,
+        signal: abortControllerRef.current?.signal,
       });
       checkReviewResponse(response);
       const result = await response.json();
@@ -161,7 +158,7 @@ function useExpectationsDataMutation({
         sentences: [data.response.sent_ids],
       });
       setCurrent?.(eventKey); // open this accordion item
-      onGrade(token, 1.0, {
+      onGrade(1.0, {
         tool: "expectations",
         task_id: task?.info.id ?? "",
         expectation: expectation.name,
@@ -239,9 +236,7 @@ function generateExpectationsSnapshotMutation(snapshotID: string) {
           expectationIndex < 0
         )
           throw new Error("Invalid preview parameters");
-        if (abortControllerRef.current) {
-          abortControllerRef.current.abort("canceling previous request");
-        }
+        abortControllerRef.current?.abort("canceling previous request");
         abortControllerRef.current = new AbortController();
         dispatch({ type: "unset" }); // probably not needed, but just in case
         dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
@@ -252,7 +247,7 @@ function generateExpectationsSnapshotMutation(snapshotID: string) {
             headers: {
               "Content-Type": "application/json",
             },
-            signal: abortControllerRef.current.signal,
+            signal: abortControllerRef.current?.signal,
           }
         );
         checkReviewResponse(response);

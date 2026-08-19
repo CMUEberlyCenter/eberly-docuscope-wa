@@ -1,6 +1,7 @@
-import { GradeService, IdToken } from 'ltijs';
-import { Settings } from './ToolSettings';
-import { Prompt } from '#server/model/prompt.js';
+import { type Prompt } from '#server/model/prompt.js';
+import { type SessionData } from 'express-session';
+import { type GradeService } from 'ltijs';
+import { type Settings } from './ToolSettings';
 
 export type TelefuncContext = {
   acceptLanguage?: string;
@@ -8,7 +9,7 @@ export type TelefuncContext = {
   isAdmin: boolean;
   sessionId?: string;
   settings: Settings;
-  token?: IdToken;
   user?: string | null;
   prompts: Map<string, Prompt>;
+  session?: SessionData | null;
 };
