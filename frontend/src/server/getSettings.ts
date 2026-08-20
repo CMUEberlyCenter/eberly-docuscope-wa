@@ -1,4 +1,4 @@
-import { enhance, type UniversalMiddleware } from '@universal-middleware/core';
+import { enhance } from '@universal-middleware/core';
 import { watch } from 'fs';
 import { readFile } from 'fs/promises';
 import { DEFAULT, type Settings } from '../lib/ToolSettings';
@@ -44,7 +44,7 @@ export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
   return () => settings.close();
 }
 
-export const toolSettingsMiddleware: UniversalMiddleware = enhance(
+export const toolSettingsMiddleware = enhance(
   async (_request, context, _runtime) => {
     const settings = await getSettings();
     return { ...context, settings };

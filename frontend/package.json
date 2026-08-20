@@ -20,7 +20,7 @@
     "build:server": "vite build --config vite.config.server.ts",
     "test": "npx bun test",
     "test:watch": "npx bun test --watch",
-    "preview": "cross-env NODE_ENV=production npm run build && npx tsx ./index.ts",
+    "preview": "cross-env NODE_ENV=production npm run build && node ./dist/server/index.mjs",
     "start": "npm run preview",
     "check_format": "prettier -c src/ pages/ components/ layouts/ index.ts",
     "lint": "eslint src pages components layouts index.ts",

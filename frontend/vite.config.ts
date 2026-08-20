@@ -6,6 +6,11 @@ import svgr from 'vite-plugin-svgr';
 import { version } from './package.json' with { type: 'json' };
 import { telefunc } from 'telefunc/vite';
 
+function getPort() {
+    const port = parseInt(process.env.PORT ?? '');
+    return !isNaN(port) ? port : undefined;
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
@@ -43,9 +48,9 @@ export default defineConfig({
     __APP_VERSION__: JSON.stringify(version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
   },
-  // server: {
-  //   // fixes accessing from docker container
-  //   allowedHosts:
-  //     mode !== 'development' ? [] : ['localhost', 'host.docker.internal'],
-  // },
+  server: { // only applies to dev server.
+    // fixes accessing from docker container
+    allowedHosts: ['localhost', 'host.docker.internal'],
+    port: getPort(),
+  },
 });

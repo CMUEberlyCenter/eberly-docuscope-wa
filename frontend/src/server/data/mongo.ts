@@ -1,13 +1,31 @@
 import { PromptType } from '#server/model/prompt.js';
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
-import { MongoClient, ObjectId } from 'mongodb';
+import { Db, MongoClient, ObjectId } from 'mongodb';
 import { Analysis, ReviewTool } from '../../lib/ReviewResponse';
 import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { initWritingTasks } from './writing_task_description';
 
-const client = new MongoClient(MONGO_CLIENT);
+let client: MongoClient | null = null;
+let db: Db | null = null;
+
+export async function getDb(): Promise<Db> {
+  if (db && client) {
+    return db;
+  }
+  try {
+    if (!client) {
+      client = new MongoClient(MONGO_CLIENT);
+      await client.connect();
+    }
+    db = client.db(MONGO_DB);
+    return db;
+  } catch (error) {
+    logger.error('Error connecting to MongoDB', { error });
+    throw error;
+  }
+}
 
 /** Database collection for storing writing tasks. */
 const WRITING_TASKS = 'writing_tasks';
@@ -47,7 +65,8 @@ type Snapshot = {
  * @returns Array of snapshots with only _id, filename, timestamp, task.info.name, and tool_config.
  */
 export async function findAllSnapshotsBasic(): Promise<Snapshot[]> {
-  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+  const db = await getDb();
+  const collection = db.collection<Snapshot>(SNAPSHOTS);
   const snapshots = await collection
     .find<Snapshot>(
       {},
@@ -65,7 +84,8 @@ export async function findAllSnapshotsBasic(): Promise<Snapshot[]> {
 }
 
 export async function findSnapshotById(id: string): Promise<Snapshot> {
-  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+  const db = await getDb();
+  const collection = db.collection<Snapshot>(SNAPSHOTS);
   if (!ObjectId.isValid(id) || id.length !== 24) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
@@ -89,7 +109,8 @@ export async function insertSnapshot(
 ): Promise<ObjectId> {
   tool_config = tool_config ?? [];
   analyses = analyses ?? [];
-  const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
+  const db = await getDb();
+  const collection = db.collection<Snapshot>(SNAPSHOTS);
   const ins = await collection.insertOne({
     task,
     file,
@@ -111,8 +132,8 @@ export async function deleteSnapshotById(id: string) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const del = await client
-    .db(MONGO_DB)
+  const db = await getDb();
+  const del = await db
     .collection(SNAPSHOTS)
     .deleteOne({ _id });
   if (!del.acknowledged || del.deletedCount !== 1) {
@@ -139,8 +160,8 @@ export async function updateSnapshotReviewsById(
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const upd = await client
-    .db(MONGO_DB)
+  const db = await getDb();
+  const upd = await db
     .collection<Snapshot>(SNAPSHOTS)
     .findOneAndUpdate(
       { _id },
@@ -170,8 +191,8 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const upd = await client
-    .db(MONGO_DB)
+  const db = await getDb();
+  const upd = await db
     .collection<Snapshot>(SNAPSHOTS)
     .findOneAndUpdate(
       { _id },
@@ -197,8 +218,8 @@ export async function clearSnapshotAnalysisById(
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const upd = await client
-    .db(MONGO_DB)
+  const db = await getDb();
+  const upd = await db
     .collection<Snapshot>(SNAPSHOTS)
     .findOneAndUpdate(
       { _id },
@@ -223,7 +244,7 @@ export async function clearSnapshotAnalysisById(
  * @returns
  */
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
-  const collection = client.db(MONGO_DB).collection(WRITING_TASKS);
+  const collection = (await getDb()).collection(WRITING_TASKS);
   if (ObjectId.isValid(id) && id.length === 24) {
     const _id = new ObjectId(id);
     const rules = await collection.findOne<WritingTask>(
@@ -255,9 +276,8 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
 export async function insertWritingTask(
   writing_task: WritingTask
 ): Promise<ObjectId> {
-  const collection = client
-    .db(MONGO_DB)
-    .collection<WritingTaskDb>(WRITING_TASKS);
+  const db = await getDb();
+  const collection = db.collection<WritingTaskDb>(WRITING_TASKS);
   const ins = await collection.insertOne({
     ...writing_task,
     public: false,
@@ -271,9 +291,7 @@ export async function insertWritingTask(
  * @returns writing tasks where the public attribute is false. These are typically custom or in development tasks.
  */
 async function* generateAllPrivateWritingTasks(): AsyncGenerator<DbWritingTask> {
-  const collection = client
-    .db(MONGO_DB)
-    .collection<DbWritingTask>(WRITING_TASKS);
+  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
   const cursor = collection.find<DbWritingTask>(
     { public: false },
     { projection: { path: 0 } }
@@ -299,9 +317,7 @@ export async function findAllPrivateWritingTasks(): Promise<DbWritingTask[]> {
  * @returns writing tasks where the public attribute is true.
  */
 async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
-  const collection = client
-    .db(MONGO_DB)
-    .collection<DbWritingTask>(WRITING_TASKS);
+  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
   const cursor = collection.find<DbWritingTask>(
     { public: true, 'info.access': ACCESS_LEVEL },
     { projection: { path: 0, modified: 0 } }
@@ -329,9 +345,7 @@ export async function findAllPublicWritingTasks(): Promise<DbWritingTask[]> {
  * @returns id of the writing task in the database.
  */
 async function upsertPublicWritingTask(path: string, data: WritingTask) {
-  const collection = client
-    .db(MONGO_DB)
-    .collection<WritingTaskDb>(WRITING_TASKS);
+  const collection = (await getDb()).collection<WritingTaskDb>(WRITING_TASKS);
   // There should only be one public writing task with a given id.
   // _id is the unique identifier for the document in MongoDB and is used for private tasks.
   const ins = await collection.replaceOne(
@@ -352,8 +366,8 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
  * @returns true if deletion is acknowledged.
  */
 async function deleteWritingTaskByPath(path: string) {
-  const del = await client
-    .db(MONGO_DB)
+  const db = await getDb();
+  const del = await db
     .collection(WRITING_TASKS)
     .deleteOne({ path });
   if (!del.acknowledged || del.deletedCount !== 1) {
@@ -380,9 +394,10 @@ function timeout(ms: number | undefined): Promise<void> {
 export async function initDatabase() {
   let retry = 30;
   const sleep = 5000; // 5 seconds
-  while (retry > 0) {
+  let db: Db | null = null;
+  while (retry > 0 && !db) {
     try {
-      await client.connect();
+      db = await getDb(); // Attempt to connect to the database.
       retry = 0;
     } catch (err) {
       const { message } = err as Error;
@@ -394,13 +409,17 @@ export async function initDatabase() {
     }
   }
 
+  if (!db) {
+    throw new Error('Failed to connect to database');
+  }
+
   // Make sure collection exists and has index on id
-  const collection = client.db(MONGO_DB).collection<WritingTask>(WRITING_TASKS);
+  const collection = db.collection<WritingTask>(WRITING_TASKS);
   await collection.createIndex({ 'info.id': 1, public: 1 });
   // Delete all public writing tasks to maintain consistency with filesystem.
   await collection.deleteMany({ public: true });
 
-  await client.db(MONGO_DB).createCollection<LogData>(LOGGING, {
+  await db.createCollection<LogData>(LOGGING, {
     timeseries: {
       timeField: 'timestamp',
       metaField: 'meta',
@@ -414,7 +433,7 @@ export async function initDatabase() {
   );
   return async () => {
     await wtdShutdown();
-    await client.close();
+    await client?.close();
   };
 }
 
@@ -432,7 +451,7 @@ type LogData = {
     usage: Messages.Usage;
   };
 };
-export function insertLog(
+export async function insertLog(
   session_id: string,
   {
     finished,
@@ -448,8 +467,9 @@ export function insertLog(
     usage: Messages.Usage;
   }
 ) {
-  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
-  collection.insertOne({
+  const db = await getDb();
+  const collection = db.collection<LogData>(LOGGING);
+  await collection.insertOne({
     timestamp: finished,
     meta: {
       prompt: key,
@@ -480,7 +500,7 @@ type AggregateLogData = {
 };
 
 async function* generateLogData(): AsyncGenerator<AggregateLogData> {
-  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const collection = (await getDb()).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<AggregateLogData>([
     {
       $group: {
@@ -534,7 +554,7 @@ export type SessionAggregateData = {
 };
 
 async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
-  const collection = client.db(MONGO_DB).collection<LogData>(LOGGING);
+  const collection = (await getDb()).collection<LogData>(LOGGING);
   const cursor = collection.aggregate<SessionAggregateData>([
     {
       $group: {
