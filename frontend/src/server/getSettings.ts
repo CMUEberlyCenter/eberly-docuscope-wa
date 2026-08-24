@@ -8,10 +8,12 @@ import { TOOL_SETTINGS_PATH } from './settings';
 let ToolSettings: Settings | null = null;
 
 /** Gets the site wide settings. */
-export async function getSettings(): Promise<Settings> {
+export async function getSettings(
+  settingsPath = TOOL_SETTINGS_PATH
+): Promise<Settings> {
   if (!ToolSettings) {
     logger.warn('ToolSettings not loaded yet, loading from file...');
-    ToolSettings = await loadSettingsFromFile(TOOL_SETTINGS_PATH);
+    ToolSettings = await loadSettingsFromFile(settingsPath);
   }
   return ToolSettings;
 }
@@ -48,6 +50,8 @@ export const toolSettingsMiddleware = enhance(
   async (_request, context, _runtime) => {
     const settings = await getSettings();
     return { ...context, settings };
-  }, {
+  },
+  {
     name: 'myprose:toolSettingsMiddleware',
-  });
+  }
+);

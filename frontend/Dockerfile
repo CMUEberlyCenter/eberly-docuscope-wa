@@ -1,6 +1,7 @@
 FROM docker.io/node:26-slim AS base
 RUN mkdir -p /app
 WORKDIR /app
+ENV NODE_ENV=production
 
 FROM base AS install
 RUN mkdir -p /tmp/dev
@@ -17,7 +18,6 @@ COPY --from=install /tmp/dev/node_modules node_modules
 COPY . .
 ENV NODE_ENV=production
 RUN npm run build
-RUN npm run build:server
 
 FROM base AS release
 LABEL org.opencontainers.image.description="myProse web application"
@@ -28,7 +28,5 @@ ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=install /tmp/prod/node_modules node_modules
 COPY --from=build /app/dist/ ./dist/
-COPY --from=build /app/build/ ./build/
-COPY --from=build /app/public/ ./public/
 COPY --from=build /app/package.json ./package.json
-CMD [ "node", "build/server/index.js" ]
+CMD [ "node", "dist/server/index.mjs" ]

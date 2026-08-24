@@ -71,13 +71,13 @@ services:
       PORT: 8888
       PROMPT_TEMPLATES: /app/resources/prompts
       TOKEN_SECRET_FILE: /run/secrets/token
-      TOOL_SETTINGS: /app/build/app/settings/settings.json
+      TOOL_SETTINGS: /app/settings/settings.json
       WRITING_TASKS: /app/resources/wtd_lib
     restart: always
     depends_on:
       - "mongo"
     volumes:
-      - "./settings:/app/build/app/settings:ro"
+      - "./settings:/app/settings:ro"
       - "./private:/app/private:ro"
       - "../myprose-resources:/app/resources:ro"
   grafana:

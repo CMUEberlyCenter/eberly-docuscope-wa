@@ -1,4 +1,4 @@
-import { enhance } from "@universal-middleware/core";
+import { enhance } from '@universal-middleware/core';
 
 export const i18nMiddleware = enhance(
   async (request, context) => {

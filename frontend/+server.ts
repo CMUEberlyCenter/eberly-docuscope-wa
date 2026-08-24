@@ -11,369 +11,53 @@ import express, {
   type Response,
 } from 'express';
 import type { IBasicAuthedRequest } from 'express-basic-auth';
-import fileUpload from 'express-fileupload';
-// import promBundle from 'express-prom-bundle';
 import session from 'express-session';
-import { readFileSync } from 'fs';
-// import { readdir, readFile, stat } from 'fs/promises';
 import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
-import type { ContentItem, IdToken, PlatformConfig } from 'ltijs';
 import { Provider } from 'ltijs';
-import { join } from 'path';
 import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
-import { renderPage } from 'vike/server';
 import { parse } from 'yaml';
-import {
-  BadRequestError,
-  ForbiddenError,
-  handleError,
-  UnprocessableContentError,
-} from './src/lib/ProblemDetails';
-import { validateWritingTask } from './src/lib/schemaValidate';
-import { type DbWritingTask, isWritingTask } from './src/lib/WritingTask';
+import { handleError } from './src/lib/ProblemDetails';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
 import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts, PROMPTS } from './src/server/data/prompts';
-import { getSettings, toolSettingsMiddleware, watchSettings } from './src/server/getSettings';
-import { logger } from './src/server/logger';
-// import { metrics } from './src/server/prometheus';
 import {
-  LTI_DB,
-  LTI_HOSTNAME,
-  LTI_KEY,
-  LTI_OPTIONS,
+  getSettings,
+  toolSettingsMiddleware,
+  watchSettings,
+} from './src/server/getSettings';
+import { logger } from './src/server/logger';
+import { initializePrometheusMetrics } from './src/server/prometheus'; // gets metrics initialized and registered
+import {
   MONGO_CLIENT,
   ONTOPIC_URL,
-  PLATFORMS_PATH,
   PORT,
-  PRODUCT,
   SESSION_KEY,
 } from './src/server/settings';
-import { basicAuthMiddleware, BasicUserMiddleware } from './src/utils/basicAuth';
+import {
+  basicAuthMiddleware,
+  BasicUserMiddleware,
+} from './src/utils/basicAuth';
 import { type Server } from 'vike/types';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
-import vike, { toFetchHandler } from "@vikejs/express";
-import { getContext } from '@universal-middleware/express';
-import { Settings } from '#lib/ToolSettings';
+import vike, { toFetchHandler } from '@vikejs/express';
 import { sessionMiddleware } from '#server/sessionMiddleware.js';
 import { i18nMiddleware } from '#server/i18nMiddleware.js';
+import { ensureLTIInitialized } from '#server/lti.js';
+import EN from './public/locales/en/translation.yaml?raw';
+import ES from './public/locales/es/translation.yaml?raw';
 
-// use process.cwd() to get the current working directory so that
-// both development and production environments work correctly.
-const __dirname = process.cwd();
-const root = __dirname;
-/** Root directory for the public server files. */
-const PUBLIC = __dirname;
-
-function getHandler() {
+async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
-  initPrompts();
-  // Initialize LTI provider and middleware
-  // Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
-  // Provider.app.use(cors({ origin: '*' }));
-  // Provider.app.use(fileUpload({ createParentPath: true }));
-  // Provider.app.use(
-  //   express.urlencoded({
-  //     extended: true,
-  //   })
-  // );
+  await initPrompts();
+  await ensureLTIInitialized();
 
-  // Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
-  //   if (token) {
-  //     // if LTI token is present
-  //     if (token.platformContext.custom?.tool) {
-  //       // if tool is specified in deep linking settings, redirect accordingly
-  //       return Provider.redirect(res, `/${token.platformContext.custom.tool}`);
-  //     }
-  //     // default to non-specified writing type drafting tool.
-  //     return Provider.redirect(res, '/draft'); //'/index.html');
-  //   }
-  //   if (req.query.writing_task) {
-  //     return Provider.redirect(res, `/myprose/${req.query.writing_task}/`);
-  //   }
-  //   Provider.redirect(res, '/draft');
-  //   // Provider.redirect(res, '/index'); //'/index.html');
-  // });
-  // // Could be used to provide a custom response for invalid tokens
-  // // Provider.onInvalidToken(async (req: Request, res: Response) => {
-  // //   console.log('InvalidToken');
-  // //   return res.sendFile(join(PUBLIC, 'index.html'));
-  // // })
-  // Provider.onDeepLinking(
-  //   async (_token: IdToken, _req: Request, res: Response) =>
-  //     // Provider.redirect(res, '/deeplink', { newResource: true })
-  //     Provider.redirect(res, '/deeplink')
-  // );
-  // Provider.app.post(
-  //   '/deeplink',
-  //   // TODO validate(checkSchema({})),
-  //   async (request: Request, response: Response, next: NextFunction) => {
-  //     try {
-  //       const task = request.body.file
-  //         ? (JSON.parse(request.body.file) as DbWritingTask)
-  //         : null;
-  //       const tool = ['draft', 'review'].includes(request.body.tool)
-  //         ? request.body.tool
-  //         : 'draft';
-  //       const url = new URL(tool, LTI_HOSTNAME);
-  //       const custom: {
-  //         tool: string;
-  //         writing_task_id?: string;
-  //         writing_task?: string;
-  //       } = { tool };
-  //       if (task) {
-  //         const { _id, ...writing_task } = task;
-  //         const valid = validateWritingTask(writing_task);
-  //         if (!valid) {
-  //           throw new UnprocessableContentError(
-  //             validateWritingTask.errors,
-  //             'Invalid JSON'
-  //           );
-  //         }
-  //         if (!isWritingTask(writing_task)) {
-  //           throw new UnprocessableContentError(
-  //             ['Failed type checking!'],
-  //             'Invalid JSON'
-  //           );
-  //         }
-  //         // FIXME task should not be inserted. Use writing_task directly.
-  //         // Requires changing LTI front-end to use writing_task in custom.
-  //         const writing_task_id: string =
-  //           _id ?? (await insertWritingTask(writing_task)).toString();
-  //         custom.writing_task_id = writing_task_id;
-  //         custom.writing_task = JSON.stringify(writing_task);
-  //       }
-  //       const { t } = request.i18n;
-  //       const items: ContentItem[] = [
-  //         {
-  //           type: 'ltiResourceLink',
-  //           // title: writing_task.info.name ?? response.locals.token.platformContext.deepLinkingSettings.title,
-  //           // text: writing_task.rules.overview ?? response.locals.token.platformContext.deepLinkingSettings.text,
-  //           title:
-  //             response.locals.token.platformContext.deepLinkingSettings.title, // #236
-  //           text: t('deeplinking.description', {
-  //             context: task ? 'task' : undefined,
-  //             interpolation: { skipOnVariables: false },
-  //             tool: `$t(deeplinking.option.${tool})`,
-  //             task,
-  //           }),
-  //           url: url.toString(),
-  //           icon: {
-  //             url: new URL('logo.svg', LTI_HOSTNAME).toString(),
-  //             width: 500,
-  //             height: 160,
-  //           },
-  //           custom,
-  //         },
-  //       ];
-  //       const form = await Provider.DeepLinking.createDeepLinkingForm(
-  //         response.locals.token,
-  //         items
-  //       );
-  //       // { message: 'Success' });
-  //       response.send(form);
-  //     } catch (err) {
-  //       next(err);
-  //     }
-  //   }
-  // );
-
-  // // Handle LTI dynamic registration requests
-  // Provider.onDynamicRegistration(
-  //   async (req: Request, res: Response, next: NextFunction) => {
-  //     try {
-  //       if (!req.query.openid_configuration) {
-  //         throw new BadRequestError(
-  //           'Missing parameter: "openid_configuration".'
-  //         );
-  //       }
-  //       const message = await Provider.DynamicRegistration.register(
-  //         req.query.openid_configuration,
-  //         req.query.registration_token,
-  //         {
-  //           // https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
-  //           'https://purl.imsglobal.org/spec/lti-tool-configuration': {
-  //             messages: [
-  //               { type: 'LtiResourceLinkRequest' },
-  //               {
-  //                 type: 'LtiResourceLinkRequest',
-  //                 label: `${PRODUCT} Review`,
-  //                 'label#es': `${PRODUCT} Revisión`,
-  //                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-  //                 placements: ['course_navigation'],
-  //                 custom_parameters: {
-  //                   tool: 'review',
-  //                   course_id: '$Canvas.course.id',
-  //                   course_name: '$Canvas.course.name',
-  //                 },
-  //               },
-  //               {
-  //                 type: 'LtiDeepLinkingRequest',
-  //                 label: PRODUCT,
-  //                 icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-  //                 placements: [
-  //                   'ContentArea',
-  //                   'assignment_selection',
-  //                   'link_selection',
-  //                 ], // Add placements for Canvas
-  //                 selection_height: 800, // Set the height for the deep linking modal in canvas, maybe...
-  //                 selection_width: 800,
-  //                 supported_types: ['LtiResourceLink'], // match what is produced in deep linking
-  //               },
-  //             ],
-  //           },
-  //         }
-  //       );
-  //       res.setHeader('Content-type', 'text/html');
-  //       res.send(message);
-  //     } catch (err) {
-  //       if (
-  //         err instanceof Error &&
-  //         err.message === 'PLATFORM_ALREADY_REGISTERED'
-  //       ) {
-  //         return next(new ForbiddenError('Platform already registered.'));
-  //       }
-  //       next(err);
-  //     }
-  //   }
-  // );
-
-  // /**
-  //  * Endpoint to retrieve the Canvas LTI configuration for the tool.
-  //  */
-  // Provider.app.get(
-  //   '/lti/configuration',
-  //   async (_req: Request, res: Response) => {
-  //     const placement_defaults = {
-  //       icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-  //       message_type: 'LtiDeepLinkingRequest',
-  //       target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-  //     };
-  //     res.json({
-  //       title: PRODUCT,
-  //       description: 'myProse Editing and Review tools',
-  //       oidc_initiation_url: new URL(
-  //         Provider.loginRoute(),
-  //         LTI_HOSTNAME
-  //       ).toString(),
-  //       target_link_uri: new URL(Provider.appRoute(), LTI_HOSTNAME).toString(),
-  //       scopes: [
-  //         'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
-  //         'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
-  //         'https://purl.imsglobal.org/spec/lti-ags/scope/score',
-  //         'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
-  //         'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly',
-  //         // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
-  //         'https://canvas.instructure.com/lti/public_jwk/scope/update',
-  //       ],
-  //       extensions: [
-  //         {
-  //           domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
-  //           tool_id: PRODUCT,
-  //           platform: 'canvas.instructure.com',
-  //           privacy_level: 'public',
-  //           settings: {
-  //             text: 'myProse Drafting and Review tools',
-  //             labels: {
-  //               en: 'myProse Drafting and Review tools',
-  //               es: 'myProse Herramientas de Redacción y Revisión',
-  //             },
-  //             icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
-  //             selection_height: 800,
-  //             selection_width: 800,
-  //             placements: [
-  //               {
-  //                 ...placement_defaults,
-  //                 text: `${PRODUCT} Assignment Selection Placement`,
-  //                 placement: 'assignment_selection',
-  //               },
-  //               {
-  //                 ...placement_defaults,
-  //                 text: `${PRODUCT} Link Selection Placement`,
-  //                 placement: 'link_selection',
-  //               },
-  //               {
-  //                 ...placement_defaults,
-  //                 text: `${PRODUCT} Course Navigation Placement`,
-  //                 placement: 'course_navigation',
-  //                 message_type: 'LtiResourceLinkRequest',
-  //                 target_link_uri: new URL(
-  //                   Provider.appRoute(),
-  //                   LTI_HOSTNAME
-  //                 ).toString(),
-  //                 windowTarget: '_blank',
-  //                 custom_fields: {
-  //                   course_id: '$Canvas.course.id',
-  //                   course_name: '$Canvas.course.name',
-  //                   tool: 'review',
-  //                 },
-  //               },
-  //             ],
-  //           },
-  //         },
-  //       ],
-  //       public_jwk_url: new URL(
-  //         Provider.keysetRoute(),
-  //         LTI_HOSTNAME
-  //       ).toString(),
-  //     });
-  //   }
-  // );
-
-  // Provider.whitelist(
-  //   Provider.appRoute(),
-  //   /\w+\.html$/,
-  //   '/genlink', // Eventually to be moved to admin endpoint.  TODO: Public access via LTI only.
-  //   /draft/, // TODO: Eventually to be removed so only available in LTI
-  //   /review/, // TODO: Eventually to be removed so only available in LTI
-  //   /\/snapshot/, // Snapshot viewing.  TODO: This will eventually be the only public tool.
-  //   '/', // TODO: Eventually to be replaced by welcome page with no tools.
-  //   /locales/, // Localization files need to be public
-  //   /myprose/, // These should be the "public" tools.
-  //   /lti/, // additional public lti "well-known" endpoints
-  //   /admin/, // Admin routes, security should be handled outside LTI
-  //   /_telefunc/ // Telefunc endpoint, should be protected in the future if used for non-public actions.
-  // );
-
-  // Provider.deploy({ serverless: true }); // await
-  // Register manually configured platforms.
-  // try {
-  //   const files = await readdir(PLATFORMS_PATH);
-  //   for (const file of files) {
-  //     const path = join(PLATFORMS_PATH, file);
-  //     const stats = await stat(path);
-  //     if (stats.isFile() && file.endsWith('.json')) {
-  //       const content = await readFile(path, { encoding: 'utf8' });
-  //       const json = JSON.parse(content) as PlatformConfig;
-  //       await Provider.registerPlatform(json);
-  //       logger.info(
-  //         `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
-  //         { platformId: json.clientId, url: json.url, path }
-  //       );
-  //     }
-  //   }
-  // } catch (err) {
-  //   logger.error(err);
-  // } finally {
-  //   const platforms = await Provider.getAllPlatforms();
-  //   platforms.forEach(async (platform) => {
-  //     const platformId = await platform.platformId();
-  //     const name = await platform.platformName();
-  //     const url = await platform.platformUrl();
-  //     const active = await platform.platformActive();
-  //     logger.info(
-  //       `LTI Registered platform: ${active ? '+' : 'o'} ${name} (${platformId}), URL: ${url}, Active: ${active}`,
-  //       { platformId, name, url, active }
-  //     );
-  //   });
-  // }
   const app = express();
   app.use((req, res, next) => {
     if (req.path.startsWith('/admin')) {
@@ -413,32 +97,17 @@ function getHandler() {
       },
       resources: {
         en: {
-          translation: parse(
-            readFileSync(
-              join(root, 'public/locales/en/translation.yaml'),
-              'utf-8'
-            )
-          ),
+          translation: parse(EN),
         },
-        // 'es': {
-        //   translation: parse(
-        //     readFileSync(join(root, 'public/locales/es/translation.yaml'), 'utf-8')
-        //   )
-        // }
+        es: {
+          translation: parse(ES),
+        },
       },
     });
   app.use(handle(i18n));
 
-  // if (process.env.NODE_ENV === 'production') {
-  //   logger.info('Production mode', { mode: 'production' });
-  //   app.use(express.static(join(root, 'dist', 'client')));
-  // } else {
-  //   const vike = await import('vike/server');
-  //   const { devMiddleware } = await vike.createDevMiddleware({ root });
-  //   app.use(devMiddleware);
-  // }
-  // prometheus metrics
-  // app.use('/api/', promBundle({ includeMethod: true, includePath: true }));
+  // Prometheus metrics
+  initializePrometheusMetrics(app);
   // Writing Task/Outline API Endpoints
   app.use('/api/v2/writing_tasks', writingTasks);
   // OnTopic API Endpoints
@@ -448,9 +117,6 @@ function getHandler() {
   // Snapshot API Endpoints for static content.
   app.use('/api/v2/snapshot', snapshot);
 
-  // Metrics
-  // app.use(metrics);
-
   // Static directories that do not need to be managed by ltijs
   // app.use('/favicon.ico', express.static(join(PUBLIC, 'favicon.ico')));
   // app.use('/static', express.static(join(PUBLIC, 'static')));
@@ -458,8 +124,6 @@ function getHandler() {
   // app.use('/locales', express.static(join(root, 'public/locales')));
   // app.use('/settings', express.static(join(PUBLIC, 'settings')));
 
-  // app.use(toolSettingsMiddleware);
-  // app.use(Provider.app);
   // app.use(express.static(PUBLIC));
   // Handle index.html to support old (pre-tool split) genlink links
   // app.get('/index.html', (req: Request, res: Response) => {
@@ -510,6 +174,8 @@ function getHandler() {
       res.send(body);
     }
   );
+  app.use(Provider.app);
+
   // Handle all other routes with Vike
   // app.all(
   //   '{*vike}',
@@ -570,25 +236,30 @@ function getHandler() {
   //     }
   //   }
   // );
-  vike(app, [toolSettingsMiddleware, BasicUserMiddleware, sessionMiddleware, i18nMiddleware]); // TODO convert more to middleware and use here updating context to push into pageContext.
+  vike(app, [
+    toolSettingsMiddleware,
+    BasicUserMiddleware,
+    sessionMiddleware,
+    i18nMiddleware,
+  ]); // TODO convert more to middleware and use here updating context to push into pageContext.
 
   // Global error handler/formatter
-  // app.use(handleError);
+  app.use(handleError);
 
-  return toFetchHandler(app);
+  return app;
 }
 
 export default {
-  fetch: getHandler(),
+  fetch: toFetchHandler(await getHandler()),
   prod: {
-    port: PORT, static: PUBLIC,
+    port: PORT,
     onReady(server) {
       const address = server.url;
       logger.info(`Server ready on ${server.url}`, {
         address,
         status: 'ready',
       });
-    }
+    },
   },
   // onCreate: async (server: HttpServer) => {
   //   // const shutdownDatabase = await initDatabase();

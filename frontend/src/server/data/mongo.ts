@@ -133,9 +133,7 @@ export async function deleteSnapshotById(id: string) {
   }
   const _id = new ObjectId(id);
   const db = await getDb();
-  const del = await db
-    .collection(SNAPSHOTS)
-    .deleteOne({ _id });
+  const del = await db.collection(SNAPSHOTS).deleteOne({ _id });
   if (!del.acknowledged || del.deletedCount !== 1) {
     throw new ReferenceError(`Delete operation for Snapshot ${id} failed`);
   }
@@ -161,15 +159,13 @@ export async function updateSnapshotReviewsById(
   }
   const _id = new ObjectId(id);
   const db = await getDb();
-  const upd = await db
-    .collection<Snapshot>(SNAPSHOTS)
-    .findOneAndUpdate(
-      { _id },
-      {
-        $push: { analyses: { $each: analyses } },
-        $set: { timestamp: new Date() },
-      }
-    );
+  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+    { _id },
+    {
+      $push: { analyses: { $each: analyses } },
+      $set: { timestamp: new Date() },
+    }
+  );
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
@@ -192,14 +188,12 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   }
   const _id = new ObjectId(id);
   const db = await getDb();
-  const upd = await db
-    .collection<Snapshot>(SNAPSHOTS)
-    .findOneAndUpdate(
-      { _id },
-      {
-        $set: { analyses: [], timestamp: new Date() },
-      }
-    );
+  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+    { _id },
+    {
+      $set: { analyses: [], timestamp: new Date() },
+    }
+  );
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
@@ -219,15 +213,13 @@ export async function clearSnapshotAnalysisById(
   }
   const _id = new ObjectId(id);
   const db = await getDb();
-  const upd = await db
-    .collection<Snapshot>(SNAPSHOTS)
-    .findOneAndUpdate(
-      { _id },
-      {
-        $pull: { analyses: { tool } }, // Pull the specific analysis by tool
-        $set: { timestamp: new Date() },
-      }
-    );
+  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+    { _id },
+    {
+      $pull: { analyses: { tool } }, // Pull the specific analysis by tool
+      $set: { timestamp: new Date() },
+    }
+  );
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
@@ -367,9 +359,7 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
  */
 async function deleteWritingTaskByPath(path: string) {
   const db = await getDb();
-  const del = await db
-    .collection(WRITING_TASKS)
-    .deleteOne({ path });
+  const del = await db.collection(WRITING_TASKS).deleteOne({ path });
   if (!del.acknowledged || del.deletedCount !== 1) {
     throw new ReferenceError(
       `Delete operation for Writing Task at '${path}' failed`

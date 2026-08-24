@@ -1,3 +1,5 @@
+import { Settings } from '#lib/ToolSettings.js';
+import { getContext } from '@universal-middleware/express';
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
 import {
@@ -28,9 +30,7 @@ import { doOnTopic } from '../data/ontopic';
 import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
-// import { countPrompt } from '../prometheus';
-import { Settings } from '#lib/ToolSettings.js';
-import { getContext } from '@universal-middleware/express';
+import { countPrompt } from '../prometheus';
 
 export const reviews = Router();
 
@@ -323,7 +323,7 @@ reviews.post(
     if (controller.signal.aborted) {
       return;
     }
-    // countPrompt(chat);
+    countPrompt(chat);
     insertLog(request.sessionID ?? '', chat);
     const { response: chat_response, finished: datetime } = chat;
     if (!chat_response) throw new Error(`NULL chat response for ${analysis}`);

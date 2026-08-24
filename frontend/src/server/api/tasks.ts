@@ -45,7 +45,7 @@ writingTasks.get('', async (request: Request, response: Response) => {
   const rules = await findAllPublicWritingTasks();
   if (request.accepts('html')) {
     response.send(
-      `<html><body><h1>Writing Tasks</h1><ul>${rules.map((rule) => `<li><a href="${LTI_HOSTNAME}index.html?writing_task=${rule.info.id ?? rule._id ?? ''}">${rule.info.name}</a></li>`).join('')}</ul></body></html>`
+      `<html><body><h1>Writing Tasks</h1><ul>${rules.map((rule) => `<li><a href="${LTI_HOSTNAME}myprose/${rule.info.id ?? rule._id ?? ''}">${rule.info.name}</a></li>`).join('')}</ul></body></html>`
     );
     return;
   }

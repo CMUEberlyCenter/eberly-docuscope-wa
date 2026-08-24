@@ -1,4 +1,4 @@
-import { enhance } from '@universal-middleware/core'
+import { enhance } from '@universal-middleware/core';
 
 export const sessionMiddleware = enhance(
   async (request, context) => {
