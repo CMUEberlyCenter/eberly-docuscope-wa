@@ -201,33 +201,48 @@ async function __main__() {
           req.query.openid_configuration,
           req.query.registration_token,
           {
-            // https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
+            // Ref: https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
             'https://purl.imsglobal.org/spec/lti-tool-configuration': {
+              // Ref: https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.registration#lti-message-schema
               messages: [
                 { type: 'LtiResourceLinkRequest' },
                 {
                   type: 'LtiResourceLinkRequest',
                   label: `${PRODUCT} Review`,
-                  'label#es': `${PRODUCT} Revisión`,
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  'label#es': `${PRODUCT} Reseñar`,
+                  'lebel#fr': `${PRODUCT} Réviser`,
+                  icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                   placements: ['course_navigation'],
+                  preferred_presentation: 'window',
                   custom_parameters: {
-                    tool: 'review',
                     course_id: '$Canvas.course.id',
                     course_name: '$Canvas.course.name',
+                    placement: 'course_navigation',
+                    tool: 'review',
                   },
+                  'https://canvas.instructure.com/lti/display_type':
+                    'new_window',
                 },
                 {
                   type: 'LtiDeepLinkingRequest',
                   label: PRODUCT,
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                   placements: [
                     'ContentArea',
                     'assignment_selection',
                     'link_selection',
-                  ], // Add placements for Canvas
-                  selection_height: 800, // Set the height for the deep linking modal in canvas, maybe...
-                  selection_width: 800,
+                  ],
+                  // preferred_presentation: 'iframe', // Leave as default
+                  iframe: {
+                    // Canvas uses this if preferred_presentation is not set.
+                    width: 800,
+                    height: 800,
+                  },
+                  window: {
+                    // Canvas uses this if preferred_presentation is not nset and iframe does no exist.
+                    width: 800,
+                    height: 800,
+                  },
                   supported_types: ['LtiResourceLink'], // match what is produced in deep linking
                 },
               ],
@@ -315,6 +330,7 @@ async function __main__() {
                   custom_fields: {
                     course_id: '$Canvas.course.id',
                     course_name: '$Canvas.course.name',
+                    placement: 'course_navigation',
                     tool: 'review',
                   },
                 },
