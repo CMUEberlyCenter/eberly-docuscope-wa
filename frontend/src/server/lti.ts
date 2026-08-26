@@ -7,7 +7,6 @@ import { DbWritingTask, isWritingTask } from '#lib/WritingTask.js';
 import { validateWritingTask } from '#lib/schemaValidate.js';
 import cors from 'cors';
 import { NextFunction, Request, Response, urlencoded } from 'express';
-import fileUpload from 'express-fileupload';
 import { readdir, readFile, stat } from 'fs/promises';
 import { ContentItem, IdToken, PlatformConfig, Provider } from 'ltijs';
 import { join } from 'path';
@@ -24,12 +23,8 @@ import {
 
 // Hack to ensure that LTI is only initialized once in hot reload environments.
 const LTI_SETUP_KEY = Symbol.for('myprose.lti.setup_complete');
-const LTI_SETUP_PLATFORMS_KEY = Symbol.for(
-  'myprose.lti.platforms_setup_complete'
-);
 const globalRef = globalThis as typeof globalThis & {
   [LTI_SETUP_KEY]?: boolean;
-  [LTI_SETUP_PLATFORMS_KEY]?: boolean;
 };
 
 export async function ensureLTIInitialized() {
@@ -48,7 +43,7 @@ function initializeLTI() {
   // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
-  Provider.app.use(fileUpload({ createParentPath: true }));
+  // Provider.app.use(fileUpload({ createParentPath: true }));
   Provider.app.use(
     urlencoded({
       extended: true,
@@ -167,34 +162,50 @@ function initializeLTI() {
         const message = await Provider.DynamicRegistration.register(
           req.query.openid_configuration,
           req.query.registration_token,
+          // this custom object overwrites the default lti-tool-configuration messages
           {
-            // https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
+            // Ref: https://www.imsglobal.org/spec/lti-dr/v1p0#lti-configuration-0
             'https://purl.imsglobal.org/spec/lti-tool-configuration': {
               messages: [
-                { type: 'LtiResourceLinkRequest' },
+                // Messages used to configure the tool in the LMS.  LMS should select the most appropriate one based on type and placement.
+                // Ref: https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.registration#lti-message-schema
+                { type: 'LtiResourceLinkRequest' }, // Required base message type for LTI 1.3 resource link launches.
                 {
+                  // Canvas's course navigation placement.
                   type: 'LtiResourceLinkRequest',
                   label: `${PRODUCT} Review`,
-                  'label#es': `${PRODUCT} Revisión`,
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  'label#es': `${PRODUCT} Reseñar`,
+                  'label#fr': `${PRODUCT} Réviser`,
+                  icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                   placements: ['course_navigation'],
+                  preferred_presentation: 'window', // Apparently, this is ignored by Canvas for course navigation placement.
                   custom_parameters: {
-                    tool: 'review',
                     course_id: '$Canvas.course.id',
                     course_name: '$Canvas.course.name',
+                    placement: 'course_navigation', // For future use in case we want to know that this was launched from the course navigation placement.
+                    tool: 'review',
                   },
+                  // Canvas specific extension to open the course navigation target in a new window.
+                  "https://canvas.instructure.com/lti/display_type": "new_window",
                 },
                 {
                   type: 'LtiDeepLinkingRequest',
                   label: PRODUCT,
-                  icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                  icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
                   placements: [
                     'ContentArea',
-                    'assignment_selection',
-                    'link_selection',
-                  ], // Add placements for Canvas
-                  selection_height: 800, // Set the height for the deep linking modal in canvas, maybe...
-                  selection_width: 800,
+                    'assignment_selection', // Canvas uses this for assignment selection.
+                    'link_selection', // Canvas uses this for link selection.
+                  ],
+                  // preferred_presentation: 'iframe', // leave as default to let LMS decide.
+                  iframe: { // Canvas uses this if preferred_presentation is not set.
+                    width: 800,
+                    height: 800,
+                  },
+                  window: { // Canvas uses this if preferred_presentation is not set and iframe is not set.
+                    width: 800,
+                    height: 800,
+                  },
                   supported_types: ['LtiResourceLink'], // match what is produced in deep linking
                 },
               ],
