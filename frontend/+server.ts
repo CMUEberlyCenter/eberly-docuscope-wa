@@ -52,6 +52,7 @@ import { i18nMiddleware } from '#server/i18nMiddleware.js';
 import { ensureLTIInitialized } from '#server/lti.js';
 import EN from './public/locales/en/translation.yaml?raw';
 import ES from './public/locales/es/translation.yaml?raw';
+import { headersMiddleware } from '#server/headersMiddleware.js';
 
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -68,7 +69,6 @@ async function getHandler() {
   // app.all('/api/auth/{*auth}', toNodeHandler(auth));
   // mount json middleware after auth
   app.use(express.json({ limit: '10mb' }));
-  app.use(express.text());
   // app.use(cors({ origin: '*' }));
   app.use(cors());
 
@@ -134,6 +134,7 @@ async function getHandler() {
   // });
   app.all(
     '/_telefunc',
+    express.text(),
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const body = JSON.parse(req.body) as {
@@ -237,6 +238,7 @@ async function getHandler() {
   //   }
   // );
   vike(app, [
+    headersMiddleware,
     toolSettingsMiddleware,
     BasicUserMiddleware,
     sessionMiddleware,
