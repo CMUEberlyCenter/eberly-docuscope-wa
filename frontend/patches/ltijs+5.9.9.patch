@@ -1,5 +1,5 @@
 diff --git a/node_modules/ltijs/dist/Provider/Services/DeepLinking.js b/node_modules/ltijs/dist/Provider/Services/DeepLinking.js
-index a665b03..b6455e4 100644
+index a665b03..0e5d5ce 100644
 --- a/node_modules/ltijs/dist/Provider/Services/DeepLinking.js
 +++ b/node_modules/ltijs/dist/Provider/Services/DeepLinking.js
 @@ -9,11 +9,11 @@ function _assertClassBrand(e, t, n) { if ("function" == typeof e ? e === t : e.h
@@ -41,7 +41,7 @@ index a665b03..b6455e4 100644
    }
  
 diff --git a/node_modules/ltijs/dist/Utils/Database.js b/node_modules/ltijs/dist/Utils/Database.js
-index d48737e..c9eb517 100644
+index d48737e..aad7d42 100644
 --- a/node_modules/ltijs/dist/Utils/Database.js
 +++ b/node_modules/ltijs/dist/Utils/Database.js
 @@ -24,9 +24,9 @@ class Database {
@@ -56,3 +56,16 @@ index d48737e..c9eb517 100644
      });
      _classPrivateFieldInitSpec(this, _deploy, false);
      if (!database || !database.url) throw new Error('MISSING_DATABASE_CONFIG');
+diff --git a/node_modules/ltijs/dist/Utils/Server.js b/node_modules/ltijs/dist/Utils/Server.js
+index b54b8d3..3e2cb73 100644
+--- a/node_modules/ltijs/dist/Utils/Server.js
++++ b/node_modules/ltijs/dist/Utils/Server.js
+@@ -47,7 +47,7 @@ class Server {
+         },
+         credentials: true
+       }));
+-      this.app.options('*', cors());
++      this.app.options('{*ltijs}', cors());
+     }
+     this.app.use(bodyParser.urlencoded({
+       extended: false
