@@ -10,7 +10,7 @@ type ReviewGradeData = {
   task_id?: string;
   /** Approximate text length of student submission. */
   input_length?: number;
-}
+};
 
 /**
  * Issue a grade for a student's work based on the review tool used.

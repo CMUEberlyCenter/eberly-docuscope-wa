@@ -6,12 +6,12 @@ import { TelefuncContext } from '#lib/TelefuncContext.js';
 import MongoStore from 'connect-mongo';
 import cors from 'cors';
 import express, {
+  urlencoded,
   type NextFunction,
   type Request,
   type Response,
 } from 'express';
 import type { IBasicAuthedRequest } from 'express-basic-auth';
-import fileUpload from 'express-fileupload';
 import promBundle from 'express-prom-bundle';
 import session from 'express-session';
 import { readFileSync } from 'fs';
@@ -80,12 +80,6 @@ async function __main__() {
   // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
-  Provider.app.use(fileUpload({ createParentPath: true }));
-  Provider.app.use(
-    express.urlencoded({
-      extended: true,
-    })
-  );
 
   Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
     if (token) {
@@ -115,6 +109,7 @@ async function __main__() {
   );
   Provider.app.post(
     '/deeplink',
+    urlencoded({ extended: true }),
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
@@ -395,10 +390,15 @@ async function __main__() {
       });
     }
     const app = express();
-    app.use('/admin', basicAuthMiddleware);
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/admin')) {
+        return basicAuthMiddleware(req, res, next);
+      }
+      next();
+    });
     // app.all('/api/auth/{*auth}', toNodeHandler(auth));
     // mount json middleware after auth
-    app.use(express.json({ limit: '10mb' }));
+    app.use('/api', express.json({ limit: '10mb' }));
     // app.use(cors({ origin: '*' }));
     app.use(cors());
 
@@ -483,6 +483,7 @@ async function __main__() {
     });
     app.all(
       '/_telefunc',
+      express.text(),
       async (req: Request, res: Response, next: NextFunction) => {
         const body = JSON.parse(req.body) as {
           file?: string;

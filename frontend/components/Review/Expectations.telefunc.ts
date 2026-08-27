@@ -12,7 +12,7 @@ type ExpectationGradeData = {
   input_length?: number;
   /** The expectation being evaluated. */
   expectation: string;
-}
+};
 
 /* NOTE: the generic JSON type does not work with automatic shield generation. */
 
@@ -23,7 +23,10 @@ type ExpectationGradeData = {
  * @param customData - Additional data for the line item.
  * @returns A promise resolving to a Score or null.
  */
-export async function onGrade(score: number, customData?: ExpectationGradeData) {
+export async function onGrade(
+  score: number,
+  customData?: ExpectationGradeData
+) {
   const { gradeService, session } = getContext<TelefuncContext>();
   if (!session?.token || !gradeService) {
     return null; // no-op if no token is present, as grading requires a valid LTI token.
