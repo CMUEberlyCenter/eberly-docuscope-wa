@@ -46,6 +46,7 @@ export async function watchSettings(settingsPath = TOOL_SETTINGS_PATH) {
   return () => settings.close();
 }
 
+/** Middleware to add tool settings to the request context. */
 export const toolSettingsMiddleware = enhance(
   async (_request, context, _runtime) => {
     const settings = await getSettings();

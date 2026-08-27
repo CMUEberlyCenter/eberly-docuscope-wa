@@ -17,7 +17,6 @@ declare global {
     }
     interface PageContextServer {
       i18n?: i18n;
-      token?: IdToken;
       session?: SessionData;
       writing_task_id?: string;
       settings?: Settings;
@@ -27,6 +26,7 @@ declare global {
       settings?: Settings;
       google?: GoogleSettings;
       user?: string;
+      isAdmin?: boolean;
       abortReason?: string | { notAdmin?: true };
       abortStatusCode?: number;
     }

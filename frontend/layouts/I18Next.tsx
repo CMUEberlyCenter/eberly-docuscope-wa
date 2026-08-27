@@ -13,6 +13,7 @@ i18n
   .init({
     fallbackLng: "en",
     interpolation: { escapeValue: false },
+    load: "languageOnly",
     backend: {
       loadPath: "/locales/{{lng}}/{{ns}}.yaml",
       parse: (data: string) => parse(data),

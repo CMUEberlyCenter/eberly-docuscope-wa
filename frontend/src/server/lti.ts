@@ -44,11 +44,11 @@ function initializeLTI() {
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
   Provider.app.use(cors({ origin: '*' }));
   // Provider.app.use(fileUpload({ createParentPath: true }));
-  Provider.app.use(
-    urlencoded({
-      extended: true,
-    })
-  );
+  // Provider.app.use(
+  //   urlencoded({
+  //     extended: true,
+  //   })
+  // );
 
   Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
     if (token) {
@@ -78,6 +78,7 @@ function initializeLTI() {
   );
   Provider.app.post(
     '/deeplink',
+    urlencoded({ extended: true }),
     // TODO validate(checkSchema({})),
     async (request: Request, response: Response, next: NextFunction) => {
       try {
@@ -186,7 +187,8 @@ function initializeLTI() {
                     tool: 'review',
                   },
                   // Canvas specific extension to open the course navigation target in a new window.
-                  "https://canvas.instructure.com/lti/display_type": "new_window",
+                  'https://canvas.instructure.com/lti/display_type':
+                    'new_window',
                 },
                 {
                   type: 'LtiDeepLinkingRequest',
@@ -198,11 +200,13 @@ function initializeLTI() {
                     'link_selection', // Canvas uses this for link selection.
                   ],
                   // preferred_presentation: 'iframe', // leave as default to let LMS decide.
-                  iframe: { // Canvas uses this if preferred_presentation is not set.
+                  iframe: {
+                    // Canvas uses this if preferred_presentation is not set.
                     width: 800,
                     height: 800,
                   },
-                  window: { // Canvas uses this if preferred_presentation is not set and iframe is not set.
+                  window: {
+                    // Canvas uses this if preferred_presentation is not set and iframe is not set.
                     width: 800,
                     height: 800,
                   },

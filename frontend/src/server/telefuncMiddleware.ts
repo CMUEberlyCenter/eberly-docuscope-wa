@@ -21,6 +21,5 @@ export const telefuncHandler = enhance(
     name: 'my-app:telefunc-handler',
     path: `/_telefunc`,
     method: ['GET', 'POST'],
-    immutable: false,
   }
 );

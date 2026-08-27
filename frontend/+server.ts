@@ -68,7 +68,7 @@ async function getHandler() {
   });
   // app.all('/api/auth/{*auth}', toNodeHandler(auth));
   // mount json middleware after auth
-  app.use(express.json({ limit: '10mb' }));
+  app.use('/api', express.json({ limit: '10mb' }));
   // app.use(cors({ origin: '*' }));
   app.use(cors());
 
@@ -90,6 +90,7 @@ async function getHandler() {
     .init({
       preload: ['en'],
       fallbackLng: 'en',
+      load: 'languageOnly',
       interpolation: { escapeValue: false },
       backend: {
         loadPath: '/locales/{{lng}}/{{ns}}.yaml',
@@ -134,7 +135,7 @@ async function getHandler() {
   // });
   app.all(
     '/_telefunc',
-    express.text(),
+    express.text(), // telefunc encodes the request body as text.
     async (req: Request, res: Response, next: NextFunction) => {
       try {
         const body = JSON.parse(req.body) as {

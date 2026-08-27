@@ -9,13 +9,12 @@ export const basicAuthMiddleware = basicAuth({
 });
 
 export const BasicUserMiddleware = enhance(
-  async (request, context, _runtime) => {
-    const user = request.auth?.user ?? null;
+  async (_request, context, runtime) => {
+    const user = runtime?.express?.req?.auth?.user ?? null;
     const isAdmin = user === 'admin';
     return { ...context, user, isAdmin };
   },
   {
     name: 'myprose:BasicUserMiddleware',
-    immutable: false,
   }
 );

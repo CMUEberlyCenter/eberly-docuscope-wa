@@ -1,4 +1,4 @@
-import { enhance } from "@universal-middleware/core";
+import { enhance } from '@universal-middleware/core';
 
 /** Simple middleware to remove CORS headers that interfere with google drive integration. */
 export const headersMiddleware = enhance(
@@ -12,5 +12,5 @@ export const headersMiddleware = enhance(
   {
     name: 'myprose:headers-middleware',
     method: ['GET'],
-    immutable: false
-  });
+  }
+);

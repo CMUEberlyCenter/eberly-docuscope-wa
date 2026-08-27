@@ -1,16 +1,12 @@
 import { enhance } from '@universal-middleware/core';
 
+/** Middleware to add internationalization information to the request context. */
 export const i18nMiddleware = enhance(
-  async (request, context) => {
-    // req is attached to the request/context by the framework adapter
-    const req = (context as any).req ?? (request as any).req;
-    if (req && req.i18n) {
-      return {
-        ...context,
-        i18n: req.i18n,
-      };
+  async (_request, context, runtime) => {
+    if (runtime.adapter === 'express') {
+      const { i18n } = runtime.express.req;
+      return { ...context, i18n };
     }
-    return context;
   },
-  { name: 'app:i18n-middleware', immutable: false }
+  { name: 'myprose:i18n-middleware' }
 );
