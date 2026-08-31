@@ -109,11 +109,6 @@ function initializeLTI() {
               'Invalid JSON'
             );
           }
-          // FIXME task should not be inserted. Use writing_task directly.
-          // Requires changing LTI front-end to use writing_task in custom.
-          const writing_task_id: string =
-            _id ?? (await insertWritingTask(writing_task)).toString();
-          custom.writing_task_id = writing_task_id;
           custom.writing_task = JSON.stringify(writing_task);
         }
         const { t } = request.i18n;

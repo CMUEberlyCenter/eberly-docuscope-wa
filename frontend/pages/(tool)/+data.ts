@@ -14,6 +14,15 @@ import {
 import { Provider } from 'ltijs';
 import type { PageContextServer } from 'vike/types';
 
+const getWritingTaskById = async (id: string) => {
+  try {
+    return await findWritingTaskById(id);
+  } catch (error) {
+    logger.error('Error finding writing task by ID:', { error });
+    return undefined;
+  }
+};
+
 export async function data(pageContext: PageContextServer) {
   const taskId = pageContext.writing_task_id; // set if system specified
   const token = pageContext.session?.token; // set if LTI specified
@@ -33,11 +42,8 @@ export async function data(pageContext: PageContextServer) {
       logger.error('Error parsing writing_task from LTI token:', { error });
     }
   }
-  const task = parsedTask
-    ? parsedTask
-    : taskId
-      ? await findWritingTaskById(taskId)
-      : undefined;
+  const task =
+    parsedTask ?? (taskId ? await getWritingTaskById(taskId) : undefined);
   const tasks = task
     ? []
     : (await findAllPublicWritingTasks()).map(({ _id, ...task }) => task); // need everything but _id for preview.

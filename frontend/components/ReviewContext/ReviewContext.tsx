@@ -57,25 +57,25 @@ export const useReviewDispatch = () => use(ReviewDispatchContext);
 
 type ReviewAction =
   | {
-    type: "set"; // set highlighting
-    sentences: string[][]; // array of arrays of sentence ids
-    paragraphs?: string[]; // array of paragraph ids
-  }
+      type: "set"; // set highlighting
+      sentences: string[][]; // array of arrays of sentence ids
+      paragraphs?: string[]; // array of paragraph ids
+    }
   | {
-    type: "unset"; // unset highlighting
-    sentences?: undefined;
-    paragraphs?: undefined;
-  }
+      type: "unset"; // unset highlighting
+      sentences?: undefined;
+      paragraphs?: undefined;
+    }
   | {
-    type: "update"; // set text content
-    sentences: string; // text content
-    paragraphs?: undefined;
-  }
+      type: "update"; // set text content
+      sentences: string; // text content
+      paragraphs?: undefined;
+    }
   | {
-    type: "remove";
-    sentences?: undefined;
-    paragraphs?: undefined;
-  };
+      type: "remove";
+      sentences?: undefined;
+      paragraphs?: undefined;
+    };
 
 /** Dispatch function for modifying the review state. */
 function reviewReducer(
@@ -155,32 +155,32 @@ export const ReviewToolCard: FC<
   review,
   ...props
 }) => {
-    return (
-      <ReviewReset>
-        <ToolContainer {...props}>
-          <ToolHeader title={title} instructionsKey={instructionsKey} />
-          {isPending || !review ? (
-            <Loading />
-          ) : (
-            <ErrorBoundary
-              fallbackRender={({
-                error /*, resetErrorBoundary*/,
-              }: FallbackProps) => (
-                <Alert variant="danger">
-                  <p>{errorMessage}</p>
-                  {error instanceof Error && (
-                    <pre className="mt-2">{error.message}</pre>
-                  )}
-                  {/* needs onReset <Button variant="primary" onClick={resetErrorBoundary}>Try again</Button> */}
-                </Alert>
-              )}
+  return (
+    <ReviewReset>
+      <ToolContainer {...props}>
+        <ToolHeader title={title} instructionsKey={instructionsKey} />
+        {isPending || !review ? (
+          <Loading />
+        ) : (
+          <ErrorBoundary
+            fallbackRender={({
+              error /*, resetErrorBoundary*/,
+            }: FallbackProps) => (
+              <Alert variant="danger">
+                <p>{errorMessage}</p>
+                {error instanceof Error && (
+                  <pre className="mt-2">{error.message}</pre>
+                )}
+                {/* needs onReset <Button variant="primary" onClick={resetErrorBoundary}>Try again</Button> */}
+              </Alert>
+            )}
             // onReset={(details) => mutation.reset()}
-            >
-              {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
-              {children}
-            </ErrorBoundary>
-          )}
-        </ToolContainer>
-      </ReviewReset>
-    );
-  };
+          >
+            {isErrorData(review) ? <ReviewErrorData data={review} /> : null}
+            {children}
+          </ErrorBoundary>
+        )}
+      </ToolContainer>
+    </ReviewReset>
+  );
+};

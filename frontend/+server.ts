@@ -15,7 +15,7 @@ import session from 'express-session';
 import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
-import { Provider } from 'ltijs';
+import { IdToken, Provider } from 'ltijs';
 import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
 import { parse } from 'yaml';
@@ -24,12 +24,12 @@ import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
 import { writingTasks } from './src/server/api/tasks';
-import { initDatabase, insertWritingTask } from './src/server/data/mongo';
+// import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts, PROMPTS } from './src/server/data/prompts';
 import {
   getSettings,
-  toolSettingsMiddleware,
-  watchSettings,
+  // toolSettingsMiddleware,
+  // watchSettings,
 } from './src/server/getSettings';
 import { logger } from './src/server/logger';
 import { initializePrometheusMetrics } from './src/server/prometheus'; // gets metrics initialized and registered
@@ -41,18 +41,19 @@ import {
 } from './src/server/settings';
 import {
   basicAuthMiddleware,
-  BasicUserMiddleware,
+  // BasicUserMiddleware,
 } from './src/utils/basicAuth';
 import { type Server } from 'vike/types';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
 import vike, { toFetchHandler } from '@vikejs/express';
-import { sessionMiddleware } from '#server/sessionMiddleware.js';
-import { i18nMiddleware } from '#server/i18nMiddleware.js';
+// import { sessionMiddleware } from '#server/sessionMiddleware';
+// import { i18nMiddleware } from '#server/i18nMiddleware';
 import { ensureLTIInitialized } from '#server/lti.js';
 import EN from './public/locales/en/translation.yaml?raw';
 import ES from './public/locales/es/translation.yaml?raw';
-import { headersMiddleware } from '#server/headersMiddleware.js';
+// import { headersMiddleware } from '#server/headersMiddleware';
+import { renderPage } from 'vike/server';
 
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -179,72 +180,72 @@ async function getHandler() {
   app.use(Provider.app);
 
   // Handle all other routes with Vike
-  // app.all(
-  //   '{*vike}',
-  //   async (_req, res, next) => {
-  //     // Remove COEP/COOP headers to allow use of Google Drive Picker
-  //     res.removeHeader('Cross-Origin-Embedder-Policy');
-  //     res.removeHeader('Cross-Origin-Resource-Policy');
-  //     next();
-  //   },
-  //   async (req: Request, res: Response, next) => {
-  //     // need to do this here as without vike-photon pageContext.runtime.res is not available in hooks.
-  //     const token: IdToken | undefined = res.locals.token;
-  //     const query =
-  //       typeof req.query.writing_task === 'string'
-  //         ? req.query.writing_task
-  //         : undefined;
-  //     const writing_task_id: string | undefined =
-  //       // from LTI
-  //       token?.platformContext.custom?.writing_task_id ||
-  //       // from query parameter
-  //       query ||
-  //       // from session
-  //       req.session.writing_task_id;
-  //     const pageContextInit = {
-  //       urlOriginal: req.url,
-  //       headersOriginal: req.headers,
-  //       i18n: req.i18n,
-  //       token,
-  //       session: req.session,
-  //       writing_task_id,
-  //       user: (req as IBasicAuthedRequest).auth?.user,
-  //       // ltik,
-  //       // headers: {
-  //       //   'Content-Type': 'text/html',
-  //       //   'Cache-Control': 'no-cache',
-  //       // },
-  //     };
-  //     const pageContext = await renderPage(pageContextInit);
-  //     // pageContext.urlParsed?.search;
-  //     if (pageContext.errorWhileRendering) {
-  //       logger.error('Error rendering page:', {
-  //         error: pageContext.errorWhileRendering,
-  //       });
-  //       // return next(new Error(`$${pageContext.errorWhileRendering}`));
-  //     }
-  //     const { httpResponse } = pageContext;
-  //     if (!httpResponse) {
-  //       return next();
-  //     } else {
-  //       const { body, statusCode, headers, earlyHints } = httpResponse;
-  //       if (res.writeEarlyHints) {
-  //         res.writeEarlyHints({
-  //           link: earlyHints.map((hint) => hint.earlyHintLink),
-  //         });
-  //       }
-  //       headers.forEach(([name, value]) => res.setHeader(name, value));
-  //       res.status(statusCode).send(body);
-  //     }
-  //   }
-  // );
-  vike(app, [
-    headersMiddleware,
-    toolSettingsMiddleware,
-    BasicUserMiddleware,
-    sessionMiddleware,
-    i18nMiddleware,
-  ]); // TODO convert more to middleware and use here updating context to push into pageContext.
+  app.all(
+    '{*vike}',
+    async (_req, res, next) => {
+      // Remove COEP/COOP headers to allow use of Google Drive Picker
+      res.removeHeader('Cross-Origin-Embedder-Policy');
+      res.removeHeader('Cross-Origin-Resource-Policy');
+      next();
+    },
+    async (req, res, next) => {
+      const token: IdToken | undefined = res.locals.token;
+      req.session.token = token; // add token to session for use in telefuncs
+      next();
+    },
+    async (req: Request, res: Response, next) => {
+      const query =
+        typeof req.query.writing_task === 'string'
+          ? req.query.writing_task
+          : undefined;
+      const token: IdToken | undefined = req.session.token;
+      const writing_task_id: string | undefined =
+        // from LTI
+        token?.platformContext.custom?.writing_task_id ||
+        // from query parameter
+        query ||
+        // from session
+        req.session.writing_task_id;
+      const pageContextInit = {
+        urlOriginal: req.url,
+        headersOriginal: req.headers,
+        i18n: req.i18n,
+        session: req.session,
+        settings: await getSettings(),
+        writing_task_id,
+        user: (req as IBasicAuthedRequest).auth?.user,
+      };
+      const pageContext = await renderPage(pageContextInit);
+      // pageContext.urlParsed?.search;
+      if (pageContext.errorWhileRendering) {
+        logger.error('Error rendering page:', {
+          error: pageContext.errorWhileRendering,
+        });
+        // return next(new Error(`$${pageContext.errorWhileRendering}`));
+      }
+      const { httpResponse } = pageContext;
+      if (!httpResponse) {
+        return next();
+      } else {
+        const { body, statusCode, headers, earlyHints } = httpResponse;
+        if (res.writeEarlyHints) {
+          res.writeEarlyHints({
+            link: earlyHints.map((hint) => hint.earlyHintLink),
+          });
+        }
+        headers.forEach(([name, value]) => res.setHeader(name, value));
+        res.status(statusCode).send(body);
+      }
+    }
+  );
+  // need to do manual middleware to handle dirty stream issues.
+  // vike(app, [
+  //   headersMiddleware,
+  //   toolSettingsMiddleware,
+  //   BasicUserMiddleware,
+  //   sessionMiddleware,
+  //   i18nMiddleware,
+  // ]); // TODO convert more to middleware and use here updating context to push into pageContext.
 
   // Global error handler/formatter
   app.use(handleError);
