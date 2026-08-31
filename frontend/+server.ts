@@ -46,7 +46,7 @@ import {
 import { type Server } from 'vike/types';
 // import { toNodeHandler } from 'better-auth/node';
 // import { auth } from './src/utils/auth';
-import vike, { toFetchHandler } from '@vikejs/express';
+import { /*vike,*/ toFetchHandler } from '@vikejs/express';
 // import { sessionMiddleware } from '#server/sessionMiddleware';
 // import { i18nMiddleware } from '#server/i18nMiddleware';
 import { ensureLTIInitialized } from '#server/lti.js';
@@ -58,7 +58,7 @@ import { renderPage } from 'vike/server';
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   await initPrompts();
-  await ensureLTIInitialized();
+  const ltiApp = await ensureLTIInitialized();
 
   const app = express();
   app.use((req, res, next) => {
@@ -119,14 +119,6 @@ async function getHandler() {
   // Snapshot API Endpoints for static content.
   app.use('/api/v2/snapshot', snapshot);
 
-  // Static directories that do not need to be managed by ltijs
-  // app.use('/favicon.ico', express.static(join(PUBLIC, 'favicon.ico')));
-  // app.use('/static', express.static(join(PUBLIC, 'static')));
-  // app.use('/assets', express.static(join(PUBLIC, 'assets')));
-  // app.use('/locales', express.static(join(root, 'public/locales')));
-  // app.use('/settings', express.static(join(PUBLIC, 'settings')));
-
-  // app.use(express.static(PUBLIC));
   // Handle index.html to support old (pre-tool split) genlink links
   // app.get('/index.html', (req: Request, res: Response) => {
   //   if (req.query.writing_task) {
@@ -169,7 +161,7 @@ async function getHandler() {
           // settings: universalCtx.settings,
           settings: await getSettings(),
           prompts: PROMPTS,
-          session: req.session,
+          session: req.session, // includes lti token if present.
         } as TelefuncContext,
       });
       res.status(statusCode);
@@ -177,7 +169,7 @@ async function getHandler() {
       res.send(body);
     }
   );
-  app.use(Provider.app);
+  app.use(ltiApp);
 
   // Handle all other routes with Vike
   app.all(

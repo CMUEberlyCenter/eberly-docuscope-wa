@@ -1,4 +1,4 @@
-import { enhance, type UniversalHandler } from '@universal-middleware/core';
+import { enhance } from '@universal-middleware/core';
 import { Provider } from 'ltijs';
 import { Telefunc } from 'telefunc/node';
 

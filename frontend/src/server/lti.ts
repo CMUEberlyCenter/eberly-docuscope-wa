@@ -10,7 +10,6 @@ import { NextFunction, Request, Response, urlencoded } from 'express';
 import { readdir, readFile, stat } from 'fs/promises';
 import { ContentItem, IdToken, PlatformConfig, Provider } from 'ltijs';
 import { join } from 'path';
-import { insertWritingTask } from './data/mongo';
 import { logger } from './logger';
 import {
   LTI_DB,
@@ -37,6 +36,7 @@ export async function ensureLTIInitialized() {
     await Provider.deploy({ serverless: true });
     await registerPlatforms();
   }
+  return Provider.app;
 }
 
 function initializeLTI() {
@@ -95,6 +95,7 @@ function initializeLTI() {
           writing_task?: string;
         } = { tool };
         if (task) {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
           const { _id, ...writing_task } = task;
           const valid = validateWritingTask(writing_task);
           if (!valid) {

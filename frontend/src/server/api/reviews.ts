@@ -1,5 +1,3 @@
-import { Settings } from '#lib/ToolSettings.js';
-import { getContext } from '@universal-middleware/express';
 import { type Request, type Response, Router } from 'express';
 import { body, param } from 'express-validator';
 import {
@@ -196,7 +194,8 @@ reviews.post(
       .withMessage('Expectation is required')
   ),
   async (request: Request, response: Response) => {
-    const { settings } = getContext<{ settings: Settings }>(request as any);
+    const settings = await getSettings();
+    // const { settings } = getContext<{ settings: Settings }>(request);
     if (!settings.expectations) {
       throw new ForbiddenError('Expectations tool is not available!');
     }

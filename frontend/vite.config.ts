@@ -14,6 +14,9 @@ function getPort() {
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
+  // ssr: {
+  //   noExternal: ['react-bootstrap'],
+  // },
   // build: {
     // sourcemap: mode === 'development',
     // minify: mode !== 'development',

@@ -78,7 +78,7 @@ const httpRequestDurationMiddleware: RequestHandler = (req, res, next) => {
 
   res.on('finish', () => {
     const durationSeconds = end();
-    let path = req.route?.path ?? req.path; // Use req.route.path to get template path if available, otherwise fallback to req.path
+    const path = req.route?.path ?? req.path; // Use req.route.path to get template path if available, otherwise fallback to req.path
 
     httpRequestDuration.observe(
       {

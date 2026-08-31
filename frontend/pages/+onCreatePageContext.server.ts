@@ -1,7 +1,7 @@
 // import { getSettings } from '#server/getSettings';
 import type { PageContext } from 'vike/types';
 
-export async function onCreatePageContext(pageContext: PageContext) {
+export async function onCreatePageContext(_pageContext: PageContext) {
   // const {req} = pageContext;
   // pageContext.i18n = req.i18n; // TODO: this is a hack, we should use a proper i18n middleware to set this up.
   // pageContext.session = req.session; // TODO: this is a hack, we should use a proper session middleware to set this up.
