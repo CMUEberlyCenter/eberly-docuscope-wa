@@ -10,6 +10,7 @@ import type { NotesPrompt } from '../model/prompt';
 import { validate } from '../model/validate';
 import { DEFAULT_LANGUAGE_SETTINGS } from '../settings';
 
+/** @deprecated replaced with telefunc's */
 export const scribe = Router();
 
 const scribeNotes =

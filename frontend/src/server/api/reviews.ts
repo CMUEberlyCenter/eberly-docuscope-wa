@@ -68,7 +68,7 @@ reviews.post(
       request.headers['accept-language']
     );
     if (segmented.trim() === '') {
-      throw new UnprocessableContentError(['Unable to segment document']);
+      throw new UnprocessableContentError([], 'Unable to segment document');
     }
     request.session.document = request.body; // save original document
     request.session.segmented = segmented; // save segmented document
@@ -93,7 +93,7 @@ async function updateSession(
     !equivalentWritingTasks(writing_task, request.session.writing_task)
   ) {
     if (!isWritingTask(writing_task)) {
-      throw new UnprocessableContentError(['Invalid writing task object']);
+      throw new UnprocessableContentError([], 'Invalid writing task object');
     }
     request.session.writing_task = writing_task;
     request.session.analysis = []; // reset analysis
@@ -102,7 +102,7 @@ async function updateSession(
   // Validate document.  It should contain some text.
   if (document && document !== request.session.document) {
     if (document.trim() === '') {
-      throw new UnprocessableContentError(['Empty document!']);
+      throw new UnprocessableContentError([], 'Empty document!');
     }
     request.session.segmented = undefined; // reset segmented document
     request.session.document = document; // save original document
@@ -114,7 +114,7 @@ async function updateSession(
       request.headers['accept-language']
     );
     if (segmented.trim() === '') {
-      throw new UnprocessableContentError(['Unable to segment document']);
+      throw new UnprocessableContentError([], 'Unable to segment document');
     }
     request.session.segmented = segmented; // save segmented document
   }
@@ -202,7 +202,7 @@ reviews.post(
     const { document, writing_task, expectation } =
       request.body as AnalysisBody;
     if (!isWritingTask(writing_task)) {
-      throw new UnprocessableContentError('Invalid writing task');
+      throw new UnprocessableContentError([], 'Invalid writing task');
     }
     if (!isEnabled(writing_task, 'expectations')) {
       throw new ForbiddenError(
@@ -210,7 +210,7 @@ reviews.post(
       );
     }
     if (!expectation) {
-      throw new UnprocessableContentError('Expectation is required');
+      throw new UnprocessableContentError([], 'Expectation is required');
     }
     const controller = new AbortController();
     request.on('close', () => {
@@ -282,7 +282,7 @@ reviews.post(
     const { analysis } = request.params;
     if (Array.isArray(analysis)) {
       // This should never happen as params should be singular, but we check just in case.
-      throw new UnprocessableContentError('Invalid analysis type');
+      throw new UnprocessableContentError([], 'Invalid analysis type');
     }
     // Check if the tool is enabled in settings
     const settings = await getSettings();
@@ -293,7 +293,7 @@ reviews.post(
     // const token: IdToken | undefined = response.locals.token;
     if (writing_task && !isWritingTask(writing_task)) {
       // conditional validation as writing_task is optional #230
-      throw new UnprocessableContentError('Invalid writing task');
+      throw new UnprocessableContentError([], 'Invalid writing task');
     }
     if (writing_task && !isEnabled(writing_task, analysis as ReviewPrompt)) {
       throw new ForbiddenError(`${analysis} is disabled!`);

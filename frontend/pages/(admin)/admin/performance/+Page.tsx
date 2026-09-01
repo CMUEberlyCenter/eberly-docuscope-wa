@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, useState } from "react";
 import { Button, ButtonGroup, Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -14,12 +14,18 @@ const msToDuration = (ms: number) => ({
   milliseconds: ms % 1000,
 });
 
-const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
-  const duration = msToDuration(end.getTime() - start.getTime());
+const DateRange: FC<{ start?: Date; end?: Date }> = ({ start, end }) => {
+  const [startDate] = useState<Date>(() => start ?? new Date());
+  const [endDate] = useState<Date>(() => end ?? new Date());
+  const duration = msToDuration(endDate.getTime() - startDate.getTime());
 
   return (
     <span>
-      {new Intl.DateTimeFormat(navigator.languages).formatRange(start, end)} (
+      {new Intl.DateTimeFormat(navigator.languages).formatRange(
+        startDate,
+        endDate
+      )}{" "}
+      (
       {
         // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
         new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
@@ -30,6 +36,7 @@ const DateRange: FC<{ start: Date; end: Date }> = ({ start, end }) => {
     </span>
   );
 };
+
 export const Page: FC = () => {
   const { performance, session } = useData<Data>();
   const { t } = useTranslation("admin");
@@ -73,81 +80,85 @@ export const Page: FC = () => {
       <Card.Body>
         <Card.Text as="div">
           {performance.length === 0 && <p>{t("performance.no_data")}</p>}
-          {performance.map((entry) => (
-            <div key={entry._id} style={{ marginBottom: "1em" }}>
-              <h5>{t("performance.prompt", { prompt: entry._id })}</h5>
-              <ul>
-                <li>
-                  {t("performance.range", {
-                    count: entry.count.toLocaleString(),
-                  })}
-                  <DateRange
-                    start={new Date(entry.startTime)}
-                    end={new Date(entry.endTime)}
-                  />
-                </li>
-                <li>
-                  {t("performance.time_per_request")}
-                  <ul>
-                    <li>
-                      {t("performance.average", {
-                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
-                        time: new Intl.DurationFormat(navigator.languages, {
-                          style: "long",
-                        }).format(msToDuration(Math.floor(entry.avgTime))),
-                      })}
-                    </li>
-                    <li>
-                      {t("performance.minimum", {
-                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
-                        time: new Intl.DurationFormat(navigator.languages, {
-                          style: "long",
-                        }).format(msToDuration(Math.floor(entry.minTime))),
-                      })}
-                    </li>
-                    <li>
-                      {t("performance.maximum", {
-                        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
-                        time: new Intl.DurationFormat(navigator.languages, {
-                          style: "long",
-                        }).format(msToDuration(Math.floor(entry.maxTime))),
-                      })}
-                    </li>
-                  </ul>
-                </li>
-                <li>
-                  {t("performance.average_input_tokens", {
-                    tokens: entry.avgInputTokens.toLocaleString(),
-                  })}
-                </li>
-                <li>
-                  {t("performance.average_output_tokens", {
-                    tokens: entry.avgOutputTokens.toLocaleString(),
-                  })}
-                </li>
-                <li>
-                  {t("performance.average_cache_creation_input_tokens", {
-                    tokens: entry.avgCacheCreate.toLocaleString(),
-                  })}
-                </li>
-                <li>
-                  {t("performance.max_cache_creation_input_tokens", {
-                    tokens: entry.maxCacheCreate.toLocaleString(),
-                  })}
-                </li>
-                <li>
-                  {t("performance.average_cache_read_input_tokens", {
-                    tokens: entry.avgCacheRead.toLocaleString(),
-                  })}
-                </li>
-                <li>
-                  {t("performance.max_cache_read_input_tokens", {
-                    tokens: entry.maxCacheRead.toLocaleString(),
-                  })}
-                </li>
-              </ul>
-            </div>
-          ))}
+          {performance
+            .filter((entry) => entry)
+            .map((entry) => (
+              <div key={entry._id} style={{ marginBottom: "1em" }}>
+                <h5>{t("performance.prompt", { prompt: entry._id })}</h5>
+                <ul>
+                  <li>
+                    {t("performance.range", {
+                      count: entry.count.toLocaleString(),
+                    })}
+                    <DateRange
+                      start={
+                        entry?.startTime ? new Date(entry.startTime) : undefined
+                      }
+                      end={entry?.endTime ? new Date(entry.endTime) : undefined}
+                    />
+                  </li>
+                  <li>
+                    {t("performance.time_per_request")}
+                    <ul>
+                      <li>
+                        {t("performance.average", {
+                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
+                          time: new Intl.DurationFormat(navigator.languages, {
+                            style: "long",
+                          }).format(msToDuration(Math.floor(entry.avgTime))),
+                        })}
+                      </li>
+                      <li>
+                        {t("performance.minimum", {
+                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
+                          time: new Intl.DurationFormat(navigator.languages, {
+                            style: "long",
+                          }).format(msToDuration(Math.floor(entry.minTime))),
+                        })}
+                      </li>
+                      <li>
+                        {t("performance.maximum", {
+                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
+                          time: new Intl.DurationFormat(navigator.languages, {
+                            style: "long",
+                          }).format(msToDuration(Math.floor(entry.maxTime))),
+                        })}
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    {t("performance.average_input_tokens", {
+                      tokens: entry.avgInputTokens.toLocaleString(),
+                    })}
+                  </li>
+                  <li>
+                    {t("performance.average_output_tokens", {
+                      tokens: entry.avgOutputTokens.toLocaleString(),
+                    })}
+                  </li>
+                  <li>
+                    {t("performance.average_cache_creation_input_tokens", {
+                      tokens: entry.avgCacheCreate.toLocaleString(),
+                    })}
+                  </li>
+                  <li>
+                    {t("performance.max_cache_creation_input_tokens", {
+                      tokens: entry.maxCacheCreate.toLocaleString(),
+                    })}
+                  </li>
+                  <li>
+                    {t("performance.average_cache_read_input_tokens", {
+                      tokens: entry.avgCacheRead.toLocaleString(),
+                    })}
+                  </li>
+                  <li>
+                    {t("performance.max_cache_read_input_tokens", {
+                      tokens: entry.maxCacheRead.toLocaleString(),
+                    })}
+                  </li>
+                </ul>
+              </div>
+            ))}
           <table className="table table-sm caption-top">
             <caption>{t("performance.session.title")}</caption>
             <thead>

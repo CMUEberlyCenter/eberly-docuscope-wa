@@ -15,6 +15,7 @@ import {
 import { validate } from '../model/validate';
 import { LTI_HOSTNAME } from '../settings';
 
+/** @deprecated No longer used by frontend as this is handled by telefuncs or +data hooks. */
 export const writingTasks = Router();
 
 /**
@@ -55,6 +56,7 @@ writingTasks.get('', async (request: Request, response: Response) => {
 /**
  * Endpoint for creating a new writing task.
  * Used by the admin interface for uploading custom writing tasks.
+ * @deprecated No longer used by frontend as this is handled by telefuncs.
  */
 writingTasks.post(
   '',
@@ -65,7 +67,7 @@ writingTasks.post(
     const valid = validateWritingTask(task);
     if (!valid) {
       throw new UnprocessableContentError(
-        validateWritingTask.errors,
+        validateWritingTask.errors ?? ['Unknown validation error.'],
         'Invalid JSON'
       );
     }

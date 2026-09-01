@@ -16,14 +16,14 @@ import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { IdToken, Provider } from 'ltijs';
-// import { initReactI18next } from 'react-i18next';
+import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
 import { parse } from 'yaml';
-import { ForbiddenError, handleError } from './src/lib/ProblemDetails';
+import { handleError } from './src/lib/ProblemDetails';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
-import { writingTasks } from './src/server/api/tasks';
+// import { writingTasks } from './src/server/api/tasks';
 // import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts, PROMPTS } from './src/server/data/prompts';
 import {
@@ -51,8 +51,20 @@ import { /*vike,*/ toFetchHandler } from '@vikejs/express';
 // import { sessionMiddleware } from '#server/sessionMiddleware';
 // import { i18nMiddleware } from '#server/i18nMiddleware';
 import { ensureLTIInitialized } from '#server/lti.js';
-import EN from './public/locales/en/translation.yaml?raw';
-import ES from './public/locales/es/translation.yaml?raw';
+import AdminEN from './public/locales/en/admin.yaml?raw';
+import AdminES from './public/locales/es/admin.yaml?raw';
+import DeeplinkEN from './public/locales/en/deeplink.yaml?raw';
+import DeeplinkES from './public/locales/es/deeplink.yaml?raw';
+import ErrorEN from './public/locales/en/error.yaml?raw';
+import ErrorES from './public/locales/es/error.yaml?raw';
+import ExpectationsEN from './public/locales/en/expectations.yaml?raw';
+import ExpectationsES from './public/locales/es/expectations.yaml?raw';
+import InstructionsEN from './public/locales/en/instructions.yaml?raw';
+import InstructionsES from './public/locales/es/instructions.yaml?raw';
+import ReviewEN from './public/locales/en/review.yaml?raw';
+import ReviewES from './public/locales/es/review.yaml?raw';
+import TranslationEN from './public/locales/en/translation.yaml?raw';
+import TranslationES from './public/locales/es/translation.yaml?raw';
 // import { headersMiddleware } from '#server/headersMiddleware';
 import { renderPage } from 'vike/server';
 
@@ -71,24 +83,25 @@ async function getHandler() {
   });
   // app.all('/api/auth/{*auth}', toNodeHandler(auth));
   // mount json middleware after auth
-  app.use('/api', express.json({ limit: '10mb' }));
   // app.use(cors({ origin: '*' }));
   // app.use(cors());
-  app.use(cors({
-    origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
-    // origin: (origin, callback) => {
-    //   // Allow requests with no origin (like mobile apps or curl requests)
-    //   if (!origin) return callback(null, true);
-    //   // Allow requests from the frontend domain
-    //   if ([
-    //     LTI_HOSTNAME.toString(),
-    //     // `http://localhost:${PORT}`, // LTI_HOSTNAME should already cover this.
-    //   ].includes(origin)) return callback(null, true);
-    //   // Otherwise, block the request
-    //   return callback(new ForbiddenError('Not allowed by CORS'));
-    // },
-    credentials: true, // Allow cookies to be sent with requests
-  }));
+  app.use(
+    cors({
+      origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
+      // origin: (origin, callback) => {
+      //   // Allow requests with no origin (like mobile apps or curl requests)
+      //   if (!origin) return callback(null, true);
+      //   // Allow requests from the frontend domain
+      //   if ([
+      //     LTI_HOSTNAME.toString(),
+      //     // `http://localhost:${PORT}`, // LTI_HOSTNAME should already cover this.
+      //   ].includes(origin)) return callback(null, true);
+      //   // Otherwise, block the request
+      //   return callback(new ForbiddenError('Not allowed by CORS'));
+      // },
+      credentials: true, // Allow cookies to be sent with requests
+    })
+  );
 
   // Setup sessions
   app.use(
@@ -104,7 +117,7 @@ async function getHandler() {
   i18n
     .use(Backend)
     .use(LanguageDetector)
-    // .use(initReactI18next)
+    .use(initReactI18next)
     .init({
       preload: ['en'],
       fallbackLng: 'en',
@@ -116,10 +129,22 @@ async function getHandler() {
       },
       resources: {
         en: {
-          translation: parse(EN),
+          translation: parse(TranslationEN),
+          admin: parse(AdminEN),
+          deeplink: parse(DeeplinkEN),
+          error: parse(ErrorEN),
+          expectations: parse(ExpectationsEN),
+          instructions: parse(InstructionsEN),
+          review: parse(ReviewEN),
         },
         es: {
-          translation: parse(ES),
+          translation: parse(TranslationES),
+          admin: parse(AdminES),
+          deeplink: parse(DeeplinkES),
+          error: parse(ErrorES),
+          expectations: parse(ExpectationsES),
+          instructions: parse(InstructionsES),
+          review: parse(ReviewES),
         },
       },
     });
@@ -127,8 +152,10 @@ async function getHandler() {
 
   // Prometheus metrics
   initializePrometheusMetrics(app);
+
+  app.use('/api', express.json({ limit: '10mb' }));
   // Writing Task/Outline API Endpoints
-  app.use('/api/v2/writing_tasks', writingTasks);
+  // app.use('/api/v2/writing_tasks', writingTasks);
   // OnTopic API Endpoints
   app.use('/api/v2/ontopic', ontopic);
   // Reviews API Endpoints

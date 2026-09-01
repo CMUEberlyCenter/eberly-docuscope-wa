@@ -113,13 +113,13 @@ const ContentTooLarge = (
 });
 
 export class UnprocessableContentError extends Error {
-  validation: unknown = undefined;
+  validation: unknown[] = [];
   constructor(
-    validation?: unknown,
+    validation?: unknown[],
     ...params: ConstructorParameters<typeof Error>
   ) {
     super(...params);
-    this.validation = validation;
+    this.validation = validation ?? [];
   }
 }
 

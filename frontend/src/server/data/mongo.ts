@@ -169,10 +169,13 @@ export async function updateSnapshotReviewsById(
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  logger.info(`Updated reviews for snapshot with id '${id}': ${analyses.map((a) => a.tool).join(', ')}`, {
-    snapshotId: id,
-    action: 'update_snapshot',
-  });
+  logger.info(
+    `Updated reviews for snapshot with id '${id}': ${analyses.map((a) => a.tool).join(', ')}`,
+    {
+      snapshotId: id,
+      action: 'update_snapshot',
+    }
+  );
   return upd._id;
 }
 

@@ -33,7 +33,7 @@ import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "./+data";
-import { onClearSnapshotCache } from "./Page.telefunc";
+import { onClearSnapshotCache, onInsertWritingTask } from "./Page.telefunc";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
@@ -86,35 +86,31 @@ export const Page: FC = () => {
       if (!validateWritingTask(json)) {
         setValid(false);
         setError(JSON.stringify(validateWritingTask.errors));
-      } else if (isWritingTask(json)) {
-        const response = await fetch(
-          new URL("/api/v2/writing_tasks", location.href),
-          {
-            method: "POST",
-            credentials: "same-origin",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(json),
-          }
-        );
-        if (!response.ok) {
-          setValid(false);
-          setError(await response.text());
-          return;
-        }
-        setValid(true);
-        const id = await response.text();
-        const custom = {
-          ...json,
-          _id: id,
-          info: { ...json.info, id },
-          public: false,
-        };
-        setCustom(custom);
-        updateSelected(custom);
-      } else {
+        return;
+      }
+      if (!isWritingTask(json)) {
         setValid(false);
         setError(t("select_task.invalid_upload"));
+        return;
       }
+      const response = await onInsertWritingTask(json);
+      if ("error" in response) {
+        setValid(false);
+        setError(
+          `Error inserting writing task: ${JSON.stringify(response.error)}`
+        );
+        return;
+      }
+      setValid(true);
+      const { id } = response;
+      const custom = {
+        ...json,
+        _id: id,
+        info: { ...json.info, id },
+        public: false,
+      };
+      setCustom(custom);
+      updateSelected(custom);
     } catch (err) {
       // expecting JSON parser error.
       // TODO provide error message to invalid text.
@@ -253,7 +249,7 @@ export const Page: FC = () => {
                 </ListGroup>
               </div>
               <Form.Group>
-                <Form.Label>{t("deeplinking.upload")}</Form.Label>
+                <Form.Label>{t("admin:genlink.json")}</Form.Label>
                 <Form.Control
                   type="file"
                   onChange={onFileChange}

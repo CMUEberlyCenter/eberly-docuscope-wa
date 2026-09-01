@@ -1,11 +1,18 @@
 import {
+  errorToProblemDetails,
+  UnprocessableContentError,
+} from '#lib/ProblemDetails.js';
+import { ReviewTool } from '#lib/ReviewResponse';
+import { validateWritingTask } from '#lib/schemaValidate.js';
+import { isWritingTask, WritingTask } from '#lib/WritingTask.js';
+import {
   clearSnapshotAnalysesById,
   clearSnapshotAnalysisById,
+  insertWritingTask,
 } from '#server/data/mongo';
 import { logger } from '#server/logger';
 import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
-import { ReviewTool } from '#lib/ReviewResponse';
 
 type ClearSnapshotCacheResponse = {
   /** If the operation succeeded. */
@@ -48,5 +55,29 @@ export async function onClearSnapshotCache(
       success: false,
       message: `Error clearing snapshot analyses cache: ${error instanceof Error ? error.message : String(error)}`,
     };
+  }
+}
+
+export async function onInsertWritingTask(task: WritingTask) {
+  getAuthorizedUser();
+  try {
+    if (!validateWritingTask(task)) {
+      throw new UnprocessableContentError(
+        validateWritingTask.errors ?? ['Unknown validation error.'],
+        'Invalid JSON'
+      );
+    }
+    if (!isWritingTask(task)) {
+      throw new UnprocessableContentError(
+        ['Failed type check.'],
+        'Invalid JSON'
+      );
+    }
+    // Do not need to check id for validity as it is clobbered in frontend
+    // with this id.
+    const id = (await insertWritingTask(task)).toString();
+    return { id };
+  } catch (error) {
+    return { error: errorToProblemDetails(error) };
   }
 }

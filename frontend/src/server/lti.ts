@@ -101,7 +101,7 @@ function initializeLTI() {
           const valid = validateWritingTask(writing_task);
           if (!valid) {
             throw new UnprocessableContentError(
-              validateWritingTask.errors,
+              validateWritingTask.errors ?? ['Unknown validation error.'],
               'Invalid JSON'
             );
           }

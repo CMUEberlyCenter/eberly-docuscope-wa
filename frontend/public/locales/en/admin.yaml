@@ -68,6 +68,7 @@ genlink:
   tab: Generate Links
   title: Writing Task and Snapshot Link Generator
   description: Use this tool to generate links for specific Writing Tasks within myProse.
+  json: Upload Custom Writing Task JSON
   document:
     title: Snapshot Document
     description: Use this link to view the document for the selected Writing Task.

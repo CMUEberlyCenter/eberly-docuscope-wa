@@ -80,9 +80,9 @@ describe('ProblemDetails', () => {
     expect(auth.instance).toBeUndefined();
   });
   test('when UnprocessableContentError', () => {
-    const valid = 'INVALID';
+    const valid = ['INVALID'];
     const msg = 'TEST';
-    expect(new UnprocessableContentError().validation).toBeUndefined();
+    expect(new UnprocessableContentError().validation).toEqual([]);
     expect(new UnprocessableContentError(valid).validation).toBe(valid);
     expect(new UnprocessableContentError(valid, msg).message).toBe(msg);
   });
