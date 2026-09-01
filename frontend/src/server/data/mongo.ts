@@ -169,7 +169,7 @@ export async function updateSnapshotReviewsById(
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  logger.info(`Updated reviews for snapshot with id '${id}'`, {
+  logger.info(`Updated reviews for snapshot with id '${id}': ${analyses.map((a) => a.tool).join(', ')}`, {
     snapshotId: id,
     action: 'update_snapshot',
   });
@@ -223,9 +223,10 @@ export async function clearSnapshotAnalysisById(
   if (!upd) {
     throw new ReferenceError(`Update operation for Snapshot ${id} failed`);
   }
-  logger.info(`Cleared analyses for snapshot with id '${id}'`, {
+  logger.info(`Cleared analyses of type ${tool} for snapshot with id '${id}'`, {
     snapshotId: id,
     action: 'clear_snapshot_analyses',
+    target: tool,
   });
   return upd._id;
 }

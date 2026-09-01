@@ -5,7 +5,7 @@ import {
 } from '#lib/ProblemDetails.js';
 import { DbWritingTask, isWritingTask } from '#lib/WritingTask.js';
 import { validateWritingTask } from '#lib/schemaValidate.js';
-import cors from 'cors';
+// import cors from 'cors';
 import { NextFunction, Request, Response, urlencoded } from 'express';
 import { readdir, readFile, stat } from 'fs/promises';
 import { ContentItem, IdToken, PlatformConfig, Provider } from 'ltijs';
@@ -42,7 +42,8 @@ export async function ensureLTIInitialized() {
 function initializeLTI() {
   // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
-  Provider.app.use(cors({ origin: '*' }));
+  // Provider.app.set('trust proxy', 1); // needed to work behind a reverse proxy
+  // Provider.app.use(cors({ origin: '*' }));
   // Provider.app.use(fileUpload({ createParentPath: true }));
   // Provider.app.use(
   //   urlencoded({

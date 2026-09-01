@@ -133,10 +133,16 @@ function useSnapshotReview<T extends Analysis>(
         },
         signal: abortControllerRef.current?.signal,
       });
+      if (abortControllerRef.current?.signal.aborted) {
+        return;
+      }
       checkReviewResponse(response);
       return response.json();
     },
     onSuccess: (data: T) => {
+      if (!data || abortControllerRef.current?.signal.aborted) {
+        return;
+      }
       dispatch({ type: "unset" });
       // dispatch({ type: "update", sentences:  });
       setReview(data);
@@ -160,6 +166,7 @@ function useSnapshotReview<T extends Analysis>(
     });
     return () => {
       abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
     };
   }, [snapshotID]);
   useEffect(() => {

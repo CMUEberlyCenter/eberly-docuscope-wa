@@ -16,10 +16,10 @@ import i18n from 'i18next';
 import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
 import { IdToken, Provider } from 'ltijs';
-import { initReactI18next } from 'react-i18next';
+// import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
 import { parse } from 'yaml';
-import { handleError } from './src/lib/ProblemDetails';
+import { ForbiddenError, handleError } from './src/lib/ProblemDetails';
 import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
@@ -34,6 +34,7 @@ import {
 import { logger } from './src/server/logger';
 import { initializePrometheusMetrics } from './src/server/prometheus'; // gets metrics initialized and registered
 import {
+  LTI_HOSTNAME,
   MONGO_CLIENT,
   ONTOPIC_URL,
   PORT,
@@ -61,6 +62,7 @@ async function getHandler() {
   const ltiApp = await ensureLTIInitialized();
 
   const app = express();
+  app.set('trust proxy', 1); // needed to work behind a reverse proxy
   app.use((req, res, next) => {
     if (req.path.startsWith('/admin')) {
       return basicAuthMiddleware(req, res, next);
@@ -71,7 +73,22 @@ async function getHandler() {
   // mount json middleware after auth
   app.use('/api', express.json({ limit: '10mb' }));
   // app.use(cors({ origin: '*' }));
-  app.use(cors());
+  // app.use(cors());
+  app.use(cors({
+    origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
+    // origin: (origin, callback) => {
+    //   // Allow requests with no origin (like mobile apps or curl requests)
+    //   if (!origin) return callback(null, true);
+    //   // Allow requests from the frontend domain
+    //   if ([
+    //     LTI_HOSTNAME.toString(),
+    //     // `http://localhost:${PORT}`, // LTI_HOSTNAME should already cover this.
+    //   ].includes(origin)) return callback(null, true);
+    //   // Otherwise, block the request
+    //   return callback(new ForbiddenError('Not allowed by CORS'));
+    // },
+    credentials: true, // Allow cookies to be sent with requests
+  }));
 
   // Setup sessions
   app.use(
@@ -87,7 +104,7 @@ async function getHandler() {
   i18n
     .use(Backend)
     .use(LanguageDetector)
-    .use(initReactI18next)
+    // .use(initReactI18next)
     .init({
       preload: ['en'],
       fallbackLng: 'en',
