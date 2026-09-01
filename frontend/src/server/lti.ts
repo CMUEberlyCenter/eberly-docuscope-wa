@@ -167,7 +167,11 @@ function initializeLTI() {
               messages: [
                 // Messages used to configure the tool in the LMS.  LMS should select the most appropriate one based on type and placement.
                 // Ref: https://developerdocs.instructure.com/services/canvas/external-tools/lti/file.registration#lti-message-schema
-                { type: 'LtiResourceLinkRequest' }, // Required base message type for LTI 1.3 resource link launches.
+                {
+                  // Required base message type for LTI 1.3 resource link launches.
+                  type: 'LtiResourceLinkRequest',
+                  preferred_presentation: 'window',
+                },
                 {
                   // Canvas's course navigation placement.
                   type: 'LtiResourceLinkRequest',
