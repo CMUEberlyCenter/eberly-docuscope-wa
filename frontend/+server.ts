@@ -49,20 +49,20 @@ import { /*vike,*/ toFetchHandler } from '@vikejs/express';
 // import { sessionMiddleware } from '#server/sessionMiddleware';
 // import { i18nMiddleware } from '#server/i18nMiddleware';
 import { ensureLTIInitialized } from '#server/lti.js';
-import AdminEN from './public/locales/en/admin.yaml?raw';
-import AdminES from './public/locales/es/admin.yaml?raw';
-import DeeplinkEN from './public/locales/en/deeplink.yaml?raw';
-import DeeplinkES from './public/locales/es/deeplink.yaml?raw';
-import ErrorEN from './public/locales/en/error.yaml?raw';
-import ErrorES from './public/locales/es/error.yaml?raw';
-import ExpectationsEN from './public/locales/en/expectations.yaml?raw';
-import ExpectationsES from './public/locales/es/expectations.yaml?raw';
-import InstructionsEN from './public/locales/en/instructions.yaml?raw';
-import InstructionsES from './public/locales/es/instructions.yaml?raw';
-import ReviewEN from './public/locales/en/review.yaml?raw';
-import ReviewES from './public/locales/es/review.yaml?raw';
-import TranslationEN from './public/locales/en/translation.yaml?raw';
-import TranslationES from './public/locales/es/translation.yaml?raw';
+import enAdmin from './public/locales/en/admin.yaml?raw';
+import esAdmin from './public/locales/es/admin.yaml?raw';
+import enDeeplink from './public/locales/en/deeplink.yaml?raw';
+import esDeeplink from './public/locales/es/deeplink.yaml?raw';
+import enError from './public/locales/en/error.yaml?raw';
+import esError from './public/locales/es/error.yaml?raw';
+import enExpectations from './public/locales/en/expectations.yaml?raw';
+import esExpectations from './public/locales/es/expectations.yaml?raw';
+import enInstructions from './public/locales/en/instructions.yaml?raw';
+import esInstructions from './public/locales/es/instructions.yaml?raw';
+import enReview from './public/locales/en/review.yaml?raw';
+import esReview from './public/locales/es/review.yaml?raw';
+import enTranslation from './public/locales/en/translation.yaml?raw';
+import esTranslation from './public/locales/es/translation.yaml?raw';
 // import { headersMiddleware } from '#server/headersMiddleware';
 import { renderPage } from 'vike/server';
 
@@ -111,36 +111,36 @@ async function getHandler() {
   );
   // Configure i18n middleware
   i18n
-    .use(Backend)
+    // .use(Backend)
     .use(LanguageDetector)
-    .use(initReactI18next)
+    // .use(initReactI18next)
     .init({
-      preload: ['en'],
+      // preload: ['en'],
       fallbackLng: 'en',
       load: 'languageOnly',
       interpolation: { escapeValue: false },
-      backend: {
-        loadPath: '/locales/{{lng}}/{{ns}}.yaml',
-        parse: (data: string) => parse(data),
-      },
+      // backend: {
+        // loadPath: '/locales/{{lng}}/{{ns}}.yaml',
+        // parse: (data: string) => parse(data),
+      // },
       resources: {
         en: {
-          translation: parse(TranslationEN),
-          admin: parse(AdminEN),
-          deeplink: parse(DeeplinkEN),
-          error: parse(ErrorEN),
-          expectations: parse(ExpectationsEN),
-          instructions: parse(InstructionsEN),
-          review: parse(ReviewEN),
+          translation: parse(enTranslation),
+          admin: parse(enAdmin),
+          deeplink: parse(enDeeplink),
+          error: parse(enError),
+          expectations: parse(enExpectations),
+          instructions: parse(enInstructions),
+          review: parse(enReview),
         },
         es: {
-          translation: parse(TranslationES),
-          admin: parse(AdminES),
-          deeplink: parse(DeeplinkES),
-          error: parse(ErrorES),
-          expectations: parse(ExpectationsES),
-          instructions: parse(InstructionsES),
-          review: parse(ReviewES),
+          translation: parse(esTranslation),
+          admin: parse(esAdmin),
+          deeplink: parse(esDeeplink),
+          error: parse(esError),
+          expectations: parse(esExpectations),
+          instructions: parse(esInstructions),
+          review: parse(esReview),
         },
       },
     });
