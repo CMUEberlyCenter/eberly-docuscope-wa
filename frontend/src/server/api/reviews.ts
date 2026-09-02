@@ -33,6 +33,7 @@ import { countPrompt } from '../prometheus';
 export const reviews = Router();
 
 /**
+ * @deprecated Incorporated into /snapshot and /review/:analysis endpoint and not called directly by frontend.
  * @swagger
  * <reviews>/segment:
  *   post:

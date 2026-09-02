@@ -3,9 +3,11 @@ import { InternalServerError } from '../../lib/ProblemDetails';
 import { logger } from '../logger';
 import { ONTOPIC_URL } from '../settings';
 
+/** @deprecated Use review/ontopic endpoint instead. */
 export const ontopic = Router();
 
 // TODO replace with express-proxy
+/** @deprecated Use review/ontopic endpoint instead. */
 ontopic.post('/', async (request: Request, response: Response) => {
   try {
     const res = await fetch(ONTOPIC_URL, {

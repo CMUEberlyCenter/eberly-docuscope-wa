@@ -42,14 +42,6 @@ export async function ensureLTIInitialized() {
 function initializeLTI() {
   // Initialize LTI provider and middleware
   Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
-  // Provider.app.set('trust proxy', 1); // needed to work behind a reverse proxy
-  // Provider.app.use(cors({ origin: '*' }));
-  // Provider.app.use(fileUpload({ createParentPath: true }));
-  // Provider.app.use(
-  //   urlencoded({
-  //     extended: true,
-  //   })
-  // );
 
   Provider.onConnect(async (token: IdToken, req: Request, res: Response) => {
     if (token) {
@@ -59,7 +51,7 @@ function initializeLTI() {
         return Provider.redirect(res, `/${token.platformContext.custom.tool}`);
       }
       // default to non-specified writing type drafting tool.
-      return Provider.redirect(res, '/draft'); //'/index.html');
+      return Provider.redirect(res, '/draft');
     }
     if (req.query.writing_task) {
       return Provider.redirect(res, `/myprose/${req.query.writing_task}/`);

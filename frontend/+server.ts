@@ -20,10 +20,8 @@ import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
 import { parse } from 'yaml';
 import { handleError } from './src/lib/ProblemDetails';
-import { ontopic } from './src/server/api/onTopic';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
-// import { writingTasks } from './src/server/api/tasks';
 // import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initPrompts, PROMPTS } from './src/server/data/prompts';
 import {
@@ -83,8 +81,6 @@ async function getHandler() {
   });
   // app.all('/api/auth/{*auth}', toNodeHandler(auth));
   // mount json middleware after auth
-  // app.use(cors({ origin: '*' }));
-  // app.use(cors());
   app.use(
     cors({
       origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
@@ -154,10 +150,6 @@ async function getHandler() {
   initializePrometheusMetrics(app);
 
   app.use('/api', express.json({ limit: '10mb' }));
-  // Writing Task/Outline API Endpoints
-  // app.use('/api/v2/writing_tasks', writingTasks);
-  // OnTopic API Endpoints
-  app.use('/api/v2/ontopic', ontopic);
   // Reviews API Endpoints
   app.use('/api/v2/review', reviews);
   // Snapshot API Endpoints for static content.
@@ -213,7 +205,7 @@ async function getHandler() {
       res.send(body);
     }
   );
-  app.use(ltiApp);
+  app.use(ltiApp); // res.locals.token is not available in _telefunc even if this is mounted before it.
 
   // Handle all other routes with Vike
   app.all(
@@ -225,6 +217,7 @@ async function getHandler() {
       next();
     },
     async (req, res, next) => {
+      // this should probably be done in onConnect
       const token: IdToken | undefined = res.locals.token;
       req.session.token = token; // add token to session for use in telefuncs
       next();
