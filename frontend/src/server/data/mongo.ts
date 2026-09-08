@@ -42,13 +42,21 @@ type WritingTaskDb = WritingTask & {
 };
 
 type Snapshot = {
+  /** Database id for the snapshot. */
   _id?: ObjectId;
+  /** When the snapshot was created. */
   timestamp: Date;
+  /** Writing task associated with the snapshot. */
   task: WritingTask;
+  /** The htmlized snapshot file content. */
   file: string; // html encoded
+  /** The name of the snapshot file. */
   filename?: string;
+  /** The segmented content of snapshot file. */
   segmented: string;
+  /** List of available tools configured for the snapshot. */
   tool_config: string[];
+  /** List of completed analyses. */
   analyses: Analysis[];
 };
 

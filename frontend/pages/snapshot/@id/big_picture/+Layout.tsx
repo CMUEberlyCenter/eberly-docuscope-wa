@@ -13,7 +13,7 @@ import { Data } from "../+data";
 import { useSnapshotContext } from "../SnapshotContext";
 
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
-  const { routeParams, urlPathname, settings } = usePageContext();
+  const { routeParams, urlPathname } = usePageContext();
   const [, setSnapshotContext] = useSnapshotContext();
   const { task, tool_config } = useData<Data>();
   const { t } = useTranslation("review");
