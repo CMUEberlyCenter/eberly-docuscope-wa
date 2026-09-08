@@ -1,4 +1,4 @@
-import type { Preview } from '@storybook/react-vite';
+import { definePreview } from '@storybook/react-vite';
 // import '../pages/i18n';
 import '../pages/index.scss';
 /* Configuration for i18n support. */
@@ -21,7 +21,7 @@ i18n
     },
   });
 
-const preview: Preview = {
+const preview = definePreview({
   parameters: {
     controls: {
       matchers: {
@@ -30,6 +30,6 @@ const preview: Preview = {
       },
     },
   },
-};
+});
 
 export default preview;

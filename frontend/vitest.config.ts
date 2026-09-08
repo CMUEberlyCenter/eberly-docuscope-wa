@@ -2,13 +2,9 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
-const dirname =
-  typeof __dirname !== 'undefined'
-    ? __dirname
-    : path.dirname(fileURLToPath(import.meta.url));
+const dirname = import.meta.dirname;
 
 export default defineConfig({
   plugins: [react()],
@@ -20,7 +16,7 @@ export default defineConfig({
     },
     projects: [
       {
-        extends: 'vite.storybook.config.ts',
+        extends: path.join(dirname, 'vite.storybook.config.ts'),
         plugins: [
           // The plugin will run tests for the stories defined in your Storybook config
           // See options at: https://storybook.js.org/docs/writing-tests/test-addon#storybooktest
