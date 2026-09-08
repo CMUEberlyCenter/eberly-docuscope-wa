@@ -30,6 +30,15 @@ export const FileUpload: FC<FileUploadProps> = ({
     }
     setFile(files[0]);
   };
+
+  const acceptedTypes = [
+    ".docx",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    // ".tex",
+    // ".ltx",
+    // "text/x-tex",
+  ].join(",");
+
   return (
     <Modal show={show} onHide={onHide} {...props}>
       <Modal.Header closeButton>{t("editor.upload.title")}</Modal.Header>
@@ -40,7 +49,7 @@ export const FileUpload: FC<FileUploadProps> = ({
               type="file"
               isInvalid={!valid}
               onChange={onFileChange}
-              accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept={acceptedTypes}
             />
             <Form.Control.Feedback type="invalid">
               {t("editor.upload.error.fail")}

@@ -12,6 +12,7 @@ import { useFileImportErrors } from "./FileImportErrors";
 import { useFileText, useFilename } from "./FileTextContext";
 import { FileUpload } from "./FileUpload";
 import { convertOptions } from "./convertOptions";
+// import { HtmlGenerator, parse } from "latex.js";
 
 /** Context for initiating the file upload dialog. */
 const InitiateOpenFileDispatchContext = createContext<() => void>(() => {});
@@ -29,6 +30,7 @@ const loadSaveFileOps = {
       accept: {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
           [".docx"],
+        // "text/x-tex": [".tex", ".ltx"],
       },
     },
   ],
@@ -52,6 +54,20 @@ export const FileUploadProvider: FC<{ children: ReactNode }> = ({
         setFilename(null);
         return;
       }
+      // if ( // latex.js is producing garbage output for ontopic
+      //   file.type === "text/x-tex" ||
+      //   file.name.endsWith(".tex") ||
+      //   file.name.endsWith(".ltx")
+      // ) {
+      //   clearErrors();
+      //   setFilename(file.name);
+      //   file.text().then((text) => {
+      //     const generator = new HtmlGenerator({ hyphenate: false });
+      //     const doc = parse(text, { generator }).htmlDocument();
+      //     setText(doc.body.innerHTML);
+      //   });
+      //   return;
+      // }
       if (
         file.type !==
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document"

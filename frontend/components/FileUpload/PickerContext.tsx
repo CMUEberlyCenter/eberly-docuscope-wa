@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useFileImportErrors } from "./FileImportErrors";
 import { useFilename, useFileText } from "./FileTextContext";
 import { convertOptions } from "./convertOptions";
+// import { HtmlGenerator, parse } from "latex.js";
 
 // TODO file data
 const PickerContext = createContext<(show: boolean) => void>(() => undefined);
@@ -68,6 +69,7 @@ export const PickerProvider: FC<{
     docsView.setAttribute(
       "mime-types",
       "application/vnd.google-apps.document,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      // "application/vnd.google-apps.document,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/x-tex"
     );
     picker.appendChild(docsView);
 
@@ -163,6 +165,22 @@ export const PickerProvider: FC<{
             error: err,
           });
         }
+      // } else if (doc.mimeType === "text/x-tex") {
+      //   try {
+      //     // prettier-ignore
+      //     // @ts-expect-error: gapi.client.drive.files.get does not have a proper TypeScript definition for the responseType option.
+      //     const content = await gapi.client.drive.files.get({ fileId: doc.id, alt: "media", }, { responseType: "text" });
+      //     const generator = new HtmlGenerator({ hyphenate: false });
+      //     const doc = parse(content.body, { generator }).htmlDocument();
+      //     setText(doc.body.innerHTML);
+      //   } catch (err) {
+      //     console.error("Error fetching or converting tex file:", err);
+      //     showError({
+      //       type: "error",
+      //       message: t("editor.gdoc.error.tex"),
+      //       error: err,
+      //     });
+      //   }
       } else {
         console.warn("Unsupported file type:", doc.mimeType);
         showError({
