@@ -1,10 +1,9 @@
-import { ParagraphClarityButton } from "#components/Review/ParagraphClarity";
-import { ProfessionalToneButton } from "#components/Review/ProfessionalTone";
-import { SentencesButton } from "#components/Review/Sentences";
-import { SourcesButton } from "#components/Review/Sources";
-import { isEnabled } from "#lib/WritingTask";
+import {
+  FineTuningButtonToolbar,
+  FineTuningTool,
+} from "#components/ReviewNavigation/FineTuningButtonToolbar";
 import { FC, ReactNode } from "react";
-import { Alert, ButtonToolbar } from "react-bootstrap";
+import { Alert } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
@@ -23,7 +22,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { t } = useTranslation("review");
   const id = routeParams.id as string;
   const match = urlPathname.match(/\/snapshot\/[^/]+\/fine_tuning\/([^/]+)/);
-  const activeTool = match?.at(1) as string;
+  const activeTool = (match?.at(1) as FineTuningTool) ?? null;
   const onSelect = (key: string) => {
     if (key === activeTool) {
       setSnapshotContext({ fine_tuning: null });
@@ -39,36 +38,12 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
 
   return (
     <div className="h-100 d-flex flex-column overflow-auto">
-      <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-        {settings?.paragraph_clarity && isEnabled(task, "paragraph_clarity") ? (
-          <ParagraphClarityButton
-            disabled={disabled("paragraph_clarity")}
-            active={activeTool === "paragraph_clarity"}
-            onClick={() => onSelect("paragraph_clarity")}
-          />
-        ) : null}
-        {settings?.sentence_density && isEnabled(task, "sentence_density") ? (
-          <SentencesButton
-            disabled={disabled("sentence_density")}
-            active={activeTool === "sentence_density"}
-            onClick={() => onSelect("sentence_density")}
-          />
-        ) : null}
-        {settings?.professional_tone && isEnabled(task, "professional_tone") ? (
-          <ProfessionalToneButton
-            disabled={disabled("professional_tone")}
-            active={activeTool === "professional_tone"}
-            onClick={() => onSelect("professional_tone")}
-          />
-        ) : null}
-        {settings?.sources && isEnabled(task, "sources") ? (
-          <SourcesButton
-            disabled={disabled("sources")}
-            active={activeTool === "sources"}
-            onClick={() => onSelect("sources")}
-          />
-        ) : null}
-      </ButtonToolbar>
+      <FineTuningButtonToolbar
+        activeTool={activeTool}
+        onSelect={onSelect}
+        task={task}
+        disabled={disabled}
+      />
       <ErrorBoundary
         fallbackRender={({ error }) => (
           <Alert>

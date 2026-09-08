@@ -120,8 +120,8 @@ async function getHandler() {
       load: 'languageOnly',
       interpolation: { escapeValue: false },
       // backend: {
-        // loadPath: '/locales/{{lng}}/{{ns}}.yaml',
-        // parse: (data: string) => parse(data),
+      //   loadPath: '/locales/{{lng}}/{{ns}}.yaml',
+      //   parse: (data: string) => parse(data),
       // },
       resources: {
         en: {
