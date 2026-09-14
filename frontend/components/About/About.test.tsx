@@ -1,9 +1,18 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, test } from "bun:test";
-import { About } from "./About"; // react 19 use pattern causes error in tests as location.href is not set.
 import { act } from "react";
+import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
+import { About } from "./About";
 
 describe("About", () => {
+
+  beforeAll(() => {
+    vi.stubGlobal("__APP_VERSION__", "TEST");
+    vi.stubGlobal("__BUILD_DATE__", new Date().toISOString());
+  });
+  afterAll(() => {
+    vi.unstubAllGlobals();
+  });
+
   test("link creation", async () => {
     render(<About />);
     const title = screen.getByText(/about.title/);

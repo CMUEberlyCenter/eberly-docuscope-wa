@@ -4,7 +4,7 @@
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
-import { version } from './package.json' with { type: 'json' };
+import packageJson from './package.json' with { type: 'json' };
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     sourcemap: true, // always true for storybook
     minify: false, // always false for storybook
-    target: 'ES2022',
+    target: 'ES2023',
   },
   css: {
     preprocessorOptions: {
@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    __APP_VERSION__: JSON.stringify(version),
+    __APP_VERSION__: JSON.stringify(packageJson.version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
     __BUILD_MODE__: JSON.stringify(mode),
   },

@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { ClipboardIconButton } from "./ClipboardIconButton";
 
 describe("ClipboardIconButton", () => {

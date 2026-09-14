@@ -16,9 +16,8 @@
   "scripts": {
     "dev": "vike dev",
     "build": "vike build",
-    "test": "npx bun test",
-    "test:watch": "npx bun test --watch",
-    "test:vitest": "vitest",
+    "test": "vitest run --project=unit",
+    "test:watch": "vitest",
     "preview": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production node ./dist/server/index.mjs",
     "start": "npm run preview",
     "check_format": "prettier -c src/ pages/ components/ layouts/ +server.ts",
@@ -30,6 +29,7 @@
     "storybook": "storybook dev -p 6006",
     "upgrade-storybook": "npx storybook@latest upgrade",
     "build-storybook": "storybook build",
+    "test-storybook": "vitest --project=storybook",
     "postinstall": "patch-package",
     "knip": "knip"
   },
@@ -70,7 +70,6 @@
     "@testing-library/react": "^16.3.3",
     "@tsconfig/recommended": "^1.0.13",
     "@tsconfig/vite-react": "^8.1.1",
-    "@types/bun": "^1.4.2",
     "@types/cors": "^2.8.19",
     "@types/escape-html": "^1.0.4",
     "@types/express": "^5.0.6",

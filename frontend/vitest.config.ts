@@ -2,7 +2,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import path from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, defineProject } from 'vitest/config';
 
 const dirname = import.meta.dirname;
 
@@ -15,6 +15,13 @@ export default defineConfig({
       include: undefined,
     },
     projects: [
+      defineProject({
+        test: {
+          name: 'unit',
+          environment: 'happy-dom',
+          setupFiles: ['vitest.setup.ts'],
+        },
+      }),
       {
         extends: path.join(dirname, 'vite.storybook.config.ts'),
         plugins: [

@@ -1,5 +1,6 @@
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, test } from "bun:test";
+import { describe, expect, test } from "vitest";
 import { Logo } from "./Logo";
 
 describe("Logo", () => {
