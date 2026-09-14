@@ -1,6 +1,5 @@
 import { JsonValue, Optional } from '#/index';
-import { logger } from '#server/logger.js';
-import type { GradeService, IdToken, Score } from 'ltijs';
+import type { IdToken, LaunchContext } from 'ltijs';
 
 /*
 // @deprecated
@@ -89,13 +88,13 @@ const LTI_Test_User =
   'http://purl.imsglobal.org/vocab/lti/system/person#TestUser';
 
 export function isTestUser(token: Optional<IdToken>): boolean {
-  return !!token && token.platformContext.roles.includes(LTI_Test_User);
+  return !!token && token.user.roles.includes(LTI_Test_User);
 }
 export function isInstructor(token: Optional<IdToken>): boolean {
   return (
     !!token &&
     ['http://purl.imsglobal.org/vocab/lis/v2/membership#Instructor'].some(
-      (role) => token.platformContext.roles.includes(role)
+      (role) => token.user.roles.includes(role)
     )
   );
 }
@@ -106,7 +105,7 @@ export function isStudent(token: Optional<IdToken>): boolean {
   return (
     !!token &&
     ['http://purl.imsglobal.org/vocab/lis/v2/membership#Learner'].some((role) =>
-      token.platformContext.roles.includes(role)
+      token.user.roles.includes(role)
     )
   );
 }
@@ -115,7 +114,7 @@ export function isContentDeveloper(token: Optional<IdToken>): boolean {
   return (
     !!token &&
     ['http://purl.imsglobal.org/vocab/lis/v2/membership#ContentDeveloper'].some(
-      (role) => token.platformContext.roles.includes(role)
+      (role) => token.user.roles.includes(role)
     )
   );
 }
@@ -124,106 +123,125 @@ export function isContentDeveloper(token: Optional<IdToken>): boolean {
 //   return !!token && token.platformInfo?.guid === 'true';
 // }
 
-export const MAX_SCORE = 1.0; // Using undefined, 0 (openned), and 1 (used at least one tool)
+export const MAX_SCORE = 1.0; // Using undefined and 1 (used at least one tool)
 
-const createLineItem = async (
-  gradeService: GradeService,
-  token: IdToken
-): Promise<string> => {
-  try {
-    // Check if a line item already exists for this resource link
-    const response = await gradeService.getLineItems(token, {
-      resourceLinkId: true,
-    });
-    const lineItemId = response.lineItems.at(0)?.id;
-    if (lineItemId) {
-      // If a line item already exists for this resource link, use it.
-      return lineItemId;
-    }
-    const newLineItem = await gradeService.createLineItem(token, {
-      scoreMaximum: MAX_SCORE,
-      label: 'myProse Score',
-      resourceId: token.platformContext.resource.id,
-    });
-    return newLineItem.id!;
-  } catch (err) {
-    logger.error('Error creating line item:', { error: err });
-    throw new Error('Failed to create line item for grade submission.', {
-      cause: err,
-    });
-  }
-};
+// const createLineItem = async (
+//   gradeService: GradeService,
+//   token: IdToken
+// ): Promise<string> => {
+//   try {
+//     // Check if a line item already exists for this resource link
+//     const response = await gradeService.getLineItems(token, {
+//       resourceLinkId: true,
+//     });
+//     const lineItemId = response.lineItems.at(0)?.id;
+//     if (lineItemId) {
+//       // If a line item already exists for this resource link, use it.
+//       return lineItemId;
+//     }
+//     const newLineItem = await gradeService.createLineItem(token, {
+//       scoreMaximum: MAX_SCORE,
+//       label: 'myProse Score',
+//       resourceId: token.platformContext.resource.id,
+//     });
+//     return newLineItem.id!;
+//   } catch (err) {
+//     logger.error('Error creating line item:', { error: err });
+//     throw new Error('Failed to create line item for grade submission.', {
+//       cause: err,
+//     });
+//   }
+// };
 
-const getLineItemId = async (
-  gradeService: GradeService,
-  token: IdToken
-): Promise<string> => {
-  return (
-    token.platformContext.endpoint?.lineitem ||
-    createLineItem(gradeService, token)
-  );
-};
+// const getLineItemId = async (
+//   gradeService: GradeService,
+//   token: IdToken
+// ): Promise<string> => {
+//   return (
+//     token.platformContext.endpoint?.lineitem ||
+//     createLineItem(gradeService, token)
+//   );
+// };
 
-export const startGrading = async (
-  gradeService: Optional<GradeService>,
-  token: Optional<IdToken>
-) => {
-  if (!gradeService) return null;
-  if (!token) return null;
-  const existingGrade = await getGrade(gradeService, token);
-  if (existingGrade) {
-    // Don't update the grade if it already exists.
+export const startGrading = async (context: Optional<LaunchContext>) => {
+  if (!context?.grading?.isAvailable()) return null;
+  const { lineItems } = await context.grading.getLineItems();
+  if (lineItems.length > 0) {
     return;
-  }
-  const lineItemId = await getLineItemId(gradeService, token);
-  const gradeObj: Score = {
-    userId: token.user,
+  } // line item already exists, no need to create a new one.
+  const { id } = await context.grading.createLineItem({
+    scoreMaximum: MAX_SCORE,
+    label:
+      (context.idToken.launch.resource?.title as string) ?? 'myProse Score',
+  });
+  return context.grading.submitScore(id!, {
     activityProgress: 'InProgress',
     gradingProgress: 'NotReady',
-  };
-  return gradeService.submitScore(token, lineItemId, gradeObj);
+  });
 };
+//   const existingGrade = await getGrade(gradeService, token);
+//   if (existingGrade) {
+//     // Don't update the grade if it already exists.
+//     return;
+//   }
+//   const lineItemId = await getLineItemId(gradeService, token);
+//   const gradeObj: Score = {
+//     userId: token.user,
+//     activityProgress: 'InProgress',
+//     gradingProgress: 'NotReady',
+//   };
+//   return gradeService.submitScore(token, lineItemId, gradeObj);
+// };
 
 export const grade = async (
-  gradeService: Optional<GradeService>,
-  token: Optional<IdToken>,
+  context: Optional<LaunchContext>,
+  // token: Optional<IdToken>,
   score: number,
   customData?: JsonValue
 ) => {
-  if (!gradeService) return null;
-  if (!token) return null;
+  if (!context?.grading?.isAvailable()) return null;
+  // if (!token) return null;
   // Check if a line item already exists for this resource link, and if so, get the existing grade.
-  const existingGrade = await getGrade(gradeService, token);
+  const { lineItems } = await context.grading.getLineItems(); // should be singular for student.
+  const results = await Promise.all(
+    lineItems
+      .filter(({ id }) => id)
+      .map(({ id }) => context.grading.getScores(id!))
+  );
+  const scores = results.flatMap(({ scores }) => scores);
   if (
-    existingGrade?.resultScore !== undefined &&
-    existingGrade.resultScore >= score
+    scores.some(
+      (item) => item.resultScore !== undefined && item.resultScore >= score
+    )
   ) {
     // Don't update the grade if the new score is not higher than the existing score.
-    return existingGrade;
+    return scores;
   }
-  const lineItemId = await getLineItemId(gradeService, token);
-  const gradeObj: Score = {
-    userId: token.user,
-    scoreGiven: score * 1.0, // ensure it is a float, as some LTI platforms may require a decimal value for the score, even if it is a whole number.
-    scoreMaximum: MAX_SCORE,
-    activityProgress: 'Completed',
-    gradingProgress: 'FullyGraded',
-    'https://docuscope-sc.eberly.cmu.edu/myprose/score': customData,
-  };
-  return gradeService.submitScore(token, lineItemId, gradeObj);
+  return Promise.all(
+    lineItems
+      .filter(({ id }) => id)
+      .map(({ id }) =>
+        context.grading.submitScore(id!, {
+          scoreGiven: score * 1.0, // ensure it is a float, as some LTI platforms may require a decimal value for the score, even if it is a whole number.
+          scoreMaximum: MAX_SCORE,
+          activityProgress: 'Completed',
+          gradingProgress: 'FullyGraded',
+          'https://docuscope-sc.eberly.cmu.edu/myprose/score': customData,
+        })
+      )
+  );
 };
 
-async function getGrade(
-  gradeService: Optional<GradeService>,
-  token: Optional<IdToken>
-) {
-  if (!gradeService) return null;
-  if (!token) return null;
-  // If there is no line item associated with the token, we cannot retrieve a grade.
-  if (!token.platformContext.endpoint?.lineitem) return null;
-  const lineItemId = token.platformContext.endpoint.lineitem;
-  const { scores } = await gradeService.getScores(token, lineItemId, {
-    userId: token.user,
-  });
-  return scores.at(0) ?? null; // multiple scores only available when grading multiple students, not currently supported.
-}
+// async function getGrade(
+//   context: Optional<LaunchContext>,
+//   // token: Optional<IdToken>
+// ) {
+//   if (!context || !context.idToken) return null;
+//   // If there is no line item associated with the token, we cannot retrieve a grade.
+//   if (!token.platformContext.endpoint?.lineitem) return null;
+//   const lineItemId = token.platformContext.endpoint.lineitem;
+//   const { scores } = await gradeService.getScores(token, lineItemId, {
+//     userId: token.user,
+//   });
+//   return scores.at(0) ?? null; // multiple scores only available when grading multiple students, not currently supported.
+// }

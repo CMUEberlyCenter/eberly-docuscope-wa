@@ -327,7 +327,6 @@ export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
         {review && "response" in review && paragraphRange.length > 0 ? (
           <DataTable
             options={{
-              // @ts-expect-error: bad typing in DataTable extension
               paging: false,
               order: [],
               scrollCollapse: true,

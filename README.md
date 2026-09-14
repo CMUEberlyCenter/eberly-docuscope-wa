@@ -17,7 +17,7 @@ This application requires several files in order to function:
   - `secrets/token`: LTI token.
 - Required system files (available seperately):
   - `../myprose-resources/prompts/**`: LLM Prompt templates (.md files for each prompt).
-  - `../pyprose-resources/wtd_lib/**`: Writing task specification files available to all users.
+  - `../myprose-resources/wtd_lib/**`: Writing task specification files available to all users.
 
 ## Latest stable build using Docker
 
@@ -35,8 +35,8 @@ This application requires several files in order to function:
 
 ## Using from source without Docker for development
 This requires that the following are installed or otherwise available:
-- [NodeJS](https://nodejs.org/) >=24.0
-- [Python](https://www.python.org/) >=3.12
+- [NodeJS](https://nodejs.org/) >=26.0
+- [Python](https://www.python.org/) >=3.14
 - [MongoDB](https://www.mongodb.com/) >=8.0
 
 1. Clone this repository.

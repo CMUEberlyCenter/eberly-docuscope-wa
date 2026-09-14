@@ -1,10 +1,10 @@
+import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
 import { act } from "react";
 import { afterAll, beforeAll, describe, expect, test, vi } from "vitest";
 import { About } from "./About";
 
 describe("About", () => {
-
   beforeAll(() => {
     vi.stubGlobal("__APP_VERSION__", "TEST");
     vi.stubGlobal("__BUILD_DATE__", new Date().toISOString());

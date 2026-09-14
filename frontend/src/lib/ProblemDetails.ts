@@ -163,6 +163,7 @@ const GatewayTimeout = (
   instance,
 });
 
+export class ServiceUnavailableError extends Error {}
 const ServiceUnavailable = (
   err: Error | string,
   instance?: string
@@ -207,6 +208,9 @@ export const errorToProblemDetails = (
   }
   if (err instanceof APIConnectionTimeoutError) {
     return GatewayTimeout(err, instance);
+  }
+  if (err instanceof ServiceUnavailableError) {
+    return ServiceUnavailable(err, instance);
   }
   if (err instanceof APIError) {
     if (err.error?.response?.status === 400) {

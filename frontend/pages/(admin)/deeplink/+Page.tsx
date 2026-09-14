@@ -18,7 +18,7 @@ import "./style.scss";
 
 export const Page: FC = () => {
   const { t } = useTranslation();
-  const { tasks } = useData<Data>();
+  const { tasks, ltik } = useData<Data>();
   const [selected, setSelected] = useState<WritingTask | null>(null);
   const [data, setData] = useState<WritingTask[]>([]);
 
@@ -115,6 +115,13 @@ export const Page: FC = () => {
             }
           }}
         >
+          <input
+            type="hidden"
+            name="ltik"
+            value={ltik}
+            readOnly={true}
+            className="d-none"
+          />
           <input
             type="hidden"
             name="file"
