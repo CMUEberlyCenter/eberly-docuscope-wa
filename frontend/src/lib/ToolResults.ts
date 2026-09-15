@@ -1,6 +1,6 @@
 import type { Descendant, Range } from 'slate';
 
-export interface SelectedText {
+interface SelectedText {
   text: string;
   fragment?: Descendant[];
   range?: Range;

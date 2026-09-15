@@ -370,13 +370,13 @@ type ProminentTopicsOutput = {
 //   );
 // }
 
-export type SourceType = 'supporting' | 'hedged' | 'alternative' | 'neutral';
-export type Source = {
-  names: string;
-  assessment: string;
-  sent_ids: string[];
-  src_type: SourceType;
-};
+// type SourceType = 'supporting' | 'hedged' | 'alternative' | 'neutral';
+// export type Source = {
+//   names: string;
+//   assessment: string;
+//   sent_ids: string[];
+//   src_type: SourceType;
+// };
 // function isSource(data: unknown): data is Source {
 //   return (
 //     !!data &&
@@ -483,8 +483,8 @@ export const isExpectationsData = (
   isExpectationsOutput(data.response);
 
 /** Test if the string is the "none" fail state in the LLM response. */
-const isNone = (suggestion: string): boolean =>
-  suggestion.match(/^none/i) !== null;
+// const isNone = (suggestion: string): boolean =>
+//   suggestion.match(/^none/i) !== null;
 
 /**
  * Tests if the suggestion in expectation data is marked as "none".
@@ -492,11 +492,11 @@ const isNone = (suggestion: string): boolean =>
  * @returns true if the suggestions start with "none", indicating that the LLM did not identify references to the expectation.
  * @deprecated The expectations prompt no longer uses the "none" fail state.
  */
-export function isExpectationsDataSuggestionNone(
-  data: ExpectationsData
-): boolean {
-  return isNone(data.response.suggestion);
-}
+// export function isExpectationsDataSuggestionNone(
+//   data: ExpectationsData
+// ): boolean {
+//   return isNone(data.response.suggestion);
+// }
 
 export interface LinesOfArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
   tool: 'lines_of_arguments';

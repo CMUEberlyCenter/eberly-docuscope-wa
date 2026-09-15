@@ -51,7 +51,6 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   }
   const launchContext =
     ltik && provider ? await provider.getLaunchContext(ltik) : undefined;
-  console.log('user:', launchContext?.idToken.user.id);
   try {
     const template = prompts.get(key);
     if (!template) {
@@ -139,7 +138,6 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
       if (isTestUser(launchContext.idToken)) {
         logger.info(`Test user grading in draft mode with score: ${score}`);
       }
-      console.log('grading with score:', score);
       try {
         const gradeResult = await grade(launchContext, score); // Attempt to grade regardless of success or failure.
         logger.info('Grading result:', gradeResult);

@@ -2,7 +2,7 @@ import { createContext, Dispatch, FC, ReactNode, use, useReducer } from "react";
 
 type SnapshotContextState = Record<string, string | null>;
 
-export const SnapshotContext = createContext<
+const SnapshotContext = createContext<
   [SnapshotContextState, Dispatch<SnapshotContextState>]
 >([
   {

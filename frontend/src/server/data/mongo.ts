@@ -10,7 +10,7 @@ import { initWritingTasks } from './writing_task_description';
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
-export async function getDb(): Promise<Db> {
+async function getDb(): Promise<Db> {
   if (db && client) {
     return db;
   }
@@ -62,7 +62,7 @@ type Snapshot = {
 
 type PortableSnapshot = Omit<Snapshot, '_id'> & { id: string };
 /** Convert a Snapshot to a PortableSnapshot which replaces _id with id or the given id if _id is undefined. */
-export function toPortableSnapshot(
+function toPortableSnapshot(
   { _id, ...rest }: Snapshot,
   id?: string
 ): PortableSnapshot {

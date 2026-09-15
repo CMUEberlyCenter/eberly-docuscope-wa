@@ -5,7 +5,6 @@ import {
 } from '#lib/ProblemDetails.js';
 import { DbWritingTask, isWritingTask } from '#lib/WritingTask';
 import { validateWritingTask } from '#lib/schemaValidate';
-// import cors from 'cors';
 import { Request, Response, Router } from 'express';
 import { readdir, readFile, stat } from 'fs/promises';
 import {
@@ -18,6 +17,8 @@ import {
 import { join } from 'path';
 import { logger } from './logger';
 import { LTI_DB, LTI_HOSTNAME, PLATFORMS_PATH, PRODUCT } from './settings';
+
+const LOGO = new URL('/logo.svg', LTI_HOSTNAME).toString();
 
 // Hack to ensure that LTI is only initialized once in hot reload environments.
 const LTI_SETUP_KEY = Symbol.for('myprose.lti.setup_complete');
@@ -65,10 +66,14 @@ function initializeLTI(httpHandler: HttpHandler) {
     database: LTI_DB,
     dynamicRegistration: {
       name: PRODUCT,
+      description: 'myProse Editing and Review tools',
       url: LTI_HOSTNAME.toString(),
       autoActivate: true,
       useDeepLinking: true,
-      logo: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+      logo: LOGO,
+      redirectUris: ['/draft', '/review'].map((endpoint) =>
+        new URL(endpoint, LTI_HOSTNAME).toString()
+      ),
     },
     httpHandler,
   });
@@ -80,10 +85,6 @@ function initializeLTI(httpHandler: HttpHandler) {
 
   provider.onResourceLink(async (context, request, response) => {
     if (context.idToken.launch) {
-      console.log('LTI launch request received:', {
-        launch: context.idToken.launch,
-        custom: context.idToken.launch.custom,
-      });
       // if LTI token is present
       if (context.idToken.launch.custom?.tool) {
         // if tool is specified in deep linking settings, redirect accordingly
@@ -119,7 +120,6 @@ function initializeLTI(httpHandler: HttpHandler) {
     // urlencoded({ extended: true }),
     // TODO validate(checkSchema({})),
     async (request, response) => {
-      console.log('Deep linking request body:', request.body);
       if (!isDeepLinkingRequestDTO(request.body)) {
         throw new BadRequestError('Invalid request body.');
       }
@@ -173,7 +173,7 @@ function initializeLTI(httpHandler: HttpHandler) {
           'text#es': `myProse ${tool === 'draft' ? 'Borrador' : 'Reseñar'}`,
           url: url.toString(),
           icon: {
-            url: new URL('logo.svg', LTI_HOSTNAME).toString(),
+            url: LOGO,
             width: 500,
             height: 160,
           },
@@ -182,7 +182,6 @@ function initializeLTI(httpHandler: HttpHandler) {
       ];
       const form = await context.deepLinking.createDeepLinkingForm(items);
       // { message: 'Success' });
-      console.log('Deep linking form created:', form);
       response.html(form);
     }
   );
@@ -237,7 +236,7 @@ function initializeLTI(httpHandler: HttpHandler) {
                 label: `${PRODUCT} Review`,
                 'label#es': `${PRODUCT} Reseñar`,
                 'label#fr': `${PRODUCT} Réviser`,
-                icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                icon_uri: LOGO,
                 placements: ['course_navigation'],
                 preferred_presentation: 'window', // Apparently, this is ignored by Canvas for course navigation placement.
                 custom_parameters: {
@@ -252,7 +251,7 @@ function initializeLTI(httpHandler: HttpHandler) {
               {
                 type: 'LtiDeepLinkingRequest',
                 label: PRODUCT,
-                icon_uri: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+                icon_uri: LOGO,
                 placements: [
                   'ContentArea',
                   'assignment_selection', // Canvas uses this for assignment selection.
@@ -279,7 +278,7 @@ function initializeLTI(httpHandler: HttpHandler) {
         provider.dynamicRegistrationService.FINALIZE_REGISTRATION_HTML_SNIPPET
       );
     } catch (err) {
-      console.error('Error during dynamic registration:', err);
+      logger.error('Error during dynamic registration:', err);
       throw new ServiceUnavailableError(
         'Error during dynamic registration. Please check the server logs for details.',
         { cause: err }
@@ -345,7 +344,7 @@ lti_configuration_router.get(
   '/lti/configuration',
   async (_req: Request, res: Response) => {
     const placement_defaults = {
-      icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+      icon_url: LOGO,
       message_type: 'LtiDeepLinkingRequest',
       target_link_uri: LTI_HOSTNAME.toString(),
     };
@@ -378,7 +377,7 @@ lti_configuration_router.get(
               en: 'myProse Drafting and Review tools',
               es: 'myProse Herramientas de Redacción y Revisión',
             },
-            icon_url: new URL('/logo.svg', LTI_HOSTNAME).toString(),
+            icon_url: LOGO,
             selection_height: 800,
             selection_width: 800,
             placements: [

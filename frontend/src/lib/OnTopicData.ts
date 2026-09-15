@@ -113,7 +113,7 @@ type ClaritySentenceData = {
 //   'new_accum_lemmas' in data &&
 //   Array.isArray(data.new_accum_lemmas);
 // Best guess as to what this is supposed to be.
-export type ClarityData = Array<
+type ClarityData = Array<
   | string // for paragraph breaks
   | [
       number, // paragraph index (1-based)

@@ -123,7 +123,7 @@ export function isContentDeveloper(token: Optional<IdToken>): boolean {
 //   return !!token && token.platformInfo?.guid === 'true';
 // }
 
-export const MAX_SCORE = 1.0; // Using undefined and 1 (used at least one tool)
+const MAX_SCORE = 1.0; // Using undefined and 1 (used at least one tool)
 
 // const createLineItem = async (
 //   gradeService: GradeService,

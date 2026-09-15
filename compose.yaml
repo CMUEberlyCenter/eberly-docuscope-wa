@@ -53,7 +53,6 @@ services:
       - anthropic_api_key
       - mongo_user
       - mongo_pass
-      - token
     env_file:
       - google.env
     environment:
@@ -61,7 +60,6 @@ services:
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       ANTHROPIC_MAX_TOKENS: 2048
       LTI_HOSTNAME: https://docuscope-sc-test.eberly.cmu.edu/
-      LTI_KEY_FILE: /run/secrets/token
       MONGO_DB: myprose
       MONGO_HOST: mongo:27017
       MONGO_PASSWORD_FILE: /run/secrets/mongo_pass
@@ -118,8 +116,6 @@ secrets:
     file: secrets/mongo_user
   mongo_pass:
     file: secrets/mongo_pass
-  token:
-    file: secrets/token
 
 volumes:
   grafana_storage: {}

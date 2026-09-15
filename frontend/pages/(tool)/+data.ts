@@ -42,7 +42,6 @@ export async function data(pageContext: PageContextServer) {
       logger.error('Error parsing writing_task from LTI token:', { error });
     }
   }
-  console.log(parsedTask);
   const task =
     parsedTask ?? (taskId ? await getWritingTaskById(taskId) : undefined);
   const tasks = task

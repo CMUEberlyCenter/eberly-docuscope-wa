@@ -4,7 +4,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { LanguageSettingsRequest } from '../lib/Requests';
 
-const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
+// const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 
 function envInt(env: string | undefined, fallback = 0) {
@@ -32,7 +32,6 @@ export const ADMIN_PASSWORD = fromEnvFile(
   crypto.getRandomValues(new BigUint64Array(1))[0].toString(36)
 );
 export const SESSION_KEY = fromEnvFile('SESSION_KEY', randomUUID());
-export const LTI_KEY = fromEnvFile('LTI_KEY'); // As it is shared with the LMS, it should always exist.
 export const LTI_HOSTNAME = new URL(
   process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
 );
@@ -46,25 +45,6 @@ export const LTI_DB = {
 };
 
 export const MONGO_CLIENT = `mongodb://${MONGO_USER ? `${MONGO_USER}:${MONGO_PASSWORD}@` : ''}${MONGO_HOST}/${MONGO_DB}?authSource=admin`;
-export const LTI_OPTIONS = {
-  devMode: DEV,
-  ltiaas: true,
-  cookies: {
-    secure: true, // Use secure cookies in production.
-    sameSite: 'None', // SameSite policy for cookies.
-  },
-  dynReg: {
-    url: LTI_HOSTNAME.toString(), // Tool Provider URL. Required field.
-    name: PRODUCT, // Tool Provider name. Required field.
-    logo: new URL('/logo.svg', LTI_HOSTNAME).toString(), // Tool Provider logo URL.
-    description: 'myProse Editing and Review tools', // Tool Provider description.
-    redirectUris: ['/draft', '/review'].map((endpoint) =>
-      new URL(endpoint, LTI_HOSTNAME).toString()
-    ), // Additional redirection URLs. The main URL is added by default.
-    customParameters: {}, // Custom parameters.
-    autoActivate: true, // Whether or not dynamically registered Platforms should be automatically activated. Defaults to false.
-  },
-};
 
 const ONTOPIC_SERVER = process.env.ONTOPIC_SERVER ?? 'http://localhost:5000/';
 export const ONTOPIC_URL = new URL('api/v2/ontopic', ONTOPIC_SERVER);
