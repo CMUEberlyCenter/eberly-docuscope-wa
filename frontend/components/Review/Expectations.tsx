@@ -42,6 +42,7 @@ import type {
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
 import { useTranslation } from "react-i18next";
+import { usePageContext } from "vike-react/usePageContext";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
   checkReviewResponse,
@@ -102,6 +103,7 @@ function useExpectationsDataMutation({
   const dispatch = useReviewDispatch();
   const [{ task }] = useWritingTask();
   const [document] = useFileText();
+  const { ltik } = usePageContext();
   const [errorData, setErrorData] = useState<ErrorData | null>(null);
   const [result, setResult] =
     useState<OptionalReviewData<ExpectationsData>>(null);
@@ -158,12 +160,14 @@ function useExpectationsDataMutation({
         sentences: [data.response.sent_ids],
       });
       setCurrent?.(eventKey); // open this accordion item
-      onGrade(1.0, {
-        tool: "expectations",
-        task_id: task?.info.id ?? "",
-        expectation: expectation.name,
-        input_length: input.length,
-      });
+      if (ltik) {
+        onGrade(ltik, 1.0, {
+          tool: "expectations",
+          task_id: task?.info.id ?? "",
+          expectation: expectation.name,
+          input_length: input.length,
+        });
+      }
     },
     onError: (error) => {
       console.error("Error fetching expectation:", error);

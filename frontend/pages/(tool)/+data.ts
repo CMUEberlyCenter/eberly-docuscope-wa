@@ -11,7 +11,6 @@ import {
   isTestUser,
   startGrading,
 } from '#server/model/lti';
-import { Provider } from 'ltijs';
 import type { PageContextServer } from 'vike/types';
 
 const getWritingTaskById = async (id: string) => {
@@ -25,8 +24,9 @@ const getWritingTaskById = async (id: string) => {
 
 export async function data(pageContext: PageContextServer) {
   const taskId = pageContext.writing_task_id; // set if system specified
-  const token = pageContext.session?.token; // set if LTI specified
-  const tokenTask = token?.platformContext.custom?.writing_task; // set if LTI specified and writing_task included in custom
+  // const token = pageContext.session?.token; // set if LTI specified
+  const token = pageContext.launchContext?.idToken; // set if LTI specified
+  const tokenTask = token?.launch.custom?.writing_task as string | undefined; // set if LTI specified and writing_task included in custom
   let parsedTask: WritingTask | undefined = undefined;
   if (tokenTask) {
     try {
@@ -42,6 +42,7 @@ export async function data(pageContext: PageContextServer) {
       logger.error('Error parsing writing_task from LTI token:', { error });
     }
   }
+  console.log(parsedTask);
   const task =
     parsedTask ?? (taskId ? await getWritingTaskById(taskId) : undefined);
   const tasks = task
@@ -55,7 +56,7 @@ export async function data(pageContext: PageContextServer) {
         logger.info('Test user grading initialization.');
       }
       // Not necessarily the most appropriate place to put this, but it ensures that we attempt to grade as soon as possible when the user accesses the app with an LTI token.
-      startGrading(Provider.Grade, token);
+      startGrading(pageContext.launchContext);
     } catch (error) {
       logger.error('Error during LTI grade check:', { error });
       // NOOP if grading fails, as this is not critical for the main functionality of the app, and we do not want to block users from using the app if there is an issue with grading.
@@ -63,11 +64,12 @@ export async function data(pageContext: PageContextServer) {
   }
 
   return {
+    ltik: pageContext.ltik,
     task,
     taskId,
     tasks,
-    ltiActivityTitle: token?.platformContext?.resource?.title,
-    username: token?.userInfo?.name,
+    // ltiActivityTitle: token?.platformContext?.resource?.title,
+    // username: token?.userInfo?.name,
     isLTI: !!token,
     isContentDeveloper: isContentDeveloper(token),
     isInstructor: isInstructor(token),

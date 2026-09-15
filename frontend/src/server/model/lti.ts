@@ -199,7 +199,9 @@ export const grade = async (
   score: number,
   customData?: JsonValue
 ) => {
-  if (!context?.grading?.isAvailable()) return null;
+  if (!context?.grading?.isAvailable()) {
+    return null;
+  }
   // if (!token) return null;
   // Check if a line item already exists for this resource link, and if so, get the existing grade.
   const { lineItems } = await context.grading.getLineItems(); // should be singular for student.

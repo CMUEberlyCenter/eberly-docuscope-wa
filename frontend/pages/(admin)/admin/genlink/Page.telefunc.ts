@@ -4,7 +4,7 @@ import {
 } from '#lib/ProblemDetails.js';
 import { ReviewTool } from '#lib/ReviewResponse';
 import { validateWritingTask } from '#lib/schemaValidate.js';
-import { isWritingTask, WritingTask } from '#lib/WritingTask.js';
+import { isWritingTask, type WritingTask } from '#lib/WritingTask.js';
 import {
   clearSnapshotAnalysesById,
   clearSnapshotAnalysisById,

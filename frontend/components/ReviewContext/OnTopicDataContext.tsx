@@ -12,6 +12,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { usePageContext } from "vike-react/usePageContext";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -30,6 +31,7 @@ function useOnTopic() {
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
   const [{ task }] = useWritingTask();
+  const { ltik } = usePageContext();
 
   const mutation = useMutation({
     mutationFn: async (data: { document: string }) => {
@@ -54,7 +56,9 @@ function useOnTopic() {
       if (data.response.html) {
         dispatch({ type: "update", sentences: data.response.html });
       }
-      onGrade(1.0, { tool: "ontopic" });
+      if (ltik) {
+        onGrade(ltik, 1.0, { tool: "ontopic" });
+      }
     },
     onSettled: () => {
       abortControllerRef.current = null;

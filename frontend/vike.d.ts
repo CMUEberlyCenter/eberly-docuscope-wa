@@ -1,7 +1,7 @@
 import type { SessionData } from 'express-session';
 import type { i18n } from 'i18next';
 import type { Settings } from './src/lib/ToolSettings';
-import type { IdToken } from './src/server/model/lti';
+import type { Provider, LaunchContext } from 'ltijs';
 
 interface GoogleSettings {
   analytics?: string;
@@ -16,6 +16,9 @@ declare global {
       google?: GoogleSettings;
     }
     interface PageContextServer {
+      ltik?: string;
+      provider?: Provider;
+      launchContext?: LaunchContext;
       i18n?: i18n;
       session?: SessionData;
       writing_task_id?: string;
@@ -23,6 +26,7 @@ declare global {
     }
     interface PageContext {
       locale?: string;
+      ltik?: string;
       settings?: Settings;
       google?: GoogleSettings;
       user?: string;

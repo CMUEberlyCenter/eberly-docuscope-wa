@@ -4,8 +4,9 @@ Sets up and starts the expressjs server for handling requests for the myProse ap
 */
 import { TelefuncContext } from '#lib/TelefuncContext.js';
 import MongoStore from 'connect-mongo';
-import cors from 'cors';
+// import cors from 'cors';
 import express, {
+  urlencoded,
   type NextFunction,
   type Request,
   type Response,
@@ -13,10 +14,10 @@ import express, {
 import type { IBasicAuthedRequest } from 'express-basic-auth';
 import session from 'express-session';
 import i18n from 'i18next';
-import Backend from 'i18next-http-backend';
+// import Backend from 'i18next-http-backend';
 import { handle, LanguageDetector } from 'i18next-http-middleware';
-import { IdToken, Provider } from 'ltijs';
-import { initReactI18next } from 'react-i18next';
+import { ExpressHttpHandler, LaunchContext } from 'ltijs';
+// import { initReactI18next } from 'react-i18next';
 import { serve } from 'telefunc';
 import { parse } from 'yaml';
 import { handleError } from './src/lib/ProblemDetails';
@@ -36,6 +37,7 @@ import {
   MONGO_CLIENT,
   ONTOPIC_URL,
   PORT,
+  // PRODUCT,
   SESSION_KEY,
 } from './src/server/settings';
 import {
@@ -48,7 +50,7 @@ import { type Server } from 'vike/types';
 import { /*vike,*/ toFetchHandler } from '@vikejs/express';
 // import { sessionMiddleware } from '#server/sessionMiddleware';
 // import { i18nMiddleware } from '#server/i18nMiddleware';
-import { ensureLTIInitialized } from '#server/lti.js';
+import { ensureLTIInitialized, lti_configuration_router } from '#server/lti.js';
 import enAdmin from './public/locales/en/admin.yaml?raw';
 import esAdmin from './public/locales/es/admin.yaml?raw';
 import enDeeplink from './public/locales/en/deeplink.yaml?raw';
@@ -69,10 +71,21 @@ import { renderPage } from 'vike/server';
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   await initPrompts();
-  const ltiApp = await ensureLTIInitialized();
+  const httpHandler = new ExpressHttpHandler(logger, {
+    port: PORT,
+    cors: {
+      origin: LTI_HOSTNAME.toString(),
+      credentials: true,
+    },
+  });
+  httpHandler.app.set('trust proxy', 1); // needed to work behind a reverse proxy
+  httpHandler.app.use('/deeplink', urlencoded({ extended: true }));
+  const provider = await ensureLTIInitialized(httpHandler);
+  provider.databaseManager.listen();
+  provider.cacheManager.listen();
 
-  const app = express();
-  app.set('trust proxy', 1); // needed to work behind a reverse proxy
+  const app = httpHandler.app;
+  // app.set('trust proxy', 1); // needed to work behind a reverse proxy
   app.use((req, res, next) => {
     if (req.path.startsWith('/admin')) {
       return basicAuthMiddleware(req, res, next);
@@ -81,23 +94,23 @@ async function getHandler() {
   });
   // app.all('/api/auth/{*auth}', toNodeHandler(auth));
   // mount json middleware after auth
-  app.use(
-    cors({
-      origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
-      // origin: (origin, callback) => {
-      //   // Allow requests with no origin (like mobile apps or curl requests)
-      //   if (!origin) return callback(null, true);
-      //   // Allow requests from the frontend domain
-      //   if ([
-      //     LTI_HOSTNAME.toString(),
-      //     // `http://localhost:${PORT}`, // LTI_HOSTNAME should already cover this.
-      //   ].includes(origin)) return callback(null, true);
-      //   // Otherwise, block the request
-      //   return callback(new ForbiddenError('Not allowed by CORS'));
-      // },
-      credentials: true, // Allow cookies to be sent with requests
-    })
-  );
+  // app.use(
+  //   cors({
+  //     origin: LTI_HOSTNAME.toString(), // Allow requests from the frontend domain
+  //     // origin: (origin, callback) => {
+  //     //   // Allow requests with no origin (like mobile apps or curl requests)
+  //     //   if (!origin) return callback(null, true);
+  //     //   // Allow requests from the frontend domain
+  //     //   if ([
+  //     //     LTI_HOSTNAME.toString(),
+  //     //     // `http://localhost:${PORT}`, // LTI_HOSTNAME should already cover this.
+  //     //   ].includes(origin)) return callback(null, true);
+  //     //   // Otherwise, block the request
+  //     //   return callback(new ForbiddenError('Not allowed by CORS'));
+  //     // },
+  //     credentials: true, // Allow cookies to be sent with requests
+  //   })
+  // );
 
   // Setup sessions
   app.use(
@@ -189,7 +202,8 @@ async function getHandler() {
         context: {
           // You can add any arbitrary contextual information here
           // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
-          gradeService: Provider.Grade,
+          provider,
+          ltik: req.query.ltik,
           sessionId: req.sessionID,
           user,
           isAdmin: user === 'admin',
@@ -205,7 +219,11 @@ async function getHandler() {
       res.send(body);
     }
   );
-  app.use(ltiApp); // res.locals.token is not available in _telefunc even if this is mounted before it.
+  /**
+   * Endpoint to retrieve the Canvas LTI static JSON configuration for the tool.
+   */
+  app.use(lti_configuration_router);
+  // app.use(ltiApp); // res.locals.token is not available in _telefunc even if this is mounted before it.
 
   // Handle all other routes with Vike
   app.all(
@@ -216,27 +234,43 @@ async function getHandler() {
       res.removeHeader('Cross-Origin-Resource-Policy');
       next();
     },
-    async (req, res, next) => {
-      // this should probably be done in onConnect
-      const token: IdToken | undefined = res.locals.token;
-      req.session.token = token; // add token to session for use in telefuncs
-      next();
-    },
+    // async (req, res, next) => {
+    //   // this should probably be done in onConnect
+    //   const context = await provider.getLaunchContext(req.query.ltik as string);
+    //   const token = context.idToken;
+    //   req.session.token = token; // add token to session for use in telefuncs
+    //   next();
+    // },
     async (req: Request, res: Response, next) => {
+      let context: LaunchContext | undefined;
+      if (req.query.ltik) {
+        try {
+          context = await provider.getLaunchContext(req.query.ltik as string);
+        } catch (err) {
+          logger.error('Error getting LTI launch context', { error: err });
+        }
+      } else {
+        console.log('No ltik query parameter found in request');
+      }
+      // const context = await provider.getLaunchContext(req.query.ltik as string);
       const query =
         typeof req.query.writing_task === 'string'
           ? req.query.writing_task
           : undefined;
-      const token: IdToken | undefined = req.session.token;
+      // const token: IdToken | undefined = req.session.token;
       const writing_task_id: string | undefined =
         // from LTI
-        token?.platformContext.custom?.writing_task_id ||
+        (context?.idToken.launch.custom?.writing_task_id as string) ||
+        // token?.platformContext.custom?.writing_task_id ||
         // from query parameter
         query ||
         // from session
         req.session.writing_task_id;
       const pageContextInit = {
+        ltik: req.query.ltik,
         urlOriginal: req.url,
+        provider,
+        launchContext: context,
         headersOriginal: req.headers,
         i18n: req.i18n,
         session: req.session,

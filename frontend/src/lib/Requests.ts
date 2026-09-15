@@ -4,6 +4,10 @@ export interface LanguageSettingsRequest {
   target_lang?: string;
 }
 
+interface LtikRequest {
+  ltik?: string;
+}
+
 /** Assess a single expectation request. */
 // export interface AssessExpectationRequest extends LanguageSettingsRequest {
 //   text: string;
@@ -12,11 +16,12 @@ export interface LanguageSettingsRequest {
 // }
 
 /** Notes to prose request. */
-export interface NotesRequest extends LanguageSettingsRequest {
+export interface NotesRequest extends LanguageSettingsRequest, LtikRequest {
   notes: string;
 }
 
 /** Request that posts a block of text. */
-export interface TextRequest extends LanguageSettingsRequest {
-  text: string;
-}
+// @deprecated not used anymore, tools that used it have beed removed.
+// export interface TextRequest extends LanguageSettingsRequest {
+//   text: string;
+// }

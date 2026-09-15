@@ -14,6 +14,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import { usePageContext } from "vike-react/usePageContext";
 import { checkReviewResponse } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -26,6 +27,7 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
   const [review, setReview] = useState<OptionalReviewData<T>>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dispatch = useReviewDispatch();
+  const { ltik } = usePageContext();
 
   const mutation = useMutation({
     mutationFn: async (data: {
@@ -55,14 +57,16 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
       dispatch({ type: "update", sentences: input });
       // check if isErrorData? - should be handled in component
       setReview(data);
-      onGrade(1.0, {
-        tool,
-        task_id: writing_task?.info.id ?? "",
-        input_length: input.length,
-        // TODO: ability to reconstruct student final state.
-        // TODO: document: input,
-        // TODO: data: [...prev, data]
-      });
+      if (ltik) {
+        onGrade(ltik, 1.0, {
+          tool,
+          task_id: writing_task?.info.id ?? "",
+          input_length: input.length,
+          // TODO: ability to reconstruct student final state.
+          // TODO: document: input,
+          // TODO: data: [...prev, data]
+        });
+      }
     },
     onError: (error) => {
       setReview({ tool, error });
@@ -231,3 +235,20 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
   };
   return { ReviewDataProvider, SnapshotDataProvider, useReviewDataContext };
 }
+
+// type ReviewService<T extends Analysis> = {
+//   fetchData: (tool: ReviewTool) => Promise<OptionalReviewData<T>>
+// }
+// const ReviewServiceContext = createContext<ReviewService<Analysis> | null>(null);
+
+// export function ReviewServiceProvider<T extends Analysis>({ children, service }: { children: ReactNode, service: ReviewService<T> }) {
+//   return <ReviewServiceContext value={service}>{children}</ReviewServiceContext>;
+// }
+
+// export function useReviewService() {
+//   const context = use(ReviewServiceContext);
+//   if (!context) {
+//     throw new Error("useReviewService must be used within a ReviewServiceProvider");
+//   }
+//   return context;
+// }

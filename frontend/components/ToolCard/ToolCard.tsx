@@ -40,7 +40,7 @@ type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
 const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
-  const { settings } = usePageContext();
+  const { settings, ltik } = usePageContext();
   const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
   const selectionLimit = settings?.select_word_limit ?? 250;
@@ -57,6 +57,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
           notes: data.input.text,
           user_lang: writingTask?.info.user_lang,
           target_lang: writingTask?.info.target_lang,
+          ltik,
         };
         const onNotes =
           data.tool === "bullets" ? onNotesToBullets : onNotesToProse;

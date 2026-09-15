@@ -17,7 +17,7 @@ import { getContext } from 'telefunc';
 
 async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const started = new Date(); // performance tracking: record the start time of the conversion process.
-  const { notes, user_lang } = data;
+  const { notes, user_lang, ltik } = data;
   let score = 0;
   if (!notes || notes.trim() === '') {
     return { error: BadRequest('No text provided.', 'empty_input') };
@@ -28,8 +28,8 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     onClose,
     sessionId,
     prompts,
-    gradeService,
-    session,
+    provider,
+    // session,
   } = getContext<TelefuncContext>();
   const language = user_lang
     ? resolveLanguageCode(user_lang)
@@ -49,7 +49,9 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
       ),
     };
   }
-  const token = session?.token;
+  const launchContext =
+    ltik && provider ? await provider.getLaunchContext(ltik) : undefined;
+  console.log('user:', launchContext?.idToken.user.id);
   try {
     const template = prompts.get(key);
     if (!template) {
@@ -114,7 +116,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     const result = chat.content.at(0);
     if (result?.type === 'text') {
       const finished = new Date();
-      insertLog(token?.user ?? sessionId ?? 'index.html', {
+      insertLog(launchContext?.idToken.user.id ?? sessionId ?? 'index.html', {
         finished,
         key,
         delta_ms: finished.getTime() - started.getTime(),
@@ -133,12 +135,13 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     return { error: errorToProblemDetails(error) };
   } finally {
     // only attempt to grade if the user is a student and both gradeService and token are available.
-    if (gradeService && token && isStudent(token)) {
-      if (isTestUser(token)) {
+    if (launchContext && isStudent(launchContext.idToken)) {
+      if (isTestUser(launchContext.idToken)) {
         logger.info(`Test user grading in draft mode with score: ${score}`);
       }
+      console.log('grading with score:', score);
       try {
-        const gradeResult = await grade(gradeService, token, score); // Attempt to grade regardless of success or failure.
+        const gradeResult = await grade(launchContext, score); // Attempt to grade regardless of success or failure.
         logger.info('Grading result:', gradeResult);
       } catch (error) {
         logger.error('Error in grading:', error);

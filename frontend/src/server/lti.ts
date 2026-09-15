@@ -8,7 +8,13 @@ import { validateWritingTask } from '#lib/schemaValidate';
 // import cors from 'cors';
 import { Request, Response, Router } from 'express';
 import { readdir, readFile, stat } from 'fs/promises';
-import { ContentItem, HttpHandler, HttpMethod, PlatformRegistrationInput, Provider } from 'ltijs';
+import {
+  ContentItem,
+  HttpHandler,
+  HttpMethod,
+  PlatformRegistrationInput,
+  Provider,
+} from 'ltijs';
 import { join } from 'path';
 import { logger } from './logger';
 import { LTI_DB, LTI_HOSTNAME, PLATFORMS_PATH, PRODUCT } from './settings';
@@ -39,15 +45,21 @@ type DeepLinkingRequestDTO = {
   file: string; // JSON stringified writing task
   tool: '' | 'draft' | 'review'; // 'draft' or 'review'
 };
-function isDeepLinkingRequestDTO(obj: unknown): obj is DeepLinkingRequestDTO {
+
+function isDeepLinkingRequestDTO(
+  obj: DeepLinkingRequestDTO | unknown
+): obj is DeepLinkingRequestDTO {
   if (typeof obj !== 'object' || obj === null) return false;
-  const dto = obj as DeepLinkingRequestDTO;
   return (
-    typeof dto.ltik === 'string' &&
-    typeof dto.file === 'string' &&
-    (dto.tool === '' || dto.tool === 'draft' || dto.tool === 'review')
+    'ltik' in obj &&
+    typeof obj.ltik === 'string' &&
+    'file' in obj &&
+    typeof obj.file === 'string' &&
+    'tool' in obj &&
+    (obj.tool === '' || obj.tool === 'draft' || obj.tool === 'review')
   );
 }
+
 function initializeLTI(httpHandler: HttpHandler) {
   const provider = new Provider({
     database: LTI_DB,
@@ -63,8 +75,15 @@ function initializeLTI(httpHandler: HttpHandler) {
   // Initialize LTI provider and middleware
   // Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
 
+  provider.registerLtiRoute('/draft');
+  provider.registerLtiRoute('/review');
+
   provider.onResourceLink(async (context, request, response) => {
     if (context.idToken.launch) {
+      console.log('LTI launch request received:', {
+        launch: context.idToken.launch,
+        custom: context.idToken.launch.custom,
+      });
       // if LTI token is present
       if (context.idToken.launch.custom?.tool) {
         // if tool is specified in deep linking settings, redirect accordingly
@@ -100,6 +119,7 @@ function initializeLTI(httpHandler: HttpHandler) {
     // urlencoded({ extended: true }),
     // TODO validate(checkSchema({})),
     async (request, response) => {
+      console.log('Deep linking request body:', request.body);
       if (!isDeepLinkingRequestDTO(request.body)) {
         throw new BadRequestError('Invalid request body.');
       }
@@ -162,6 +182,7 @@ function initializeLTI(httpHandler: HttpHandler) {
       ];
       const form = await context.deepLinking.createDeepLinkingForm(items);
       // { message: 'Success' });
+      console.log('Deep linking form created:', form);
       response.html(form);
     }
   );
@@ -260,7 +281,8 @@ function initializeLTI(httpHandler: HttpHandler) {
     } catch (err) {
       console.error('Error during dynamic registration:', err);
       throw new ServiceUnavailableError(
-        'Error during dynamic registration. Please check the server logs for details.', { cause: err }
+        'Error during dynamic registration. Please check the server logs for details.',
+        { cause: err }
       );
     }
   });
@@ -330,7 +352,10 @@ lti_configuration_router.get(
     res.json({
       title: PRODUCT,
       description: 'myProse Editing and Review tools',
-      oidc_initiation_url: new URL('/lti/login' /*provider.loginRoute*/, LTI_HOSTNAME).toString(),
+      oidc_initiation_url: new URL(
+        '/lti/login' /*provider.loginRoute*/,
+        LTI_HOSTNAME
+      ).toString(),
       target_link_uri: LTI_HOSTNAME.toString(),
       scopes: [
         'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
@@ -384,7 +409,10 @@ lti_configuration_router.get(
           },
         },
       ],
-      public_jwk_url: new URL('/lti/keys' /*provider.keysRoute*/, LTI_HOSTNAME).toString(),
+      public_jwk_url: new URL(
+        '/lti/keys' /*provider.keysRoute*/,
+        LTI_HOSTNAME
+      ).toString(),
     });
   }
 );

@@ -1,5 +1,6 @@
+import { TelefuncContext } from '#lib/TelefuncContext.js';
 import { logger } from '#server/logger';
-import { Provider } from 'ltijs';
+import { getContext } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
 
 type ActivatePlatformResponse = {
@@ -22,16 +23,28 @@ export async function onActivatePlatform(
   active: boolean
 ): Promise<ActivatePlatformResponse> {
   getAuthorizedUser();
+  const { provider } = getContext<TelefuncContext>();
+  if (!provider) {
+    logger.error('Provider is not available in the context.');
+    return {
+      success: false,
+      message: 'Provider is not available in the context.',
+    };
+  }
   try {
     // const { Provider } = await import('ltijs');
-    const platform = await Provider.getPlatformById(platformId);
+    const platform = await provider.platformManager.getPlatformById(platformId);
     if (!platform) {
       return {
         success: false,
         message: `Platform with id ${platformId} not found`,
       };
     }
-    return { success: true, value: await platform.platformActive(active) };
+    const updatedPlatform = await provider.platformManager.updatePlatform(
+      platform,
+      { active }
+    );
+    return { success: true, value: updatedPlatform.active };
   } catch (error) {
     logger.error(`Error setting platform ${platformId} active status:`, error);
     return {

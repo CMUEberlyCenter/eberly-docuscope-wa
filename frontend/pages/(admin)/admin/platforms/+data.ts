@@ -1,23 +1,17 @@
 import type { PageContextServer } from 'vike/types';
-import { Provider } from 'ltijs';
 
-export async function data(_pageContext: PageContextServer) {
-  const platforms = await Promise.all(
-    (await Provider.getAllPlatforms()).map(async (ltiplatform, i) => {
-      const platformId = await ltiplatform.platformId();
-      const platformName = await ltiplatform.platformName();
-      const platformUrl = await ltiplatform.platformUrl();
-      return {
-        platformId:
-          typeof platformId === 'string' ? platformId : `unknown-${i}`,
-        platformName:
-          typeof platformName === 'string' ? platformName : `unknown-${i}`,
-        platformActive: await ltiplatform.platformActive(),
-        platformUrl:
-          typeof platformUrl === 'string' ? platformUrl : `unknown-${i}`,
-      };
-    })
-  );
+export async function data(pageContext: PageContextServer) {
+  const platforms =
+    (await pageContext.provider?.platformManager.getPlatforms())?.map(
+      ({ id, name, url, active }, i) => {
+        return {
+          platformId: typeof id === 'string' ? id : `unknown-${i}`,
+          platformName: typeof name === 'string' ? name : `unknown-${i}`,
+          platformActive: active,
+          platformUrl: typeof url === 'string' ? url : `unknown-${i}`,
+        };
+      }
+    ) ?? [];
 
   return {
     platforms,
