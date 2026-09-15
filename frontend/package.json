@@ -146,7 +146,6 @@
     "ltijs": "^7.0.0",
     "mammoth": "^1.12.3",
     "mongodb": "^7.6.0",
-    "multer": "^2.4.0",
     "node-html-parser": "^9.0.4",
     "patch-package": "^8.0.1",
     "react": "^19.3.0",

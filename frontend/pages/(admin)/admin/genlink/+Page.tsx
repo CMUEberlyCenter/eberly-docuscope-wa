@@ -33,13 +33,19 @@ import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "./+data";
-import { onClearSnapshotCache, onInsertWritingTask } from "./Page.telefunc";
+import {
+  onClearSnapshotCache,
+  onDeleteSnapshot,
+  onInsertSnapshot,
+  onInsertWritingTask,
+} from "./Page.telefunc";
 
 /** Page for generating links to writing tasks with optional document upload to generate previews. */
 export const Page: FC = () => {
   const { t } = useTranslation();
   const { t: tr } = useTranslation("review");
   const { snapshots, tasks } = useData<Data>();
+  const [mySnapshots, setMySnapshots] = useState(snapshots);
   const { settings } = usePageContext();
 
   const [data, setData] = useState<DbWritingTask[]>([]);
@@ -124,9 +130,10 @@ export const Page: FC = () => {
     }
   };
   const [document, setDocument] = useState<File | null>(null);
+  const [documentHtml, setDocumentHtml] = useState<string | null>(null);
   const [validDocument, setValidDocument] = useState(true); // Uploaded file validity.
   const [errorDocument, setErrorDocument] = useState(""); // Error messages for uploaded file.
-  const [enabledTools, setEnabledTools] = useState<string[]>([]);
+  const [enabledTools, setEnabledTools] = useState<string[]>([]); // FIXME type this as ReviewTool[]
 
   const onDocumentChange = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
@@ -180,6 +187,7 @@ export const Page: FC = () => {
 
       setErrorDocument("");
       setValidDocument(true);
+      setDocumentHtml(value);
       setDocument(file);
     } catch (err) {
       setValidDocument(false);
@@ -272,11 +280,31 @@ export const Page: FC = () => {
             <h5>{t("admin:genlink.document.title")}</h5>
             <p>{t("admin:genlink.document.description")}</p>
             <Form
-              method="POST"
-              action={"/api/v2/snapshot"}
-              encType="multipart/form-data"
-              target="_blank"
-              onSubmit={() => setTimeout(() => window.location.reload(), 100)}
+              onSubmit={async (event) => {
+                event.preventDefault();
+                if (!selected || !document || !documentHtml) {
+                  return;
+                }
+                try {
+                  const filename = document.name;
+
+                  const insert = await onInsertSnapshot(
+                    selected,
+                    documentHtml,
+                    filename,
+                    enabledTools
+                  );
+                  if (insert.success && insert.snapshot?.id) {
+                    window.open(`/snapshot/${insert.snapshot.id}`, "_blank");
+                    setMySnapshots((prev) => [...prev, insert.snapshot]);
+                  } else {
+                    console.error("Failed to insert snapshot:", insert.error);
+                    // TODO: display error to user in UI
+                  }
+                } catch (error) {
+                  console.error("Error inserting snapshot:", error);
+                }
+              }}
             >
               <input
                 type="hidden"
@@ -392,11 +420,11 @@ export const Page: FC = () => {
           </div>
         </Card.Body>
       </Card>
-      {snapshots.length > 0 && (
+      {mySnapshots.length > 0 && (
         <Card>
           <Card.Header>{t("admin:genlink.existing_snapshots")}</Card.Header>
           <ListGroup variant="flush">
-            {snapshots.map(({ id, task, filename, timestamp }) => (
+            {mySnapshots.map(({ id, task, filename, timestamp }) => (
               <ListGroup.Item key={`${id}`}>
                 <a href={`/snapshot/${id}`} target="_blank">
                   {task.info.name}: {filename} (
@@ -451,21 +479,16 @@ export const Page: FC = () => {
                     variant="icon"
                     className="text-danger"
                     onClick={() => {
-                      fetch(`/api/v2/snapshot/${id}`, { method: "DELETE" })
-                        .then((response) => {
-                          if (response.ok) {
-                            // Optionally, add logic to remove the deleted snapshot from the UI
-                            window.location.reload();
-                          } else {
-                            console.error(
-                              "Failed to delete snapshot",
-                              response.statusText
-                            );
-                          }
-                        })
-                        .catch((error) => {
-                          console.error("Error deleting snapshot:", error);
-                        });
+                      onDeleteSnapshot(id).then(({ success, value }) => {
+                        if (!success) {
+                          console.error("Failed to delete snapshot:", value);
+                        } else {
+                          setMySnapshots((prev) =>
+                            prev.filter((s) => s.id !== id)
+                          );
+                          // Optionally, add logic to remove the deleted snapshot from the UI
+                        }
+                      });
                     }}
                     title={t("admin:genlink.delete_snapshot")}
                   >

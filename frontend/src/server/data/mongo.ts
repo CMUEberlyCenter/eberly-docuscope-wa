@@ -60,6 +60,18 @@ type Snapshot = {
   analyses: Analysis[];
 };
 
+type PortableSnapshot = Omit<Snapshot, '_id'> & { id: string };
+/** Convert a Snapshot to a PortableSnapshot which replaces _id with id or the given id if _id is undefined. */
+export function toPortableSnapshot(
+  { _id, ...rest }: Snapshot,
+  id?: string
+): PortableSnapshot {
+  return {
+    ...rest,
+    id: _id?.toString() ?? id ?? '',
+  };
+}
+
 // Unused
 // export async function findAllSnapshots(): Promise<Snapshot[]> {
 //   const collection = client.db(MONGO_DB).collection<Snapshot>(SNAPSHOTS);
@@ -67,31 +79,36 @@ type Snapshot = {
 //   return snapshots;
 // }
 
+async function* generateAllSnapshots(): AsyncGenerator<PortableSnapshot> {
+  const db = await getDb();
+  const collection = db.collection<Snapshot>(SNAPSHOTS);
+  const cursor = collection.find<Snapshot>(
+    {},
+    {
+      projection: {
+        _id: 1,
+        filename: 1,
+        timestamp: 1,
+        'task.info.name': 1,
+        tool_config: 1,
+      },
+    }
+  );
+  for await (const snapshot of cursor) {
+    yield toPortableSnapshot(snapshot);
+  }
+}
+
 /**
  * Find all snapshots with minimal information.
  * Used for listing snapshots without loading full data.
  * @returns Array of snapshots with only _id, filename, timestamp, task.info.name, and tool_config.
  */
-export async function findAllSnapshotsBasic(): Promise<Snapshot[]> {
-  const db = await getDb();
-  const collection = db.collection<Snapshot>(SNAPSHOTS);
-  const snapshots = await collection
-    .find<Snapshot>(
-      {},
-      {
-        projection: {
-          filename: 1,
-          timestamp: 1,
-          'task.info.name': 1,
-          tool_config: 1,
-        },
-      }
-    )
-    .toArray();
-  return snapshots;
+export async function findAllSnapshotsBasic(): Promise<PortableSnapshot[]> {
+  return Array.fromAsync(generateAllSnapshots());
 }
 
-export async function findSnapshotById(id: string): Promise<Snapshot> {
+export async function findSnapshotById(id: string): Promise<PortableSnapshot> {
   const db = await getDb();
   const collection = db.collection<Snapshot>(SNAPSHOTS);
   if (!ObjectId.isValid(id) || id.length !== 24) {
@@ -105,7 +122,7 @@ export async function findSnapshotById(id: string): Promise<Snapshot> {
   if (!snapshot) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
-  return snapshot;
+  return toPortableSnapshot(snapshot);
 }
 export async function insertSnapshot(
   task: WritingTask,
@@ -114,7 +131,7 @@ export async function insertSnapshot(
   filename?: string,
   tool_config?: string[],
   analyses?: Analysis[]
-): Promise<ObjectId> {
+): Promise<PortableSnapshot> {
   tool_config = tool_config ?? [];
   analyses = analyses ?? [];
   const db = await getDb();
@@ -128,7 +145,12 @@ export async function insertSnapshot(
     analyses,
     timestamp: new Date(),
   });
-  return ins.insertedId;
+  const snapshot = await collection.findOne<Snapshot>({ _id: ins.insertedId });
+  if (!snapshot)
+    throw new ReferenceError(
+      `Snapshot ${ins.insertedId.toString()} not found after insertion.`
+    );
+  return toPortableSnapshot(snapshot);
 }
 /**
  * Delete a snapshot by its ID.

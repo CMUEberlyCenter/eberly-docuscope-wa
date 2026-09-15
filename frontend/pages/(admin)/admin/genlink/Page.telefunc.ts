@@ -1,18 +1,56 @@
+import { userLanguage } from '#lib/languageCode.js';
 import {
+  BadRequestError,
   errorToProblemDetails,
   UnprocessableContentError,
 } from '#lib/ProblemDetails.js';
 import { ReviewTool } from '#lib/ReviewResponse';
 import { validateWritingTask } from '#lib/schemaValidate.js';
-import { isWritingTask, type WritingTask } from '#lib/WritingTask.js';
+import {
+  DbWritingTask,
+  isWritingTask,
+  type WritingTask,
+} from '#lib/WritingTask.js';
 import {
   clearSnapshotAnalysesById,
   clearSnapshotAnalysisById,
+  deleteSnapshotById,
+  insertSnapshot,
   insertWritingTask,
 } from '#server/data/mongo';
+import { segmentText } from '#server/data/segmentText.js';
 import { logger } from '#server/logger';
 import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
+
+/**
+ * Insert a new writing task into the database.
+ * @param task The Writing Task JSON.
+ * @throws telefunc.Abort with status 403 if the user is not authorized.
+ */
+export async function onInsertWritingTask(task: WritingTask) {
+  getAuthorizedUser();
+  try {
+    if (!validateWritingTask(task)) {
+      throw new UnprocessableContentError(
+        validateWritingTask.errors ?? ['Unknown validation error.'],
+        'Invalid JSON'
+      );
+    }
+    if (!isWritingTask(task)) {
+      throw new UnprocessableContentError(
+        ['Failed type check.'],
+        'Invalid JSON'
+      );
+    }
+    // Do not need to check id for validity as it is clobbered in frontend
+    // with this id.
+    const id = (await insertWritingTask(task)).toString();
+    return { id };
+  } catch (error) {
+    return { error: errorToProblemDetails(error) };
+  }
+}
 
 type ClearSnapshotCacheResponse = {
   /** If the operation succeeded. */
@@ -26,6 +64,7 @@ type ClearSnapshotCacheResponse = {
  * @param id - snapshot id
  * @param tool - review tool identifier (or '*' for all tools)
  * @returns A promise resolving to the cache clearing response or an error.
+ * @throws telefunc.Abort with status 403 if the user is not authorized.
  */
 export async function onClearSnapshotCache(
   id: string,
@@ -58,26 +97,61 @@ export async function onClearSnapshotCache(
   }
 }
 
-export async function onInsertWritingTask(task: WritingTask) {
+/**
+ * Deletes a snapshot from the database.
+ * @param id database id of the snapshot to delete.
+ * @throws telefunc.Abort with status 403 if the user is not authorized.
+ */
+export async function onDeleteSnapshot(id: string) {
   getAuthorizedUser();
   try {
-    if (!validateWritingTask(task)) {
+    const value = await deleteSnapshotById(id);
+    return { success: true, value };
+  } catch (error) {
+    return { success: false, value: errorToProblemDetails(error) };
+  }
+}
+
+/**
+ * Inserts a new snapshot into the database.
+ * @param task Writing type from genlink page (includes _id)
+ * @param file Document contents as HTML string.
+ * @param filename Name of the uploaded file.
+ * @param tools List of enabled review tools.
+ * @returns A promise resolving to the inserted snapshot or an error.
+ * @throws telefunc.Abort with status 403 if the user is not authorized.
+ */
+export async function onInsertSnapshot(
+  task: DbWritingTask,
+  file: string,
+  filename: string,
+  tools: string[]
+) {
+  getAuthorizedUser();
+  try {
+    const { _id, ...taskWithoutId } = task; // Remove _id if present
+    if (!validateWritingTask(taskWithoutId)) {
       throw new UnprocessableContentError(
         validateWritingTask.errors ?? ['Unknown validation error.'],
-        'Invalid JSON'
+        'Invalid Writing Task JSON'
       );
     }
     if (!isWritingTask(task)) {
-      throw new UnprocessableContentError(
-        ['Failed type check.'],
-        'Invalid JSON'
-      );
+      throw new BadRequestError('Invalid Writing Task structure.');
     }
-    // Do not need to check id for validity as it is clobbered in frontend
-    // with this id.
-    const id = (await insertWritingTask(task)).toString();
-    return { id };
+    if (!file) {
+      throw new BadRequestError('No document uploaded.');
+    }
+    const segmented = await segmentText(file, userLanguage(task));
+    const snapshot = await insertSnapshot(
+      task,
+      file,
+      segmented,
+      filename,
+      tools
+    );
+    return { success: true, snapshot };
   } catch (error) {
-    return { error: errorToProblemDetails(error) };
+    return { success: false, error: errorToProblemDetails(error) };
   }
 }

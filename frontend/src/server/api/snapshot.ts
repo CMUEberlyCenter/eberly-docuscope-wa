@@ -1,13 +1,5 @@
-import { Request, Router } from 'express';
-import { body, param, query } from 'express-validator';
-import { convertToHtml } from 'mammoth';
-import multer from 'multer';
 import { userLanguage } from '#lib/languageCode';
-import {
-  BadRequestError,
-  ForbiddenError,
-  GatewayError,
-} from '#lib/ProblemDetails';
+import { ForbiddenError, GatewayError } from '#lib/ProblemDetails';
 import {
   Analysis,
   BasicReviewPrompts,
@@ -18,79 +10,68 @@ import {
   ReviewPrompt,
   ReviewResponse,
 } from '#lib/ReviewResponse';
-import {
-  getExpectationByIndex,
-  isEnabled,
-  isWritingTask,
-  WritingTask,
-} from '#lib/WritingTask';
-import { basicAuthMiddleware } from '../../utils/basicAuth';
+import { getExpectationByIndex, isEnabled } from '#lib/WritingTask';
+import { Request, Router } from 'express';
+import { param } from 'express-validator';
 import { doChat, reviewData } from '../data/chat';
-import {
-  clearSnapshotAnalysesById,
-  deleteSnapshotById,
-  findSnapshotById,
-  insertSnapshot,
-  updateSnapshotReviewsById,
-} from '../data/mongo';
+import { findSnapshotById, updateSnapshotReviewsById } from '../data/mongo';
 import { doOnTopic } from '../data/ontopic';
-import { segmentText } from '../data/segmentText';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 
 export const snapshot = Router();
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+// const storage = multer.memoryStorage();
+// const upload = multer({ storage });
 
-snapshot.post(
-  '/',
-  basicAuthMiddleware,
-  upload.single('document'),
-  validate(body('tool_config').isArray()),
-  validate(body('tool_config.*').isString()),
-  validate(
-    body('task')
-      .isString()
-      .custom((value) => isWritingTask(JSON.parse(value)))
-      .withMessage('Invalid writing task JSON.')
-  ),
-  async (request, response) => {
-    const { task, tool_config } = request.body;
-    const writingTask = JSON.parse(task) as WritingTask; // already validated in middleware
-    const tools = tool_config as string[];
-    if (!request.file) {
-      throw new BadRequestError('No document uploaded.');
-    }
-    if (
-      request.file.mimetype !==
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    ) {
-      throw new BadRequestError('Uploaded document is not a valid .docx file.');
-    }
-    // TODO: check file size limits
-    // TODO: handle image resizing server-side
-    const { value, messages } = await convertToHtml(
-      { buffer: request.file.buffer },
-      {
-        styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
-      }
-    );
-    if (messages.length) {
-      throw new BadRequestError(
-        `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
-      );
-    }
-    const segmented = await segmentText(value, userLanguage(writingTask));
-    const dbId = await insertSnapshot(
-      writingTask,
-      value,
-      segmented,
-      request.file.originalname,
-      tools
-    );
-    response.redirect(`/snapshot/${dbId.toString()}`);
-  }
-);
+// snapshot.post(
+//   '/',
+//   basicAuthMiddleware,
+//   upload.single('document'),
+//   validate(body('tool_config').isArray()),
+//   validate(body('tool_config.*').isString()),
+//   validate(
+//     body('task')
+//       .isString()
+//       .custom((value) => isWritingTask(JSON.parse(value)))
+//       .withMessage('Invalid writing task JSON.')
+//   ),
+//   async (request, response) => {
+//     const { task, tool_config } = request.body;
+//     const writingTask = JSON.parse(task) as WritingTask; // already validated in middleware
+//     const tools = tool_config as string[];
+//     if (!request.file) {
+//       throw new BadRequestError('No document uploaded.');
+//     }
+//     if (
+//       request.file.mimetype !==
+//       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+//     ) {
+//       throw new BadRequestError('Uploaded document is not a valid .docx file.');
+//     }
+//     // TODO: check file size limits
+//     // TODO: handle image resizing server-side
+//     const { value, messages } = await convertToHtml(
+//       { buffer: request.file.buffer },
+//       {
+//         styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
+//       }
+//     );
+//     if (messages.length) {
+//       throw new BadRequestError(
+//         `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
+//       );
+//     }
+//     const segmented = await segmentText(value, userLanguage(writingTask));
+//     const dbId = await insertSnapshot(
+//       writingTask,
+//       value,
+//       segmented,
+//       request.file.originalname,
+//       tools
+//     );
+//     response.redirect(`/snapshot/${dbId.toString()}`);
+//   }
+// );
 
 snapshot.get(
   '/:id',
@@ -98,22 +79,6 @@ snapshot.get(
   async (request: Request<{ id: string }>, response) => {
     const id = request.params.id;
     response.send(await findSnapshotById(id));
-  }
-);
-snapshot.delete(
-  '/:id',
-  basicAuthMiddleware,
-  validate(param('id').isMongoId()),
-  validate(query('cache_only').optional().isBoolean()),
-  async (request: Request<{ id: string }>, response) => {
-    const id = request.params.id;
-    const cache = request.query.cache_only === 'true';
-    if (cache) {
-      await clearSnapshotAnalysesById(id);
-    } else {
-      await deleteSnapshotById(id);
-    }
-    response.status(200).send();
   }
 );
 
