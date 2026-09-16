@@ -1,4 +1,4 @@
-import { PromptType } from '#server/model/prompt.js';
+import { PromptType } from '#server/model/prompt';
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { Db, MongoClient, ObjectId } from 'mongodb';
 import { Analysis, ReviewTool } from '../../lib/ReviewResponse';

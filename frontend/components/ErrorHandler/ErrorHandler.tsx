@@ -1,4 +1,3 @@
-import { Optional } from "#/index";
 import type { ErrorData } from "#/lib/ReviewResponse";
 import { ToolResult } from "#/lib/ToolResults";
 import type { FC } from "react";

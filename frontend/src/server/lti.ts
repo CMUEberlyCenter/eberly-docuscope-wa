@@ -20,24 +20,11 @@ import { LTI_DB, LTI_HOSTNAME, PLATFORMS_PATH, PRODUCT } from './settings';
 
 const LOGO = new URL('/logo.svg', LTI_HOSTNAME).toString();
 
-// Hack to ensure that LTI is only initialized once in hot reload environments.
-const LTI_SETUP_KEY = Symbol.for('myprose.lti.setup_complete');
-const globalRef = globalThis as typeof globalThis & {
-  [LTI_SETUP_KEY]?: boolean;
-};
-
 export async function ensureLTIInitialized(
   httpHandler: HttpHandler
 ): Promise<Provider> {
-  // if (
-  // process.env.NODE_ENV === 'production' ||
-  // !(LTI_SETUP_KEY in globalRef && globalRef[LTI_SETUP_KEY])
-  // ) {
-  // globalRef[LTI_SETUP_KEY] = true;
   const provider = initializeLTI(httpHandler);
-  // await Provider.deploy({ serverless: true });
-  // await registerPlatforms();
-  // }
+  await registerPlatforms(provider);
   return provider;
 }
 
@@ -77,8 +64,6 @@ function initializeLTI(httpHandler: HttpHandler) {
     },
     httpHandler,
   });
-  // Initialize LTI provider and middleware
-  // Provider.setup(LTI_KEY, LTI_DB, LTI_OPTIONS);
 
   provider.registerLtiRoute('/draft');
   provider.registerLtiRoute('/review');
@@ -286,25 +271,6 @@ function initializeLTI(httpHandler: HttpHandler) {
     }
   });
 
-  /**
-   * Endpoint to retrieve the Canvas LTI configuration for the tool.
-   */
-
-  // Provider.whitelist(
-  //   Provider.appRoute(),
-  //   /\w+\.html$/,
-  //   '/genlink', // Eventually to be moved to admin endpoint.  TODO: Public access via LTI only.
-  //   /draft/, // TODO: Eventually to be removed so only available in LTI
-  //   /review/, // TODO: Eventually to be removed so only available in LTI
-  //   /\/snapshot/, // Snapshot viewing.  TODO: This will eventually be the only public tool.
-  //   '/', // TODO: Eventually to be replaced by welcome page with no tools.
-  //   /locales/, // Localization files need to be public
-  //   /myprose/, // These should be the "public" tools.
-  //   /metrics/, // Prometheus metrics endpoint.
-  //   /lti/, // additional public lti "well-known" endpoints
-  //   /admin/, // Admin routes, security should be handled outside LTI
-  //   /_telefunc/ // Telefunc endpoint, should be protected in the future if used for non-public actions.
-  // );
   return provider;
 }
 
@@ -340,6 +306,9 @@ async function registerPlatforms(provider: Provider) {
 }
 
 export const lti_configuration_router = Router();
+/**
+ * Endpoint to retrieve the Canvas LTI configuration JSON for the tool.
+ */
 lti_configuration_router.get(
   '/lti/configuration',
   async (_req: Request, res: Response) => {

@@ -1,4 +1,3 @@
-import { Optional } from "#/index";
 import { userLanguage } from "#/lib/languageCode";
 import { Analysis, OptionalReviewData, ReviewTool } from "#/lib/ReviewResponse";
 import { WritingTask } from "#/lib/WritingTask";

@@ -7,9 +7,9 @@ import {
 import { type NotesRequest } from '#lib/Requests';
 import { type TelefuncContext } from '#lib/TelefuncContext';
 import { anthropic, ErrorMessage } from '#server/data/chat';
-import { insertLog } from '#server/data/mongo.js';
+import { insertLog } from '#server/data/mongo';
 import { logger } from '#server/logger';
-import { grade, isStudent, isTestUser } from '#server/model/lti.js';
+import { grade, isStudent, isTestUser } from '#server/model/lti';
 import { type NotesPrompt } from '#server/model/prompt';
 import { ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '#server/settings';
 import format from 'string-format';

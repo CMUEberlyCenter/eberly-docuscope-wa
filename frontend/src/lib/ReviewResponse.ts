@@ -1,4 +1,3 @@
-import { Optional } from '..';
 import { type OnTopicData } from './OnTopicData';
 
 export type ReviewPrompt =

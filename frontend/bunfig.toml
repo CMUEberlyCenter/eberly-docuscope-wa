@@ -1,3 +1,0 @@
-[test]
-preload = ["./test/happydom.ts", "./test/testing-library.ts", "./test/global-mocks.ts"]
-plugins = ["bun-plugin-svgr"]

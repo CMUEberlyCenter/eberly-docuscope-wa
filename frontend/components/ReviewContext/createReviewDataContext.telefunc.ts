@@ -1,7 +1,6 @@
-import { Optional } from '#/index';
-import { type TelefuncContext } from '#lib/TelefuncContext.js';
-import { logger } from '#server/logger.js';
-import { grade, isStudent, isTestUser } from '#server/model/lti.js';
+import { type TelefuncContext } from '#lib/TelefuncContext';
+import { logger } from '#server/logger';
+import { grade, isStudent, isTestUser } from '#server/model/lti';
 import { getContext } from 'telefunc';
 
 type ReviewGradeData = {

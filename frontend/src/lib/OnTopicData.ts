@@ -1,5 +1,3 @@
-import type { Optional } from '..';
-
 type CoherenceParagraph = {
   first_left_sent_id: number;
   is_left: boolean;

@@ -1,4 +1,4 @@
-import { TelefuncContext } from '#lib/TelefuncContext.js';
+import { TelefuncContext } from '#lib/TelefuncContext';
 import { logger } from '#server/logger';
 import { Abort, getContext } from 'telefunc';
 

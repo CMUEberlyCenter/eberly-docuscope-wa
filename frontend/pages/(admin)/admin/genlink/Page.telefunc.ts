@@ -1,16 +1,16 @@
-import { userLanguage } from '#lib/languageCode.js';
+import { userLanguage } from '#lib/languageCode';
 import {
   BadRequestError,
   errorToProblemDetails,
   UnprocessableContentError,
 } from '#lib/ProblemDetails.js';
 import { ReviewTool } from '#lib/ReviewResponse';
-import { validateWritingTask } from '#lib/schemaValidate.js';
+import { validateWritingTask } from '#lib/schemaValidate';
 import {
-  DbWritingTask,
   isWritingTask,
-  type WritingTask,
-} from '#lib/WritingTask.js';
+  type PortableDbWritingTask,
+  type PortableWritingTask,
+} from '#lib/WritingTask';
 import {
   clearSnapshotAnalysesById,
   clearSnapshotAnalysisById,
@@ -18,7 +18,7 @@ import {
   insertSnapshot,
   insertWritingTask,
 } from '#server/data/mongo';
-import { segmentText } from '#server/data/segmentText.js';
+import { segmentText } from '#server/data/segmentText';
 import { logger } from '#server/logger';
 import { Abort } from 'telefunc';
 import { getAuthorizedUser } from '../getAuthorizedUser';
@@ -28,7 +28,7 @@ import { getAuthorizedUser } from '../getAuthorizedUser';
  * @param task The Writing Task JSON.
  * @throws telefunc.Abort with status 403 if the user is not authorized.
  */
-export async function onInsertWritingTask(task: WritingTask) {
+export async function onInsertWritingTask(task: PortableWritingTask) {
   getAuthorizedUser();
   try {
     if (!validateWritingTask(task)) {
@@ -122,13 +122,14 @@ export async function onDeleteSnapshot(id: string) {
  * @throws telefunc.Abort with status 403 if the user is not authorized.
  */
 export async function onInsertSnapshot(
-  task: DbWritingTask,
+  task: PortableDbWritingTask,
   file: string,
   filename: string,
   tools: string[]
 ) {
   getAuthorizedUser();
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, ...taskWithoutId } = task; // Remove _id if present
     if (!validateWritingTask(taskWithoutId)) {
       throw new UnprocessableContentError(

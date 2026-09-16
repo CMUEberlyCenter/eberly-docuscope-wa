@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import { FC } from "react";
 import { Nav, NavProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -14,10 +15,10 @@ export const ReviewToolCategoryNav: FC<NavProps> = ({
   const { t } = useTranslation("review");
   return (
     <Nav
-      variant="underline"
+      variant={variant || "underline"}
       activeKey={activeKey}
       onSelect={onSelect}
-      className="justify-content-around inverse-color"
+      className={classNames(className, "justify-content-around inverse-color")}
       {...props}
     >
       <Nav.Item>

@@ -4,8 +4,7 @@ import { enhance } from '@universal-middleware/core';
 export const sessionMiddleware = enhance(
   async (_request, context, runtime) => {
     if (runtime.adapter === 'express') {
-      const { session, locals } = runtime.express.req;
-      session.token = locals?.token; // added to session for use in telefunc's
+      const { session } = runtime.express.req;
       return { ...context, session };
     }
   },

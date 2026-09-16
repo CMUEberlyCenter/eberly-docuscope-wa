@@ -1,8 +1,6 @@
 import type { Analysis } from './lib/ReviewResponse';
 import type { WritingTask } from './lib/WritingTask';
 
-type Optional<T> = T | undefined | null;
-
 declare module 'express-session' {
   interface SessionData {
     document?: string;
@@ -12,6 +10,3 @@ declare module 'express-session' {
     analysis?: Analysis[];
   }
 }
-
-type JsonValue =
-  string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];

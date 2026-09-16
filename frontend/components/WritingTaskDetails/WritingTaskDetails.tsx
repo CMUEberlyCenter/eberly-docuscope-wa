@@ -1,4 +1,3 @@
-import type { Optional } from "#/index";
 import type { WritingTask } from "#/lib/WritingTask";
 import { type FC, useState } from "react";
 import { Form, Modal, type ModalProps } from "react-bootstrap";

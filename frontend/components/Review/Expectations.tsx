@@ -1,5 +1,4 @@
 import { trackScreenView } from "#/client/tracking";
-import { Optional } from "#/index";
 import {
   ErrorDataError,
   isErrorData,

@@ -1,4 +1,3 @@
-import type { Optional } from "#/index";
 import type { WritingTask } from "#/lib/WritingTask";
 import classNames from "classnames";
 import type { FC, HTMLProps } from "react";

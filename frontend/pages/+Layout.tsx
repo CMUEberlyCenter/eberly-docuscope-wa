@@ -3,6 +3,7 @@
  * Mostly responsible for importing global styles and providing a wrapper for
  * the entire app.
  */
+import "bootstrap";
 import { type FC, type ReactNode } from "react";
 import "./index.scss";
 

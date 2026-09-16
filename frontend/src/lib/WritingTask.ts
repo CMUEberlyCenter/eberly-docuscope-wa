@@ -1,5 +1,3 @@
-import type { Optional } from '../index.d';
-
 /** Test if the argument is an array of strings. */
 function isStringArray(arr: unknown): arr is string[] {
   return arr instanceof Array && arr.every((item) => typeof item === 'string');
@@ -318,6 +316,32 @@ export type WritingTask = {
 };
 
 export type DbWritingTask = WritingTask & { _id?: string; modified?: string };
+/** Hack to deal with telefunc's auto-shield generation not handling recursive type definitions. */
+type PortableRules = {
+  name: string;
+  overview: string;
+  rules: {
+    /** Rule name, used for rule lookup. */
+    name: string;
+    /** Human readable description of the rule. */
+    description: string;
+    topics?: Topic[];
+    examples?: string;
+    type: string;
+    is_group: boolean;
+    children: unknown[]; // Alternatively, could have a fixed depth, but this is more flexible.
+    cv_description?: string;
+    /**
+     * Parent rule name.
+     *
+     * @TJS-type ["string", "null"]
+     */
+    parent?: string | null;
+    sentenceCount?: number;
+  }[];
+};
+export type PortableDbWritingTask = DbWritingTask & { rules: PortableRules };
+export type PortableWritingTask = WritingTask & { rules: PortableRules };
 
 /** Type guard for WritingTask. */
 export function isWritingTask(

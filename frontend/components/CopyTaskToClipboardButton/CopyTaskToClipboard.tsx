@@ -1,4 +1,3 @@
-import { Optional } from "#/index";
 import { WritingTask } from "#/lib/WritingTask";
 import { FC } from "react";
 import { Button, ButtonProps } from "react-bootstrap";

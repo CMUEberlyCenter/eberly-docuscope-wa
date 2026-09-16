@@ -1,9 +1,9 @@
-import { isWritingTask, WritingTask } from '#lib/WritingTask.js';
+import { isWritingTask, WritingTask } from '#lib/WritingTask';
 import {
   findAllPublicWritingTasks,
   findWritingTaskById,
 } from '#server/data/mongo';
-import { logger } from '#server/logger.js';
+import { logger } from '#server/logger';
 import {
   isContentDeveloper,
   isInstructor,

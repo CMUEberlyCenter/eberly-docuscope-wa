@@ -1,4 +1,3 @@
-import type { Optional } from "#/index";
 import type { Rule, WritingTask } from "#/lib/WritingTask";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import classnames from "classnames";

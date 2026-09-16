@@ -91,7 +91,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         }
       }
     },
-    [writingTask]
+    [ltik, writingTask]
   );
   const onTool = useCallback(
     (tool: Tool) => {

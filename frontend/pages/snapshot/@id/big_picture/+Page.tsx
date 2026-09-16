@@ -1,4 +1,4 @@
-import { NullTool } from "#components/Review/NullTool.js";
+import { NullTool } from "#components/Review/NullTool";
 import { FC } from "react";
 import { useTranslation } from "react-i18next";
 

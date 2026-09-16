@@ -6,12 +6,17 @@ import { Telefunc } from 'telefunc/node';
 export const telefuncHandler = (provider: Provider) => {
   const telefunc = new Telefunc();
   return enhance(
+    // TODO: add authentication check
     async (request, context, runtime) => {
+      const sessionId =
+        runtime.adapter === 'express'
+          ? runtime.express.req.sessionId
+          : undefined;
       const httpResponse = await telefunc.serve({
         request,
         context: {
           provider,
-          sessionId: request.sessionId,
+          sessionId,
           ...context,
           ...runtime,
         },
