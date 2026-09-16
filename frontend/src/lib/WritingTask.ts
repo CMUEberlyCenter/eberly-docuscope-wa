@@ -262,6 +262,7 @@ type Rules = {
   /** List of top-level rules. */
   rules: Rule[];
 };
+/** Type guard for Rules. */
 function isRules(rules: unknown): rules is Rules {
   return (
     !!rules &&
@@ -280,6 +281,7 @@ type Impressions = {
   common_clusters: string[];
   rare_clusters: string[];
 };
+/** Type guard for Impressions. */
 function isImpressions(imp: unknown): imp is Impressions {
   return (
     !!imp &&
@@ -331,11 +333,6 @@ type PortableRules = {
     is_group: boolean;
     children: unknown[]; // Alternatively, could have a fixed depth, but this is more flexible.
     cv_description?: string;
-    /**
-     * Parent rule name.
-     *
-     * @TJS-type ["string", "null"]
-     */
     parent?: string | null;
     sentenceCount?: number;
   }[];
@@ -359,6 +356,7 @@ export function isWritingTask(
   );
 }
 
+/** Test if two WritingTask objects are equivalent. */
 export function equivalentWritingTasks(
   a: Optional<WritingTask>,
   b: Optional<WritingTask>
@@ -374,8 +372,3 @@ export function equivalentWritingTasks(
     JSON.stringify(a.rules) === JSON.stringify(b.rules)
   );
 }
-
-// export const WritingTaskSchema = {
-//   'rules.name': { isString: { errorMessage: 'Invalid rules.name'}},
-//   'rules.info.name': { isString: { errorMessage}}
-// }

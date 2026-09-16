@@ -1,5 +1,5 @@
 import { deserializeHtmlText } from "#/client/slate";
-import type { ToolResult } from "#/lib/ToolResults";
+import type { DraftToolResult } from "#lib/DraftToolResults";
 import AIResponseIcon from "#assets/icons/ai_icon.svg?react";
 import YourInputIcon from "#assets/icons/YourInput.svg?react";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
@@ -49,7 +49,7 @@ export const ToolButton: FC<ToolButtonProps> = ({
   </OverlayTrigger>
 );
 
-type ToolProp = { tool?: ToolResult | null };
+type ToolProp = { tool?: DraftToolResult | null };
 
 /** Component for displaying the users input selected for this tool. */
 const ToolInput: FC<ToolProp> = ({ tool }) => {
@@ -79,7 +79,7 @@ const ToolInput: FC<ToolProp> = ({ tool }) => {
 };
 
 type ToolResponseProps = HTMLProps<HTMLDivElement> &
-  ToolProp & { text?: string; regenerate?: (tool: ToolResult) => void };
+  ToolProp & { text?: string; regenerate?: (tool: DraftToolResult) => void };
 /** Component for displaying the LLM response with the appropriate header */
 const ToolResponse: FC<ToolResponseProps> = ({
   tool,
@@ -176,9 +176,9 @@ const ToolPaste: FC<ToolPasteProps> = ({ text }) => {
 /** Component for displaying tool pending and results */
 export const ToolDisplay: FC<{
   title: string;
-  results: ToolResult;
+  results: DraftToolResult;
   onBookmark?: () => void;
-  retry?: (prev: ToolResult) => Promise<void>;
+  retry?: (prev: DraftToolResult) => Promise<void>;
   children: ReactNode;
 }> = ({ results, title, onBookmark, retry, children }) => {
   const { t } = useTranslation();

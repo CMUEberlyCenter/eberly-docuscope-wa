@@ -1,6 +1,6 @@
 import { resolveLanguageCode } from '#lib/languageCode';
 import {
-  BadRequest,
+  badRequest,
   ChatStopError,
   errorToProblemDetails,
 } from '#lib/ProblemDetails';
@@ -20,7 +20,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const { notes, user_lang, ltik } = data;
   let score = 0;
   if (!notes || notes.trim() === '') {
-    return { error: BadRequest('No text provided.', 'empty_input') };
+    return { error: badRequest('No text provided.', 'empty_input') };
   }
   const {
     acceptLanguage,
@@ -42,7 +42,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const limit = settings.select_word_limit;
   if (wordCount > limit) {
     return {
-      error: BadRequest(
+      error: badRequest(
         'Submitted input exceeds the maximum word count.',
         'word_count_exceeded',
         { count: wordCount, limit }

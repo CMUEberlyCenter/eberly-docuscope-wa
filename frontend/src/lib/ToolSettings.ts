@@ -55,7 +55,6 @@ export const DEFAULT: Settings = {
   select_word_limit: SELECT_WORD_COUNT_LIMIT,
   notes2prose: true,
   notes2bullets: true,
-  // assess_expectation: false,
 
   civil_tone: false,
   credibility: true,
@@ -68,9 +67,6 @@ export const DEFAULT: Settings = {
   sentence_density: true,
   sources: true,
   term_matrix: true,
-
-  // flow: false,
-  // copyedit: false,
 
   // docuscope: false,
   // impressions: false,

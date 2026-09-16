@@ -124,44 +124,6 @@ export function isContentDeveloper(token: Optional<IdToken>): boolean {
 
 const MAX_SCORE = 1.0; // Using undefined and 1 (used at least one tool)
 
-// const createLineItem = async (
-//   gradeService: GradeService,
-//   token: IdToken
-// ): Promise<string> => {
-//   try {
-//     // Check if a line item already exists for this resource link
-//     const response = await gradeService.getLineItems(token, {
-//       resourceLinkId: true,
-//     });
-//     const lineItemId = response.lineItems.at(0)?.id;
-//     if (lineItemId) {
-//       // If a line item already exists for this resource link, use it.
-//       return lineItemId;
-//     }
-//     const newLineItem = await gradeService.createLineItem(token, {
-//       scoreMaximum: MAX_SCORE,
-//       label: 'myProse Score',
-//       resourceId: token.platformContext.resource.id,
-//     });
-//     return newLineItem.id!;
-//   } catch (err) {
-//     logger.error('Error creating line item:', { error: err });
-//     throw new Error('Failed to create line item for grade submission.', {
-//       cause: err,
-//     });
-//   }
-// };
-
-// const getLineItemId = async (
-//   gradeService: GradeService,
-//   token: IdToken
-// ): Promise<string> => {
-//   return (
-//     token.platformContext.endpoint?.lineitem ||
-//     createLineItem(gradeService, token)
-//   );
-// };
-
 export const startGrading = async (context: Optional<LaunchContext>) => {
   if (!context?.grading?.isAvailable()) return null;
   const { lineItems } = await context.grading.getLineItems();
@@ -178,30 +140,15 @@ export const startGrading = async (context: Optional<LaunchContext>) => {
     gradingProgress: 'NotReady',
   });
 };
-//   const existingGrade = await getGrade(gradeService, token);
-//   if (existingGrade) {
-//     // Don't update the grade if it already exists.
-//     return;
-//   }
-//   const lineItemId = await getLineItemId(gradeService, token);
-//   const gradeObj: Score = {
-//     userId: token.user,
-//     activityProgress: 'InProgress',
-//     gradingProgress: 'NotReady',
-//   };
-//   return gradeService.submitScore(token, lineItemId, gradeObj);
-// };
 
 export const grade = async (
   context: Optional<LaunchContext>,
-  // token: Optional<IdToken>,
   score: number,
   customData?: JsonValue
 ) => {
   if (!context?.grading?.isAvailable()) {
     return null;
   }
-  // if (!token) return null;
   // Check if a line item already exists for this resource link, and if so, get the existing grade.
   const { lineItems } = await context.grading.getLineItems(); // should be singular for student.
   const results = await Promise.all(

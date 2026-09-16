@@ -20,7 +20,7 @@ type ProblemDetails<Details = string> = {
 /** File Not Found Error */
 export class FileNotFoundError extends Error {}
 /** Generate File Not Found message. */
-export const FileNotFound = (
+const fileNotFound = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -36,7 +36,7 @@ export const FileNotFound = (
 /** Forbidden Error */
 export class ForbiddenError extends Error {}
 /** Generate Forbidden message. */
-const Forbidden = (
+const forbidden = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -50,7 +50,7 @@ const Forbidden = (
 });
 
 /** Generate Internal Server Error message. */
-export const InternalServerError = (
+const internalServerError = (
   err: Error | string | unknown,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -72,7 +72,7 @@ export const InternalServerError = (
 export class BadRequestError extends Error {}
 
 /** Generate Bad Request message. */
-export const BadRequest = (
+export const badRequest = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -86,7 +86,7 @@ export const BadRequest = (
 });
 
 /** Generate Unauthorized message. */
-export const Unauthorized = (
+const unauthorized = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -99,7 +99,7 @@ export const Unauthorized = (
   ...extensions,
 });
 
-const ContentTooLarge = (
+const contentTooLarge = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -124,7 +124,7 @@ export class UnprocessableContentError extends Error {
 }
 
 /** Generate Unprocessable Content message. */
-export const UnprocessableContent = (
+const unprocessableContent = (
   err: Error | string,
   instance?: string,
   extensions?: { [key: string]: unknown }
@@ -140,7 +140,7 @@ export const UnprocessableContent = (
 
 export class GatewayError extends Error {}
 
-const BadGateway = (
+const badGateway = (
   err: Error | string,
   instance?: string
 ): ProblemDetails => ({
@@ -152,7 +152,7 @@ const BadGateway = (
   errors: err instanceof APIError ? err.error?.response?.status : undefined,
 });
 
-const GatewayTimeout = (
+const gatewayTimeout = (
   err: Error | string,
   instance?: string
 ): ProblemDetails => ({
@@ -164,7 +164,7 @@ const GatewayTimeout = (
 });
 
 export class ServiceUnavailableError extends Error {}
-const ServiceUnavailable = (
+const serviceUnavailable = (
   err: Error | string,
   instance?: string
 ): ProblemDetails => ({
@@ -183,41 +183,41 @@ export const errorToProblemDetails = (
   extensions?: { [key: string]: unknown }
 ): ProblemDetails => {
   if (err instanceof BadRequestError) {
-    return BadRequest(err, instance, extensions);
+    return badRequest(err, instance, extensions);
   }
   if (err instanceof ForbiddenError) {
-    return Forbidden(err, instance, extensions);
+    return forbidden(err, instance, extensions);
   }
   if (err instanceof FileNotFoundError) {
-    return FileNotFound(err, instance, extensions);
+    return fileNotFound(err, instance, extensions);
   }
   if (err instanceof ReferenceError) {
-    return FileNotFound(err, instance, extensions);
+    return fileNotFound(err, instance, extensions);
   }
   if (err instanceof SyntaxError) {
-    return UnprocessableContent(err, instance, extensions);
+    return unprocessableContent(err, instance, extensions);
   }
   if (err instanceof UnprocessableContentError) {
-    return UnprocessableContent(err, instance, extensions);
+    return unprocessableContent(err, instance, extensions);
   }
   if (err instanceof GatewayError) {
-    return BadGateway(err, instance);
+    return badGateway(err, instance);
   }
   if (err instanceof APIUserAbortError) {
-    return BadGateway(err, instance);
+    return badGateway(err, instance);
   }
   if (err instanceof APIConnectionTimeoutError) {
-    return GatewayTimeout(err, instance);
+    return gatewayTimeout(err, instance);
   }
   if (err instanceof ServiceUnavailableError) {
-    return ServiceUnavailable(err, instance);
+    return serviceUnavailable(err, instance);
   }
   if (err instanceof APIError) {
     if (err.error?.response?.status === 400) {
-      return ServiceUnavailable(err, instance);
+      return serviceUnavailable(err, instance);
     }
     if (err.error?.response?.status === 413) {
-      return ContentTooLarge(err, instance);
+      return contentTooLarge(err, instance);
     }
     // https://docs.claude.com/en/api/errors
     // 401 authentication_error
@@ -226,16 +226,16 @@ export const errorToProblemDetails = (
     // 429 rate_limit_error
     // 500 api_error
     // 529 overloaded_error
-    return ServiceUnavailable(err, instance);
+    return serviceUnavailable(err, instance);
   }
   if (err instanceof ChatStopError) {
-    return ServiceUnavailable(err, instance);
+    return serviceUnavailable(err, instance);
   }
   logger.error(
     `Unhandled error: ${err instanceof Error ? err.message : err}`,
     err
   );
-  return InternalServerError(err, instance, extensions);
+  return internalServerError(err, instance, extensions);
 };
 /** Express error handling middleware */
 export const handleError = (
@@ -249,3 +249,12 @@ export const handleError = (
   const details = errorToProblemDetails(err);
   response.status(details.status || 500).json(details);
 };
+
+// Export for testing purposes only.
+if (process.env.NODE_ENV === 'test') {
+  module.exports._testOnly = {
+    fileNotFound,
+    unauthorized,
+    unprocessableContent,
+  };
+}

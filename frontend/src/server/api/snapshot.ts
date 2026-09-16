@@ -19,59 +19,8 @@ import { doOnTopic } from '../data/ontopic';
 import { getSettings } from '../getSettings';
 import { validate } from '../model/validate';
 
+/** Router for handling snapshot-related API endpoints. */
 export const snapshot = Router();
-// const storage = multer.memoryStorage();
-// const upload = multer({ storage });
-
-// snapshot.post(
-//   '/',
-//   basicAuthMiddleware,
-//   upload.single('document'),
-//   validate(body('tool_config').isArray()),
-//   validate(body('tool_config.*').isString()),
-//   validate(
-//     body('task')
-//       .isString()
-//       .custom((value) => isWritingTask(JSON.parse(value)))
-//       .withMessage('Invalid writing task JSON.')
-//   ),
-//   async (request, response) => {
-//     const { task, tool_config } = request.body;
-//     const writingTask = JSON.parse(task) as WritingTask; // already validated in middleware
-//     const tools = tool_config as string[];
-//     if (!request.file) {
-//       throw new BadRequestError('No document uploaded.');
-//     }
-//     if (
-//       request.file.mimetype !==
-//       'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-//     ) {
-//       throw new BadRequestError('Uploaded document is not a valid .docx file.');
-//     }
-//     // TODO: check file size limits
-//     // TODO: handle image resizing server-side
-//     const { value, messages } = await convertToHtml(
-//       { buffer: request.file.buffer },
-//       {
-//         styleMap: 'u => u', // Preserve underline styles (str | str[] | regexp)
-//       }
-//     );
-//     if (messages.length) {
-//       throw new BadRequestError(
-//         `Error converting document to HTML: ${messages.map((m) => m.message).join('; ')}`
-//       );
-//     }
-//     const segmented = await segmentText(value, userLanguage(writingTask));
-//     const dbId = await insertSnapshot(
-//       writingTask,
-//       value,
-//       segmented,
-//       request.file.originalname,
-//       tools
-//     );
-//     response.redirect(`/snapshot/${dbId.toString()}`);
-//   }
-// );
 
 snapshot.get(
   '/:id',
@@ -252,9 +201,3 @@ snapshot.get(
     response.json(data);
   }
 );
-
-// UNUSED API endpoint to get all previews
-// preview.get('/', async (_request, response) => {
-//   const previews = await findAllPreviews();
-//   response.send(previews);
-// });

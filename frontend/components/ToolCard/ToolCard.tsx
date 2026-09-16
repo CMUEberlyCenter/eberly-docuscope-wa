@@ -1,7 +1,7 @@
 import { serialize, serializeHtml } from "#/client/slate";
 import { trackScreenView } from "#/client/tracking";
 import { NotesRequest } from "#/lib/Requests";
-import type { Tool, ToolResult } from "#/lib/ToolResults";
+import type { DraftTool, DraftToolResult } from "#lib/DraftToolResults";
 import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "#assets/icons/Highlight.svg?react";
@@ -41,13 +41,13 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
   const { settings, ltik } = usePageContext();
-  const [currentTool, setCurrentTool] = useState<ToolResult | null>(null);
+  const [currentTool, setCurrentTool] = useState<DraftToolResult | null>(null);
   // const [history, setHistory] = useState<ToolResult[]>([]);
   const selectionLimit = settings?.select_word_limit ?? 250;
 
   const editor = useSlate();
   const doTool = useCallback(
-    async (data: ToolResult) => {
+    async (data: DraftToolResult) => {
       setCurrentTool(data);
       try {
         if (data.input.text.trim() === "") {
@@ -94,7 +94,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
     [ltik, writingTask]
   );
   const onTool = useCallback(
-    (tool: Tool) => {
+    (tool: DraftTool) => {
       if (editor.selection) {
         const fragment = Editor.fragment(editor, editor.selection);
         const text = serialize(fragment);
@@ -162,7 +162,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
     [editor, doTool, selectionLimit]
   ); // Does this need to be wrapped in useCallback?
   const retry = useCallback(
-    async (previous: ToolResult) =>
+    async (previous: DraftToolResult) =>
       doTool({
         ...previous,
         datetime: new Date(),

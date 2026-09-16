@@ -30,28 +30,6 @@ export type ReviewTool =
   | 'ontopic'
   | 'docuscope';
 
-type GeneralAssessment = {
-  assessment: {
-    /** A brief comment on the strenghts. */
-    strengths: string;
-    /** A brief comment on the weaknesses. */
-    weaknesses: string;
-  };
-};
-
-/** Check if the data has a valid general assessment. */
-export function isAssessment(data: unknown): data is GeneralAssessment {
-  return (
-    !!data &&
-    typeof data === 'object' &&
-    'assessment' in data &&
-    !!data.assessment &&
-    typeof data.assessment === 'object' &&
-    'strengths' in data.assessment &&
-    'weaknesses' in data.assessment
-  );
-}
-
 /** List of identified civility issues in the text. */
 type CivilToneOutput = {
   /** Identified inappropriate text segment from the input text. */
@@ -181,7 +159,7 @@ type LinesOfArgumentsOutput = {
   sent_ids?: string[];
   /** List of identified claims that supports the thesis. */
   claims: Claim[];
-} & Partial<GeneralAssessment>;
+};
 // function isLinesOfArgumentsOutput(
 //   data: unknown
 // ): data is LinesOfArgumentsOutput {

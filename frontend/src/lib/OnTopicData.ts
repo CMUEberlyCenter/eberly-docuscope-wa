@@ -134,6 +134,7 @@ type ClarityData = Array<
 //         typeof item[3] === 'boolean')
 //   );
 
+/** Form of on-topic results data. */
 export type OnTopicData = {
   clarity?: ClarityData;
   coherence?: CoherenceData;

@@ -1,5 +1,5 @@
 import type { ErrorData } from "#/lib/ReviewResponse";
-import { ToolResult } from "#/lib/ToolResults";
+import { DraftToolResult } from "#lib/DraftToolResults";
 import type { FC } from "react";
 import { Alert, type AlertProps } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
@@ -55,7 +55,7 @@ export function checkReviewResponse(response: Response): Optional<ErrorData> {
  * @param param0.tool - The tool result containing error information.
  * @returns
  */
-export const ToolErrorHandler: FC<{ tool: ToolResult }> = ({ tool }) => {
+export const ToolErrorHandler: FC<{ tool: DraftToolResult }> = ({ tool }) => {
   const { t } = useTranslation();
   if (!tool.error) {
     return null;

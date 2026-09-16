@@ -108,6 +108,7 @@ export async function findAllSnapshotsBasic(): Promise<PortableSnapshot[]> {
   return Array.fromAsync(generateAllSnapshots());
 }
 
+/** Retrieve a snapshot by its ID. */
 export async function findSnapshotById(id: string): Promise<PortableSnapshot> {
   const db = await getDb();
   const collection = db.collection<Snapshot>(SNAPSHOTS);
@@ -124,6 +125,16 @@ export async function findSnapshotById(id: string): Promise<PortableSnapshot> {
   }
   return toPortableSnapshot(snapshot);
 }
+
+/**
+ * Insert a new snapshot.
+ * @param task the writing task associated with the snapshot.
+ * @param file the htmlized snapshot file content.
+ * @param segmented the segmented content of the snapshot file.
+ * @param filename the name of the snapshot file.
+ * @param tool_config the list of available tools configured for the snapshot.
+ * @param analyses the list of completed analyses.
+ */
 export async function insertSnapshot(
   task: WritingTask,
   file: string,
@@ -152,6 +163,7 @@ export async function insertSnapshot(
     );
   return toPortableSnapshot(snapshot);
 }
+
 /**
  * Delete a snapshot by its ID.
  * @param id the identifier for the snapshot to delete.
@@ -210,7 +222,7 @@ export async function updateSnapshotReviewsById(
 }
 
 /**
- *
+ * Clear all analyses for a snapshot by its ID.
  * @param id Analysis database id.
  * @returns database id
  * @throws RefereceError if id is not found.
@@ -237,6 +249,12 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
   return upd._id;
 }
 
+/**
+ * Clear the analysis for a specific tool for a snapshot by its ID.
+ * @param id Snapshot database id.
+ * @param tool tool name to clear analysis for.
+ * @returns The id of the updated snapshot.
+ */
 export async function clearSnapshotAnalysisById(
   id: string | ObjectId,
   tool: ReviewTool
@@ -267,7 +285,6 @@ export async function clearSnapshotAnalysisById(
 /**
  * Retrieves a given writing task specification from the database.
  * @param id the identifier for the desired writing task specification.
- * @returns
  */
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
   const collection = (await getDb()).collection(WRITING_TASKS);
@@ -556,6 +573,8 @@ async function* generateLogData(): AsyncGenerator<AggregateLogData> {
     yield doc;
   }
 }
+
+/** Retrieve all of the aggregate log data. */
 export function getLogData(): Promise<AggregateLogData[]> {
   return Array.fromAsync(generateLogData());
 }
@@ -638,6 +657,7 @@ async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
   }
 }
 
+/** Retrieve all of the aggregate session data. */
 export function getSessionData(): Promise<SessionAggregateData[]> {
   return Array.fromAsync(generateSessionData());
 }
