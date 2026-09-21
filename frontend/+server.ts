@@ -81,8 +81,6 @@ async function getHandler() {
   httpHandler.app.set('trust proxy', 1); // needed to work behind a reverse proxy
   httpHandler.app.use('/deeplink', urlencoded({ extended: true }));
   const provider = await ensureLTIInitialized(httpHandler);
-  provider.databaseManager.listen();
-  provider.cacheManager.listen();
 
   const app = httpHandler.app;
   // app.set('trust proxy', 1); // needed to work behind a reverse proxy

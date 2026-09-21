@@ -11,8 +11,10 @@ import {
   ContentItem,
   HttpHandler,
   HttpMethod,
+  LtijsError,
   PlatformRegistrationInput,
   Provider,
+  ValidationError,
 } from 'ltijs';
 import { join } from 'path';
 import { logger } from './logger';
@@ -24,7 +26,15 @@ export async function ensureLTIInitialized(
   httpHandler: HttpHandler
 ): Promise<Provider> {
   const provider = initializeLTI(httpHandler);
+  await provider.databaseManager.listen();
+  await provider.cacheManager.listen();
   await registerPlatforms(provider);
+  process.on('SIGINT', async () => {
+    await provider.httpHandler.close();
+    await provider.databaseManager.close();
+    await provider.cacheManager.close();
+    process.exit(0);
+  });
   return provider;
 }
 
@@ -274,9 +284,17 @@ function initializeLTI(httpHandler: HttpHandler) {
   return provider;
 }
 
+/**
+ * Registers platforms from the PLATFORMS_PATH directory.
+ *
+ * Runs after connecting the provider's database.
+ * (e.g., after calling `await provider.databaseManager.listen()`).
+ * @param provider the LTI Provider (this application)
+ * @returns the provider after registering platforms from the PLATFORMS_PATH directory
+ */
 async function registerPlatforms(provider: Provider) {
   // Register manually configured platforms.
-  // Run after provider.databaseManager.connect() to ensure that the database is ready for platform registration.
+  // Run after await provider.databaseManager.connect() to ensure that the database is ready for platform registration.
   try {
     const files = await readdir(PLATFORMS_PATH);
     for (const file of files) {
@@ -285,15 +303,35 @@ async function registerPlatforms(provider: Provider) {
       if (stats.isFile() && file.endsWith('.json')) {
         const content = await readFile(path, { encoding: 'utf8' });
         const json = JSON.parse(content) as PlatformRegistrationInput;
-        await provider.platformManager.registerPlatform(json);
-        logger.info(
-          `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
-          { platformId: json.clientId, url: json.url, path }
-        );
+        try {
+          await provider.platformManager.registerPlatform(json);
+          logger.info(
+            `Registered platform for ${json.url}, clientId: ${json.clientId} from ${path}`,
+            { clientId: json.clientId, url: json.url, path }
+          );
+        } catch (err) {
+          if (
+            err instanceof LtijsError &&
+            err.name === 'PlatformAlreadyRegisteredError'
+          ) {
+            logger.info(
+              `Platform already registered for ${json.url}, clientId: ${json.clientId} from ${path}`,
+              { clientId: json.clientId, url: json.url, file: path }
+            );
+            continue; // Skip to the next platform
+          } else if (err instanceof ValidationError) {
+            logger.error(`Validation error for platform: ${json.clientId} (${json.url})`, { cause: err.name, file: path, clientId: json.clientId, url: json.url });
+            continue; // Skip to the next platform
+          } else {
+            logger.error(`Error registering platform: ${json.clientId} (${json.url})`, { cause: err, file: path, clientId: json.clientId, url: json.url });
+            continue; // Skip to the next platform
+          }
+        }
       }
     }
   } catch (err) {
-    logger.error(err);
+    // JSON parsing errors or file reading errors will be caught here
+    logger.error('Error registering platforms:', err);
   } finally {
     const platforms = await provider.platformManager.getPlatforms();
     platforms.forEach(async ({ id, name, url, active }) => {
@@ -303,6 +341,7 @@ async function registerPlatforms(provider: Provider) {
       );
     });
   }
+  return provider;
 }
 
 export const lti_configuration_router = Router();
