@@ -7,8 +7,6 @@ RUN mkdir -p /tmp/dev
 RUN mkdir -p /tmp/prod
 COPY ./package*.json /tmp/dev
 COPY ./package*.json /tmp/prod
-COPY ./patches /tmp/dev/patches
-COPY ./patches /tmp/prod/patches
 RUN --mount=type=cache,target=/root/.npm cd /tmp/dev && npm ci --include=dev
 RUN --mount=type=cache,target=/root/.npm cd /tmp/prod && npm ci --omit=dev
 

@@ -1,7 +1,7 @@
 import {
   AccessDeniedReason,
   AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool.js";
+} from "#components/AccessDenied/AccessDeniedReviewTool";
 import {
   Expectations,
   ExpectationSnapshotProvider,

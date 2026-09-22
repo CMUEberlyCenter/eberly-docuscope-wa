@@ -1,6 +1,6 @@
 {
   "name": "myprose",
-  "version": "3.2.7",
+  "version": "3.3.0",
   "description": "myProse is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.",
   "type": "module",
   "imports": {
@@ -30,7 +30,6 @@
     "upgrade-storybook": "npx storybook@latest upgrade",
     "build-storybook": "storybook build",
     "test-storybook": "vitest --project=storybook",
-    "postinstall": "patch-package",
     "knip": "knip"
   },
   "repository": {
@@ -100,13 +99,13 @@
     "sass": "^1.104.1",
     "storybook": "^10.6.0",
     "typescript": "npm:@typescript/typescript6@^6.0.2",
-    "typescript-eslint": "^8.70.0",
+    "typescript-eslint": "^8.70.1",
     "vite": "^8.3.0",
     "vite-plugin-svgr": "^5.2.0",
     "vitest": "^4.1.11"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.127.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
     "@fortawesome/free-regular-svg-icons": "^7.3.1",
@@ -129,7 +128,7 @@
     "datatables.net-react": "^1.0.2",
     "docx": "^9.7.1",
     "dompurify": "^3.4.15",
-    "dotenv": "^18.0.1",
+    "dotenv": "^18.0.3",
     "escape-html": "^1.0.3",
     "express": "^5.2.1",
     "express-basic-auth": "^1.2.1",
@@ -143,13 +142,12 @@
     "mammoth": "^1.12.3",
     "mongodb": "^7.6.0",
     "node-html-parser": "^9.0.4",
-    "patch-package": "^8.0.1",
     "react": "^19.3.0",
     "react-animate-height": "^3.2.4",
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.3.0",
     "react-error-boundary": "^6.1.6",
-    "react-i18next": "^17.0.14",
+    "react-i18next": "^17.0.15",
     "react-split": "^2.0.14",
     "react-streaming": "^0.4.20",
     "sanitize-html": "^2.17.7",

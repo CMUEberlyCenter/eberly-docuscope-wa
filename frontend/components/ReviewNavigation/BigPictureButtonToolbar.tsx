@@ -1,7 +1,7 @@
 import { ExpectationsButton } from "#components/Review/Expectations";
 import { LinesOfArgumentsButton } from "#components/Review/LinesOfArguments";
 import { LogicalFlowButton } from "#components/Review/LogicalFlow";
-import { TopicalProgressionButton } from "#components/Review/TopicalProgression.js";
+import { TopicalProgressionButton } from "#components/Review/TopicalProgression";
 import { ProminentTopicsButton } from "#components/Review/ProminentTopics";
 import { isEnabled, WritingTask } from "#lib/WritingTask";
 import { FC } from "react";

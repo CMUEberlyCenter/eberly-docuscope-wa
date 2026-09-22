@@ -8,7 +8,7 @@ import HighlightIcon from "#assets/icons/Highlight.svg?react";
 import {
   NoInputError,
   SelectionTooLargeError,
-} from "#components/ErrorHandler/ErrorHandler.js";
+} from "#components/ErrorHandler/ErrorHandler";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import { FC, type HTMLProps, useCallback, useState } from "react";
 import {
