@@ -3,10 +3,9 @@ import {
   AccessDeniedReviewTool,
 } from "#components/AccessDenied/AccessDeniedReviewTool.js";
 import {
-  Expectations,
-  ExpectationSnapshotProvider,
-} from "#components/Review/Expectations";
-import { isExpectationsData } from "#lib/ReviewResponse";
+  TopicalProgression,
+  OrganizationSnapshotProvider,
+} from "#components/Review/TopicalProgression.js";
 import { isEnabled } from "#lib/WritingTask";
 import { FC } from "react";
 import { useData } from "vike-react/useData";
@@ -19,40 +18,35 @@ export const Page: FC = () => {
     settings,
     routeParams: { id },
   } = usePageContext();
-  // Following is to deny access to the Expectations tool if the server settings or writing task does not allow it, preventing access via url manipulation.
+  // Following is to deny access to the Topical Progression tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.expectations) {
+  if (!settings?.term_matrix) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="organization"
         reason={AccessDeniedReason.SERVER_DENY}
       />
     );
   }
-  if (task && !isEnabled(task, "expectations")) {
+  if (task && !isEnabled(task, "term_matrix")) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="organization"
         reason={AccessDeniedReason.WRITING_TASK_DENY}
       />
     );
   }
-  if (!tool_config.includes("expectations")) {
+  if (!tool_config.includes("term_matrix")) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="organization"
         reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
       />
     );
   }
-
   return (
-    <ExpectationSnapshotProvider
-      snapshotID={id}
-      analysis={analyses.filter(isExpectationsData)}
-      task={task}
-    >
-      <Expectations />
-    </ExpectationSnapshotProvider>
+    <OrganizationSnapshotProvider snapshotId={id} analyses={analyses}>
+      <TopicalProgression />
+    </OrganizationSnapshotProvider>
   );
 };

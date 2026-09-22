@@ -237,6 +237,8 @@ export const errorToProblemDetails = (
   );
   return internalServerError(err, instance, extensions);
 };
+export type ErrorDetails = ReturnType<typeof errorToProblemDetails>;
+
 /** Express error handling middleware */
 export const handleError = (
   err: Error,

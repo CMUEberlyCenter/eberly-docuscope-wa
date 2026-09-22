@@ -24,8 +24,8 @@ import { ToolButton } from "../ToolButton/ToolButton";
 
 export const {
   ReviewDataProvider: ProfessionalToneReviewProvider,
-  SnapshotDataProvider: ProfessionalToneSnapshotProvider,
   useReviewDataContext: useProfessionalToneReview,
+  ReviewDataContext: ProfessionalToneContext,
 } = createReviewDataContext<ProfessionalToneData>("professional_tone");
 
 /** Button component for selecting the Professional Tone tool. */

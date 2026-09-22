@@ -15,8 +15,8 @@ import { ToolButton } from "../ToolButton/ToolButton";
 
 export const {
   ReviewDataProvider: ProminentTopicsReviewProvider,
-  SnapshotDataProvider: ProminentTopicsSnapshotProvider,
   useReviewDataContext: useProminentTopicsReview,
+  ReviewDataContext: ProminentTopicsContext,
 } = createReviewDataContext<ProminentTopicsData>("prominent_topics");
 
 /** Button component for selecting the Prominent Topics tool. */

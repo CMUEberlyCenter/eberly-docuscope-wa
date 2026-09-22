@@ -3,10 +3,9 @@ import {
   AccessDeniedReviewTool,
 } from "#components/AccessDenied/AccessDeniedReviewTool.js";
 import {
-  Expectations,
-  ExpectationSnapshotProvider,
-} from "#components/Review/Expectations";
-import { isExpectationsData } from "#lib/ReviewResponse";
+  Sentences,
+  SentencesSnapshotProvider,
+} from "#components/Review/Sentences";
 import { isEnabled } from "#lib/WritingTask";
 import { FC } from "react";
 import { useData } from "vike-react/useData";
@@ -19,40 +18,35 @@ export const Page: FC = () => {
     settings,
     routeParams: { id },
   } = usePageContext();
-  // Following is to deny access to the Expectations tool if the server settings or writing task does not allow it, preventing access via url manipulation.
+  // Following is to deny access to the Sentences tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.expectations) {
+  if (!settings?.sentence_density) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="sentences"
         reason={AccessDeniedReason.SERVER_DENY}
       />
     );
   }
-  if (task && !isEnabled(task, "expectations")) {
+  if (task && !isEnabled(task, "sentence_density")) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="sentences"
         reason={AccessDeniedReason.WRITING_TASK_DENY}
       />
     );
   }
-  if (!tool_config.includes("expectations")) {
+  if (!tool_config.includes("sentence_density")) {
     return (
       <AccessDeniedReviewTool
-        tool="expectations"
+        tool="sentences"
         reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
       />
     );
   }
-
   return (
-    <ExpectationSnapshotProvider
-      snapshotID={id}
-      analysis={analyses.filter(isExpectationsData)}
-      task={task}
-    >
-      <Expectations />
-    </ExpectationSnapshotProvider>
+    <SentencesSnapshotProvider snapshotId={id} analyses={analyses}>
+      <Sentences />
+    </SentencesSnapshotProvider>
   );
 };

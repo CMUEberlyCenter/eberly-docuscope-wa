@@ -18,6 +18,9 @@ error:
   details: 'Details: {{message}}'
   too_large: The document is too large to process. Please shorten your text and try again.
   service_unavailable: The review service is temporarily unavailable. Please try again later.
+  server_deny: The {{tool}} tool is not available on this server.
+  writing_task_deny: The {{tool}} tool is not available for this writing task.
+  snapshot_deny: The {{tool}} tool is not available.
 additional_tools:
   title: Additional Tools
   tooltip: Refine your draft with additional review.
@@ -93,9 +96,6 @@ prominent_topics:
 lines_of_arguments:
   title: Lines of Argument
   error: Error reading Lines of Arguements data.
-  server_deny: The $t(lines_of_arguments.title) tool is not available on this server.
-  writing_task_deny: The $t(lines_of_arguments.title) tool is not available for this writing task.
-  snapshot_deny: The $t(lines_of_arguments.title) tool is not available.
   no_sentences: No sentences to support this claim were found in your draft.
   strategies: Strategies Used
   main: "Thesis:"

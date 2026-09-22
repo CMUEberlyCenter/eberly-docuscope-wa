@@ -7,14 +7,16 @@ import { FC } from "react";
 import { ButtonToolbar } from "react-bootstrap";
 import { usePageContext } from "vike-react/usePageContext";
 
-export type FineTuningTool =
+export type WritingTaskFineTuning =
   "paragraph_clarity" | "sentence_density" | "professional_tone" | "sources";
+export type FineTuningTool =
+  "paragraph_clarity" | "sentence_clarity" | "professional_tone" | "sources";
 
 export const FineTuningButtonToolbar: FC<{
   activeTool: FineTuningTool | null;
   onSelect: (key: FineTuningTool) => void;
   task?: WritingTask;
-  disabled: (tool: FineTuningTool) => boolean;
+  disabled: (tool: WritingTaskFineTuning) => boolean;
 }> = ({ activeTool, onSelect, task, disabled }) => {
   const { settings } = usePageContext();
   return (
@@ -29,8 +31,8 @@ export const FineTuningButtonToolbar: FC<{
       {settings?.sentence_density && isEnabled(task, "sentence_density") ? (
         <SentencesButton
           disabled={disabled("sentence_density")}
-          active={activeTool === "sentence_density"}
-          onClick={() => onSelect("sentence_density")}
+          active={activeTool === "sentence_clarity"}
+          onClick={() => onSelect("sentence_clarity")}
         />
       ) : null}
       {settings?.professional_tone && isEnabled(task, "professional_tone") ? (

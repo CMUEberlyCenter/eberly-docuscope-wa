@@ -13,8 +13,8 @@ import { ToolButton } from "../ToolButton/ToolButton";
 
 export const {
   ReviewDataProvider: ParagraphClarityReviewProvider,
-  SnapshotDataProvider: ParagraphClaritySnapshotProvider,
   useReviewDataContext: useParagraphClarityReview,
+  ReviewDataContext: ParagraphClarityContext,
 } = createReviewDataContext<ParagraphClarityData>("paragraph_clarity");
 
 /** Button component for selecting the Paragraph Clarity tool. */

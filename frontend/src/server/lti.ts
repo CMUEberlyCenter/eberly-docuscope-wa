@@ -320,10 +320,21 @@ async function registerPlatforms(provider: Provider) {
             );
             continue; // Skip to the next platform
           } else if (err instanceof ValidationError) {
-            logger.error(`Validation error for platform: ${json.clientId} (${json.url})`, { cause: err.name, file: path, clientId: json.clientId, url: json.url });
+            logger.error(
+              `Validation error for platform: ${json.clientId} (${json.url})`,
+              {
+                cause: err.name,
+                file: path,
+                clientId: json.clientId,
+                url: json.url,
+              }
+            );
             continue; // Skip to the next platform
           } else {
-            logger.error(`Error registering platform: ${json.clientId} (${json.url})`, { cause: err, file: path, clientId: json.clientId, url: json.url });
+            logger.error(
+              `Error registering platform: ${json.clientId} (${json.url})`,
+              { cause: err, file: path, clientId: json.clientId, url: json.url }
+            );
             continue; // Skip to the next platform
           }
         }

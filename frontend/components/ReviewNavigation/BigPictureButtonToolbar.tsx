@@ -1,26 +1,33 @@
 import { ExpectationsButton } from "#components/Review/Expectations";
 import { LinesOfArgumentsButton } from "#components/Review/LinesOfArguments";
 import { LogicalFlowButton } from "#components/Review/LogicalFlow";
-import { OrganizationButton } from "#components/Review/Organization";
+import { TopicalProgressionButton } from "#components/Review/TopicalProgression.js";
 import { ProminentTopicsButton } from "#components/Review/ProminentTopics";
 import { isEnabled, WritingTask } from "#lib/WritingTask";
 import { FC } from "react";
 import { ButtonToolbar } from "react-bootstrap";
 import { usePageContext } from "vike-react/usePageContext";
 
-export type BigPictureTool =
+// The big picture tools as referenced in the writing task database. The "term_matrix" tool is used for the "topical_progression" tool in the UI.
+export type WritingTypeBigPictureTool =
   | "expectations"
-  | "prominent_topics"
   | "lines_of_arguments"
   | "logical_flow"
-  | "term_matrix"
-  | "organization";
+  | "prominent_topics"
+  | "term_matrix";
+
+export type BigPictureTool =
+  | "expectations"
+  | "lines_of_arguments"
+  | "logical_flow"
+  | "prominent_topics"
+  | "topical_progression";
 
 export const BigPictureButtonToolbar: FC<{
   activeTool: BigPictureTool | null;
   onSelect: (key: BigPictureTool) => void;
   task?: WritingTask;
-  disabled?: (tool: BigPictureTool) => boolean;
+  disabled?: (tool: WritingTypeBigPictureTool) => boolean;
 }> = ({ activeTool, onSelect, task, disabled }) => {
   const { settings } = usePageContext();
   return (
@@ -54,10 +61,10 @@ export const BigPictureButtonToolbar: FC<{
         />
       ) : null}
       {settings?.term_matrix && isEnabled(task, "term_matrix") ? (
-        <OrganizationButton
+        <TopicalProgressionButton
           disabled={disabled?.("term_matrix") ?? false}
-          active={activeTool === "organization"}
-          onClick={() => onSelect("organization")}
+          active={activeTool === "topical_progression"}
+          onClick={() => onSelect("topical_progression")}
         />
       ) : null}
     </ButtonToolbar>

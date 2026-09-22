@@ -1,3 +1,4 @@
+import { getAnalysis } from '#components/ReviewContext/createReviewDataContext.js';
 import { userLanguage } from '#lib/languageCode';
 import { ForbiddenError, GatewayError } from '#lib/ProblemDetails';
 import {
@@ -7,6 +8,7 @@ import {
   ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
+  OptionalReviewData,
   ReviewPrompt,
   ReviewResponse,
 } from '#lib/ReviewResponse';
@@ -201,3 +203,49 @@ snapshot.get(
     response.json(data);
   }
 );
+
+export function onAnalysis<T extends Analysis>(tool: ReviewPrompt) {
+  return async (id: string, signal: AbortSignal) => {
+    const snapshot = await findSnapshotById(id);
+    if (!isEnabled(snapshot.task, tool)) {
+      throw new ForbiddenError(
+        `${tool} tool is not available for this writing task.`
+      );
+    }
+    if (!snapshot.tool_config?.includes(tool)) {
+      throw new ForbiddenError(
+        `${tool} tool is not configured for this snapshot.`
+      );
+    }
+    const analysis = getAnalysis<T>(snapshot.analyses, tool);
+    if (analysis) {
+      return analysis;
+    }
+    const chat = await doChat<ReviewResponse>(
+      tool,
+      reviewData({
+        segmented: snapshot.segmented,
+        writing_task: snapshot.task ?? null,
+      }),
+      signal,
+      true,
+      true
+    );
+    if (signal.aborted) {
+      throw new Error('Request aborted');
+    }
+    const { response: chat_response, finished: datetime } = chat;
+    if (!chat_response) throw new Error(`NULL chat response for ${tool}`);
+    if (typeof chat_response === 'string') {
+      throw new Error(chat_response); // if string, throw as error
+    }
+    const data = {
+      tool,
+      datetime,
+      response: chat_response,
+    } as Analysis;
+    await updateSnapshotReviewsById(id, data);
+
+    return data as OptionalReviewData<T>;
+  };
+}

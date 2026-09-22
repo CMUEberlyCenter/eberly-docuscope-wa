@@ -30,7 +30,7 @@ export type ReviewTool =
   | 'ontopic'
   | 'docuscope';
 
-/** List of identified civility issues in the text. */
+/** List of identified civility issues in the text. @deprecated Civil Tone review is no longer supported. */
 type CivilToneOutput = {
   /** Identified inappropriate text segment from the input text. */
   text: string;
@@ -61,7 +61,7 @@ type CivilToneOutput = {
 //   );
 // }
 
-/** List of identified credibility issues in the text */
+/** List of identified credibility issues in the text. @deprecated Credibility review is no longer supported. */
 type CredibilityOutput = {
   /** One sentence assessment about the credibility issue. */
   issue: string;
@@ -115,6 +115,11 @@ export function isExpectationsOutput(
   );
 }
 
+/**
+ * Form of a claim in the text.
+ * @see LinesOfArgumentsData.response.claims
+ * @see LinesOfArgumentsOutput.claims
+ */
 export type Claim = {
   /** A brief description of the claim. */
   claim: string;
@@ -436,17 +441,27 @@ interface ReviewData<T extends ReviewResponse> {
   response: T;
 }
 
+/**
+ * Civil Tone review data structure.
+ * @deprecated Civil Tone review is no longer supported.
+ */
 export interface CivilToneData extends ReviewData<CivilToneOutput> {
   tool: 'civil_tone';
 }
+/**
+ * Credibility review data structure.
+ * @deprecated Credibility review is no longer supported.
+ */
 export interface CredibilityData extends ReviewData<CredibilityOutput> {
   tool: 'credibility';
 }
+
+/** Expectation review data structure. */
 export interface ExpectationsData extends ReviewData<ExpectationsOutput> {
   tool: 'expectations';
   expectation: string;
 }
-
+/** Type guard for ExpectationsData. */
 export const isExpectationsData = (
   data: ExpectationsData | unknown
 ): data is ExpectationsData =>
@@ -459,40 +474,31 @@ export const isExpectationsData = (
   'response' in data &&
   isExpectationsOutput(data.response);
 
-/** Test if the string is the "none" fail state in the LLM response. */
-// const isNone = (suggestion: string): boolean =>
-//   suggestion.match(/^none/i) !== null;
-
-/**
- * Tests if the suggestion in expectation data is marked as "none".
- * @param data Expectation data returned from the review process.
- * @returns true if the suggestions start with "none", indicating that the LLM did not identify references to the expectation.
- * @deprecated The expectations prompt no longer uses the "none" fail state.
- */
-// export function isExpectationsDataSuggestionNone(
-//   data: ExpectationsData
-// ): boolean {
-//   return isNone(data.response.suggestion);
-// }
-
+/** Lines of Arguments review data structure. */
 export interface LinesOfArgumentsData extends ReviewData<LinesOfArgumentsOutput> {
   tool: 'lines_of_arguments';
 }
+/** Logical Flow review data structure. */
 export interface LogicalFlowData extends ReviewData<LogicalFlowOutput> {
   tool: 'logical_flow';
 }
+/** Paragraph Clarity review data structure. */
 export interface ParagraphClarityData extends ReviewData<ParagraphClarityOutput> {
   tool: 'paragraph_clarity';
 }
+/** Professional Tone review data structure. */
 export interface ProfessionalToneData extends ReviewData<ProfessionalToneOutput> {
   tool: 'professional_tone';
 }
+/** Prominent Topics review data structure. */
 export interface ProminentTopicsData extends ReviewData<ProminentTopicsOutput> {
   tool: 'prominent_topics';
 }
+/** Sources review data structure. */
 export interface SourcesData extends ReviewData<SourcesOutput> {
   tool: 'sources';
 }
+/** OnTopic review data structure for Topical Progression and Sentence Clarity tools. */
 export interface OnTopicReviewData extends ReviewData<OnTopicData> {
   tool: 'ontopic';
 }

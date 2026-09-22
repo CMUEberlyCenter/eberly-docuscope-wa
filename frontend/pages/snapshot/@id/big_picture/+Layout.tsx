@@ -1,6 +1,7 @@
 import {
   BigPictureButtonToolbar,
   BigPictureTool,
+  WritingTypeBigPictureTool,
 } from "#components/ReviewNavigation/BigPictureButtonToolbar";
 import { FC, ReactNode } from "react";
 import { Alert } from "react-bootstrap";
@@ -29,7 +30,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
       navigate(`/snapshot/${id}/big_picture/${key}`);
     }
   };
-  const disabled = (tool: BigPictureTool): boolean => {
+  const disabled = (tool: WritingTypeBigPictureTool): boolean => {
     return !tool_config.includes(tool);
   };
 

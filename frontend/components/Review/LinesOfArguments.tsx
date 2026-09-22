@@ -26,8 +26,8 @@ import { ToolButton } from "../ToolButton/ToolButton";
 
 export const {
   ReviewDataProvider: LinesOfArgumentsReviewProvider,
-  SnapshotDataProvider: LinesOfArgumentsSnapshotProvider,
   useReviewDataContext: useLinesOfArgumentsReview,
+  ReviewDataContext: LinesOfArgumentsContext,
 } = createReviewDataContext<LinesOfArgumentsData>("lines_of_arguments");
 
 /** Button component for selecting the Lines Of Arguments tool. */

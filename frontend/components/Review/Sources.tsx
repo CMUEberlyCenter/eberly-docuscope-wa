@@ -13,8 +13,8 @@ import { createReviewDataContext } from "../ReviewContext/createReviewDataContex
 
 export const {
   ReviewDataProvider: SourcesReviewProvider,
-  SnapshotDataProvider: SourcesSnapshotProvider,
   useReviewDataContext: useSourcesReview,
+  ReviewDataContext: SourcesContext,
 } = createReviewDataContext<SourcesData>("sources");
 
 export const SourcesButton: FC<ButtonProps> = (props) => {

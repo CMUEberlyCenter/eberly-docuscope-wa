@@ -232,7 +232,12 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
     );
     return <Context value={{ review, pending }}>{children}</Context>;
   };
-  return { ReviewDataProvider, SnapshotDataProvider, useReviewDataContext };
+  return {
+    ReviewDataProvider,
+    SnapshotDataProvider,
+    useReviewDataContext,
+    ReviewDataContext: Context,
+  };
 }
 
 // type ReviewService<T extends Analysis> = {

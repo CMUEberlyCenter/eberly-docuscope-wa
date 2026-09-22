@@ -47,14 +47,14 @@ import {
 import { Translation, useTranslation } from "react-i18next";
 import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
 import { ReviewToolCard } from "../ReviewContext/ReviewContext";
-import "./Organization.scss";
+import "./TopicalProgression.scss";
 
 export {
   OnTopicDataProvider as OrganizationDataProvider,
   OnTopicSnapshotProvider as OrganizationSnapshotProvider,
 } from "../ReviewContext/OnTopicDataContext";
 
-export const OrganizationButton: FC<ButtonProps> = (props) => {
+export const TopicalProgressionButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");
   return (
     <ToolButton
@@ -243,7 +243,7 @@ type SelectedRowCol = {
 } | null;
 
 /** Organization review tool component. */
-export const Organization: FC<HTMLProps<HTMLDivElement>> = (props) => {
+export const TopicalProgression: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { review, pending } = useOnTopicData();
   const { t } = useTranslation("review");
   const showToggle = false;

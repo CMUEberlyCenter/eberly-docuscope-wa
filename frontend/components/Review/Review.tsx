@@ -34,10 +34,10 @@ import {
 } from "./LogicalFlow";
 import { NullTool } from "./NullTool";
 import {
-  Organization,
-  OrganizationButton,
+  TopicalProgression,
+  TopicalProgressionButton,
   OrganizationDataProvider,
-} from "./Organization";
+} from "./TopicalProgression";
 import {
   ParagraphClarity,
   ParagraphClarityButton,
@@ -214,7 +214,7 @@ export const Review: FC = () => {
                   />
                 ) : null}
                 {organizationFeature ? (
-                  <OrganizationButton
+                  <TopicalProgressionButton
                     disabled={!ready || isPending}
                     active={tool === "organization"}
                     onClick={toggleToolHandler("organization")}
@@ -246,7 +246,7 @@ export const Review: FC = () => {
               )}
               {tool === "organization" && (
                 <OrganizationDataProvider>
-                  <Organization />
+                  <TopicalProgression />
                 </OrganizationDataProvider>
               )}
               {/* Add Big Picture tools here. */}

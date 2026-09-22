@@ -221,8 +221,6 @@ async function getHandler() {
         } catch (err) {
           logger.error('Error getting LTI launch context', { error: err });
         }
-      } else {
-        console.log('No ltik query parameter found in request');
       }
       // const context = await provider.getLaunchContext(req.query.ltik as string);
       const query =

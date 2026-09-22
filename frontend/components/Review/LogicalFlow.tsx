@@ -13,8 +13,8 @@ import { ToolButton } from "../ToolButton/ToolButton";
 
 export const {
   ReviewDataProvider: LogicalFlowReviewProvider,
-  SnapshotDataProvider: LogicalFlowSnapshotProvider,
   useReviewDataContext: useLogicalFlowReview,
+  ReviewDataContext: LogicalFlowContext,
 } = createReviewDataContext<LogicalFlowData>("logical_flow");
 
 /** Button component for selecting the Logical Flow tool. */
