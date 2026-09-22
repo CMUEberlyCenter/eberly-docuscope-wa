@@ -49,10 +49,7 @@ import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
 import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import "./TopicalProgression.scss";
 
-export {
-  OnTopicDataProvider as OrganizationDataProvider,
-  OnTopicSnapshotProvider as OrganizationSnapshotProvider,
-} from "../ReviewContext/OnTopicDataContext";
+export { OnTopicDataProvider as OrganizationDataProvider } from "../ReviewContext/OnTopicDataContext";
 
 export const TopicalProgressionButton: FC<ButtonProps> = (props) => {
   const { t } = useTranslation("review");

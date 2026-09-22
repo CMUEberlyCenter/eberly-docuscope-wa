@@ -11,10 +11,7 @@ import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import { ToolButton } from "../ToolButton/ToolButton";
 import "./Sentences.scss";
 
-export {
-  OnTopicDataProvider as SentencesDataProvider,
-  OnTopicSnapshotProvider as SentencesSnapshotProvider,
-} from "../ReviewContext/OnTopicDataContext";
+export { OnTopicDataProvider as SentencesDataProvider } from "../ReviewContext/OnTopicDataContext";
 
 /**
  * Add highlight to the specified sentence in a given paragraph.

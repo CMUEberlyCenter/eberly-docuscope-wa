@@ -1,4 +1,4 @@
-import { getAnalysis } from '#components/ReviewContext/createReviewDataContext.js';
+import { getAnalysis } from '#components/ReviewContext/createReviewDataContext';
 import { userLanguage } from '#lib/languageCode';
 import { ForbiddenError, GatewayError } from '#lib/ProblemDetails';
 import {
@@ -8,6 +8,7 @@ import {
   ExpectationsOutput,
   isExpectationsData,
   isExpectationsOutput,
+  OnTopicReviewData,
   OptionalReviewData,
   ReviewPrompt,
   ReviewResponse,
@@ -145,6 +146,7 @@ snapshot.get(
   }
 );
 
+/** @deprecated replaced with telefunc */
 snapshot.get(
   '/:id/:analysis',
   validate(param('id').isMongoId()),
@@ -248,4 +250,36 @@ export function onAnalysis<T extends Analysis>(tool: ReviewPrompt) {
 
     return data as OptionalReviewData<T>;
   };
+}
+
+export async function onOnTopic(id: string, signal: AbortSignal) {
+  const snapshot = await findSnapshotById(id);
+  if (!isEnabled(snapshot.task, 'ontopic')) {
+    throw new ForbiddenError(
+      `Ontopic tool is not available for this writing task.`
+    );
+  }
+  if (!snapshot.tool_config?.includes('ontopic')) {
+    throw new ForbiddenError(
+      `Ontopic tool is not configured for this snapshot.`
+    );
+  }
+  const analysis = getAnalysis<OnTopicReviewData>(snapshot.analyses, 'ontopic');
+  if (analysis) {
+    return analysis;
+  }
+  // generate analysis on the fly
+  const data = await doOnTopic(
+    snapshot.segmented,
+    userLanguage(snapshot.task),
+    signal
+  );
+  if (signal.aborted) {
+    throw new Error('Request aborted');
+  }
+  if (!data) {
+    throw new GatewayError('No response from onTopic');
+  }
+  await updateSnapshotReviewsById(id, data);
+  return data;
 }
