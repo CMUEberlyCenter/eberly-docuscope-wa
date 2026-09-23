@@ -13,13 +13,13 @@ import {
   type Rule,
 } from "#/lib/WritingTask";
 import Icon from "#assets/icons/expectations_icon.svg?react";
+import { ToolContainer } from "#components/ToolContainer/ToolContainer";
 import {
   faCircleExclamation,
   faEllipsis,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useMutation } from "@tanstack/react-query";
-import classNames from "classnames";
 import {
   Activity,
   createContext,
@@ -530,10 +530,7 @@ const LoadedExpectationRule: FC<
 };
 
 /** Content Expectations tool component. */
-export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
-  className,
-  ...props
-}) => {
+export const Expectations: FC<HTMLProps<HTMLDivElement>> = (props) => {
   const { t } = useTranslation("review");
   const { t: te } = useTranslation("expectations");
   const analyses = use(ExpectationsSnapshotContext);
@@ -563,13 +560,7 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
 
   return (
     <ReviewReset>
-      <article
-        {...props}
-        className={classNames(
-          className,
-          "container-fluid overflow-auto d-flex flex-column flex-grow-1"
-        )}
-      >
+      <ToolContainer {...props}>
         <ToolHeader
           title={t("expectations.title")}
           instructionsKey="expectations"
@@ -615,7 +606,7 @@ export const Expectations: FC<HTMLProps<HTMLDivElement>> = ({
             </section>
           ))}
         </section>
-      </article>
+      </ToolContainer>
     </ReviewReset>
   );
 };

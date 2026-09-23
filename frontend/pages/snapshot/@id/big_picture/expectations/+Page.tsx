@@ -17,30 +17,24 @@ export const Page: FC = () => {
     settings,
     routeParams: { id },
   } = usePageContext();
+  const accessDeniedReason = (() => {
+    if (!settings?.expectations) {
+      return AccessDeniedReason.SERVER_DENY;
+    }
+    if (task && !isEnabled(task, "expectations")) {
+      return AccessDeniedReason.WRITING_TASK_DENY;
+    }
+    if (!tool_config.includes("expectations")) {
+      return AccessDeniedReason.SNAPSHOT_CONFIG_DENY;
+    }
+    return null;
+  })();
+
   // Following is to deny access to the Expectations tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.expectations) {
+  if (accessDeniedReason) {
     return (
-      <AccessDeniedReviewTool
-        tool="expectations"
-        reason={AccessDeniedReason.SERVER_DENY}
-      />
-    );
-  }
-  if (task && !isEnabled(task, "expectations")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="expectations"
-        reason={AccessDeniedReason.WRITING_TASK_DENY}
-      />
-    );
-  }
-  if (!tool_config.includes("expectations")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="expectations"
-        reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
-      />
+      <AccessDeniedReviewTool tool="expectations" reason={accessDeniedReason} />
     );
   }
 

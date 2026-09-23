@@ -15,7 +15,11 @@ import {
   useReducer,
 } from "react";
 import { Alert } from "react-bootstrap";
-import { ErrorBoundary, FallbackProps } from "react-error-boundary";
+import {
+  ErrorBoundary,
+  FallbackProps,
+  getErrorMessage,
+} from "react-error-boundary";
 import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { Loading } from "../Loading/Loading";
 import { ToolHeader } from "../ToolHeader/ToolHeader";
@@ -168,9 +172,7 @@ export const ReviewToolCard: FC<
             }: FallbackProps) => (
               <Alert variant="danger">
                 <p>{errorMessage}</p>
-                {error instanceof Error && (
-                  <pre className="mt-2">{error.message}</pre>
-                )}
+                <pre className="mt-2">{getErrorMessage(error)}</pre>
                 {/* needs onReset <Button variant="primary" onClick={resetErrorBoundary}>Try again</Button> */}
               </Alert>
             )}
