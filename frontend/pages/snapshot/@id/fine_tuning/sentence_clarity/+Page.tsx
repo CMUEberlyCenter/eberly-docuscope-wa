@@ -1,91 +1,71 @@
-import {
-  AccessDeniedReason,
-  AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool";
+import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import { Sentences } from "#components/Review/Sentences";
-import { getAnalysis } from "#components/ReviewContext/createReviewDataContext";
 import { OnTopicDataContext } from "#components/ReviewContext/OnTopicDataContext";
 import { useReviewDispatch } from "#components/ReviewContext/ReviewContext";
-import { OnTopicReviewData, OptionalReviewData } from "#lib/ReviewResponse";
+import { AccessDeniedReason } from "#lib/AccessDeniedReason";
 import { isEnabled } from "#lib/WritingTask";
-import { FC, useEffect, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { FC, useEffect } from "react";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "../../+data";
 import { onSentenceClarity } from "./Page.telefunc";
 
 export const Page: FC = () => {
-  const { analyses, task, tool_config } = useData<Data>();
+  const { task, tool_config } = useData<Data>();
   const {
     settings,
     routeParams: { id },
   } = usePageContext();
   const dispatch = useReviewDispatch();
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<
-    OptionalReviewData<OnTopicReviewData>
-  >(() => getAnalysis<OnTopicReviewData>(analyses, "ontopic") ?? null);
-  const accessGranted =
-    settings?.sentence_density &&
-    isEnabled(task, "sentence_density") &&
-    tool_config.includes("sentence_density");
-  useEffect(() => {
-    if (!analysis && accessGranted) {
-      const handleGetData = async () => {
-        setLoading(true);
-        try {
-          const snapshotData = await onSentenceClarity(id);
-          if ("error" in snapshotData) {
-            throw new Error(
-              snapshotData.error?.detail ||
-                "Unknown error occurred while fetching Lines of Arguments data."
-            );
-          }
-          setAnalysis(snapshotData.analysis);
-        } catch (error) {
-          console.error("Error fetching Lines of Arguments data:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      handleGetData();
+
+  const accessDeniedReason = (() => {
+    if (!settings?.sentence_density) {
+      return AccessDeniedReason.SERVER_DENY;
     }
-  }, [analysis, accessGranted, id]);
+    if (task && !isEnabled(task, "sentence_density")) {
+      return AccessDeniedReason.WRITING_TASK_DENY;
+    }
+    if (!tool_config.includes("sentence_density")) {
+      return AccessDeniedReason.SNAPSHOT_CONFIG_DENY;
+    }
+    return null;
+  })();
+
+  const result = useSuspenseQuery({
+    queryKey: ["sentence_clarity", id],
+    queryFn: async () => {
+      const analysis = await onSentenceClarity(id);
+      if ("error" in analysis) {
+        throw new Error(
+          analysis.error?.detail ||
+            "Unknown error occurred while fetching Lines of Arguments data."
+        );
+      }
+      return analysis;
+    },
+  });
   useEffect(() => {
+    const { analysis } = result.data ?? {};
     if (analysis && "response" in analysis && analysis.response.html) {
       // Update the review context with the onTopic tagged sentences
-      console.log("update sentences.");
       dispatch({ type: "update", sentences: analysis.response.html });
     }
-  }, [analysis, dispatch]);
+    return () => {
+      dispatch({ type: "remove" });
+    };
+  }, [result, dispatch]);
   // Following is to deny access to the Sentences tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.sentence_density) {
+  if (accessDeniedReason) {
     return (
-      <AccessDeniedReviewTool
-        tool="sentences"
-        reason={AccessDeniedReason.SERVER_DENY}
-      />
-    );
-  }
-  if (task && !isEnabled(task, "sentence_density")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="sentences"
-        reason={AccessDeniedReason.WRITING_TASK_DENY}
-      />
-    );
-  }
-  if (!tool_config.includes("sentence_density")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="sentences"
-        reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
-      />
+      <AccessDeniedReviewTool tool="sentences" reason={accessDeniedReason} />
     );
   }
   return (
-    <OnTopicDataContext value={{ pending: loading, review: analysis }}>
+    <OnTopicDataContext
+      value={{ pending: result.isLoading, review: result.data?.analysis }}
+    >
       <Sentences />
     </OnTopicDataContext>
   );

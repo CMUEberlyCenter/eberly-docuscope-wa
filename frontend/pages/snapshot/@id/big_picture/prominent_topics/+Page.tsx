@@ -1,88 +1,64 @@
-import {
-  AccessDeniedReason,
-  AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool";
+import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import {
   ProminentTopics,
   ProminentTopicsContext,
 } from "#components/Review/ProminentTopics";
-import { getAnalysis } from "#components/ReviewContext/createReviewDataContext";
-import { OptionalReviewData, ProminentTopicsData } from "#lib/ReviewResponse";
+import { AccessDeniedReason } from "#lib/AccessDeniedReason";
 import { isEnabled } from "#lib/WritingTask";
-import { FC, useEffect, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { FC } from "react";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "../../+data";
 import { onProminentTopics } from "./Page.telefunc";
 
 export const Page: FC = () => {
-  const { analyses, task, tool_config } = useData<Data>();
+  const { task, tool_config } = useData<Data>();
   const {
     settings,
     routeParams: { id },
   } = usePageContext();
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<
-    OptionalReviewData<ProminentTopicsData>
-  >(
-    () => getAnalysis<ProminentTopicsData>(analyses, "prominent_topics") ?? null
-  );
 
-  const accessGranted =
-    settings?.prominent_topics &&
-    isEnabled(task, "prominent_topics") &&
-    tool_config.includes("prominent_topics");
-  useEffect(() => {
-    if (!analysis && accessGranted) {
-      const handleGetData = async () => {
-        setLoading(true);
-        try {
-          const snapshotData = await onProminentTopics(id);
-          console.log(`Snapshot data received for id ${id}:`, snapshotData);
-          if ("error" in snapshotData) {
-            throw new Error(
-              snapshotData.error?.detail ||
-                "Unknown error occurred while fetching Prominent Topics data."
-            );
-          }
-          setAnalysis(snapshotData.analysis);
-        } catch (error) {
-          console.error("Error fetching Prominent Topics data:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      handleGetData();
+  const accessDeniedReason = (() => {
+    if (!settings?.prominent_topics) {
+      return AccessDeniedReason.SERVER_DENY;
     }
-  }, [analysis, accessGranted, id]);
+    if (task && !isEnabled(task, "prominent_topics")) {
+      return AccessDeniedReason.WRITING_TASK_DENY;
+    }
+    if (!tool_config.includes("prominent_topics")) {
+      return AccessDeniedReason.SNAPSHOT_CONFIG_DENY;
+    }
+    return null;
+  })();
+
+  const result = useSuspenseQuery({
+    queryKey: ["prominent_topics", id],
+    queryFn: async () => {
+      const analysis = await onProminentTopics(id);
+      if ("error" in analysis) {
+        throw new Error(
+          analysis.error?.detail ||
+            "Unknown error occurred while fetching Prominent Topics data."
+        );
+      }
+      return analysis;
+    },
+  });
   // Following is to deny access to the Prominent Topics tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.prominent_topics) {
+  if (accessDeniedReason) {
     return (
       <AccessDeniedReviewTool
         tool="prominent_topics"
-        reason={AccessDeniedReason.SERVER_DENY}
-      />
-    );
-  }
-  if (task && !isEnabled(task, "prominent_topics")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="prominent_topics"
-        reason={AccessDeniedReason.WRITING_TASK_DENY}
-      />
-    );
-  }
-  if (!tool_config.includes("prominent_topics")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="prominent_topics"
-        reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
+        reason={accessDeniedReason}
       />
     );
   }
   return (
-    <ProminentTopicsContext value={{ pending: loading, review: analysis }}>
+    <ProminentTopicsContext
+      value={{ pending: result.isLoading, review: result.data?.analysis }}
+    >
       <ProminentTopics />
     </ProminentTopicsContext>
   );

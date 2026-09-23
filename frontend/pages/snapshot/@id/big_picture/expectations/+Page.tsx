@@ -1,7 +1,5 @@
-import {
-  AccessDeniedReason,
-  AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool";
+import { AccessDeniedReason } from "#/lib/AccessDeniedReason";
+import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import {
   Expectations,
   ExpectationSnapshotProvider,

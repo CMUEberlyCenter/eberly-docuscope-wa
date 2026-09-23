@@ -1,89 +1,64 @@
-import {
-  AccessDeniedReason,
-  AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool";
+import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import {
   ProfessionalTone,
   ProfessionalToneContext,
 } from "#components/Review/ProfessionalTone";
-import { getAnalysis } from "#components/ReviewContext/createReviewDataContext";
-import { OptionalReviewData, ProfessionalToneData } from "#lib/ReviewResponse";
+import { AccessDeniedReason } from "#lib/AccessDeniedReason";
 import { isEnabled } from "#lib/WritingTask";
-import { FC, useEffect, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { FC } from "react";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "../../+data";
 import { onProfessionalTone } from "./Page.telefunc";
 
 export const Page: FC = () => {
-  const { analyses, task, tool_config } = useData<Data>();
+  const { task, tool_config } = useData<Data>();
   const {
     settings,
     routeParams: { id },
   } = usePageContext();
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<
-    OptionalReviewData<ProfessionalToneData>
-  >(
-    () =>
-      getAnalysis<ProfessionalToneData>(analyses, "professional_tone") ?? null
-  );
 
-  const accessGranted =
-    settings?.professional_tone &&
-    isEnabled(task, "professional_tone") &&
-    tool_config.includes("professional_tone");
-  useEffect(() => {
-    if (!analysis && accessGranted) {
-      const handleGetData = async () => {
-        setLoading(true);
-        try {
-          const snapshotData = await onProfessionalTone(id);
-          console.log(`Snapshot data received for id ${id}:`, snapshotData);
-          if ("error" in snapshotData) {
-            throw new Error(
-              snapshotData.error?.detail ||
-                "Unknown error occurred while fetching Professional Tone data."
-            );
-          }
-          setAnalysis(snapshotData.analysis);
-        } catch (error) {
-          console.error("Error fetching Professional Tone data:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      handleGetData();
+  const accessDeniedReason = (() => {
+    if (!settings?.professional_tone) {
+      return AccessDeniedReason.SERVER_DENY;
     }
-  }, [analysis, accessGranted, id]);
+    if (task && !isEnabled(task, "professional_tone")) {
+      return AccessDeniedReason.WRITING_TASK_DENY;
+    }
+    if (!tool_config.includes("professional_tone")) {
+      return AccessDeniedReason.SNAPSHOT_CONFIG_DENY;
+    }
+    return null;
+  })();
+
+  const result = useSuspenseQuery({
+    queryKey: ["professional_tone", id],
+    queryFn: async () => {
+      const analysis = await onProfessionalTone(id);
+      if ("error" in analysis) {
+        throw new Error(
+          analysis.error?.detail ||
+            "Unknown error occurred while fetching Professional Tone data."
+        );
+      }
+      return analysis;
+    },
+  });
   // Following is to deny access to the Professional Tone tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.professional_tone) {
+  if (accessDeniedReason) {
     return (
       <AccessDeniedReviewTool
         tool="professional_tone"
-        reason={AccessDeniedReason.SERVER_DENY}
-      />
-    );
-  }
-  if (task && !isEnabled(task, "professional_tone")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="professional_tone"
-        reason={AccessDeniedReason.WRITING_TASK_DENY}
-      />
-    );
-  }
-  if (!tool_config.includes("professional_tone")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="professional_tone"
-        reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
+        reason={accessDeniedReason}
       />
     );
   }
   return (
-    <ProfessionalToneContext value={{ pending: loading, review: analysis }}>
+    <ProfessionalToneContext
+      value={{ pending: result.isLoading, review: result.data?.analysis }}
+    >
       <ProfessionalTone />
     </ProfessionalToneContext>
   );

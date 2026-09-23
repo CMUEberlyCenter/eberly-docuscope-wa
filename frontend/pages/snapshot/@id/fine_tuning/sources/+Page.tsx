@@ -1,83 +1,59 @@
-import {
-  AccessDeniedReason,
-  AccessDeniedReviewTool,
-} from "#components/AccessDenied/AccessDeniedReviewTool";
+import { AccessDeniedReason } from "#/lib/AccessDeniedReason";
+import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import { Sources, SourcesContext } from "#components/Review/Sources";
-import { getAnalysis } from "#components/ReviewContext/createReviewDataContext";
-import { OptionalReviewData, SourcesData } from "#lib/ReviewResponse";
 import { isEnabled } from "#lib/WritingTask";
-import { FC, useEffect, useState } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { FC } from "react";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "../../+data";
 import { onSources } from "./Page.telefunc";
 
 export const Page: FC = () => {
-  const { analyses, task, tool_config } = useData<Data>();
+  const { task, tool_config } = useData<Data>();
   const {
     settings,
     routeParams: { id },
   } = usePageContext();
-  const [loading, setLoading] = useState(false);
-  const [analysis, setAnalysis] = useState<OptionalReviewData<SourcesData>>(
-    () => getAnalysis<SourcesData>(analyses, "sources") ?? null
-  );
-  const accessGranted =
-    settings?.sources &&
-    isEnabled(task, "sources") &&
-    tool_config.includes("sources");
-  useEffect(() => {
-    if (!analysis && accessGranted) {
-      const handleGetData = async () => {
-        setLoading(true);
-        try {
-          const snapshotData = await onSources(id);
-          console.log(`Snapshot data received for id ${id}:`, snapshotData);
-          if ("error" in snapshotData) {
-            throw new Error(
-              snapshotData.error?.detail ||
-                "Unknown error occurred while fetching Sources data."
-            );
-          }
-          setAnalysis(snapshotData.analysis);
-        } catch (error) {
-          console.error("Error fetching Sources data:", error);
-        } finally {
-          setLoading(false);
-        }
-      };
-      handleGetData();
+
+  const accessDeniedReason = (() => {
+    if (!settings?.sources) {
+      return AccessDeniedReason.SERVER_DENY;
     }
-  }, [analysis, accessGranted, id]);
+    if (task && !isEnabled(task, "sources")) {
+      return AccessDeniedReason.WRITING_TASK_DENY;
+    }
+    if (!tool_config.includes("sources")) {
+      return AccessDeniedReason.SNAPSHOT_CONFIG_DENY;
+    }
+    return null;
+  })();
+
+  const result = useSuspenseQuery({
+    queryKey: ["sources", id],
+    queryFn: async () => {
+      const analysis = await onSources(id);
+      if ("error" in analysis) {
+        throw new Error(
+          analysis.error?.detail ||
+            "Unknown error occurred while fetching Sources data."
+        );
+      }
+      return analysis;
+    },
+  });
 
   // Following is to deny access to the Sources tool if the server settings or writing task does not allow it, preventing access via url manipulation.
   // Preserves most of the interface unlike using +guard hook.
-  if (!settings?.sources) {
+  if (accessDeniedReason) {
     return (
-      <AccessDeniedReviewTool
-        tool="sources"
-        reason={AccessDeniedReason.SERVER_DENY}
-      />
-    );
-  }
-  if (task && !isEnabled(task, "sources")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="sources"
-        reason={AccessDeniedReason.WRITING_TASK_DENY}
-      />
-    );
-  }
-  if (!tool_config.includes("sources")) {
-    return (
-      <AccessDeniedReviewTool
-        tool="sources"
-        reason={AccessDeniedReason.SNAPSHOT_CONFIG_DENY}
-      />
+      <AccessDeniedReviewTool tool="sources" reason={accessDeniedReason} />
     );
   }
   return (
-    <SourcesContext value={{ pending: loading, review: analysis }}>
+    <SourcesContext
+      value={{ pending: result.isLoading, review: result.data?.analysis }}
+    >
       <Sources />
     </SourcesContext>
   );

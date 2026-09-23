@@ -1,3 +1,4 @@
+import { AccessDeniedReason } from '#/lib/AccessDeniedReason';
 import { getAnalysis } from '#components/ReviewContext/createReviewDataContext';
 import { userLanguage } from '#lib/languageCode';
 import { ForbiddenError, GatewayError } from '#lib/ProblemDetails';
@@ -12,6 +13,7 @@ import {
   OptionalReviewData,
   ReviewPrompt,
   ReviewResponse,
+  ReviewTool,
 } from '#lib/ReviewResponse';
 import { getExpectationByIndex, isEnabled } from '#lib/WritingTask';
 import { Request, Router } from 'express';
@@ -206,18 +208,19 @@ snapshot.get(
   }
 );
 
+/**
+ * Creates a function that handles a specific review analysis.
+ * @param tool the review tool id.
+ * @returns A function that takes a snapshot id and an AbortSignal, and returns the analysis data or throws an error if access is denied or if the analysis fails.
+ */
 export function onAnalysis<T extends Analysis>(tool: ReviewPrompt) {
   return async (id: string, signal: AbortSignal) => {
     const snapshot = await findSnapshotById(id);
     if (!isEnabled(snapshot.task, tool)) {
-      throw new ForbiddenError(
-        `${tool} tool is not available for this writing task.`
-      );
+      throw new ForbiddenError(AccessDeniedReason.WRITING_TASK_DENY);
     }
     if (!snapshot.tool_config?.includes(tool)) {
-      throw new ForbiddenError(
-        `${tool} tool is not configured for this snapshot.`
-      );
+      throw new ForbiddenError(AccessDeniedReason.SNAPSHOT_CONFIG_DENY);
     }
     const analysis = getAnalysis<T>(snapshot.analyses, tool);
     if (analysis) {
@@ -252,17 +255,17 @@ export function onAnalysis<T extends Analysis>(tool: ReviewPrompt) {
   };
 }
 
-export async function onOnTopic(id: string, signal: AbortSignal) {
+export async function onOnTopic(
+  id: string,
+  tool: ReviewTool,
+  signal: AbortSignal
+) {
   const snapshot = await findSnapshotById(id);
-  if (!isEnabled(snapshot.task, 'ontopic')) {
-    throw new ForbiddenError(
-      `Ontopic tool is not available for this writing task.`
-    );
+  if (!isEnabled(snapshot.task, tool)) {
+    throw new ForbiddenError(AccessDeniedReason.WRITING_TASK_DENY);
   }
-  if (!snapshot.tool_config?.includes('ontopic')) {
-    throw new ForbiddenError(
-      `Ontopic tool is not configured for this snapshot.`
-    );
+  if (!snapshot.tool_config.includes(tool)) {
+    throw new ForbiddenError(AccessDeniedReason.SNAPSHOT_CONFIG_DENY);
   }
   const analysis = getAnalysis<OnTopicReviewData>(snapshot.analyses, 'ontopic');
   if (analysis) {

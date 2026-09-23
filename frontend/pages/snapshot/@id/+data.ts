@@ -6,6 +6,7 @@ export const data = async (pageContext: PageContextServer) => {
   const id = pageContext.routeParams.id;
   try {
     const snapshot = await findSnapshotById(id);
+    snapshot.analyses = [];
     return snapshot;
   } catch (err) {
     if (err instanceof ReferenceError)

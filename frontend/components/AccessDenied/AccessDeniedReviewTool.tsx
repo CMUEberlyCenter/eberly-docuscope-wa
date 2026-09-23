@@ -1,12 +1,8 @@
+import { AccessDeniedReason } from "#lib/AccessDeniedReason";
 import { FC } from "react";
 import Alert from "react-bootstrap/esm/Alert";
 import { useTranslation } from "react-i18next";
 
-export enum AccessDeniedReason {
-  SERVER_DENY = "server_deny",
-  WRITING_TASK_DENY = "writing_task_deny",
-  SNAPSHOT_CONFIG_DENY = "config_deny",
-}
 export const AccessDeniedReviewTool: FC<{
   tool: string;
   reason: AccessDeniedReason;

@@ -1,4 +1,9 @@
-import { ErrorDetails, errorToProblemDetails } from '#lib/ProblemDetails';
+import { AccessDeniedReason } from '#/lib/AccessDeniedReason';
+import {
+  ErrorDetails,
+  errorToProblemDetails,
+  ForbiddenError,
+} from '#lib/ProblemDetails';
 import { OnTopicReviewData, OptionalReviewData } from '#lib/ReviewResponse';
 import { TelefuncContext } from '#lib/TelefuncContext';
 import { onOnTopic } from '#server/api/snapshot';
@@ -9,17 +14,25 @@ export const onSentenceClarity = async (
 ): Promise<
   { analysis: OptionalReviewData<OnTopicReviewData> } | { error: ErrorDetails }
 > => {
-  const { onClose } = getContext<TelefuncContext>();
+  const { onClose, settings } = getContext<TelefuncContext>();
   const controller = new AbortController();
   onClose(() => {
     controller.abort();
   });
   try {
-    const analysis = await onOnTopic(id, controller.signal);
+    if (!settings?.sentence_density) {
+      throw new ForbiddenError(AccessDeniedReason.SERVER_DENY);
+    }
+    const analysis = await onOnTopic(id, 'sentence_density', controller.signal);
     return {
       analysis,
     };
   } catch (error) {
-    return { error: errorToProblemDetails(error, id) };
+    return {
+      error: errorToProblemDetails(error, id, {
+        tool: 'sentence_clarity',
+        phase: 'snapshot',
+      }),
+    };
   }
 };

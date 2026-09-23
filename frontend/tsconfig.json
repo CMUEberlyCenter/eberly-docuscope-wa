@@ -10,6 +10,7 @@
     "module": "ESNext",
     "noEmit": true,
     "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
     "paths": {
       "#/*": ["./src/*"],
       "#assets/*": ["./assets/*"],
