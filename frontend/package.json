@@ -114,7 +114,7 @@
     "vitest-fetch-mock": "^0.4.5"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.121.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "@fortawesome/fontawesome-free": "^7.3.1",
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
     "@fortawesome/free-regular-svg-icons": "^7.3.1",
@@ -168,7 +168,7 @@
     "slate": "^0.126.2",
     "slate-dom": "^0.126.0",
     "slate-history": "^0.113.1",
-    "slate-hyperscript": "^0.125.0",
+    "slate-hyperscript": "^0.127.0",
     "slate-react": "^0.126.4",
     "string-format": "^2.0.0",
     "telefunc": "^0.2.24",
