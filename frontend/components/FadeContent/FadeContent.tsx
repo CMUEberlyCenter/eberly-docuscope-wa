@@ -41,7 +41,7 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
           aria-expanded={expanded}
           aria-controls={id}
         >
-          ...
+          &hellip;
         </Button>
       </div>
     </article>

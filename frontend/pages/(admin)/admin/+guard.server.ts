@@ -9,7 +9,7 @@ export async function guard(pageContext: PageContext) {
   //   permission: { user: ["create", "list", "set-role", "set-password", "update", "delete", "ban"] },
   // }})
   // console.log("Guard data:", data);
-  if (!pageContext.user) {
+  if (!pageContext.basicAuth?.user || !pageContext.basicAuth?.isAdmin) {
     throw render(401, 'Unauthorized');
   }
   return;

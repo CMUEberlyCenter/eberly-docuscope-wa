@@ -1,14 +1,12 @@
-// import { getSettings } from '#server/getSettings';
-import type { PageContext } from 'vike/types';
+// Environment: server
+import { getSettings } from '#/server/getSettings';
+import { auth } from '#/utils/auth';
+import type { PageContextServer } from 'vike/types';
 
-export async function onCreatePageContext(_pageContext: PageContext) {
-  // const {req} = pageContext;
-  // pageContext.i18n = req.i18n; // TODO: this is a hack, we should use a proper i18n middleware to set this up.
-  // pageContext.session = req.session; // TODO: this is a hack, we should use a proper session middleware to set this up.
-  // The object pageContext was just created
-  // pageContext.settings = getSettings(); // should already be in pageContext via toolSettingsMiddleware
-  // const req = pageContext.req;
-  // const session = await auth.api.getSession({ req });
-  // pageContext.session = session;
-  // console.log(pageContext.settings)
+export async function onCreatePageContext(pageContext: PageContextServer) {
+  pageContext.settings = await getSettings();
+  const session = await auth.api.getSession({
+    headers: pageContext.runtime.req.headers as HeadersInit,
+  });
+  pageContext.auth = session;
 }

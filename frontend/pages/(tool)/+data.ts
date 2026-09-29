@@ -1,3 +1,4 @@
+import { MyProseCustomLTIClaims } from '#/server/lti.ts';
 import { isWritingTask, WritingTask } from '#lib/WritingTask';
 import {
   findAllPublicWritingTasks,
@@ -23,14 +24,16 @@ const getWritingTaskById = async (id: string) => {
 };
 
 export async function data(pageContext: PageContextServer) {
-  const taskId = pageContext.writing_task_id; // set if system specified
-  // const token = pageContext.session?.token; // set if LTI specified
-  const token = pageContext.launchContext?.idToken; // set if LTI specified
-  const tokenTask = token?.launch.custom?.writing_task as string | undefined; // set if LTI specified and writing_task included in custom
+  const queryId = pageContext.req.query?.writing_task_id as string | undefined; // get from query string if present
+  const sessionId = pageContext.session?.writing_task_id; // get from session if present
+  const token = pageContext.launchContext?.idToken; // get from LTI launch context if present
+  const { writing_task_id, writing_task } = (token?.launch.custom ||
+    {}) as MyProseCustomLTIClaims; // get from LTI token custom claims if present
+  const taskId = writing_task_id || queryId || sessionId; // LTI > query > session
   let parsedTask: WritingTask | undefined = undefined;
-  if (tokenTask) {
+  if (writing_task) {
     try {
-      const taskData = JSON.parse(tokenTask);
+      const taskData = JSON.parse(writing_task);
       if (isWritingTask(taskData)) {
         parsedTask = taskData;
       } else {

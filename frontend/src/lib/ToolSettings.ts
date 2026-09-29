@@ -15,15 +15,10 @@ export interface Settings {
   // assess_expectation: boolean; // Assess Single Expectation LLM tool // to be removed
 
   // LLM Review Tools
-  // overview?: boolean;
-  civil_tone: boolean;
-  credibility: boolean; // Credibility review LLM tool
-  // ethos?: boolean;
   expectations: boolean; // All Expectations review LLM tool
   lines_of_arguments: boolean; // Lines of Arguments review LLM tool
   logical_flow: boolean; // Logical Progression review LLM tool
   paragraph_clarity: boolean;
-  // pathos?: boolean; // to be removed
   professional_tone: boolean;
   prominent_topics: boolean; // Key Ideas review LLM tool
   sources: boolean;
@@ -56,8 +51,6 @@ export const DEFAULT: Settings = {
   notes2prose: true,
   notes2bullets: true,
 
-  civil_tone: false,
-  credibility: true,
   expectations: true,
   lines_of_arguments: true,
   logical_flow: true,

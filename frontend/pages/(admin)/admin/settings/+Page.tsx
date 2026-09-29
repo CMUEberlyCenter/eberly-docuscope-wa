@@ -9,7 +9,7 @@ export const Page: FC = () => {
   const { settings } = usePageContext();
   const { ANTHROPIC_MODEL, DEFAULT_LANGUAGE, ACCESS_LEVEL } = useData<Data>();
   const { t } = useTranslation("admin");
-  useTranslation("review"); // load review namespace for translation availability
+  // useTranslation("review"); // load review namespace for translation availability no longer needed since all ns are loaded
   return (
     <Card>
       <Card.Header>{t("settings.title")}</Card.Header>
@@ -54,22 +54,6 @@ export const Page: FC = () => {
             {t("settings.notes_to_bullets")}
             <strong>
               {settings?.scribe && settings?.notes2bullets
-                ? t("settings.enabled")
-                : t("settings.disabled")}
-            </strong>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            {t("settings.civil_tone")}
-            <strong>
-              {settings?.scribe && settings?.civil_tone
-                ? t("settings.enabled")
-                : t("settings.disabled")}
-            </strong>
-          </ListGroup.Item>
-          <ListGroup.Item>
-            {t("settings.credibility")}
-            <strong>
-              {settings?.scribe && settings?.credibility
                 ? t("settings.enabled")
                 : t("settings.disabled")}
             </strong>

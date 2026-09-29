@@ -10,7 +10,7 @@ import { initWritingTasks } from './writing_task_description';
 let client: MongoClient | null = null;
 let db: Db | null = null;
 
-async function getDb(): Promise<Db> {
+export async function getDb(): Promise<Db> {
   if (db && client) {
     return db;
   }

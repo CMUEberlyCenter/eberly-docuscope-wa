@@ -4,6 +4,7 @@ import {
   APIUserAbortError,
 } from '@anthropic-ai/sdk';
 import type { NextFunction, Request, Response } from 'express';
+import { HttpError, LtijsError } from 'ltijs';
 import { logger } from '../server/logger';
 
 /* Type declaration for RFC-9457 problem details */
@@ -177,13 +178,43 @@ const serviceUnavailable = (
 
 export class ChatStopError extends Error {}
 
+const httpError = (err: HttpError, instance?: string): ProblemDetails => ({
+  type: `https://developer.mozilla.org/docs/Web/HTTP/Status/${err.status}`,
+  title: 'HTTP Error',
+  detail: err.message,
+  status: err.status,
+  instance,
+  error: err.name,
+  external: true,
+  platformResponse: err.response,
+});
+
+const middlewareError = (
+  status: number,
+  err: Error | string,
+  instance?: string
+): ProblemDetails => ({
+  type: `https://developer.mozilla.org/docs/Web/HTTP/Status/${status}`,
+  title: 'Internal Server Error',
+  detail: err instanceof Error ? err.message : err,
+  status,
+  instance,
+  error: err instanceof Error ? err.name : undefined,
+});
+
 export const errorToProblemDetails = (
   err: Error | string | unknown,
   instance?: string,
   extensions?: { [key: string]: unknown }
 ): ProblemDetails => {
-  if (err instanceof BadRequestError) {
-    return badRequest(err, instance, extensions);
+  if (err instanceof LtijsError) {
+    logger.error(err.message, '<LTIJS_ERROR>');
+    return badRequest(err, instance, {
+      ...extensions,
+      error: err.name,
+      external: true,
+      platformResponse: 'response' in err ? err.response : undefined,
+    });
   }
   if (err instanceof ForbiddenError) {
     return forbidden(err, instance, extensions);
@@ -231,6 +262,21 @@ export const errorToProblemDetails = (
   if (err instanceof ChatStopError) {
     return serviceUnavailable(err, instance);
   }
+  if (err instanceof BadRequestError) {
+    return badRequest(err, instance, extensions);
+  }
+  if (err instanceof HttpError) {
+    return httpError(err, instance);
+  }
+  // some middleware libraries (body-parser among them, for a malformed request body) throw a plain Error
+  // carrying its own `.status`/`.statusCode`, deliberately meant to be shown to the caller. Trusting
+  // only the 4xx range keeps a genuine 5xx-ish or absent status falling through to the generic case
+  if (err instanceof Error && ('status' in err || 'statusCode' in err)) {
+    const status = 'status' in err ? err.status : err.statusCode;
+    if (typeof status === 'number' && status >= 400 && status < 500) {
+      return middlewareError(status, err, instance);
+    }
+  }
   logger.error(
     `Unhandled error: ${err instanceof Error ? err.message : err}`,
     err
@@ -253,10 +299,11 @@ export const handleError = (
 };
 
 // Export for testing purposes only.
-if (process.env.NODE_ENV === 'test') {
-  module.exports._testOnly = {
-    fileNotFound,
-    unauthorized,
-    unprocessableContent,
-  };
-}
+export const _testOnly =
+  process?.env.NODE_ENV === 'test'
+    ? {
+        fileNotFound,
+        unauthorized,
+        unprocessableContent,
+      }
+    : {};

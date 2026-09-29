@@ -2,10 +2,10 @@ import {
   BadRequestError,
   ServiceUnavailableError,
   UnprocessableContentError,
-} from '#lib/ProblemDetails.js';
+} from '#lib/ProblemDetails';
 import { DbWritingTask, isWritingTask } from '#lib/WritingTask';
 import { validateWritingTask } from '#lib/schemaValidate';
-import { Request, Response, Router } from 'express';
+import { enhance } from '@universal-middleware/core';
 import { readdir, readFile, stat } from 'fs/promises';
 import {
   ContentItem,
@@ -57,6 +57,12 @@ function isDeepLinkingRequestDTO(
     (obj.tool === '' || obj.tool === 'draft' || obj.tool === 'review')
   );
 }
+
+export type MyProseCustomLTIClaims = {
+  tool?: 'draft' | 'review';
+  writing_task?: string; // JSON stringified writing task
+  writing_task_id?: string; // ID of the writing task
+};
 
 function initializeLTI(httpHandler: HttpHandler) {
   const provider = new Provider({
@@ -133,13 +139,9 @@ function initializeLTI(httpHandler: HttpHandler) {
         );
       }
       const task = file ? (JSON.parse(file) as DbWritingTask) : null;
-      tool = ['draft', 'review'].includes(tool) ? tool : 'draft';
+      tool = (['draft', 'review'].includes(tool) ? tool : 'draft') || 'draft';
       const url = new URL(tool, LTI_HOSTNAME);
-      const custom: {
-        tool: string;
-        writing_task_id?: string;
-        writing_task?: string;
-      } = { tool };
+      const custom: MyProseCustomLTIClaims = { tool };
       if (task) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { _id, ...writing_task } = task;
@@ -355,82 +357,95 @@ async function registerPlatforms(provider: Provider) {
   return provider;
 }
 
-export const lti_configuration_router = Router();
 /**
- * Endpoint to retrieve the Canvas LTI configuration JSON for the tool.
+ * Returns the LTI Configuration JSON with Canvas extensions.
+ * @returns LTI Configuration JSON with Canvas extensions.
  */
-lti_configuration_router.get(
-  '/lti/configuration',
-  async (_req: Request, res: Response) => {
-    const placement_defaults = {
-      icon_url: LOGO,
-      message_type: 'LtiDeepLinkingRequest',
-      target_link_uri: LTI_HOSTNAME.toString(),
-    };
-    res.json({
-      title: PRODUCT,
-      description: 'myProse Editing and Review tools',
-      oidc_initiation_url: new URL(
-        '/lti/login' /*provider.loginRoute*/,
-        LTI_HOSTNAME
-      ).toString(),
-      target_link_uri: LTI_HOSTNAME.toString(),
-      scopes: [
-        'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
-        'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
-        'https://purl.imsglobal.org/spec/lti-ags/scope/score',
-        'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
-        'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly',
-        // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
-        'https://canvas.instructure.com/lti/public_jwk/scope/update',
-      ],
-      extensions: [
-        {
-          domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
-          tool_id: PRODUCT,
-          platform: 'canvas.instructure.com',
-          privacy_level: 'public',
-          settings: {
-            text: 'myProse Drafting and Review tools',
-            labels: {
-              en: 'myProse Drafting and Review tools',
-              es: 'myProse Herramientas de Redacción y Revisión',
-            },
-            icon_url: LOGO,
-            selection_height: 800,
-            selection_width: 800,
-            placements: [
-              {
-                ...placement_defaults,
-                text: `${PRODUCT} Assignment Selection Placement`,
-                placement: 'assignment_selection',
-              },
-              {
-                ...placement_defaults,
-                text: `${PRODUCT} Link Selection Placement`,
-                placement: 'link_selection',
-              },
-              {
-                ...placement_defaults,
-                text: `${PRODUCT} Course Navigation Placement`,
-                placement: 'course_navigation',
-                message_type: 'LtiResourceLinkRequest',
-                target_link_uri: LTI_HOSTNAME.toString(),
-                windowTarget: '_blank',
-                custom_fields: {
-                  course_id: '$Canvas.course.id',
-                  course_name: '$Canvas.course.name',
-                  tool: 'review',
-                },
-              },
-            ],
+export function getLTIConfiguration() {
+  const placement_defaults = {
+    icon_url: LOGO,
+    message_type: 'LtiDeepLinkingRequest',
+    target_link_uri: LTI_HOSTNAME.toString(),
+  };
+  return {
+    title: PRODUCT,
+    description: 'myProse Editing and Review tools',
+    oidc_initiation_url: new URL(
+      '/lti/login' /*provider.loginRoute*/,
+      LTI_HOSTNAME
+    ).toString(),
+    target_link_uri: LTI_HOSTNAME.toString(),
+    scopes: [
+      'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem',
+      'https://purl.imsglobal.org/spec/lti-ags/scope/result.readonly',
+      'https://purl.imsglobal.org/spec/lti-ags/scope/score',
+      'https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly',
+      'https://purl.imsglobal.org/spec/lti-ags/scope/lineitem.readonly',
+      // "https://purl.imsglobal.org/spec/lti/scope/noticehandlers",
+      'https://canvas.instructure.com/lti/public_jwk/scope/update',
+    ],
+    extensions: [
+      {
+        domain: LTI_HOSTNAME.hostname.split('.').slice(-2).join('.'),
+        tool_id: PRODUCT,
+        platform: 'canvas.instructure.com',
+        privacy_level: 'public',
+        settings: {
+          text: 'myProse Drafting and Review tools',
+          labels: {
+            en: 'myProse Drafting and Review tools',
+            es: 'myProse Herramientas de Redacción y Revisión',
           },
+          icon_url: LOGO,
+          selection_height: 800,
+          selection_width: 800,
+          placements: [
+            {
+              ...placement_defaults,
+              text: `${PRODUCT} Assignment Selection Placement`,
+              placement: 'assignment_selection',
+            },
+            {
+              ...placement_defaults,
+              text: `${PRODUCT} Link Selection Placement`,
+              placement: 'link_selection',
+            },
+            {
+              ...placement_defaults,
+              text: `${PRODUCT} Course Navigation Placement`,
+              placement: 'course_navigation',
+              message_type: 'LtiResourceLinkRequest',
+              target_link_uri: LTI_HOSTNAME.toString(),
+              windowTarget: '_blank',
+              custom_fields: {
+                course_id: '$Canvas.course.id',
+                course_name: '$Canvas.course.name',
+                tool: 'review',
+              },
+            },
+          ],
         },
-      ],
-      public_jwk_url: new URL(
-        '/lti/keys' /*provider.keysRoute*/,
-        LTI_HOSTNAME
-      ).toString(),
-    });
-  }
-);
+      },
+    ],
+    public_jwk_url: new URL(
+      '/lti/keys' /*provider.keysRoute*/,
+      LTI_HOSTNAME
+    ).toString(),
+  };
+}
+
+export const LtiHandler = (provider: Provider) => {
+  return enhance(
+    async (request, context, _runtime) => {
+      const url = new URL(request.url);
+      const ltik = url.searchParams.get('ltik') ?? undefined;
+      const launchContext = ltik
+        ? await provider.getLaunchContext(ltik)
+        : undefined;
+      return { ...context, launchContext, ltik, provider };
+    },
+    {
+      name: 'myprose:lti-handler',
+    }
+  );
+};

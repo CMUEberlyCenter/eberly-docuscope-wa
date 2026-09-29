@@ -12,7 +12,7 @@ export const BasicUserMiddleware = enhance(
   async (_request, context, runtime) => {
     const user = runtime?.express?.req?.auth?.user ?? null;
     const isAdmin = user === 'admin';
-    return { ...context, user, isAdmin };
+    return { ...context, basicAuth: { user, isAdmin } };
   },
   {
     name: 'myprose:BasicUserMiddleware',
