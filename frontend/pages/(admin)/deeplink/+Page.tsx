@@ -122,10 +122,17 @@ export const Page: FC = () => {
             readOnly={true}
             className="d-none"
           />
-          <input
+          {/* <input
             type="hidden"
             name="file"
-            value={JSON.stringify(selected)}
+            value={JSON.stringify(selected ?? null)}
+            className="d-none"
+            readOnly={true}
+          /> */}
+          <input
+            type="hidden"
+            name="taskid"
+            value={selected?.info.id ?? ""}
             className="d-none"
             readOnly={true}
           />

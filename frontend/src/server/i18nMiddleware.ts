@@ -7,6 +7,7 @@ export const i18nMiddleware = enhance(
       const { i18n } = runtime.express.req;
       return { ...context, i18n };
     }
+    return context;
   },
   { name: 'myprose:i18n-middleware' }
 );

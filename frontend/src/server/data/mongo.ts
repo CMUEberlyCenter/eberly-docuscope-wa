@@ -60,6 +60,7 @@ type Snapshot = {
   analyses: Analysis[];
 };
 
+/** A snapshot with a portable ID. */
 type PortableSnapshot = Omit<Snapshot, '_id'> & { id: string };
 /** Convert a Snapshot to a PortableSnapshot which replaces _id with id or the given id if _id is undefined. */
 function toPortableSnapshot(
@@ -311,6 +312,23 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
   return rules;
 }
 
+/** Check if a writing task exists in the database by its database ID. */
+export async function checkWritingTaskDbIdExists(
+  dbid: string
+): Promise<boolean> {
+  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
+  const count = await collection.countDocuments({ _id: dbid }, { limit: 1 });
+  return count > 0;
+}
+/** Check if a writing task exists in the database by its database ID. */
+export async function checkWritingTaskIdExists(id: string): Promise<boolean> {
+  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
+  const count = await collection.countDocuments(
+    { 'info.id': id },
+    { limit: 1 }
+  );
+  return count > 0;
+}
 /**
  * Insert a non-public writing task into database.
  * @param writing_task

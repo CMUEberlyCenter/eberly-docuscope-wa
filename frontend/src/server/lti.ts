@@ -1,10 +1,4 @@
-import {
-  BadRequestError,
-  ServiceUnavailableError,
-  UnprocessableContentError,
-} from '#lib/ProblemDetails';
-import { DbWritingTask, isWritingTask } from '#lib/WritingTask';
-import { validateWritingTask } from '#lib/schemaValidate';
+import { BadRequestError, ServiceUnavailableError } from '#lib/ProblemDetails';
 import { enhance } from '@universal-middleware/core';
 import { readdir, readFile, stat } from 'fs/promises';
 import {
@@ -17,6 +11,7 @@ import {
   ValidationError,
 } from 'ltijs';
 import { join } from 'path';
+import { checkWritingTaskIdExists } from './data/mongo';
 import { logger } from './logger';
 import { LTI_DB, LTI_HOSTNAME, PLATFORMS_PATH, PRODUCT } from './settings';
 
@@ -40,9 +35,16 @@ export async function ensureLTIInitialized(
 
 type DeepLinkingRequestDTO = {
   ltik: string; // LTI token for the current session
-  file: string; // JSON stringified writing task
+  file?: string; // JSON stringified writing task, for future use if uploading writing tasks is allowed in deeplinking
+  taskid: string; // ID of the writing task
   tool: '' | 'draft' | 'review'; // 'draft' or 'review'
 };
+
+function selectTool(tool: string): 'draft' | 'review' {
+  if (tool === 'draft') return 'draft';
+  if (tool === 'review') return 'review';
+  return 'draft'; // default to draft if not specified
+}
 
 function isDeepLinkingRequestDTO(
   obj: DeepLinkingRequestDTO | unknown
@@ -51,10 +53,12 @@ function isDeepLinkingRequestDTO(
   return (
     'ltik' in obj &&
     typeof obj.ltik === 'string' &&
-    'file' in obj &&
-    typeof obj.file === 'string' &&
+    ('file' in obj ? typeof obj.file === 'string' : true) &&
+    'taskid' in obj &&
+    typeof obj.taskid === 'string' &&
     'tool' in obj &&
-    (obj.tool === '' || obj.tool === 'draft' || obj.tool === 'review')
+    typeof obj.tool === 'string' &&
+    ['', 'draft', 'review'].includes(obj.tool)
   );
 }
 
@@ -124,11 +128,11 @@ function initializeLTI(httpHandler: HttpHandler) {
       if (!isDeepLinkingRequestDTO(request.body)) {
         throw new BadRequestError('Invalid request body.');
       }
-      const { file } = request.body;
-      let { ltik, tool } = request.body;
-      ltik ||= Array.isArray(request.query.ltik)
-        ? request.query.ltik[0]
-        : request.query.ltik;
+      const ltik =
+        request.body.ltik ||
+        (Array.isArray(request.query.ltik)
+          ? request.query.ltik[0]
+          : request.query.ltik);
       if (!ltik) {
         throw new BadRequestError('Missing parameter: "ltik".');
       }
@@ -138,27 +142,29 @@ function initializeLTI(httpHandler: HttpHandler) {
           'Deep linking is not available for this launch.'
         );
       }
-      const task = file ? (JSON.parse(file) as DbWritingTask) : null;
-      tool = (['draft', 'review'].includes(tool) ? tool : 'draft') || 'draft';
+      const taskId = request.body.taskid;
+      const tool = selectTool(request.body.tool);
+      // const task = file ? (JSON.parse(file) as DbWritingTask) : null;
       const url = new URL(tool, LTI_HOSTNAME);
       const custom: MyProseCustomLTIClaims = { tool };
-      if (task) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _id, ...writing_task } = task;
-        const valid = validateWritingTask(writing_task);
-        if (!valid) {
-          throw new UnprocessableContentError(
-            validateWritingTask.errors ?? ['Unknown validation error.'],
-            'Invalid JSON'
-          );
-        }
-        if (!isWritingTask(writing_task)) {
-          throw new UnprocessableContentError(
-            ['Failed type checking!'],
-            'Invalid JSON'
-          );
-        }
-        custom.writing_task = JSON.stringify(writing_task);
+      if (taskId && (await checkWritingTaskIdExists(taskId))) {
+        custom.writing_task_id = taskId;
+        // } else if (request.body.file) { // TODO: Uncomment this block if uploading writing tasks is allowed in deeplinking.
+        // const { _id, ...writing_task } = task;
+        // const valid = validateWritingTask(writing_task);
+        // if (!valid) {
+        //   throw new UnprocessableContentError(
+        //     validateWritingTask.errors ?? ['Unknown validation error.'],
+        //     'Invalid JSON'
+        //   );
+        // }
+        // if (!isWritingTask(writing_task)) {
+        //   throw new UnprocessableContentError(
+        //     ['Failed type checking!'],
+        //     'Invalid JSON'
+        //   );
+        // }
+        // custom.writing_task = JSON.stringify(writing_task);
       }
       const items: ContentItem[] = [
         {
