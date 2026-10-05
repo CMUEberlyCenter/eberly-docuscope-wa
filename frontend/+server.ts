@@ -19,6 +19,7 @@ import { handleError } from './src/lib/ProblemDetails';
 import { reviews } from './src/server/api/reviews';
 import { snapshot } from './src/server/api/snapshot';
 // import { initDatabase, insertWritingTask } from './src/server/data/mongo';
+import { initDatabase } from '#/server/data/mongo';
 import { headersMiddleware } from '#/server/headersMiddleware';
 import { MyExpressHttpHandler } from '#/server/http-handler.service';
 import { i18nMiddleware } from '#/server/i18nMiddleware';
@@ -63,7 +64,8 @@ import {
 
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
-  await initPrompts();
+  const shutdownPrompts = await initPrompts();
+  const shutdownDb = await initDatabase();
   const httpHandler = new MyExpressHttpHandler({
     port: PORT,
     cors: {
@@ -279,6 +281,16 @@ async function getHandler() {
 
   // Global error handler/formatter
   app.use(handleError);
+
+  const gracefulShutdown = async () => {
+    await shutdownPrompts();
+    await shutdownDb();
+    logger.info('Server shutting down gracefully.');
+    process.exit(0);
+  };
+
+  process.on('SIGINT', gracefulShutdown);
+  process.on('SIGTERM', gracefulShutdown);
 
   return app;
 }
