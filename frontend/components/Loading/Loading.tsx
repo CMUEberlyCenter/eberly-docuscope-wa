@@ -1,8 +1,7 @@
+import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
+import classNames from "classnames";
 import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
-import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
-import style from "./Loading.module.scss";
-import classNames from "classnames";
 
 /**
  * Basic loading spinner with text.
@@ -17,24 +16,24 @@ export const Loading: FC<HTMLProps<HTMLDivElement>> = ({
       role="status"
       className={classNames(
         className,
-        `mx-auto loading w-100 h-100 position-relative`
+        `tw:flex tw:flex-col loading tw:w-full tw:h-full tw:items-center tw:justify-content-center`
       )}
       {...props}
     >
-      <div className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
-        <DotSpinner
-          aria-hidden="true"
-          className={`text-primary ${style["loading-animate-spin"]}`}
-        />
-        <Translation>
-          {(t) => (
-            <>
-              <div className="text-center text-wrap">{t("loading")}</div>
-              <div className="text-center text-wrap fw-light">{t("wait")}</div>
-            </>
-          )}
-        </Translation>
-      </div>
+      <DotSpinner
+        aria-hidden="true"
+        className={`tw:text-primary tw:animate-spin`}
+      />
+      <Translation>
+        {(t) => (
+          <>
+            <div className="tw:text-center tw:text-wrap">{t("loading")}</div>
+            <div className="tw:text-center tw:text-wrap tw:font-light">
+              {t("wait")}
+            </div>
+          </>
+        )}
+      </Translation>
     </div>
   );
 };

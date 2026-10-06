@@ -1,7 +1,6 @@
 import DotSpinner from "#assets/icons/6-dots-rotate.svg?react";
 import type { FC, HTMLProps } from "react";
 import { Translation } from "react-i18next";
-import style from "./Loading.module.scss";
 
 /**
  * Component for displaying a small loading spinner.
@@ -12,10 +11,10 @@ export const LoadingSmall: FC<HTMLProps<HTMLDivElement>> = (props) => {
     <div role="status" {...props}>
       <DotSpinner
         aria-hidden="true"
-        className={`text-primary ${style["loading-animate-spin"]}`}
+        className={`tw:text-primary tw:animate-spin`}
       />
       <Translation>
-        {(t) => <span className="sr-only visually-hidden">{t("loading")}</span>}
+        {(t) => <span className="tw:sr-only">{t("loading")}</span>}
       </Translation>
     </div>
   );

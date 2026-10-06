@@ -12,7 +12,7 @@ export const Logo: FC = () => (
         rel="noreferrer noopener"
         data-testid="logo-link"
       >
-        <img style={{ height: "1.1em" }} src={logo} alt={t("document.title")} />
+        <img className="tw:h-[1.1em]" src={logo} alt={t("document.title")} />
       </a>
     )}
   </Translation>

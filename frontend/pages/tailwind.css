@@ -1,0 +1,27 @@
+/* @import "tailwindcss" prefix(tw); For use with migration */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme" layer(theme) prefix(tw);
+@import "tailwindcss/utilities" layer(utilities);
+
+@theme {
+  --color-primary-50: #eaf4ff;
+  --color-primary-100: #d8eaff;
+  --color-primary-200: #b9d8ff;
+  --color-primary-300: #8fbdff;
+  --color-primary-400: #6396ff;
+  --color-primary-500: #3f71ff;
+  --color-primary-600: #1e47ff;
+  --color-primary-700: #2445f0;
+  --color-primary-800: #1e2f99;
+  --color-primary-900: #193296;
+  --color-primary-950: #0f1c57;
+  --color-primary: #2445f0;
+  --color-secondary: #c2d4ec;
+  --color-light: #f6f7f9;
+  --color-organization: darkBlue;
+  --color-highlight: #fffbbb;
+  --color-info: #067; /* cmu-secondary-teal */
+  --color-warning: #a60; /* cmu-secondary-gold */
+  --color-danger: #ef3340; /* cmu-secondary-rose */
+  --color-mercury: oklch(91.09% 0.007 247.9); /* border */
+}

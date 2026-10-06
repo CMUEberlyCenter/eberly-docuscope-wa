@@ -15,10 +15,10 @@ export const telefuncHandler = (provider: Provider) => {
       const httpResponse = await telefunc.serve({
         request,
         context: {
-          provider,
-          sessionId,
           ...context,
           ...runtime,
+          provider,
+          sessionId,
         },
       });
       return httpResponse;

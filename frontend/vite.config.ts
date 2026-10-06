@@ -1,10 +1,11 @@
 import react from '@vitejs/plugin-react';
 // import { visualizer } from "rollup-plugin-visualizer";
+import tailwindcss from '@tailwindcss/vite';
+import { telefunc } from 'telefunc/vite';
 import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import packageJson from './package.json' with { type: 'json' };
-import { telefunc } from 'telefunc/vite';
 
 function getPort() {
     const port = parseInt(process.env.PORT ?? '');
@@ -13,7 +14,7 @@ function getPort() {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
+  plugins: [tailwindcss(), vike(), react(), /*visualizer(),*/ telefunc(), svgr()],
   // ssr: {
   //   noExternal: ['react-bootstrap'],
   // },

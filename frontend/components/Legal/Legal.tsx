@@ -17,14 +17,13 @@ export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
         {...props}
         className={classNames(
           className,
-          "container-fluid border-top py-2 d-flex flex-row align-items-baseline justify-content-end"
+          "tw:w-full tw:px-3 tw:border-t tw:border-mercury tw:py-2 tw:flex tw:flex-row tw:items-center tw:justify-end tw:divide-x-2 tw:divide-mercury tw:text-sm"
         )}
-        style={{ ...style, fontSize: "small" }}
       >
-        <About />
+        <About className="tw:px-1" />
         {/* <a className="px-1 border-end border-2" href="https://www.andrew.cmu.edu/" target="_blank">{t('legal.myprose')}</a> */}
         <a
-          className="border-start border-end border-2 px-1"
+          className="tw:px-1"
           href="https://www.cmu.edu/legal/"
           target="_blank"
           rel="noreferrer noopener"
@@ -32,7 +31,7 @@ export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
           {t("legal.cmu")}
         </a>
         <a
-          className="px-1"
+          className="tw:px-1"
           href="https://www.cmu.edu/legal/privacy-notice.html"
           target="_blank"
           rel="noreferrer noopener"

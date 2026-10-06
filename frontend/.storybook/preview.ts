@@ -1,6 +1,7 @@
 import { definePreview } from '@storybook/react-vite';
 // import '../pages/i18n';
 import '../pages/index.scss';
+import '../pages/tailwind.css';
 /* Configuration for i18n support. */
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';

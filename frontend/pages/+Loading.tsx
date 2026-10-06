@@ -7,7 +7,7 @@ const LoadingLayout: FC = () => (
     <div className="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center">
       <DotSpinner
         aria-hidden="true"
-        className={`text-primary ${style["loading-animate-spin"]}`}
+        className={`tw:text-primary tw:animate-spin`}
       />
     </div>
   </div>

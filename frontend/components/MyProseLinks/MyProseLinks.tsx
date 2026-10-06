@@ -1,8 +1,8 @@
 import { DbWritingTask } from "#/lib/WritingTask";
+import { ListGroup } from "#components/ui/ListGroup.tsx";
 import { FC } from "react";
-import { ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton";
+import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton.tsx";
 
 const MyLink: FC<{ href: URL; title: string }> = ({ href, title }) => {
   const url = href.toString();

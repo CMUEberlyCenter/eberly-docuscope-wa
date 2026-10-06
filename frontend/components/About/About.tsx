@@ -1,6 +1,7 @@
+import { ListGroup } from "#components/ui/ListGroup.tsx";
 import classNames from "classnames";
-import { type FC, type HTMLProps, useMemo, useState } from "react";
-import { ListGroup, Modal, type ModalProps } from "react-bootstrap";
+import { type FC, type HTMLProps, useId, useMemo, useState } from "react";
+import { Modal, type ModalProps } from "react-bootstrap";
 import { Translation, useTranslation } from "react-i18next";
 import { Logo } from "../Logo/Logo";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
@@ -94,20 +95,23 @@ export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
   const toggle = () => setShow((prev) => !prev);
+  const modalId = useId();
   return (
     <Translation>
       {(t) => (
-        <>
+        <div>
           <a
+            role="button"
+            aria-expanded={show}
+            aria-controls={modalId}
             {...props}
-            style={{ ...style, fontSize: "small" }}
-            className={classNames(className, "btn btn-link py-0 m-0 px-1")}
+            className={classNames(className, "tw:cursor-pointer")}
             onClick={toggle}
           >
             {t("about.title")}
           </a>
-          <AboutModal show={show} onHide={onHide} />
-        </>
+          <AboutModal id={modalId} show={show} onHide={onHide} />
+        </div>
       )}
     </Translation>
   );

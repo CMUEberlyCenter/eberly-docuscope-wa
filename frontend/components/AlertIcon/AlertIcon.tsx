@@ -1,7 +1,6 @@
 import AttentionIcon from "#assets/icons/attention_icon.svg?react";
 import classNames from "classnames";
 import type { FC, HTMLProps } from "react";
-import css from "./AlertIcon.module.scss";
 
 type AlertIconProps = HTMLProps<HTMLDivElement> & {
   message: string;
@@ -22,7 +21,7 @@ export const AlertIcon: FC<AlertIconProps> = ({
         className={classNames(className, "text-warning")}
         title={message}
       >
-        <AttentionIcon className={css["alert-icon"]} />
+        <AttentionIcon className="tw:size-16" />
         <span className="sr-only visually-hidden">{message}</span>
       </div>
     ) : null}
