@@ -60,6 +60,12 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
               >
                 {t("writing_tasks.tab")}
               </Nav.Link>
+              <Nav.Link
+                active={urlPathname === "/admin/users"}
+                href="/admin/users"
+              >
+                {t("users.tab")}
+              </Nav.Link>
             </Nav>
           </Navbar.Collapse>
         </Container>

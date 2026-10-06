@@ -98,3 +98,5 @@ writing_tasks:
     saved: "Saved: {{saved}}"
     uploaded: "Uploaded: {{uploaded}}"
     main: View
+users:
+  tab: Users
