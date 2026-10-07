@@ -2,19 +2,18 @@ import { WritingTask } from "#/lib/WritingTask.ts";
 import { Logo } from "#components/Logo/Logo";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter.tsx";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo.tsx";
+import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree.tsx";
 import {
   Activity,
-  useState,
-  type FC,
   ViewTransition,
   startTransition,
-  useId,
+  useState,
+  type FC
 } from "react";
 import { Button, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
-import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree.tsx";
 import "./style.css";
 
 const Page: FC = () => {
@@ -23,7 +22,6 @@ const Page: FC = () => {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<WritingTask | null>(null);
   const [data, setData] = useState<WritingTask[]>(() => tasks);
-  const animationName = useId();
   return (
     <div className="tw:mx-5 tw:h-screen tw:w-screen tw:flex tw:flex-col tw:overflow-hidden tw:gap-1">
       <header>
@@ -34,7 +32,7 @@ const Page: FC = () => {
       <nav className="tw:h-full tw:flex tw:flex-row tw:overflow-hidden tw:grow">
         <Activity mode={index === 0 ? "visible" : "hidden"}>
           <ViewTransition enter="slide-in-left" exit="slide-out-left">
-            <div className="tw:flex tw:flex-row tw:gap-3 tw:align-items-stretch tw:h-full">
+            <div className="tw:flex tw:flex-row tw:gap-3 tw:align-items-stretch tw:h-full tw:w-full">
               <div className="tw:w-full">
                 <h5 className="tw:font-bold">{t("select_task.title")}</h5>
                 <WritingTaskFilter tasks={tasks} update={setData} />
