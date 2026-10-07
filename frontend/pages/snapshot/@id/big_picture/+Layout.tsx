@@ -1,7 +1,6 @@
 import {
   BigPictureButtonToolbar,
   BigPictureTool,
-  WritingTypeBigPictureTool,
 } from "#components/ReviewNavigation/BigPictureButtonToolbar";
 import { FC, ReactNode } from "react";
 import { useData } from "vike-react/useData";
@@ -26,17 +25,14 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
       navigate(`/snapshot/${id}/big_picture/${key}`);
     }
   };
-  const disabled = (tool: WritingTypeBigPictureTool): boolean => {
-    return !tool_config.includes(tool);
-  };
 
   return (
-    <div className="h-100 d-flex flex-column overflow-auto">
+    <div className="tw:h-full tw:flex tw:flex-col tw:overflow-auto">
       <BigPictureButtonToolbar
         activeTool={activeTool}
         onSelect={onSelect}
         task={task}
-        disabled={disabled}
+        enabled={tool_config}
       />
       {children}
     </div>

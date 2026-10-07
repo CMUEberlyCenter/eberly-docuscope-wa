@@ -14,9 +14,7 @@ import {
   type ButtonProps,
   ButtonToolbar,
   Card,
-  OverlayTrigger,
   Stack,
-  Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Node, Transforms } from "slate";
@@ -26,6 +24,11 @@ import { ToolErrorHandler } from "../ErrorHandler/ErrorHandler";
 import { FadeContent } from "../FadeContent/FadeContent";
 import { Loading } from "../Loading/Loading";
 import { TextToSpeech } from "../TextToSpeech/TextToSpeech";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/ui/tooltip.tsx";
 
 type ToolButtonProps = ButtonProps & {
   tooltip: string;
@@ -39,14 +42,17 @@ export const ToolButton: FC<ToolButtonProps> = ({
   title,
   ...props
 }) => (
-  <OverlayTrigger placement="bottom" overlay={<Tooltip>{tooltip}</Tooltip>}>
-    <Button variant="outline-primary" {...props}>
-      <Stack>
-        {icon}
-        <span>{title}</span>
-      </Stack>
-    </Button>
-  </OverlayTrigger>
+  <Tooltip>
+    <TooltipTrigger>
+      <Button variant="outline-primary" {...props}>
+        <Stack>
+          {icon}
+          <span>{title}</span>
+        </Stack>
+      </Button>
+    </TooltipTrigger>
+    <TooltipContent>{tooltip}</TooltipContent>
+  </Tooltip>
 );
 
 type ToolProp = { tool?: DraftToolResult | null };

@@ -8,7 +8,7 @@ import {
   ViewTransition,
   startTransition,
   useState,
-  type FC
+  type FC,
 } from "react";
 import { Button, ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";

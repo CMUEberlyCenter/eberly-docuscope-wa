@@ -9,9 +9,6 @@ import { navigate } from "vike/client/router";
 import { Data } from "../+data";
 import { useSnapshotContext } from "../SnapshotContext";
 
-type Tool =
-  "paragraph_clarity" | "sentence_density" | "professional_tone" | "sources";
-
 export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   const { routeParams, urlPathname } = usePageContext();
   const [, setSnapshotContext] = useSnapshotContext();
@@ -28,9 +25,6 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
       navigate(`/snapshot/${id}/fine_tuning/${key}`);
     }
   };
-  const disabled = (tool: Tool): boolean => {
-    return !tool_config.includes(tool);
-  };
 
   return (
     <div className="h-100 d-flex flex-column overflow-auto">
@@ -38,7 +32,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
         activeTool={activeTool}
         onSelect={onSelect}
         task={task}
-        disabled={disabled}
+        enabled={tool_config}
       />
       {children}
     </div>

@@ -1,100 +1,85 @@
-import type { ReviewTool } from "#/lib/ReviewResponse";
-import { isEnabled } from "#/lib/WritingTask";
 import { trackScreenView } from "#/client/tracking";
-import { Activity, type FC, useEffect, useState, useTransition } from "react";
+import { isEnabled } from "#/lib/WritingTask";
 import {
-  Alert,
-  ButtonToolbar,
-  OverlayTrigger,
-  Tab,
-  Tabs,
-  Tooltip,
-} from "react-bootstrap";
+  BigPictureButtonToolbar,
+  BigPictureTool,
+} from "#components/ReviewNavigation/BigPictureButtonToolbar.tsx";
+import {
+  FineTuningButtonToolbar,
+  FineTuningTool,
+} from "#components/ReviewNavigation/FineTuningButtonToolbar.tsx";
+import { Activity, type FC, useEffect, useState, useTransition } from "react";
+import { Alert, Tab, Tabs } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import { CivilTone, CivilToneReviewProvider } from "./CivilTone";
-import { Credibility, CredibilityReviewProvider } from "./Credibility";
-import {
-  Expectations,
-  ExpectationsButton,
-  ExpectationsDataProvider,
-} from "./Expectations";
+import { Expectations, ExpectationsDataProvider } from "./Expectations";
 import {
   LinesOfArguments,
-  LinesOfArgumentsButton,
   LinesOfArgumentsReviewProvider,
 } from "./LinesOfArguments";
-import {
-  LogicalFlow,
-  LogicalFlowButton,
-  LogicalFlowReviewProvider,
-} from "./LogicalFlow";
+import { LogicalFlow, LogicalFlowReviewProvider } from "./LogicalFlow";
 import { NullTool } from "./NullTool";
 import {
-  TopicalProgression,
-  TopicalProgressionButton,
-  OrganizationDataProvider,
-} from "./TopicalProgression";
-import {
   ParagraphClarity,
-  ParagraphClarityButton,
   ParagraphClarityReviewProvider,
 } from "./ParagraphClarity";
 import {
   ProfessionalTone,
-  ProfessionalToneButton,
   ProfessionalToneReviewProvider,
 } from "./ProfessionalTone";
 import {
   ProminentTopics,
-  ProminentTopicsButton,
   ProminentTopicsReviewProvider,
 } from "./ProminentTopics";
 import "./Review.scss";
-import { Sentences, SentencesButton, SentencesDataProvider } from "./Sentences";
-import { Sources, SourcesButton, SourcesReviewProvider } from "./Sources";
+import { Sentences, SentencesDataProvider } from "./Sentences";
+import { Sources, SourcesReviewProvider } from "./Sources";
+import {
+  OrganizationDataProvider,
+  TopicalProgression,
+} from "./TopicalProgression";
 
 // tab event keys
 type TabKey = "big_picture" | "fine_tuning";
 // tool event keys
-type Tool = ReviewTool | "sentences" | "organization" | "impressions" | "null";
 
 /** Top level component for displaying reviews. */
 export const Review: FC = () => {
   const { t } = useTranslation("review");
   const [tab, setTab] = useState<TabKey>("big_picture");
-  const [tool, setTool] = useState<Tool>("null");
-  const [otherTool, setOtherTool] = useState<Tool>("null");
+  const [tool, setTool] = useState<BigPictureTool | null>(null);
+  const [otherTool, setOtherTool] = useState<FineTuningTool | null>(null);
   const [userText] = useFileText();
   const [{ task: writingTask }] = useWritingTask();
   const { settings } = usePageContext();
-  const ready = !!userText && userText.trim().length > 0;
 
-  const toggleToolHandler =
-    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
-      if (!evt.currentTarget.classList.contains("active")) {
-        trackScreenView({
-          screen_name: selectedTool,
-          screen_class: "Review",
-          task_id: writingTask?.info.id,
-        });
-      }
-      setTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-    };
-  const toggleOtherToolHandler =
-    (selectedTool: Tool) => (evt: React.MouseEvent<HTMLButtonElement>) => {
-      if (!evt.currentTarget.classList.contains("active")) {
-        trackScreenView({
-          screen_name: selectedTool,
-          screen_class: "Review",
-          task_id: writingTask?.info.id,
-        });
-      }
-      setOtherTool((prev) => (prev === selectedTool ? "null" : selectedTool));
-    };
+  const selectTool = (selectedTool: BigPictureTool) => {
+    setTool((prev) => (prev === selectedTool ? null : selectedTool));
+  };
+  useEffect(() => {
+    if (tool) {
+      trackScreenView({
+        screen_name: tool,
+        screen_class: "Review",
+        task_id: writingTask?.info.id,
+      });
+    }
+  }, [tool, writingTask]);
+  const selectOtherTool = (selectedTool: FineTuningTool) => {
+    setOtherTool((prev) => (prev === selectedTool ? null : selectedTool));
+  };
+  useEffect(() => {
+    if (otherTool) {
+      trackScreenView({
+        screen_name: otherTool,
+        screen_class: "Review",
+        task_id: writingTask?.info.id,
+      });
+    }
+  }, [otherTool, writingTask]);
 
   // As per #230 most features are available even without a writing task if
   // enabled in settings.  The server settings have priority over writing tasks.
@@ -128,7 +113,8 @@ export const Review: FC = () => {
     expectationsFeature ||
     argumentsFeature ||
     ideasFeature ||
-    logicalFlowFeature;
+    logicalFlowFeature ||
+    organizationFeature;
   const fineTuningFeature =
     paragraphClarityFeature ||
     professionalToneFeature ||
@@ -136,15 +122,16 @@ export const Review: FC = () => {
     sourcesFeature;
 
   const [isPending, startTransition] = useTransition();
+  const ready = !!userText && userText.trim().length > 0 && !isPending;
+
   useEffect(() => {
     // Reset to default tab/tool if writing task, file, or settings change.
     startTransition(() => {
       setTab(() => "big_picture");
-      setTool(() => "null");
-      setOtherTool(() => "null");
+      setTool(() => null);
+      setOtherTool(() => null);
     });
   }, [settings, writingTask, userText]);
-
   return (
     <>
       {!bigPictureFeature && !fineTuningFeature && (
@@ -166,62 +153,23 @@ export const Review: FC = () => {
             className="h-100"
           >
             <div className="h-100 d-flex flex-column overflow-auto">
-              <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                {expectationsFeature ? (
-                  !writingTask && ready ? (
-                    <OverlayTrigger
-                      placement="bottom"
-                      overlay={
-                        <Tooltip>
-                          {t("instructions:expectations_scope_note")}
-                          <hr />
-                          {t("expectations.no_writing_task_tooltip")}
-                        </Tooltip>
-                      }
-                    >
-                      {/* div required to get tooltip overlay to work. */}
-                      <div>
-                        <ExpectationsButton disabled={true} />
-                      </div>
-                    </OverlayTrigger>
-                  ) : (
-                    <ExpectationsButton
-                      disabled={!ready || isPending}
-                      active={tool === "expectations"}
-                      onClick={toggleToolHandler("expectations")}
-                    />
-                  )
-                ) : null}
-                {ideasFeature ? (
-                  <ProminentTopicsButton
-                    disabled={!ready || isPending}
-                    active={tool === "prominent_topics"}
-                    onClick={toggleToolHandler("prominent_topics")}
-                  />
-                ) : null}
-                {argumentsFeature ? (
-                  <LinesOfArgumentsButton
-                    disabled={!ready || isPending}
-                    active={tool === "lines_of_arguments"}
-                    onClick={toggleToolHandler("lines_of_arguments")}
-                  />
-                ) : null}
-                {logicalFlowFeature ? (
-                  <LogicalFlowButton
-                    disabled={!ready || isPending}
-                    active={tool === "logical_flow"}
-                    onClick={toggleToolHandler("logical_flow")}
-                  />
-                ) : null}
-                {organizationFeature ? (
-                  <TopicalProgressionButton
-                    disabled={!ready || isPending}
-                    active={tool === "organization"}
-                    onClick={toggleToolHandler("organization")}
-                  />
-                ) : null}
-              </ButtonToolbar>
-              <Activity mode={!tool || tool === "null" ? "visible" : "hidden"}>
+              <BigPictureButtonToolbar
+                activeTool={tool}
+                onSelect={selectTool}
+                task={writingTask}
+                enabled={
+                  ready
+                    ? [
+                        "expectations",
+                        "lines_of_arguments",
+                        "logical_flow",
+                        "prominent_topics",
+                        "term_matrix",
+                      ]
+                    : []
+                }
+              />
+              <Activity mode={!tool ? "visible" : "hidden"}>
                 <NullTool text={t("null.big_picture")} />
               </Activity>
               <Activity mode={tool === "expectations" ? "visible" : "hidden"}>
@@ -244,7 +192,7 @@ export const Review: FC = () => {
                   <LogicalFlow />
                 </LogicalFlowReviewProvider>
               )}
-              {tool === "organization" && (
+              {tool === "topical_progression" && (
                 <OrganizationDataProvider>
                   <TopicalProgression />
                 </OrganizationDataProvider>
@@ -260,36 +208,21 @@ export const Review: FC = () => {
             className="h-100"
           >
             <div className="h-100 d-flex flex-column overflow-auto">
-              <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-                {paragraphClarityFeature ? (
-                  <ParagraphClarityButton
-                    disabled={!ready || isPending}
-                    active={otherTool === "paragraph_clarity"}
-                    onClick={toggleOtherToolHandler("paragraph_clarity")}
-                  />
-                ) : null}
-                {sentencesFeature ? (
-                  <SentencesButton
-                    disabled={!ready || isPending}
-                    active={otherTool === "sentences"}
-                    onClick={toggleOtherToolHandler("sentences")}
-                  />
-                ) : null}
-                {professionalToneFeature ? (
-                  <ProfessionalToneButton
-                    disabled={!ready || isPending}
-                    active={otherTool === "professional_tone"}
-                    onClick={toggleOtherToolHandler("professional_tone")}
-                  />
-                ) : null}
-                {sourcesFeature ? (
-                  <SourcesButton
-                    disabled={!ready || isPending}
-                    active={otherTool === "sources"}
-                    onClick={toggleOtherToolHandler("sources")}
-                  />
-                ) : null}
-              </ButtonToolbar>
+              <FineTuningButtonToolbar
+                activeTool={otherTool}
+                onSelect={selectOtherTool}
+                task={writingTask}
+                enabled={
+                  ready
+                    ? [
+                        "paragraph_clarity",
+                        "sentence_density",
+                        "professional_tone",
+                        "sources",
+                      ]
+                    : []
+                }
+              />
               <ErrorBoundary
                 fallbackRender={({ error }) => (
                   <Alert>
@@ -306,24 +239,10 @@ export const Review: FC = () => {
                   </Alert>
                 )}
               >
-                <Activity
-                  mode={
-                    !otherTool || otherTool === "null" ? "visible" : "hidden"
-                  }
-                >
+                <Activity mode={!otherTool ? "visible" : "hidden"}>
                   <NullTool text={t("null.fine_tuning")} />
                 </Activity>
-                {otherTool === "civil_tone" && (
-                  <CivilToneReviewProvider>
-                    <CivilTone />
-                  </CivilToneReviewProvider>
-                )}
-                {otherTool === "credibility" && (
-                  <CredibilityReviewProvider>
-                    <Credibility />
-                  </CredibilityReviewProvider>
-                )}
-                {otherTool === "sentences" && (
+                {otherTool === "sentence_clarity" && (
                   <SentencesDataProvider>
                     <Sentences />
                   </SentencesDataProvider>

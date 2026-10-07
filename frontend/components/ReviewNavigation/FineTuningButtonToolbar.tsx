@@ -4,8 +4,8 @@ import { SentencesButton } from "#components/Review/Sentences";
 import { SourcesButton } from "#components/Review/Sources";
 import { isEnabled, WritingTask } from "#lib/WritingTask";
 import { FC } from "react";
-import { ButtonToolbar } from "react-bootstrap";
 import { usePageContext } from "vike-react/usePageContext";
+import { ReviewButtonToolbar } from "./ReviewButtonToolbar";
 
 export type WritingTaskFineTuning =
   "paragraph_clarity" | "sentence_density" | "professional_tone" | "sources";
@@ -15,40 +15,53 @@ export type FineTuningTool =
 export const FineTuningButtonToolbar: FC<{
   activeTool: FineTuningTool | null;
   onSelect: (key: FineTuningTool) => void;
-  task?: WritingTask;
-  disabled: (tool: WritingTaskFineTuning) => boolean;
-}> = ({ activeTool, onSelect, task, disabled }) => {
+  task?: Optional<WritingTask>;
+  enabled?: string[];
+}> = ({
+  activeTool,
+  onSelect,
+  task,
+  enabled = [
+    "paragraph_clarity",
+    "sentence_density",
+    "professional_tone",
+    "sources",
+  ],
+}) => {
   const { settings } = usePageContext();
   return (
-    <ButtonToolbar className="m-3 d-flex justify-content-center gap-4">
-      {settings?.paragraph_clarity && isEnabled(task, "paragraph_clarity") ? (
+    <ReviewButtonToolbar>
+      {settings?.paragraph_clarity &&
+      (!task || isEnabled(task, "paragraph_clarity")) ? (
         <ParagraphClarityButton
-          disabled={disabled("paragraph_clarity")}
+          disabled={enabled?.includes("paragraph_clarity") === false}
           active={activeTool === "paragraph_clarity"}
           onClick={() => onSelect("paragraph_clarity")}
         />
       ) : null}
-      {settings?.sentence_density && isEnabled(task, "sentence_density") ? (
+      {settings?.sentence_density &&
+      (!task || isEnabled(task, "sentence_density")) ? (
         <SentencesButton
-          disabled={disabled("sentence_density")}
+          disabled={enabled?.includes("sentence_density") === false}
           active={activeTool === "sentence_clarity"}
           onClick={() => onSelect("sentence_clarity")}
         />
       ) : null}
-      {settings?.professional_tone && isEnabled(task, "professional_tone") ? (
+      {settings?.professional_tone &&
+      (!task || isEnabled(task, "professional_tone")) ? (
         <ProfessionalToneButton
-          disabled={disabled("professional_tone")}
+          disabled={enabled?.includes("professional_tone") === false}
           active={activeTool === "professional_tone"}
           onClick={() => onSelect("professional_tone")}
         />
       ) : null}
-      {settings?.sources && isEnabled(task, "sources") ? (
+      {settings?.sources && (!task || isEnabled(task, "sources")) ? (
         <SourcesButton
-          disabled={disabled("sources")}
+          disabled={enabled?.includes("sources") === false}
           active={activeTool === "sources"}
           onClick={() => onSelect("sources")}
         />
       ) : null}
-    </ButtonToolbar>
+    </ReviewButtonToolbar>
   );
 };
