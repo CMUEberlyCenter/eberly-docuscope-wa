@@ -10,10 +10,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [
-    admin(),
-    username()
-  ],
+  plugins: [admin(), username()],
 });
 
 export const authMiddleware = toNodeHandler(auth);

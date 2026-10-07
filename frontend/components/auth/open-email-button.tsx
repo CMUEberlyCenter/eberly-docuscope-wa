@@ -1,29 +1,32 @@
-import { createQrCodeSvgData, getEmailProviderLink } from "@better-auth-ui/core"
-import { useAuth } from "@better-auth-ui/react"
-import type { VariantProps } from "class-variance-authority"
-import { QrCode } from "lucide-react"
-import { useMemo } from "react"
+import {
+  createQrCodeSvgData,
+  getEmailProviderLink,
+} from "@better-auth-ui/core";
+import { useAuth } from "@better-auth-ui/react";
+import type { VariantProps } from "class-variance-authority";
+import { QrCode } from "lucide-react";
+import { useMemo } from "react";
 
-import { buttonVariants } from "#components/ui/button.tsx"
+import { buttonVariants } from "#components/ui/button.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger
-} from "#components/ui/tooltip.tsx"
-import { cn } from "cn"
+  TooltipTrigger,
+} from "#components/ui/tooltip.tsx";
+import { cn } from "cn";
 
 export type OpenEmailButtonProps = {
   /** Email address used to detect the provider, e.g. from the verify-email flow. */
-  email: string
-  className?: string
+  email: string;
+  className?: string;
   /**
    * Button variant. Defaults to the primary style for dead-end views where
    * opening the inbox is the only action; pass `"secondary"` where it sits
    * beside a submit button that should stay the primary call to action.
    */
-  variant?: VariantProps<typeof buttonVariants>["variant"]
-}
+  variant?: VariantProps<typeof buttonVariants>["variant"];
+};
 
 /**
  * Render a button that opens the user's email provider login page in a new
@@ -42,23 +45,23 @@ export type OpenEmailButtonProps = {
 export function OpenEmailButton({
   email,
   className,
-  variant
+  variant,
 }: OpenEmailButtonProps) {
-  const { localization } = useAuth()
+  const { localization } = useAuth();
 
-  const provider = getEmailProviderLink(email)
-  const loginUrl = provider?.loginUrl
+  const provider = getEmailProviderLink(email);
+  const loginUrl = provider?.loginUrl;
   const qrCode = useMemo(
     () => (loginUrl ? createQrCodeSvgData(loginUrl) : null),
     [loginUrl]
-  )
+  );
 
-  if (!provider || !qrCode) return null
+  if (!provider || !qrCode) return null;
 
   const scanLabel = localization.auth.scanToOpenEmailProvider.replace(
     "{{provider}}",
     provider.companyProvider
-  )
+  );
 
   return (
     <TooltipProvider>
@@ -89,9 +92,11 @@ export function OpenEmailButton({
             <path fill="white" d={`M0 0h${qrCode.size}v${qrCode.size}H0z`} />
             <path fill="black" d={qrCode.path} shapeRendering="crispEdges" />
           </svg>
-          <p className="tw:max-w-40 tw:text-center tw:leading-snug">{scanLabel}</p>
+          <p className="tw:max-w-40 tw:text-center tw:leading-snug">
+            {scanLabel}
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
-  )
+  );
 }

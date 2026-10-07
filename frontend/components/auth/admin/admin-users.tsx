@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
 import {
   DEFAULT_TABLE_SEARCH_DEBOUNCE_MS,
   fieldsWithModelValues,
   getAdditionalFieldDefaultValues,
   getAdditionalFieldSubmitValues,
-  getClampedTablePageIndex
-} from "@better-auth-ui/core"
+  getClampedTablePageIndex,
+} from "@better-auth-ui/core";
 import {
   type AdminAuthClient,
   type AdminListUsersParams,
@@ -21,24 +21,24 @@ import {
   setAdminUserPasswordOptions,
   setAdminUserRoleOptions,
   unbanAdminUserOptions,
-  updateAdminUserOptions
-} from "@better-auth-ui/core/plugins/admin"
+  updateAdminUserOptions,
+} from "@better-auth-ui/core/plugins/admin";
 import {
   useAuth,
   useAuthPlugin,
   useCopyToClipboard,
-  useSession
-} from "@better-auth-ui/react"
+  useSession,
+} from "@better-auth-ui/react";
 import {
   useAdminPermission,
   useAdminUser,
   useAdminUserSessions,
-  useAdminUsers
-} from "@better-auth-ui/react/plugins/admin"
-import { useDebouncedValue } from "@tanstack/react-pacer"
-import { keepPreviousData, useMutation } from "@tanstack/react-query"
-import type { SortingState } from "@tanstack/react-table"
-import type { BetterFetchError } from "better-auth/react"
+  useAdminUsers,
+} from "@better-auth-ui/react/plugins/admin";
+import { useDebouncedValue } from "@tanstack/react-pacer";
+import { keepPreviousData, useMutation } from "@tanstack/react-query";
+import type { SortingState } from "@tanstack/react-table";
+import type { BetterFetchError } from "better-auth/react";
 import {
   BanIcon,
   CheckIcon,
@@ -53,10 +53,10 @@ import {
   ShieldAlertIcon,
   Trash2Icon,
   UserPlusIcon,
-  UserRound
-} from "lucide-react"
-import { type FormEvent, useEffect, useMemo, useState } from "react"
-import { UserAvatar } from "#components/auth/user/user-avatar.tsx"
+  UserRound,
+} from "lucide-react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
+import { UserAvatar } from "#components/auth/user/user-avatar.tsx";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,26 +65,26 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
-} from "#components/ui/alert-dialog.tsx"
-import { Badge } from "#components/ui/badge.tsx"
-import { Button } from "#components/ui/button.tsx"
-import { Checkbox } from "#components/ui/checkbox.tsx"
+  AlertDialogTitle,
+} from "#components/ui/alert-dialog.tsx";
+import { Badge } from "#components/ui/badge.tsx";
+import { Button } from "#components/ui/button.tsx";
+import { Checkbox } from "#components/ui/checkbox.tsx";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle
-} from "#components/ui/dialog.tsx"
+  DialogTitle,
+} from "#components/ui/dialog.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
-  DropdownMenuTrigger
-} from "#components/ui/dropdown-menu.tsx"
+  DropdownMenuTrigger,
+} from "#components/ui/dropdown-menu.tsx";
 import {
   Field,
   FieldContent,
@@ -92,59 +92,64 @@ import {
   FieldGroup,
   FieldLabel,
   FieldLegend,
-  FieldSet
-} from "#components/ui/field.tsx"
+  FieldSet,
+} from "#components/ui/field.tsx";
 import {
   InputGroup,
   InputGroupAddon,
-  InputGroupInput
-} from "#components/ui/input-group.tsx"
-import { RadioGroup, RadioGroupItem } from "#components/ui/radio-group.tsx"
+  InputGroupInput,
+} from "#components/ui/input-group.tsx";
+import { RadioGroup, RadioGroupItem } from "#components/ui/radio-group.tsx";
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
-  SelectValue
-} from "#components/ui/select.tsx"
-import { Separator } from "#components/ui/separator.tsx"
-import { Skeleton } from "#components/ui/skeleton.tsx"
-import { Switch } from "#components/ui/switch.tsx"
+  SelectValue,
+} from "#components/ui/select.tsx";
+import { Separator } from "#components/ui/separator.tsx";
+import { Skeleton } from "#components/ui/skeleton.tsx";
+import { Switch } from "#components/ui/switch.tsx";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
-} from "#components/ui/table.tsx"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "#components/ui/tabs.tsx"
-import { adminPlugin } from "#lib/auth/admin-plugin.ts"
-import { getAuthAdditionalFieldValidators, useAuthForm } from "../auth-form"
-import { useServerTableState } from "../server-table-state"
+  TableRow,
+} from "#components/ui/table.tsx";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "#components/ui/tabs.tsx";
+import { adminPlugin } from "#lib/auth/admin-plugin.ts";
+import { getAuthAdditionalFieldValidators, useAuthForm } from "../auth-form";
+import { useServerTableState } from "../server-table-state";
 
-import { createAdminColumnHelper, useAdminTable } from "./admin-table"
+import { createAdminColumnHelper, useAdminTable } from "./admin-table";
 
-type SearchField = "email" | "name"
-type SearchOperator = "contains" | "ends_with" | "starts_with"
-type StatusFilter = "all" | "active" | "banned"
-type DangerousAction = "ban" | "delete" | "impersonate" | "revokeAll"
+type SearchField = "email" | "name";
+type SearchOperator = "contains" | "ends_with" | "starts_with";
+type StatusFilter = "all" | "active" | "banned";
+type DangerousAction = "ban" | "delete" | "impersonate" | "revokeAll";
 
 export type AdminUsersProps = {
-  className?: string
-  onSelectedUserIdChange?: (userId: string | undefined) => void
-  selectedUserId?: string
-}
+  className?: string;
+  onSelectedUserIdChange?: (userId: string | undefined) => void;
+  selectedUserId?: string;
+};
 
 const formatDate = (value: Date | string | undefined | null) =>
   value
     ? new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(
         new Date(value)
       )
-    : "–"
+    : "–";
 
-const asAdminRoles = (roles: string[]) => roles as ("user" | "admin")[]
+const asAdminRoles = (roles: string[]) => roles as ("user" | "admin")[];
 
 const parseAdminRoles = (
   role: string | undefined,
@@ -154,94 +159,94 @@ const parseAdminRoles = (
   const roles = role
     ?.split(",")
     .map((value) => value.trim())
-    .filter(Boolean)
-  const resolved = roles?.length ? roles : [fallback]
-  return allowMultipleRoles ? resolved : resolved.slice(0, 1)
-}
+    .filter(Boolean);
+  const resolved = roles?.length ? roles : [fallback];
+  return allowMultipleRoles ? resolved : resolved.slice(0, 1);
+};
 
 const getBanDurationSeconds = (value: string) => {
-  if (!value) return undefined
-  const days = Number(value)
-  if (!Number.isSafeInteger(days) || days <= 0) return null
-  const seconds = days * 86_400
-  return Number.isSafeInteger(seconds) ? seconds : null
-}
+  if (!value) return undefined;
+  const days = Number(value);
+  if (!Number.isSafeInteger(days) || days <= 0) return null;
+  const seconds = days * 86_400;
+  return Number.isSafeInteger(seconds) ? seconds : null;
+};
 
 const getAdminErrorMessage = (error: Error | null) => {
-  const authError = error as BetterFetchError | null
-  return authError?.error?.message ?? authError?.message
-}
+  const authError = error as BetterFetchError | null;
+  return authError?.error?.message ?? authError?.message;
+};
 
-const adminColumnHelper = createAdminColumnHelper<AdminUser>()
+const adminColumnHelper = createAdminColumnHelper<AdminUser>();
 const adminColumns = adminColumnHelper.columns([
   adminColumnHelper.accessor("name", { id: "name" }),
   adminColumnHelper.accessor("role", {
     id: "role",
-    enableSorting: false
+    enableSorting: false,
   }),
   adminColumnHelper.accessor("banned", {
     id: "status",
-    enableSorting: false
+    enableSorting: false,
   }),
   adminColumnHelper.accessor((user) => new Date(user.createdAt).getTime(), {
-    id: "createdAt"
-  })
-])
-const EMPTY_USERS: AdminUser[] = []
-const INITIAL_ADMIN_SORTING: SortingState = [{ id: "createdAt", desc: true }]
+    id: "createdAt",
+  }),
+]);
+const EMPTY_USERS: AdminUser[] = [];
+const INITIAL_ADMIN_SORTING: SortingState = [{ id: "createdAt", desc: true }];
 
 /** Server-paginated user management with optional controlled inspector state. */
 export function AdminUsers({
   className,
   onSelectedUserIdChange,
-  selectedUserId: controlledSelectedUserId
+  selectedUserId: controlledSelectedUserId,
 }: AdminUsersProps) {
-  const auth = useAuth<AdminAuthClient>()
-  const config = useAuthPlugin(adminPlugin)
-  const { localization } = config
-  const [localSelectedUserId, setLocalSelectedUserId] = useState<string>()
+  const auth = useAuth<AdminAuthClient>();
+  const config = useAuthPlugin(adminPlugin);
+  const { localization } = config;
+  const [localSelectedUserId, setLocalSelectedUserId] = useState<string>();
   const tableState = useServerTableState({
     initialSorting: INITIAL_ADMIN_SORTING,
-    pageSize: config.pageSize
-  })
+    pageSize: config.pageSize,
+  });
   const { columnFilters, globalFilter, pagination, setPagination, sorting } =
-    tableState
-  const [searchField, setSearchField] = useState<SearchField>("email")
+    tableState;
+  const [searchField, setSearchField] = useState<SearchField>("email");
   const [searchOperator, setSearchOperator] =
-    useState<SearchOperator>("contains")
-  const [createOpen, setCreateOpen] = useState(false)
+    useState<SearchOperator>("contains");
+  const [createOpen, setCreateOpen] = useState(false);
   const [debouncedSearch] = useDebouncedValue(globalFilter.trim(), {
-    wait: DEFAULT_TABLE_SEARCH_DEBOUNCE_MS
-  })
+    wait: DEFAULT_TABLE_SEARCH_DEBOUNCE_MS,
+  });
   const status = String(
     columnFilters.find((filter) => filter.id === "status")?.value ?? "all"
-  ) as StatusFilter
+  ) as StatusFilter;
   const searchFieldItems = [
     { label: localization.email, value: "email" },
-    { label: localization.name, value: "name" }
-  ]
+    { label: localization.name, value: "name" },
+  ];
   const searchOperatorItems = [
     { label: localization.searchContains, value: "contains" },
     { label: localization.startsWith, value: "starts_with" },
-    { label: localization.endsWith, value: "ends_with" }
-  ]
+    { label: localization.endsWith, value: "ends_with" },
+  ];
   const statusItems = [
     { label: localization.filterAllStatuses, value: "all" },
     { label: localization.active, value: "active" },
-    { label: localization.banned, value: "banned" }
-  ]
-  const primarySort = sorting[0]
-  const sortBy = primarySort?.id === "name" ? "name" : "createdAt"
-  const sortDirection = primarySort?.desc ? "desc" : "asc"
-  const isSelectionControlled = onSelectedUserIdChange !== undefined
+    { label: localization.banned, value: "banned" },
+  ];
+  const primarySort = sorting[0];
+  const sortBy = primarySort?.id === "name" ? "name" : "createdAt";
+  const sortDirection = primarySort?.desc ? "desc" : "asc";
+  const isSelectionControlled = onSelectedUserIdChange !== undefined;
   const selectedUserId = isSelectionControlled
     ? controlledSelectedUserId
-    : localSelectedUserId
+    : localSelectedUserId;
 
   const setSelectedUserId = (userId: string | undefined) => {
-    if (!isSelectionControlled) setLocalSelectedUserId(userId)
-    onSelectedUserIdChange?.(userId)
-  }
+    if (!isSelectionControlled) setLocalSelectedUserId(userId);
+    onSelectedUserIdChange?.(userId);
+  };
 
   const params = useMemo<AdminListUsersParams>(
     () => ({
@@ -257,8 +262,8 @@ export function AdminUsers({
         : {
             filterField: "banned",
             filterOperator: "eq" as const,
-            filterValue: status === "banned"
-          })
+            filterValue: status === "banned",
+          }),
     }),
     [
       debouncedSearch,
@@ -268,37 +273,37 @@ export function AdminUsers({
       searchOperator,
       sortBy,
       sortDirection,
-      status
+      status,
     ]
-  )
-  const permission = useAdminPermission(auth.authClient, { user: ["list"] })
+  );
+  const permission = useAdminPermission(auth.authClient, { user: ["list"] });
   const users = useAdminUsers(auth.authClient, {
     enabled: permission.data?.success === true,
     params,
-    placeholderData: keepPreviousData
-  })
-  const canCreate = useAdminPermission(auth.authClient, { user: ["create"] })
-  const canGet = useAdminPermission(auth.authClient, { user: ["get"] })
+    placeholderData: keepPreviousData,
+  });
+  const canCreate = useAdminPermission(auth.authClient, { user: ["create"] });
+  const canGet = useAdminPermission(auth.authClient, { user: ["get"] });
 
-  const total = users.data?.total ?? 0
+  const total = users.data?.total ?? 0;
 
   useEffect(() => {
-    if (!users.isSuccess) return
+    if (!users.isSuccess) return;
     const pageIndex = getClampedTablePageIndex(
       pagination.pageIndex,
       pagination.pageSize,
       total
-    )
+    );
     if (pageIndex !== pagination.pageIndex) {
-      setPagination((current) => ({ ...current, pageIndex }))
+      setPagination((current) => ({ ...current, pageIndex }));
     }
   }, [
     pagination.pageIndex,
     pagination.pageSize,
     setPagination,
     total,
-    users.isSuccess
-  ])
+    users.isSuccess,
+  ]);
   const table = useAdminTable(
     {
       atoms: tableState.atoms,
@@ -308,12 +313,12 @@ export function AdminUsers({
       manualFiltering: true,
       manualPagination: true,
       manualSorting: true,
-      rowCount: total
+      rowCount: total,
     },
     () => null
-  )
-  const from = total ? pagination.pageIndex * pagination.pageSize + 1 : 0
-  const to = Math.min(total, (pagination.pageIndex + 1) * pagination.pageSize)
+  );
+  const from = total ? pagination.pageIndex * pagination.pageSize + 1 : 0;
+  const to = Math.min(total, (pagination.pageIndex + 1) * pagination.pageSize);
 
   return (
     <section className={className}>
@@ -342,9 +347,9 @@ export function AdminUsers({
             items={searchFieldItems}
             value={searchField}
             onValueChange={(value) => {
-              if (!value) return
-              setSearchField(value as SearchField)
-              table.setPageIndex(0)
+              if (!value) return;
+              setSearchField(value as SearchField);
+              table.setPageIndex(0);
             }}
           >
             <SelectTrigger
@@ -367,9 +372,9 @@ export function AdminUsers({
             items={searchOperatorItems}
             value={searchOperator}
             onValueChange={(value) => {
-              if (!value) return
-              setSearchOperator(value as SearchOperator)
-              table.setPageIndex(0)
+              if (!value) return;
+              setSearchOperator(value as SearchOperator);
+              table.setPageIndex(0);
             }}
           >
             <SelectTrigger aria-label={localization.searchOperator}>
@@ -396,7 +401,7 @@ export function AdminUsers({
                   : localization.searchByName
               }
               onChange={(event) => {
-                table.setGlobalFilter(event.target.value)
+                table.setGlobalFilter(event.target.value);
               }}
               placeholder={
                 searchField === "email"
@@ -410,10 +415,10 @@ export function AdminUsers({
             items={statusItems}
             value={status}
             onValueChange={(value) => {
-              if (!value) return
+              if (!value) return;
               table
                 .getColumn("status")
-                ?.setFilterValue(value === "all" ? undefined : value)
+                ?.setFilterValue(value === "all" ? undefined : value);
             }}
           >
             <SelectTrigger
@@ -491,7 +496,7 @@ export function AdminUsers({
                   <UserRowsSkeleton />
                 ) : table.getRowModel().rows.length ? (
                   table.getRowModel().rows.map((row) => {
-                    const user = row.original
+                    const user = row.original;
                     return (
                       <TableRow
                         key={row.id}
@@ -513,12 +518,14 @@ export function AdminUsers({
                                 <Button
                                   className="tw:h-auto tw:min-w-0 tw:justify-start tw:p-0 tw:font-medium"
                                   onClick={(event) => {
-                                    event.stopPropagation()
-                                    setSelectedUserId(user.id)
+                                    event.stopPropagation();
+                                    setSelectedUserId(user.id);
                                   }}
                                   variant="link"
                                 >
-                                  <span className="tw:truncate">{user.name}</span>
+                                  <span className="tw:truncate">
+                                    {user.name}
+                                  </span>
                                 </Button>
                               ) : (
                                 <span className="tw:truncate">{user.name}</span>
@@ -547,7 +554,7 @@ export function AdminUsers({
                           {formatDate(user.createdAt)}
                         </TableCell>
                       </TableRow>
-                    )
+                    );
                   })
                 ) : (
                   <TableRow>
@@ -604,17 +611,17 @@ export function AdminUsers({
         userId={selectedUserId}
       />
     </section>
-  )
+  );
 }
 
 function SortButton({
   children,
   onClick,
-  sorted
+  sorted,
 }: {
-  children: React.ReactNode
-  onClick?: (event: unknown) => void
-  sorted: false | "asc" | "desc"
+  children: React.ReactNode;
+  onClick?: (event: unknown) => void;
+  sorted: false | "asc" | "desc";
 }) {
   return (
     <button
@@ -625,30 +632,32 @@ function SortButton({
       {children}
       {sorted ? (sorted === "asc" ? "↑" : "↓") : null}
     </button>
-  )
+  );
 }
 
 function AdminState({
   action,
   description,
   icon,
-  title
+  title,
 }: {
-  action?: React.ReactNode
-  description: string
-  icon: React.ReactNode
-  title: string
+  action?: React.ReactNode;
+  description: string;
+  icon: React.ReactNode;
+  title: string;
 }) {
   return (
     <div className="tw:flex tw:min-h-64 tw:flex-col tw:items-center tw:justify-center tw:gap-3 tw:rounded-lg tw:border tw:border-dashed tw:p-8 tw:text-center">
       <span className="tw:text-muted-foreground tw:[&>svg]:size-8">{icon}</span>
       <div className="tw:flex tw:flex-col tw:gap-1">
         <h2 className="tw:font-medium">{title}</h2>
-        <p className="tw:max-w-md tw:text-sm tw:text-muted-foreground">{description}</p>
+        <p className="tw:max-w-md tw:text-sm tw:text-muted-foreground">
+          {description}
+        </p>
       </div>
       {action}
     </div>
-  )
+  );
 }
 
 const skeletonRowIds = [
@@ -656,8 +665,8 @@ const skeletonRowIds = [
   "admin-row-2",
   "admin-row-3",
   "admin-row-4",
-  "admin-row-5"
-]
+  "admin-row-5",
+];
 
 function UserRowsSkeleton() {
   return skeletonRowIds.map((id) => (
@@ -681,7 +690,7 @@ function UserRowsSkeleton() {
         <Skeleton className="tw:h-4 tw:w-24" />
       </TableCell>
     </TableRow>
-  ))
+  ));
 }
 
 function UserTableSkeleton() {
@@ -693,26 +702,26 @@ function UserTableSkeleton() {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }
 
 function CreateUserDialog({
   open,
-  onOpenChange
+  onOpenChange,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }) {
-  const auth = useAuth<AdminAuthClient>()
-  const config = useAuthPlugin(adminPlugin)
-  const { data: session } = useSession(auth.authClient)
+  const auth = useAuth<AdminAuthClient>();
+  const config = useAuthPlugin(adminPlugin);
+  const { data: session } = useSession(auth.authClient);
   const createUser = useMutation(
     createAdminUserOptions(auth.authClient, session?.user.id)
-  )
+  );
   const canSetRole = useAdminPermission(auth.authClient, {
-    user: ["set-role"]
-  })
-  const additionalFields = auth.additionalFields ?? []
+    user: ["set-role"],
+  });
+  const additionalFields = auth.additionalFields ?? [];
   const form = useAuthForm({
     defaultValues: {
       additionalFields: getAdditionalFieldDefaultValues(additionalFields),
@@ -720,7 +729,7 @@ function CreateUserDialog({
       emailVerified: false,
       name: "",
       password: "",
-      roles: [config.defaultRole]
+      roles: [config.defaultRole],
     },
     onSubmit: async ({ value }) => {
       try {
@@ -731,33 +740,33 @@ function CreateUserDialog({
                 additionalFields,
                 value.additionalFields
               ),
-              emailVerified: value.emailVerified
+              emailVerified: value.emailVerified,
             },
             email: value.email,
             name: value.name,
             password: value.password,
             ...(canSetRole.data?.success
               ? { role: asAdminRoles(value.roles) }
-              : {})
+              : {}),
           },
           { onSuccess: close }
-        )
+        );
       } catch {
         // The mutation reports the error through its configured handler.
       }
-    }
-  })
+    },
+  });
 
   useEffect(() => {
     if (!config.allowMultipleRoles)
-      form.setFieldValue("roles", (current) => current.slice(0, 1))
-  }, [config.allowMultipleRoles, form.setFieldValue])
+      form.setFieldValue("roles", (current) => current.slice(0, 1));
+  }, [config.allowMultipleRoles, form.setFieldValue]);
 
   const close = () => {
-    form.reset()
-    createUser.reset()
-    onOpenChange(false)
-  }
+    form.reset();
+    createUser.reset();
+    onOpenChange(false);
+  };
 
   return (
     <Dialog
@@ -859,8 +868,8 @@ function CreateUserDialog({
                                     ? [...field.state.value, role]
                                     : field.state.value.filter(
                                         (item) => item !== role
-                                      )
-                                  if (next.length) field.handleChange(next)
+                                      );
+                                  if (next.length) field.handleChange(next);
                                 }}
                               />
                               <FieldLabel htmlFor={`admin-create-role-${role}`}>
@@ -938,147 +947,147 @@ function CreateUserDialog({
         </form.AppForm>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 function UserInspector({
   canGetUser,
   open,
   onOpenChange,
-  userId
+  userId,
 }: {
-  canGetUser: boolean
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  userId?: string
+  canGetUser: boolean;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userId?: string;
 }) {
-  const auth = useAuth<AdminAuthClient>()
-  const config = useAuthPlugin(adminPlugin)
+  const auth = useAuth<AdminAuthClient>();
+  const config = useAuthPlugin(adminPlugin);
   const contributedTabs = auth.plugins.flatMap((plugin) =>
     (plugin.adminUserTabs ?? []).map((tab) => ({
       ...tab,
-      value: `${plugin.id}:${tab.id}`
+      value: `${plugin.id}:${tab.id}`,
     }))
-  )
+  );
   const detail = useAdminUser(auth.authClient, userId, {
-    enabled: canGetUser
-  })
-  const user = detail.data
+    enabled: canGetUser,
+  });
+  const user = detail.data;
   const sessionsPermission = useAdminPermission(
     auth.authClient,
     {
-      session: ["list"]
+      session: ["list"],
     },
     { enabled: Boolean(userId) }
-  )
+  );
   const sessions = useAdminUserSessions(auth.authClient, userId, {
-    enabled: sessionsPermission.data?.success === true
-  })
-  const { data: actor } = useSession(auth.authClient)
+    enabled: sessionsPermission.data?.success === true,
+  });
+  const { data: actor } = useSession(auth.authClient);
   const canSetRole = useAdminPermission(
     auth.authClient,
     {
-      user: ["set-role"]
+      user: ["set-role"],
     },
     { enabled: Boolean(userId) }
-  )
+  );
   const canUpdate = useAdminPermission(
     auth.authClient,
     { user: ["update"] },
     { enabled: Boolean(userId) }
-  )
+  );
   const canSetEmail = useAdminPermission(
     auth.authClient,
     { user: ["set-email"] },
     { enabled: Boolean(userId) }
-  )
+  );
   const canSetPassword = useAdminPermission(
     auth.authClient,
     {
-      user: ["set-password"]
+      user: ["set-password"],
     },
     { enabled: Boolean(userId) }
-  )
+  );
   const canBan = useAdminPermission(
     auth.authClient,
     { user: ["ban"] },
     { enabled: Boolean(userId) }
-  )
+  );
   const canImpersonate = useAdminPermission(
     auth.authClient,
     {
-      user: ["impersonate"]
+      user: ["impersonate"],
     },
     { enabled: Boolean(userId) }
-  )
+  );
   const targetIsAdmin = user
     ? isAdminTarget(user, config.adminRoles, config.adminUserIds)
-    : false
+    : false;
   const canImpersonateAdmins = useAdminPermission(
     auth.authClient,
     { user: ["impersonate-admins"] },
     { enabled: Boolean(userId && targetIsAdmin) }
-  )
+  );
   const canDelete = useAdminPermission(
     auth.authClient,
     { user: ["delete"] },
     { enabled: Boolean(userId) }
-  )
+  );
   const canRevoke = useAdminPermission(
     auth.authClient,
     {
-      session: ["revoke"]
+      session: ["revoke"],
     },
     { enabled: Boolean(userId) }
-  )
+  );
   const {
     copied: userIdCopied,
     copy: copyUserId,
-    reset: resetUserIdCopy
-  } = useCopyToClipboard()
+    reset: resetUserIdCopy,
+  } = useCopyToClipboard();
 
   useEffect(() => {
-    if (open && userId) resetUserIdCopy()
-  }, [open, userId, resetUserIdCopy])
+    if (open && userId) resetUserIdCopy();
+  }, [open, userId, resetUserIdCopy]);
 
-  const [banReason, setBanReason] = useState("")
-  const [banDuration, setBanDuration] = useState("")
-  const banDurationSeconds = getBanDurationSeconds(banDuration)
-  const [passwordOpen, setPasswordOpen] = useState(false)
-  const [dangerousAction, setDangerousAction] = useState<DangerousAction>()
-  const isSelf = user?.id === actor?.user.id
+  const [banReason, setBanReason] = useState("");
+  const [banDuration, setBanDuration] = useState("");
+  const banDurationSeconds = getBanDurationSeconds(banDuration);
+  const [passwordOpen, setPasswordOpen] = useState(false);
+  const [dangerousAction, setDangerousAction] = useState<DangerousAction>();
+  const isSelf = user?.id === actor?.user.id;
 
   const updateUser = useMutation(
     updateAdminUserOptions(auth.authClient, actor?.user.id)
-  )
+  );
 
   useEffect(() => {
-    if (user?.id) updateUser.reset()
-  }, [user?.id, updateUser.reset])
+    if (user?.id) updateUser.reset();
+  }, [user?.id, updateUser.reset]);
 
   useEffect(() => {
-    if (!open) updateUser.reset()
-  }, [open, updateUser.reset])
+    if (!open) updateUser.reset();
+  }, [open, updateUser.reset]);
 
   const setRoleMutation = useMutation(
     setAdminUserRoleOptions(auth.authClient, actor?.user.id)
-  )
-  const ban = useMutation(banAdminUserOptions(auth.authClient, actor?.user.id))
+  );
+  const ban = useMutation(banAdminUserOptions(auth.authClient, actor?.user.id));
   const unban = useMutation(
     unbanAdminUserOptions(auth.authClient, actor?.user.id)
-  )
+  );
   const remove = useMutation(
     removeAdminUserOptions(auth.authClient, actor?.user.id)
-  )
+  );
   const impersonate = useMutation(
     impersonateAdminUserOptions(auth.authClient, actor?.user.id)
-  )
+  );
   const revokeSession = useMutation(
     revokeAdminUserSessionOptions(auth.authClient, actor?.user.id, userId)
-  )
+  );
   const revokeSessions = useMutation(
     revokeAdminUserSessionsOptions(auth.authClient, actor?.user.id, userId)
-  )
+  );
   const configuredUserFields = useMemo(
     () =>
       fieldsWithModelValues(
@@ -1086,19 +1095,19 @@ function UserInspector({
         user ? (user as unknown as Record<string, unknown>) : {}
       ),
     [auth.additionalFields, user]
-  )
+  );
   const profileForm = useAuthForm({
     defaultValues: {
       additionalFields: getAdditionalFieldDefaultValues(configuredUserFields),
       email: "",
       emailVerified: false,
       name: "",
-      roles: [config.defaultRole]
+      roles: [config.defaultRole],
     },
     onSubmit: async ({ value }) => {
-      if (!user) return
+      if (!user) return;
 
-      const mutations: Promise<unknown>[] = []
+      const mutations: Promise<unknown>[] = [];
       if (canUpdate.data?.success) {
         mutations.push(
           updateUser.mutateAsync({
@@ -1112,30 +1121,30 @@ function UserInspector({
               ...(canSetEmail.data?.success
                 ? {
                     email: value.email.trim(),
-                    emailVerified: value.emailVerified
+                    emailVerified: value.emailVerified,
                   }
-                : {})
-            }
+                : {}),
+            },
           })
-        )
+        );
       }
       if (canSetRole.data?.success && !isSelf) {
         mutations.push(
           setRoleMutation.mutateAsync({
             userId: user.id,
-            role: asAdminRoles(value.roles)
+            role: asAdminRoles(value.roles),
           })
-        )
+        );
       }
 
       try {
-        await Promise.all(mutations)
-        onOpenChange(false)
+        await Promise.all(mutations);
+        onOpenChange(false);
       } catch {
         // Mutation errors are rendered next to the form.
       }
-    }
-  })
+    },
+  });
 
   useEffect(() => {
     profileForm.reset({
@@ -1147,8 +1156,8 @@ function UserInspector({
         user?.role,
         config.defaultRole,
         config.allowMultipleRoles
-      )
-    })
+      ),
+    });
   }, [
     config.allowMultipleRoles,
     config.defaultRole,
@@ -1157,64 +1166,64 @@ function UserInspector({
     user?.email,
     user?.emailVerified,
     user?.name,
-    user?.role
-  ])
+    user?.role,
+  ]);
 
   const confirm = () => {
-    if (!user) return
+    if (!user) return;
     if (dangerousAction === "ban") {
-      if (banDurationSeconds === null) return
+      if (banDurationSeconds === null) return;
       ban.mutate(
         {
           banExpiresIn: banDurationSeconds,
           banReason: banReason.trim() || undefined,
-          userId: user.id
+          userId: user.id,
         },
         {
           onSuccess: () => {
-            setBanDuration("")
-            setBanReason("")
-            setDangerousAction(undefined)
-          }
+            setBanDuration("");
+            setBanReason("");
+            setDangerousAction(undefined);
+          },
         }
-      )
+      );
     }
     if (dangerousAction === "delete")
       remove.mutate(
         { userId: user.id },
         {
           onSuccess: () => {
-            setDangerousAction(undefined)
-            onOpenChange(false)
-          }
+            setDangerousAction(undefined);
+            onOpenChange(false);
+          },
         }
-      )
+      );
     if (dangerousAction === "revokeAll")
       revokeSessions.mutate(
         { userId: user.id },
         { onSuccess: () => setDangerousAction(undefined) }
-      )
+      );
     if (dangerousAction === "impersonate")
       impersonate.mutate(
         { userId: user.id },
         {
           onSuccess: () => {
-            setDangerousAction(undefined)
+            setDangerousAction(undefined);
             if (config.impersonationRedirectTo)
-              auth.navigate({ to: config.impersonationRedirectTo })
-          }
+              auth.navigate({ to: config.impersonationRedirectTo });
+          },
         }
-      )
-  }
+      );
+  };
   const closeDangerousAction = () => {
-    ban.reset()
-    remove.reset()
-    revokeSessions.reset()
-    impersonate.reset()
-    setBanDuration("")
-    setBanReason("")
-    setDangerousAction(undefined)
-  }
+    ban.reset();
+    remove.reset();
+    revokeSessions.reset();
+    impersonate.reset();
+    setBanDuration("");
+    setBanReason("");
+    setDangerousAction(undefined);
+  };
   const dangerousMutation =
     dangerousAction === "ban"
       ? ban
@@ -1222,8 +1231,8 @@ function UserInspector({
         ? remove
         : dangerousAction === "revokeAll"
           ? revokeSessions
-          : impersonate
-  const dangerousError = getAdminErrorMessage(dangerousMutation.error)
+          : impersonate;
+  const dangerousError = getAdminErrorMessage(dangerousMutation.error);
   const dangerLabel =
     dangerousAction === "ban"
       ? config.localization.banUser
@@ -1231,7 +1240,7 @@ function UserInspector({
         ? config.localization.deleteUser
         : dangerousAction === "revokeAll"
           ? config.localization.revokeAllSessions
-          : config.localization.impersonateUser
+          : config.localization.impersonateUser;
 
   return (
     <>
@@ -1243,7 +1252,9 @@ function UserInspector({
                 <div className="tw:flex tw:min-w-0 tw:items-center tw:gap-3">
                   <UserAvatar className="tw:size-12" user={user} />
                   <div className="tw:min-w-0">
-                    <DialogTitle className="tw:truncate">{user.name}</DialogTitle>
+                    <DialogTitle className="tw:truncate">
+                      {user.name}
+                    </DialogTitle>
                     <DialogDescription className="tw:truncate">
                       {user.email}
                     </DialogDescription>
@@ -1335,7 +1346,10 @@ function UserInspector({
                   </TabsTrigger>
                 ))}
               </TabsList>
-              <TabsContent className="tw:min-h-0 tw:overflow-hidden" value="overview">
+              <TabsContent
+                className="tw:min-h-0 tw:overflow-hidden"
+                value="overview"
+              >
                 <profileForm.AppForm>
                   <profileForm.AuthFormRoot className="tw:grid tw:h-full tw:grid-rows-[minmax(0,1fr)_auto]">
                     <div className="tw:overflow-y-auto">
@@ -1438,9 +1452,9 @@ function UserInspector({
                                               ? [...field.state.value, item]
                                               : field.state.value.filter(
                                                   (role) => role !== item
-                                                )
+                                                );
                                             if (next.length)
-                                              field.handleChange(next)
+                                              field.handleChange(next);
                                           }}
                                         />
                                         <FieldLabel
@@ -1656,7 +1670,7 @@ function UserInspector({
                       <profileForm.Subscribe
                         selector={(state) => [
                           state.values.name,
-                          state.values.email
+                          state.values.email,
                         ]}
                       >
                         {([name, email]) => (
@@ -1758,7 +1772,7 @@ function UserInspector({
                 </div>
               </TabsContent>
               {contributedTabs.map((tab) => {
-                const ContributedTab = tab.component
+                const ContributedTab = tab.component;
                 return (
                   <TabsContent
                     className="tw:min-h-0 tw:overflow-y-auto tw:p-6"
@@ -1767,7 +1781,7 @@ function UserInspector({
                   >
                     <ContributedTab userId={user.id} />
                   </TabsContent>
-                )
+                );
               })}
             </Tabs>
           ) : (
@@ -1837,8 +1851,8 @@ function UserInspector({
                 (dangerousAction === "ban" && banDurationSeconds === null)
               }
               onClick={(event) => {
-                event.preventDefault()
-                confirm()
+                event.preventDefault();
+                confirm();
               }}
               variant={dangerousAction === "delete" ? "destructive" : "default"}
             >
@@ -1848,45 +1862,45 @@ function UserInspector({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }
 
 function PasswordDialog({
   open,
   onOpenChange,
-  userId
+  userId,
 }: {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  userId?: string
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  userId?: string;
 }) {
-  const auth = useAuth<AdminAuthClient>()
-  const config = useAuthPlugin(adminPlugin)
-  const [password, setPassword] = useState("")
-  const [errorMessage, setErrorMessage] = useState<string>()
+  const auth = useAuth<AdminAuthClient>();
+  const config = useAuthPlugin(adminPlugin);
+  const [password, setPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string>();
   const mutation = useMutation(
     setAdminUserPasswordOptions(auth.authClient, () => {
-      setTimeout(() => mutation.reset(), 0)
+      setTimeout(() => mutation.reset(), 0);
     })
-  )
+  );
   const close = () => {
-    setPassword("")
-    setErrorMessage(undefined)
-    mutation.reset()
-    onOpenChange(false)
-  }
+    setPassword("");
+    setErrorMessage(undefined);
+    mutation.reset();
+    onOpenChange(false);
+  };
   const submit = (event: FormEvent) => {
-    event.preventDefault()
-    setErrorMessage(undefined)
+    event.preventDefault();
+    setErrorMessage(undefined);
     if (userId)
       mutation.mutate(
         { userId, newPassword: password },
         {
           onError: (error) => setErrorMessage(getAdminErrorMessage(error)),
-          onSuccess: close
+          onSuccess: close,
         }
-      )
-  }
+      );
+  };
   return (
     <Dialog
       open={open}
@@ -1928,5 +1942,5 @@ function PasswordDialog({
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

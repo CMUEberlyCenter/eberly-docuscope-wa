@@ -1,13 +1,13 @@
-import * as React from "react"
-import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
-import { cn } from "cn"
+import * as React from "react";
+import { Popover as PopoverPrimitive } from "@base-ui/react/popover";
+import { cn } from "cn";
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+  return <PopoverPrimitive.Root data-slot="popover" {...props} />;
 }
 
 function PopoverTrigger({ ...props }: PopoverPrimitive.Trigger.Props) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />;
 }
 
 function PopoverContent({
@@ -41,7 +41,7 @@ function PopoverContent({
         />
       </PopoverPrimitive.Positioner>
     </PopoverPrimitive.Portal>
-  )
+  );
 }
 
 function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
@@ -51,7 +51,7 @@ function PopoverHeader({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("tw:flex tw:flex-col tw:gap-0.5 tw:text-sm", className)}
       {...props}
     />
-  )
+  );
 }
 
 function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
@@ -61,7 +61,7 @@ function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
       className={cn("tw:font-medium", className)}
       {...props}
     />
-  )
+  );
 }
 
 function PopoverDescription({
@@ -74,7 +74,7 @@ function PopoverDescription({
       className={cn("tw:text-muted-foreground", className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -84,4 +84,4 @@ export {
   PopoverHeader,
   PopoverTitle,
   PopoverTrigger,
-}
+};

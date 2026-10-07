@@ -1,27 +1,27 @@
-"use client"
+"use client";
 
-import type { UsernameAuthClient } from "@better-auth-ui/core/plugins/username"
-import { useAuth, useSession } from "@better-auth-ui/react"
-import type { User } from "better-auth"
+import type { UsernameAuthClient } from "@better-auth-ui/core/plugins/username";
+import { useAuth, useSession } from "@better-auth-ui/react";
+import type { User } from "better-auth";
 
-import { Skeleton } from "#components/ui/skeleton.tsx"
-import { cn } from "cn"
-import { UserAvatar } from "./user-avatar"
+import { Skeleton } from "#components/ui/skeleton.tsx";
+import { cn } from "cn";
+import { UserAvatar } from "./user-avatar";
 
 export type UserViewProps = {
-  className?: string
-  isPending?: boolean
+  className?: string;
+  isPending?: boolean;
   /**
    * When true, the subtitle line (email when name/username is shown) is hidden.
    * @default false
    */
-  hideSubtitle?: boolean
+  hideSubtitle?: boolean;
   /** @remarks `User` */
   user?: Partial<User> & {
-    username?: string | null
-    displayUsername?: string | null
-  }
-}
+    username?: string | null;
+    displayUsername?: string | null;
+  };
+};
 
 /**
  * Render a compact user item with an avatar, a primary label (display username, name, or email), and an optional subtitle (email).
@@ -36,18 +36,20 @@ export function UserView({
   className,
   isPending,
   hideSubtitle = false,
-  user
+  user,
 }: UserViewProps) {
-  const { authClient } = useAuth<UsernameAuthClient>()
+  const { authClient } = useAuth<UsernameAuthClient>();
   const { data: session, isPending: sessionPending } = useSession(authClient, {
-    enabled: !user && !isPending
-  })
+    enabled: !user && !isPending,
+  });
 
-  const resolvedUser = user ?? session?.user
+  const resolvedUser = user ?? session?.user;
 
   if ((isPending || sessionPending) && !user) {
     return (
-      <div className={cn("tw:flex tw:items-center tw:gap-2 tw:min-w-0", className)}>
+      <div
+        className={cn("tw:flex tw:items-center tw:gap-2 tw:min-w-0", className)}
+      >
         <UserAvatar isPending />
 
         <div className="tw:grid tw:flex-1 tw:gap-1 tw:text-left tw:text-sm">
@@ -56,11 +58,13 @@ export function UserView({
           {!hideSubtitle && <Skeleton className="tw:h-3 tw:w-32" />}
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className={cn("tw:flex tw:items-center tw:gap-2 tw:min-w-0", className)}>
+    <div
+      className={cn("tw:flex tw:items-center tw:gap-2 tw:min-w-0", className)}
+    >
       <UserAvatar user={resolvedUser as User | undefined} />
 
       <div className="tw:grid tw:min-w-0 tw:flex-1 tw:text-left tw:text-sm tw:leading-tight">
@@ -78,5 +82,5 @@ export function UserView({
           )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,25 +1,30 @@
-import { getViewURL, validateEmailAddress } from "@better-auth-ui/core"
+import { getViewURL, validateEmailAddress } from "@better-auth-ui/core";
 import {
   useAuth,
   useFetchOptions,
-  useRequestPasswordReset
-} from "@better-auth-ui/react"
+  useRequestPasswordReset,
+} from "@better-auth-ui/react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "#components/ui/card.tsx"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
 import {
   Field,
   FieldDescription,
   FieldGroup,
-  FieldLabel
-} from "#components/ui/field.tsx"
-import { Input } from "#components/ui/input.tsx"
-import { cn } from "cn"
-import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form"
-import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent"
+  FieldLabel,
+} from "#components/ui/field.tsx";
+import { Input } from "#components/ui/input.tsx";
+import { cn } from "cn";
+import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
+import { RESET_LINK_SENT_STORAGE_KEY } from "./reset-link-sent";
 
 export type ForgotPasswordProps = {
-  className?: string
-}
+  className?: string;
+};
 
 /**
  * Render a card-based "Forgot Password" form that sends a password-reset email.
@@ -41,21 +46,21 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
     navigate,
     plugins,
     viewPaths,
-    Link
-  } = useAuth()
+    Link,
+  } = useAuth();
 
-  const { fetchOptions, resetFetchOptions } = useFetchOptions()
+  const { fetchOptions, resetFetchOptions } = useFetchOptions();
 
   const { mutateAsync: requestPasswordReset, isPending } =
     useRequestPasswordReset(authClient, {
       onError: () => {
-        resetFetchOptions()
+        resetFetchOptions();
       },
       onSuccess: (_data, { email }) => {
-        sessionStorage.setItem(RESET_LINK_SENT_STORAGE_KEY, email)
-        navigate({ to: `${basePaths.auth}/${viewPaths.auth.resetLinkSent}` })
-      }
-    })
+        sessionStorage.setItem(RESET_LINK_SENT_STORAGE_KEY, email);
+        navigate({ to: `${basePaths.auth}/${viewPaths.auth.resetLinkSent}` });
+      },
+    });
 
   const form = useAuthForm({
     defaultValues: { email: "" },
@@ -67,13 +72,13 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
           basePaths.auth,
           viewPaths.auth.resetPassword
         ),
-        fetchOptions
-      })
-  })
+        fetchOptions,
+      }),
+  });
 
   const Captcha = plugins.find(
     (plugin) => plugin.captchaComponent
-  )?.captchaComponent
+  )?.captchaComponent;
 
   return (
     <Card className={cn("tw:w-full tw:max-w-sm", className)}>
@@ -93,12 +98,12 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
                   onChange: ({ value }) =>
                     validateEmailAddress(value, {
                       invalidMessage: localization.auth.invalidEmail,
-                      requiredMessage: localization.auth.fieldRequired
-                    })
+                      requiredMessage: localization.auth.fieldRequired,
+                    }),
                 }}
               >
                 {(field) => {
-                  const isInvalid = isAuthFormFieldInvalid(field.state.meta)
+                  const isInvalid = isAuthFormFieldInvalid(field.state.meta);
                   return (
                     <Field data-invalid={isInvalid}>
                       <FieldLabel htmlFor="email">
@@ -121,11 +126,13 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
                       />
                       <field.AuthFormFieldError />
                     </Field>
-                  )
+                  );
                 }}
               </form.AppField>
 
-              {Captcha && <div className="tw:flex tw:justify-center">{Captcha}</div>}
+              {Captcha && (
+                <div className="tw:flex tw:justify-center">{Captcha}</div>
+              )}
 
               <div className="tw:flex tw:flex-col tw:gap-3">
                 <form.AuthFormSubmitButton
@@ -152,5 +159,5 @@ export function ForgotPassword({ className }: ForgotPasswordProps) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

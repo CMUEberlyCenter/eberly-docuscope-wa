@@ -91,7 +91,7 @@ const AboutModal: FC<ModalProps> = (props) => {
 
 type AnchorProps = HTMLProps<HTMLAnchorElement>;
 /** About link button component that triggers the About modal. */
-export const About: FC<AnchorProps> = ({ className, style, ...props }) => {
+export const About: FC<AnchorProps> = ({ className, ...props }) => {
   const [show, setShow] = useState(false);
   const onHide = () => setShow(false);
   const toggle = () => setShow((prev) => !prev);

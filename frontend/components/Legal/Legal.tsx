@@ -8,7 +8,6 @@ import { About } from "../About/About";
  */
 export const Legal: FC<HTMLProps<HTMLDivElement>> = ({
   className,
-  style,
   ...props
 }) => (
   <Translation>

@@ -1,28 +1,28 @@
 import {
   evaluatePasswordStrength,
-  type PasswordStrengthLevel
-} from "@better-auth-ui/core"
-import { useAuth } from "@better-auth-ui/react"
+  type PasswordStrengthLevel,
+} from "@better-auth-ui/core";
+import { useAuth } from "@better-auth-ui/react";
 
-import { cn } from "cn"
+import { cn } from "cn";
 
 /** Fixed segment identities, so the bars keep their own React keys. */
-const STRENGTH_SEGMENTS = [1, 2, 3, 4] as const
+const STRENGTH_SEGMENTS = [1, 2, 3, 4] as const;
 
-type FilledLevel = Exclude<PasswordStrengthLevel, "empty">
+type FilledLevel = Exclude<PasswordStrengthLevel, "empty">;
 
 const segmentColors: Record<FilledLevel, string> = {
   weak: "bg-destructive",
   fair: "bg-amber-500",
   good: "bg-sky-500",
-  strong: "bg-emerald-500"
-}
+  strong: "bg-emerald-500",
+};
 
 export type PasswordStrengthMeterProps = {
   /** The password as typed. Renders nothing while it is empty. */
-  password: string
-  className?: string
-}
+  password: string;
+  className?: string;
+};
 
 /**
  * Four-segment strength hint shown while someone picks a new password.
@@ -33,24 +33,24 @@ export type PasswordStrengthMeterProps = {
  */
 export function PasswordStrengthMeter({
   password,
-  className
+  className,
 }: PasswordStrengthMeterProps) {
-  const { emailAndPassword, localization } = useAuth()
+  const { emailAndPassword, localization } = useAuth();
 
-  if (!emailAndPassword?.strengthMeter) return null
+  if (!emailAndPassword?.strengthMeter) return null;
 
   const { score, level } = evaluatePasswordStrength(password, {
-    minLength: emailAndPassword.minPasswordLength
-  })
+    minLength: emailAndPassword.minPasswordLength,
+  });
 
-  if (level === "empty") return null
+  if (level === "empty") return null;
 
   const levelLabels: Record<FilledLevel, string> = {
     weak: localization.auth.passwordWeak,
     fair: localization.auth.passwordFair,
     good: localization.auth.passwordGood,
-    strong: localization.auth.passwordStrong
-  }
+    strong: localization.auth.passwordStrong,
+  };
 
   return (
     <div className={cn("tw:flex tw:flex-col tw:gap-1.5", className)}>
@@ -74,5 +74,5 @@ export function PasswordStrengthMeter({
         </span>
       </p>
     </div>
-  )
+  );
 }

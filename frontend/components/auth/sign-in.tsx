@@ -1,52 +1,57 @@
-"use client"
+"use client";
 
 import {
   authMutationKeys,
   validateEmailAddress,
-  validateStringLength
-} from "@better-auth-ui/core"
+  validateStringLength,
+} from "@better-auth-ui/core";
 import {
   isPasskeyAutoFillEnabled,
-  withPasskeyAutoFill
-} from "@better-auth-ui/core/plugins/passkey"
+  withPasskeyAutoFill,
+} from "@better-auth-ui/core/plugins/passkey";
 import {
   AuthPrompts,
   useAuth,
   useFetchOptions,
-  useSignInEmail
-} from "@better-auth-ui/react"
-import { useIsMutating } from "@tanstack/react-query"
-import { Eye, EyeOff } from "lucide-react"
-import { useState } from "react"
+  useSignInEmail,
+} from "@better-auth-ui/react";
+import { useIsMutating } from "@tanstack/react-query";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "#components/ui/card.tsx"
-import { Checkbox } from "#components/ui/checkbox.tsx"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
+import { Checkbox } from "#components/ui/checkbox.tsx";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator
-} from "#components/ui/field.tsx"
-import { Input } from "#components/ui/input.tsx"
+  FieldSeparator,
+} from "#components/ui/field.tsx";
+import { Input } from "#components/ui/input.tsx";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput
-} from "#components/ui/input-group.tsx"
-import { useSignInContinuation } from "#lib/auth/use-sign-in-continuation.ts"
-import { cn } from "cn"
-import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form"
-import { LastUsedBadge } from "./last-login-method/last-used-badge"
-import { ProviderButtons, type SocialLayout } from "./provider-buttons"
-import { ReauthenticationNotice } from "./reauthentication"
+  InputGroupInput,
+} from "#components/ui/input-group.tsx";
+import { useSignInContinuation } from "#lib/auth/use-sign-in-continuation.ts";
+import { cn } from "cn";
+import { isAuthFormFieldInvalid, useAuthForm } from "./auth-form";
+import { LastUsedBadge } from "./last-login-method/last-used-badge";
+import { ProviderButtons, type SocialLayout } from "./provider-buttons";
+import { ReauthenticationNotice } from "./reauthentication";
 
 export type SignInProps = {
-  className?: string
-  socialLayout?: SocialLayout
-  socialPosition?: "top" | "bottom"
-}
+  className?: string;
+  socialLayout?: SocialLayout;
+  socialPosition?: "top" | "bottom";
+};
 
 /**
  * Render the sign-in form UI with email/password, magic link, and social provider options.
@@ -59,7 +64,7 @@ export type SignInProps = {
 export function SignIn({
   className,
   socialLayout,
-  socialPosition = "bottom"
+  socialPosition = "bottom",
 }: SignInProps) {
   const {
     authClient,
@@ -70,44 +75,44 @@ export function SignIn({
     socialProviders,
     viewPaths,
     navigate,
-    Link
-  } = useAuth()
+    Link,
+  } = useAuth();
 
-  const { fetchOptions, resetFetchOptions } = useFetchOptions()
-  const continueSignIn = useSignInContinuation()
+  const { fetchOptions, resetFetchOptions } = useFetchOptions();
+  const continueSignIn = useSignInContinuation();
 
   const { mutateAsync: signInEmail, isPending: signInEmailPending } =
     useSignInEmail(authClient, {
       onError: (error, { email }) => {
-        form.setFieldValue("password", "")
+        form.setFieldValue("password", "");
 
         if (error.error?.code === "EMAIL_NOT_VERIFIED") {
-          sessionStorage.setItem("better-auth-ui.verify-email", email)
+          sessionStorage.setItem("better-auth-ui.verify-email", email);
           navigate({
-            to: `${basePaths.auth}/${viewPaths.auth.verifyEmail}`
-          })
+            to: `${basePaths.auth}/${viewPaths.auth.verifyEmail}`,
+          });
         }
 
-        resetFetchOptions()
+        resetFetchOptions();
       },
-      onSuccess: (data) => continueSignIn(data)
-    })
+      onSuccess: (data) => continueSignIn(data),
+    });
 
   const signInMutating = useIsMutating({
-    mutationKey: authMutationKeys.signIn.all
-  })
+    mutationKey: authMutationKeys.signIn.all,
+  });
   const signUpMutating = useIsMutating({
-    mutationKey: authMutationKeys.signUp.all
-  })
-  const isPending = signInMutating + signUpMutating > 0
+    mutationKey: authMutationKeys.signUp.all,
+  });
+  const isPending = signInMutating + signUpMutating > 0;
 
   const Captcha = plugins.find(
     (plugin) => plugin.captchaComponent
-  )?.captchaComponent
+  )?.captchaComponent;
 
-  const passkeyAutoFill = isPasskeyAutoFillEnabled(plugins)
+  const passkeyAutoFill = isPasskeyAutoFillEnabled(plugins);
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false)
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const form = useAuthForm({
     defaultValues: { email: "", password: "", rememberMe: false },
     onSubmit: async ({ value }) =>
@@ -117,12 +122,12 @@ export function SignIn({
         ...(emailAndPassword?.rememberMe
           ? { rememberMe: value.rememberMe }
           : {}),
-        fetchOptions
-      })
-  })
+        fetchOptions,
+      }),
+  });
 
   const showSeparator =
-    emailAndPassword?.enabled && socialProviders && socialProviders.length > 0
+    emailAndPassword?.enabled && socialProviders && socialProviders.length > 0;
 
   return (
     <Card className={cn("tw:w-full tw:max-w-sm", className)}>
@@ -160,12 +165,14 @@ export function SignIn({
                       onChange: ({ value }) =>
                         validateEmailAddress(value, {
                           invalidMessage: localization.auth.invalidEmail,
-                          requiredMessage: localization.auth.fieldRequired
-                        })
+                          requiredMessage: localization.auth.fieldRequired,
+                        }),
                     }}
                   >
                     {(field) => {
-                      const isInvalid = isAuthFormFieldInvalid(field.state.meta)
+                      const isInvalid = isAuthFormFieldInvalid(
+                        field.state.meta
+                      );
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor="email">
@@ -192,7 +199,7 @@ export function SignIn({
                           />
                           <field.AuthFormFieldError />
                         </Field>
-                      )
+                      );
                     }}
                   </form.AppField>
 
@@ -211,12 +218,14 @@ export function SignIn({
                             "{{min}}",
                             String(emailAndPassword?.minPasswordLength)
                           ),
-                          requiredMessage: localization.auth.fieldRequired
-                        })
+                          requiredMessage: localization.auth.fieldRequired,
+                        }),
                     }}
                   >
                     {(field) => {
-                      const isInvalid = isAuthFormFieldInvalid(field.state.meta)
+                      const isInvalid = isAuthFormFieldInvalid(
+                        field.state.meta
+                      );
                       return (
                         <Field data-invalid={isInvalid}>
                           <FieldLabel htmlFor="password">
@@ -261,7 +270,7 @@ export function SignIn({
                                     : localization.auth.showPassword
                                 }
                                 onClick={() => {
-                                  setIsPasswordVisible((visible) => !visible)
+                                  setIsPasswordVisible((visible) => !visible);
                                 }}
                               >
                                 {isPasswordVisible ? <EyeOff /> : <Eye />}
@@ -271,7 +280,7 @@ export function SignIn({
 
                           <field.AuthFormFieldError />
                         </Field>
-                      )
+                      );
                     }}
                   </form.AppField>
 
@@ -370,5 +379,5 @@ export function SignIn({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

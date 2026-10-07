@@ -18,10 +18,14 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => (
     <TooltipProvider>
       <AuthProvider
         authClient={authClient}
-        navigate={({ to, replace }) => navigate(to, { overwriteLastHistoryEntry: replace })}
+        navigate={({ to, replace }) =>
+          navigate(to, { overwriteLastHistoryEntry: replace })
+        }
         plugins={[adminPlugin()]}
         Link={({ href, children, ...props }) => (
-          <a href={href} {...props}
+          <a
+            href={href}
+            {...props}
             onClick={(e) => {
               e.preventDefault();
               navigate(href);
