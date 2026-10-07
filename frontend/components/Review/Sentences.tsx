@@ -5,7 +5,7 @@ import { SafeHTML } from "#components/SafeHTML/SafeHTML";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useEffect, useReducer } from "react";
 import { type ButtonProps } from "react-bootstrap";
-import { useTranslation } from "react-i18next";
+import { Translation, useTranslation } from "react-i18next";
 import { useOnTopicData } from "../ReviewContext/OnTopicDataContext";
 import { ReviewToolCard } from "../ReviewContext/ReviewContext";
 import { ToolButton } from "../ToolButton/ToolButton";
@@ -34,15 +34,17 @@ function highlightSentence(aParagraphIndex: number, aSentenceIndex: number) {
 
 /** Button component for selecting the Sentences tool. */
 export const SentencesButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
-  const { t: it } = useTranslation("instructions");
   return (
-    <ToolButton
-      {...props}
-      title={t("sentences.title")}
-      tooltip={it("sentence_density_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("sentences.title")}
+          tooltip={t("sentence_density_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

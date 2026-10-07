@@ -21,14 +21,17 @@ export const {
 
 /** Button component for selecting the Prominent Topics tool. */
 export const ProminentTopicsButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:prominent_topics.title")}
-      tooltip={t("instructions:prominent_topics_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:prominent_topics.title")}
+          tooltip={t("instructions:prominent_topics_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

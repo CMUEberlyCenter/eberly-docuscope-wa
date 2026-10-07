@@ -19,14 +19,17 @@ export const {
 
 /** Button component for selecting the Paragraph Clarity tool. */
 export const ParagraphClarityButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:paragraph_clarity.title")}
-      tooltip={t("instructions:paragraph_clarity_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:paragraph_clarity.title")}
+          tooltip={t("instructions:paragraph_clarity_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

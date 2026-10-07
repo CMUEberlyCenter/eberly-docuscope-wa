@@ -30,14 +30,17 @@ export const {
 
 /** Button component for selecting the Professional Tone tool. */
 export const ProfessionalToneButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:professional_tone.title")}
-      tooltip={t("instructions:professional_tone_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:professional_tone.title")}
+          tooltip={t("instructions:professional_tone_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

@@ -32,14 +32,17 @@ export const {
 
 /** Button component for selecting the Lines Of Arguments tool. */
 export const LinesOfArgumentsButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:lines_of_arguments.title")}
-      tooltip={t("instructions:lines_of_arguments_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:lines_of_arguments.title")}
+          tooltip={t("instructions:lines_of_arguments_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

@@ -52,14 +52,17 @@ import "./TopicalProgression.scss";
 export { OnTopicDataProvider as OrganizationDataProvider } from "../ReviewContext/OnTopicDataContext";
 
 export const TopicalProgressionButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:organization.title")}
-      tooltip={t("instructions:term_matrix_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:organization.title")}
+          tooltip={t("instructions:term_matrix_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

@@ -40,7 +40,7 @@ import type {
   AccordionEventKey,
   AccordionSelectCallback,
 } from "react-bootstrap/esm/AccordionContext";
-import { useTranslation } from "react-i18next";
+import { Translation, useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
@@ -58,14 +58,17 @@ import { onGrade } from "./Expectations.telefunc";
 
 /** Button component to use for selecting the Content Expectations tool. */
 export const ExpectationsButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("expectations.title")}
-      tooltip={t("instructions:expectations_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("expectations.title")}
+          tooltip={t("instructions:expectations_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

@@ -19,14 +19,17 @@ export const {
 
 /** Button component for selecting the Logical Flow tool. */
 export const LogicalFlowButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:logical_flow.title")}
-      tooltip={t("instructions:logical_flow_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:logical_flow.title")}
+          tooltip={t("instructions:logical_flow_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 

@@ -18,14 +18,17 @@ export const {
 } = createReviewDataContext<SourcesData>("sources");
 
 export const SourcesButton: FC<ButtonProps> = (props) => {
-  const { t } = useTranslation("review");
   return (
-    <ToolButton
-      {...props}
-      title={t("review:sources.title")}
-      tooltip={t("instructions:sources_scope_note")}
-      icon={<Icon />}
-    />
+    <Translation ns={["review", "instructions"]}>
+      {(t) => (
+        <ToolButton
+          {...props}
+          title={t("review:sources.title")}
+          tooltip={t("instructions:sources_scope_note")}
+          icon={<Icon />}
+        />
+      )}
+    </Translation>
   );
 };
 
