@@ -1,5 +1,4 @@
 import { WritingTask } from "#/lib/WritingTask.ts";
-import { Logo } from "#components/Logo/Logo";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter.tsx";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo.tsx";
 import { WritingTaskRulesTree } from "#components/WritingTaskRulesTree/WritingTaskRulesTree.tsx";
@@ -23,12 +22,7 @@ const Page: FC = () => {
   const [selected, setSelected] = useState<WritingTask | null>(null);
   const [data, setData] = useState<WritingTask[]>(() => tasks);
   return (
-    <div className="tw:mx-5 tw:h-screen tw:w-screen tw:flex tw:flex-col tw:overflow-hidden tw:gap-1">
-      <header>
-        <h1 className="text-center">
-          <Logo />
-        </h1>
-      </header>
+    <>
       <nav className="tw:h-full tw:flex tw:flex-row tw:overflow-hidden tw:grow">
         <Activity mode={index === 0 ? "visible" : "hidden"}>
           <ViewTransition enter="slide-in-left" exit="slide-out-left">
@@ -109,7 +103,7 @@ const Page: FC = () => {
           </div>
         </Activity>
       </main>
-    </div>
+    </>
   );
 };
 

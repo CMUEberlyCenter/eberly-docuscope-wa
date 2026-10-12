@@ -1,3 +1,4 @@
+import { UserButton } from "#components/auth/user/user-button.tsx";
 import { Logo } from "#components/Logo/Logo";
 import { FC, ReactNode, useId } from "react";
 import { Container, Nav, Navbar } from "react-bootstrap";
@@ -12,14 +13,14 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <main className="container-fluid vh-100 w-100 d-flex flex-column align-items-stretch overflow-none">
       <Navbar>
-        <Container>
+        <div className="tw:flex tw:flex-row tw:px-12 tw:w-full">
           <Navbar.Brand>
             <Logo /> {t("title")}
           </Navbar.Brand>
           <Navbar.Toggle aria-controls={id} />
           <Navbar.Collapse id={id}>
             <Nav
-              className="me-auto"
+              className="me-auto flex-wrap"
               variant="underline"
               defaultActiveKey={"home"}
             >
@@ -68,7 +69,10 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
               </Nav.Link>
             </Nav>
           </Navbar.Collapse>
-        </Container>
+          <div>
+            <UserButton className="rounded" />
+          </div>
+        </div>
       </Navbar>
       <Container className="flex-grow-1 overflow-auto">{children}</Container>
     </main>
