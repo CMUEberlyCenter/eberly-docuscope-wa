@@ -20,6 +20,10 @@ const config: StorybookConfig = {
       },
     },
   },
+  typescript: {
+    check: true,
+    reactDocgen: 'react-docgen', //-typescript',
+  },
   // "core": {
   //   "builder":
   //   {

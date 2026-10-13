@@ -3,7 +3,9 @@ import { Translation } from "react-i18next";
 import { FadeContent } from "../FadeContent/FadeContent";
 
 type Props = {
+  /** Title to display in the header. */
   title: string;
+  /** Key for the instructions text in the i18n instructions translation file. */
   instructionsKey: string;
 };
 export const ToolHeader: FC<Props> = ({ title, instructionsKey }) => (

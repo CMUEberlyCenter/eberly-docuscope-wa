@@ -6,6 +6,9 @@ import { Translation } from "react-i18next";
 
 /**
  * Icon button component for displaying a button with a clipboard icon.
+ * ```tsx
+ * <ClipboardIconButton onClick={() => {}} />
+ * ```
  */
 export const ClipboardIconButton: FC<ButtonProps> = ({
   className,
@@ -20,7 +23,7 @@ export const ClipboardIconButton: FC<ButtonProps> = ({
         title={t("clipboard")}
       >
         <ClipboardIcon />
-        <span className="visually-hidden sr-only">{t("clipboard")}</span>
+        <span className="visually-hidden tw:sr-only">{t("clipboard")}</span>
       </Button>
     )}
   </Translation>

@@ -7,7 +7,7 @@ import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton.
 const MyLink: FC<{ href: URL; title: string }> = ({ href, title }) => {
   const url = href.toString();
   return (
-    <div className="d-flex flex-column justify-content-between">
+    <div className="tw:flex tw:flex-col tw:justify-between">
       <a href={url}>{title}</a>
       <span>
         {url}
@@ -26,7 +26,9 @@ const MyLink: FC<{ href: URL; title: string }> = ({ href, title }) => {
  * @param param0.hostname The hostname of the application.
  */
 export const MyProseLinks: FC<{
+  /** The selected writing task. */
   selected: DbWritingTask | null;
+  /** The base URL of the application. */
   hostname: URL;
 }> = ({ selected, hostname }) => {
   const { t } = useTranslation();
@@ -86,7 +88,7 @@ export const MyProseLinks: FC<{
                 title={t("document.title")}
               />
             </ListGroup.Item>
-            <ListGroup.Item>
+            {/* <ListGroup.Item>
               <MyLink
                 href={new URL("/draft", hostname)}
                 title={t("genlink.draft")}
@@ -97,7 +99,7 @@ export const MyProseLinks: FC<{
                 href={new URL("/review", hostname)}
                 title={t("genlink.review")}
               />
-            </ListGroup.Item>
+            </ListGroup.Item> */}
           </>
         )}
       </ListGroup>

@@ -44,12 +44,23 @@ const taskToEditor = (task: WritingTask, details?: boolean): Node[] => [
   ]),
 ];
 
-/** Button component for copying a writing task to the Slate editor. */
+/**
+ * Button component for copying a writing task to the Slate editor.
+ * @example
+ * ```tsx
+ * <CopyTaskToEditorButton task={task} includeDetails={true} />
+ * ```
+ * @param props Bootstrap Button properties, plus:
+ * - `task`: The writing task JSON to copy to the editor.
+ * - `includeDetails`: Whether to include rule descriptions in the copied text.
+ * @returns A Button component that copies the writing task to the Slate editor when clicked.
+ */
 export const CopyTaskToEditorButton: FC<
   ButtonProps & {
+    /** The writing task JSON to copy to the editor. */
     task: Optional<WritingTask>;
+    /** Whether to include rule descriptions in the copied text. */
     includeDetails?: boolean;
-    label?: string;
   }
 > = ({ task, disabled, includeDetails, onClick, children, ...props }) => {
   const editor = useSlate();

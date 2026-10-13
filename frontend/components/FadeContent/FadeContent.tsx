@@ -5,8 +5,11 @@ import { Button } from "react-bootstrap";
 import css from "./FadeContent.module.scss";
 
 type ToolFadeContentProps = {
+  /** The minimum height of the component. */
   minHeight?: Height;
+  /** The maximum height of the component. */
   maxHeight?: Height;
+  /** The HTML content to display. */
   htmlContent?: string;
 } & HTMLProps<HTMLDivElement>;
 /** An expandable component that fades overflow content when minimized. */
@@ -34,7 +37,7 @@ export const FadeContent: FC<ToolFadeContentProps> = ({
         {htmlContent && <SafeHTML html={htmlContent} />}
         {children}
       </AnimateHeight>
-      <div className="d-flex justify-content-around">
+      <div className="tw:flex tw:justify-around">
         <Button
           variant="icon"
           onClick={() => setExpanded(!expanded)}

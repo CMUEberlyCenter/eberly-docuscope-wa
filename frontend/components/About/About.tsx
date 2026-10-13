@@ -8,7 +8,6 @@ import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 
 /**
  * AboutModal component for displaying information about the application.
- * @component
  * @example
  * ```tsx
  * <AboutModal show={true} onHide={() => {}} />

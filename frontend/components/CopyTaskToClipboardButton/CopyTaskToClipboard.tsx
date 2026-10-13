@@ -28,12 +28,19 @@ const taskToClipboard = (
   return lines.join("\n\n");
 };
 
-/** Button component for copying a writing task to the clipboard. */
+/**
+ * Button component for copying a writing task to the clipboard.
+ * ```tsx
+ * <CopyTaskToClipboardButton task={task} includeDetails={true} />
+ * ```
+ */
 export const CopyTaskToClipboardButton: FC<
-  ButtonProps & {
+  {
+    /** The writing task JSON to copy to the clipboard. */
     task: Optional<WritingTask>;
+    /** Whether to include rule descriptions in the copied text. */
     includeDetails: boolean;
-  }
+  } & ButtonProps
 > = ({ task, includeDetails, disabled, onClick, ...props }) => {
   const { t } = useTranslation();
   return (

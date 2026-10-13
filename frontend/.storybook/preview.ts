@@ -3,6 +3,7 @@ import { definePreview } from '@storybook/react-vite';
 import '../pages/index.scss';
 import '../pages/tailwind.css';
 /* Configuration for i18n support. */
+import addonDocs from '@storybook/addon-docs';
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend from 'i18next-http-backend';
@@ -23,6 +24,8 @@ i18n
   });
 
 const preview = definePreview({
+  addons: [addonDocs()],
+  tags: ['autodocs'],
   parameters: {
     controls: {
       matchers: {
