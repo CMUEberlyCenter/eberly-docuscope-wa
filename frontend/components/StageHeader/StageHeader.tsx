@@ -11,7 +11,7 @@ import { Logo } from "../Logo/Logo";
 export const StageHeader: FC<{
   /** The title of the stage. */
   title: string
-  /** The user to display in the header. */
+  /** Optional user profile button. */
   user?: React.ReactNode
 }> = ({ title, user }) => (
   <header>

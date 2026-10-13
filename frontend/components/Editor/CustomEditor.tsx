@@ -9,7 +9,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Packer } from "docx";
-import { type FC, useCallback, useEffect, useState } from "react";
+import { type FC, ReactNode, useCallback, useEffect, useState } from "react";
 import {
   ButtonGroup,
   ButtonToolbar,
@@ -21,12 +21,12 @@ import { useTranslation } from "react-i18next";
 import { createEditor, type Descendant, Editor, Transforms } from "slate";
 import { withHistory } from "slate-history";
 import { Editable, Slate, withReact } from "slate-react";
+import Draft from "../Draft/Draft";
 import { FileDownload } from "../FileDownload/FileDownload";
 import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";
 import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
-import Draft from "../Draft/Draft";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./CustomEditor.scss";
@@ -46,7 +46,10 @@ const loadSaveFileOps = {
   ],
 };
 
-const CustomEditor: FC = () => {
+const CustomEditor: FC<{ 
+  /** Optional user profile button. */
+  user?: ReactNode
+ }> = ({ user }) => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
@@ -144,7 +147,7 @@ const CustomEditor: FC = () => {
         } else {
           const sel = editor.selection
             ? serialize(Editor.fragment(editor, editor.selection)).trim()
-                .length > 0
+              .length > 0
             : false;
           if (sel !== selection) {
             // debounce
@@ -243,7 +246,7 @@ const CustomEditor: FC = () => {
             autoFocus
           />
         </main>
-        <ToolLayout stage={t("tool.tab.generate")}>
+        <ToolLayout stage={t("tool.tab.generate")} user={user}>
           <Draft hasSelection={selection} />
         </ToolLayout>
       </SplitLayout>
