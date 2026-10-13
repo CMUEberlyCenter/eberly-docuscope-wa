@@ -18,8 +18,6 @@ export const guard = async ({
     throw redirect(`/auth/sign-in?${searchParams.toString()}`);
   }
   if (!validSettingsPaths.has(routeParams.view)) {
-    throw render(404, {
-      message: `Invalid settings view: ${routeParams.view}`,
-    });
+    throw render(404, `Invalid settings view: ${routeParams.view}`);
   }
 };

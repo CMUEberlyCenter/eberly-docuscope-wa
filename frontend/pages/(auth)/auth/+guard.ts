@@ -10,6 +10,6 @@ const validAuthPaths = new Set([
 
 export const guard = async ({ routeParams }: PageContextServer) => {
   if (!validAuthPaths.has(routeParams.view)) {
-    throw render(404, { message: `Invalid auth view: ${routeParams.view}` });
+    throw render(404, `Invalid auth view: ${routeParams.view}`);
   }
 };

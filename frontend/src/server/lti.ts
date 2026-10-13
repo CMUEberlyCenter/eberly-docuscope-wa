@@ -91,17 +91,18 @@ function initializeLTI(httpHandler: HttpHandler) {
   provider.onResourceLink(async (context, request, response) => {
     if (context.idToken.launch) {
       // if LTI token is present
-      if (context.idToken.launch.custom?.tool) {
+      const tool = context.idToken.launch.custom?.tool as string | undefined;
+      if (tool && ['draft', 'review'].includes(tool)) {
         // if tool is specified in deep linking settings, redirect accordingly
         return context.redirect(
           response,
-          `/${context.idToken.launch.custom.tool}`
+          `/${tool}`
         );
       }
       // default to non-specified writing type drafting tool.
       return context.redirect(response, '/draft');
     }
-    if (request.query.writing_task) {
+    if (request.query.writing_task && typeof request.query.writing_task === 'string') {
       return context.redirect(
         response,
         `/myprose/${request.query.writing_task}/`
