@@ -4,13 +4,16 @@ import { Logo } from "../Logo/Logo";
 
 /**
  * Header component for displaying the stage title and logo.
- * @component
- * @example
  * ```tsx
- * <StageHeader title="My Stage" />
+ * <StageHeader title="Review" />
  * ```
  */
-export const StageHeader: FC<{ title: string }> = ({ title }) => (
+export const StageHeader: FC<{
+  /** The title of the stage. */
+  title: string
+  /** The user to display in the header. */
+  user?: React.ReactNode
+}> = ({ title, user }) => (
   <header>
     <Navbar
       className="border-bottom py-1 mb-1 mt-0 d-flex align-items-baseline justify-content-between"
@@ -27,6 +30,11 @@ export const StageHeader: FC<{ title: string }> = ({ title }) => (
       <Navbar.Brand>
         <Logo />
       </Navbar.Brand>
+      {user && (
+        <Nav>
+          <Nav.Item className="me-3">{user}</Nav.Item>
+        </Nav>
+      )}
     </Navbar>
   </header>
 );

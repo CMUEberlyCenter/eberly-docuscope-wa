@@ -26,7 +26,7 @@ import { useFileImportErrors } from "../FileUpload/FileImportErrors";
 import { useFilename, useFileText } from "../FileUpload/FileTextContext";
 import { useInitiateUploadFile } from "../FileUpload/FileUploadContext";
 import { usePicker } from "../FileUpload/PickerContext";
-import ToolCard from "../ToolCard/ToolCard";
+import Draft from "../Draft/Draft";
 import { WritingTaskButton } from "../WritingTaskButton/WritingTaskButton";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import "./CustomEditor.scss";
@@ -244,7 +244,7 @@ const CustomEditor: FC = () => {
           />
         </main>
         <ToolLayout stage={t("tool.tab.generate")}>
-          <ToolCard hasSelection={selection} />
+          <Draft hasSelection={selection} />
         </ToolLayout>
       </SplitLayout>
     </Slate>

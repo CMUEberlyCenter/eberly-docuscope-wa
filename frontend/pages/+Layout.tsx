@@ -22,6 +22,7 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => (
           navigate(to, { overwriteLastHistoryEntry: replace })
         }
         plugins={[adminPlugin()]}
+        redirectTo="/myprose"
         Link={({ href, children, ...props }) => (
           <a
             href={href}

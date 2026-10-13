@@ -23,21 +23,21 @@ import { Editor } from "slate";
 import { useSlate } from "slate-react";
 import { usePageContext } from "vike-react/usePageContext";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
-import "./ToolCard.scss";
-import { onNotesToBullets, onNotesToProse } from "./ToolCard.telefunc";
+import "./Draft.scss";
+import { onNotesToBullets, onNotesToProse } from "./Draft.telefunc";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
-type ToolCardProps = HTMLProps<HTMLDivElement> & { hasSelection?: boolean };
+type DraftToolCardProps = { hasSelection?: boolean } & HTMLProps<HTMLDivElement>;
 
 /**
  * Top level framework for drafting tools display.
  * @component
  * @example
  * ```tsx
- * <ToolCard hasSelection={true} />
+ * <Draft hasSelection={true} />
  * ```
  */
-const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
+const Draft: FC<DraftToolCardProps> = ({ hasSelection }) => {
   const [{ task: writingTask }] = useWritingTask();
   const { t } = useTranslation();
   const { settings, ltik } = usePageContext();
@@ -78,7 +78,7 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
         const toolResult = { ...data, result: response.result };
         trackScreenView({
           screen_name: data.tool,
-          screen_class: "ToolCard",
+          screen_class: "DraftTool",
           task_id: writingTask?.info.id,
         });
         setCurrentTool(toolResult);
@@ -248,4 +248,4 @@ const ToolCard: FC<ToolCardProps> = ({ hasSelection }) => {
   );
 };
 
-export default ToolCard;
+export default Draft;
