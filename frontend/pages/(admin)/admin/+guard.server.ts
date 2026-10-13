@@ -1,16 +1,13 @@
-import { render } from 'vike/abort';
-import type { PageContext } from 'vike/types';
-// import { auth } from "#/utils/auth";
+import { redirect, render } from 'vike/abort';
+import type { PageContextServer } from 'vike/types';
 
-export async function guard(pageContext: PageContext) {
-  // const data = await auth.api.userHasPermission({ body:{
-  //   // userId: pageContext.user?.id ?? "",
-  //   role: "admin",
-  //   permission: { user: ["create", "list", "set-role", "set-password", "update", "delete", "ban"] },
-  // }})
-  // console.log("Guard data:", data);
-  if (!pageContext.basicAuth?.user || !pageContext.basicAuth?.isAdmin) {
-    throw render(401, 'Unauthorized');
+export async function guard({ auth, urlPathname }: PageContextServer) {
+  if (!auth?.user) {
+    const searchParams = new URLSearchParams({ redirectTo: urlPathname });
+    throw redirect(`/auth/sign-in?${searchParams.toString()}`);
+  }
+  if (auth.user.role !== 'admin') {
+    throw render(403, 'Forbidden');
   }
   return;
 }

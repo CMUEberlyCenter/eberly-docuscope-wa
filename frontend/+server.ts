@@ -2,36 +2,31 @@
 
 Sets up and starts the expressjs server for handling requests for the myProse application.
 */
-import { TelefuncContext } from '#lib/TelefuncContext.js';
-import MongoStore from 'connect-mongo';
-import express, {
-  type NextFunction,
-  type Request,
-  type Response,
-} from 'express';
-import type { IBasicAuthedRequest } from 'express-basic-auth';
-import session from 'express-session';
-import i18n from 'i18next';
-import { handle, LanguageDetector } from 'i18next-http-middleware';
-import { serve } from 'telefunc';
-import { parse } from 'yaml';
-import { handleError } from './src/lib/ProblemDetails';
-import { reviews } from './src/server/api/reviews';
-import { snapshot } from './src/server/api/snapshot';
-// import { initDatabase, insertWritingTask } from './src/server/data/mongo';
 import { initDatabase } from '#/server/data/mongo';
 import { headersMiddleware } from '#/server/headersMiddleware';
 import { MyExpressHttpHandler } from '#/server/http-handler.service';
 import { i18nMiddleware } from '#/server/i18nMiddleware';
 import { sessionMiddleware } from '#/server/sessionMiddleware';
-import { authMiddleware } from '#/utils/auth';
+import { auth, authMiddleware } from '#/utils/auth';
+import { TelefuncContext } from '#lib/TelefuncContext.js';
 import {
   ensureLTIInitialized,
   getLTIConfiguration,
   LtiHandler,
 } from '#server/lti';
 import vike, { toFetchHandler } from '@vikejs/express';
+import MongoStore from 'connect-mongo';
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from 'express';
+import session from 'express-session';
+import i18n from 'i18next';
+import { handle, LanguageDetector } from 'i18next-http-middleware';
+import { serve } from 'telefunc';
 import { type Server } from 'vike/types';
+import { parse } from 'yaml';
 import enAdmin from './public/locales/en/admin.yaml?raw';
 import enDeeplink from './public/locales/en/deeplink.yaml?raw';
 import enError from './public/locales/en/error.yaml?raw';
@@ -46,6 +41,9 @@ import esExpectations from './public/locales/es/expectations.yaml?raw';
 import esInstructions from './public/locales/es/instructions.yaml?raw';
 import esReview from './public/locales/es/review.yaml?raw';
 import esTranslation from './public/locales/es/translation.yaml?raw';
+import { handleError } from './src/lib/ProblemDetails';
+import { reviews } from './src/server/api/reviews';
+import { snapshot } from './src/server/api/snapshot';
 import { initPrompts, PROMPTS } from './src/server/data/prompts';
 import { getSettings } from './src/server/getSettings';
 import { logger } from './src/server/logger';
@@ -57,10 +55,6 @@ import {
   PORT,
   SESSION_KEY,
 } from './src/server/settings';
-import {
-  basicAuthMiddleware,
-  BasicUserMiddleware,
-} from './src/utils/basicAuth';
 
 async function getHandler() {
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
@@ -88,15 +82,6 @@ async function getHandler() {
   const { app } = httpHandler;
   app.set('trust proxy', 1); // needed to work behind a reverse proxy
   app.all('/api/auth/{*auth}', authMiddleware); // handle auth for all /api/auth/* routes
-  app.use((req, res, next) => {
-    if (req.path.startsWith('/admin')) {
-      return basicAuthMiddleware(req, res, next);
-    }
-    // if (req.path.startsWith('/api/auth')) {
-    //   return authMiddleware(req, res);
-    // }
-    next();
-  });
   const provider = await ensureLTIInitialized(httpHandler);
 
   // Setup sessions
@@ -149,22 +134,8 @@ async function getHandler() {
   app.all(
     '/_telefunc',
     express.text(), // telefunc encodes the request body as text.
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        const body = JSON.parse(req.body) as {
-          file?: string;
-          [key: string]: unknown;
-        };
-        if (body.file?.includes('/admin/')) {
-          return basicAuthMiddleware(req, res, next);
-        }
-      } catch (err) {
-        logger.error('Error parsing telefunc request body', { error: err });
-      }
-      next();
-    },
     async (req: Request, res: Response, _next: NextFunction) => {
-      const user = (req as IBasicAuthedRequest).auth?.user;
+      const authSession = await auth.api.getSession({ headers: req.headers as HeadersInit });
       const { body, statusCode, headers } = await serve({
         url: req.originalUrl,
         method: req.method,
@@ -172,15 +143,14 @@ async function getHandler() {
         context: {
           // You can add any arbitrary contextual information here
           // TODO figure out what context is needed for telefuncs and add it here.  For example, session info, user info, etc.
+          auth: authSession,
           provider,
           ltik: req.query.ltik,
           sessionId: req.sessionID,
-          user,
-          isAdmin: user === 'admin',
           acceptLanguage: req.headers['accept-language'],
           settings: await getSettings(),
           prompts: PROMPTS,
-          session: req.session, // includes lti token if present.
+          session: req.session,
         } as TelefuncContext,
       });
       res.status(statusCode);
@@ -196,84 +166,8 @@ async function getHandler() {
     res.json(ltiConfig);
   });
 
-  // Handle all other routes with Vike
-  // app.all(
-  //   '{*vike}',
-  //   async (_req, res, next) => {
-  //     // Remove COEP/COOP headers to allow use of Google Drive Picker
-  //     res.removeHeader('Cross-Origin-Embedder-Policy');
-  //     res.removeHeader('Cross-Origin-Resource-Policy');
-  //     next();
-  //   },
-  //   // async (req, res, next) => {
-  //   //   // this should probably be done in onConnect
-  //   //   const context = await provider.getLaunchContext(req.query.ltik as string);
-  //   //   const token = context.idToken;
-  //   //   req.session.token = token; // add token to session for use in telefuncs
-  //   //   next();
-  //   // },
-  //   async (req: Request, res: Response, next) => {
-  //     let context: LaunchContext | undefined;
-  //     if (req.query.ltik) {
-  //       try {
-  //         context = await provider.getLaunchContext(req.query.ltik as string);
-  //       } catch (err) {
-  //         logger.error('Error getting LTI launch context', { error: err });
-  //       }
-  //     }
-  //     // const context = await provider.getLaunchContext(req.query.ltik as string);
-  //     const query =
-  //       typeof req.query.writing_task === 'string'
-  //         ? req.query.writing_task
-  //         : undefined;
-  //     // const token: IdToken | undefined = req.session.token;
-  //     const writing_task_id: string | undefined =
-  //       // from LTI
-  //       (context?.idToken.launch.custom?.writing_task_id as string) ||
-  //       // token?.platformContext.custom?.writing_task_id ||
-  //       // from query parameter
-  //       query ||
-  //       // from session
-  //       req.session.writing_task_id;
-  //     const pageContextInit = {
-  //       ltik: req.query.ltik,
-  //       urlOriginal: req.url,
-  //       provider,
-  //       launchContext: context,
-  //       headersOriginal: req.headers,
-  //       i18n: req.i18n,
-  //       session: req.session,
-  //       // settings: await getSettings(),
-  //       writing_task_id,
-  //       user: (req as IBasicAuthedRequest).auth?.user,
-  //     };
-  //     const pageContext = await renderPage(pageContextInit);
-  //     // pageContext.urlParsed?.search;
-  //     if (pageContext.errorWhileRendering) {
-  //       logger.error('Error rendering page:', {
-  //         error: pageContext.errorWhileRendering,
-  //       });
-  //       // return next(new Error(`$${pageContext.errorWhileRendering}`));
-  //     }
-  //     const { httpResponse } = pageContext;
-  //     if (!httpResponse) {
-  //       return next();
-  //     } else {
-  //       const { body, statusCode, headers, earlyHints } = httpResponse;
-  //       if (res.writeEarlyHints) {
-  //         res.writeEarlyHints({
-  //           link: earlyHints.map((hint) => hint.earlyHintLink),
-  //         });
-  //       }
-  //       headers.forEach(([name, value]) => res.setHeader(name, value));
-  //       res.status(statusCode).send(body);
-  //     }
-  //   }
-  // );
-  // need to do manual middleware to handle dirty stream issues.
   vike(app, [
     headersMiddleware,
-    BasicUserMiddleware,
     sessionMiddleware,
     i18nMiddleware,
     LtiHandler(provider),

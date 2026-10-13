@@ -8,13 +8,13 @@ import { Abort, getContext } from 'telefunc';
  * @throws telefunc.Abort with status 403 if the user is not authorized.
  */
 export function getAuthorizedUser() {
-  const { user, isAdmin } = getContext<TelefuncContext>();
-  if (!user || !isAdmin) {
+  const { auth } = getContext<TelefuncContext>();
+  if (!auth?.user || auth?.user.role !== 'admin') {
     logger.error('Unauthorized attempt to use admin functionality', {
-      user,
-      isAdmin,
+      authUser: auth?.user,
+      isAdmin: auth?.user?.role === 'admin',
     });
     throw Abort({ status: 403, message: 'FORBIDDEN' });
   }
-  return user;
+  return auth.user;
 }
