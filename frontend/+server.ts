@@ -7,7 +7,7 @@ import { headersMiddleware } from '#/server/headersMiddleware';
 import { MyExpressHttpHandler } from '#/server/http-handler.service';
 import { i18nMiddleware } from '#/server/i18nMiddleware';
 import { sessionMiddleware } from '#/server/sessionMiddleware';
-import { auth, authMiddleware } from '#/utils/auth';
+import { addAdminUser, auth, authMiddleware } from '#/utils/auth';
 import { TelefuncContext } from '#lib/TelefuncContext.js';
 import {
   ensureLTIInitialized,
@@ -178,6 +178,8 @@ async function getHandler() {
 
   // Global error handler/formatter
   app.use(handleError);
+
+  await addAdminUser();
 
   const gracefulShutdown = async () => {
     await shutdownPrompts();

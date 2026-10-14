@@ -49,6 +49,8 @@ services:
     ports:
      - 8888:8888
     secrets:
+      - admin_email
+      - admin_password
       - anthropic_api_key
       - mongo_user
       - mongo_pass
@@ -57,6 +59,9 @@ services:
       - lti.env
       - google.env
     environment:
+      ADMIN_USERNAME: admin
+      ADMIN_EMAIL_FILE: /run/secrets/admin_email
+      ADMIN_PASSWORD_FILE: /run/secrets/admin_password
       ANTHROPIC_API_KEY_FILE: /run/secrets/anthropic_api_key
       ANTHROPIC_MAX_TOKENS: 2048
       MONGO_DB: myprose
@@ -105,6 +110,10 @@ services:
     restart: unless-stopped
 
 secrets:
+  admin_email:
+    file: secrets/admin_email
+  admin_password:
+    file: secrets/admin_password
   anthropic_api_key:
     file: secrets/anthropic_api_key
   grafana_admin_pass:

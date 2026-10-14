@@ -701,3 +701,24 @@ export function getSessionData(): Promise<SessionAggregateData[]> {
 // export function getLatestLogData(prompt: string): Promise<LogData[]> {
 //   return Array.fromAsync(generateLatestLogData(prompt));
 // }
+
+export async function getUser({ email }: { email?: string }) {
+  const db = await getDb();
+  const collection = db.collection('user');
+  return collection.findOne({ email: email });
+}
+export async function updateUserRole({
+  email,
+  role,
+}: {
+  email: string;
+  role: string;
+}) {
+  const db = await getDb();
+  const collection = db.collection('user');
+  const result = await collection.updateOne(
+    { email: email },
+    { $set: { role } }
+  );
+  return result.modifiedCount > 0;
+}

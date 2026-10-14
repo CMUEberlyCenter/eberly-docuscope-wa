@@ -31,6 +31,8 @@ export const ADMIN_PASSWORD = fromEnvFile(
   // Use crypto module to generate a random password if not set
   crypto.getRandomValues(new BigUint64Array(1))[0].toString(36)
 );
+export const ADMIN_EMAIL = fromEnvFile('ADMIN_EMAIL', '');
+export const ADMIN_USERNAME = fromEnvFile('ADMIN_USERNAME', 'admin');
 export const SESSION_KEY = fromEnvFile('SESSION_KEY', randomUUID());
 export const LTI_HOSTNAME = new URL(
   process.env.LTI_HOSTNAME ?? `http://localhost:${PORT}/`
