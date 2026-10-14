@@ -88,4 +88,4 @@ if [[ -z "$ROLE" ]]; then
 fi
 
 # Create the admin user using the specified parameters
-$COMPOSE -it frontend npx @auth@latest create-admin --email $ADMIN_EMAIL --password $ADMIN_PASSWORD --name $ADMIN_USERNAME --role $ROLE
+$COMPOSE exec -i -t frontend npx -y auth@latest create-admin --email $ADMIN_EMAIL --password $ADMIN_PASSWORD --name $ADMIN_USERNAME --role $ROLE
