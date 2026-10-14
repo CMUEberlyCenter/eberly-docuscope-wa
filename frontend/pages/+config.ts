@@ -1,3 +1,4 @@
+import vikeReactQuery from 'vike-react-query/config';
 import vikeReact from 'vike-react/config';
 import type { Config } from 'vike/types';
 
@@ -14,5 +15,5 @@ export default {
   ssr: false,
   passToClient: ['settings', 'google'],
 
-  extends: [vikeReact],
+  extends: [vikeReact, vikeReactQuery],
 } satisfies Config;
