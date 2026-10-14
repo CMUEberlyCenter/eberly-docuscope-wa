@@ -2,8 +2,11 @@
 
 # Default values
 COMPOSE="docker compose -f compose.yaml -f compose.production.yaml"
-ADMIN_PASSWORD=${ADMIN_PASSWORD:-$(cat ${ADMIN_PASSWORD_FILE:-./secrets/admin_password})} 
-ADMIN_EMAIL=${ADMIN_EMAIL:-$(cat ${ADMIN_EMAIL_FILE:-./secrets/admin_email})} 
+ADMIN_PASSWORD_FILE=${ADMIN_PASSWORD_FILE:-./secrets/admin_password}
+[ -z "${ADMIN_EMAIL_FILE+x}" ] && ADMIN_EMAIL_FILE=${ADMIN_EMAIL_FILE:-./secrets/admin_email}
+[ -z "${ADMIN_PASSWORD_FILE+x}" ] && ADMIN_PASSWORD_FILE=${ADMIN_PASSWORD_FILE:-./secrets/admin_password}
+[ -z "${ADMIN_PASSWORD+x}" ] && [ -f "${ADMIN_PASSWORD_FILE}" ] && ADMIN_PASSWORD=$(cat "$ADMIN_PASSWORD_FILE")
+[ -z "${ADMIN_EMAIL+x}" ] && [ -f "${ADMIN_EMAIL_FILE}" ] && ADMIN_EMAIL=$(cat "$ADMIN_EMAIL_FILE")
 ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
 ROLE=${ROLE:-user}
 
@@ -34,7 +37,7 @@ while true; do
       shift 2
       ;;
     -p|--password)
-      IFS= read -rs -p "Enter admin password: " ADMIN_PASSWORD
+      IFS= read -rs -p "Enter password: " ADMIN_PASSWORD
       echo
       shift
       ;;
@@ -68,19 +71,19 @@ done
 
 # Validate required parameters
 if [[ -z "$ADMIN_EMAIL" ]]; then
-  echo "Error: Admin email is required. Use -e or --email to specify it or set the ADMIN_EMAIL environment variable."
+  echo "Error: email is required. Use -e or --email to specify it or set the ADMIN_EMAIL environment variable."
   exit 1
 fi
 if [[ -z "$ADMIN_PASSWORD" ]]; then
-  echo "Error: Admin password is required. Use -p or --password to specify it or set the ADMIN_PASSWORD environment variable."
+  echo "Error: password is required. Use -p or --password to specify it or set the ADMIN_PASSWORD environment variable."
   exit 1
 fi
 if [[ -z "$ADMIN_USERNAME" ]]; then
-  echo "Error: Admin username is required. Use -u or --username to specify it or set the ADMIN_USERNAME environment variable."
+  echo "Error: username is required. Use -u or --username to specify it or set the ADMIN_USERNAME environment variable."
   exit 1
 fi
 if [[ -z "$ROLE" ]]; then
-  echo "Error: Admin role is required. Use -r or --role to specify it or set the ROLE environment variable."
+  echo "Error: role is required. Use -r or --role to specify it or set the ROLE environment variable."
   exit 1
 fi
 
