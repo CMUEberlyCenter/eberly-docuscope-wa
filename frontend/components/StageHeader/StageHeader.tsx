@@ -10,9 +10,9 @@ import { Logo } from "../Logo/Logo";
  */
 export const StageHeader: FC<{
   /** The title of the stage. */
-  title: string
+  title: string;
   /** Optional user profile button. */
-  user?: React.ReactNode
+  user?: React.ReactNode;
 }> = ({ title, user }) => (
   <header>
     <Navbar

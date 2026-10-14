@@ -46,10 +46,10 @@ const loadSaveFileOps = {
   ],
 };
 
-const CustomEditor: FC<{ 
+const CustomEditor: FC<{
   /** Optional user profile button. */
-  user?: ReactNode
- }> = ({ user }) => {
+  user?: ReactNode;
+}> = ({ user }) => {
   const { t } = useTranslation();
   const [editor] = useState(() => withReact(withHistory(createEditor())));
   const [content, setContent] = useState<Descendant[]>(
@@ -147,7 +147,7 @@ const CustomEditor: FC<{
         } else {
           const sel = editor.selection
             ? serialize(Editor.fragment(editor, editor.selection)).trim()
-              .length > 0
+                .length > 0
             : false;
           if (sel !== selection) {
             // debounce

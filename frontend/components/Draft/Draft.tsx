@@ -27,7 +27,9 @@ import "./Draft.scss";
 import { onNotesToBullets, onNotesToProse } from "./Draft.telefunc";
 import { ToolButton, ToolDisplay } from "./ToolDisplay";
 
-type DraftToolCardProps = { hasSelection?: boolean } & HTMLProps<HTMLDivElement>;
+type DraftToolCardProps = {
+  hasSelection?: boolean;
+} & HTMLProps<HTMLDivElement>;
 
 /**
  * Top level framework for drafting tools display.

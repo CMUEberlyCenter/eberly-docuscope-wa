@@ -43,6 +43,8 @@ deeplinking:
   description: $t(document.title) {{tool}}
   description_task: '{{task.rules.overview}}'
   # upload: Select a Writing Task or upload a custom Writing Task File
+index:
+  welcome: Welcome to $t(document.title)
 genlink:
   title: $t(document.title) Writing Task Link Generator
   link: 'Links:'

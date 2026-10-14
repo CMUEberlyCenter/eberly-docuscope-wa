@@ -4,7 +4,11 @@ import classNames from "classnames";
 import { FC, HTMLProps, ReactNode } from "react";
 
 export const ToolLayout: FC<
-  { stage: string; children: ReactNode; user?: ReactNode } & HTMLProps<HTMLDivElement>
+  {
+    stage: string;
+    children: ReactNode;
+    user?: ReactNode;
+  } & HTMLProps<HTMLDivElement>
 > = ({ stage, children, user, className, ...props }) => (
   <aside
     {...props}

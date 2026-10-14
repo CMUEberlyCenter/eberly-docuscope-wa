@@ -94,15 +94,15 @@ function initializeLTI(httpHandler: HttpHandler) {
       const tool = context.idToken.launch.custom?.tool as string | undefined;
       if (tool && ['draft', 'review'].includes(tool)) {
         // if tool is specified in deep linking settings, redirect accordingly
-        return context.redirect(
-          response,
-          `/${tool}`
-        );
+        return context.redirect(response, `/${tool}`);
       }
       // default to non-specified writing type drafting tool.
       return context.redirect(response, '/draft');
     }
-    if (request.query.writing_task && typeof request.query.writing_task === 'string') {
+    if (
+      request.query.writing_task &&
+      typeof request.query.writing_task === 'string'
+    ) {
       return context.redirect(
         response,
         `/myprose/${request.query.writing_task}/`
@@ -446,10 +446,18 @@ export const LtiHandler = (provider: Provider) => {
     async (request, context, _runtime) => {
       const url = new URL(request.url);
       const ltik = url.searchParams.get('ltik') ?? undefined;
-      const launchContext = ltik
-        ? await provider.getLaunchContext(ltik)
-        : undefined;
-      return { ...context, launchContext, ltik, provider };
+      try {
+        const launchContext = ltik
+          ? await provider.getLaunchContext(ltik)
+          : undefined;
+        return { ...context, launchContext, ltik, provider };
+      } catch (err) {
+        if (err instanceof LtijsError) {
+          logger.error('Error retrieving launch context:', err);
+          return { ...context, launchContext: undefined, ltik, provider };
+        }
+        throw err;
+      }
     },
     {
       name: 'myprose:lti-handler',
