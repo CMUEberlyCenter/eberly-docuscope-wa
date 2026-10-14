@@ -1,4 +1,5 @@
 import { getDb } from '#/server/data/mongo.ts';
+import { i18n, locales } from '@better-auth/i18n';
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { toNodeHandler } from 'better-auth/node';
@@ -10,7 +11,7 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
-  plugins: [admin(), username()],
+  plugins: [admin(), username(), i18n({ translations: locales })],
 });
 
 export const authMiddleware = toNodeHandler(auth);

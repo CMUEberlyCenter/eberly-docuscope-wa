@@ -15,6 +15,7 @@ import {
   LtiHandler,
 } from '#server/lti';
 import vike, { toFetchHandler } from '@vikejs/express';
+import { fromNodeHeaders } from 'better-auth/node';
 import MongoStore from 'connect-mongo';
 import express, {
   type NextFunction,
@@ -135,7 +136,7 @@ async function getHandler() {
     '/_telefunc',
     express.text(), // telefunc encodes the request body as text.
     async (req: Request, res: Response, _next: NextFunction) => {
-      const authSession = await auth.api.getSession({ headers: req.headers as HeadersInit });
+      const authSession = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) });
       const { body, statusCode, headers } = await serve({
         url: req.originalUrl,
         method: req.method,
