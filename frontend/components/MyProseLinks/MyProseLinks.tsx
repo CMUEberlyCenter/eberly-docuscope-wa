@@ -1,5 +1,5 @@
 import { DbWritingTask } from "#/lib/WritingTask";
-import { ListGroup } from "#components/ui/ListGroup.tsx";
+import { ListGroup } from "#components/bootstrap/ListGroup.tsx";
 import { FC } from "react";
 import { useTranslation } from "react-i18next";
 import { ClipboardIconButton } from "../ClipboardIconButton/ClipboardIconButton.tsx";

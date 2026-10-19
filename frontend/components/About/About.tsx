@@ -1,4 +1,4 @@
-import { ListGroup } from "#components/ui/ListGroup.tsx";
+import { ListGroup } from "#components/bootstrap/ListGroup.tsx";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useId, useMemo, useState } from "react";
 import { Modal, type ModalProps } from "react-bootstrap";

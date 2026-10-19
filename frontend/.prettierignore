@@ -1,0 +1,6 @@
+# Ignore build directories
+dist/
+
+# Ignore shadcn components
+components/ui/
+components/auth/

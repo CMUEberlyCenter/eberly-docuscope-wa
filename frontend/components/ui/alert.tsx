@@ -1,6 +1,6 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "cn";
+import * as React from "react"
+import { cva, type VariantProps } from "class-variance-authority"
+import { cn } from "cn"
 
 const alertVariants = cva(
   "tw:group/alert tw:relative tw:grid tw:w-full tw:gap-0.5 tw:rounded-lg tw:border tw:px-2.5 tw:py-2 tw:text-left tw:text-sm tw:has-data-[slot=alert-action]:relative tw:has-data-[slot=alert-action]:pr-18 tw:has-[>svg]:grid-cols-[auto_1fr] tw:has-[>svg]:gap-x-2 tw:*:[svg]:row-span-2 tw:*:[svg]:translate-y-0.5 tw:*:[svg]:text-current tw:*:[svg:not([class*=size-])]:size-4",
@@ -16,7 +16,7 @@ const alertVariants = cva(
       variant: "default",
     },
   }
-);
+)
 
 function Alert({
   className,
@@ -30,7 +30,7 @@ function Alert({
       className={cn(alertVariants({ variant }), className)}
       {...props}
     />
-  );
+  )
 }
 
 function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
@@ -43,7 +43,7 @@ function AlertTitle({ className, ...props }: React.ComponentProps<"div">) {
       )}
       {...props}
     />
-  );
+  )
 }
 
 function AlertDescription({
@@ -59,7 +59,7 @@ function AlertDescription({
       )}
       {...props}
     />
-  );
+  )
 }
 
 function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
@@ -69,7 +69,7 @@ function AlertAction({ className, ...props }: React.ComponentProps<"div">) {
       className={cn("tw:absolute tw:top-2 tw:right-2", className)}
       {...props}
     />
-  );
+  )
 }
 
-export { Alert, AlertTitle, AlertDescription, AlertAction };
+export { Alert, AlertTitle, AlertDescription, AlertAction }

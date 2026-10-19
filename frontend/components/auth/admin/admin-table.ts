@@ -1,15 +1,17 @@
+"use client"
+
 import {
   columnFilteringFeature,
   createTableHook,
   globalFilteringFeature,
   rowPaginationFeature,
   rowSortingFeature,
-  tableFeatures,
-} from '@tanstack/react-table';
+  tableFeatures
+} from "@tanstack/react-table"
 
 export const {
   createAppColumnHelper: createAdminColumnHelper,
-  useAppTable: useAdminTable,
+  useAppTable: useAdminTable
 } = createTableHook({
   enableMultiSort: false,
   enableSortingRemoval: false,
@@ -18,6 +20,6 @@ export const {
     columnFilteringFeature,
     globalFilteringFeature,
     rowPaginationFeature,
-    rowSortingFeature,
-  }),
-});
+    rowSortingFeature
+  })
+})

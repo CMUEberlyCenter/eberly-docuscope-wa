@@ -1,15 +1,17 @@
-import { useLastLoginMethod } from "@better-auth-ui/react";
+"use client"
 
-import { Badge } from "#components/ui/badge.tsx";
+import { useLastLoginMethod } from "@better-auth-ui/react"
+
+import { Badge } from "#components/ui/badge.tsx"
 
 export type LastUsedBadgeProps = {
   /** Login method IDs that should display the indicator. */
-  method: string | string[];
+  method: string | string[]
   /** Use the shorter label in constrained layouts. */
-  compact?: boolean;
+  compact?: boolean
   /** Float the compact indicator over the top-right edge of its container. */
-  floating?: boolean;
-};
+  floating?: boolean
+}
 
 /**
  * Displays an indicator when one of the supplied method IDs matches Better
@@ -18,12 +20,12 @@ export type LastUsedBadgeProps = {
 export function LastUsedBadge({
   method,
   compact,
-  floating,
+  floating
 }: LastUsedBadgeProps) {
-  const { method: lastLoginMethod, localization } = useLastLoginMethod();
-  const methods = Array.isArray(method) ? method : [method];
+  const { method: lastLoginMethod, localization } = useLastLoginMethod()
+  const methods = Array.isArray(method) ? method : [method]
 
-  if (!lastLoginMethod || !methods.includes(lastLoginMethod)) return null;
+  if (!lastLoginMethod || !methods.includes(lastLoginMethod)) return null
 
   return (
     <Badge
@@ -36,5 +38,5 @@ export function LastUsedBadge({
     >
       {compact || floating ? localization.lastUsedShort : localization.lastUsed}
     </Badge>
-  );
+  )
 }

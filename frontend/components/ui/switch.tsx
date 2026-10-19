@@ -1,12 +1,12 @@
-import { Switch as SwitchPrimitive } from "@base-ui/react/switch";
-import { cn } from "cn";
+import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
+import { cn } from "cn"
 
 function Switch({
   className,
   size = "default",
   ...props
 }: SwitchPrimitive.Root.Props & {
-  size?: "sm" | "default";
+  size?: "sm" | "default"
 }) {
   return (
     <SwitchPrimitive.Root
@@ -23,7 +23,7 @@ function Switch({
         className="tw:pointer-events-none tw:block tw:rounded-full tw:bg-background tw:ring-0 tw:transition-transform tw:group-data-[size=default]/switch:size-4 tw:group-data-[size=sm]/switch:size-3 tw:group-data-[size=default]/switch:data-checked:translate-x-[calc(100%-2px)] tw:group-data-[size=sm]/switch:data-checked:translate-x-[calc(100%-2px)] tw:dark:data-checked:bg-primary-foreground tw:group-data-[size=default]/switch:data-unchecked:translate-x-0 tw:group-data-[size=sm]/switch:data-unchecked:translate-x-0 tw:dark:data-unchecked:bg-foreground"
       />
     </SwitchPrimitive.Root>
-  );
+  )
 }
 
-export { Switch };
+export { Switch }

@@ -1,14 +1,12 @@
-"use client";
-
-import { useAuth } from "@better-auth-ui/react";
-import { cn } from "cn";
-import { ActiveSessions } from "./active-sessions";
-import { ChangePassword } from "./change-password";
-import { LinkedAccounts } from "./linked-accounts";
+import { useAuth } from "@better-auth-ui/react"
+import { cn } from "cn"
+import { ActiveSessions } from "./active-sessions"
+import { ChangePassword } from "./change-password"
+import { LinkedAccounts } from "./linked-accounts"
 
 export type SecuritySettingsProps = {
-  className?: string;
-};
+  className?: string
+}
 
 /**
  * Renders the security settings layout including password management, linked accounts, and active sessions.
@@ -20,15 +18,10 @@ export type SecuritySettingsProps = {
  * @returns The security settings container as a JSX element.
  */
 export function SecuritySettings({ className }: SecuritySettingsProps) {
-  const { emailAndPassword, plugins, socialProviders } = useAuth();
+  const { emailAndPassword, plugins, socialProviders } = useAuth()
 
   return (
-    <div
-      className={cn(
-        "tw:flex tw:w-full tw:flex-col tw:gap-4 tw:md:gap-6",
-        className
-      )}
-    >
+    <div className={cn("tw:flex tw:w-full tw:flex-col tw:gap-4 tw:md:gap-6", className)}>
       {emailAndPassword?.enabled && <ChangePassword />}
       {!!socialProviders?.length && <LinkedAccounts />}
       <ActiveSessions />
@@ -39,5 +32,5 @@ export function SecuritySettings({ className }: SecuritySettingsProps) {
           )) ?? []
       )}
     </div>
-  );
+  )
 }

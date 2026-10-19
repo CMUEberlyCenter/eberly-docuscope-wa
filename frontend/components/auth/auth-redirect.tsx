@@ -1,12 +1,14 @@
-import { getAuthRedirectAction } from "@better-auth-ui/core";
-import { useAuth, useSession } from "@better-auth-ui/react";
-import { useEffect, useRef } from "react";
-import { Spinner } from "#components/ui/spinner.tsx";
-import { cn } from "cn";
+"use client"
+
+import { getAuthRedirectAction } from "@better-auth-ui/core"
+import { useAuth, useSession } from "@better-auth-ui/react"
+import { useEffect, useRef } from "react"
+import { Spinner } from "#components/ui/spinner.tsx"
+import { cn } from "cn"
 
 export type AuthRedirectProps = {
-  className?: string;
-};
+  className?: string
+}
 
 /**
  * Redirects authenticated users to a validated same-origin target.
@@ -19,22 +21,22 @@ export type AuthRedirectProps = {
  * @returns The centered spinner shown while the session and redirect resolve
  */
 export function AuthRedirect({ className }: AuthRedirectProps) {
-  const { authClient, basePaths, viewPaths } = useAuth();
-  const { data: session, isPending } = useSession(authClient);
-  const hasRedirectedRef = useRef(false);
+  const { authClient, basePaths, viewPaths } = useAuth()
+  const { data: session, isPending } = useSession(authClient)
+  const hasRedirected = useRef(false)
 
   useEffect(() => {
-    if (isPending || hasRedirectedRef.current) return;
-    hasRedirectedRef.current = true;
+    if (isPending || hasRedirected.current) return
+    hasRedirected.current = true
 
     const action = getAuthRedirectAction(
       new URL(window.location.href),
       Boolean(session),
       `${basePaths.auth}/${viewPaths.auth.signIn}`
-    );
+    )
 
-    window.location.replace(action.to);
-  }, [basePaths.auth, isPending, session, viewPaths.auth.signIn]);
+    window.location.replace(action.to)
+  }, [basePaths.auth, isPending, session, viewPaths.auth.signIn])
 
-  return <Spinner className={cn("tw:mx-auto tw:my-auto", className)} />;
+  return <Spinner className={cn("tw:mx-auto tw:my-auto", className)} />
 }

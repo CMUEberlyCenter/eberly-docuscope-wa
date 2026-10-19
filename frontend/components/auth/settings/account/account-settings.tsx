@@ -1,13 +1,13 @@
-import { useAuth } from "@better-auth-ui/react";
-import type { ComponentProps } from "react";
+import { useAuth } from "@better-auth-ui/react"
+import type { ComponentProps } from "react"
 
-import { cn } from "cn";
-import { ChangeEmail } from "./change-email";
-import { UserProfile } from "./user-profile";
+import { cn } from "cn"
+import { ChangeEmail } from "./change-email"
+import { UserProfile } from "./user-profile"
 
 export type AccountSettingsProps = {
-  className?: string;
-};
+  className?: string
+}
 
 /**
  * Renders the account settings layout.
@@ -26,26 +26,23 @@ export function AccountSettings({
   className,
   ...props
 }: AccountSettingsProps & ComponentProps<"div">) {
-  const { emailAndPassword, plugins } = useAuth();
+  const { emailAndPassword, plugins } = useAuth()
 
-  const hasMagicLink = plugins.some((plugin) => plugin.id === "magicLink");
+  const hasMagicLink = plugins.some((plugin) => plugin.id === "magicLink")
 
   const ChangeEmailOverride = plugins.find(
     (plugin) => plugin.cardOverrides?.account?.changeEmail
-  )?.cardOverrides?.account?.changeEmail;
-  const ChangeEmailCard = ChangeEmailOverride ?? ChangeEmail;
+  )?.cardOverrides?.account?.changeEmail
+  const ChangeEmailCard = ChangeEmailOverride ?? ChangeEmail
 
   // A plugin that replaces the card brings its own way to confirm the change,
   // so it can stand on its own without password or magic-link auth.
   const showChangeEmail =
-    emailAndPassword?.enabled || hasMagicLink || Boolean(ChangeEmailOverride);
+    emailAndPassword?.enabled || hasMagicLink || Boolean(ChangeEmailOverride)
 
   return (
     <div
-      className={cn(
-        "tw:flex tw:w-full tw:flex-col tw:gap-4 tw:md:gap-6",
-        className
-      )}
+      className={cn("tw:flex tw:w-full tw:flex-col tw:gap-4 tw:md:gap-6", className)}
       {...props}
     >
       <UserProfile />
@@ -57,5 +54,5 @@ export function AccountSettings({
           )) ?? []
       )}
     </div>
-  );
+  )
 }

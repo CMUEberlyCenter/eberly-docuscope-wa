@@ -2,39 +2,39 @@ import {
   getViewURL,
   isPasswordCompromisedError,
   validateMatchingValue,
-  validateStringLength,
-} from "@better-auth-ui/core";
+  validateStringLength
+} from "@better-auth-ui/core"
 import {
   useAuth,
   useChangePassword,
   useFetchOptions,
   useListAccounts,
   useRequestPasswordReset,
-  useSession,
-} from "@better-auth-ui/react";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "#components/ui/button.tsx";
-import { Card, CardContent, CardFooter } from "#components/ui/card.tsx";
-import { Field, FieldError, FieldLabel } from "#components/ui/field.tsx";
-import { Input } from "#components/ui/input.tsx";
+  useSession
+} from "@better-auth-ui/react"
+import { Eye, EyeOff } from "lucide-react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { Button } from "#components/ui/button.tsx"
+import { Card, CardContent, CardFooter } from "#components/ui/card.tsx"
+import { Field, FieldError, FieldLabel } from "#components/ui/field.tsx"
+import { Input } from "#components/ui/input.tsx"
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
-  InputGroupInput,
-} from "#components/ui/input-group.tsx";
-import { Skeleton } from "#components/ui/skeleton.tsx";
-import { Spinner } from "#components/ui/spinner.tsx";
-import { cn } from "cn";
-import { isAuthFormFieldInvalid, useAuthForm } from "../../auth-form";
-import { OpenEmailButton } from "../../open-email-button";
-import { PasswordStrengthMeter } from "../../password-strength-meter";
+  InputGroupInput
+} from "#components/ui/input-group.tsx"
+import { Skeleton } from "#components/ui/skeleton.tsx"
+import { Spinner } from "#components/ui/spinner.tsx"
+import { cn } from "cn"
+import { isAuthFormFieldInvalid, useAuthForm } from "../../auth-form"
+import { OpenEmailButton } from "../../open-email-button"
+import { PasswordStrengthMeter } from "../../password-strength-meter"
 
 export type ChangePasswordProps = {
-  className?: string;
-};
+  className?: string
+}
 
 /**
  * Render a card form for changing the authenticated user's password.
@@ -46,17 +46,17 @@ export type ChangePasswordProps = {
  * @returns A JSX element containing the change-password or set-password card
  */
 export function ChangePassword({ className }: ChangePasswordProps) {
-  const { authClient, emailAndPassword, localization } = useAuth();
-  const { data: session } = useSession(authClient);
+  const { authClient, emailAndPassword, localization } = useAuth()
+  const { data: session } = useSession(authClient)
   const { data: accounts, isPending: isAccountsPending } =
-    useListAccounts(authClient);
+    useListAccounts(authClient)
 
   const hasCredentialAccount = accounts?.some(
     (account) => account.providerId === "credential"
-  );
+  )
 
   if (!isAccountsPending && !hasCredentialAccount) {
-    return <SetPassword className={className} />;
+    return <SetPassword className={className} />
   }
 
   return (
@@ -66,34 +66,34 @@ export function ChangePassword({ className }: ChangePasswordProps) {
       localization={localization}
       session={isAccountsPending ? undefined : session}
     />
-  );
+  )
 }
 
 function SetPassword({ className }: { className?: string }) {
   const { authClient, basePaths, baseURL, localization, plugins, viewPaths } =
-    useAuth();
-  const { data: session } = useSession(authClient);
-  const { fetchOptions, resetFetchOptions } = useFetchOptions();
-  const [sentEmail, setSentEmail] = useState("");
+    useAuth()
+  const { data: session } = useSession(authClient)
+  const { fetchOptions, resetFetchOptions } = useFetchOptions()
+  const [sentEmail, setSentEmail] = useState("")
 
   const { mutate: requestPasswordReset, isPending } = useRequestPasswordReset(
     authClient,
     {
       onError: () => {
-        resetFetchOptions();
+        resetFetchOptions()
       },
       onSuccess: (_data, { email }) => {
-        setSentEmail(email);
-      },
+        setSentEmail(email)
+      }
     }
-  );
+  )
 
   const Captcha = plugins.find(
     (plugin) => plugin.captchaComponent
-  )?.captchaComponent;
+  )?.captchaComponent
 
   const handleSetPassword = () => {
-    if (!session) return;
+    if (!session) return
 
     requestPasswordReset({
       email: session.user.email,
@@ -102,9 +102,9 @@ function SetPassword({ className }: { className?: string }) {
         basePaths.auth,
         viewPaths.auth.resetPassword
       ),
-      fetchOptions,
-    });
-  };
+      fetchOptions
+    })
+  }
 
   return (
     <div>
@@ -153,62 +153,62 @@ function SetPassword({ className }: { className?: string }) {
         </CardContent>
       </Card>
     </div>
-  );
+  )
 }
 
 function ChangePasswordForm({
   className,
   emailAndPassword,
   localization,
-  session,
+  session
 }: {
-  className?: string;
-  emailAndPassword: ReturnType<typeof useAuth>["emailAndPassword"];
-  localization: ReturnType<typeof useAuth>["localization"];
-  session: ReturnType<typeof useSession>["data"];
+  className?: string
+  emailAndPassword: ReturnType<typeof useAuth>["emailAndPassword"]
+  localization: ReturnType<typeof useAuth>["localization"]
+  session: ReturnType<typeof useSession>["data"]
 }) {
-  const { authClient } = useAuth();
+  const { authClient } = useAuth()
   const { mutateAsync: changePassword, isPending } = useChangePassword(
     authClient,
     {
       onError: (error) => {
         // The haveIBeenPwned plugin rejects on the password itself, so it
         // belongs against the field rather than in a toast.
-        setIsCompromised(isPasswordCompromisedError(error));
+        setIsCompromised(isPasswordCompromisedError(error))
       },
       onSuccess: () => {
-        form.reset();
-        toast.success(localization.settings.changePasswordSuccess);
-      },
+        form.reset()
+        toast.success(localization.settings.changePasswordSuccess)
+      }
     }
-  );
+  )
 
   const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
-    useState(false);
-  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
+    useState(false)
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false)
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
-    useState(false);
+    useState(false)
 
-  const [isCompromised, setIsCompromised] = useState(false);
+  const [isCompromised, setIsCompromised] = useState(false)
 
   const form = useAuthForm({
     defaultValues: {
       confirmPassword: "",
       currentPassword: "",
-      newPassword: "",
+      newPassword: ""
     },
     onSubmit: async ({ value }) => {
       try {
         await changePassword({
           currentPassword: value.currentPassword,
           newPassword: value.newPassword,
-          revokeOtherSessions: true,
-        });
+          revokeOtherSessions: true
+        })
       } catch {
         // The mutation reports the error through its configured handler.
       }
-    },
-  });
+    }
+  })
 
   return (
     <div>
@@ -225,8 +225,8 @@ function ChangePasswordForm({
                 validators={{
                   onChange: ({ value }) =>
                     validateStringLength(value, {
-                      requiredMessage: localization.auth.fieldRequired,
-                    }),
+                      requiredMessage: localization.auth.fieldRequired
+                    })
                 }}
               >
                 {(field) => (
@@ -271,9 +271,7 @@ function ChangePasswordForm({
                                 : localization.auth.showPassword
                             }
                             onClick={() => {
-                              setIsCurrentPasswordVisible(
-                                (visible) => !visible
-                              );
+                              setIsCurrentPasswordVisible((visible) => !visible)
                             }}
                           >
                             {isCurrentPasswordVisible ? <EyeOff /> : <Eye />}
@@ -306,13 +304,13 @@ function ChangePasswordForm({
                         "{{min}}",
                         String(emailAndPassword.minPasswordLength)
                       ),
-                      requiredMessage: localization.auth.fieldRequired,
-                    }),
+                      requiredMessage: localization.auth.fieldRequired
+                    })
                 }}
               >
                 {(field) => {
                   const isInvalid =
-                    isAuthFormFieldInvalid(field.state.meta) || isCompromised;
+                    isAuthFormFieldInvalid(field.state.meta) || isCompromised
 
                   return (
                     <Field data-invalid={isInvalid}>
@@ -333,8 +331,8 @@ function ChangePasswordForm({
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => {
-                              field.handleChange(e.target.value);
-                              setIsCompromised(false);
+                              field.handleChange(e.target.value)
+                              setIsCompromised(false)
                             }}
                             minLength={emailAndPassword.minPasswordLength}
                             maxLength={emailAndPassword.maxPasswordLength}
@@ -375,7 +373,7 @@ function ChangePasswordForm({
 
                       <PasswordStrengthMeter password={field.state.value} />
                     </Field>
-                  );
+                  )
                 }}
               </form.AppField>
 
@@ -396,13 +394,13 @@ function ChangePasswordForm({
                           "{{min}}",
                           String(emailAndPassword.minPasswordLength)
                         ),
-                        requiredMessage: localization.auth.fieldRequired,
+                        requiredMessage: localization.auth.fieldRequired
                       }) ??
                       validateMatchingValue(
                         value,
                         fieldApi.form.getFieldValue("newPassword"),
                         localization.auth.passwordsDoNotMatch
-                      ),
+                      )
                   }}
                 >
                   {(field) => (
@@ -480,5 +478,5 @@ function ChangePasswordForm({
         </form.AuthFormRoot>
       </form.AppForm>
     </div>
-  );
+  )
 }
