@@ -17,6 +17,9 @@ services:
     secrets:
       - mongo_user
       - mongo_pass
+    volumes:
+      - mongo_config:/data/configdb
+      - mongo_data:/data/db
   mongo-express:
     image: mongo-express
     restart: always
@@ -39,7 +42,7 @@ services:
       dockerfile: ./Dockerfile
     restart: always
     ports:
-     - 5000:5000
+     - "127.0.0.1:5000:5000"
 
   frontend:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/myprose:latest
@@ -47,7 +50,7 @@ services:
       context: ./frontend
       dockerfile: ./Dockerfile
     ports:
-     - 8888:8888
+     - "127.0.0.1:8888:8888"
     secrets:
       - admin_email
       - admin_password
@@ -124,4 +127,10 @@ secrets:
     file: secrets/mongo_pass
 
 volumes:
-  grafana_storage: {}
+  grafana_storage:
+  mongo_config:
+    labels:
+      edu.cmu.eberly.myprose.config.description: "myProse MongoDB configuration volume"
+  mongo_data:
+    labels:
+      edu.cmu.eberly.myprose.data.description: "myProse MongoDB data volume"
