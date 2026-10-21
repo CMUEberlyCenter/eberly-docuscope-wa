@@ -108,84 +108,6 @@ function useReview<T extends Analysis>(tool: ReviewTool) {
   };
 }
 
-function useSnapshotReview<T extends Analysis>(
-  tool: ReviewTool,
-  snapshotID: string | undefined,
-  analysis: OptionalReviewData<T>
-) {
-  const [review, setReview] = useState<OptionalReviewData<T>>(analysis);
-  const dispatch = useReviewDispatch();
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const mutation = useMutation({
-    mutationFn: async (data: { id: string }) => {
-      const { id } = data;
-      if (
-        abortControllerRef.current &&
-        abortControllerRef.current.signal.aborted === false
-      ) {
-        abortControllerRef.current.abort("canceling previous request");
-      }
-      abortControllerRef.current = new AbortController();
-      dispatch({ type: "unset" }); // probably not needed, but just in case
-      dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-      const response = await fetch(`/api/v2/snapshot/${id}/${tool}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          // language should be determined server side by snapshot's writing task's user_lang.
-        },
-        signal: abortControllerRef.current?.signal,
-      });
-      if (abortControllerRef.current?.signal.aborted) {
-        return;
-      }
-      checkReviewResponse(response);
-      return response.json();
-    },
-    onSuccess: (data: T) => {
-      if (!data || abortControllerRef.current?.signal.aborted) {
-        return;
-      }
-      dispatch({ type: "unset" });
-      // dispatch({ type: "update", sentences:  });
-      setReview(data);
-    },
-    onError: (error) => {
-      setReview({ tool, error });
-      console.error(`Error fetching ${tool} review:`, error);
-    },
-    onSettled: () => {
-      abortControllerRef.current = null;
-    },
-  });
-  const triggerMutation = useEffectEvent((id: string) => {
-    mutation.mutate({ id });
-  });
-  const [pending, startTransition] = useTransition();
-  useEffect(() => {
-    if (!snapshotID) return;
-    startTransition(() => {
-      triggerMutation(snapshotID);
-    });
-    return () => {
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = null;
-    };
-  }, [snapshotID]);
-  useEffect(() => {
-    return () => {
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = null;
-    };
-  }, []);
-  return {
-    review,
-    mutation,
-    setReview,
-    pending: mutation.isPending || pending,
-  };
-}
-
 export type ReviewDataContext<T extends Analysis> = {
   review: OptionalReviewData<T>;
   pending: boolean;
@@ -220,21 +142,8 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
     return <Context value={{ review, pending }}>{children}</Context>;
   };
 
-  const SnapshotDataProvider: FC<SnapshotProviderProps> = ({
-    children,
-    snapshotId,
-    analyses,
-  }) => {
-    const { review, pending } = useSnapshotReview<T>(
-      tool,
-      snapshotId,
-      getAnalysis<T>(analyses, tool)
-    );
-    return <Context value={{ review, pending }}>{children}</Context>;
-  };
   return {
     ReviewDataProvider,
-    SnapshotDataProvider,
     useReviewDataContext,
     ReviewDataContext: Context,
   };

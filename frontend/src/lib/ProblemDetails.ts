@@ -18,6 +18,20 @@ type ProblemDetails<Details = string> = {
   [key: string]: unknown;
 };
 
+export class AbortError extends Error {}
+const abortError = (
+  err: Error | string,
+  instance?: string,
+  extensions?: { [key: string]: unknown }
+): ProblemDetails => ({
+  type: 'https://developer.mozilla.org/docs/Web/HTTP/Status/499',
+  title: 'Client Closed Request',
+  detail: err instanceof Error ? err.message || 'Request aborted' : err,
+  status: 499,
+  instance,
+  ...extensions,
+});
+
 /** File Not Found Error */
 export class FileNotFoundError extends Error {}
 /** Generate File Not Found message. */
@@ -215,6 +229,9 @@ export const errorToProblemDetails = (
       external: true,
       platformResponse: 'response' in err ? err.response : undefined,
     });
+  }
+  if (err instanceof AbortError) {
+    return abortError(err, instance, extensions);
   }
   if (err instanceof ForbiddenError) {
     return forbidden(err, instance, extensions);

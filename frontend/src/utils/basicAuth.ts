@@ -16,5 +16,6 @@ export const BasicUserMiddleware = enhance(
   },
   {
     name: 'myprose:BasicUserMiddleware',
+    method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   }
 );

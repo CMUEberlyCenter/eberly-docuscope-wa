@@ -54,5 +54,6 @@ export const toolSettingsMiddleware = enhance(
   },
   {
     name: 'myprose:toolSettingsMiddleware',
+    method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   }
 );

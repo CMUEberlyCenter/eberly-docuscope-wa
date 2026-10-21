@@ -6,6 +6,7 @@ import {
   ADMIN_USERNAME,
 } from '#server/settings.ts';
 import { i18n, locales } from '@better-auth/i18n';
+import { enhance, Get, UniversalHandler } from '@universal-middleware/core';
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { toNodeHandler } from 'better-auth/node';
@@ -21,6 +22,11 @@ export const auth = betterAuth({
 });
 
 export const authMiddleware = toNodeHandler(auth);
+export const authHandler = (() =>
+  enhance(auth.handler, {
+    path: '/api/auth/*',
+    method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  })) satisfies Get<[], UniversalHandler>;
 
 export type AuthSession = typeof auth.$Infer.Session | null;
 
@@ -44,6 +50,10 @@ export async function addAdminUser() {
   }
 
   // Create the admin user
+  console.log('Creating admin user...');
+  console.log(`Admin Email: ${ADMIN_EMAIL}`);
+  console.log(`Admin Username: ${ADMIN_USERNAME}`);
+  console.log(`Admin Password: ${ADMIN_PASSWORD}`);
   const { user } = await auth.api.signUpEmail({
     body: {
       email: ADMIN_EMAIL,

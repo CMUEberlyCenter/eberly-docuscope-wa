@@ -1,32 +1,51 @@
-import { enhance } from '@universal-middleware/core';
+import { auth } from '#/utils/auth';
+import { errorToProblemDetails } from '#lib/ProblemDetails.ts';
+import { TelefuncContext } from '#lib/TelefuncContext.ts';
+import { enhance, UniversalHandler } from '@universal-middleware/core';
 import { Provider } from 'ltijs';
 import { Telefunc } from 'telefunc/node';
+import { getSettings } from './getSettings';
 
-// Note: You can directly define a server middleware instead of defining a Universal Middleware. (You can remove @universal-middleware/* — Vike's scaffolder uses it only to simplify its internal logic, see https://github.com/vikejs/vike/discussions/3116)
-export const telefuncHandler = (provider: Provider) => {
+export const telefuncHandler = (provider?: Provider) => {
   const telefunc = new Telefunc();
   return enhance(
-    // TODO: add authentication check
-    async (request, context, runtime) => {
-      const sessionId =
-        runtime.adapter === 'express'
-          ? runtime.express.req.sessionId
-          : undefined;
-      const httpResponse = await telefunc.serve({
-        request,
-        context: {
-          ...context,
-          ...runtime,
-          provider,
-          sessionId,
-        },
-      });
-      return httpResponse;
-    },
+    (async (request, context, runtime) => {
+      try {
+        const sessionId =
+          runtime.adapter === 'express'
+            ? runtime.express.req.sessionID
+            : undefined;
+        const httpResponse = await telefunc.serve({
+          request,
+          context: {
+            ...context,
+            ...runtime,
+            auth: await auth.api.getSession({ headers: request.headers }),
+            provider,
+            ltik: new URL(request.url).searchParams.get('ltik'),
+            sessionId,
+            acceptLanguage: request.headers.get('accept-language'),
+            settings: await getSettings(),
+            session:
+              runtime.adapter === 'express'
+                ? runtime.express.req.session
+                : undefined,
+          } as TelefuncContext,
+        });
+        if (!httpResponse) {
+          throw new Error('No response from telefunc service.');
+        }
+        return httpResponse;
+      } catch (error) {
+        console.error('Error in telefuncHandler:', error);
+        const details = errorToProblemDetails(error);
+        return Response.json(details, { status: details.status || 500 });
+      }
+    }) satisfies UniversalHandler,
     {
-      name: 'my-app:telefunc-handler',
+      name: 'myprose:telefunc-handler',
       path: `/_telefunc`,
-      method: ['GET', 'POST'],
+      method: ['POST'],
     }
   );
 };

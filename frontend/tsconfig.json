@@ -18,7 +18,8 @@
       "#layouts/*": ["./layouts/*"],
       "#lib/*": ["./src/lib/*"],
       "#pages/*": ["./pages/*"],
-      "#server/*": ["./src/server/*"]
+      "#server/*": ["./src/server/*"],
+      "#public/*": ["./public/*"],
     },
     "target": "esnext",
     "lib": [

@@ -1,4 +1,4 @@
-import { PromptType } from '#server/model/prompt';
+import { Prompt, PromptType } from '#server/model/prompt';
 import type { Messages } from '@anthropic-ai/sdk/resources/index.mjs';
 import { Db, MongoClient, ObjectId } from 'mongodb';
 import { Analysis, ReviewTool } from '../../lib/ReviewResponse';
@@ -6,6 +6,7 @@ import type { DbWritingTask, WritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
 import { ACCESS_LEVEL, MONGO_CLIENT, MONGO_DB } from '../settings';
 import { initWritingTasks } from './writing_task_description';
+import { initPrompts } from './prompts';
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
@@ -27,19 +28,31 @@ export async function getDb(): Promise<Db> {
   }
 }
 
+const PROMPTS = 'prompts';
+async function promptsCollection() {
+  return (await getDb()).collection<Prompt>(PROMPTS);
+}
 /** Database collection for storing writing tasks. */
 const WRITING_TASKS = 'writing_tasks';
-/** Database collection for logging. */
-const LOGGING = 'logging';
-/** Database collection for static snapshots. */
-const SNAPSHOTS = 'snapshots';
-
 /** Extra information stored in database about the writing task */
 type WritingTaskDb = WritingTask & {
   _id?: ObjectId;
   path?: string;
   modified?: Date;
 };
+async function writingTasksCollection() {
+  return (await getDb()).collection<WritingTaskDb>(WRITING_TASKS);
+}
+/** Database collection for logging. */
+const LOGGING = 'logging';
+async function loggingCollection() {
+  return (await getDb()).collection<LogData>(LOGGING);
+}
+/** Database collection for static snapshots. */
+const SNAPSHOTS = 'snapshots';
+async function snapshotsCollection() {
+  return (await getDb()).collection<Snapshot>(SNAPSHOTS);
+}
 
 type Snapshot = {
   /** Database id for the snapshot. */
@@ -81,9 +94,7 @@ function toPortableSnapshot(
 // }
 
 async function* generateAllSnapshots(): AsyncGenerator<PortableSnapshot> {
-  const db = await getDb();
-  const collection = db.collection<Snapshot>(SNAPSHOTS);
-  const cursor = collection.find<Snapshot>(
+  const cursor = (await snapshotsCollection()).find<Snapshot>(
     {},
     {
       projection: {
@@ -111,12 +122,11 @@ export async function findAllSnapshotsBasic(): Promise<PortableSnapshot[]> {
 
 /** Retrieve a snapshot by its ID. */
 export async function findSnapshotById(id: string): Promise<PortableSnapshot> {
-  const db = await getDb();
-  const collection = db.collection<Snapshot>(SNAPSHOTS);
   if (!ObjectId.isValid(id) || id.length !== 24) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
+  const collection = await snapshotsCollection();
   const snapshot = await collection.findOne<Snapshot>(
     { _id },
     { projection: { _id: 0 } }
@@ -146,8 +156,7 @@ export async function insertSnapshot(
 ): Promise<PortableSnapshot> {
   tool_config = tool_config ?? [];
   analyses = analyses ?? [];
-  const db = await getDb();
-  const collection = db.collection<Snapshot>(SNAPSHOTS);
+  const collection = await snapshotsCollection();
   const ins = await collection.insertOne({
     task,
     file,
@@ -175,8 +184,8 @@ export async function deleteSnapshotById(id: string) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const db = await getDb();
-  const del = await db.collection(SNAPSHOTS).deleteOne({ _id });
+  const collection = await snapshotsCollection();
+  const del = await collection.deleteOne({ _id });
   if (!del.acknowledged || del.deletedCount !== 1) {
     throw new ReferenceError(`Delete operation for Snapshot ${id} failed`);
   }
@@ -201,8 +210,8 @@ export async function updateSnapshotReviewsById(
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const db = await getDb();
-  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+  const collection = await snapshotsCollection();
+  const upd = await collection.findOneAndUpdate(
     { _id },
     {
       $push: { analyses: { $each: analyses } },
@@ -233,8 +242,8 @@ export async function clearSnapshotAnalysesById(id: string | ObjectId) {
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const db = await getDb();
-  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+  const collection = await snapshotsCollection();
+  const upd = await collection.findOneAndUpdate(
     { _id },
     {
       $set: { analyses: [], timestamp: new Date() },
@@ -264,8 +273,8 @@ export async function clearSnapshotAnalysisById(
     throw new ReferenceError(`Snapshot ${id} not found.`);
   }
   const _id = new ObjectId(id);
-  const db = await getDb();
-  const upd = await db.collection<Snapshot>(SNAPSHOTS).findOneAndUpdate(
+  const collection = await snapshotsCollection();
+  const upd = await collection.findOneAndUpdate(
     { _id },
     {
       $pull: { analyses: { tool } }, // Pull the specific analysis by tool
@@ -288,7 +297,7 @@ export async function clearSnapshotAnalysisById(
  * @param id the identifier for the desired writing task specification.
  */
 export async function findWritingTaskById(id: string): Promise<WritingTask> {
-  const collection = (await getDb()).collection(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   if (ObjectId.isValid(id) && id.length === 24) {
     const _id = new ObjectId(id);
     const rules = await collection.findOne<WritingTask>(
@@ -316,19 +325,25 @@ export async function findWritingTaskById(id: string): Promise<WritingTask> {
 export async function checkWritingTaskDbIdExists(
   dbid: string
 ): Promise<boolean> {
-  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
-  const count = await collection.countDocuments({ _id: dbid }, { limit: 1 });
+  const collection = await writingTasksCollection();
+  if (!ObjectId.isValid(dbid) || dbid.length !== 24) {
+    throw new ReferenceError(`Writing Task ${dbid} not found.`);
+  }
+  const id = new ObjectId(dbid);
+  const count = await collection.countDocuments({ _id: id }, { limit: 1 });
   return count > 0;
 }
+
 /** Check if a writing task exists in the database by its database ID. */
 export async function checkWritingTaskIdExists(id: string): Promise<boolean> {
-  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   const count = await collection.countDocuments(
     { 'info.id': id },
     { limit: 1 }
   );
   return count > 0;
 }
+
 /**
  * Insert a non-public writing task into database.
  * @param writing_task
@@ -337,8 +352,7 @@ export async function checkWritingTaskIdExists(id: string): Promise<boolean> {
 export async function insertWritingTask(
   writing_task: WritingTask
 ): Promise<ObjectId> {
-  const db = await getDb();
-  const collection = db.collection<WritingTaskDb>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   const ins = await collection.insertOne({
     ...writing_task,
     public: false,
@@ -352,7 +366,7 @@ export async function insertWritingTask(
  * @returns writing tasks where the public attribute is false. These are typically custom or in development tasks.
  */
 async function* generateAllPrivateWritingTasks(): AsyncGenerator<DbWritingTask> {
-  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   const cursor = collection.find<DbWritingTask>(
     { public: false },
     { projection: { path: 0 } }
@@ -378,7 +392,7 @@ export async function findAllPrivateWritingTasks(): Promise<DbWritingTask[]> {
  * @returns writing tasks where the public attribute is true.
  */
 async function* generateAllPublicWritingTasks(): AsyncGenerator<DbWritingTask> {
-  const collection = (await getDb()).collection<DbWritingTask>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   const cursor = collection.find<DbWritingTask>(
     { public: true, 'info.access': ACCESS_LEVEL },
     { projection: { path: 0, modified: 0 } }
@@ -406,7 +420,7 @@ export async function findAllPublicWritingTasks(): Promise<DbWritingTask[]> {
  * @returns id of the writing task in the database.
  */
 async function upsertPublicWritingTask(path: string, data: WritingTask) {
-  const collection = (await getDb()).collection<WritingTaskDb>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   // There should only be one public writing task with a given id.
   // _id is the unique identifier for the document in MongoDB and is used for private tasks.
   const ins = await collection.replaceOne(
@@ -414,10 +428,10 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
     { ...data, public: true, path, modified: new Date() },
     { upsert: true }
   );
-  logger.info(`Inserted writing task ${data.info.name} v${data.info.version}`, {
-    writingTaskId: data.info.id,
-    action: 'upsert_public_writing_task',
-  });
+  // logger.info(`Inserted writing task ${data.info.name} v${data.info.version}`, {
+  //   writingTaskId: data.info.id,
+  //   action: 'upsert_public_writing_task',
+  // });
   return ins.upsertedId;
 }
 
@@ -427,8 +441,8 @@ async function upsertPublicWritingTask(path: string, data: WritingTask) {
  * @returns true if deletion is acknowledged.
  */
 async function deleteWritingTaskByPath(path: string) {
-  const db = await getDb();
-  const del = await db.collection(WRITING_TASKS).deleteOne({ path });
+  const collection = await writingTasksCollection();
+  const del = await collection.deleteOne({ path });
   if (!del.acknowledged || del.deletedCount !== 1) {
     throw new ReferenceError(
       `Delete operation for Writing Task at '${path}' failed`
@@ -437,6 +451,44 @@ async function deleteWritingTaskByPath(path: string) {
   logger.info(`Deleted writing task at path '${path}'`, {
     path,
     action: 'delete_writing_task',
+  });
+  return del.acknowledged;
+}
+
+export async function findPromptById(key: string): Promise<Prompt> {
+  const collection = await promptsCollection();
+  const prompt = await collection.findOne({ key });
+  if (!prompt) {
+    throw new ReferenceError(`Prompt with id "${key}" not found.`);
+  }
+  return prompt;
+}
+async function upsertPrompt(prompt: Prompt) {
+  const collection = await promptsCollection();
+  const ins = await collection.replaceOne(
+    { key: prompt.key },
+    { ...prompt },
+    { upsert: true }
+  );
+  if (!ins.acknowledged) {
+    throw new Error(`Upsert operation for Prompt ${prompt.key} failed`);
+  }
+  logger.info(`Upserted prompt with id '${prompt.key}'`, {
+    id: prompt.key,
+    action: 'upsert_prompt',
+  });
+  return ins.upsertedId ?? prompt.key;
+}
+
+async function deletePromptById(key: string) {
+  const collection = await promptsCollection();
+  const del = await collection.deleteOne({ key });
+  if (!del.acknowledged || del.deletedCount !== 1) {
+    throw new ReferenceError(`Delete operation for Prompt ${key} failed`);
+  }
+  logger.info(`Deleted prompt with id '${key}'`, {
+    id: key,
+    action: 'delete_prompt',
   });
   return del.acknowledged;
 }
@@ -459,9 +511,8 @@ export async function initDatabase() {
       db = await getDb(); // Attempt to connect to the database.
       retry = 0;
     } catch (err) {
-      const { message } = err as Error;
       logger.warn(
-        `Failed to connect to database: ${message}  Retrying in ${sleep}ms (${retry} attempts left)...`
+        `Failed to connect to database: ${err instanceof Error ? err.message : String(err)}  Retrying in ${sleep}ms (${retry} attempts left)...`
       );
       retry -= 1;
       await timeout(sleep);
@@ -473,7 +524,7 @@ export async function initDatabase() {
   }
 
   // Make sure collection exists and has index on id
-  const collection = db.collection<WritingTask>(WRITING_TASKS);
+  const collection = await writingTasksCollection();
   await collection.createIndex({ 'info.id': 1, public: 1 });
   // Delete all public writing tasks to maintain consistency with filesystem.
   await collection.deleteMany({ public: true });
@@ -486,12 +537,14 @@ export async function initDatabase() {
     expireAfterSeconds: 3.154e7, // 1 year // 7.884e+6, // 3 months //
   });
 
+  const promptsShutdown = await initPrompts(upsertPrompt, deletePromptById);
   const wtdShutdown = await initWritingTasks(
     upsertPublicWritingTask,
     deleteWritingTaskByPath
   );
   return async () => {
     await wtdShutdown();
+    await promptsShutdown();
     await client?.close();
   };
 }
@@ -526,8 +579,7 @@ export async function insertLog(
     usage: Messages.Usage;
   }
 ) {
-  const db = await getDb();
-  const collection = db.collection<LogData>(LOGGING);
+  const collection = await loggingCollection();
   await collection.insertOne({
     timestamp: finished,
     meta: {
@@ -559,7 +611,7 @@ type AggregateLogData = {
 };
 
 async function* generateLogData(): AsyncGenerator<AggregateLogData> {
-  const collection = (await getDb()).collection<LogData>(LOGGING);
+  const collection = await loggingCollection();
   const cursor = collection.aggregate<AggregateLogData>([
     {
       $group: {
@@ -615,7 +667,7 @@ export type SessionAggregateData = {
 };
 
 async function* generateSessionData(): AsyncGenerator<SessionAggregateData> {
-  const collection = (await getDb()).collection<LogData>(LOGGING);
+  const collection = await loggingCollection();
   const cursor = collection.aggregate<SessionAggregateData>([
     {
       $group: {

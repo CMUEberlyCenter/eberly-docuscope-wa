@@ -5,14 +5,14 @@ import format from 'string-format';
 import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
 import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
-import type { PromptType } from '../model/prompt';
+import type { Prompt, PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
   ANTHROPIC_MODEL,
   DEFAULT_LANGUAGE,
 } from '../settings';
-import { findPromptById } from './prompts';
+import { findPromptById } from './mongo';
 
 export const anthropic = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
 
@@ -39,16 +39,14 @@ export async function doChat<T>(
   data: Record<string, string>,
   signal?: AbortSignal,
   json?: boolean,
-  cache?: boolean
+  cache?: boolean,
+  prompts?: Map<string, Prompt>
 ) {
   if (!ANTHROPIC_API_KEY) {
     throw new GatewayError('No LLM configured.'); // should this be 502?
   }
   const started = new Date();
   const template = await findPromptById(key);
-  if (!template) {
-    throw new ReferenceError(`${key} template not found.`);
-  }
   const { prompt, role, temperature } = template;
   if (!prompt) {
     throw new Error(`Malformed prompt for ${key}.`, { cause: template });

@@ -1,10 +1,14 @@
 import { AccessDeniedReason } from '#/lib/AccessDeniedReason';
 import { getAnalysis } from '#components/ReviewContext/createReviewDataContext';
 import { userLanguage } from '#lib/languageCode';
-import { ForbiddenError, GatewayError } from '#lib/ProblemDetails';
+import {
+  AbortError,
+  errorToProblemDetails,
+  ForbiddenError,
+  GatewayError,
+} from '#lib/ProblemDetails';
 import {
   Analysis,
-  BasicReviewPrompts,
   ExpectationsData,
   ExpectationsOutput,
   isExpectationsData,
@@ -16,6 +20,12 @@ import {
   ReviewTool,
 } from '#lib/ReviewResponse';
 import { getExpectationByIndex, isEnabled } from '#lib/WritingTask';
+import {
+  enhance,
+  Get,
+  params,
+  UniversalHandler,
+} from '@universal-middleware/core';
 import { Request, Router } from 'express';
 import { param } from 'express-validator';
 import { doChat, reviewData } from '../data/chat';
@@ -27,51 +37,122 @@ import { validate } from '../model/validate';
 /** Router for handling snapshot-related API endpoints. */
 export const snapshot = Router();
 
-snapshot.get(
-  '/:id',
-  validate(param('id').isMongoId()),
-  async (request: Request<{ id: string }>, response) => {
-    const id = request.params.id;
-    response.send(await findSnapshotById(id));
-  }
-);
-
-snapshot.get(
-  '/:id/ontopic',
-  validate(param('id').isMongoId()),
-  async (request: Request<{ id: string }>, response) => {
-    const id = request.params.id;
-    const settings = await getSettings();
-    if (!settings.term_matrix && !settings.sentence_density) {
-      throw new ForbiddenError('Ontopic tool is not available!');
-    }
-    const snapshot = await findSnapshotById(id);
-    const analysisData = snapshot.analyses.find(
-      ({ tool }) => tool === 'ontopic'
+export async function getExpectation(
+  id: string,
+  index: number,
+  signal: AbortSignal
+) {
+  const snapshot = await findSnapshotById(id);
+  if (!isEnabled(snapshot.task, 'expectations')) {
+    throw new ForbiddenError(
+      `Expectation analysis is not enabled for this writing task.`
     );
-    if (analysisData) {
-      return response.send(analysisData);
-    }
-    // generate analysis on the fly
-    const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
+  }
+  if (!snapshot.tool_config.includes('expectations')) {
+    throw new ForbiddenError(
+      `Expectation analysis is not configured for this snapshot.`
+    );
+  }
+  const target = getExpectationByIndex(snapshot.task, index);
+  if (!target) {
+    throw new ReferenceError(`No expectation found at index ${index}.`);
+  }
+  const analysisData = snapshot.analyses
+    .filter((data) => isExpectationsData(data))
+    .find(({ expectation }) => expectation === target.name);
+  if (analysisData) {
+    return analysisData;
+  }
+  const chat = await doChat<ExpectationsOutput>(
+    'expectations',
+    {
+      ...reviewData({
+        segmented: snapshot.segmented,
+        writing_task: snapshot.task ?? null,
+      }),
+      expectation: target.name,
+      description: target.description ?? '',
+    },
+    signal,
+    true,
+    true
+  );
+  if (signal.aborted) {
+    throw new AbortError();
+  }
+  const { response: chat_response, finished: datetime } = chat;
+  if (!chat_response)
+    throw new Error(
+      `NULL chat response for expectation ${index}: ${target.name}`
+    );
+  if (!isExpectationsOutput(chat_response)) {
+    throw new Error(`Malformed results for ${index}: ${target.name}`, {
+      cause: chat_response,
     });
-    const data = await doOnTopic(
-      snapshot.segmented,
-      userLanguage(snapshot.task),
-      controller.signal
-    );
-    if (controller.signal.aborted) {
-      return;
-    }
-    if (!data) {
-      throw new GatewayError('No response from onTopic');
-    }
-    await updateSnapshotReviewsById(id, data);
-    response.send(data);
   }
-);
+  const data: ExpectationsData = {
+    tool: 'expectations',
+    datetime,
+    expectation: target.name,
+    response: chat_response,
+  };
+  await updateSnapshotReviewsById(id, data);
+  return data;
+}
+
+export const snapshotExpectationHandler = (() => {
+  return enhance(
+    async (request, _context, runtime) => {
+      try {
+        const settings = await getSettings();
+        if (!settings.expectations) {
+          throw new ForbiddenError(
+            'Expectation Analysis tool is not available!'
+          );
+        }
+        const snapshotParams = params(
+          request,
+          runtime,
+          '/api/v2/snapshot/:id/expectation/:index'
+        );
+        if (!snapshotParams) {
+          throw new Error('Invalid parameters');
+        }
+        const indexNum = parseInt(snapshotParams.index, 10);
+        if (isNaN(indexNum) || indexNum < 0) {
+          throw new ReferenceError(
+            `Invalid index parameter: ${snapshotParams.index}`
+          );
+        }
+        const snapshot = await getExpectation(
+          snapshotParams.id,
+          indexNum,
+          request.signal
+        );
+        return Response.json(snapshot);
+      } catch (error) {
+        if (request.signal.aborted) {
+          return Response.json(
+            errorToProblemDetails(new AbortError(), request.url),
+            { status: 499 }
+          );
+        }
+        console.error('Error in snapshotExpectationHandler:', error);
+        const details = errorToProblemDetails(error);
+        return Response.json(details, { status: details.status || 400 });
+      }
+    },
+    {
+      method: ['GET'],
+      name: 'myprose:snapshotExpectationHandler',
+      path: '/api/v2/snapshot/:id/expectation/:index',
+      params: {
+        id: { type: 'string', pattern: '^[a-fA-F0-9]{24}$' },
+        index: { type: 'string', pattern: '^[0-9]+$' },
+      },
+    }
+  );
+}) satisfies Get<[], UniversalHandler>;
 
 snapshot.get(
   '/:id/expectation/:index',
@@ -80,131 +161,16 @@ snapshot.get(
   async (request: Request<{ id: string; index: string }>, response) => {
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
+    const controller = new AbortController();
+    request.on('close', () => {
+      controller.abort();
+    });
     const settings = await getSettings();
     if (!settings.expectations) {
       throw new ForbiddenError('Expectation Analysis tool is not available!');
     }
-    const snapshot = await findSnapshotById(id);
-    if (!isEnabled(snapshot.task, 'expectations')) {
-      throw new ForbiddenError(
-        `Expectation analysis is not enabled for this writing task.`
-      );
-    }
-    if (!snapshot.tool_config.includes('expectations')) {
-      throw new ForbiddenError(
-        `Expectation analysis is not configured for this snapshot.`
-      );
-    }
-    const target = getExpectationByIndex(snapshot.task, indexNum);
-    if (!target) {
-      throw new ReferenceError(`No expectation found at index ${index}.`);
-    }
-    const analysisData = snapshot.analyses
-      .filter((data) => isExpectationsData(data))
-      .find(({ expectation }) => expectation === target.name);
-    if (analysisData) {
-      return response.send(analysisData);
-    }
-    // generate analysis on the fly
-    const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
-    });
-    const chat = await doChat<ExpectationsOutput>(
-      'expectations',
-      {
-        ...reviewData({
-          segmented: snapshot.segmented,
-          writing_task: snapshot.task ?? null,
-        }),
-        expectation: target.name,
-        description: target.description ?? '',
-      },
-      controller.signal,
-      true,
-      true
-    );
-    if (controller.signal.aborted) {
-      return;
-    }
-    const { response: chat_response, finished: datetime } = chat;
-    if (!chat_response)
-      throw new Error(
-        `NULL chat response for expectation ${index}: ${target.name}`
-      );
-    if (!isExpectationsOutput(chat_response)) {
-      throw new Error(`Malformed results for ${index}: ${target.name}`, {
-        cause: chat_response,
-      });
-    }
-    const data: ExpectationsData = {
-      tool: 'expectations',
-      datetime,
-      expectation: target.name,
-      response: chat_response,
-    };
-    await updateSnapshotReviewsById(id, data);
-    response.json(data);
-  }
-);
-
-/** @deprecated replaced with telefunc */
-snapshot.get(
-  '/:id/:analysis',
-  validate(param('id').isMongoId()),
-  validate(param('analysis').isString().isIn(BasicReviewPrompts)),
-  async (request: Request<{ id: string; analysis: string }>, response) => {
-    // should this be behind authentication?
-    const { id, analysis } = request.params;
-    const settings = getSettings();
-    if (analysis in settings && !settings[analysis as keyof typeof settings]) {
-      throw new ForbiddenError(`${analysis} tool is not available!`);
-    }
-    const snapshot = await findSnapshotById(id);
-    if (!isEnabled(snapshot.task, analysis)) {
-      throw new ForbiddenError(
-        `Analysis ${analysis} is not enabled for this writing task.`
-      );
-    }
-    if (!snapshot.tool_config.includes(analysis)) {
-      throw new ForbiddenError(
-        `Analysis ${analysis} is not configured for this snapshot.`
-      );
-    }
-    const analysisData = snapshot.analyses.find((a) => a.tool === analysis);
-    if (analysisData) {
-      return response.send(analysisData);
-    }
-    // generate analysis on the fly
-    const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
-    });
-    const chat = await doChat<ReviewResponse>(
-      analysis as ReviewPrompt,
-      reviewData({
-        segmented: snapshot.segmented,
-        writing_task: snapshot.task ?? null,
-      }),
-      controller.signal,
-      true,
-      true
-    );
-    if (controller.signal.aborted) {
-      return;
-    }
-    const { response: chat_response, finished: datetime } = chat;
-    if (!chat_response) throw new Error(`NULL chat response for ${analysis}`);
-    if (typeof chat_response === 'string') {
-      throw new Error(chat_response); // if string, throw as error
-    }
-    const data = {
-      tool: analysis as ReviewPrompt,
-      datetime,
-      response: chat_response,
-    } as Analysis;
-    await updateSnapshotReviewsById(id, data);
-    response.json(data);
+    const snapshot = await getExpectation(id, indexNum, controller.signal);
+    return response.send(snapshot);
   }
 );
 

@@ -1,5 +1,10 @@
 import { BadRequestError, ServiceUnavailableError } from '#lib/ProblemDetails';
-import { enhance } from '@universal-middleware/core';
+import {
+  enhance,
+  Get,
+  UniversalHandler,
+  UniversalMiddleware,
+} from '@universal-middleware/core';
 import { readdir, readFile, stat } from 'fs/promises';
 import {
   ContentItem,
@@ -441,7 +446,20 @@ export function getLTIConfiguration() {
   };
 }
 
-export const LtiHandler = (provider: Provider) => {
+export const ltiConfigurationHandler = (() =>
+  enhance(
+    async () =>
+      Response.json(getLTIConfiguration(), {
+        status: 200,
+      }),
+    {
+      name: 'myprose:lti-configuration-handler',
+      path: '/lti/configuration',
+      method: [HttpMethod.Get],
+    }
+  )) satisfies Get<[], UniversalHandler>;
+
+export const LtiMiddleware = ((provider: Provider) => {
   return enhance(
     async (request, context, _runtime) => {
       const url = new URL(request.url);
@@ -460,7 +478,8 @@ export const LtiHandler = (provider: Provider) => {
       }
     },
     {
-      name: 'myprose:lti-handler',
+      name: 'myprose:lti-middleware',
+      method: ['GET', 'POST'],
     }
   );
-};
+}) satisfies Get<[Provider], UniversalMiddleware>;

@@ -2,6 +2,7 @@ import type { ReviewPrompt } from '../../lib/ReviewResponse';
 
 /** Prompt data for formulating OpenAI requests. */
 export type Prompt = {
+  key: string;
   prompt: string;
   role?: string;
   temperature?: number | string;

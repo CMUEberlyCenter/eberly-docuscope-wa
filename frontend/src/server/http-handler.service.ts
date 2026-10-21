@@ -1,153 +1,126 @@
-import cors from 'cors';
-import type { Request, Response } from 'express';
-import express, { urlencoded } from 'express';
-import helmet from 'helmet';
+import { enhance, UniversalHandler } from '@universal-middleware/core';
 import type {
-  ExpressHttpHandlerOptions,
   HttpHandler,
   HttpRequestParameters,
   HttpResponse,
   RouteHandler,
-  SslOptions,
 } from 'ltijs';
 import { HttpMethod } from 'ltijs';
-import type { Server } from 'node:http';
-import type { Server as HttpsServer } from 'node:https';
-import { createServer as createHttpsServer } from 'node:https';
+import { logger } from './logger';
 
-class ExpressHttpResponse implements HttpResponse {
-  constructor(private readonly res: Response) {}
+class UniversalHttpResponse implements HttpResponse {
+  #status = 200;
+  #url: string | undefined;
+  #contentType: 'redirect' | 'html' | 'json' | undefined;
+  #content: string | undefined;
+  #body: unknown;
+  constructor() {}
 
   status(code: number): HttpResponse {
-    this.res.status(code);
+    this.#status = code;
     return this;
   }
 
   redirect(url: string): void {
-    this.res.redirect(url);
+    this.#url = url;
+    this.#contentType = 'redirect';
   }
 
   html(content: string): void {
-    this.res.type('html').send(content);
+    this.#content = content;
+    this.#contentType = 'html';
   }
 
   json(body: unknown): void {
-    this.res.json(body);
+    this.#body = body;
+    this.#contentType = 'json';
+  }
+
+  finish(): Response {
+    switch (this.#contentType) {
+      case 'redirect':
+        return Response.redirect(this.#url!, this.#status);
+      case 'html':
+        return new Response(this.#content, {
+          status: this.#status,
+          headers: { 'Content-Type': 'text/html' },
+        });
+      case 'json':
+        return Response.json(this.#body, { status: this.#status });
+      default:
+        return new Response(null, { status: this.#status });
+    }
   }
 }
 
-type ExpressHttpHandlerOptionsWithDeeplink = ExpressHttpHandlerOptions & {
-  deeplinkUrl?: string;
-};
+export class UniversalHttpHandler implements HttpHandler {
+  public routes: UniversalHandler[] = [];
 
-export class MyExpressHttpHandler implements HttpHandler {
-  private readonly port: number;
-  private readonly ssl: SslOptions | undefined;
-  private server: Server | HttpsServer | undefined;
-
-  public readonly app = express();
-
-  constructor({
-    port,
-    ssl,
-    cors: corsOptions,
-    deeplinkUrl,
-  }: ExpressHttpHandlerOptionsWithDeeplink) {
-    this.port = port;
-    this.ssl = ssl;
-    this.app.use(helmet({ frameguard: false, contentSecurityPolicy: false }));
-    if (corsOptions !== false) {
-      const corsMiddleware = cors({
-        origin: true,
-        credentials: true,
-        ...corsOptions,
-      });
-      this.app.use(corsMiddleware);
-      this.app.options('*splat', corsMiddleware);
-    }
-
-    // Setup body parsing for deeplink route to handle application/x-www-form-urlencoded content type
-    if (deeplinkUrl) {
-      this.app.use(deeplinkUrl, urlencoded({ extended: true }));
-    }
-  }
+  constructor() {} // TODO inject dependencies if needed (eg) logger
 
   public registerRoute(
     path: string,
     methods: HttpMethod[],
     handler: RouteHandler
   ): void {
-    const adapter = this.buildAdapter(handler);
-    for (const method of methods)
-      this.app[this.toExpressMethod(method)](
+    logger.info(`Registering route: ${methods.join(', ')} ${path}`);
+    const enhancedHandler = enhance(
+      async (request, _context, _runtime) => {
+        const url = new URL(request.url);
+        const query: Record<string, string | string[]> = {};
+        url.searchParams.forEach((value, key) => {
+          if (query[key]) {
+            if (Array.isArray(query[key])) {
+              (query[key] as string[]).push(value);
+            } else {
+              query[key] = [query[key] as string, value];
+            }
+          } else {
+            query[key] = value;
+          }
+        });
+        let body: Record<string, unknown> = {};
+        switch (request.headers.get('content-type')) {
+          case 'application/json':
+            body = await request.clone().json();
+            break;
+          case 'application/x-www-form-urlencoded':
+          case 'multipart/form-data':
+            const formData = await request.clone().formData();
+            body = Object.fromEntries(formData.entries());
+            break;
+          default:
+            body = {};
+        }
+        const req: HttpRequestParameters = {
+          method: request.method,
+          path: url.pathname,
+          query: query,
+          body: body,
+          headers: Object.fromEntries(request.headers),
+        };
+        const response = new UniversalHttpResponse();
+        await handler(req, response);
+        return response.finish();
+      },
+      {
+        name: `myprose:express-handler-${methods.join('-')}-${path}`,
         path,
-        express.json(),
-        express.urlencoded({ extended: false }),
-        adapter
-      );
+        method: methods.includes(HttpMethod.All)
+          ? ['GET', 'POST', 'PUT', 'DELETE']
+          : (methods.map((method) => method.toUpperCase()) as (
+              'GET' | 'POST' | 'PUT' | 'DELETE'
+            )[]),
+      }
+    ) satisfies UniversalHandler;
+    this.routes.push(enhancedHandler);
   }
 
   public async listen(): Promise<void> {
-    await new Promise<void>((resolve, reject) => {
-      this.server =
-        this.ssl === undefined
-          ? this.app.listen(this.port)
-          : createHttpsServer(this.ssl, this.app).listen(this.port);
-      this.server.once('listening', () => {
-        resolve();
-      });
-      this.server.once('error', (error: Error) => {
-        reject(error);
-      });
-    });
+    // Placeholder to satisfy the interface, since the server is started elsewhere
   }
 
   public async close(): Promise<void> {
-    if (this.server === undefined) return;
-    await new Promise<void>((resolve, reject) => {
-      this.server?.close((error) => {
-        if (error !== undefined) {
-          reject(error);
-          return;
-        }
-        resolve();
-      });
-    });
-  }
-
-  private buildAdapter(
-    handler: RouteHandler
-  ): (req: Request, res: Response) => Promise<void> {
-    return async (req, res) => {
-      const request = this.buildRequestParameters(req);
-      const response = new ExpressHttpResponse(res);
-      await handler(request, response);
-    };
-  }
-
-  private buildRequestParameters(req: Request): HttpRequestParameters {
-    return {
-      method: req.method,
-      path: req.path,
-      query: req.query as Record<string, string | string[]>,
-      body: (req.body as Record<string, unknown> | undefined) ?? {},
-      headers: req.headers as Record<string, string | string[]>,
-    };
-  }
-
-  private toExpressMethod(
-    method: HttpMethod
-  ): 'get' | 'post' | 'put' | 'delete' | 'all' {
-    const EXPRESS_METHOD_BY_HTTP_METHOD: Record<
-      HttpMethod,
-      'get' | 'post' | 'put' | 'delete' | 'all'
-    > = {
-      [HttpMethod.Get]: 'get',
-      [HttpMethod.Post]: 'post',
-      [HttpMethod.Put]: 'put',
-      [HttpMethod.Delete]: 'delete',
-      [HttpMethod.All]: 'all',
-    };
-    return EXPRESS_METHOD_BY_HTTP_METHOD[method];
+    return Promise.resolve(); // Placeholder to satisfy the interface, since the server is closed elsewhere
   }
 }

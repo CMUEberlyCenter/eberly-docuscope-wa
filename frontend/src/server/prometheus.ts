@@ -5,7 +5,12 @@ import {
   Histogram,
   register,
 } from '@prometheus-io/client';
-import type { RequestHandler, Express } from 'express';
+import {
+  enhance,
+  type Get,
+  type UniversalHandler,
+  type UniversalMiddleware,
+} from '@universal-middleware/core';
 import { type ChatResponse } from './data/chat';
 
 const httpRequestDuration = new Histogram({
@@ -58,40 +63,66 @@ const MyProseMetrics = [
   myproseOutputTokensTotal,
 ];
 
-export const initializePrometheusMetrics = (app: Express) => {
+// export const initializePrometheusMetrics = (app: Express) => {
+//   register.clear(); // Clear the default registry to avoid duplicate metrics in case of hot reloads.
+//   MyProseMetrics.forEach((metric) => register.registerMetric(metric)); // Register custom metrics to the default registry
+//   collectDefaultMetrics({ register }); // Register default metrics to the default registry
+//   register.registerMetric(httpRequestDuration); // Register the HTTP request duration histogram
+//   register.registerMetric(upGauge); // Register the up gauge metric
+//   upGauge.set(1); // Set the gauge to 1 to indicate that the application is up and running
+//   app.get('/metrics', async (_req, res) => {
+//     res.set('Content-Type', register.contentType);
+//     res.end(await register.metrics());
+//   });
+//   // add duration middleware to measure request durations after metrics so that the /metrics endpoint is not included in the metrics.
+//   app.use(httpRequestDurationMiddleware);
+// };
+
+export const metricsHandler = (() =>
+  enhance(
+    async (_request, _context, _runtime) => {
+      const metrics = await register.metrics();
+      return new Response(metrics, {
+        status: 200,
+        headers: { 'Content-Type': register.contentType },
+      });
+    },
+    {
+      name: 'myprose:prometheus-handler',
+      path: '/metrics',
+      method: ['GET'],
+    }
+  )) satisfies Get<[], UniversalHandler>;
+
+export const httpRequestDurationMiddleware = (() => {
   register.clear(); // Clear the default registry to avoid duplicate metrics in case of hot reloads.
   MyProseMetrics.forEach((metric) => register.registerMetric(metric)); // Register custom metrics to the default registry
   collectDefaultMetrics({ register }); // Register default metrics to the default registry
   register.registerMetric(httpRequestDuration); // Register the HTTP request duration histogram
   register.registerMetric(upGauge); // Register the up gauge metric
   upGauge.set(1); // Set the gauge to 1 to indicate that the application is up and running
-  app.get('/metrics', async (_req, res) => {
-    res.set('Content-Type', register.contentType);
-    res.end(await register.metrics());
-  });
-  // add duration middleware to measure request durations after metrics so that the /metrics endpoint is not included in the metrics.
-  app.use(httpRequestDurationMiddleware);
-};
 
-const httpRequestDurationMiddleware: RequestHandler = (req, res, next) => {
-  const end = httpRequestDuration.startTimer();
+  return async (request, _context, runtime) => {
+    const end = httpRequestDuration.startTimer();
+    const path =
+      runtime.adapter === 'express'
+        ? (runtime.express.req.route?.path ?? runtime.express.req.path)
+        : request.url; // Use req.route.path to get template path if available, otherwise fallback to req.path
 
-  res.on('finish', () => {
-    const durationSeconds = end();
-    const path = req.route?.path ?? req.path; // Use req.route.path to get template path if available, otherwise fallback to req.path
+    return (response) => {
+      const durationSeconds = end();
 
-    httpRequestDuration.observe(
-      {
-        method: req.method,
-        path: typeof path === 'string' ? path : 'unknown',
-        status_code: String(res.statusCode),
-      },
-      durationSeconds
-    );
-  });
-
-  next();
-};
+      httpRequestDuration.observe(
+        {
+          method: request.method,
+          path: path ?? 'unknown',
+          status_code: response.status.toString(),
+        },
+        durationSeconds
+      );
+    };
+  };
+}) satisfies Get<[], UniversalMiddleware>;
 
 /**
  * Update Prometheus LLM metrics based on the provided ChatResponse.
