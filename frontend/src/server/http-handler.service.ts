@@ -8,6 +8,10 @@ import type {
 import { HttpMethod } from 'ltijs';
 import { logger } from './logger';
 
+/**
+ * UniversalHttpResponse is a class that implements the HttpResponse interface
+ * for use with UniversalHandler.
+ */
 class UniversalHttpResponse implements HttpResponse {
   #status = 200;
   #url: string | undefined;
@@ -53,11 +57,26 @@ class UniversalHttpResponse implements HttpResponse {
   }
 }
 
+/**
+ * UniversalHttpHandler is a class that implements the HttpHandler interface
+ * using UniversalHandler for route handling.
+ * It allows registering routes with specific paths, methods, and handlers.
+ * The registered routes are stored in the `routes` array for deferred use
+ * in the server initialization.
+ */
 export class UniversalHttpHandler implements HttpHandler {
   public routes: UniversalHandler[] = [];
 
   constructor() {} // TODO inject dependencies if needed (eg) logger
 
+  /**
+   * Register a new route with the given path, methods, and handler.
+   * This generates a UniversalHandler that is added to the routes array
+   * for deferred use in the server initialization.
+   * @param path router path.
+   * @param methods Http methods to respond to.
+   * @param handler function for processing the request.
+   */
   public registerRoute(
     path: string,
     methods: HttpMethod[],
@@ -79,18 +98,20 @@ export class UniversalHttpHandler implements HttpHandler {
             query[key] = value;
           }
         });
+        // Parse the request body based on its content type
         let body: Record<string, unknown> = {};
         switch (request.headers.get('content-type')) {
           case 'application/json':
             body = await request.clone().json();
             break;
           case 'application/x-www-form-urlencoded':
-          case 'multipart/form-data':
+          case 'multipart/form-data': {
             const formData = await request.clone().formData();
             body = Object.fromEntries(formData.entries());
             break;
+          }
           default:
-            body = {};
+            // noop
         }
         const req: HttpRequestParameters = {
           method: request.method,
@@ -117,10 +138,10 @@ export class UniversalHttpHandler implements HttpHandler {
   }
 
   public async listen(): Promise<void> {
-    // Placeholder to satisfy the interface, since the server is started elsewhere
+    // Placeholder to satisfy the interface, since the server is managed elsewhere.
   }
 
   public async close(): Promise<void> {
-    return Promise.resolve(); // Placeholder to satisfy the interface, since the server is closed elsewhere
+    return Promise.resolve(); // Placeholder to satisfy the interface, since the server is managed elsewhere
   }
 }

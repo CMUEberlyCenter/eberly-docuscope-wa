@@ -7,7 +7,7 @@ import {
 import { type NotesRequest } from '#lib/Requests';
 import { type TelefuncContext } from '#lib/TelefuncContext';
 import { anthropic, ErrorMessage } from '#server/data/chat';
-import { insertLog } from '#server/data/mongo';
+import { findPromptById, insertLog } from '#server/data/mongo';
 import { logger } from '#server/logger';
 import { grade, isStudent, isTestUser } from '#server/model/lti';
 import { type NotesPrompt } from '#server/model/prompt';
@@ -24,10 +24,10 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   }
   const {
     acceptLanguage,
+    // ltik
     settings,
     onClose,
     sessionId,
-    prompts,
     provider,
     // session,
   } = getContext<TelefuncContext>();
@@ -52,7 +52,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const launchContext =
     ltik && provider ? await provider.getLaunchContext(ltik) : undefined;
   try {
-    const template = prompts.get(key);
+    const template = await findPromptById(key);
     if (!template) {
       throw new ReferenceError(`Prompt template '${key}' not found.`);
     }
@@ -66,6 +66,7 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     const chat = await anthropic.messages.create(
       {
         max_tokens: ANTHROPIC_MAX_TOKENS,
+        // @ts-expect-error temperature is supported for sonnet-4.6, will have to be removed when model is updated. FIXME #351
         temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         model: ANTHROPIC_MODEL,
         system: [

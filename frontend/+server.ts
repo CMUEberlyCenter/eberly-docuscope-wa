@@ -18,9 +18,20 @@ import { I18N_CONFIG } from '#server/i18nMiddleware.ts';
 import { telefuncHandler } from '#server/telefuncMiddleware.ts';
 import cors from 'cors';
 import helmet from 'helmet';
-import { LTI_HOSTNAME, ONTOPIC_URL, PORT } from './src/server/settings';
+import {
+  LTI_HOSTNAME,
+  MONGO_CLIENT,
+  ONTOPIC_URL,
+  PORT,
+  SESSION_KEY,
+} from './src/server/settings';
+import { MongoStore } from 'connect-mongo';
+import session from 'express-session';
 
 async function getHandler() {
+  // Remove any existing listeners for SIGINT and SIGTERM to avoid duplicate handling on hot reloads.
+  process.removeAllListeners('SIGINT');
+  process.removeAllListeners('SIGTERM');
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDb = await initDatabase();
   const httpHandler = new UniversalHttpHandler();
@@ -33,7 +44,14 @@ async function getHandler() {
   });
   app.use(corsMiddleware);
   app.options('*splat', corsMiddleware);
-  // app.all('/api/auth/{*auth}', authMiddleware); // handle auth for all /api/auth/* routes
+  const sessionMiddleware = session({
+    cookie: { secure: 'auto' },
+    resave: false,
+    saveUninitialized: false,
+    secret: SESSION_KEY,
+    store: MongoStore.create({ mongoUrl: MONGO_CLIENT }),
+  });
+  app.use(sessionMiddleware); // add session middleware to the express app
   const provider = await ensureLTIInitialized(httpHandler);
   vike(app, [
     LtiMiddleware(provider),

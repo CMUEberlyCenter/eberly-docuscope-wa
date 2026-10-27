@@ -15,7 +15,7 @@ app = FastAPI(
     description="onTopic text analysis tools for generating sentence density "
     "and term matrix data for a given text.",
     version="2.1.1",
-    license={
+    license_info={
         "name": "CC BY-NC-SA 4.0",
         "url": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
     },

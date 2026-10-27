@@ -162,8 +162,10 @@ snapshot.get(
     const { id, index } = request.params;
     const indexNum = parseInt(index, 10);
     const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
+    response.on('close', () => {
+      if (!response.writableEnded) {
+        controller.abort();
+      }
     });
     const settings = await getSettings();
     if (!settings.expectations) {

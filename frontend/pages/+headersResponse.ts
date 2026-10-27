@@ -14,7 +14,7 @@ export async function headersResponse(pageContext: PageContextServer) {
       `img-src 'self' data: https://*.googleusercontent.com`,
       `font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com`,
       `connect-src 'self' https://*.googleapis.com`,
-      `default-src 'self'`
+      `default-src 'self'`,
     ].join('; '),
   };
 }

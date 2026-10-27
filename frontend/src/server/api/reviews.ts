@@ -33,51 +33,6 @@ import { countPrompt } from '../prometheus';
 export const reviews = Router();
 
 /**
- * @deprecated Incorporated into /snapshot and /review/:analysis endpoint and not called directly by frontend.
- * @swagger
- * <reviews>/segment:
- *   post:
- *     summary: Segment text into sentences.
- *     description: Segments the given text into sentences and labels them using the onTopic service. This is used to prepare the text for analysis.
- *     requestBody:
- *       required: true
- *       content:
- *         plain/text:
- *           schema:
- *             type: string
- *             description: The text to be segmented.
- *     responses:
- *       '200':
- *         description: Segmented text.
- *         content:
- *           plain/text:
- *             schema:
- *               type: string
- *       '422':
- *         description: Unprocessable Content Error.
- *         content:
- *           application/problem+json:
- *             schema:
- *               $ref: '#/components/schemas/UnprocessableContent'
- */
-reviews.post(
-  '/segment',
-  validate(body().isString().notEmpty()),
-  async (request: Request, response: Response) => {
-    const segmented = await segmentText(
-      request.body as string,
-      request.headers['accept-language']
-    );
-    if (segmented.trim() === '') {
-      throw new UnprocessableContentError([], 'Unable to segment document');
-    }
-    request.session.document = request.body; // save original document
-    request.session.segmented = segmented; // save segmented document
-    response.send(segmented);
-  }
-);
-
-/**
  * Update the session data with the given document and writing task.
  * @param request Request object.
  * @param document user's document text.
@@ -101,7 +56,7 @@ async function updateSession(
     // request.session.writing_task_id = writing_task.info.id;
   }
   // Validate document.  It should contain some text.
-  if (document && document !== request.session.document) {
+  if (document && document !== request.session?.document) {
     if (document.trim() === '') {
       throw new UnprocessableContentError([], 'Empty document!');
     }
@@ -143,10 +98,15 @@ reviews.post(
   validate(body('document').isString().notEmpty()),
   async (request: Request, response: Response) => {
     const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
+    response.on('close', () => {
+      if (!response.writableEnded) {
+        controller.abort();
+      }
     });
     const { document } = request.body as AnalysisBody;
+    if (controller.signal.aborted) {
+      return;
+    }
     await updateSession(request, document);
     const cached = request.session.analysis?.find((a) => a.tool === 'ontopic');
     if (cached) {
@@ -195,6 +155,12 @@ reviews.post(
       .withMessage('Expectation is required')
   ),
   async (request: Request, response: Response) => {
+    const controller = new AbortController();
+    response.on('close', () => {
+      if (!response.writableEnded) {
+        controller.abort();
+      }
+    });
     const settings = await getSettings();
     // const { settings } = getContext<{ settings: Settings }>(request);
     if (!settings.expectations) {
@@ -213,10 +179,9 @@ reviews.post(
     if (!expectation) {
       throw new UnprocessableContentError([], 'Expectation is required');
     }
-    const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
-    });
+    if (controller.signal.aborted) {
+      return;
+    }
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find(
       (a) => isExpectationsData(a) && a.expectation === expectation
@@ -280,6 +245,10 @@ reviews.post(
   validate(param('analysis').isString().isIn(BasicReviewPrompts)),
   validate(body('document').isString().notEmpty()),
   async (request: Request<{ analysis: string }>, response: Response) => {
+    const controller = new AbortController();
+    response.on('close', () => {
+      controller.abort();
+    });
     const { analysis } = request.params;
     if (Array.isArray(analysis)) {
       // This should never happen as params should be singular, but we check just in case.
@@ -299,11 +268,11 @@ reviews.post(
     if (writing_task && !isEnabled(writing_task, analysis as ReviewPrompt)) {
       throw new ForbiddenError(`${analysis} is disabled!`);
     }
-    const controller = new AbortController();
-    request.on('close', () => {
-      controller.abort();
-    });
 
+    if (controller.signal.aborted) {
+      // needed because express-session is one-per-user and thus can get confused when interacting with abort signals.
+      return;
+    }
     await updateSession(request, document, writing_task);
     const cached = request.session.analysis?.find((a) => a.tool === analysis);
     if (cached) {

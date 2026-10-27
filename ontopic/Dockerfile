@@ -1,4 +1,4 @@
-FROM docker.io/python:3.14 AS base
+FROM docker.io/python:3.15 AS base
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE=1

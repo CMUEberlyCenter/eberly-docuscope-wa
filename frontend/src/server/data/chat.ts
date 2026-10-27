@@ -5,7 +5,7 @@ import format from 'string-format';
 import { ChatStopError, GatewayError } from '../../lib/ProblemDetails';
 import { type WritingTask, isWritingTask } from '../../lib/WritingTask';
 import { logger } from '../logger';
-import type { Prompt, PromptType } from '../model/prompt';
+import type { PromptType } from '../model/prompt';
 import {
   ANTHROPIC_API_KEY,
   ANTHROPIC_MAX_TOKENS,
@@ -39,8 +39,7 @@ export async function doChat<T>(
   data: Record<string, string>,
   signal?: AbortSignal,
   json?: boolean,
-  cache?: boolean,
-  prompts?: Map<string, Prompt>
+  cache?: boolean
 ) {
   if (!ANTHROPIC_API_KEY) {
     throw new GatewayError('No LLM configured.'); // should this be 502?
@@ -69,6 +68,7 @@ export async function doChat<T>(
   const chat = await anthropic.messages.create(
     {
       max_tokens: ANTHROPIC_MAX_TOKENS,
+      // @ts-expect-error temperature is supported for sonnet-4.6, will have to be removed when model is updated. FIXME #351
       temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
       system: [
         {
