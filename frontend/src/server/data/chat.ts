@@ -58,11 +58,14 @@ export async function doChat<T>(
     if (!inputTemplate) {
       throw new ReferenceError('Unable to locate input_text template.');
     }
-    const userText = format(inputTemplate.prompt, data);
-    if (/<\/?text/.test(userText)) {
-      console.error('Invalid text format detected in user input, attempt to jailbreak:', userText);
-      throw new Error('Invalid text format', { cause: userText });
+    if (/<\/?text/.test(data.text)) {
+      console.error(
+        'Invalid text format detected in user input, attempt to jailbreak:',
+        data.text
+      );
+      throw new Error('Invalid text format', { cause: data.text });
     }
+    const userText = format(inputTemplate.prompt, data);
     const text_cache: TextBlockParam = {
       type: 'text',
       text: userText,

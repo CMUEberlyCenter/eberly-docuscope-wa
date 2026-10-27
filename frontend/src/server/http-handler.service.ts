@@ -111,7 +111,7 @@ export class UniversalHttpHandler implements HttpHandler {
             break;
           }
           default:
-            // noop
+          // noop
         }
         const req: HttpRequestParameters = {
           method: request.method,

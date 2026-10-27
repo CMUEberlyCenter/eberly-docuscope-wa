@@ -60,11 +60,14 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     if (!prompt) {
       throw new Error(`Malformed prompt for '${key}'.`, { cause: template });
     }
-    const content = format(prompt, data);
-    if (/<\/?notes/.test(content)) {
-      console.error('Invalid notes format detected in content, attempt to jailbreak:', content);
-      throw new Error('Invalid notes format', { cause: content });
+    if (/<\/?notes/.test(data.notes)) {
+      console.error(
+        'Invalid notes format detected in content, attempt to jailbreak:',
+        data.notes
+      );
+      throw new Error('Invalid notes format', { cause: data.notes });
     }
+    const content = format(prompt, data);
     const controller = new AbortController();
     onClose(() => controller.abort());
     const chat = await anthropic.messages.create(
