@@ -56,18 +56,20 @@ async function convertNotes(key: NotesPrompt, data: NotesRequest) {
     if (!template) {
       throw new ReferenceError(`Prompt template '${key}' not found.`);
     }
-    const { prompt, role, temperature } = template;
+    const { prompt, role } = template;
     if (!prompt) {
       throw new Error(`Malformed prompt for '${key}'.`, { cause: template });
     }
     const content = format(prompt, data);
+    if (/<\/?notes/.test(content)) {
+      console.error('Invalid notes format detected in content, attempt to jailbreak:', content);
+      throw new Error('Invalid notes format', { cause: content });
+    }
     const controller = new AbortController();
     onClose(() => controller.abort());
     const chat = await anthropic.messages.create(
       {
         max_tokens: ANTHROPIC_MAX_TOKENS,
-        // @ts-expect-error temperature is supported for sonnet-4.6, will have to be removed when model is updated. FIXME #351
-        temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
         model: ANTHROPIC_MODEL,
         system: [
           {

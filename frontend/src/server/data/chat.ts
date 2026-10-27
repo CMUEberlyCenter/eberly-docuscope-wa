@@ -46,7 +46,7 @@ export async function doChat<T>(
   }
   const started = new Date();
   const template = await findPromptById(key);
-  const { prompt, role, temperature } = template;
+  const { prompt, role } = template;
   if (!prompt) {
     throw new Error(`Malformed prompt for ${key}.`, { cause: template });
   }
@@ -58,9 +58,14 @@ export async function doChat<T>(
     if (!inputTemplate) {
       throw new ReferenceError('Unable to locate input_text template.');
     }
+    const userText = format(inputTemplate.prompt, data);
+    if (/<\/?text/.test(userText)) {
+      console.error('Invalid text format detected in user input, attempt to jailbreak:', userText);
+      throw new Error('Invalid text format', { cause: userText });
+    }
     const text_cache: TextBlockParam = {
       type: 'text',
-      text: format(inputTemplate.prompt, data),
+      text: userText,
       cache_control: { type: 'ephemeral' },
     };
     caching.push(text_cache);
@@ -68,8 +73,6 @@ export async function doChat<T>(
   const chat = await anthropic.messages.create(
     {
       max_tokens: ANTHROPIC_MAX_TOKENS,
-      // @ts-expect-error temperature is supported for sonnet-4.6, will have to be removed when model is updated. FIXME #351
-      temperature: isNaN(Number(temperature)) ? 0.0 : Number(temperature),
       system: [
         {
           type: 'text',
