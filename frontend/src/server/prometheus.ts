@@ -63,21 +63,7 @@ const MyProseMetrics = [
   myproseOutputTokensTotal,
 ];
 
-// export const initializePrometheusMetrics = (app: Express) => {
-//   register.clear(); // Clear the default registry to avoid duplicate metrics in case of hot reloads.
-//   MyProseMetrics.forEach((metric) => register.registerMetric(metric)); // Register custom metrics to the default registry
-//   collectDefaultMetrics({ register }); // Register default metrics to the default registry
-//   register.registerMetric(httpRequestDuration); // Register the HTTP request duration histogram
-//   register.registerMetric(upGauge); // Register the up gauge metric
-//   upGauge.set(1); // Set the gauge to 1 to indicate that the application is up and running
-//   app.get('/metrics', async (_req, res) => {
-//     res.set('Content-Type', register.contentType);
-//     res.end(await register.metrics());
-//   });
-//   // add duration middleware to measure request durations after metrics so that the /metrics endpoint is not included in the metrics.
-//   app.use(httpRequestDurationMiddleware);
-// };
-
+/** Handler to expose Prometheus metrics. */
 export const metricsHandler = (() =>
   enhance(
     async (_request, _context, _runtime) => {
@@ -94,6 +80,7 @@ export const metricsHandler = (() =>
     }
   )) satisfies Get<[], UniversalHandler>;
 
+/** Middleware to measure HTTP request duration and update Prometheus metrics. */
 export const httpRequestDurationMiddleware = (() => {
   register.clear(); // Clear the default registry to avoid duplicate metrics in case of hot reloads.
   MyProseMetrics.forEach((metric) => register.registerMetric(metric)); // Register custom metrics to the default registry

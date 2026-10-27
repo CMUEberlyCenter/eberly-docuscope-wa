@@ -12,13 +12,57 @@ import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { toNodeHandler } from 'better-auth/node';
 import { admin } from 'better-auth/plugins/admin';
 import { username } from 'better-auth/plugins/username';
+import { sendEmail } from './email';
+import { haveIBeenPwned } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   database: mongodbAdapter(await getDb()),
   emailAndPassword: {
     enabled: true,
+    requireEmailVerification: true,
+    revokeSessionsOnPasswordReset: true,
+    onExistingUserSignUp: async ({ user }, request) => {
+      void sendEmail({
+        to: user.email,
+        subject: "Sign-up attempt with your email",
+        text: "Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.",
+      });
+    },
+    sendResetPassword: async ({ user, url, token }, request) => {
+      void sendEmail({
+        to: user.email,
+        subject: 'Reset your password',
+        text: `Click the link to reset your password: ${url}`,
+        html: `<p>Click the link to reset your password: <a href="${url}">${url}</a></p>`,
+      });
+    },
+    customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
+      ...coreFields,
+      // Admin plugin fields (in schema order)
+      role: "user",
+      banned: false,
+      banReason: null,
+      banExpires: null,
+      ...additionalFields,
+      // ID must be last to match database output order
+      id,
+    }),
   },
-  plugins: [admin(), username(), i18n({ translations: locales })],
+  emailVerification: {
+    sendVerificationEmail: async ({ user, url, token }, request) => {
+      void sendEmail({
+        to: user.email,
+        subject: "Verify your email address",
+        text: `Click the link to verify your email: ${url}`,
+        html: `<p>Click the link to verify your email: <a href="${url}">${url}</a></p>`,
+      });
+    },
+  },
+  plugins: [admin(), username(), i18n({ translations: locales }), haveIBeenPwned(
+    {
+      enabled: process.env.NODE_ENV === 'production',
+    }
+  )],
 });
 
 export const authMiddleware = toNodeHandler(auth);

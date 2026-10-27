@@ -373,7 +373,7 @@ async function registerPlatforms(provider: Provider) {
  * Returns the LTI Configuration JSON with Canvas extensions.
  * @returns LTI Configuration JSON with Canvas extensions.
  */
-export function getLTIConfiguration() {
+function getLTIConfiguration() {
   const placement_defaults = {
     icon_url: LOGO,
     message_type: 'LtiDeepLinkingRequest',

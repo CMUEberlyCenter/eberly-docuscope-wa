@@ -1,6 +1,3 @@
-import i18n, { type InitOptions } from 'i18next';
-import { handle, LanguageDetector } from 'i18next-http-middleware';
-import { parse } from 'yaml';
 import enAdmin from '#public/locales/en/admin.yaml?raw';
 import enDeeplink from '#public/locales/en/deeplink.yaml?raw';
 import enError from '#public/locales/en/error.yaml?raw';
@@ -15,6 +12,8 @@ import esExpectations from '#public/locales/es/expectations.yaml?raw';
 import esInstructions from '#public/locales/es/instructions.yaml?raw';
 import esReview from '#public/locales/es/review.yaml?raw';
 import esTranslation from '#public/locales/es/translation.yaml?raw';
+import { type InitOptions } from 'i18next';
+import { parse } from 'yaml';
 
 export const I18N_CONFIG = {
   fallbackLng: 'en',
@@ -43,9 +42,9 @@ export const I18N_CONFIG = {
 } satisfies InitOptions;
 
 /** Middleware to add internationalization information to the request context. */
-export const i18nHandler = () => {
-  // Configure i18n middleware
-  i18n.use(LanguageDetector).init(I18N_CONFIG);
+// export const i18nHandler = () => {
+//   // Configure i18n middleware
+//   i18n.use(LanguageDetector).init(I18N_CONFIG);
 
-  return handle(i18n);
-};
+//   return handle(i18n);
+// };

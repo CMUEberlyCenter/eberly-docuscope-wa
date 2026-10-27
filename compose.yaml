@@ -20,20 +20,15 @@ services:
     volumes:
       - mongo_config:/data/configdb
       - mongo_data:/data/db
-  mongo-express:
-    image: mongo-express
-    restart: always
+
+  mailserver:
+    image: maildev/maildev
     ports:
-      - 8081:8081
+      - 127.0.0.1:1080:1080
+      - 127.0.0.1:1025:1025
     profiles:
       - dev
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_ADMINUSERNAME_FILE: "/run/secrets/mongo_user"
-      ME_CONFIG_MONGODB_ADMINPASSWORD_FILE: "/run/secrets/mongo_pass"
-    secrets:
-      - mongo_user
-      - mongo_pass
+    restart: unless-stopped
 
   ontopic:
     image: ghcr.io/cmueberlycenter/eberly-docuscope-wa/ontopic:latest
@@ -59,8 +54,9 @@ services:
       - mongo_pass
     env_file:
       - auth.env
-      - lti.env
       - google.env
+      - lti.env
+      - mail.env
     environment:
       ADMIN_USERNAME: admin
       ADMIN_EMAIL_FILE: /run/secrets/admin_email
@@ -85,6 +81,7 @@ services:
       - "./settings:/app/settings:ro"
       - "./private:/app/private:ro"
       - "../myprose-resources:/app/resources:ro"
+
   grafana:
     image: docker.io/grafana/grafana-enterprise:latest
     container_name: grafana
@@ -99,6 +96,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD__FILE: "/run/secrets/grafana_admin_pass"
     volumes:
       - 'grafana_storage:/var/lib/grafana'
+
   prometheus:
     image: docker.io/prom/prometheus:latest
     container_name: prometheus

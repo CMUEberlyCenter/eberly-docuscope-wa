@@ -32,6 +32,7 @@ async function getHandler() {
   // Remove any existing listeners for SIGINT and SIGTERM to avoid duplicate handling on hot reloads.
   process.removeAllListeners('SIGINT');
   process.removeAllListeners('SIGTERM');
+
   logger.info(`OnTopic backend url: ${ONTOPIC_URL.toString()}`);
   const shutdownDb = await initDatabase();
   const httpHandler = new UniversalHttpHandler();
