@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import vike from 'vike/plugin';
 import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
-import { version } from './package.json' with { type: 'json' };
+import packageJson from './package.json' with { type: 'json' };
 import { telefunc } from 'telefunc/vite';
 
 // https://vitejs.dev/config/
@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   define: {
-    __APP_VERSION__: JSON.stringify(version),
+    __APP_VERSION__: JSON.stringify(packageJson.version),
     __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
   },
   server: {
