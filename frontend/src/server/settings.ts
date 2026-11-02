@@ -4,7 +4,6 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import type { LanguageSettingsRequest } from '../lib/Requests';
 
-// const DEV = process.env.NODE_ENV !== 'production'; // use token only, no cookies.
 export const PRODUCT = process.env.PRODUCT ?? 'myProse';
 
 function envInt(env: string | undefined, fallback = 0) {

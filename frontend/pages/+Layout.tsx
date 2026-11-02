@@ -18,11 +18,13 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => (
     <TooltipProvider>
       <AuthProvider
         authClient={authClient}
+        baseURL={import.meta.env.PUBLIC_ENV__BASE_URL}
         navigate={({ to, replace }) =>
           navigate(to, { overwriteLastHistoryEntry: replace })
         }
         plugins={[adminPlugin()]}
         redirectTo="/myprose"
+        socialProviders={["google"]}
         Link={({ href, children, ...props }) => (
           <a
             href={href}

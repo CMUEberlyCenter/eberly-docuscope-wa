@@ -4,9 +4,15 @@ import {
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
   ADMIN_USERNAME,
+  LTI_HOSTNAME,
 } from '#server/settings.ts';
 import { i18n, locales } from '@better-auth/i18n';
-import { enhance, Get, UniversalHandler } from '@universal-middleware/core';
+import {
+  enhance,
+  Get,
+  MiddlewareOrder,
+  UniversalHandler,
+} from '@universal-middleware/core';
 import { betterAuth } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { toNodeHandler } from 'better-auth/node';
@@ -17,6 +23,7 @@ import { haveIBeenPwned } from 'better-auth/plugins';
 
 export const auth = betterAuth({
   database: mongodbAdapter(await getDb()),
+  baseURL: LTI_HOSTNAME.toString(),
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -24,8 +31,8 @@ export const auth = betterAuth({
     onExistingUserSignUp: async ({ user }, request) => {
       void sendEmail({
         to: user.email,
-        subject: "Sign-up attempt with your email",
-        text: "Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.",
+        subject: 'Sign-up attempt with your email',
+        text: 'Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.',
       });
     },
     sendResetPassword: async ({ user, url, token }, request) => {
@@ -39,7 +46,7 @@ export const auth = betterAuth({
     customSyntheticUser: ({ coreFields, additionalFields, id }) => ({
       ...coreFields,
       // Admin plugin fields (in schema order)
-      role: "user",
+      role: 'user',
       banned: false,
       banReason: null,
       banExpires: null,
@@ -52,24 +59,34 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ user, url, token }, request) => {
       void sendEmail({
         to: user.email,
-        subject: "Verify your email address",
+        subject: 'Verify your email address',
         text: `Click the link to verify your email: ${url}`,
         html: `<p>Click the link to verify your email: <a href="${url}">${url}</a></p>`,
       });
     },
   },
-  plugins: [admin(), username(), i18n({ translations: locales }), haveIBeenPwned(
-    {
+  plugins: [
+    admin(),
+    username(),
+    i18n({ translations: locales }),
+    haveIBeenPwned({
       enabled: process.env.NODE_ENV === 'production',
-    }
-  )],
+    }),
+  ],
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    },
+  },
 });
 
 export const authMiddleware = toNodeHandler(auth);
 export const authHandler = (() =>
   enhance(auth.handler, {
-    path: '/api/auth/*',
+    path: '/api/auth/**',
     method: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    order: MiddlewareOrder.AUTHENTICATION,
   })) satisfies Get<[], UniversalHandler>;
 
 export type AuthSession = typeof auth.$Infer.Session | null;

@@ -22,7 +22,7 @@ import { LTI_DB, LTI_HOSTNAME, PLATFORMS_PATH, PRODUCT } from './settings';
 
 const LOGO = new URL('/logo.svg', LTI_HOSTNAME).toString();
 
-export async function ensureLTIInitialized(
+export async function initializeLTIProvider(
   httpHandler: HttpHandler
 ): Promise<Provider> {
   const provider = initializeLTI(httpHandler);

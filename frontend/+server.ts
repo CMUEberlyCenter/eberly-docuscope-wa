@@ -5,7 +5,7 @@ Sets up and starts the expressjs server for handling requests for the myProse ap
 import { initDatabase } from '#/server/data/mongo';
 import { UniversalHttpHandler } from '#/server/http-handler.service';
 import { addAdminUser } from '#/utils/auth';
-import { ensureLTIInitialized, LtiMiddleware } from '#server/lti';
+import { initializeLTIProvider, LtiMiddleware } from '#server/lti';
 import vike, { toFetchHandler } from '@vikejs/express';
 import express from 'express';
 import i18n from 'i18next';
@@ -53,7 +53,7 @@ async function getHandler() {
     store: MongoStore.create({ mongoUrl: MONGO_CLIENT }),
   });
   app.use(sessionMiddleware); // add session middleware to the express app
-  const provider = await ensureLTIInitialized(httpHandler);
+  const provider = await initializeLTIProvider(httpHandler);
   vike(app, [
     LtiMiddleware(provider),
     telefuncHandler(provider),
