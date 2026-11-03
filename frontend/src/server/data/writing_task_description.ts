@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import {
   isWritingTask,
   isWritingTaskIdValid,
+  stripBodyTagsFromRuleDescriptions,
   type WritingTask,
 } from '../../lib/WritingTask';
 import { logger } from '../logger';
@@ -40,7 +41,7 @@ export async function initWritingTasks(
       if (!isWritingTaskIdValid(json.info.id)) {
         throw new Error(`${path} has an invalid info.id value.`);
       }
-      await add(path, json);
+      await add(path, stripBodyTagsFromRuleDescriptions(json));
     } catch (err) {
       logger.error(err);
     }
@@ -55,7 +56,7 @@ export async function initWritingTasks(
       if (!isWritingTaskIdValid(json.info.id)) {
         throw new Error(`${path} has an invalid info.id value.`);
       }
-      await add(path, json);
+      await add(path, stripBodyTagsFromRuleDescriptions(json));
     } catch (err) {
       logger.error(err);
     }

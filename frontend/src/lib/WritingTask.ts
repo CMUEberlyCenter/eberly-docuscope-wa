@@ -317,6 +317,27 @@ export type WritingTask = {
   public?: boolean;
 };
 
+function stripBodyTagsFromRule(rule: Rule): Rule {
+  return {
+    ...rule,
+    description: rule.description.replace(/<\/?body\b[^>]*>/gi, ''),
+    children: rule.children.map(stripBodyTagsFromRule),
+  };
+}
+
+/** Remove body tags from every rule description in a writing task. */
+export function stripBodyTagsFromRuleDescriptions(
+  task: WritingTask
+): WritingTask {
+  return {
+    ...task,
+    rules: {
+      ...task.rules,
+      rules: task.rules.rules.map(stripBodyTagsFromRule),
+    },
+  };
+}
+
 export type DbWritingTask = WritingTask & { _id?: string; modified?: string };
 /** Hack to deal with telefunc's auto-shield generation not handling recursive type definitions. */
 type PortableRules = {

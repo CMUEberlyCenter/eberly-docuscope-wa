@@ -10,6 +10,7 @@ import {
   hasKeywords,
   isEnabled,
   isWritingTask,
+  stripBodyTagsFromRuleDescriptions,
   WritingTask,
 } from './WritingTask';
 
@@ -41,6 +42,37 @@ describe('getExpectations', () => {
     expect(exp.length).toBe(6);
     expect(exp.at(0)?.name).toBe('Address the reader.');
     expect(exp.every((e) => e.children.length === 0));
+  });
+});
+
+describe('stripBodyTagsFromRuleDescriptions', () => {
+  test('given a writing task then strips body tags from nested rule descriptions', () => {
+    const task: WritingTask = {
+      ...CoverLetter,
+      rules: {
+        ...CoverLetter.rules,
+        rules: [
+          {
+            ...CoverLetter.rules.rules[0],
+            description: '<body><p>Top-level</p></body>',
+            children: [
+              {
+                ...CoverLetter.rules.rules[0].children[0],
+                description: '<BODY class="content">Nested</BODY>',
+              },
+            ],
+          },
+        ],
+      },
+    };
+
+    const stripped = stripBodyTagsFromRuleDescriptions(task);
+
+    expect(stripped.rules.rules[0]?.description).toBe('<p>Top-level</p>');
+    expect(stripped.rules.rules[0]?.children[0]?.description).toBe('Nested');
+    expect(task.rules.rules[0]?.description).not.toBe(
+      stripped.rules.rules[0]?.description
+    );
   });
 });
 

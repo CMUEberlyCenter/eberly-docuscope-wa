@@ -5,7 +5,7 @@ export type Prompt = {
   key: string;
   prompt: string;
   role?: string;
-  temperature?: number | string;
+  // temperature?: number | string;
 };
 
 export type NotesPrompt = 'notes_to_prose' | 'notes_to_bullets';
