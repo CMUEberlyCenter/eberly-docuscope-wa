@@ -71,7 +71,7 @@ genlink:
   json: Upload Custom Writing Task JSON
   document:
     title: Snapshot Document
-    description: Use this link to view the document for the selected Writing Task.
+    description: Use this form to make a snapshot of a document for the selected Writing Task.
     upload: Upload Document
     tools: 'Select Enabled Tools:'
     select_label: Select All / Deselect All
@@ -83,6 +83,7 @@ genlink:
     too_large: The uploaded document with {{wordCount}} words exceeds the maximum allowed size of {{maxWords}} words. Please upload a smaller document.
   submit: Launch
   existing_snapshots: Existing Snapshots
+  existing_snapshots_description: Manage existing snapshots. View, delete, or refresh them as needed.
   delete_snapshot: Delete Snapshot
   refresh_snapshot: Clear analysis cache
 writing_tasks:

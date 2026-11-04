@@ -1,5 +1,12 @@
 import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIconButton";
 import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
 import { ReviewTool } from "#lib/ReviewResponse";
@@ -23,7 +30,6 @@ import { Activity, ChangeEvent, FC, useCallback, useState } from "react";
 import {
   Button,
   ButtonGroup,
-  Card,
   Form,
   InputGroup,
   ListGroup,
@@ -207,9 +213,13 @@ export const Page: FC = () => {
   return (
     <>
       <Card>
-        <Card.Header>{t("admin:genlink.title")}</Card.Header>
-        <Card.Body>
-          <Card.Text>{t("admin:genlink.description")}</Card.Text>
+        <CardHeader>
+          <CardTitle className="tw:text-lg">
+            {t("admin:genlink.title")}
+          </CardTitle>
+          <CardDescription>{t("admin:genlink.description")}</CardDescription>
+        </CardHeader>
+        <CardContent>
           <div
             className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
             style={{ maxHeight: "30rem" }}
@@ -413,86 +423,95 @@ export const Page: FC = () => {
               </Button>
             </Form>
           </div>
-        </Card.Body>
+        </CardContent>
       </Card>
       {mySnapshots.length > 0 && (
-        <Card>
-          <Card.Header>{t("admin:genlink.existing_snapshots")}</Card.Header>
-          <ListGroup variant="flush">
-            {mySnapshots.map(({ id, task, filename, timestamp }) => (
-              <ListGroup.Item key={`${id}`}>
-                <a href={`/snapshot/${id}`} target="_blank">
-                  {task.info.name}: {filename} (
-                  {new Date(timestamp).toLocaleString()})
-                </a>
-                <ButtonGroup>
-                  <ClipboardIconButton
-                    onClick={() =>
-                      navigator.clipboard.writeText(
-                        new URL(`/snapshot/${id}`, hostname).toString()
-                      )
-                    }
-                  />
-                  <Form
-                    onSubmit={async (event) => {
-                      event.preventDefault();
-                      const data = new FormData(event.currentTarget);
-                      const id = data.get("id") as string;
-                      const tool = data.get("tool") as ReviewTool | "*";
-
-                      const response = await onClearSnapshotCache(id, tool);
-                      if (!response.success) {
-                        console.error(response.message);
+        <Card className="tw:my-1">
+          <CardHeader>
+            <CardTitle className="tw:text-lg">
+              {t("admin:genlink.existing_snapshots")}
+            </CardTitle>
+            <CardDescription>
+              {t("admin:genlink.existing_snapshots_description")}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="tw:text-base">
+            <ul>
+              {mySnapshots.map(({ id, task, filename, timestamp }) => (
+                <li key={`${id}`}>
+                  <a href={`/snapshot/${id}`} target="_blank">
+                    {task.info.name}: {filename} (
+                    {new Date(timestamp).toLocaleString()})
+                  </a>
+                  <ButtonGroup>
+                    <ClipboardIconButton
+                      onClick={() =>
+                        navigator.clipboard.writeText(
+                          new URL(`/snapshot/${id}`, hostname).toString()
+                        )
                       }
-                    }}
-                  >
-                    <input type="hidden" name="id" value={id} />
-                    <InputGroup>
-                      <Form.Select
-                        aria-label={t("admin:genlink.select_tool")}
-                        name="tool"
-                        size="sm"
-                      >
-                        <option value="*">All</option>
-                        {reviewTools.map((tool) => (
-                          <option key={tool} value={tool}>
-                            {tr(`review:${tool}.title`)}
-                          </option>
-                        ))}
-                      </Form.Select>
-                      <Button
-                        variant="icon"
-                        className="text-danger bg-light"
-                        type="submit"
-                        title={t("admin:genlink.refresh_snapshot")}
-                      >
-                        <FontAwesomeIcon icon={faBroom} />
-                      </Button>
-                    </InputGroup>
-                  </Form>
-                  <Button
-                    variant="icon"
-                    className="text-danger"
-                    onClick={() => {
-                      onDeleteSnapshot(id).then(({ success, value }) => {
-                        if (!success) {
-                          console.error("Failed to delete snapshot:", value);
-                        } else {
-                          setMySnapshots((prev) =>
-                            prev.filter((s) => s.id !== id)
-                          );
-                          // Optionally, add logic to remove the deleted snapshot from the UI
+                    />
+                    <Form
+                      onSubmit={async (event) => {
+                        event.preventDefault();
+                        const data = new FormData(event.currentTarget);
+                        const id = data.get("id") as string;
+                        const tool = data.get("tool") as ReviewTool | "*";
+
+                        const response = await onClearSnapshotCache(id, tool);
+                        if (!response.success) {
+                          console.error(response.message);
                         }
-                      });
-                    }}
-                    title={t("admin:genlink.delete_snapshot")}
-                  >
-                    <FontAwesomeIcon icon={faTrash} />
-                  </Button>
-                </ButtonGroup>
-              </ListGroup.Item>
-            ))}
-          </ListGroup>
+                      }}
+                    >
+                      <input type="hidden" name="id" value={id} />
+                      <InputGroup>
+                        <Form.Select
+                          aria-label={t("admin:genlink.select_tool")}
+                          name="tool"
+                          size="sm"
+                        >
+                          <option value="*">All</option>
+                          {reviewTools.map((tool) => (
+                            <option key={tool} value={tool}>
+                              {tr(`review:${tool}.title`)}
+                            </option>
+                          ))}
+                        </Form.Select>
+                        <Button
+                          variant="icon"
+                          className="text-danger bg-light"
+                          type="submit"
+                          title={t("admin:genlink.refresh_snapshot")}
+                        >
+                          <FontAwesomeIcon icon={faBroom} />
+                        </Button>
+                      </InputGroup>
+                    </Form>
+                    <Button
+                      variant="icon"
+                      className="text-danger"
+                      onClick={() => {
+                        onDeleteSnapshot(id).then(({ success, value }) => {
+                          if (!success) {
+                            console.error("Failed to delete snapshot:", value);
+                          } else {
+                            setMySnapshots((prev) =>
+                              prev.filter((s) => s.id !== id)
+                            );
+                            // Optionally, add logic to remove the deleted snapshot from the UI
+                          }
+                        });
+                      }}
+                      title={t("admin:genlink.delete_snapshot")}
+                    >
+                      <FontAwesomeIcon icon={faTrash} />
+                    </Button>
+                  </ButtonGroup>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
         </Card>
       )}
     </>

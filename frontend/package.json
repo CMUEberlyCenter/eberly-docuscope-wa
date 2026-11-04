@@ -22,7 +22,7 @@
     "preview": "cross-env NODE_ENV=production npm run build && cross-env NODE_ENV=production node ./dist/server/index.mjs",
     "start": "npm run preview",
     "check_format": "prettier -c src/ pages/ components/ layouts/ +server.ts",
-    "lint": "eslint src pages components layouts +server.ts",
+    "lint": "eslint src pages components layouts +server.ts --ignore-pattern 'components/auth/**/*' --ignore-pattern 'components/ui/**/*'",
     "format": "prettier --write src/ pages/ components/ layouts/ +server.ts .storybook/",
     "depcheck": "npx knip",
     "precommit": "npm run check_format && npm run lint && npm run test && npm run gen:schema",

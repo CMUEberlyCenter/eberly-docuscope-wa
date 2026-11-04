@@ -229,7 +229,7 @@ export function hasKeywords(task: WritingTask, keywords: string[]) {
  * @returns true if the given tool is enabled for the writing task.
  */
 export function isEnabled(
-  task: Optional<WritingTask>,
+  task: WritingTask | null | undefined,
   toolId: string
 ): boolean {
   // patch for #151 to support old WTDs
@@ -379,8 +379,8 @@ export function isWritingTask(
 
 /** Test if two WritingTask objects are equivalent. */
 export function equivalentWritingTasks(
-  a: Optional<WritingTask>,
-  b: Optional<WritingTask>
+  a: WritingTask | null | undefined,
+  b: WritingTask | null | undefined
 ): boolean {
   if (!isWritingTask(a) || !isWritingTask(b)) return false;
   if (a === b) return true;

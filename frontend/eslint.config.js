@@ -12,7 +12,7 @@ export default defineConfig(
   ...tseslint.configs.recommended,
   {
     ...react.configs["recommended-typescript"],
-    files: ['index.ts', 'src/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'components/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'layouts/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'pages/**/*.{js,jsx,mjs,cjs,ts,tsx}'],
+    files: ['components/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'layouts/**/*.{js,jsx,mjs,cjs,ts,tsx}', 'pages/**/*.{js,jsx,mjs,cjs,ts,tsx}'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {

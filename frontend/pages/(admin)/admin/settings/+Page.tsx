@@ -1,9 +1,15 @@
 import { FC } from "react";
-import { Card, ListGroup } from "react-bootstrap";
+import { ListGroup } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "./+data";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
 
 export const Page: FC = () => {
   const { settings } = usePageContext();
@@ -12,8 +18,10 @@ export const Page: FC = () => {
   // useTranslation("review"); // load review namespace for translation availability no longer needed since all ns are loaded
   return (
     <Card>
-      <Card.Header>{t("settings.title")}</Card.Header>
-      <Card.Body>
+      <CardHeader>
+        <CardTitle className="tw:text-lg">{t("settings.title")}</CardTitle>
+      </CardHeader>
+      <CardContent>
         <ListGroup className="mb-3">
           <ListGroup.Item>
             {t("settings.text_to_speech")}
@@ -139,7 +147,7 @@ export const Page: FC = () => {
         </ListGroup>
         {/* <h3>Raw Settings Data</h3>
         <pre>{JSON.stringify(settings, null, 2)}</pre> */}
-      </Card.Body>
+      </CardContent>
     </Card>
   );
 };

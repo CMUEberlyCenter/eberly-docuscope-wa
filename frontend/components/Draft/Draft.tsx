@@ -1,7 +1,6 @@
 import { serialize, serializeHtml } from "#/client/slate";
 import { trackScreenView } from "#/client/tracking";
 import { NotesRequest } from "#/lib/Requests";
-import type { DraftTool, DraftToolResult } from "#lib/DraftToolResults";
 import GenerateBulletsIcon from "#assets/icons/generate_bullets_icon.svg?react";
 import GenerateProseIcon from "#assets/icons/generate_prose_icon.svg?react";
 import HighlightIcon from "#assets/icons/Highlight.svg?react";
@@ -10,14 +9,9 @@ import {
   SelectionTooLargeError,
 } from "#components/ErrorHandler/ErrorHandler";
 import { SafeHTML } from "#components/SafeHTML/SafeHTML";
+import type { DraftTool, DraftToolResult } from "#lib/DraftToolResults";
 import { FC, type HTMLProps, useCallback, useState } from "react";
-import {
-  Alert,
-  ButtonGroup,
-  ButtonToolbar,
-  Card,
-  Stack,
-} from "react-bootstrap";
+import { Alert, ButtonGroup, ButtonToolbar } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { Editor } from "slate";
 import { useSlate } from "slate-react";
@@ -184,9 +178,9 @@ const Draft: FC<DraftToolCardProps> = ({ hasSelection }) => {
   // );
 
   return (
-    <div className="tool-card d-flex flex-column flex-grow-1 overflow-hidden">
-      <div className="d-flex justify-content-around">
-        <ButtonToolbar className="mb-2 mx-auto">
+    <div className="tool-card tw:flex tw:flex-col tw:grow tw:overflow-hidden">
+      <div className="tw:flex justify-content-around">
+        <ButtonToolbar className="mb-2 tw:mx-auto">
           {(settings?.notes2prose || settings?.notes2bullets) && (
             <ButtonGroup className="bg-white shadow-sm tools">
               {settings.notes2prose && (
@@ -212,11 +206,13 @@ const Draft: FC<DraftToolCardProps> = ({ hasSelection }) => {
         </ButtonToolbar>
       </div>
       {!currentTool && (
-        <article className="d-flex flex-grow-1 flex-column position-relative overflow-auto container-fluid">
-          <Stack className="position-absolute start-50 top-50 translate-middle w-75 ">
-            <HighlightIcon className="icon-lg mx-auto" />
-            <span className="mx-auto text-center">{t("tool.initial")}</span>
-          </Stack>
+        <article className="tw:flex tw:grow tw:flex-col tw:relative tw:overflow-auto container-fluid">
+          <div className="tw:absolute start-50 top-50 translate-middle w-75 tw:flex tw:flex-col tw:items-center tw:justify-center tw:gap-1 tw:self-stretch">
+            <HighlightIcon className="icon-lg tw:mx-auto" />
+            <span className="tw:mx-auto tw:text-center">
+              {t("tool.initial")}
+            </span>
+          </div>
         </article>
       )}
       {/* Maybe use Carousel for history? */}
@@ -228,7 +224,7 @@ const Draft: FC<DraftToolCardProps> = ({ hasSelection }) => {
           retry={retry}
         >
           {/* TODO add error reporting */}
-          <Card.Text as="div">{currentTool.result}</Card.Text>
+          <div className="tw:mb-0">{currentTool.result}</div>
         </ToolDisplay>
       )}
       {currentTool?.tool === "bullets" && (

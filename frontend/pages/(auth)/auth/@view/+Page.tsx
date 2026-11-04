@@ -3,5 +3,5 @@ import { usePageContext } from "vike-react/usePageContext";
 
 export const Page = () => {
   const { routeParams } = usePageContext();
-  return <Auth path={routeParams.view} />;
+  return <Auth path={routeParams.view} socialPosition="top" />;
 };

@@ -1,11 +1,17 @@
 import { ClipboardIconButton } from "#components/ClipboardIconButton/ClipboardIconButton";
 import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
 import { DbWritingTask } from "#lib/WritingTask";
 import { FC, useState } from "react";
 import { Badge, ListGroup } from "react-bootstrap";
-import Card from "react-bootstrap/esm/Card";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
@@ -23,14 +29,18 @@ export const Page: FC = () => {
   return (
     <>
       <Card>
-        <Card.Header>
-          {t("admin:writing_tasks.public.title")}{" "}
-          <Badge bg="secondary">{tasks.length}</Badge>
-        </Card.Header>
-        <Card.Body>
-          <Card.Subtitle className="mb-2 text-muted">
+        <CardHeader>
+          <CardTitle>
+            {t("admin:writing_tasks.public.title")}
+            <Badge bg="primary" className="tw:ms-2">
+              {data.length}/{tasks.length}
+            </Badge>
+          </CardTitle>
+          <CardDescription>
             {t("admin:writing_tasks.public.description")}
-          </Card.Subtitle>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="tw:text-base">
           <div
             className="d-flex flex-row flex-grow-1 align-items-stretch gap-3 w-100"
             style={{ maxHeight: "70vh", minHeight: 0 }}
@@ -59,18 +69,22 @@ export const Page: FC = () => {
               <WritingTaskInfo task={selected} />
             </div>
           </div>
-        </Card.Body>
+        </CardContent>
       </Card>
       {privateTasks.length > 0 && (
         <Card>
-          <Card.Header>
-            {t("writing_tasks.private.title")}{" "}
-            <Badge bg="secondary">{privateTasks.length}</Badge>
-          </Card.Header>
-          <Card.Body>
-            <Card.Subtitle className="mb-2 text-muted">
+          <CardHeader>
+            <CardTitle>
+              {t("writing_tasks.private.title")}
+              <Badge bg="primary" className="tw:ms-2">
+                {privateTasks.length}
+              </Badge>
+            </CardTitle>
+            <CardDescription>
               {t("writing_tasks.private.description")}
-            </Card.Subtitle>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="tw:text-base">
             <ListGroup as="ul">
               {privateTasks.map((task) => (
                 <ListGroup.Item
@@ -121,7 +135,7 @@ export const Page: FC = () => {
                 </ListGroup.Item>
               ))}
             </ListGroup>
-          </Card.Body>
+          </CardContent>
         </Card>
       )}
     </>

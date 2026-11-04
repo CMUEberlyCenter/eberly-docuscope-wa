@@ -1,5 +1,12 @@
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "#components/ui/card.tsx";
 import { FC, useState } from "react";
-import { Button, ButtonGroup, Card } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { Data } from "./+data";
@@ -27,7 +34,6 @@ const DateRange: FC<{ start?: Date; end?: Date }> = ({ start, end }) => {
       )}{" "}
       (
       {
-        // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
         new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
           duration
         )
@@ -42,10 +48,10 @@ export const Page: FC = () => {
   const { t } = useTranslation("admin");
   return (
     <Card>
-      <Card.Header>
-        {t("performance.title")}
+      <CardHeader>
+        <CardTitle className="tw:text-lg">{t("performance.title")}</CardTitle>
         {performance.length > 0 || session.length > 0 ? (
-          <ButtonGroup className="float-end">
+          <CardAction>
             {performance.length > 0 && (
               <Button
                 variant="link"
@@ -74,11 +80,11 @@ export const Page: FC = () => {
                 {t("performance.download_session")}
               </Button>
             )}
-          </ButtonGroup>
+          </CardAction>
         ) : null}
-      </Card.Header>
-      <Card.Body>
-        <Card.Text as="div">
+      </CardHeader>
+      <CardContent className="tw:text-base">
+        <div>
           {performance.length === 0 && <p>{t("performance.no_data")}</p>}
           {performance
             .filter((entry) => entry)
@@ -102,7 +108,6 @@ export const Page: FC = () => {
                     <ul>
                       <li>
                         {t("performance.average", {
-                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                           time: new Intl.DurationFormat(navigator.languages, {
                             style: "long",
                           }).format(msToDuration(Math.floor(entry.avgTime))),
@@ -110,7 +115,6 @@ export const Page: FC = () => {
                       </li>
                       <li>
                         {t("performance.minimum", {
-                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                           time: new Intl.DurationFormat(navigator.languages, {
                             style: "long",
                           }).format(msToDuration(Math.floor(entry.minTime))),
@@ -118,7 +122,6 @@ export const Page: FC = () => {
                       </li>
                       <li>
                         {t("performance.maximum", {
-                          // @ts-expect-error: vite build error: Intl.DurationFormat is not yet supported in TypeScript's lib.dom.d.ts
                           time: new Intl.DurationFormat(navigator.languages, {
                             style: "long",
                           }).format(msToDuration(Math.floor(entry.maxTime))),
@@ -193,8 +196,8 @@ export const Page: FC = () => {
               ))}
             </tbody>
           </table>
-        </Card.Text>
-      </Card.Body>
+        </div>
+      </CardContent>
     </Card>
   );
 };

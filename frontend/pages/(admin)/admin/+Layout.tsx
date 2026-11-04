@@ -74,7 +74,9 @@ export const Layout: FC<{ children: ReactNode }> = ({ children }) => {
           </div>
         </div>
       </Navbar>
-      <Container className="flex-grow-1 overflow-auto">{children}</Container>
+      <Container className="flex-grow-1 overflow-auto py-1">
+        {children}
+      </Container>
     </main>
   );
 };
