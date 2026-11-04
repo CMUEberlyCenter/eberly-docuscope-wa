@@ -3,7 +3,6 @@ import { MyProseLinks } from "#components/MyProseLinks/MyProseLinks";
 import { WritingTaskFilter } from "#components/WritingTaskFilter/WritingTaskFilter";
 import { WritingTaskInfo } from "#components/WritingTaskInfo/WritingTaskInfo";
 import { ReviewTool } from "#lib/ReviewResponse";
-import { validateWritingTask } from "#lib/schemaValidate";
 import { checkWordCount } from "#lib/ToolSettings";
 import {
   type DbWritingTask,
@@ -89,11 +88,7 @@ export const Page: FC = () => {
     try {
       const content = await files[0].text();
       const json = JSON.parse(content);
-      if (!validateWritingTask(json)) {
-        setValid(false);
-        setError(JSON.stringify(validateWritingTask.errors));
-        return;
-      }
+      // validation against the WritingTask schema is done in the telefunc onInsertWritingTask function.
       if (!isWritingTask(json)) {
         setValid(false);
         setError(t("select_task.invalid_upload"));

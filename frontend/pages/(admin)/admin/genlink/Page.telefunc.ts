@@ -27,6 +27,8 @@ import { getAuthorizedUser } from '../getAuthorizedUser';
  * Insert a new writing task into the database.
  * @param task The Writing Task JSON.
  * @throws telefunc.Abort with status 403 if the user is not authorized.
+ * @returns A promise resolving to the inserted writing task id or an error.
+ * Most likely errors are due to invalid JSON or schema validation failures.
  */
 export async function onInsertWritingTask(task: PortableWritingTask) {
   getAuthorizedUser();
