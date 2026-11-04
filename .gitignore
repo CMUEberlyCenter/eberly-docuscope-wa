@@ -38,3 +38,7 @@ dswadb
 /secrets/
 /private/
 /frontend/error.log
+auth.env
+google.env
+lti.env
+mail.env
