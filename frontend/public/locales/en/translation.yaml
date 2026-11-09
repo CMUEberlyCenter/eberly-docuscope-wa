@@ -20,6 +20,8 @@ about:
       Department of English, and Center for Technology Transfer and Enterprise Creation.
   cmu: Carnegie Mellon University
   simon: Simon Initiative
+auth:
+  return: Return to myProse
 document.title: myProse
 document.description: $t(document.title) is an environment for structuring writing tasks with the help of generative artificial intelligence and other natural language analysis tools.
 loading: Analyzing...
