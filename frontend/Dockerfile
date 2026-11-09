@@ -14,6 +14,7 @@ FROM base AS build
 COPY --from=install /tmp/dev/node_modules node_modules
 COPY . .
 ENV NODE_ENV=production
+ENV PUBLIC_ENV__BASE_URL=PUBLIC_ENV__BASE_URL
 RUN npm run build
 
 FROM base AS release
@@ -26,4 +27,6 @@ WORKDIR /app
 COPY --from=install /tmp/prod/node_modules node_modules
 COPY --from=build /app/dist/ ./dist/
 COPY --from=build /app/package.json ./package.json
+COPY --chmod=755 docker-entrypoint.sh /usr/local/bin/myprose-entrypoint
+ENTRYPOINT [ "/usr/local/bin/myprose-entrypoint" ]
 CMD [ "node", "dist/server/index.mjs" ]

@@ -6,36 +6,41 @@ import {
   ADMIN_USERNAME,
   LTI_HOSTNAME,
 } from '#server/settings.ts';
+import { OrganizationInvitationEmail } from '@better-auth-ui/react/email';
 import { i18n, locales } from '@better-auth/i18n';
+import { render } from '@react-email/render';
 import {
   enhance,
   Get,
   MiddlewareOrder,
   UniversalHandler,
 } from '@universal-middleware/core';
-import { betterAuth } from 'better-auth';
+import { betterAuth, User } from 'better-auth';
 import { mongodbAdapter } from 'better-auth/adapters/mongodb';
 import { toNodeHandler } from 'better-auth/node';
+import { haveIBeenPwned, organization } from 'better-auth/plugins';
 import { admin } from 'better-auth/plugins/admin';
 import { username } from 'better-auth/plugins/username';
+import { createElement } from 'react';
 import { sendEmail } from './email';
-import { haveIBeenPwned } from 'better-auth/plugins';
+// import { OrganizationInvitationEmail } from '#components/auth/email/organization-invitation.tsx';
 
 export const auth = betterAuth({
   database: mongodbAdapter(await getDb()),
   baseURL: LTI_HOSTNAME.toString(),
   emailAndPassword: {
+    // disableSignUp: true, // TODO: also requires changes in Signin and auth/+guard
     enabled: true,
     requireEmailVerification: true,
     revokeSessionsOnPasswordReset: true,
-    onExistingUserSignUp: async ({ user }, request) => {
+    onExistingUserSignUp: async ({ user }, _request) => {
       void sendEmail({
         to: user.email,
         subject: 'Sign-up attempt with your email',
         text: 'Someone tried to create an account using your email address. If this was you, try signing in instead. If not, you can safely ignore this email.',
       });
     },
-    sendResetPassword: async ({ user, url, token }, request) => {
+    sendResetPassword: async ({ user, url }, _request) => {
       void sendEmail({
         to: user.email,
         subject: 'Reset your password',
@@ -56,7 +61,7 @@ export const auth = betterAuth({
     }),
   },
   emailVerification: {
-    sendVerificationEmail: async ({ user, url, token }, request) => {
+    sendVerificationEmail: async ({ user, url }, _request) => {
       void sendEmail({
         to: user.email,
         subject: 'Verify your email address',
@@ -71,6 +76,39 @@ export const auth = betterAuth({
     i18n({ translations: locales }),
     haveIBeenPwned({
       enabled: process.env.NODE_ENV === 'production',
+    }),
+    organization({
+      allowUserToCreateOrganizations: async ({
+        role,
+      }: User & { role?: string }) => {
+        // Only allow users with the "admin" role to create organizations
+        return role === 'admin';
+      },
+      allowUserToInviteMembers: async ({ role }: User & { role?: string }) => {
+        // Only allow users with the "admin" role to invite members
+        return role === 'admin';
+      },
+      async sendInvitationEmail({ id, email, organization, inviter, role }) {
+        const url = new URL(`/auth/accept-invitation`, LTI_HOSTNAME);
+        url.searchParams.set('invitationId', id);
+        const html = await render(
+          createElement(OrganizationInvitationEmail, {
+            url: url.toString(),
+            email,
+            inviterName: inviter.user.name,
+            inviterEmail: inviter.user.email,
+            organizationName: organization.name,
+            organizationLogoURL: organization.logo ?? undefined,
+            role,
+            appName: process.env.PRODUCT ?? 'myProse',
+          })
+        );
+        await sendEmail({
+          to: email,
+          subject: `Invitation to join ${organization.name}`,
+          html,
+        });
+      },
     }),
   ],
   socialProviders: {
