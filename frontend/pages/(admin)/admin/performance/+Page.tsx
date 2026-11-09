@@ -33,11 +33,9 @@ const DateRange: FC<{ start?: Date; end?: Date }> = ({ start, end }) => {
         endDate
       )}{" "}
       (
-      {
-        new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
-          duration
-        )
-      }
+      {new Intl.DurationFormat(navigator.languages, { style: "short" }).format(
+        duration
+      )}
       )
     </span>
   );

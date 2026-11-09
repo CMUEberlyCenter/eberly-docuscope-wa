@@ -16,21 +16,10 @@ type WritingTaskContext = {
   taskId?: string | null;
   /** Writing tasks available for selection, only used if taskId is not set. */
   tasks?: WritingTask[];
-  /** The username of the current user, only available in an LTI context. */
-  username?: string;
-  /** The title of the LTI activity inside the LMS's LTI context. */
-  ltiActivityTitle?: string;
-  /** If true, the task is being used in an LTI context. */
-  isLTI?: boolean;
-  /** If true, the user is an instructor in the LTI context. */
-  isInstructor?: boolean;
 };
 const WritingTaskContext = createContext<
   [WritingTaskContext, Dispatch<WritingTaskContext>]
 >([{}, () => {}]);
-// const WritingTaskDispatchContext = createContext<Dispatch<WritingTaskContext>>(
-// () => {}
-// );
 
 /**
  * Context provider component for the writing task context.
@@ -56,10 +45,7 @@ export const WritingTaskProvider: FC<{
     {
       task: undefined,
       taskId: undefined,
-      username: undefined,
-      ltiActivityTitle: undefined,
-      isLTI: false,
-      isInstructor: false,
+      tasks: undefined,
       ...initial,
     }
   );

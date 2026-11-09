@@ -33,6 +33,8 @@ import "./CustomEditor.scss";
 import { FormatDropdown } from "./FormatDropdown";
 import { MarkButton } from "./MarkButton";
 import { renderElement, renderLeaf } from "./SlateElements";
+import { useUserContext } from "#components/UserContext/UserContext.tsx";
+import { useAssignmentContext } from "#components/AssignmentContext/AssignmentContext.tsx";
 
 const loadSaveFileOps = {
   id: "myprose",
@@ -86,7 +88,10 @@ const CustomEditor: FC<{
 
   // Stuff for exporting docx file.
   const [docx, setDocx] = useState<Blob | null>(null);
-  const [{ task: writingTask, username, ltiActivityTitle }] = useWritingTask();
+  const [{ task: writingTask }] = useWritingTask();
+  const [{ activityTitle }] = useAssignmentContext();
+  const [{ username }] = useUserContext();
+
   const saveAs = useCallback(async () => {
     if (content) {
       const blob = await Packer.toBlob(
@@ -97,7 +102,7 @@ const CustomEditor: FC<{
         typeof window.showSaveFilePicker === "function"
       ) {
         const rootname =
-          file || ltiActivityTitle || writingTask?.rules.name || "myProse";
+          file || activityTitle || writingTask?.rules.name || "myProse";
         try {
           const handle: FileSystemFileHandle = await window.showSaveFilePicker({
             ...loadSaveFileOps,
@@ -133,7 +138,7 @@ const CustomEditor: FC<{
     } else {
       setDocx(null);
     }
-  }, [content, file, ltiActivityTitle, showError, t, username, writingTask]);
+  }, [content, file, activityTitle, showError, t, username, writingTask]);
 
   return (
     <Slate
@@ -185,7 +190,7 @@ const CustomEditor: FC<{
                   <FileDownload
                     content={docx}
                     title={
-                      ltiActivityTitle || writingTask?.rules.name || "myProse"
+                      activityTitle || writingTask?.rules.name || "myProse"
                     }
                   />
                 )}

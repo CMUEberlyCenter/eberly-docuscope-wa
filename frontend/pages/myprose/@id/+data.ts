@@ -4,16 +4,18 @@ import type { PageContextServer } from 'vike/types';
 
 export const data = async (pageContext: PageContextServer) => {
   const taskId = pageContext.routeParams.id;
-  // const token = pageContext.session?.token; // as this is in the myprose route (non-LTI), this should be null.
+  const { username, email, name } = pageContext.auth?.user ?? {};
+
   try {
     const task = await findWritingTaskById(taskId);
     return {
       task,
       taskId,
-      // course: token?.platformContext.context.title,
-      // instructor: token?.platformContext.resource,
-      // userInfo: token?.userInfo,
-      // resource: token?.platformContext.resource.title,
+      user: {
+        username: username ?? undefined,
+        email,
+        name,
+      },
     };
   } catch (err) {
     if (err instanceof ReferenceError)
