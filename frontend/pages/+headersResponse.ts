@@ -13,7 +13,7 @@ export async function headersResponse(pageContext: PageContextServer) {
       `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
       `img-src 'self' data: https://*.googleusercontent.com`,
       `font-src 'self' https://fonts.gstatic.com https://fonts.googleapis.com`,
-      `connect-src 'self' https://*.googleapis.com`,
+      `connect-src 'self' https://*.googleapis.com https://*.google-analytics.com https://accounts.google.com/gsi/`,
       `default-src 'self'`,
     ].join('; '),
   };
