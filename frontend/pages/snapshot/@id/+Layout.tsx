@@ -9,7 +9,7 @@ import { UserText } from "#components/UserTextView/UserText";
 import { SplitLayout } from "#layouts/SplitLayout";
 import { ToolLayout } from "#layouts/ToolLayout";
 import { Activity, FC, ReactNode } from "react";
-import Placeholder from "react-bootstrap/esm/Placeholder";
+import Placeholder from "react-bootstrap/Placeholder";
 import { useTranslation } from "react-i18next";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";

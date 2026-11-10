@@ -39,7 +39,7 @@ import {
 import type {
   AccordionEventKey,
   AccordionSelectCallback,
-} from "react-bootstrap/esm/AccordionContext";
+} from "react-bootstrap/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
 import { AlertIcon } from "../AlertIcon/AlertIcon";

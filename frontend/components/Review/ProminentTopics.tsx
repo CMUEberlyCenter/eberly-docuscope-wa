@@ -3,7 +3,7 @@ import Icon from "#assets/icons/list_key_ideas_icon.svg?react";
 import classNames from "classnames";
 import { type FC, type HTMLProps, useEffect, useState } from "react";
 import { Accordion, Alert, type ButtonProps } from "react-bootstrap";
-import type { AccordionEventKey } from "react-bootstrap/esm/AccordionContext";
+import type { AccordionEventKey } from "react-bootstrap/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
@@ -123,7 +123,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                       <AlertIcon
                         show={
                           topic_sents_ids.length +
-                            elaboration_sents_ids.length ===
+                          elaboration_sents_ids.length ===
                           0
                         }
                         message={t("prominent_topics.no_sentences")}

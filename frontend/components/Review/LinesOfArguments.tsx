@@ -14,7 +14,7 @@ import {
 import type {
   AccordionEventKey,
   AccordionSelectCallback,
-} from "react-bootstrap/esm/AccordionContext";
+} from "react-bootstrap/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
 import {
@@ -94,7 +94,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                       message={t("lines_of_arguments.no_sentences")}
                       show={
                         (claim_sent_ids ?? []).length +
-                          (support_sent_ids ?? []).length ===
+                        (support_sent_ids ?? []).length ===
                         0
                       }
                     />
@@ -117,7 +117,7 @@ const Claims: FC<ClaimsProps> = ({ claims, ...props }) => {
                         className={classNames(
                           "p-3 pb-2",
                           (support_sent_ids ?? []).length &&
-                            "highlight highlight-1"
+                          "highlight highlight-1"
                         )}
                       >
                         <h6>{t("lines_of_arguments.support")}</h6>
@@ -211,7 +211,7 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
               </div>
             ) : null}
             {"strategies" in review.response &&
-            Array.isArray(review.response.strategies) ? (
+              Array.isArray(review.response.strategies) ? (
               <section className="mt-3">
                 <h6>{t("lines_of_arguments.strategies")}</h6>
                 <ul>
@@ -227,8 +227,8 @@ export const LinesOfArguments: FC<HTMLProps<HTMLDivElement>> = (props) => {
               claims={review.response.claims}
             />
             {!review.response.thesis &&
-            !review.response.strategies?.length &&
-            !review.response.claims?.length ? (
+              !review.response.strategies?.length &&
+              !review.response.claims?.length ? (
               <Alert variant="warning">{t("lines_of_arguments.null")}</Alert>
             ) : null}
           </section>

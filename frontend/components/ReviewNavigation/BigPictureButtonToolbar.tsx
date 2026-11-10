@@ -6,7 +6,7 @@ import { TopicalProgressionButton } from "#components/Review/TopicalProgression"
 import { isEnabled, WritingTask } from "#lib/WritingTask";
 import { FC } from "react";
 import { Tooltip } from "react-bootstrap";
-import OverlayTrigger from "react-bootstrap/esm/OverlayTrigger";
+import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import { Translation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
 import { ReviewButtonToolbar } from "./ReviewButtonToolbar";
@@ -42,69 +42,69 @@ export const BigPictureButtonToolbar: FC<{
     "topical_progression",
   ],
 }) => {
-  const { settings } = usePageContext();
-  return (
-    <ReviewButtonToolbar>
-      {settings?.expectations && (!task || isEnabled(task, "expectations")) ? (
-        !task && enabled?.includes("expectations") ? (
-          <OverlayTrigger
-            placement="bottom"
-            overlay={
-              <Tooltip>
-                <Translation ns={["review", "instructions"]}>
-                  {(t) => (
-                    <>
-                      {t("instructions:expectations_scope_note")}
-                      <hr />
-                      {t("review:expectations.no_writing_task_tooltip")}
-                    </>
-                  )}
-                </Translation>
-              </Tooltip>
-            }
-          >
-            {/* div required to get tooltip overlay to work. */}
-            <div>
-              <ExpectationsButton disabled={true} />
-            </div>
-          </OverlayTrigger>
-        ) : (
-          <ExpectationsButton
-            active={activeTool === "expectations"}
-            disabled={enabled?.includes("expectations") === false}
-            onClick={() => onSelect("expectations")}
+    const { settings } = usePageContext();
+    return (
+      <ReviewButtonToolbar>
+        {settings?.expectations && (!task || isEnabled(task, "expectations")) ? (
+          !task && enabled?.includes("expectations") ? (
+            <OverlayTrigger
+              placement="bottom"
+              overlay={
+                <Tooltip>
+                  <Translation ns={["review", "instructions"]}>
+                    {(t) => (
+                      <>
+                        {t("instructions:expectations_scope_note")}
+                        <hr />
+                        {t("review:expectations.no_writing_task_tooltip")}
+                      </>
+                    )}
+                  </Translation>
+                </Tooltip>
+              }
+            >
+              {/* div required to get tooltip overlay to work. */}
+              <div>
+                <ExpectationsButton disabled={true} />
+              </div>
+            </OverlayTrigger>
+          ) : (
+            <ExpectationsButton
+              active={activeTool === "expectations"}
+              disabled={enabled?.includes("expectations") === false}
+              onClick={() => onSelect("expectations")}
+            />
+          )
+        ) : null}
+        {settings?.prominent_topics &&
+          (!task || isEnabled(task, "prominent_topics")) ? (
+          <ProminentTopicsButton
+            disabled={enabled?.includes("prominent_topics") === false}
+            active={activeTool === "prominent_topics"}
+            onClick={() => onSelect("prominent_topics")}
           />
-        )
-      ) : null}
-      {settings?.prominent_topics &&
-      (!task || isEnabled(task, "prominent_topics")) ? (
-        <ProminentTopicsButton
-          disabled={enabled?.includes("prominent_topics") === false}
-          active={activeTool === "prominent_topics"}
-          onClick={() => onSelect("prominent_topics")}
-        />
-      ) : null}
-      {settings?.lines_of_arguments && isEnabled(task, "lines_of_arguments") ? (
-        <LinesOfArgumentsButton
-          disabled={enabled?.includes("lines_of_arguments") === false}
-          active={activeTool === "lines_of_arguments"}
-          onClick={() => onSelect("lines_of_arguments")}
-        />
-      ) : null}
-      {settings?.logical_flow && (!task || isEnabled(task, "logical_flow")) ? (
-        <LogicalFlowButton
-          disabled={enabled?.includes("logical_flow") === false}
-          active={activeTool === "logical_flow"}
-          onClick={() => onSelect("logical_flow")}
-        />
-      ) : null}
-      {settings?.term_matrix && (!task || isEnabled(task, "term_matrix")) ? (
-        <TopicalProgressionButton
-          disabled={enabled?.includes("term_matrix") === false}
-          active={activeTool === "topical_progression"}
-          onClick={() => onSelect("topical_progression")}
-        />
-      ) : null}
-    </ReviewButtonToolbar>
-  );
-};
+        ) : null}
+        {settings?.lines_of_arguments && isEnabled(task, "lines_of_arguments") ? (
+          <LinesOfArgumentsButton
+            disabled={enabled?.includes("lines_of_arguments") === false}
+            active={activeTool === "lines_of_arguments"}
+            onClick={() => onSelect("lines_of_arguments")}
+          />
+        ) : null}
+        {settings?.logical_flow && (!task || isEnabled(task, "logical_flow")) ? (
+          <LogicalFlowButton
+            disabled={enabled?.includes("logical_flow") === false}
+            active={activeTool === "logical_flow"}
+            onClick={() => onSelect("logical_flow")}
+          />
+        ) : null}
+        {settings?.term_matrix && (!task || isEnabled(task, "term_matrix")) ? (
+          <TopicalProgressionButton
+            disabled={enabled?.includes("term_matrix") === false}
+            active={activeTool === "topical_progression"}
+            onClick={() => onSelect("topical_progression")}
+          />
+        ) : null}
+      </ReviewButtonToolbar>
+    );
+  };

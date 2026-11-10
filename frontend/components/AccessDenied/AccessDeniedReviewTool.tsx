@@ -1,6 +1,6 @@
 import { AccessDeniedReason } from "#lib/AccessDeniedReason";
 import { FC } from "react";
-import Alert from "react-bootstrap/esm/Alert";
+import Alert from "react-bootstrap/Alert";
 import { useTranslation } from "react-i18next";
 
 /** Component for displaying access denied messages for a specific review tool. */

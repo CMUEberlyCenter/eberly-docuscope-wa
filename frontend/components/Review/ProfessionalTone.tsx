@@ -13,7 +13,7 @@ import {
 import {
   AccordionEventKey,
   AccordionSelectCallback,
-} from "react-bootstrap/esm/AccordionContext";
+} from "react-bootstrap/AccordionContext";
 import { Translation, useTranslation } from "react-i18next";
 import {
   ReviewToolCard,
