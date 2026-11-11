@@ -123,7 +123,7 @@ export const ProminentTopics: FC<HTMLProps<HTMLDivElement>> = (props) => {
                       <AlertIcon
                         show={
                           topic_sents_ids.length +
-                          elaboration_sents_ids.length ===
+                            elaboration_sents_ids.length ===
                           0
                         }
                         message={t("prominent_topics.no_sentences")}

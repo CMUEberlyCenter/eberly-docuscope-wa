@@ -16,7 +16,7 @@ export default {
   },
 
   rootAttributes: { role: 'none' },
-  ssr: false,
+  ssr: true,
   passToClient: ['settings', 'google'],
 
   extends: [vikeReact, vikeReactQuery],

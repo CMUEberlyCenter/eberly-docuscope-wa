@@ -1,12 +1,7 @@
 import { AccessDeniedReason } from '#/lib/AccessDeniedReason';
 import { getAnalysis } from '#components/ReviewContext/createReviewDataContext';
 import { userLanguage } from '#lib/languageCode';
-import {
-  AbortError,
-  errorToProblemDetails,
-  ForbiddenError,
-  GatewayError,
-} from '#lib/ProblemDetails';
+import { AbortError, ForbiddenError, GatewayError } from '#lib/ProblemDetails';
 import {
   Analysis,
   ExpectationsData,
@@ -20,22 +15,9 @@ import {
   ReviewTool,
 } from '#lib/ReviewResponse';
 import { getExpectationByIndex, isEnabled } from '#lib/WritingTask';
-import {
-  enhance,
-  Get,
-  params,
-  UniversalHandler,
-} from '@universal-middleware/core';
-import { Request, Router } from 'express';
-import { param } from 'express-validator';
 import { doChat, reviewData } from '../data/chat';
 import { findSnapshotById, updateSnapshotReviewsById } from '../data/mongo';
 import { doOnTopic } from '../data/ontopic';
-import { getSettings } from '../getSettings';
-import { validate } from '../model/validate';
-
-/** Router for handling snapshot-related API endpoints. */
-export const snapshot = Router();
 
 export async function getExpectation(
   id: string,
@@ -100,81 +82,81 @@ export async function getExpectation(
   return data;
 }
 
-export const snapshotExpectationHandler = (() => {
-  return enhance(
-    async (request, _context, runtime) => {
-      try {
-        const settings = await getSettings();
-        if (!settings.expectations) {
-          throw new ForbiddenError(
-            'Expectation Analysis tool is not available!'
-          );
-        }
-        const snapshotParams = params(
-          request,
-          runtime,
-          '/api/v2/snapshot/:id/expectation/:index'
-        );
-        if (!snapshotParams) {
-          throw new Error('Invalid parameters');
-        }
-        const indexNum = parseInt(snapshotParams.index, 10);
-        if (isNaN(indexNum) || indexNum < 0) {
-          throw new ReferenceError(
-            `Invalid index parameter: ${snapshotParams.index}`
-          );
-        }
-        const snapshot = await getExpectation(
-          snapshotParams.id,
-          indexNum,
-          request.signal
-        );
-        return Response.json(snapshot);
-      } catch (error) {
-        if (request.signal.aborted) {
-          return Response.json(
-            errorToProblemDetails(new AbortError(), request.url),
-            { status: 499 }
-          );
-        }
-        console.error('Error in snapshotExpectationHandler:', error);
-        const details = errorToProblemDetails(error);
-        return Response.json(details, { status: details.status || 400 });
-      }
-    },
-    {
-      method: ['GET'],
-      name: 'myprose:snapshotExpectationHandler',
-      path: '/api/v2/snapshot/:id/expectation/:index',
-      params: {
-        id: { type: 'string', pattern: '^[a-fA-F0-9]{24}$' },
-        index: { type: 'string', pattern: '^[0-9]+$' },
-      },
-    }
-  );
-}) satisfies Get<[], UniversalHandler>;
+// export const snapshotExpectationHandler = (() => {
+//   return enhance(
+//     async (request, _context, runtime) => {
+//       try {
+//         const settings = await getSettings();
+//         if (!settings.expectations) {
+//           throw new ForbiddenError(
+//             'Expectation Analysis tool is not available!'
+//           );
+//         }
+//         const snapshotParams = params(
+//           request,
+//           runtime,
+//           '/api/v2/snapshot/:id/expectation/:index'
+//         );
+//         if (!snapshotParams) {
+//           throw new Error('Invalid parameters');
+//         }
+//         const indexNum = parseInt(snapshotParams.index, 10);
+//         if (isNaN(indexNum) || indexNum < 0) {
+//           throw new ReferenceError(
+//             `Invalid index parameter: ${snapshotParams.index}`
+//           );
+//         }
+//         const snapshot = await getExpectation(
+//           snapshotParams.id,
+//           indexNum,
+//           request.signal
+//         );
+//         return Response.json(snapshot);
+//       } catch (error) {
+//         if (request.signal.aborted) {
+//           return Response.json(
+//             errorToProblemDetails(new AbortError(), request.url),
+//             { status: 499 }
+//           );
+//         }
+//         console.error('Error in snapshotExpectationHandler:', error);
+//         const details = errorToProblemDetails(error);
+//         return Response.json(details, { status: details.status || 400 });
+//       }
+//     },
+//     {
+//       method: ['GET'],
+//       name: 'myprose:snapshotExpectationHandler',
+//       path: '/api/v2/snapshot/:id/expectation/:index',
+//       params: {
+//         id: { type: 'string', pattern: '^[a-fA-F0-9]{24}$' },
+//         index: { type: 'string', pattern: '^[0-9]+$' },
+//       },
+//     }
+//   );
+// }) satisfies Get<[], UniversalHandler>;
 
-snapshot.get(
-  '/:id/expectation/:index',
-  validate(param('id').isMongoId()),
-  validate(param('index').isInt({ min: 0 })),
-  async (request: Request<{ id: string; index: string }>, response) => {
-    const { id, index } = request.params;
-    const indexNum = parseInt(index, 10);
-    const controller = new AbortController();
-    response.on('close', () => {
-      if (!response.writableEnded) {
-        controller.abort();
-      }
-    });
-    const settings = await getSettings();
-    if (!settings.expectations) {
-      throw new ForbiddenError('Expectation Analysis tool is not available!');
-    }
-    const snapshot = await getExpectation(id, indexNum, controller.signal);
-    return response.send(snapshot);
-  }
-);
+// snapshot.get(
+//   '/:id/expectation/:index',
+//   validate(param('id').isMongoId()),
+//   validate(param('index').isInt({ min: 0 })),
+//   async (request: Request<{ id: string; index: string }>, response) => {
+//     const { id, index } = request.params;
+//     const indexNum = parseInt(index, 10);
+//     const controller = new AbortController();
+//     response.on('close', () => {
+//       if (!response.writableEnded) {
+//         controller.abort();
+//       }
+//     });
+//     const settings = await getSettings();
+//     if (!settings.expectations) {
+//       throw new ForbiddenError('Expectation Analysis tool is not available!');
+//     }
+//     const snapshot = await getExpectation(id, indexNum, controller.signal);
+//     return response.send(snapshot);
+//   }
+// );
 
 /**
  * Creates a function that handles a specific review analysis.

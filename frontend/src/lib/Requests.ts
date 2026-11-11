@@ -20,8 +20,11 @@ export interface NotesRequest extends LanguageSettingsRequest, LtikRequest {
   notes: string;
 }
 
-/** Request that posts a block of text. */
-// @deprecated not used anymore, tools that used it have beed removed.
-// export interface TextRequest extends LanguageSettingsRequest {
-//   text: string;
-// }
+export type ExpectationRequest = {
+  /** Index of the expectation in the writing task. */
+  index: number;
+  /** The user's document. */
+  document?: string;
+  /** The id of the writing task. */
+  writing_task?: string;
+};

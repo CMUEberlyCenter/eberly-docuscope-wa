@@ -1,5 +1,4 @@
 import { authHandler } from '#/utils/auth';
-import { snapshotExpectationHandler } from '#server/api/snapshot.ts';
 import { headersMiddleware } from '#server/headersMiddleware.ts';
 import { ltiConfigurationHandler } from '#server/lti.ts';
 import {
@@ -13,7 +12,6 @@ export default [
   headersMiddleware(),
   sessionMiddleware(),
   authHandler(),
-  snapshotExpectationHandler(),
   metricsHandler(),
   ltiConfigurationHandler(),
 ];

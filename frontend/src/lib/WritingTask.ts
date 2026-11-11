@@ -107,6 +107,20 @@ export function getExpectationByIndex(
 }
 
 /**
+ * Retrieves the rule (expectation) by name from a writing task.
+ * Assumes that rule names are unique within a writing task.
+ * @param task Writing task
+ * @param name name of rule.
+ * @returns
+ */
+export function getExpectationByName(
+  task: WritingTask,
+  name: string
+): Rule | undefined {
+  return getExpectations(task).find((rule) => rule.name === name);
+}
+
+/**
  * Retrieve the index of a specific leaf rule (expectation) in the writing task.
  * @param task The writing task specification.
  * @param expectation An expectation in the writing task.

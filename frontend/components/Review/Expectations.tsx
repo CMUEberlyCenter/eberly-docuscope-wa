@@ -1,4 +1,5 @@
 import { trackScreenView } from "#/client/tracking";
+import { ErrorDetails } from "#/lib/ProblemDetails.ts";
 import {
   ErrorDataError,
   isErrorData,
@@ -23,6 +24,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   Activity,
   createContext,
+  ReactNode,
   use,
   useCallback,
   useEffect,
@@ -43,10 +45,7 @@ import type {
 import { Translation, useTranslation } from "react-i18next";
 import { usePageContext } from "vike-react/usePageContext";
 import { AlertIcon } from "../AlertIcon/AlertIcon";
-import {
-  checkReviewResponse,
-  ReviewErrorData,
-} from "../ErrorHandler/ErrorHandler";
+import { ReviewErrorData } from "../ErrorHandler/ErrorHandler";
 import { useFileText } from "../FileUpload/FileTextContext";
 import { LoadingSmall } from "../Loading/LoadingSmall";
 import { ReviewReset, useReviewDispatch } from "../ReviewContext/ReviewContext";
@@ -55,6 +54,7 @@ import { ToolHeader } from "../ToolHeader/ToolHeader";
 import { useWritingTask } from "../WritingTaskContext/WritingTaskContext";
 import style from "./Expectations.module.scss";
 import { onGrade } from "./Expectations.telefunc";
+import { ExpectationRequest } from "#/lib/Requests.ts";
 
 /** Button component to use for selecting the Content Expectations tool. */
 export const ExpectationsButton: FC<ButtonProps> = (props) => {
@@ -96,6 +96,30 @@ const isWrappedExpectationsData = (
   );
 };
 
+type ExpectationFetchFunction = (
+  index: ExpectationRequest
+) => Promise<
+  { analysis: OptionalReviewData<ExpectationsData> } | { error: ErrorDetails }
+>;
+const FetchExpectationContext = createContext<ExpectationFetchFunction>(() =>
+  Promise.resolve({
+    error: {
+      message: "No fetch function provided",
+      code: "no_fetch_function",
+    },
+  })
+);
+export const ExpectationFetchProvider: FC<{
+  children: ReactNode;
+  fetchFunction: ExpectationFetchFunction;
+}> = ({ children, fetchFunction }) => {
+  return (
+    <FetchExpectationContext value={fetchFunction}>
+      {children}
+    </FetchExpectationContext>
+  );
+};
+
 /** Hook to create mutation for fetching expectation review data. */
 function useExpectationsDataMutation({
   expectation,
@@ -106,6 +130,7 @@ function useExpectationsDataMutation({
   const [{ task }] = useWritingTask();
   const [document] = useFileText();
   const { ltik } = usePageContext();
+  const fetchFunction = use(FetchExpectationContext);
   const [errorData, setErrorData] = useState<ErrorData | null>(null);
   const [result, setResult] =
     useState<OptionalReviewData<ExpectationsData>>(null);
@@ -123,20 +148,13 @@ function useExpectationsDataMutation({
       if (!document || !task) {
         throw new Error("Document or writing task is missing");
       }
-      const response = await fetch("/api/v2/review/expectation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          document,
-          writing_task: task,
-          expectation: expectation.name,
-        }),
-        signal: abortControllerRef.current?.signal,
+      const result = await fetchFunction({
+        index: getIndexOfExpectation(task, expectation),
+        document,
+        writing_task: task.info.id,
       });
-      checkReviewResponse(response);
-      const result = await response.json();
+      //   checkReviewResponse(response);
+      //   const result = await response.json();
       if (!result) {
         throw new Error("No data received from server");
       }
@@ -226,6 +244,7 @@ function generateExpectationsSnapshotMutation(snapshotID: string) {
     eventKey,
   }: ExpectationMutationProps) {
     const dispatch = useReviewDispatch();
+    const fetchFunction = use(FetchExpectationContext);
     const [errorData, setErrorData] = useState<ErrorData | null>(null);
     const [taggedDocument] = useState<string>("");
     const [result, setResult] =
@@ -240,24 +259,31 @@ function generateExpectationsSnapshotMutation(snapshotID: string) {
           !snapshotID ||
           expectationIndex === undefined ||
           expectationIndex < 0
-        )
+        ) {
           throw new Error("Invalid preview parameters");
+        }
         abortControllerRef.current?.abort("canceling previous request");
         abortControllerRef.current = new AbortController();
         dispatch({ type: "unset" }); // probably not needed, but just in case
         dispatch({ type: "remove" }); // fix for #225 - second import not refreshing view.
-        const response = await fetch(
-          `/api/v2/snapshot/${snapshotID}/expectation/${expectationIndex}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            signal: abortControllerRef.current?.signal,
-          }
-        );
-        checkReviewResponse(response);
-        return response.json();
+        const result = await fetchFunction({ index: expectationIndex });
+        if (!result) {
+          throw new Error("No data received from server");
+        }
+        if ("error" in result && result.error) {
+          throw new Error(result.error.detail);
+        }
+        if (isExpectationsData(result)) {
+          throw new Error("Expected wrapped data, got raw data");
+        }
+        if (
+          !("analysis" in result) ||
+          !result.analysis ||
+          !isExpectationsData(result.analysis)
+        ) {
+          throw new Error("Invalid data format received from server");
+        }
+        return result.analysis;
       },
       onSuccess: (data: ExpectationsData) => {
         if (isErrorData(data)) {

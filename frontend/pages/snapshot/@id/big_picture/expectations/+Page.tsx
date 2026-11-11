@@ -1,6 +1,7 @@
 import { AccessDeniedReason } from "#/lib/AccessDeniedReason";
 import { AccessDeniedReviewTool } from "#components/AccessDenied/AccessDeniedReviewTool";
 import {
+  ExpectationFetchProvider,
   Expectations,
   ExpectationSnapshotProvider,
 } from "#components/Review/Expectations";
@@ -10,6 +11,7 @@ import { FC } from "react";
 import { useData } from "vike-react/useData";
 import { usePageContext } from "vike-react/usePageContext";
 import { Data } from "../../+data";
+import { onExpectation } from "./Page.telefunc";
 
 export const Page: FC = () => {
   const { analyses, task, tool_config } = useData<Data>();
@@ -39,12 +41,16 @@ export const Page: FC = () => {
   }
 
   return (
-    <ExpectationSnapshotProvider
-      snapshotID={id}
-      analysis={analyses.filter(isExpectationsData)}
-      task={task}
+    <ExpectationFetchProvider
+      fetchFunction={({ index }) => onExpectation(id, index)}
     >
-      <Expectations />
-    </ExpectationSnapshotProvider>
+      <ExpectationSnapshotProvider
+        snapshotID={id}
+        analysis={analyses.filter(isExpectationsData)}
+        task={task}
+      >
+        <Expectations />
+      </ExpectationSnapshotProvider>
+    </ExpectationFetchProvider>
   );
 };
