@@ -80,8 +80,8 @@ type ExpectationMutationProps = {
 };
 
 type WrappedExpectationsDataResult = {
-  input: string;
-  data: ExpectationsData; // | ErrorData;
+  input?: string;
+  analysis: OptionalReviewData<ExpectationsData>; // | ErrorData;
 };
 const isWrappedExpectationsData = (
   obj: unknown
@@ -89,8 +89,7 @@ const isWrappedExpectationsData = (
   return (
     !!obj &&
     typeof obj === "object" &&
-    "input" in obj &&
-    typeof obj.input === "string" &&
+    ("input" in obj ? typeof obj.input === "string" : true) &&
     "data" in obj &&
     isExpectationsData(obj.data)
   );
@@ -99,7 +98,7 @@ const isWrappedExpectationsData = (
 type ExpectationFetchFunction = (
   index: ExpectationRequest
 ) => Promise<
-  { analysis: OptionalReviewData<ExpectationsData> } | { error: ErrorDetails }
+  WrappedExpectationsDataResult | { error: ErrorDetails }
 >;
 const FetchExpectationContext = createContext<ExpectationFetchFunction>(() =>
   Promise.resolve({
@@ -172,20 +171,24 @@ function useExpectationsDataMutation({
       }
       return result;
     },
-    onSuccess: ({ data, input }) => {
-      setResult(data);
-      setTaggedDocument(input);
-      dispatch({
-        type: "set",
-        sentences: [data.response.sent_ids],
-      });
+    onSuccess: ({ analysis, input }) => {
+      setResult(analysis);
+      if (input) {
+        setTaggedDocument(input);
+      }
+      if (isExpectationsData(analysis)) {
+        dispatch({
+          type: "set",
+          sentences: [analysis.response.sent_ids],
+        });
+      }
       setCurrent?.(eventKey); // open this accordion item
       if (ltik) {
         onGrade(ltik, 1.0, {
           tool: "expectations",
           task_id: task?.info.id ?? "",
           expectation: expectation.name,
-          input_length: input.length,
+          input_length: document?.length ?? 0,
         });
       }
     },

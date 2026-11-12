@@ -13,7 +13,7 @@ export const onExpectation = async (
   id: string,
   index: number
 ): Promise<
-  { analysis: OptionalReviewData<ExpectationsData> } | { error: ErrorDetails }
+  { input?: string; analysis: OptionalReviewData<ExpectationsData> } | { error: ErrorDetails }
 > => {
   const { settings, onClose } = getContext<TelefuncContext>();
   const controller = new AbortController();

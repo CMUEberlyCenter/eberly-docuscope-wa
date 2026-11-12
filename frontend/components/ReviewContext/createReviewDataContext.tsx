@@ -148,20 +148,3 @@ export function createReviewDataContext<T extends Analysis>(tool: ReviewTool) {
     ReviewDataContext: Context,
   };
 }
-
-// type ReviewService<T extends Analysis> = {
-//   fetchData: (tool: ReviewTool) => Promise<OptionalReviewData<T>>
-// }
-// const ReviewServiceContext = createContext<ReviewService<Analysis> | null>(null);
-
-// export function ReviewServiceProvider<T extends Analysis>({ children, service }: { children: ReactNode, service: ReviewService<T> }) {
-//   return <ReviewServiceContext value={service}>{children}</ReviewServiceContext>;
-// }
-
-// export function useReviewService() {
-//   const context = use(ReviewServiceContext);
-//   if (!context) {
-//     throw new Error("useReviewService must be used within a ReviewServiceProvider");
-//   }
-//   return context;
-// }

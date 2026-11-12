@@ -1,8 +1,6 @@
 import { type OnTopicData } from './OnTopicData';
 
 export type ReviewPrompt =
-  | 'civil_tone'
-  | 'credibility'
   | 'expectations'
   | 'lines_of_arguments'
   | 'logical_flow'
@@ -12,8 +10,6 @@ export type ReviewPrompt =
   | 'sources';
 
 export const BasicReviewPrompts: ReviewPrompt[] = [
-  'civil_tone',
-  'credibility',
   'lines_of_arguments',
   'logical_flow',
   'paragraph_clarity',
@@ -24,70 +20,11 @@ export const BasicReviewPrompts: ReviewPrompt[] = [
 
 export type ReviewTool =
   | ReviewPrompt
-  | 'expectations'
   | 'sentence_density'
   | 'term_matrix'
   | 'ontopic'
   | 'docuscope';
 
-/** List of identified civility issues in the text. @deprecated Civil Tone review is no longer supported. */
-type CivilToneOutput = {
-  /** Identified inappropriate text segment from the input text. */
-  text: string;
-  /** One sentence assessment about the use of uncivil tone. */
-  assessment: string;
-  /** One sentence suggestion describing how the text can be improved. */
-  suggestion: string;
-  /** The id of the span element for the sentence from the input text that was identified as having tone issues. */
-  sent_id: string;
-}[];
-// function isCivilToneOutput(data: unknown): data is CivilToneOutput {
-//   return (
-//     !!data &&
-//     Array.isArray(data) &&
-//     data.every(
-//       (item) =>
-//         typeof item === 'object' &&
-//         item !== null &&
-//         'text' in item &&
-//         typeof item.text === 'string' &&
-//         'assessment' in item &&
-//         typeof item.assessment === 'string' &&
-//         'suggestion' in item &&
-//         typeof item.suggestion === 'string' &&
-//         'sent_id' in item &&
-//         typeof item.sent_id === 'string'
-//     )
-//   );
-// }
-
-/** List of identified credibility issues in the text. @deprecated Credibility review is no longer supported. */
-type CredibilityOutput = {
-  /** One sentence assessment about the credibility issue. */
-  issue: string;
-  /** One sentence suggestion describing how the text can be improved. */
-  suggestion: string;
-  /** A list of IDs for the sentences containing the credibility issue. */
-  sent_ids: string[];
-}[];
-// function isCredibilityOutput(data: unknown): data is CredibilityOutput {
-//   return (
-//     !!data &&
-//     Array.isArray(data) &&
-//     data.every(
-//       (item) =>
-//         typeof item === 'object' &&
-//         item !== null &&
-//         'issue' in item &&
-//         typeof item.issue === 'string' &&
-//         'suggestion' in item &&
-//         typeof item.suggestion === 'string' &&
-//         'sent_ids' in item &&
-//         Array.isArray(item.sent_ids) &&
-//         item.sent_ids.every((id: unknown) => typeof id === 'string')
-//     )
-//   );
-// }
 
 /** Assessment of whether the input text meets the expectations. */
 export type ExpectationsOutput = {
@@ -410,8 +347,6 @@ type SourcesOutput = {
 // }
 
 export type ReviewResponse =
-  | CivilToneOutput
-  | CredibilityOutput
   | ExpectationsOutput
   | LinesOfArgumentsOutput
   | LogicalFlowOutput
@@ -439,21 +374,6 @@ interface ReviewData<T extends ReviewResponse> {
   tool: ReviewTool;
   datetime?: Date;
   response: T;
-}
-
-/**
- * Civil Tone review data structure.
- * @deprecated Civil Tone review is no longer supported.
- */
-export interface CivilToneData extends ReviewData<CivilToneOutput> {
-  tool: 'civil_tone';
-}
-/**
- * Credibility review data structure.
- * @deprecated Credibility review is no longer supported.
- */
-export interface CredibilityData extends ReviewData<CredibilityOutput> {
-  tool: 'credibility';
 }
 
 /** Expectation review data structure. */
@@ -534,8 +454,6 @@ export class ErrorDataError extends Error {
 export type OptionalReviewData<T> = Optional<T | ErrorData>;
 
 export type Analysis =
-  | CivilToneData
-  | CredibilityData
   | ExpectationsData
   | LinesOfArgumentsData
   | LogicalFlowData

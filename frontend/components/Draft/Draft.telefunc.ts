@@ -3,6 +3,7 @@ import {
   badRequest,
   ChatStopError,
   errorToProblemDetails,
+  ForbiddenError,
 } from '#lib/ProblemDetails';
 import { type NotesRequest } from '#lib/Requests';
 import { type TelefuncContext } from '#lib/TelefuncContext';
@@ -13,24 +14,35 @@ import { grade, isStudent, isTestUser } from '#server/model/lti';
 import { type NotesPrompt } from '#server/model/prompt';
 import { ANTHROPIC_MAX_TOKENS, ANTHROPIC_MODEL } from '#server/settings';
 import format from 'string-format';
-import { getContext } from 'telefunc';
+import { Abort, getContext } from 'telefunc';
 
 async function convertNotes(key: NotesPrompt, data: NotesRequest) {
   const started = new Date(); // performance tracking: record the start time of the conversion process.
   const { notes, user_lang, ltik } = data;
   let score = 0;
-  if (!notes || notes.trim() === '') {
-    return { error: badRequest('No text provided.', 'empty_input') };
-  }
   const {
     acceptLanguage,
-    // ltik
+    auth,
     settings,
     onClose,
     sessionId,
     provider,
     // session,
   } = getContext<TelefuncContext>();
+  if ((key === 'notes_to_bullets' && !settings?.notes2bullets) || (key === 'notes_to_prose' && !settings?.notes2prose)) {
+    throw Abort();
+  }
+  if (!auth?.user && !ltik) {
+    return {
+      error: errorToProblemDetails(new ForbiddenError('User not authenticated.'), 'unauthorized', {
+        tool: 'draft',
+        phase: 'myprose',
+      }),
+    };
+  }
+  if (!notes || notes.trim() === '') {
+    return { error: badRequest('No text provided.', 'empty_input') };
+  }
   const language = user_lang
     ? resolveLanguageCode(user_lang)
     : (acceptLanguage?.split(',')[0] ?? 'en');
